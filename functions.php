@@ -15,7 +15,7 @@
  // Useful global constants
 define( 'UALIB_VERSION', '0.1.0' );
 
-require_once( get_stylesheet_directory() . 'functions-ualib.php' );
+require_once( get_stylesheet_directory() . '/functions-ualib.php' );
 require_once( get_stylesheet_directory() . '/lib/theme-functions.php' );
 
 /**
