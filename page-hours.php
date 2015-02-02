@@ -1,5 +1,4 @@
 <?php
-include_once "functions-ualib.php";
 
 if( !defined( 'ABSPATH' ) ) {
     exit;
