@@ -1,5 +1,6 @@
 # Generic Git Ignore files
 .htaccess
+roots-child-settings.php
 
 # Deploy scripts
 deploy*.php

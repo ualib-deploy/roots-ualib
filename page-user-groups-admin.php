@@ -14,7 +14,7 @@ if( !defined( 'ABSPATH' ) ) {
 
     <?php
 
-    include ualib_child_getUnixPath() . "userGroupsAdmin/index_wp.php";
+    include WEBAPPS_PATH . "userGroupsAdmin/index_wp.php";
 
     ?>
 

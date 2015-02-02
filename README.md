@@ -8,6 +8,9 @@ The Word Press Roots.io child theme for the University of Alabama Libraries
         
 ## Before you being
 
+It is highly recommended that you work on a locally installed Word Press installation, and only push changes to this repo
+after your commits are ready for staging/optimization.
+
 ### Get familiar with LESS
 The theme CSS is generated from [LESS](http://lesscss.org/) files under `/assets/css/less/`. Any edits to the CSS files themselves will be overwritten
 after the theme files are built using both the `dev` and `default` grunt tasks.

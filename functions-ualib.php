@@ -1,14 +1,6 @@
 <?php
 
-function ualib_child_getUnixPath()
-{
-    return "/srv/web/www/webapps/";
-}
-
-function ualib_child_getDomain()
-{
-    return "//wwwdev2.lib.ua.edu/";
-}
+require_once( get_stylesheet_directory() . '/roots-child-settings.php' );
 
 function ualib_child_startSession() {
     if(!session_id()) {
@@ -37,7 +29,7 @@ function ualib_child_scripts() {
     {
         wp_enqueue_script(
             'ualib-child-scriptHoursManagement',
-            ualib_child_getDomain() . 'libhours2/js/manage-app.js',
+            ROOTS_UALIB_HOST . 'libhours2/js/manage-app.js',
             array( 'angular' ),
             true
         );
@@ -46,7 +38,7 @@ function ualib_child_scripts() {
     {
         wp_enqueue_script(
             'ualib-child-scriptUsersManagement',
-            ualib_child_getDomain() . 'libhours2/js/admin-app.js',
+            ROOTS_UALIB_HOST . 'libhours2/js/admin-app.js',
             array( 'angular' ),
             true
         );
@@ -59,7 +51,7 @@ function ualib_child_scripts() {
         );
         wp_enqueue_script(
             'ualib-child-scriptHours',
-            ualib_child_getDomain() . 'libhours2/js/app.js',
+            ROOTS_UALIB_HOST . 'libhours2/js/app.js',
             array( 'angular' ),
             true
         );
@@ -67,14 +59,14 @@ function ualib_child_scripts() {
     if ( is_page('music-library-search') )
         wp_enqueue_script(
             'ualib-child-scriptMusicSearch',
-            ualib_child_getDomain() . 'musicsearch/js/app.js',
+            ROOTS_UALIB_HOST . 'musicsearch/js/app.js',
             array( 'angular' ),
             true
         );
     if ( is_page('staff-directory') )
         wp_enqueue_script(
             'ualib-child-scriptStaffDirectory',
-            ualib_child_getDomain() . 'staffDir/js/app.js',
+            ROOTS_UALIB_HOST . 'staffDir/js/app.js',
             array( 'angular' ),
             true
         );
@@ -88,13 +80,13 @@ function ualib_child_scripts() {
         );
         wp_enqueue_script(
             'ualib-child-scriptOneSearch',
-            ualib_child_getDomain() . 'oneSearch/js/app.js',
+            ROOTS_UALIB_HOST . 'oneSearch/js/app.js',
             array( 'angular' ),
             true
         );
         wp_enqueue_script(
             'ualib-child-scriptOneSearchFilters',
-            ualib_child_getDomain() . 'oneSearch/js/filters.js',
+            ROOTS_UALIB_HOST . 'oneSearch/js/filters.js',
             array( 'angular' ),
             true
         );
@@ -102,14 +94,14 @@ function ualib_child_scripts() {
     if ( is_page('databases') )
         wp_enqueue_script(
             'ualib-child-scriptDatabases',
-            ualib_child_getDomain() . 'databases/js/app.js',
+            ROOTS_UALIB_HOST . 'databases/js/app.js',
             array( 'angular' ),
             true
         );
     if ( is_page('user-groups-admin') )
         wp_enqueue_script(
             'ualib-child-scriptUserGroups',
-            ualib_child_getDomain() . 'userGroupsAdmin/js/app.js',
+            ROOTS_UALIB_HOST . 'userGroupsAdmin/js/app.js',
             array( 'angular' ),
             true
         );

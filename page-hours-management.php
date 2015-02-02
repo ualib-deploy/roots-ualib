@@ -14,7 +14,7 @@ if( !defined( 'ABSPATH' ) ) {
 
     <?php
 
-    include ualib_child_getUnixPath() . "libhours2/index_wp.php";
+    include WEBAPPS_PATH . "libhours2/index_wp.php";
 
 	?>
 

@@ -14,8 +14,8 @@ if( !defined( 'ABSPATH' ) ) {
 <div id="content">
 
     <?php
-    include ualib_child_getUnixPath() . "oneSearch/index_wp.php";
-//    include ualib_child_getUnixPath() . "siteSurvey/loadForm.php";
+    include WEBAPPS_PATH . "oneSearch/index_wp.php";
+//    include WEBAPPS_PATH . "siteSurvey/loadForm.php";
     ?>
 
 </div><!-- end of #content -->
