@@ -1,0 +1,17 @@
+/* TEAM */
+	Developer: Will Jones
+	Contact:   willjones@ua.edu
+	URI:       https://github.com/8bitsquid
+
+/* THANKS */
+	Generator: Duane Cilliers
+	URI:		http://duane.co.za
+	Twitter:	   @duanecilliers
+
+	Parent Theme: Ben Word
+	URI:             http://benword.com
+	Twitter:         @retlehs
+
+	Child Theme: Duane Cilliers
+	URI:		http://duane.co.za
+	Twitter:	   @duanecilliers

@@ -1,0 +1,127 @@
+//
+// Variables
+// --------------------------------------------------
+
+// Import default Bootstrap variables. Override and custom variables below.
+@import "../../../bower_components/bootstrap/less/variables";
+
+// Global values [Overrides]
+// --------------------------------------------------
+
+// Grays
+// -------------------------
+
+@gray-lighter:           lighten(#000, 97.5%); // #f9f9f9
+
+// Brand colors
+// -------------------------
+
+@brand-primary:         #993333;
+
+// Links
+// -------------------------
+
+@link-color:            #428bca;
+
+// Typography
+// -------------------------
+
+@font-family-sans-serif:  'Lato', sans-serif;
+@font-family-serif:       'EB Garamond', "Times New Roman", Times, serif;
+@font-family-monospace:   'Ubuntu Mono', Menlo, Monaco, Consolas, "Courier New", monospace;
+
+@headings-font-family:    'Oxygen', sans-serif;
+@headings-font-weight:    400;
+
+// Components
+// -------------------------
+
+@border-radius-large:            4px;
+
+// Jumbotron
+// -------------------------
+
+@jumbotron-bg:                   #eee;
+
+// Global values [Custom]
+// --------------------------------------------------
+
+@content-container-class: wrap;
+
+// Crimson navbar
+// Reset crimson navbar basics
+@navbar-crimson-color:                      @gray-lighter;
+@navbar-crimson-bg:                         @brand-primary;
+@navbar-crimson-border:                     darken(@navbar-crimson-bg, 10%);
+
+// Crimson navbar links
+@navbar-crimson-link-color:                 @gray-lighter;
+@navbar-crimson-link-hover-color:           @navbar-crimson-bg;
+@navbar-crimson-link-hover-bg:              @navbar-crimson-color;
+@navbar-crimson-link-active-color:          @navbar-crimson-link-hover-color;
+@navbar-crimson-link-active-bg:             @navbar-crimson-link-hover-bg;
+@navbar-crimson-link-disabled-color:        #f2c1c1;
+@navbar-crimson-link-disabled-bg:           transparent;
+
+// Crimson navbar brand label
+@navbar-crimson-brand-color:                @navbar-crimson-link-color;
+@navbar-crimson-brand-hover-color:          #fff;
+@navbar-crimson-brand-hover-bg:             transparent;
+
+// Crimson navbar toggle
+@navbar-crimson-toggle-hover-bg:            #333;
+@navbar-crimson-toggle-icon-bar-bg:         #fff;
+@navbar-crimson-toggle-border-color:        #333;
+
+// File and External Links (iconography and decorations)
+// -------------------------
+
+@icon-ext-link: "\f08e";
+@icon-pdf: "\f1c1";
+@icon-word: "\f1c2";
+@icon-excel: "\f1c3";
+@icon-powerpoint: "\f1c4";
+
+// Standard body links
+
+.@{content-container-class}{
+  > a{
+    &[href^="http"]:after,
+    &[href^="https"]:after{
+      .link-icon-after(@icon-ext-link);
+    }
+
+    &[href$=".pdf"]:before{
+      .link-icon-before(@icon-pdf);
+    }
+    &[href$=".doc"]:before,
+    &[href$=".docx"]:before{
+      .link-icon-before(@icon-word);
+    }
+    &[href$=".xls"]:before,
+    &[href$=".xlsx"]:before{
+      .link-icon-before(@icon-excel);
+    }
+  }
+}
+
+.link-icon(@icon){
+  @line-height-reduction: floor(@line-height-computed * .20);
+  content: @icon;
+  font-family: FontAwesome;
+  font-size: .80em;
+  line-height: floor(@line-height-computed - @line-height-reduction);
+  display: inline-block;
+  text-decoration: none;
+}
+
+.link-icon-before(@icon){
+  .link-icon(@icon);
+  font-size: inherit;
+  padding-right: 5px;
+}
+
+.link-icon-after(@icon){
+  .link-icon(@icon);
+  padding-left: 5px;
+}
