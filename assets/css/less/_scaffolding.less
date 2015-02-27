@@ -1,0 +1,82 @@
+//
+// Scaffolding
+// --------------------------------------------------
+
+// Import default Bootstrap scaffolding. Overrides, custom variables, and docs below.
+@import "../../../bower_components/bootstrap/less/scaffolding";
+
+// Links
+//
+// <mark>TODO:</mark> Add details about link appearance and restrictions on text-decorations, etc
+//
+// Styleguide style.links
+
+// External & File Links
+//
+// Links to download files and links to external website are automatically appended with a context icon.
+// This icon lets the user know what to expect when they click the link.
+// <mark>TODO:</mark> Define when this differs via parent element context (i.e., in menus, footers, etc.)
+//
+// Markup: file-external-links.html
+//
+// CodeTemplate:
+// <a href="pdf-file-path.pdf">PDF file link</a>
+// <a href="word-file-path.xlsx">Excel file link</a>
+// <a href="word-file-path.xls">Works for old Excel(*.xsl) extensions</a>
+// <a href="excel-file-path.docx">Word file link</a>
+// <a href="excel-file-path.doc">Works for old Word(*.doc) extensions</a>
+// <a href="http://codepen.io/ashleynolan/pen/rpjHg">Link to external website</a>
+// <a href="https://secure-site-url">Works with HTTPS too!</a>
+//
+// Styleguide style.links.file-external
+/* Font Awesome icon codes */
+@icon-ext-link: "\f08e";
+@icon-pdf: "\f1c1";
+@icon-word: "\f1c2";
+@icon-excel: "\f1c3";
+@icon-powerpoint: "\f1c4";
+
+a[href^="http"]:after,
+a[href^="https"]:after{
+  .link-icon-after(@icon-ext-link);
+}
+
+a[href$=".pdf"]:before{
+  .link-icon-before(@icon-pdf);
+}
+a[href$=".doc"]:before,
+a[href$=".docx"]:before{
+  .link-icon-before(@icon-word);
+}
+a[href$=".xls"]:before,
+a[href$=".xlsx"]:before{
+  .link-icon-before(@icon-excel);
+}
+
+a{
+  .navbar &:before,
+  .navbar &:after{
+    display: none;
+  }
+}
+
+.link-icon(@icon){
+  @line-height-reduction: floor(@line-height-computed * .20);
+  content: @icon;
+  font-family: FontAwesome;
+  font-size: .80em;
+  line-height: floor(@line-height-computed - @line-height-reduction);
+  display: inline-block;
+  text-decoration: none;
+}
+
+.link-icon-before(@icon){
+  .link-icon(@icon);
+  font-size: inherit;
+  padding-right: 5px;
+}
+
+.link-icon-after(@icon){
+  .link-icon(@icon);
+  padding-left: 5px;
+}

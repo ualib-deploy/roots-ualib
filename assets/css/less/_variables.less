@@ -8,6 +8,25 @@
 // Global values [Overrides]
 // --------------------------------------------------
 
+// Colors
+//
+// Always try to stick to the [Primary Colors](#style-color-primary). Only use [Secondary Colors](#style-color-secondary)
+// for slight accents or highlights. [Secondary Colors](#1.2) should only be dominant
+// when used in a child/sub theme.
+//
+// Styleguide style.color
+
+// Primary Colors
+//
+// Try to use these colors for everything. Only use these colors where deemed appropriate
+// via this styleguide.
+//
+// Markup: primary.html
+//
+// HideMarkup: true
+//
+// Styleguide style.color.primary
+
 // Grays
 // -------------------------
 
@@ -24,14 +43,46 @@
 @link-color:            #428bca;
 
 // Typography
-// -------------------------
+//
+// Use and availability of fonts
+//
+// Styleguide style.typography
+
+// Body Text
+//
+// weight: 1
+//
+// The default font family for text in the `<body>` is *Lato*
+//
+// Markup: body-font.html
+//
+// HideMarkup: true
+//
+// Styleguide style.typography.body
 
 @font-family-sans-serif:  'Lato', sans-serif;
 @font-family-serif:       'EB Garamond', "Times New Roman", Times, serif;
 @font-family-monospace:   'Ubuntu Mono', Menlo, Monaco, Consolas, "Courier New", monospace;
 
+// Headings
+//
+// weight: 2
+//
+// Heading use the *Oxygen* font family and are used for all page titles and page section titles.
+//
+// Markup: headings.html
+//
+// HideMarkup: true
+//
+// Styleguide style.typography.headings
 @headings-font-family:    'Oxygen', sans-serif;
 @headings-font-weight:    400;
+
+//== Iconography
+// ****** OVER WRITTEN: fontawesome icons are used instead
+// -------------------------
+
+//TODO: Overwrite icons to use fontawesome, and build in fontawesome icons locally using grunt
 
 // Components
 // -------------------------
@@ -47,6 +98,11 @@
 // --------------------------------------------------
 
 @content-container-class: wrap;
+
+// Meganav navbar variables
+@navbar-meganav-height: 80px;
+@navbar-meganav-height-sm: 50px;
+
 
 // Crimson navbar
 // Reset crimson navbar basics
