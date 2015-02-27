@@ -1,6 +1,6 @@
 {
   "name": "roots-ualib",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "dependencies": {
     "modernizr": "~2.7.0",
     "bootstrap": "~3.3.2"
