@@ -36,7 +36,7 @@ module.exports = function( grunt ) {
 					banner: '/*! roots-ualib - Plugins - 2015-01-29 12:00\n' +
 						' * Copyright (c) 2015;' +
 						' * Licensed ECLv2+' +
-						' */\n',
+						' */\n'
 				},
 				files: [{
 					src: [
@@ -54,7 +54,7 @@ module.exports = function( grunt ) {
 					banner: '/*! roots-ualib 2015-01-29 12:00\n' +
 						' * Copyright (c) 2015;' +
 						' * Licensed ECLv2+' +
-						' */\n',
+						' */\n'
 				},
 				files: [{
 					src: [
@@ -222,6 +222,24 @@ module.exports = function( grunt ) {
 					dest: "~/path/to/theme",
 					host: "user@host.com"
 				}
+			}
+		},
+		bump: {
+			options: {
+				files: ['package.json', 'bower.json'],
+				updateConfigs: ['pkg'],
+				commit: false,
+				commitMessage: 'Release v%VERSION%',
+				commitFiles: ['package.json', 'bower.json'],
+				createTag: true,
+				tagName: 'v%VERSION%',
+				tagMessage: 'Version %VERSION%',
+				push: false,
+				pushTo: 'origin',
+				gitDescribeOptions: '--tags --always --abbrev=1 --dirty=-d',
+				globalReplace: false,
+				prereleaseName: false,
+				regExp: false
 			}
 		}
 	} );
