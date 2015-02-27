@@ -1,0 +1,253 @@
+//
+// Navbars
+// --------------------------------------------------
+
+// Import default Bootstrap navbars. Overrides, custom variables, and docs below.
+@import "../../../bower_components/bootstrap/less/navbar";
+
+
+
+@navbar-ualib-color:  @gray-lighter;
+@navbar-ualib-bg:     @brand-primary;
+
+@navbar-ualib-hover-color:  @navbar-ualib-bg;
+@navbar-ualib-hover-bg:     @navbar-ualib-color;
+
+@navbar-ualib-link-disabled-color:  #f2c1c1;
+@navbar-ualib-link-disabled-bg:           transparent;
+
+.navbar-ualib {
+  color:  @navbar-ualib-color;
+  background-color: @navbar-ualib-bg;
+  border: none;
+  /*border-bottom: 1px solid #eee;*/
+  margin-bottom: 0;
+
+  .navbar-brand {
+    color: darken(@navbar-ualib-color, 10%);
+    &:hover,
+    &:focus {
+      color: darken(@navbar-ualib-hover-color, 10%);
+      background-color: darken(@navbar-ualib-bg, 10%);
+    }
+  }
+
+  .navbar-text {
+    color: @navbar-ualib-color;
+  }
+
+  .navbar-nav {
+    > li {
+      &.dropdown > a{
+        padding-right: 40px;
+      }
+
+      > a {
+        font-size: 16px;
+        color: @navbar-ualib-color;
+        padding: 30px;
+
+        &:hover,
+        &:focus {
+          color: @navbar-ualib-hover-color;
+          background-color: @navbar-ualib-hover-bg;
+
+          &.dropdown-toggle::before,
+          &.dropdown-toggle::after{
+            background: @navbar-ualib-hover-color;
+          }
+        }
+
+        &.dropdown-toggle::before,
+        &.dropdown-toggle::after {
+          width: 9px;
+          -webkit-transform-origin: 50% 50%;
+          -moz-transform-origin: 50% 50%;
+          -ms-transform-origin: 50% 50%;
+          -o-transform-origin: 50% 50%;
+          transform-origin: 50% 50%;
+          background: @navbar-ualib-bg;
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+          -webkit-transition: width 0.3s, -webkit-transform 0.3s;
+          -moz-transition: width 0.3s, -moz-transform 0.3s;
+          transition: width 0.3s, transform 0.3s;
+          -webkit-box-sizing: border-box;
+          -moz-box-sizing: border-box;
+          box-sizing: border-box;
+          content: '';
+          position: absolute;
+          top: 50%;
+          margin-top: -1px;
+          display: inline-block;
+          height: 2px;
+        }
+
+        &.dropdown-toggle::before {
+          right: 20px;
+          -webkit-transform: rotate(45deg);
+          -moz-transform: rotate(45deg);
+          -ms-transform: rotate(45deg);
+          -o-transform: rotate(45deg);
+          transform: rotate(45deg);
+        }
+
+        &.dropdown-toggle::after{
+          right: 15px;
+          -webkit-transform: rotate(-45deg);
+          -moz-transform: rotate(-45deg);
+          -ms-transform: rotate(-45deg);
+          -o-transform: rotate(-45deg);
+          transform: rotate(-45deg);
+        }
+      }
+      > .active > a {
+        &,
+        &:hover,
+        &:focus {
+          color: @navbar-ualib-hover-color;
+          background-color: @navbar-ualib-hover-bg;
+        }
+      }
+      > .disabled > a {
+        &,
+        &:hover,
+        &:focus {
+          color: @navbar-ualib-link-disabled-color;
+          background-color: @navbar-ualib-link-disabled-bg;
+        }
+      }
+
+      &.open > a{
+        &::before, &::after{
+          width: 14px;
+          background: @navbar-ualib-hover-bg;
+        }
+        &::before {
+          -webkit-transform: translateX(5px) rotate(-45deg);
+          -moz-transform: translateX(5px) rotate(-45deg);
+          -ms-transform: translateX(5px) rotate(-45deg);
+          -o-transform: translateX(5px) rotate(-45deg);
+          transform: translateX(5px) rotate(-45deg);
+        }
+
+        &::after{
+          -webkit-transform: rotate(45deg);
+          -moz-transform: rotate(45deg);
+          -ms-transform: rotate(45deg);
+          -o-transform: rotate(45deg);
+          transform: rotate(45deg);
+        }
+      }
+    }
+  }
+
+  .navbar-toggle {
+    border-color: @navbar-default-toggle-border-color;
+    &:hover,
+    &:focus {
+      background-color: @navbar-default-toggle-hover-bg;
+    }
+    .icon-bar {
+      background-color: @navbar-default-toggle-icon-bar-bg;
+    }
+  }
+
+  .navbar-collapse,
+  .navbar-form {
+    border-color: @navbar-default-border;
+  }
+
+  // Dropdown menu items
+  .navbar-nav {
+
+    .dropdown-menu{
+      border: 1px solid @navbar-ualib-color;
+      opacity: 0;
+      display: block;
+      visibility: hidden;
+      -webkit-transition: opacity  .2s .1s, visibility 0s  .2s;
+      -moz-transition: opacity  .2s .1s, visibility 0s  .2s;
+      transition: opacity  .2s .1s, visibility 0s  .2s;
+
+
+    }
+    .open .dropdown-menu{
+      opacity: 1;
+      visibility: visible;
+      -webkit-transition: opacity  .2s 0s, visibility 0s 0s;
+      -moz-transition: opacity  .2s 0s, visibility 0s 0s;
+      transition: opacity  .2s 0s, visibility 0s 0s;
+
+
+    }
+    // Remove background color from open dropdown
+    > .open > a {
+      &,
+      &:hover,
+      &:focus {
+        color: @navbar-ualib-color;
+        background-color: @navbar-ualib-bg;
+      }
+
+    }
+
+    @media (max-width: @grid-float-breakpoint-max) {
+      // Dropdowns get custom display when collapsed
+      .open .dropdown-menu {
+        > li > a {
+          color: @navbar-ualib-color;
+          background-color: @navbar-ualib-hover-bg;
+          &:hover,
+          &:focus {
+            color: @navbar-ualib-hover-color;
+            background-color: @navbar-ualib-hover-bg;
+          }
+        }
+        > .active > a {
+          &,
+          &:hover,
+          &:focus {
+            color: @navbar-ualib-hover-color;
+            background-color: @navbar-ualib-hover-bg;
+          }
+        }
+        > .disabled > a {
+          &,
+          &:hover,
+          &:focus {
+            color: @navbar-ualib-link-disabled-color;
+            background-color: @navbar-ualib-link-disabled-bg;
+          }
+        }
+      }
+    }
+  }
+
+
+  // Links in navbars
+  //
+  // Add a class to ensure links outside the navbar nav are colored correctly.
+
+  .navbar-link {
+    color: @navbar-ualib-color;
+    &:hover {
+      color: @navbar-ualib-hover-color;
+    }
+  }
+
+  .btn-link {
+    color: @navbar-ualib-color;
+    &:hover,
+    &:focus {
+      color: @navbar-ualib-hover-color;
+    }
+    &[disabled],
+    fieldset[disabled] & {
+      &:hover,
+      &:focus {
+        color: @navbar-ualib-link-disabled-color;
+      }
+    }
+  }
+}
