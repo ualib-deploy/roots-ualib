@@ -5,38 +5,136 @@
 // Import default Bootstrap navbars. Overrides, custom variables, and docs below.
 @import "../../../bower_components/bootstrap/less/navbar";
 
+// Mega Menu
+//
+// The mega menu should only appear once, as the website's main header navigation. The mega menu dropdowns can
+// support almost any of the website's components: <mark>TODO:</mark> list components not appropriate for mega menu. Finish responsive support.
+//
+// Markup:
+//  <nav class="navbar navbar-default navbar-mega yamm" ng-class="navbar.style" role="navigation">
+//    <div class="container-fluid">
+//      <div class="navbar-header">
+//        <button type="button" class="navbar-toggle collapsed">
+//          <span class="sr-only">Toggle navigation</span>
+//          <span class="fa fa-bars"></span>
+//        </button>
+//        <a class="navbar-brand" href="#">
+//          <img ng-src="logo.jpg" class="img-responsive" alt="University of Alabama Libraries" title="University of Alabama Libraries" />
+//        </a>
+//      </div>
+//      <div class="collapse navbar-collapse">
+//        <ul class="nav navbar-nav">
+//          <li>
+//            <a href="#">Link</a>
+//          </li>
+//          <li class="dropdown yamm-fw">
+//            <a href="#" class="dopdown-toggle">Dropdown</a>
+//            <ul class="dropdown-menu">
+//              <li>
+//                <div class="yamm-content">
+//                  <div class="row">
+//                    <div class="col-xs-4">
+//                      <a href="#">
+//                        <span class="fa fa-compass"></span>
+//                        <h4>Action</h4>
+//                        <p>An action that does things very action-ably</p>
+//                      </a>
+//                    </div>
+//                    <div class="col-xs-4">
+//                      <a href="#">
+//                        <span class="fa fa-flask"></span>
+//                        <h4>Another Action</h4>
+//                        <p>Another action that also takes action</p>
+//                      </a>
+//                    </div>
+//                    <div class="col-xs-4">
+//                      <a href="#">
+//                        <span class="fa fa-"></span>
+//                        <h4>Links So Gridly</h4>
+//                        <p>Man, all these links & icons work well in a grid</p>
+//                      </a>
+//                    </div>
+//                  </div>
+//                </div>
+//              </li>
+//            </ul>
+//          </li>
+//        </ul>
+//        <ul class="nav navbar-nav navbar-left">
+//          <li>
+//            <a href="#">Left Aligned Navbar</a>
+//          </li>
+//        </ul>
+//        <ul class="nav navbar-nav navbar-right">
+//          <li>
+//            <a href="#">Link</a>
+//          </li>
+//          <li class="dropdown yamm-fw">
+//            <a href="#" class="dopdown-toggle">Dropdown</a>
+//            <ul class="dropdown-menu">
+//              <li>
+//                <div class="yamm-content">
+//                  <div class="row">
+//                    <div class="col-sm-4">
+//                      <div class="mm-heading">
+//                        <span class="fa fa-desktop"></span>
+//                        <h4>List Should Never Stack</h4>
+//                      </div>
+//                      <ul>
+//                        <li><a href="#">Action</a></li>
+//                        <li><a href="#">Another action</a></li>
+//                      </ul>
+//                    </div>
+//                    <div class="col-sm-4">
+//                      <div class="mm-heading">
+//                        <span class="fa fa-puzzle-piece"></span>
+//                        <h4>They Should Split By Columns</h4>
+//                      </div>
+//                      <ul>
+//                        <li><a href="#">Separated</a></li>
+//                        <li><a href="#">Link</a></li>
+//                        <li><a href="#">List</a></li>
+//                      </ul>
+//                    </div>
+//                    <div class="col-sm-4">
+//                      <div class="mm-heading">
+//                        <span class="fa fa-spoon"></span>
+//                        <h4>Like This!</h4>
+//                      </div>
+//                      <ul>
+//                        <li><a href="#">Another</a></li>
+//                        <li><a href="#">Separated</a></li>
+//                        <li><a href="#">Link</a></li>
+//                        <li><a href="#">List</a></li>
+//                      </ul>
+//                    </div>
+//                  </div>
+//                </div>
+//              </li>
+//            </ul>
+//          </li>
+//        </ul>
+//      </div>
+//    </div>
+//  </nav>
+//
+// Styleguide components.megamenu
 
+header, .header{
+  height: 80px;
+}
 
-@navbar-ualib-color:  @gray-lighter;
-@navbar-ualib-bg:     @brand-primary;
-
-@navbar-ualib-hover-color:  @navbar-ualib-bg;
-@navbar-ualib-hover-bg:     @navbar-ualib-color;
-
-@navbar-ualib-link-disabled-color:  #f2c1c1;
-@navbar-ualib-link-disabled-bg:           transparent;
-
-.navbar-ualib {
-  color:  @navbar-ualib-color;
-  background-color: @navbar-ualib-bg;
+.navbar-mega{
   border: none;
-  /*border-bottom: 1px solid #eee;*/
   margin-bottom: 0;
+  padding-left: 15px;
+  padding-right: 15px;
 
   .navbar-brand {
-    color: darken(@navbar-ualib-color, 10%);
-    &:hover,
-    &:focus {
-      color: darken(@navbar-ualib-hover-color, 10%);
-      background-color: darken(@navbar-ualib-bg, 10%);
-    }
+    margin-top: 15px;
   }
 
-  .navbar-text {
-    color: @navbar-ualib-color;
-  }
-
-  .navbar-nav {
+  .magamenu-navbar {
     > li {
       &.dropdown > a{
         padding-right: 40px;
@@ -44,125 +142,46 @@
 
       > a {
         font-size: 16px;
-        color: @navbar-ualib-color;
         padding: 30px;
 
         &:hover,
         &:focus {
-          color: @navbar-ualib-hover-color;
-          background-color: @navbar-ualib-hover-bg;
-
           &.dropdown-toggle::before,
           &.dropdown-toggle::after{
-            background: @navbar-ualib-hover-color;
+            background: #993333;
+          }
+        }
+
+        &,
+        &.active{
+          &.dropdown-toggle::before,
+          &.dropdown-toggle::after{
+            background: #f9f9f9;
           }
         }
 
         &.dropdown-toggle::before,
         &.dropdown-toggle::after {
           width: 9px;
-          -webkit-transform-origin: 50% 50%;
-          -moz-transform-origin: 50% 50%;
-          -ms-transform-origin: 50% 50%;
-          -o-transform-origin: 50% 50%;
-          transform-origin: 50% 50%;
-          background: @navbar-ualib-bg;
-          -webkit-backface-visibility: hidden;
-          backface-visibility: hidden;
-          -webkit-transition: width 0.3s, -webkit-transform 0.3s;
-          -moz-transition: width 0.3s, -moz-transform 0.3s;
-          transition: width 0.3s, transform 0.3s;
-          -webkit-box-sizing: border-box;
-          -moz-box-sizing: border-box;
-          box-sizing: border-box;
-          content: '';
-          position: absolute;
-          top: 50%;
-          margin-top: -1px;
-          display: inline-block;
-          height: 2px;
         }
 
         &.dropdown-toggle::before {
           right: 20px;
-          -webkit-transform: rotate(45deg);
-          -moz-transform: rotate(45deg);
-          -ms-transform: rotate(45deg);
-          -o-transform: rotate(45deg);
-          transform: rotate(45deg);
         }
 
         &.dropdown-toggle::after{
           right: 15px;
-          -webkit-transform: rotate(-45deg);
-          -moz-transform: rotate(-45deg);
-          -ms-transform: rotate(-45deg);
-          -o-transform: rotate(-45deg);
-          transform: rotate(-45deg);
-        }
-      }
-      > .active > a {
-        &,
-        &:hover,
-        &:focus {
-          color: @navbar-ualib-hover-color;
-          background-color: @navbar-ualib-hover-bg;
-        }
-      }
-      > .disabled > a {
-        &,
-        &:hover,
-        &:focus {
-          color: @navbar-ualib-link-disabled-color;
-          background-color: @navbar-ualib-link-disabled-bg;
         }
       }
 
       &.open > a{
         &::before, &::after{
           width: 14px;
-          background: @navbar-ualib-hover-bg;
-        }
-        &::before {
-          -webkit-transform: translateX(5px) rotate(-45deg);
-          -moz-transform: translateX(5px) rotate(-45deg);
-          -ms-transform: translateX(5px) rotate(-45deg);
-          -o-transform: translateX(5px) rotate(-45deg);
-          transform: translateX(5px) rotate(-45deg);
-        }
-
-        &::after{
-          -webkit-transform: rotate(45deg);
-          -moz-transform: rotate(45deg);
-          -ms-transform: rotate(45deg);
-          -o-transform: rotate(45deg);
-          transform: rotate(45deg);
         }
       }
     }
-  }
-
-  .navbar-toggle {
-    border-color: @navbar-default-toggle-border-color;
-    &:hover,
-    &:focus {
-      background-color: @navbar-default-toggle-hover-bg;
-    }
-    .icon-bar {
-      background-color: @navbar-default-toggle-icon-bar-bg;
-    }
-  }
-
-  .navbar-collapse,
-  .navbar-form {
-    border-color: @navbar-default-border;
-  }
-
-  // Dropdown menu items
-  .navbar-nav {
 
     .dropdown-menu{
-      border: 1px solid @navbar-ualib-color;
       opacity: 0;
       display: block;
       visibility: hidden;
@@ -170,7 +189,82 @@
       -moz-transition: opacity  .2s .1s, visibility 0s  .2s;
       transition: opacity  .2s .1s, visibility 0s  .2s;
 
+      .yamm-content {
+        a {
+          color: #333;
+          position: relative;
+          display: block;
+          padding: 15px;
 
+          & > h4, & > p {
+            margin-left: 45px;
+          }
+
+          & > h4 {
+            color: #993333;
+            margin-bottom: 0;
+          }
+
+          & > .fa {
+            display: block;
+            position: absolute;
+            top: 30px;
+            font-size: 30px;
+            color: #555;
+          }
+          &:hover,
+          &:focus {
+            background-color: darken(#f9f9f9, 5%);
+            text-decoration: none;
+          }
+        }
+      }
+      .mm-heading{
+        min-height: 45px;
+        display: table;
+        margin-bottom: 5px;
+
+        > .fa, > h4{
+          color: #993333;
+          display: table-cell;
+          vertical-align: middle;
+        }
+
+        > .fa{
+          font-size: 30px;
+          color: #333;
+        }
+
+        > h4{
+          padding-left: 15px;
+          color: #993333;
+        }
+      }
+
+      ul {
+        list-style-type: none;
+        padding: 0;
+        > li {
+
+          &:last-child {
+            border-bottom: none;
+          }
+
+          > a{
+            color: #333;
+            position: relative;
+            display: block;
+            padding: 5px;
+            font-size: 16px;
+
+            &:hover,
+            &:focus {
+              background-color: darken(#f9f9f9, 5%);
+              text-decoration: none;
+            }
+          }
+        }
+      }
     }
     .open .dropdown-menu{
       opacity: 1;
@@ -178,76 +272,6 @@
       -webkit-transition: opacity  .2s 0s, visibility 0s 0s;
       -moz-transition: opacity  .2s 0s, visibility 0s 0s;
       transition: opacity  .2s 0s, visibility 0s 0s;
-
-
-    }
-    // Remove background color from open dropdown
-    > .open > a {
-      &,
-      &:hover,
-      &:focus {
-        color: @navbar-ualib-color;
-        background-color: @navbar-ualib-bg;
-      }
-
-    }
-
-    @media (max-width: @grid-float-breakpoint-max) {
-      // Dropdowns get custom display when collapsed
-      .open .dropdown-menu {
-        > li > a {
-          color: @navbar-ualib-color;
-          background-color: @navbar-ualib-hover-bg;
-          &:hover,
-          &:focus {
-            color: @navbar-ualib-hover-color;
-            background-color: @navbar-ualib-hover-bg;
-          }
-        }
-        > .active > a {
-          &,
-          &:hover,
-          &:focus {
-            color: @navbar-ualib-hover-color;
-            background-color: @navbar-ualib-hover-bg;
-          }
-        }
-        > .disabled > a {
-          &,
-          &:hover,
-          &:focus {
-            color: @navbar-ualib-link-disabled-color;
-            background-color: @navbar-ualib-link-disabled-bg;
-          }
-        }
-      }
-    }
-  }
-
-
-  // Links in navbars
-  //
-  // Add a class to ensure links outside the navbar nav are colored correctly.
-
-  .navbar-link {
-    color: @navbar-ualib-color;
-    &:hover {
-      color: @navbar-ualib-hover-color;
-    }
-  }
-
-  .btn-link {
-    color: @navbar-ualib-color;
-    &:hover,
-    &:focus {
-      color: @navbar-ualib-hover-color;
-    }
-    &[disabled],
-    fieldset[disabled] & {
-      &:hover,
-      &:focus {
-        color: @navbar-ualib-link-disabled-color;
-      }
     }
   }
 }
