@@ -1,0 +1,20 @@
+.link-icon(@icon){
+  @line-height-reduction: floor(@line-height-computed * .20);
+  content: @icon;
+  font-family: FontAwesome;
+  font-size: .80em;
+  line-height: floor(@line-height-computed - @line-height-reduction);
+  display: inline-block;
+  text-decoration: none;
+}
+
+.link-icon-before(@icon){
+  .link-icon(@icon);
+  font-size: inherit;
+  padding-right: 5px;
+}
+
+.link-icon-after(@icon){
+  .link-icon(@icon);
+  padding-left: 5px;
+}
