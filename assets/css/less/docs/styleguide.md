@@ -1,3 +1,5 @@
+# Overview
+
 University Libraries represents the University of Alabama on an academic and institutional level, not just as a library, but also as a repository, archive, computer lab, and location for students to engage both academically and socially, all in support of the university mission. Consequently, the University Libraries Web Site Style Guide will reflect this usage and will help the Libraries provide students with access to information and resources.
 
 Web Services’ top priority is to provide users with easy-to-use, accessible, and “findable,” web content. To achieve this, the following style guide presents the Libraries with rules and best practices, regarding site content, writing methods, text usage, and additional website design elements.
