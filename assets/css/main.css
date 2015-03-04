@@ -6,52 +6,6 @@
  * Licensed under the ECLv2 license.
  */
 
-.wrap > a[href^="http"]:after,
-.wrap > a[href^="https"]:after {
-  content: "\f08e";
-  font-family: FontAwesome;
-  font-size: .80em;
-  line-height: 16px;
-  display: inline-block;
-  text-decoration: none;
-  padding-left: 5px;
-}
-
-.wrap > a[href$=".pdf"]:before {
-  content: "\f1c1";
-  font-family: FontAwesome;
-  font-size: .80em;
-  line-height: 16px;
-  display: inline-block;
-  text-decoration: none;
-  font-size: inherit;
-  padding-right: 5px;
-}
-
-.wrap > a[href$=".doc"]:before,
-.wrap > a[href$=".docx"]:before {
-  content: "\f1c2";
-  font-family: FontAwesome;
-  font-size: .80em;
-  line-height: 16px;
-  display: inline-block;
-  text-decoration: none;
-  font-size: inherit;
-  padding-right: 5px;
-}
-
-.wrap > a[href$=".xls"]:before,
-.wrap > a[href$=".xlsx"]:before {
-  content: "\f1c3";
-  font-family: FontAwesome;
-  font-size: .80em;
-  line-height: 16px;
-  display: inline-block;
-  text-decoration: none;
-  font-size: inherit;
-  padding-right: 5px;
-}
-
 /*! normalize.css v3.0.2 | MIT License | git.io/normalize */
 
 html {
@@ -2837,6 +2791,52 @@ hr {
   margin: 0;
   overflow: visible;
   clip: auto;
+}
+
+.wrap a:not(.no-icon)[href^="http"]:after,
+.wrap a:not(.no-icon)[href^="https"]:after {
+  content: "\f08e";
+  font-family: FontAwesome;
+  font-size: .80em;
+  line-height: 16px;
+  display: inline-block;
+  text-decoration: none;
+  padding-left: 5px;
+}
+
+.wrap a:not(.no-icon)[href$=".pdf"]:before {
+  content: "\f1c1";
+  font-family: FontAwesome;
+  font-size: .80em;
+  line-height: 16px;
+  display: inline-block;
+  text-decoration: none;
+  font-size: inherit;
+  padding-right: 5px;
+}
+
+.wrap a:not(.no-icon)[href$=".doc"]:before,
+.wrap a:not(.no-icon)[href$=".docx"]:before {
+  content: "\f1c2";
+  font-family: FontAwesome;
+  font-size: .80em;
+  line-height: 16px;
+  display: inline-block;
+  text-decoration: none;
+  font-size: inherit;
+  padding-right: 5px;
+}
+
+.wrap a:not(.no-icon)[href$=".xls"]:before,
+.wrap a:not(.no-icon)[href$=".xlsx"]:before {
+  content: "\f1c3";
+  font-family: FontAwesome;
+  font-size: .80em;
+  line-height: 16px;
+  display: inline-block;
+  text-decoration: none;
+  font-size: inherit;
+  padding-right: 5px;
 }
 
 h1,

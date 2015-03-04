@@ -3,7 +3,7 @@ return array(
     'staticAssets' => array(
         'global' => array(
             'css' => array(
-                '/css/main.ae6d7ce3.min.css',
+                '/css/main.1ac1d8d2.min.css',
             ),
             'js' => array(
                 '/js/modernizr.fcc6f405.min.js',
