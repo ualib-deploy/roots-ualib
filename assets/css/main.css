@@ -2793,6 +2793,12 @@ hr {
   clip: auto;
 }
 
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
 .wrap a:not(.no-icon)[href^="http"]:after,
 .wrap a:not(.no-icon)[href^="https"]:after {
   content: "\f08e";
