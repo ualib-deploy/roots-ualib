@@ -1,10 +1,11 @@
 {
   "name": "roots-ualib",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "dependencies": {
     "modernizr": "~2.7.0",
     "bootstrap": "~3.3.2",
-    "fontawesome": "~4.3.0"
+    "fontawesome": "~4.3.0",
+    "yamm3": "https://github.com/geedmo/yamm3.git#~1.0.0"
   },
   "devDependencies": {
     "fontawesome": "~4.3.0"

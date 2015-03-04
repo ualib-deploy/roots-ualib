@@ -5,13 +5,16 @@
 // Import default Bootstrap navbars. Overrides, custom variables, and docs below.
 @import "../../../bower_components/bootstrap/less/navbar";
 
+// Import Yamm3, allowing megamenus within bootstrap dropdowns
+@import "../../../bower_components/yamm3/yamm/yamm";
+
 // Mega Menu
 //
 // The mega menu should only appear once, as the website's main header navigation. The mega menu dropdowns can
 // support almost any of the website's components: <mark>TODO:</mark> list components appropriate for mega menu. Finish responsive support.
 //
 // Markup:
-//  <nav class="navbar navbar-default navbar-mega yamm" ng-class="navbar.style" role="navigation">
+//  <nav class="navbar navbar-mega" role="navigation">
 //    <div class="container-fluid">
 //      <div class="navbar-header">
 //        <button type="button" class="navbar-toggle collapsed">
@@ -131,10 +134,14 @@ header, .header{
 
 .navbar-mega-inverse {
   .navbar-inverse;
-  .megamenu();
+  .megamenu(@gray-lighter, @brand-primary);
 }
 
-.megamenu() {
+.navbar-mega, .navbar-mega-inverse {
+  .yamm;
+}
+
+.megamenu(@color: @brand-primary, @hover-color: @gray-lighter) {
   border: none;
   margin-bottom: 0;
   padding-left: 15px;
@@ -158,7 +165,7 @@ header, .header{
         &:focus {
           &.dropdown-toggle::before,
           &.dropdown-toggle::after{
-            background: #993333;
+            background-color: @hover-color;
           }
         }
 
@@ -166,12 +173,13 @@ header, .header{
         &.active{
           &.dropdown-toggle::before,
           &.dropdown-toggle::after{
-            background: #f9f9f9;
+            background-color: @hover-color;
           }
         }
 
         &.dropdown-toggle::before,
         &.dropdown-toggle::after {
+          background-color: @color;
           width: 9px;
         }
 
@@ -192,16 +200,9 @@ header, .header{
     }
 
     .dropdown-menu{
-      opacity: 0;
-      display: block;
-      visibility: hidden;
-      -webkit-transition: opacity  .2s .1s, visibility 0s  .2s;
-      -moz-transition: opacity  .2s .1s, visibility 0s  .2s;
-      transition: opacity  .2s .1s, visibility 0s  .2s;
-
       .yamm-content {
         a {
-          color: #333;
+          color: @gray-dark;
           position: relative;
           display: block;
           padding: 15px;
@@ -211,7 +212,7 @@ header, .header{
           }
 
           & > h4 {
-            color: #993333;
+            color: @brand-primary;
             margin-bottom: 0;
           }
 
@@ -224,7 +225,7 @@ header, .header{
           }
           &:hover,
           &:focus {
-            background-color: darken(#f9f9f9, 5%);
+            background-color: darken(@gray-lighter, 5%);
             text-decoration: none;
           }
         }
@@ -235,19 +236,19 @@ header, .header{
         margin-bottom: 5px;
 
         > .fa, > h4{
-          color: #993333;
+          color: @brand-primary;
           display: table-cell;
           vertical-align: middle;
         }
 
         > .fa{
           font-size: 30px;
-          color: #333;
+          color: @gray-dark;
         }
 
         > h4{
           padding-left: 15px;
-          color: #993333;
+          color: @brand-primary;
         }
       }
 
@@ -261,7 +262,7 @@ header, .header{
           }
 
           > a{
-            color: #333;
+            color: @gray-dark;
             position: relative;
             display: block;
             padding: 5px;
@@ -269,19 +270,12 @@ header, .header{
 
             &:hover,
             &:focus {
-              background-color: darken(#f9f9f9, 5%);
+              background-color: darken(@gray-lighter, 5%);
               text-decoration: none;
             }
           }
         }
       }
-    }
-    .open .dropdown-menu{
-      opacity: 1;
-      visibility: visible;
-      -webkit-transition: opacity  .2s 0s, visibility 0s 0s;
-      -moz-transition: opacity  .2s 0s, visibility 0s 0s;
-      transition: opacity  .2s 0s, visibility 0s 0s;
     }
   }
 }

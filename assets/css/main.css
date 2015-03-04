@@ -5805,6 +5805,15 @@ tbody.collapse.in {
   transform: rotate(-45deg);
 }
 
+.dropdown .dropdown-menu {
+  opacity: 0;
+  border: none;
+  display: block;
+  visibility: hidden;
+  -webkit-transition: opacity  .2s .1s, visibility 0s  .2s;
+  transition: opacity  .2s .1s, visibility 0s  .2s;
+}
+
 .open .dropdown-toggle::before,
 .open .dropdown-toggle::after {
   width: 14px;
@@ -5818,6 +5827,13 @@ tbody.collapse.in {
 .open .dropdown-toggle::after {
   -webkit-transform: rotate(45deg);
   transform: rotate(45deg);
+}
+
+.open .dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  -webkit-transition: opacity  .2s 0s, visibility 0s 0s;
+  transition: opacity  .2s 0s, visibility 0s 0s;
 }
 
 .btn-group,
@@ -7074,6 +7090,42 @@ fieldset[disabled] .navbar-inverse .btn-link:focus {
   color: #e5d8d8;
 }
 
+/*!
+ * Yamm!3
+ * Yet another megamenu for Bootstrap 3
+ * 
+ * http://geedmo.github.com/yamm3
+ */
+
+.yamm .nav,
+.yamm .collapse,
+.yamm .dropup,
+.yamm .dropdown {
+  position: static;
+}
+
+.yamm .container {
+  position: relative;
+}
+
+.yamm .dropdown-menu {
+  left: auto;
+}
+
+.yamm .nav.navbar-right .dropdown-menu {
+  left: auto;
+  right: 0;
+}
+
+.yamm .yamm-content {
+  padding: 20px 30px;
+}
+
+.yamm .dropdown.yamm-fw .dropdown-menu {
+  left: 0;
+  right: 0;
+}
+
 header,
 .header {
   height: 80px;
@@ -7218,18 +7270,19 @@ fieldset[disabled] .navbar-mega .btn-link:focus {
 .navbar-mega .navbar-nav > li > a:focus.dropdown-toggle::before,
 .navbar-mega .navbar-nav > li > a:hover.dropdown-toggle::after,
 .navbar-mega .navbar-nav > li > a:focus.dropdown-toggle::after {
-  background: #993333;
+  background-color: #f9f9f9;
 }
 
 .navbar-mega .navbar-nav > li > a.dropdown-toggle::before,
 .navbar-mega .navbar-nav > li > a.active.dropdown-toggle::before,
 .navbar-mega .navbar-nav > li > a.dropdown-toggle::after,
 .navbar-mega .navbar-nav > li > a.active.dropdown-toggle::after {
-  background: #f9f9f9;
+  background-color: #f9f9f9;
 }
 
 .navbar-mega .navbar-nav > li > a.dropdown-toggle::before,
 .navbar-mega .navbar-nav > li > a.dropdown-toggle::after {
+  background-color: #993333;
   width: 9px;
 }
 
@@ -7246,16 +7299,8 @@ fieldset[disabled] .navbar-mega .btn-link:focus {
   width: 14px;
 }
 
-.navbar-mega .navbar-nav .dropdown-menu {
-  opacity: 0;
-  display: block;
-  visibility: hidden;
-  -webkit-transition: opacity  .2s .1s, visibility 0s  .2s;
-  transition: opacity  .2s .1s, visibility 0s  .2s;
-}
-
 .navbar-mega .navbar-nav .dropdown-menu .yamm-content a {
-  color: #333;
+  color: #333333;
   position: relative;
   display: block;
   padding: 15px;
@@ -7300,7 +7345,7 @@ fieldset[disabled] .navbar-mega .btn-link:focus {
 
 .navbar-mega .navbar-nav .dropdown-menu .mm-heading > .fa {
   font-size: 30px;
-  color: #333;
+  color: #333333;
 }
 
 .navbar-mega .navbar-nav .dropdown-menu .mm-heading > h4 {
@@ -7318,7 +7363,7 @@ fieldset[disabled] .navbar-mega .btn-link:focus {
 }
 
 .navbar-mega .navbar-nav .dropdown-menu ul > li > a {
-  color: #333;
+  color: #333333;
   position: relative;
   display: block;
   padding: 5px;
@@ -7329,13 +7374,6 @@ fieldset[disabled] .navbar-mega .btn-link:focus {
 .navbar-mega .navbar-nav .dropdown-menu ul > li > a:focus {
   background-color: #ececec;
   text-decoration: none;
-}
-
-.navbar-mega .navbar-nav .open .dropdown-menu {
-  opacity: 1;
-  visibility: visible;
-  -webkit-transition: opacity  .2s 0s, visibility 0s 0s;
-  transition: opacity  .2s 0s, visibility 0s 0s;
 }
 
 .navbar-mega-inverse {
@@ -7485,18 +7523,19 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
 .navbar-mega-inverse .navbar-nav > li > a:focus.dropdown-toggle::before,
 .navbar-mega-inverse .navbar-nav > li > a:hover.dropdown-toggle::after,
 .navbar-mega-inverse .navbar-nav > li > a:focus.dropdown-toggle::after {
-  background: #993333;
+  background-color: #993333;
 }
 
 .navbar-mega-inverse .navbar-nav > li > a.dropdown-toggle::before,
 .navbar-mega-inverse .navbar-nav > li > a.active.dropdown-toggle::before,
 .navbar-mega-inverse .navbar-nav > li > a.dropdown-toggle::after,
 .navbar-mega-inverse .navbar-nav > li > a.active.dropdown-toggle::after {
-  background: #f9f9f9;
+  background-color: #993333;
 }
 
 .navbar-mega-inverse .navbar-nav > li > a.dropdown-toggle::before,
 .navbar-mega-inverse .navbar-nav > li > a.dropdown-toggle::after {
+  background-color: #f9f9f9;
   width: 9px;
 }
 
@@ -7513,16 +7552,8 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
   width: 14px;
 }
 
-.navbar-mega-inverse .navbar-nav .dropdown-menu {
-  opacity: 0;
-  display: block;
-  visibility: hidden;
-  -webkit-transition: opacity  .2s .1s, visibility 0s  .2s;
-  transition: opacity  .2s .1s, visibility 0s  .2s;
-}
-
 .navbar-mega-inverse .navbar-nav .dropdown-menu .yamm-content a {
-  color: #333;
+  color: #333333;
   position: relative;
   display: block;
   padding: 15px;
@@ -7567,7 +7598,7 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
 
 .navbar-mega-inverse .navbar-nav .dropdown-menu .mm-heading > .fa {
   font-size: 30px;
-  color: #333;
+  color: #333333;
 }
 
 .navbar-mega-inverse .navbar-nav .dropdown-menu .mm-heading > h4 {
@@ -7585,7 +7616,7 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
 }
 
 .navbar-mega-inverse .navbar-nav .dropdown-menu ul > li > a {
-  color: #333;
+  color: #333333;
   position: relative;
   display: block;
   padding: 5px;
@@ -7598,11 +7629,42 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
   text-decoration: none;
 }
 
-.navbar-mega-inverse .navbar-nav .open .dropdown-menu {
-  opacity: 1;
-  visibility: visible;
-  -webkit-transition: opacity  .2s 0s, visibility 0s 0s;
-  transition: opacity  .2s 0s, visibility 0s 0s;
+.navbar-mega .nav,
+.navbar-mega-inverse .nav,
+.navbar-mega .collapse,
+.navbar-mega-inverse .collapse,
+.navbar-mega .dropup,
+.navbar-mega-inverse .dropup,
+.navbar-mega .dropdown,
+.navbar-mega-inverse .dropdown {
+  position: static;
+}
+
+.navbar-mega .container,
+.navbar-mega-inverse .container {
+  position: relative;
+}
+
+.navbar-mega .dropdown-menu,
+.navbar-mega-inverse .dropdown-menu {
+  left: auto;
+}
+
+.navbar-mega .nav.navbar-right .dropdown-menu,
+.navbar-mega-inverse .nav.navbar-right .dropdown-menu {
+  left: auto;
+  right: 0;
+}
+
+.navbar-mega .yamm-content,
+.navbar-mega-inverse .yamm-content {
+  padding: 20px 30px;
+}
+
+.navbar-mega .dropdown.yamm-fw .dropdown-menu,
+.navbar-mega-inverse .dropdown.yamm-fw .dropdown-menu {
+  left: 0;
+  right: 0;
 }
 
 .breadcrumb {

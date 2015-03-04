@@ -72,6 +72,16 @@
       transform: rotate(-45deg);
     }
   }
+
+  .dropdown-menu {
+    opacity: 0;
+    border: none;
+    display: block;
+    visibility: hidden;
+    -webkit-transition: opacity  .2s .1s, visibility 0s  .2s;
+    -moz-transition: opacity  .2s .1s, visibility 0s  .2s;
+    transition: opacity  .2s .1s, visibility 0s  .2s;
+  }
 }
 
 .open {
@@ -94,5 +104,13 @@
       -o-transform: rotate(45deg);
       transform: rotate(45deg);
     }
+  }
+
+  .dropdown-menu{
+    opacity: 1;
+    visibility: visible;
+    -webkit-transition: opacity  .2s 0s, visibility 0s 0s;
+    -moz-transition: opacity  .2s 0s, visibility 0s 0s;
+    transition: opacity  .2s 0s, visibility 0s 0s;
   }
 }
