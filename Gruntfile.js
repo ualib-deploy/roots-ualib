@@ -7,6 +7,7 @@ module.exports = function( grunt ) {
 	// Project configuration
 	grunt.initConfig( {
 		pkg:    grunt.file.readJSON( 'package.json' ),
+		bower:	grunt.file.readJSON('.bowerrc'),
 		jshint: {
 			browser: {
 				all: [
@@ -241,6 +242,26 @@ module.exports = function( grunt ) {
 				prereleaseName: false,
 				regExp: false
 			}
+		},
+		copy: {
+			dist: {
+				files: [{
+					expand: true,
+					cwd: '<%= bower.directory %>/fontawesome/fonts',
+					src: ['**'],
+					dest: 'assets/dist/fonts',
+					filter: 'isFile'
+				}]
+			},
+			dev: {
+				files: [{
+					expand: true,
+					cwd: '<%= bower.directory %>/fontawesome/fonts',
+					src: ['**'],
+					dest: 'assets/fonts',
+					filter: 'isFile'
+				}]
+			}
 		}
 	} );
 
@@ -256,6 +277,7 @@ module.exports = function( grunt ) {
 	] );
 
 	grunt.registerTask( 'dev', ['watch'] );
+	grunt.registerTask( 'vendor', ['less'] );
 
 	grunt.util.linefeed = '\n';
 };

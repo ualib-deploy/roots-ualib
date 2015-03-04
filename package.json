@@ -1,6 +1,6 @@
 {
   "name": "roots-ualib",
-  "version": "0.2.1",
+  "version": "0.3.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/ualibweb/roots-ualib.git"
@@ -19,6 +19,7 @@
     "grunt-rsync": "~0.2.1",
     "grunt-contrib-watch": "~0.5.3",
     "grunt-contrib-less": "~0.8.1",
-    "grunt-bump": "~0.3.0"
+    "grunt-bump": "~0.3.0",
+    "grunt-contrib-copy": "~0.8.0"
   }
 }
