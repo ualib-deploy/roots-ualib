@@ -29,54 +29,24 @@
 // <a href="https://secure-site-url">Works with HTTPS too!</a>
 //
 // Styleguide style.links.file-external
-/* Font Awesome icon codes */
-@icon-ext-link: "\f08e";
-@icon-pdf: "\f1c1";
-@icon-word: "\f1c2";
-@icon-excel: "\f1c3";
-@icon-powerpoint: "\f1c4";
 
-a[href^="http"]:after,
-a[href^="https"]:after{
-  .link-icon-after(@icon-ext-link);
-}
+.@{content-container-class}{
+  a:not(.no-icon){
+    &[href^="http"]:after,
+    &[href^="https"]:after{
+      .link-icon-after(@icon-ext-link);
+    }
 
-a[href$=".pdf"]:before{
-  .link-icon-before(@icon-pdf);
-}
-a[href$=".doc"]:before,
-a[href$=".docx"]:before{
-  .link-icon-before(@icon-word);
-}
-a[href$=".xls"]:before,
-a[href$=".xlsx"]:before{
-  .link-icon-before(@icon-excel);
-}
-
-a{
-  .navbar &:before,
-  .navbar &:after{
-    display: none;
+    &[href$=".pdf"]:before{
+      .link-icon-before(@icon-pdf);
+    }
+    &[href$=".doc"]:before,
+    &[href$=".docx"]:before{
+      .link-icon-before(@icon-word);
+    }
+    &[href$=".xls"]:before,
+    &[href$=".xlsx"]:before{
+      .link-icon-before(@icon-excel);
+    }
   }
-}
-
-.link-icon(@icon){
-  @line-height-reduction: floor(@line-height-computed * .20);
-  content: @icon;
-  font-family: FontAwesome;
-  font-size: .80em;
-  line-height: floor(@line-height-computed - @line-height-reduction);
-  display: inline-block;
-  text-decoration: none;
-}
-
-.link-icon-before(@icon){
-  .link-icon(@icon);
-  font-size: inherit;
-  padding-right: 5px;
-}
-
-.link-icon-after(@icon){
-  .link-icon(@icon);
-  padding-left: 5px;
 }
