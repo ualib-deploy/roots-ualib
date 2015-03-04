@@ -1,99 +1,103 @@
-UA Libraries Style Guide
-========================
+University Libraries represents the University of Alabama on an academic and institutional level, not just as a library, but also as a repository, archive, computer lab, and location for students to engage both academically and socially, all in support of the university mission. Consequently, the University Libraries Web Site Style Guide will reflect this usage and will help the Libraries provide students with access to information and resources.
 
-This styleguide is intended for web developers (e.g., not 'content creators/editors'). It gives basic information about the primary classes/features available.
-For now, this styleguide is being generating using [kss-node](https://github.com/kss-node/kss-node). Unforunately, kss-node doesn't offer
-all the features we will need, so it will likely be abandoned for another method when we need to development the styleguide for content creators.
+Web Services’ top priority is to provide users with easy-to-use, accessible, and “findable,” web content. To achieve this, the following style guide presents the Libraries with rules and best practices, regarding site content, writing methods, text usage, and additional website design elements.
 
-## First Steps
+## Content Strategy
 
-The UA Libraries website CSS is modified from [Bootstrap 3.2.0](http://getbootstrap.com/). The current build of the CSS supports all Bootstrap features,
-but the features will likely be narrowed down to only what is essential. The list below links to Bootstrap topics/features that the UA Libraries CSS will
-likely be features of the finalized UA Libraries Styles.
+> In short, your content has to be awesome. It has to be truly helpful. It cannot be about you.
+> It has to be about your customers’ wants and needs.
+> 
+> -- <cite>Forbes Magazine</cite>
 
-Although all of Bootstrap's capabilities are currently available (subject to change),
-it is strongly recommended you read through the the linked _recommended Bootstrap capabilities_ linked below:
-* CSS
-    * [Containers](http://getbootstrap.com/css/#overview-container)
-    * [Grid system](http://getbootstrap.com/css/#grid)
-        * Read through every sub-topic except "Less mixins and variables"
-    * Tables
-        * [Responsive Tables](http://getbootstrap.com/css/#tables-responsive)
-    * [Forms](http://getbootstrap.com/css/#forms)
-    * Images
-        * [Responsive images](http://getbootstrap.com/css/#images-responsive)
-    * Helper classes
-        * [Carets](http://getbootstrap.com/css/#helper-classes-carets)
-        * [Quick floats](http://getbootstrap.com/css/#helper-classes-floats)
-        * [Screen reader content](http://getbootstrap.com/css/#helper-classes-screen-readers)
-* Components
-    * [Dropdowns](http://getbootstrap.com/components/#dropdowns)
-    * [Button groups](http://getbootstrap.com/components/#btn-groups)
-    * [Button dropdowns](http://getbootstrap.com/components/#btn-dropdowns)
-    * [Input groups](http://getbootstrap.com/components/#input-groups)
-    * [Navs](http://getbootstrap.com/components/#nav)
-    * [Navbar](http://getbootstrap.com/components/#navbar)
-    * [Labels](http://getbootstrap.com/components/#labels)
-    * [Thumbnails](http://getbootstrap.com/components/#thumbnails)
-    * Alerts
-        * [Dissmissable alerts](http://getbootstrap.com/components/#alerts-dismissible)
-        * [Links in alerts](http://getbootstrap.com/components/#alerts-links)
-    * [Media object](http://getbootstrap.com/components/#media)
-       
-## Using the CSS
-For development use the [RawGit](https://rawgit.com/) service for the header include. You can change the link to your own fork as well.
+The User Interface has a strict navigation structure, meaning that new pages or alterations to existing pages will need to fit within this new organizational structure. Pay close attention to link locations, content placement, top-level navigation, and sub-navigation areas.
 
-**Note:** Only use this link for low-traffic dev or demo sites.
-```
-<link rel="stylesheet" href="https://rawgit.com/ualibweb/ualib-styles/gh-pages/dist/ualib-styles.min.css">
-```
+## What can I put on the website?
 
+Anything that is relevant to your department’s services, public information about your department, or information about specialized areas or content types. Website content must not be suitable for a LibGuide or a Blog. We can create LibGuides to promote library resources or services that are specific to an academic research pursuit. Blogs also detail library resources and services, but done so frequently and require multiple postings.
 
-### Issues and feature requests
-Use github's [issues system](https://github.com/ualibweb/ualib-styles/issues) to report problems or make feature requests. To do this, you must first create a github account. Afterwards, let me know you account name and I'll add you as a contributor.
+## What areas will I need to talk to web services about editing?
 
----
+We identified 23 content areas where the design is extensively intermixed with the content; changes to these areas will need web services intervention to ensure the integrity of the design. Web Services have based the design of the site on usability and analytics data, and it is important that the content creator not alter them accidentally or arbitrarily.
 
-## Forking, installing, and building the UA Libraries styles and styleguide
+In no way does Web Services claim responsibility or ownership of the content; content creators retain full ownership and responsibility of their page content. Web Services simply assists in the design, the look, and overall feel of how the page presents the content.
 
-### Requirements
-You must have the following software install on your computer to build the CSS and Styleguide. Grunt and Bower both require Node.js, so install Node first.
-1. [Node.js](http://nodejs.org/)
-    * Go to their [downloads page](http://nodejs.org/download/) and install the appropriate package
-2. [Grunt.js](http://gruntjs.com/)
-    * [See here](http://gruntjs.com/getting-started#installing-the-cli) for installation instructions
-3. [Bower](http://bower.io/)
-    * [See here](http://bower.io/#install-bower) for installation
+*   Databases (Application)
+*   Maps, Locations, Hours (Application)
+*   Directory (Application)
 
----
+*   Using the Libraries
 
-### Forking repo and Installing dependencies
+*   Research Tools
+*   Library Help
+*   News, Events, and Exhibitions
+*   About
+*   Libraries & Collections
 
-1. Create you own fork of the [ualibweb/ualib-styles](https://github.com/ualibweb/ualib-styles) repo. [See here](https://help.github.com/articles/fork-a-repo/) for instructions on forking a github repo.
-    * The default branch for this repo is `gh-pages`. Any [pull requests](https://help.github.com/articles/using-pull-requests/) will be merged with this branch.
-2. Run `npm install -g kss` in the command line to install `kss-node` globally.
-3. Run `npm install` to install dependencies for `grunt` (ensure you're in the same folder as the `package.json` file).
-3. Run `bower install` in the command line (ensure you're in the same folder as the `bower.json` file).
+*   E-Resources (E-Books, E-Journals)
 
----
+*   Reserves
+*   Interlibrary Borrowing
+*   Sanford Media Center
+*   Computers & Software
+*   How Do I… (Ask A Librarian)
+*   Alabama Digital Humanities Center
+*   Print, Copy, Scan
+*   Circulation Policies (Borrow, Renew, Request)
+*   Equipment
 
-### Build everything (CSS and Styleguide)
+*   Floor Maps
 
-1. Run `grunt` or `grunt default`
+*   Classes, Workshops, Tours
+*   Practice Presentation Rooms
+*   Social Media Page
 
-### Build CSS only
+## What are the rules for adding additional content?
 
-1. Run `grunt css`
+Follow the template, use our styles as per the document, or simply let the elements (<p>, <div>, etc.) style automatically as we have intended.
 
----
+## How do I use our styles and fonts? How will the elements appear, and what does each style look like?
 
-#### The final CSS file(s) are build to
-```
-dist/css/
-```
+Please see the Style Elements section of this document
 
+## Writing for the Web
 
-#### The Styleguide is build to
-```
-styleguide/
-```
+The University Libraries website is not the final destination for users, but rather a tool to help connect users to the relevant resources and services available at the libraries.  Additionally, research has shown that users interact with website content in a very specific way.Important guidelines for writing for the web:
+
+*   Be succinct : write no more than 50% of the text you would have used in a hardcopy publication
+*   Write for scannability : don't require users to read long continuous blocks of text
+    ([http://www.nngroup.com/articles/be-succinct-writing-for-the-web/](http://www.nngroup.com/articles/be-succinct-writing-for-the-web/))
+
+### Additional Resources:
+
+*   Writing for the Web
+    [http://www.nngroup.com/topic/writing-web/](http://www.nngroup.com/topic/writing-web/)
+
+*   Kill the Welcome Mat
+    [http://www.nngroup.com/articles/blah-blah-text-keep-cut-or-kill/](http://www.nngroup.com/articles/blah-blah-text-keep-cut-or-kill/)
+
+*   10 Tips for Good Web Writing
+    [http://webdesign.about.com/od/writing/a/aa031405.htm](http://webdesign.about.com/od/writing/a/aa031405.htm)
+
+### Content
+
+*   Keep content relevant to topic and goal; your writing should have a goal.
+*   When writing, think of an inverted pyramid - get to the point in the first paragraph, then expand upon it.
+*   One idea per paragraph.
+*   Web pages need to be concise and to-the-point; short, meaty paragraphs are better than long rambling ones.
+*   Use action words.
+*   Tell your readers what to do and avoid the passive voice. Keep the flow of your pages moving.
+
+![Alt text](assets/img/pages-flow.jpg)
+-- Lynda Felder, Peachpit.com
+
+### Format
+
+*   Try to use lists instead of paragraphs - lists are easier to scan than paragraphs.
+*   Try to limit list items to 7 words: studies have shown that people can only reliably remember 7-10 things at a time. More than 7 is occasionally acceptable, depending on context.
+*   Sentences should be as concise as you can make them. Use only the words you need to convey essential information.
+*   Include internal sub-headings: sub-headings make the text more scannable. Your readers will move to the section of the document that is most useful for them, and internal cues make it easier for them to achieve this.
+*   Make your links part of the copy: links are another way Web readers scan pages. They stand out from normal text, and provide additional cues as to what the page is about.
+
+### Always
+
+*   Proofread your work - typos and spelling errors will send people away from your pages. Make sure you proofread everything you post to the Web.
