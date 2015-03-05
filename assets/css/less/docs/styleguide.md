@@ -89,7 +89,7 @@ The University Libraries website is not the final destination for users, but rat
 *   Use action words.
 *   Tell your readers what to do and avoid the passive voice. Keep the flow of your pages moving.
 
-![Alt text](assets/img/pages-flow.jpg)
+![Alt text](../assets/img/pages-flow.jpg)
 -- Lynda Felder, Peachpit.com
 
 ### Format
