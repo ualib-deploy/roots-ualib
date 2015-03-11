@@ -262,12 +262,16 @@ module.exports = function( grunt ) {
 					filter: 'isFile'
 				}]
 			}
+		},
+		clean: {
+			dist:  ['assets/dist/css/']
 		}
 	} );
 
 	// Default task.
 	grunt.registerTask( 'default', [
 		'jshint',
+		'clean',
 		'uglify',
 		'less',
 		'autoprefixer',
