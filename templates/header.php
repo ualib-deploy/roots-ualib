@@ -1,4 +1,142 @@
-<header class="navbar navbar-static-top navbar-ualib" role="banner">
+<header role="banner">
+    <nav class="navbar navbar-static-top navbar-mega" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="fa fa-bars"></span>
+                </button>
+                <a class="navbar-brand" href="#">
+                    <img src="holder.js/110x75/text:Logo" class="/wp-content/uploads/2015/01/ualib-logo-textonly-inverse.png" alt="University of Alabama Libraries"/>
+                </a>
+            </div>
+            <div class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li class="dropdown yamm-fw">
+                        <a href="#" class="dropdown-toggle">Research Tools</a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <div class="yamm-content">
+                                    <div class="row">
+                                        <div class="col-xs-3 menu-col menu-onesearch"><a href="https://wwwdev2.lib.ua.edu/sample-page/onesearch/"><span class="fa fa-search"></span><h4>OneSearch</h4><p>Search everything the University Libraries’ offer from one palce</p></a></div>
+                                        <div class="col-xs-3 menu-col menu-scout"><a href="https://wwwdev2.lib.ua.edu/research-help/scout/"><span class="fa fa-binoculars"></span><h4>Scout</h4><p>Search for books, articles, and more</p></a></div>
+                                        <div class="col-xs-3 menu-col menu-databases"><a href="https://wwwdev2.lib.ua.edu/research-help/databases/"><span class="fa fa-database"></span><h4>Databases</h4><p>Explore databases for a wide range of subjects</p></a></div>
+                                        <div class="col-xs-3 menu-col menu-google-scholar"><a href="https://wwwdev2.lib.ua.edu/research-help/google-scholar/"><span class="fa fa-google"></span><h4>Google Scholar</h4><p>Search Google Scholar for articles and academic journals</p></a></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-xs-3 menu-col menu-subject-and-course-guides"><a href="https://wwwdev2.lib.ua.edu/research-help/subject-guides/"><span class="fa fa-compass"></span><h4>Subject and Course Guides</h4><p>Explore our vast array of academic subject and course guides</p></a></div>
+                                        <div class="col-xs-3 menu-col menu-subject-specialists"><a href="https://wwwdev2.lib.ua.edu/research-help/subject-specialists/"><span class="fa fa-comments"></span><h4>Subject Specialists</h4><p>Need help with your research? Get in contact with our subject specialists.</p></a></div>
+                                        <div class="col-xs-3 menu-col menu-government-information-statistics-and-data"><a href="https://wwwdev2.lib.ua.edu/research-help/government-information/"><span class="fa fa-university"></span><h4>Government Information, Statistics and Data</h4></a></div>
+                                        <div class="col-xs-3 menu-col menu-tutorials-and-instructional-videos"><a href="https://wwwdev2.lib.ua.edu/research-help/tutorials/"><span class="fa fa-magic"></span><h4>Tutorials and Instructional Videos</h4></a></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-xs-3 menu-col menu-citation-finder"><a href="https://wwwdev2.lib.ua.edu/research-help/citation-finder/"><span class="fa fa-quote-left"></span><h4>Citation Finder</h4></a></div>
+                                        <div class="col-xs-3 menu-col menu-music-library-search"><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/campus-libraries/music-library/music-library-search/"><span class="fa fa-music"></span><h4>Music Library Search</h4><p>Search what our Music Library has to offer</p></a></div>
+
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="dropdown yamm-fw">
+                        <a href="#" class="dropdown-toggle">Using the Library</a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <div class="yamm-content">
+                                    <div class="row">
+                                        <div class="col-xs-3 ualib-mm-list">
+                                            <div class="mm-heading">
+                                                <span class="fa fa-desktop"></span>
+                                                <h4>Computers, Software, &amp; Equipment</h4>
+                                            </div>
+                                            <ul>
+                                                <li><a href="https://wwwdev2.lib.ua.edu/services/photocopying/"><span class="fa fa-print"></span><h4>Print, Scan, Copy</h4><p>How and where to print, copy, or scan in the libraries</p></a></li>
+                                                <li class="menu-computer-availability"><a href="https://wwwdev2.lib.ua.edu/services/computer-availability/computer-availability/">Computer Availability</a></li>
+                                                <li class="menu-laptop-computers"><a href="https://wwwdev2.lib.ua.edu/services/computer-availability/laptop-computers/">Laptop Computers</a></li>
+                                                <li class="menu-library-software-list"><a href="https://wwwdev2.lib.ua.edu/services/computer-availability/library-software-list/">Library Software List</a></li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-sm-9">
+                                            <div class="row">
+                                                <div class="col-xs-3 menu-col menu-find-a-place-to-study"><a href="https://wwwdev2.lib.ua.edu/services/find-a-place-to-study/"><span class="fa fa-book"></span><h4>Find a Place to Study</h4><p>Quiet place to study and stuffs yallz</p></a></div>
+                                                <div class="col-xs-3 menu-col menu-practice-presentation-rooms"><a href="https://wwwdev2.lib.ua.edu/services/practice-presentation-rooms/"><span class="fa fa-area-chart"></span><h4>Practice Presentation Rooms</h4></a></div>
+                                                <div class="col-xs-3 menu-col menu-classes-workshops-tours"><a href="https://wwwdev2.lib.ua.edu/services/library-instruction/"><h4>Classes, Workshops, Tours</h4></a></div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-xs-3 menu-col menu-interlibrary-borrowing"><a href="https://wwwdev2.lib.ua.edu/services/interlibrary-loan/"><span class="fa fa-exchange"></span><h4>Interlibrary Borrowing</h4></a></div>
+                                                <div class="col-xs-3 menu-col menu-disability-services"><a href="https://wwwdev2.lib.ua.edu/services/disability-services/"><span class="fa fa-wheelchair"></span><h4>Disability Services</h4></a></div>
+                                                <div class="col-xs-3 menu-col menu-alabama-digital-humanities-center"><a href="https://wwwdev2.lib.ua.edu/services/digital-humanities-center/"><span class="fa fa-tachometer"></span><h4>Alabama Digital Humanities Center</h4></a></div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-xs-3 menu-col menu-sanford-media-center"><a href="https://wwwdev2.lib.ua.edu/services/sanford-media-center/"><span class="fa fa-cubes"></span><h4>Sanford Media Center</h4></a></div>
+                                                <div class="col-xs-3 menu-col menu-information-for-faculty"><a href="https://wwwdev2.lib.ua.edu/services/information-for-faculty/"><span class="fa fa-graduation-cap"></span><h4>Information for Faculty</h4></a></div>
+                                                <div class="col-xs-3 menu-col menu-information-for-students"><a href="https://wwwdev2.lib.ua.edu/services/library-information-for-current-students/"><span class="fa fa-pencil"></span><h4>Information for Students</h4></a></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-left">
+                    <li>
+                        <a href="#">Left Aligned Navbar</a>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="#">Link</a>
+                    </li>
+                    <li class="dropdown yamm-fw">
+                        <a href="#" class="dropdown-toggle">Dropdown</a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <div class="yamm-content">
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="mm-heading">
+                                                <span class="fa fa-desktop"></span>
+                                                <h4>List Should Never Stack</h4>
+                                            </div>
+                                            <ul>
+                                                <li><a href="#">Action</a></li>
+                                                <li><a href="#">Another action</a></li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="mm-heading">
+                                                <span class="fa fa-puzzle-piece"></span>
+                                                <h4>They Should Split By Columns</h4>
+                                            </div>
+                                            <ul>
+                                                <li><a href="#">Separated</a></li>
+                                                <li><a href="#">Link</a></li>
+                                                <li><a href="#">List</a></li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="mm-heading">
+                                                <span class="fa fa-spoon"></span>
+                                                <h4>Like This!</h4>
+                                            </div>
+                                            <ul>
+                                                <li><a href="#">Another</a></li>
+                                                <li><a href="#">Separated</a></li>
+                                                <li><a href="#">Link</a></li>
+                                                <li><a href="#">List</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+<?php /*
   <div class="container-fluid">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
@@ -71,4 +209,4 @@
             </div>
         </div>
     </div>
-<?php endif; ?>
+<?php endif; */?>

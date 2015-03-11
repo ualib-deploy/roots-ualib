@@ -1,6 +1,6 @@
 <?php
 
-require_once( get_stylesheet_directory() . '/roots-child-settings.php' );
+// require_once( get_stylesheet_directory() . '/roots-child-settings.php' );
 
 function ualib_child_startSession() {
     if(!session_id()) {
