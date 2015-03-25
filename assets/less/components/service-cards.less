@@ -1,0 +1,106 @@
+// Service Cards
+//
+// Service cards can be used to feature or link to various services, resources on the website, using
+// a standardized heading, link, and icon format for consistent UX.
+//
+// Service cards can be static elements, links, or lists to group of related/similar services together.
+//
+// <mark>TODO:</mark> Give better, more detailed explanation for the uses of service cards
+//
+// Markup: service-cards.html
+//
+// CodeTemplate:
+//  <div class="service-card">
+//    <span class="fa fa-{font-awesome-icon}"></span>
+//    <h4>Service Heading</h4>
+//    <p>Short description of the service or resource</p>
+//  </div>
+//
+// Styleguide components.service_cards
+
+.service-card, .service-list {
+  .service-card-defaults();
+}
+
+// Service Card Links
+//
+// Best used in menus or navigational grids
+//
+// Markup: service-card-links.html
+//
+// CodeTemplate:
+//  <a class="service-card" href="#">
+//    <span class="fa fa-{font-awesome-icon}"></span>
+//    <h4>Service Heading</h4>
+//    <p>Short description of the service or resource</p>
+//  </a>
+//  <!-- Service List -->
+//  <div class="service-list">
+//    <span class="fa fa-{font-awesome-icon}"></span>
+//    <h4>Service Heading</h4>
+//    <ul>
+//      <li><a href="#">Service 1</a></li>
+//      <li><a href="#">Service 2</a></li>
+//      <li><a href="#">Service 3</a></li>
+//      <li><a href="#">...</a></li>
+//    </ul>
+//  </div>
+//
+// Styleguide components.service_cards.links
+
+// Service card link styles
+a.service-card {
+  &:hover,
+  &:active,
+  &:focus {
+    background-color: @gray-lighter;
+    text-decoration: none;
+    color: @gray-dark;
+  }
+}
+
+// Service Lists
+//
+// Markup: service-lists.html
+//
+// CodeTemplate:
+//  <div class="service-list">
+//    <span class="fa fa-{font-awesome-icon}"></span>
+//    <h4>Service Heading</h4>
+//    <ul>
+//      <li><a href="#">Service 1</a></li>
+//      <li><a href="#">Service 2</a></li>
+//      <li><a href="#">Service 3</a></li>
+//      <li><a href="#">...</a></li>
+//    </ul>
+//  </div>
+//
+// Styleguide components.service_cards.lists
+.service-list {
+  > h1,h2,h3,h4,h5,h6 {
+    margin-top: 15px;
+  }
+
+  > ul {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 5px;
+    margin-left: 45px;
+
+    > li > a {
+      color: @gray-dark;
+      position: relative;
+      display: block;
+      padding: 5px;
+      font-size: 16px;
+
+      &:hover,
+      &:active,
+      &:focus {
+        background-color: @gray-lighter;
+        text-decoration: none;
+        color: @gray-dark;
+      }
+    }
+  }
+}

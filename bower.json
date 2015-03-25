@@ -1,13 +1,24 @@
 {
-  "name": "roots-ualib",
-  "version": "0.5.1",
+  "name": "roots",
+  "version": "7.0.3",
+  "homepage": "http://roots.io",
+  "authors": [
+    "Ben Word <ben@benword.com>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "assets/vendor"
+  ],
   "dependencies": {
-    "modernizr": "~2.7.0",
-    "bootstrap": "~3.3.2",
+    "modernizr": "2.8.2",
+    "jquery": "1.11.1",
+    "bootstrap": "3.3.2",
+    "respond": "1.4.2",
     "fontawesome": "~4.3.0",
-    "yamm3": "https://github.com/geedmo/yamm3.git#~1.0.0"
-  },
-  "devDependencies": {
-    "fontawesome": "~4.3.0"
+    "yamm3": "https://github.com/geedmo/yamm3.git#~1.0.0",
+    "ualib-ui": "https://github.com/ualibweb/ui-components.git"
   }
 }

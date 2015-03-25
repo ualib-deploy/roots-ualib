@@ -1,0 +1,24 @@
+.service-card-defaults(@icon-color: @gray, @heading-color: @brand-primary, @color: @gray-dark) {
+  color: @color;
+  position: relative;
+  display: block;
+  padding: 15px;
+
+  .fa {
+    display: block;
+    position: absolute;
+    top: 30px;
+    font-size: 30px;
+    color: @icon-color;
+  }
+
+  > h1,h2,h3,h4,h5,h6 {
+    color: @heading-color;
+    margin-bottom: 0;
+    margin-left: 45px;
+  }
+
+  > p {
+    margin-left: 45px;
+  }
+}

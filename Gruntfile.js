@@ -1,287 +1,196 @@
-module.exports = function( grunt ) {
-	'use strict';
+'use strict';
+module.exports = function(grunt) {
+  // Load all tasks
+  require('load-grunt-tasks')(grunt);
+  // Show elapsed time
+  require('time-grunt')(grunt);
 
-	// Load all grunt tasks
-	require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
+  var jsFileList = [
+    '<%= bower.directory %>/bootstrap/js/transition.js',
+    '<%= bower.directory %>/bootstrap/js/alert.js',
+    '<%= bower.directory %>/bootstrap/js/button.js',
+    '<%= bower.directory %>/bootstrap/js/carousel.js',
+    '<%= bower.directory %>/bootstrap/js/collapse.js',
+    '<%= bower.directory %>/bootstrap/js/dropdown.js',
+    '<%= bower.directory %>/bootstrap/js/modal.js',
+    '<%= bower.directory %>/bootstrap/js/tooltip.js',
+    '<%= bower.directory %>/bootstrap/js/popover.js',
+    '<%= bower.directory %>/bootstrap/js/scrollspy.js',
+    '<%= bower.directory %>/bootstrap/js/tab.js',
+    '<%= bower.directory %>/bootstrap/js/affix.js',
+    '<%= bower.directory %>/angular/angular.js',
+    '<%= bower.directory %>/angular-animate/angular-animate.js',
+    '<%= bower.directory %>/ualib-ui/dist/ui-components-templates.js',
+    '<%= bower.directory %>/ualib-ui/dist/ui-components.js',
+    'assets/js/plugins/*.js',
+    'assets/js/_*.js'
+  ];
 
-	// Project configuration
-	grunt.initConfig( {
-		pkg:    grunt.file.readJSON( 'package.json' ),
-		bower:	grunt.file.readJSON('.bowerrc'),
-		jshint: {
-			browser: {
-				all: [
-					'assets/js/**/*.js',
-					'assets/js/test/**/*.js'
-				],
-				options: {
-					jshintrc: '.jshintrc'
-				}
-			},
-			grunt: {
-				all: [
-					'Gruntfile.js'
-				],
-				options: {
-					jshintrc: '.gruntjshintrc'
-				}
-			}
-		},
-		// uglify to concat, minify, and make source maps
-		uglify: {
-			plugins: {
-				options: {
-					sourceMap: 'assets/js/plugins.js.map',
-					sourceMappingURL: 'plugins.js.map',
-					sourceMapPrefix: 2,
-					banner: '/*! roots-ualib - Plugins - 2015-01-29 12:00\n' +
-						' * Copyright (c) 2015;' +
-						' * Licensed ECLv2+' +
-						' */\n'
-				},
-				files: [{
-					src: [
-						'assets/js/source/plugins.js',
-						// 'assets/js/vendor/yourplugin/yourplugin.js',
-					],
-					dest: 'assets/js/plugins.min.js'
-				}]
-			},
-			main: {
-				options: {
-					sourceMap: 'assets/js/main.js.map',
-					sourceMappingURL: 'main.js.map',
-					sourceMapPrefix: 2,
-					banner: '/*! roots-ualib 2015-01-29 12:00\n' +
-						' * Copyright (c) 2015;' +
-						' * Licensed ECLv2+' +
-						' */\n'
-				},
-				files: [{
-					src: [
-						'assets/js/source/main.js'
-					],
-					dest: 'assets/js/main.min.js'
-				}]
-			}
-		},
-		test:   {
-			files: ['assets/js/test/**/*.js']
-		},
-		less:   {
-			all: {
-				files: {
-					'assets/css/main.css': 'assets/css/less/main.less'
-				}
-			}
-		},
-		autoprefixer: {
-			options: {
-				browsers: ['last 1 version']
-			},
-			dist: {
-				files: [{
-					expand: true,
-					cwd: 'assets/css/',
-					src: '{,*/}*.css',
-					dest: 'assets/css/'
-				}]
-			}
-		},
-		cssmin: {
-			options: {
-				banner: '/*!  - v0.1.4 - 2015-01-29 12:00\n' +
-					' * Copyright (c) 2015;' +
-					' * Licensed ECLv2+' +
-					' */\n'
-			},
-			minify: {
-				expand: true,
-				cwd: 'assets/css/',
-				src: ['main.css'],
-				dest: 'assets/css/',
-				ext: '.min.css'
-			}
-		},
-		imagemin: {
-			dist: {
-				options: {
-					optimizationLevel: 7,
-					progressive: true
-				},
-				files: [{
-					expand: true,
-					cwd: 'assets/img',
-					src: '{,*/}*.{png,jpg,jpeg}',
-					dest: 'assets/img/dist'
-				}]
-			}
-		},
-		versioning: {
-			options: {
-				cwd: 'assets/dist',
-				output: 'php',
-				outputConfigDir: 'lib'
-			},
-			dist: {
-				files: [{
-					assets: [{
-						src: ['assets/js/vendor/modernizr.js'],
-						dest: 'assets/js/vendor/modernizr.js'
-					}],
-					key: 'global',
-					dest: 'js',
-					type: 'js',
-					ext: '.min.js'
-				},{
-					assets: '<%= uglify.plugins.files %>',
-					key: 'global',
-					dest: 'js',
-					type: 'js',
-					ext: '.min.js'
-				}, {
-					assets: '<%= uglify.main.files %>',
-					key: 'global',
-					dest: 'js',
-					type: 'js',
-					ext: '.min.js'
-				}, {
-					assets: [{
-						src: ['assets/css/main.min.css'],
-						dest: 'assets/css/main.min.css'
-					}],
-					key: 'global',
-					dest: 'css',
-					type: 'css',
-					ext: '.min.css'
-				}]
-			}
-		},
-		// Generates a custom Modernizr build that includes only the tests you
-		// reference in your app
-		modernizr: {
-			devFile: "bower_components/modernizr/modernizr.js",
-			outputFile: "assets/js/vendor/modernizr.js",
-			excludeFiles: [
-				'assets/js/vendor/*'
-			],
+  grunt.initConfig({
+    pkg: grunt.file.readJSON('package.json'),
+    bower: grunt.file.readJSON('.bowerrc'),
+    jshint: {
+      options: {
+        jshintrc: '.jshintrc'
+      },
+      all: [
+        'Gruntfile.js',
+        'assets/js/*.js',
+        '!assets/js/scripts.js',
+        '!assets/**/*.min.*'
+      ]
+    },
+    less: {
+      dev: {
+        files: {
+          'assets/css/main.css': [
+            'assets/less/main.less'
+          ]
+        },
+        options: {
+          compress: false,
+          // LESS source map
+          // To enable, set sourceMap to true and update sourceMapRootpath based on your install
+          sourceMap: true,
+          sourceMapFilename: 'assets/css/main.css.map',
+          sourceMapRootpath: '/app/themes/roots/'
+        }
+      },
+      build: {
+        files: {
+          'assets/css/main.min.css': [
+            'assets/less/main.less'
+          ]
+        },
+        options: {
+          compress: true
+        }
+      }
+    },
+    concat: {
+      options: {
+        separator: ';'
+      },
+      dist: {
+        src: [jsFileList],
+        dest: 'assets/js/scripts.js'
+      }
+    },
+    copy: {
+        dist: {
+            files: [{
+                expand: true,
+                cwd: '<%= bower.directory %>/fontawesome/fonts',
+                src: ['**'],
+                dest: 'assets/fonts',
+                filter: 'isFile'
+            }]
+        }
+    },
+    uglify: {
+      dist: {
+        files: {
+          'assets/js/scripts.min.js': [jsFileList]
+        }
+      }
+    },
+    autoprefixer: {
+      options: {
+        browsers: ['last 2 versions', 'ie 8', 'ie 9', 'android 2.3', 'android 4', 'opera 12']
+      },
+      dev: {
+        options: {
+          map: {
+            prev: 'assets/css/'
+          }
+        },
+        src: 'assets/css/main.css'
+      },
+      build: {
+        src: 'assets/css/main.min.css'
+      }
+    },
+    modernizr: {
+      build: {
+        devFile: '<%= bower.directory %>/modernizr/modernizr.js',
+        outputFile: 'assets/js/vendor/modernizr.min.js',
+        files: {
+          'src': [
+            ['assets/js/scripts.min.js'],
+            ['assets/css/main.min.css']
+          ]
+        },
+        extra: {
+          shiv: false
+        },
+        uglify: true,
+        parseFiles: true
+      }
+    },
+    version: {
+      default: {
+        options: {
+          format: true,
+          length: 32,
+          manifest: 'assets/manifest.json',
+          querystring: {
+            style: 'roots_css',
+            script: 'roots_js'
+          }
+        },
+        files: {
+          'lib/scripts.php': 'assets/{css,js}/{main,scripts}.min.{css,js}'
+        }
+      }
+    },
+    watch: {
+      less: {
+        files: [
+          'assets/less/*.less',
+          'assets/less/**/*.less'
+        ],
+        tasks: ['less:dev', 'autoprefixer:dev']
+      },
+      js: {
+        files: [
+          jsFileList,
+          '<%= jshint.all %>'
+        ],
+        tasks: ['jshint', 'concat']
+      },
+      livereload: {
+        // Browser live reloading
+        // https://github.com/gruntjs/grunt-contrib-watch#live-reloading
+        options: {
+          livereload: false
+        },
+        files: [
+          'assets/css/main.css',
+          'assets/js/scripts.js',
+          'templates/*.php',
+          '*.php'
+        ]
+      }
+    }
+  });
 
-			// By default, source is uglified before saving
-			uglify: true,
-
-			// By default, this task will crawl your project for references to Modernizr tests.
-			// Set to false to disable.
-			parseFiles: false,
-
-			// When parseFiles = true, this task will crawl all *.js, *.css, *.scss files, except files that are in node_modules/.
-			// You can override this by defining a "files" array below.
-			files: [
-				'assets/js/{,*/}*.js',
-				'assets/css/{,*/}*.scss'
-			]
-		},
-		watch:  {
-			options: {
-				livereload: true
-			},
-			less: {
-				files: ['assets/css/less/*.less'],
-				tasks: ['LESS', 'cssmin'],
-				options: {
-					debounceDelay: 500
-				}
-			},
-			scripts: {
-				files: ['assets/js/**/*.js', 'assets/js/vendor/**/*.js'],
-				tasks: ['jshint', 'uglify'],
-				options: {
-					debounceDelay: 500
-				}
-			},
-			markup: {
-				files: ['**/*.php', '**/*.html'],
-				livereload: true
-			}
-		},
-		// deploy via rsync
-		deploy: {
-			options: {
-				src: "./",
-				args: ["--verbose"],
-				exclude: ['.git*', 'node_modules', '.sass-cache', 'Gruntfile.js', 'package.json', '.DS_Store', 'README.md', 'config.rb', '.jshintrc', '.gruntjshintrc', '.editorconfig'],
-				recursive: true,
-				syncDestIgnoreExcl: true
-			},
-			staging: {
-				options: {
-					dest: "~/path/to/theme",
-					host: "user@host.com"
-				}
-			},
-			production: {
-				options: {
-					dest: "~/path/to/theme",
-					host: "user@host.com"
-				}
-			}
-		},
-		bump: {
-			options: {
-				files: ['package.json', 'bower.json'],
-				updateConfigs: ['pkg'],
-				commit: false,
-				commitMessage: 'Release v%VERSION%',
-				commitFiles: ['package.json', 'bower.json'],
-				createTag: true,
-				tagName: 'v%VERSION%',
-				tagMessage: 'Version %VERSION%',
-				push: false,
-				pushTo: 'origin',
-				gitDescribeOptions: '--tags --always --abbrev=1 --dirty=-d',
-				globalReplace: false,
-				prereleaseName: false,
-				regExp: false
-			}
-		},
-		copy: {
-			dist: {
-				files: [{
-					expand: true,
-					cwd: '<%= bower.directory %>/fontawesome/fonts',
-					src: ['**'],
-					dest: 'assets/dist/fonts',
-					filter: 'isFile'
-				}]
-			},
-			dev: {
-				files: [{
-					expand: true,
-					cwd: '<%= bower.directory %>/fontawesome/fonts',
-					src: ['**'],
-					dest: 'assets/fonts',
-					filter: 'isFile'
-				}]
-			}
-		},
-		clean: {
-			dist:  ['assets/dist/css/']
-		}
-	} );
-
-	// Default task.
-	grunt.registerTask( 'default', [
-		'jshint',
-		'clean',
-		'uglify',
-		'less',
-		'autoprefixer',
-		'cssmin',
-		'modernizr',
-		'versioning'
-	] );
-
-	grunt.registerTask( 'dev', ['watch'] );
-	grunt.registerTask( 'vendor', ['less'] );
-
-	grunt.util.linefeed = '\n';
+  // Register tasks
+  grunt.registerTask('default', [
+    'dev'
+  ]);
+  grunt.registerTask('dev', [
+    'jshint',
+    'less:dev',
+    'autoprefixer:dev',
+    'concat'
+  ]);
+  grunt.registerTask('build', [
+    'jshint',
+    'copy',
+    'less:build',
+    'autoprefixer:build',
+    'uglify',
+    'modernizr',
+    'version'
+  ]);
 };

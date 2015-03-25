@@ -40,14 +40,14 @@
             <li><a href="http://www.youtube.com/"><span class="fa fa-fw fa-2x fa-youtube"></span></a></li>
           </ul>
 
-          <img src="/wp-content/uploads/2015/01/ua-capstone-logo.png" class="img-responsive" style="margin: 15px 0;"/>
+          <img src="/wordpress/wp-content/themes/roots-ualib/assets/img/ua-capstone-logo.png" class="img-responsive" style="margin: 15px 0;"/>
 
           <div class="row">
             <div class="col-xs-6">
-              <img src="http://www.hathitrust.org/sites/www.hathitrust.org/themes/hathitrust_unicorn/unicorn/img/HT-logo.png" class="img-responsive" />
+              <img src="/wordpress/wp-content/themes/roots-ualib/assets/img//HT-logo.png" class="img-responsive" />
             </div>
             <div class="col-xs-6">
-              <img src="http://www.fdlp.gov/images/fdlp_logo.png" class="img-responsive"/>
+              <img src="/wordpress/wp-content/themes/roots-ualib/assets/img/fdlp_logo.png" class="img-responsive"/>
             </div>
           </div>
 

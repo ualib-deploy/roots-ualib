@@ -5,22 +5,33 @@
     "type": "git",
     "url": "https://github.com/ualibweb/roots-ualib.git"
   },
-  "dependencies": {},
+  "bugs": {
+    "url": "https://github.com/ualibweb/roots-ualib/issues"
+  },
+  "licenses": [
+    {
+      "type": "ECL-2"
+    }
+  ],
+  "scripts": {
+    "postinstall": "node node_modules/bower/bin/bower install && grunt dev"
+  },
+  "engines": {
+    "node": ">= 0.10.0"
+  },
   "devDependencies": {
-    "grunt": "~0.4.1",
-    "matchdep": "~0.1.2",
-    "grunt-contrib-uglify": "~0.1.1",
-    "grunt-contrib-cssmin": "~0.6.0",
-    "grunt-contrib-imagemin": "~0.3.0",
-    "grunt-contrib-jshint": "~0.1.1",
-    "grunt-autoprefixer": "~0.2.0",
-    "grunt-modernizr": "~0.3.0",
-    "grunt-static-versioning": "~0.2.0",
-    "grunt-rsync": "~0.2.1",
-    "grunt-contrib-watch": "~0.5.3",
-    "grunt-contrib-less": "~0.8.1",
-    "grunt-bump": "~0.3.0",
-    "grunt-contrib-copy": "~0.8.0",
-    "grunt-contrib-clean": "~0.6.0"
+    "bower": ">=1.3.12",
+    "grunt": "~0.4.5",
+    "grunt-autoprefixer": "~1.0.1",
+    "grunt-contrib-concat": "~0.5.0",
+    "grunt-contrib-jshint": "~0.10.0",
+    "grunt-contrib-less": "~0.12.0",
+    "grunt-contrib-uglify": "~0.6.0",
+    "grunt-contrib-watch": "~0.6.1",
+    "grunt-modernizr": "~0.6.0",
+    "grunt-wp-assets": "~0.2.6",
+    "load-grunt-tasks": "~1.0.0",
+    "time-grunt": "~1.0.0",
+    "grunt-contrib-copy": "~0.8.0"
   }
 }
