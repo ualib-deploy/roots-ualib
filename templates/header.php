@@ -13,32 +13,14 @@
             <div class="collapse navbar-collapse">
                 <ul class="nav navbar-nav navbar-right">
                     <li class="dropdown yamm-fw">
-                        <a href="#" class="dropdown-toggle icon-only">
-                            <span class="fa fa-search"></span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li>
-                                <div class="yamm-content">
-                                    <form action="/sample-page/onesearch/">
-                                        <div class="input-group input-group-lg">
-                                            <input type="text" name="search" class="form-control onesearch-text" placeholder="Search all library resources">
-                                            <div class="input-group-btn">
-                                                <button type="submit" class="btn btn-onesearch btn-primary"><span class="fa fa-search"></span></button>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </div>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="dropdown yamm-fw">
                         <a href="#" class="dropdown-toggle icon-only" title="My Accounts">
                             <span class="fa fa-user"></span>
                         </a>
                         <ul class="dropdown-menu">
                             <li>
                                 <div class="yamm-content">
-                                    <tabset>
+                                    <h2>My Accounts</h2>
+                                    <tabset  vertical="true" tab-class="col-sm-3" content-class="col-sm-9">
                                         <tab heading="My Library (Catalog)">
                                             <form>
                                                 <div class="form-group">
@@ -125,6 +107,25 @@
                                             </form>
                                         </tab>
                                     </tabset>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="dropdown yamm-fw">
+                        <a href="#" class="dropdown-toggle icon-only">
+                            <span class="fa fa-search"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <div class="yamm-content">
+                                    <form action="/sample-page/onesearch/">
+                                        <div class="input-group input-group-lg">
+                                            <input type="text" name="search" class="form-control onesearch-text" placeholder="Search all library resources">
+                                            <div class="input-group-btn">
+                                                <button type="submit" class="btn btn-onesearch btn-primary"><span class="fa fa-search"></span></button>
+                                            </div>
+                                        </div>
+                                    </form>
                                 </div>
                             </li>
                         </ul>

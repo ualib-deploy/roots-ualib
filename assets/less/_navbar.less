@@ -226,16 +226,31 @@ header, .header{
         }
       }
 
-      &.open > a:not(.icon-only){
-        &::before, &::after{
-          width: 14px;
+      &.open > a {
+        &:not(.icon-only){
+          &::before, &::after{
+            width: 14px;
+          }
+        }
+        &.icon-only {
+          &::before, &::after{
+            background-color: @hover-color;
+          }
         }
       }
+
     }
 
     .dropdown-menu{
       background-color: @dropdown-bg;
       .yamm-content {
+
+        > h2:first-child {
+          margin-top: 0;
+          margin-bottom: 15px;
+          border-bottom: 1px solid darken(@dropdown-bg, 10%);
+        }
+
         a {
           /*color: @gray-dark;
           position: relative;
