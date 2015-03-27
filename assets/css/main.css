@@ -4885,13 +4885,16 @@ tbody.collapse.in {
   transform: rotate(-45deg);
 }
 .dropdown .dropdown-menu {
+  border: 1px solid #f9f9f9;
   opacity: 0;
-  border: none;
   display: block;
   visibility: hidden;
   -webkit-transition: opacity  .2s .1s, visibility 0s  .2s;
   -o-transition: opacity  .2s .1s, visibility 0s  .2s;
      transition: opacity  .2s .1s, visibility 0s  .2s;
+}
+.dropdown .dropdown-menu .tab-content > .active {
+  visibility: hidden;
 }
 .open .dropdown-toggle.icon-only > .fa {
   opacity: 0;
@@ -4934,6 +4937,16 @@ tbody.collapse.in {
   -webkit-transition: opacity  .2s 0s, visibility 0s 0s;
   -o-transition: opacity  .2s 0s, visibility 0s 0s;
      transition: opacity  .2s 0s, visibility 0s 0s;
+}
+.open .dropdown-menu .tab-content > .active {
+  visibility: visible;
+}
+.dropdown-static > .dropdown-menu {
+  height: auto;
+  opacity: 1;
+  z-index: 999;
+  display: block;
+  visibility: visible;
 }
 .btn-group,
 .btn-group-vertical {
@@ -6113,10 +6126,10 @@ fieldset[disabled] .navbar-inverse .btn-link:focus {
   color: #e5d8d8;
 }
 /*!
- * Yamm!3
- * Yet another megamenu for Bootstrap 3
- * 
+ * Yamm!3 - Yet another megamenu for Bootstrap 3
  * http://geedmo.github.com/yamm3
+ * 
+ * @geedmo - Licensed under the MIT license
  */
 .yamm .nav,
 .yamm .collapse,
@@ -6129,10 +6142,6 @@ fieldset[disabled] .navbar-inverse .btn-link:focus {
 }
 .yamm .dropdown-menu {
   left: auto;
-}
-.yamm .nav.navbar-right .dropdown-menu {
-  left: auto;
-  right: 0;
 }
 .yamm .yamm-content {
   padding: 20px 30px;
@@ -6616,11 +6625,6 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
 .navbar-mega .dropdown-menu,
 .navbar-mega-inverse .dropdown-menu {
   left: auto;
-}
-.navbar-mega .nav.navbar-right .dropdown-menu,
-.navbar-mega-inverse .nav.navbar-right .dropdown-menu {
-  left: auto;
-  right: 0;
 }
 .navbar-mega .yamm-content,
 .navbar-mega-inverse .yamm-content {
@@ -8767,6 +8771,20 @@ figure.alignnone {
     float: left;
     width: 33.33333333%;
   }
+}
+.home {
+  background-color: transparent;
+  background-position: 45% 45%;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  -webkit-background-size: cover;
+          background-size: cover;
+  background-image: url('../img/quad-sunset-lg.jpg');
+  /*background-blend-mode: screen;
+  background-color: rgba(102,0,0,.3);*/
+}
+.home > .wrap {
+  margin-top: 110px;
 }
 /**
  * Your styles here

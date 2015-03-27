@@ -20,6 +20,7 @@ module.exports = function(grunt) {
     '<%= bower.directory %>/bootstrap/js/affix.js',
     '<%= bower.directory %>/angular/angular.js',
     '<%= bower.directory %>/angular-animate/angular-animate.js',
+    '<%= bower.directory %>/angular-route/angular-route.js',
     '<%= bower.directory %>/ualib-ui/dist/ui-components-templates.js',
     '<%= bower.directory %>/ualib-ui/dist/ui-components.js',
     'assets/js/plugins/*.js',

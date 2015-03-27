@@ -9,17 +9,17 @@ else{
     define('IMG_PATH', get_stylesheet_directory().'/assets/dist/img/');
 }
 
-function ualib_child_startSession() {
+function ualib_startSession() {
     if(!session_id()) {
         session_start();
     }
 }
 
-function ualib_child_endSession() {
+function ualib_endSession() {
     session_destroy ();
 }
 
-function ualib_child_scripts() {
+function ualib_scripts() {
     wp_enqueue_script(
         'angular',
         '//ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js',
@@ -115,8 +115,8 @@ function ualib_child_scripts() {
 
 }
 
-add_action('init', 'ualib_child_startSession', 1);
-add_action('wp_logout', 'ualib_child_endSession');
-add_action('wp_login', 'ualib_child_endSession');
+add_action('init', 'ualib_startSession', 1);
+add_action('wp_logout', 'ualib_endSession');
+add_action('wp_login', 'ualib_endSession');
 
-add_action( 'wp_enqueue_scripts', 'ualib_child_scripts' );
+add_action( 'wp_enqueue_scripts', 'ualib_scripts' );

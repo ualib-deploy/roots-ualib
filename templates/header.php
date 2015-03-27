@@ -111,10 +111,12 @@
                             </li>
                         </ul>
                     </li>
-                    <li class="dropdown yamm-fw">
+                    <li class="<?php if(is_front_page()) print 'dropdown-static '; ?>dropdown yamm-fw">
+                        <?php if (!is_front_page()): ?>
                         <a href="#" class="dropdown-toggle icon-only">
                             <span class="fa fa-search"></span>
                         </a>
+                        <?php endif; ?>
                         <ul class="dropdown-menu">
                             <li>
                                 <div class="yamm-content">
