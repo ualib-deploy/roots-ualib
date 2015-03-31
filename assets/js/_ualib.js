@@ -2,6 +2,7 @@ angular.module('ualib', [
     'ngRoute',
     'ualib.templates',
     'ualib.ui',
+    'hours',
     'oneSearch'
 ])
 
