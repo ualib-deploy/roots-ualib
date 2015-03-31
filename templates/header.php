@@ -403,13 +403,13 @@
                                                         <p>Frequently asked questions at the libraries</p>
                                                     </a>
                                                 </div>
-                                               <div class="col-xs-3">
+                                                <div class="col-xs-3">
                                                     <a class="service-card" href="https://wwwdev2.lib.ua.edu/research-help/subject-specialists/">
                                                         <span class="fa fa-comments"></span>
                                                         <h4>Subject Specialists</h4>
                                                         <p>Need research help? Reach out to your subject specialist</p>
                                                     </a>
-                                                    </div>
+                                                </div>
                                                 <div class="col-xs-3">
                                                     <a class="service-card" href="https://wwwdev2.lib.ua.edu/research-help/tutorials/">
                                                         <span class="fa fa-magic"></span>
@@ -424,27 +424,33 @@
                                                         <p>Access the Libraries' internet using a wireless connection</p>
                                                     </a>
                                                 </div>
+                                            </div>
+                                            <div class="row">
                                                 <div class="col-xs-3">
                                                     <a class="service-card" href="https://wwwdev2.lib.ua.edu/library-help/report-a-login-problem/">
                                                         <span class="fa fa-sign-in"></span>
                                                         <h4>Report a Login Problem</h4>
-                                                        <p>Contact the libraries with problems accessing our online resources</p>
+                                                        <p>Contact the libraries with problems accessing our online resources </p>
                                                     </a>
                                                 </div>
                                                 <div class="col-xs-3">
                                                     <a class="service-card" href="https://wwwdev2.lib.ua.edu/library-help/kacecontact-form/">
                                                         <span class="fa fa-envelope"></span>
                                                         <h4>Run into Issues?</h4>
-                                                        <p>Please contact Web Services for more assistance</p>
+                                                        <p>Please contact Web Services for assistance </p>
                                                     </a>
                                                 </div>
-
+                                            </div>
                                         </div>
                                     </li>
                                 </ul>
                             </li>
-                    </li>
-                </ul>
+
+
+
+
+
+
 
             </div>
         </div>
