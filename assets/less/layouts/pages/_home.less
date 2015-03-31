@@ -1,17 +1,28 @@
 @home-card-gutter: floor((@grid-gutter-width / 2));
 
+html, body {
+  min-height: 100%;
+}
+
+.home, .bento{
+  height: 100%;
+  width: 100%;
+  > .wrap {
+    position:relative;
+    margin-top: 111px;
+  }
+}
+
 .home {
-  background-color: transparent;
-  background-position: 45% 45%;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+  background: url('../img/quad-sunset-lg.jpg') no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
   background-size: cover;
-  background-image: url('../img/quad-sunset-lg.jpg');
-  /*background-blend-mode: screen;
-  background-color: rgba(102,0,0,.3);*/
+  background-color: transparent;
 
   > .home-slice{
-    margin-top: 111px;
+
     /*padding-top: @home-card-gutter;
     padding-bottom: @home-card-gutter;
 
@@ -22,8 +33,10 @@
       }
     }*/
   }
+}
 
-  > .wrap {
-    background-color: @body-bg;
-  }
+.bento {
+  background-image: none;
+  background-color: @body-bg;
+
 }

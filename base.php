@@ -1,5 +1,5 @@
 <?php get_template_part('templates/head'); ?>
-<body <?php body_class(); ?>>
+<body <?php body_class(); ?> ng-class="appClass">
 
   <!--[if lt IE 8]>
     <div class="alert alert-warning">
@@ -12,7 +12,7 @@
     get_template_part('templates/header');
   ?>
 
-  <?php if (is_front_page()) get_template_part('templates/home-tmp'); ?>
+  <?php //if (is_front_page()) get_template_part('templates/home-tmp'); ?>
 
   <div class="wrap">
     <div class="container" role="document">
@@ -20,17 +20,11 @@
         <main class="main" role="main">
           <?php include roots_template_path(); ?>
         </main><!-- /.main -->
-        <?php
-            if (roots_display_sidebar()) :
-        ?>
+        <?php /*if (roots_display_sidebar()) : ?>
           <aside class="sidebar" role="complementary">
-            <?php
-//                include roots_sidebar_path();
-            ?>
+            <?php include roots_sidebar_path(); ?>
           </aside><!-- /.sidebar -->
-        <?php
-            endif;
-        ?>
+        <?php endif; */?>
       </div><!-- /.content -->
     </div><!-- /.wrap -->
   </div>
