@@ -36101,7 +36101,7 @@ angular.module('oneSearch', [
     'oneSearch.bento'
 ])
     // The URL to the backend JSON resource handler
-    .constant('JSON_URL', 'https://wwwdev2.lib.ua.edu/oneSearch/getJSON.php')
+    .constant('ONE_SEARCH_URL', 'https://wwwdev2.lib.ua.edu/oneSearch/getJSON.php')
 
     // Default search parameters
     .value('SearchParams', {
@@ -37079,7 +37079,7 @@ angular.module('common.oneSearch', [])
             }
         };
 
-        this.$get = ['$http', '$parse', 'enginesTemplateFactory', 'SearchParams', 'JSON_URL', function($http, $parse, enginesTemplateFactory, SearchParams, url){
+        this.$get = ['$http', '$parse', 'enginesTemplateFactory', 'SearchParams', 'ONE_SEARCH_URL', function($http, $parse, enginesTemplateFactory, SearchParams, url){
 
             return {
                 engines: _engines, // Expose engines at Service level
@@ -38020,11 +38020,11 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"col-sm-6\">\n" +
-    "            <div class=\"hours-list\"></div>\n" +
+    "            <div style=\"padding: 15px; background-color: rgba(255,255,255,.9);\" class=\"hours-list\"></div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "    <div class=\"row\">\n" +
-    "        <div class=\"col-sm-6\" style=\"background-color: rgba(255, 255, 255, 0.9); display: table; color: #999; margin-top: 30px; padding-bottom:15px;\">\n" +
+    "        <div class=\"col-sm-6\" style=\"background-color: rgba(255, 255, 255, 0.9); display: table; color: #999; margin-top: 15px; padding-bottom:15px;\">\n" +
     "            <h3>Available Computers</h3>\n" +
     "            <div class=\"col-xs-2 text-center\">\n" +
     "                <div class=\"row\">\n" +
