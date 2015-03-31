@@ -9,6 +9,8 @@
  *
  * @link https://github.com/roots/roots/pull/1042
  */
+require_once( get_stylesheet_directory() . '/functions-ualib.php' );
+
 $roots_includes = array(
   'lib/utils.php',           // Utility functions
   'lib/init.php',            // Initial theme setup and constants
