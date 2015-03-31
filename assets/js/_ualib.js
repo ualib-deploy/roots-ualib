@@ -1,3 +1,4 @@
 angular.module('ualib', [
-    'ualib.ui'
+    'ualib.ui',
+    'oneSearch'
 ]);
