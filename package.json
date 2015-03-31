@@ -1,6 +1,6 @@
 {
   "name": "roots-ualib",
-  "version": "1.0.5",
+  "version": "1.1.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/ualibweb/roots-ualib.git"
@@ -14,7 +14,7 @@
     }
   ],
   "scripts": {
-    "postinstall": "node node_modules/bower/bin/bower install && grunt dev"
+    "postinstall": "bower cache clean && bower install && grunt dev"
   },
   "engines": {
     "node": ">= 0.10.0"

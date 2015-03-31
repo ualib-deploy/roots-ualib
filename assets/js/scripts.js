@@ -31896,7 +31896,6 @@ angular.module('ui.bootstrap.dropdown', [])
 
         $scope.$on('$locationChangeSuccess', function() {
             scope.isOpen = false;
-
         });
 
         $scope.$on('$destroy', function() {
@@ -31912,21 +31911,6 @@ angular.module('ui.bootstrap.dropdown', [])
                 dropdownCtrl.init( element );
             }
         };
-    })
-
-    .directive('dropdownMenu', function(){
-        return {
-            restrict: 'AC',
-            link: function(scope, elm){
-                elm.bind('click', function(ev){
-                    ev.preventBubble();
-                });
-
-                scope.$on('$destroy', function(){
-                    elm.unbind('click');
-                })
-            }
-        }
     })
 
     .directive('dropdownToggle', function() {

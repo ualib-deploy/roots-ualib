@@ -7,7 +7,7 @@
                     <span class="fa fa-bars"></span>
                 </button>
                 <a class="navbar-brand" href="#">
-                    <img src="<?php print get_template_directory_uri(); ?>/assets/img/ualib-logo-textonly-inverse.png" alt="University of Alabama Libraries"/>
+                    <img src="<?php print get_template_directory_uri(); ?>/assets/img/ualib-logo-textonly-inverse.png" class="img-responsive" alt="University of Alabama Libraries"/>
                 </a>
             </div>
             <div class="collapse navbar-collapse">

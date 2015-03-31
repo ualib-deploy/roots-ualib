@@ -1,0 +1,29 @@
+@home-card-gutter: floor((@grid-gutter-width / 2));
+
+.home {
+  background-color: transparent;
+  background-position: 45% 45%;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+  background-image: url('../img/quad-sunset-lg.jpg');
+  /*background-blend-mode: screen;
+  background-color: rgba(102,0,0,.3);*/
+
+  > .home-slice{
+    margin-top: 111px;
+    /*padding-top: @home-card-gutter;
+    padding-bottom: @home-card-gutter;
+
+    > .row {
+      > div {
+        padding: @home-card-gutter;
+        background-color: rgba(255,255,255,.5);
+      }
+    }*/
+  }
+
+  > .wrap {
+    background-color: @body-bg;
+  }
+}

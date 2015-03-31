@@ -1,0 +1,18 @@
+@event-card-padding: floor((@grid-gutter-width / 2));
+@event-card-gutter: floor((@event-card-padding / 2));
+
+.event-card {
+  margin-top: @event-card-gutter;
+  margin-bottom: @event-card-gutter;
+
+//  background-color: rgba(255,255,255,.9);
+  border: 1px solid darken(@body-bg, 12%);
+  -webkit-border-radius: @border-radius-base;
+  border-radius: @border-radius-base;
+
+  > div {
+    padding: @event-card-padding;
+    padding-top: 0;
+  }
+
+}

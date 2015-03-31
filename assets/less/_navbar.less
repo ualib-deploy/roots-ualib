@@ -193,6 +193,8 @@ header, .header{
 
         &.icon-only {
           font-size:20px;
+          padding-top: 29px;
+          padding-bottom: 29px;
         }
 
         &:hover,
@@ -243,6 +245,9 @@ header, .header{
 
     .dropdown-menu{
       background-color: @dropdown-bg;
+      border-top: none;
+      border-radius: 0;
+
       .yamm-content {
 
         > h2:first-child {
@@ -252,27 +257,6 @@ header, .header{
         }
 
         a {
-          /*color: @gray-dark;
-          position: relative;
-          display: block;
-          padding: 15px;
-
-          & > h4, & > p {
-            margin-left: 45px;
-          }
-
-          & > h4 {
-            color: @brand-primary;
-            margin-bottom: 0;
-          }
-
-          & > .fa {
-            display: block;
-            position: absolute;
-            top: 30px;
-            font-size: 30px;
-            color: #555;
-          }*/
           &:hover,
           &:focus {
             background-color: darken(@gray-lighter, 5%);
@@ -280,52 +264,19 @@ header, .header{
           }
         }
       }
-      /*.mm-heading{
-        min-height: 45px;
-        display: table;
-        margin-bottom: 5px;
-
-        > .fa, > h4{
-          color: @brand-primary;
-          display: table-cell;
-          vertical-align: middle;
-        }
-
-        > .fa{
-          font-size: 30px;
-          color: @gray-dark;
-        }
-
-        > h4{
-          padding-left: 15px;
-          color: @brand-primary;
-        }
-      }*/
-
-      /*ul {
-        list-style-type: none;
-        padding: 0;
-        > li {
-
-          &:last-child {
-            border-bottom: none;
-          }
-
-          > a{
-            color: @gray-dark;
-            position: relative;
-            display: block;
-            padding: 5px;
-            font-size: 16px;
-
-            &:hover,
-            &:focus {
-              background-color: darken(@gray-lighter, 5%);
-              text-decoration: none;
-            }
-          }
-        }
-      }*/
     }
+  }
+}
+
+
+.dropdown-static {
+  > .dropdown-menu {
+    height: auto;
+    opacity: 1;
+    z-index: (@zindex-dropdown - 1);
+    display: block;
+    visibility: visible;
+    -webkit-box-shadow: none;
+    box-shadow: none;
   }
 }
