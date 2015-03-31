@@ -6,7 +6,7 @@
                     <span class="sr-only">Toggle navigation</span>
                     <span class="fa fa-bars"></span>
                 </button>
-                <a class="navbar-brand" href="#">
+                <a class="navbar-brand" href="https://wwwdev2.lib.ua.edu/">
                     <img src="<?php print get_template_directory_uri(); ?>/assets/img/ualib-logo-textonly-inverse.png" class="img-responsive" alt="University of Alabama Libraries"/>
                 </a>
             </div>
