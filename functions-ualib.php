@@ -1,6 +1,6 @@
 <?php
 
-function ualib_child_getUnixPath()
+function ualib_getWebappsPath()
 {
   return "/srv/web/www/webapps/";
 }

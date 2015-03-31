@@ -11,13 +11,10 @@ if( !defined( 'ABSPATH' ) ) {
 
 ?>
 
-<div class="onesearch-container" ng-app="oneSearch">
-  <div class="container" ng-controller="OneSearchCtrl">
-    <form ng-submit="search()">
+<?php
+      include ualib_getWebappsPath() . "oneSearch/index_wp_demo.php";
+//    include WEBAPPS_PATH . "siteSurvey/loadForm.php";
+?>
 
-      <suggest-one-search prompt="Search all library resources" model="searchText" search="search">
 
-    </form>
-  </div>
-</div>
 
