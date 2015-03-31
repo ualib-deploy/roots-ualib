@@ -21,7 +21,7 @@ function ualib_child_endSession() {
 }
 
 function ualib_scripts() {
-  wp_register_script(
+  /*wp_register_script(
     'angular',
     '//ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js',
     array( 'jquery' ),
@@ -32,7 +32,7 @@ function ualib_scripts() {
     '//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.11.0.js',
     array( 'angular' ),
     true
-  );
+  );*/
   if ( is_page('hm-test') )
   {
     wp_enqueue_script(
@@ -158,4 +158,4 @@ add_action('wp_logout', 'ualib_child_endSession');
 add_action('wp_login', 'ualib_child_endSession');
 
 add_action( 'wp_enqueue_scripts', 'ualib_scripts' );
-add_action( 'wp_enqueue_scripts', 'ualib_demo_scripts' );
+//add_action( 'wp_enqueue_scripts', 'ualib_demo_scripts' );
