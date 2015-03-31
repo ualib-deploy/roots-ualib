@@ -31,7 +31,7 @@
         <?php
             endif;
         ?>
--->      </div><!-- /.content -->
+      </div><!-- /.content -->
     </div><!-- /.wrap -->
   </div>
 
