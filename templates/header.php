@@ -141,7 +141,7 @@
                                 <div class="yamm-content">
                                     <div class="row">
                                         <div class="col-xs-3">
-                                            <a class="service-card" href="https://wwwdev2.lib.ua.edu/sample-page/onesearch/">
+                                            <a class="service-card" href="https://wwwdev2.lib.ua.edu/sample-page/search/">
                                                 <span class="fa fa-search"></span>
                                                 <h4>OneSearch</h4>
                                                 <p>Search everything the University Libraries’ offers from one place</p>
