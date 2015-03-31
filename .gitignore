@@ -1,7 +1,8 @@
 # Include your project-specific ignores in this file
 # Read about how to use .gitignore: https://help.github.com/articles/ignoring-files
 node_modules
-assets/vendor/*
+assets/vendor/
+!assets/vendor/modernizr/modernizr.js
 #assets/css/main.css.map
 #assets/css/*main*.css
 # assets/js/*scripts*.js
