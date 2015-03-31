@@ -6,23 +6,18 @@ module.exports = function(grunt) {
   require('time-grunt')(grunt);
 
   var jsFileList = [
-    '<%= bower.directory %>/bootstrap/js/transition.js',
-    '<%= bower.directory %>/bootstrap/js/alert.js',
-    '<%= bower.directory %>/bootstrap/js/button.js',
-    '<%= bower.directory %>/bootstrap/js/carousel.js',
-    '<%= bower.directory %>/bootstrap/js/collapse.js',
-    '<%= bower.directory %>/bootstrap/js/dropdown.js',
-    '<%= bower.directory %>/bootstrap/js/modal.js',
-    '<%= bower.directory %>/bootstrap/js/tooltip.js',
-    '<%= bower.directory %>/bootstrap/js/popover.js',
-    '<%= bower.directory %>/bootstrap/js/scrollspy.js',
-    '<%= bower.directory %>/bootstrap/js/tab.js',
-    '<%= bower.directory %>/bootstrap/js/affix.js',
     '<%= bower.directory %>/angular/angular.js',
-    '<%= bower.directory %>/angular-animate/angular-animate.js',
     '<%= bower.directory %>/angular-route/angular-route.js',
+    '<%= bower.directory %>/angular-animate/angular-animate.js',
+    '<%= bower.directory %>/angular-sanitize/angular-sanitize.js',
+    '<%= bower.directory %>/angular-ui-bootstrap-bower/ui-bootstrap-tpls.js',
+    '<%= bower.directory %>/angular-filter/dist/angular-filter.js',
+    '<%= bower.directory %>/onesearch/dist/onesearch-templates.js',
+    '<%= bower.directory %>/onesearch/dist/onesearch.js',
     '<%= bower.directory %>/ualib-ui/dist/ui-components-templates.js',
     '<%= bower.directory %>/ualib-ui/dist/ui-components.js',
+      '<%= bower.directory %>/ualib-hours/dist/hours-templates.js',
+      '<%= bower.directory %>/ualib-hours/dist/hours.js',
     'assets/js/plugins/*.js',
     'assets/js/_*.js'
   ];
