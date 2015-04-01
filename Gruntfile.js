@@ -18,9 +18,18 @@ module.exports = function(grunt) {
     '<%= bower.directory %>/ualib-ui/dist/ui-components.js',
       '<%= bower.directory %>/ualib-hours/dist/hours-templates.js',
       '<%= bower.directory %>/ualib-hours/dist/hours.js',
-    'assets/js/plugins/*.js',
+      'assets/js/ualib-templates.js',
+      'assets/js/plugins/*.js',
     'assets/js/_*.js'
   ];
+
+  var lessFileList = [
+      'assets/less/main.less',
+      '<%= bower.directory %>/onesearch/src/**/*.less',
+      '<%= bower.directory %>/ualib-ui/src/**/*.less',
+      '<%= bower.directory %>/ualib-hours/src/**/*.less'
+  ];
+
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
@@ -39,9 +48,7 @@ module.exports = function(grunt) {
     less: {
       dev: {
         files: {
-          'assets/css/main.css': [
-            'assets/less/main.less'
-          ]
+          'assets/css/main.css': [lessFileList]
         },
         options: {
           compress: false,
@@ -54,14 +61,19 @@ module.exports = function(grunt) {
       },
       build: {
         files: {
-          'assets/css/main.min.css': [
-            'assets/less/main.less'
-          ]
+          'assets/css/main.min.css': [lessFileList]
         },
         options: {
           compress: true
         }
       }
+    },
+    html2js:{
+        dev: {
+            src: 'assets/js/**/*.tpl.html',
+            dest: 'assets/js/ualib-templates.js',
+            module: 'ualib.templates'
+        }
     },
     concat: {
       options: {
@@ -193,8 +205,9 @@ module.exports = function(grunt) {
     'dev'
   ]);
   grunt.registerTask('dev', [
-    'jshint',
-    'less:dev',
+      'html2js:dev',
+      'jshint',
+      'less:dev',
     'autoprefixer:dev',
     'concat'
   ]);

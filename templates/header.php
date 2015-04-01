@@ -6,7 +6,7 @@
                     <span class="sr-only">Toggle navigation</span>
                     <span class="fa fa-bars"></span>
                 </button>
-                <a class="navbar-brand" href="https://wwwdev2.lib.ua.edu/">
+                <a class="navbar-brand" href="<?php echo get_settings('home'); ?>">
                     <img src="<?php print get_template_directory_uri(); ?>/assets/img/ualib-logo-textonly-inverse.png" class="img-responsive" alt="University of Alabama Libraries"/>
                 </a>
             </div>
@@ -119,14 +119,19 @@
                         <?php endif; ?>
                         <ul class="dropdown-menu">
                             <li>
-                                <div class="yamm-content">
-                                    <form action="/sample-page/onesearch/">
+                                <div class="yamm-content" ng-controller="OneSearchCtrl">
+                                    <!--<form action="/sample-page/onesearch/">
                                         <div class="input-group input-group-lg">
                                             <input type="text" name="search" class="form-control onesearch-text" placeholder="Search all library resources">
                                             <div class="input-group-btn">
                                                 <button type="submit" class="btn btn-onesearch btn-primary"><span class="fa fa-search"></span></button>
                                             </div>
                                         </div>
+                                    </form>-->
+                                    <form ng-submit="search()">
+
+                                        <suggest-one-search prompt="Search all library resources" model="searchText" search="search">
+
                                     </form>
                                 </div>
                             </li>
