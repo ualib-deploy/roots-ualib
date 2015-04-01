@@ -121,7 +121,7 @@
 
     </div>
   </div>
-
+<!--
     <div class="row">
         <div class="col-sm-6" style="background-color: rgba(255, 255, 255, 0.9); display: table; color: #999;
     margin-top: 30px; padding-bottom:15px;">
@@ -171,4 +171,5 @@
     <div class="col-sm-6">
 
     </div>
+    -->
 </div>
