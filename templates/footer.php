@@ -1,9 +1,9 @@
 <footer class="content-info" role="contentinfo">
   <div class="footer-wrapper">
     <div class="container">
-      <?php //dynamic_sidebar('sidebar-footer'); ?>
+      <?php dynamic_sidebar('sidebar-footer'); ?>
       <div class="row">
-        <div class="col-xs-4">
+        <div class="col-sm-4">
           <h4>Quick Links</h4>
           <ul class="footer-list">
             <li><a href="https://wwwdev2.lib.ua.edu/about-ua-libraries/contact-us/">University Libraries’ Maps and Contact Information</a></li>
@@ -17,7 +17,7 @@
           </ul>
         </div>
 
-        <div class="col-xs-4">
+        <div class="col-sm-4">
           <h4>Libraries &amp; Collections</h4>
           <ul class="footer-list">
             <li><a href="https://wwwdev2.lib.ua.edu/services/information-for-faculty/distance-education-faculty/gorgas-library/">Gorgas Library</a></li>
@@ -32,7 +32,7 @@
           </ul>
         </div>
 
-        <div class="col-xs-4">
+        <div class="col-xs-12 col-sm-4">
           <ul class="nav nav-pills nav-justified social-icons">
             <li><a href="http://www.twitter.com"><span class="fa fa-fw fa-2x fa-twitter"></span></a></li>
             <li><a href="http://www.instagram.com"><span class="fa fa-fw fa-2x fa-instagram"></span></a></li>
@@ -45,14 +45,14 @@
           </a>
 
           <div class="row">
-            <div class="col-xs-6">
-                <a href="http://www.hathitrust.org/" target="_hatti">
-                    <img src="<?php print get_template_directory_uri(); ?>/assets/img/HT-logo.png" class="img-responsive" />
-                </a>
+            <div class="col-md-6 col-md-push-6">
+              <a href="http://www.fdlp.gov/">
+                <img src="<?php print get_template_directory_uri(); ?>/assets/img/fdlp_logo.png" class="img-responsive"/>
+              </a>
             </div>
-            <div class="col-xs-6">
-                <a href="http://www.fdlp.gov/">
-                    <img src="<?php print get_template_directory_uri(); ?>/assets/img/fdlp_logo.png" class="img-responsive"/>
+            <div class="col-md-6 col-md-pull-6">
+                <a href="http://www.hathitrust.org/" target="_hatti" class="text-right">
+                    <img src="<?php print get_template_directory_uri(); ?>/assets/img/HT-logo.png" class="img-responsive" />
                 </a>
             </div>
           </div>

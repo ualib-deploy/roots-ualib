@@ -36560,7 +36560,7 @@ angular.module('angular.filter', [
 
   'a8m.filter-watcher'
 ]);
-})( window, window.angular );;angular.module('oneSearch.templates', ['bento/bento.tpl.html', 'common/directives/suggest/suggest.tpl.html', 'common/engines/acumen/acumen.tpl.html', 'common/engines/catalog/catalog.tpl.html', 'common/engines/databases/databases.tpl.html', 'common/engines/ejournals/ejournals.tpl.html', 'common/engines/google-cs/google-cs.tpl.html', 'common/engines/libguides/libguides.tpl.html', 'common/engines/recommend/recommend.tpl.html', 'common/engines/scout/scout.tpl.html']);
+})( window, window.angular );;angular.module('oneSearch.templates', ['bento/bento.tpl.html', 'common/directives/suggest/suggest.tpl.html', 'common/engines/acumen/acumen.tpl.html', 'common/engines/catalog/catalog.tpl.html', 'common/engines/databases/databases.tpl.html', 'common/engines/ejournals/ejournals.tpl.html', 'common/engines/google-cs/google-cs.tpl.html', 'common/engines/recommend/recommend.tpl.html', 'common/engines/scout/scout.tpl.html']);
 
 angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("bento/bento.tpl.html",
@@ -36814,16 +36814,6 @@ angular.module("common/engines/google-cs/google-cs.tpl.html", []).run(["$templat
     "        </div>\n" +
     "    </div>\n" +
     "</div-->");
-}]);
-
-angular.module("common/engines/libguides/libguides.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("common/engines/libguides/libguides.tpl.html",
-    "<div class=\"media\">\n" +
-    "    <div class=\"media-body\">\n" +
-    "        <h4 class=\"media-heading\"><a ng-href=\"{{item.link}}\" title=\"{{item.title}}\">{{item.title | truncate: 40: '...': true}}</a></h4>\n" +
-    "        <p ng-bind-html=\"item.htmlSnippet\"></p>\n" +
-    "    </div>\n" +
-    "</div>");
 }]);
 
 angular.module("common/engines/recommend/recommend.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -37374,10 +37364,9 @@ angular.module('engines.catalog', [])
             mediaTypes: {
                 path: 'bibFormat',
                 types: {
-                    books: 'am',
-                    journals: 'as',
-                    articles: 'tm',
-                    media: ['jm', 'gm']
+                    books: ['aa','ac', 'ad', 'am'],
+                    journals: ['ab','as','bb','bs','cb','cs','db','ds','eb','es','fb','fs','gb','gs','ib','is','jb','js','kb','ks','mb','ms','ob','os','pb','ps','rb','rs','tb','ts'],
+                    media: ['ga','gc','gd','gm','ia','ic','id','im','ja','jc','jd','jm']
                 }
             },
             templateUrl: 'common/engines/catalog/catalog.tpl.html',
@@ -37424,6 +37413,7 @@ angular.module('engines.catalog', [])
             return title;
         }
     }]);
+
 angular.module('engines.databases', [])
 
     .config(['oneSearchProvider', function(oneSearchProvider){
@@ -37649,52 +37639,6 @@ function isEmpty(obj) {
     }
 
     return true;
-}
-/**
- * @description
- * Checks an object's type given an options object
- *
- * @param opt Object   An object who's keys represent the type and the value is the object to be tested
- *                      Multiple object types act as a OR condition
- *
- * @returns Boolean
- */
-var toString = Object.prototype.toString;
-
-function isType(opt){
-    if (!isType({object: opt})) return null;
-
-    var result = false;
-
-    for (var key in opt){
-        var obj = opt[key];
-        var type = getType(obj);
-
-        if (type === key) result = true;
-    }
-
-    return result;
-}
-
-function getType(obj){
-    var type;
-    var t = toString.call(obj);
-
-    switch (type){
-        case "[object Object]":
-            type = 'object';
-            break;
-        case "[object String]":
-            type = 'string';
-            break;
-        case "[object Array]":
-            type = 'array';
-            break;
-        default:
-            type = null;
-    }
-
-    return type;
 }
 // adopted from https://github.com/a8m/angular-filter/blob/master/src/_common.js
 function toArray(object) {
