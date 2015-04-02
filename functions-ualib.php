@@ -1,9 +1,6 @@
 <?php
 
-function ualib_getWebappsPath()
-{
-  return "/srv/web/www/webapps/";
-}
+define( 'WEBAPPS_PATH', '/srv/web/www/webapps/' );
 
 function ualib_getDomain()
 {
@@ -33,24 +30,6 @@ function ualib_scripts() {
     array( 'angular' ),
     true
   );*/
-  if ( is_page('hm-test') )
-  {
-    wp_enqueue_script(
-      'ualib-child-scriptHoursManagement',
-      ualib_getDomain() . 'libhours2/js/manage-app.js',
-      array( 'angular' ),
-      true
-    );
-  }
-  if ( is_page('hours-admin') )
-  {
-    wp_enqueue_script(
-      'ualib-child-scriptUsersManagement',
-      ualib_getDomain() . 'libhours2/js/admin-app.js',
-      array( 'angular' ),
-      true
-    );
-  }
   if ( is_page('hours') )
   {
     wp_enqueue_script(
@@ -75,14 +54,6 @@ function ualib_scripts() {
     wp_enqueue_script(
       'ualib-child-scriptStaffDirectory',
       ualib_getDomain() . 'staffDir/js/app.js',
-      array( 'angular' ),
-      true
-    );
-  if ( is_page('onesearch') )
-  {
-    wp_enqueue_script(
-      'ualib-child-scriptOneSearch',
-      ualib_getDomain() . 'oneSearch/js/app.js',
       array( 'angular' ),
       true
     );

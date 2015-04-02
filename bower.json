@@ -19,6 +19,7 @@
     "ualib-ui": "https://github.com/ualibweb/ui-components.git",
     "ualib-hours": "https://github.com/ualibweb/hours_ui.git",
     "onesearch": "https://github.com/ualibweb/oneSearch_ui.git",
+    "manage": "https://github.com/bkrylov/manage_ui.git",
     "angular": "1.3.0",
     "angular-route": "1.3.0",
     "angular-ui-bootstrap-bower": "~0.12.1",
