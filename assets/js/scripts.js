@@ -38154,8 +38154,8 @@ angular.module('manage.manageHours', [])
         {name:'Midnight', value:'2400'}
     ])
 
-    .controller('manageHrsCtrl', ['$scope', 'hmFactory', 'HOURS_FROM', 'HOURS_TO',
-        function manageHrsCtrl($scope, hmFactory, hoursFrom, hoursTo){
+    .controller('manageHrsCtrl', ['$scope', '$http', 'hmFactory', 'HOURS_FROM', 'HOURS_TO',
+        function manageHrsCtrl($scope, $http, hmFactory, hoursFrom, hoursTo){
             $scope.allowedLibraries = [];
             $scope.isLoading = false;
             $scope.hrsFrom = hoursFrom;
