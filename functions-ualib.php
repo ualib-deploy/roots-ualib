@@ -57,13 +57,6 @@ function ualib_scripts() {
       array( 'angular' ),
       true
     );
-    wp_enqueue_script(
-      'ualib-child-scriptOneSearchFilters',
-      ualib_getDomain() . 'oneSearch/js/filters.js',
-      array( 'angular' ),
-      true
-    );
-  }
   if ( is_page('databases') )
     wp_enqueue_script(
       'ualib-child-scriptDatabases',
