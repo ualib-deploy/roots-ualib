@@ -37923,10 +37923,10 @@ angular.module("manageHours/manageEx.tpl.html", []).run(["$templateCache", funct
     "            <div ng-show=\"isExpExc(exception.id)\"><input type=\"text\" class=\"form-control\" size=\"30\" ng-model=\"exception.desc\" ng-required /></div>\n" +
     "        </td>\n" +
     "        <td class=\"text-center\">\n" +
-    "            <div ng-hide=\"isExpExc(exception.id)\">{{exception.date_ms | date : 'MMM d, y'}}</div>\n" +
+    "            <div ng-hide=\"isExpExc(exception.id)\">{{exception.datems | date : 'MMM d, y'}}</div>\n" +
     "            <div ng-show=\"isExpExc(exception.id)\">\n" +
     "                <input type=\"text\" class=\"form-control\" size=\"8\" datepicker-popup=\"{{format}}\" ng-click=\"toggleDP1($event)\" show-button-bar=\"false\"\n" +
-    "                       ng-model=\"exception.date_ms\" is-open=\"openedDP1\" datepicker-options=\"dateOptions\"\n" +
+    "                       ng-model=\"exception.datems\" is-open=\"openedDP1\" datepicker-options=\"dateOptions\"\n" +
     "                       close-on-date-selection=\"false\" ng-required=\"true\" />\n" +
     "            </div>\n" +
     "        </td>\n" +
@@ -37960,7 +37960,7 @@ angular.module("manageHours/manageEx.tpl.html", []).run(["$templateCache", funct
     "        </td>\n" +
     "        <td class=\"text-center\">\n" +
     "            <input type=\"text\" class=\"form-control\" size=\"8\" datepicker-popup=\"{{format}}\" ng-click=\"toggleDP2($event)\" show-button-bar=\"false\"\n" +
-    "                   ng-model=\"newException.date_ms\" is-open=\"openedDP2\" datepicker-options=\"dateOptions\"\n" +
+    "                   ng-model=\"newException.datems\" is-open=\"openedDP2\" datepicker-options=\"dateOptions\"\n" +
     "                   close-on-date-selection=\"false\" ng-required=\"true\" placeholder=\"MM/DD/YYYY\" />\n" +
     "        </td>\n" +
     "        <td class=\"text-center\">\n" +
