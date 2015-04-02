@@ -37925,11 +37925,11 @@ angular.module("manageHours/manageEx.tpl.html", []).run(["$templateCache", funct
     "        <td class=\"text-center\">\n" +
     "            <div ng-hide=\"isExpExc(exception.id)\">{{exception.datems | date : 'MMM d, y'}}</div>\n" +
     "            <div ng-show=\"isExpExc(exception.id)\">\n" +
-    "<!--\n" +
+    "\n" +
     "                <input type=\"text\" class=\"form-control\" size=\"8\" datepicker-popup=\"{{format}}\" ng-click=\"toggleDP1($event)\" show-button-bar=\"false\"\n" +
     "                       ng-model=\"exception.datems\" is-open=\"openedDP1\" datepicker-options=\"dateOptions\"\n" +
     "                       close-on-date-selection=\"false\" ng-required=\"true\" />\n" +
-    "-->            </div>\n" +
+    "            </div>\n" +
     "        </td>\n" +
     "        <td class=\"text-center\">\n" +
     "            <div ng-hide=\"isExpExc(exception.id)\">{{exception.days}}</div>\n" +
@@ -37960,11 +37960,11 @@ angular.module("manageHours/manageEx.tpl.html", []).run(["$templateCache", funct
     "            <input type=\"text\" class=\"form-control\" size=\"30\" ng-model=\"newException.desc\" placeholder=\"Exception Description\" ng-required />\n" +
     "        </td>\n" +
     "        <td class=\"text-center\">\n" +
-    "<!--\n" +
+    "\n" +
     "            <input type=\"text\" class=\"form-control\" size=\"8\" datepicker-popup=\"{{format}}\" ng-click=\"toggleDP2($event)\" show-button-bar=\"false\"\n" +
     "                   ng-model=\"newException.datems\" is-open=\"openedDP2\" datepicker-options=\"dateOptions\"\n" +
     "                   close-on-date-selection=\"false\" ng-required=\"true\" placeholder=\"MM/DD/YYYY\" />\n" +
-    "-->        </td>\n" +
+    "        </td>\n" +
     "        <td class=\"text-center\">\n" +
     "            <input type=\"text\" class=\"form-control\" size=\"2\" ng-model=\"newException.days\" placeholder=\"Days\" ng-required />\n" +
     "        </td>\n" +
@@ -38168,6 +38168,9 @@ angular.module('manage.manageHours', [])
                 .success(function(data) {
                     console.dir(data);
                     $scope.allowedLibraries = data;
+                    for (var lib = 0; lib < data.exc.length; lib++)
+                        for (var ex = 0; ex < data.exc[lib].ex.length; ex++)
+                            data.exc[lib].ex[ex].datems = new Date(data.exc[lib].ex[ex].date * 1000);
                 })
                 .error(function(data, status, headers, config) {
                     console.log(data);
