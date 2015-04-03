@@ -39364,7 +39364,11 @@ angular.module('manage.staffDirectory', [])
             $scope.addSubject = function(person){
                 sdFactory.postData({addSubject : 1}, person)
                     .success(function(data, status, headers, config) {
-                        $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjects.push($scope.selSubj);
+                        var newSubj = {};
+                        newSubj.id = $scope.selSubj.id;
+                        newSubj.subject = $scope.selSubj.subject;
+                        newSubj.link = $scope.selSubj.link;
+                        $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjects.push(newSubj);
                     })
                     .error(function(data, status, headers, config) {
                         $scope.subjResponse = "Error: Could not add subject! " + data;
