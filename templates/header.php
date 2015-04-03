@@ -13,13 +13,13 @@
             <div class="collapse navbar-collapse">
                 <ul class="nav navbar-nav navbar-right">
                     <li class="dropdown yamm-fw">
-                        <a href="#" class="dropdown-toggle icon-only" title="My Accounts">
+                        <a href="#" class="dropdown-toggle icon-only" title="My Stuff Yallz">
                             <span class="fa fa-user"></span>
                         </a>
                         <ul class="dropdown-menu">
                             <li>
                                 <div class="yamm-content">
-                                    <h2>My Accounts</h2>
+                                    <h2>My My Stuff Yallz</h2>
                                     <tabset  vertical="true" tab-class="col-sm-3" content-class="col-sm-9">
                                         <tab heading="My Library (Catalog)">
                                             <form>
