@@ -10,9 +10,13 @@
 
 // Colors
 //
+// weight: 0
+//
 // Always try to stick to the [Primary Colors](#style-color-primary). Only use [Secondary Colors](#style-color-secondary)
 // for slight accents or highlights. [Secondary Colors](#1.2) should only be dominant
 // when used in a child/sub theme.
+//
+// > When using colors as background, check that the contrast between text and background colors pass, at minimum, the WCAG AA usability standards by using [this contrast checker](http://webaim.org/resources/contrastchecker/) or similar tools.
 //
 // Icon: fa-eyedropper
 //
@@ -22,6 +26,8 @@
 // Styleguide style.color
 
 // Primary Colors
+//
+// weight: 0
 //
 // Try to use these colors for everything. Only use these colors where deemed appropriate
 // via this styleguide.
@@ -35,12 +41,44 @@
 // Grays
 // -------------------------
 
-@gray-lighter:           lighten(#000, 97.5%); // #f9f9f9
+// Gray Values
+//
+// weight: 2
+//
+// Use these to aid in contrast between elements or sections.
+//
+// Markup: gray-values.html
+//
+// HideMarkup: true
+//
+// Styleguide style.color.gray_values
+@gray-darker:            lighten(@gray-base, 13.5%); // #222
+@gray-dark:              lighten(@gray-base, 20%);   // #333
+@gray:                   lighten(@gray-base, 40%); // #666 \\ //lighten(@gray-base, 33.5%); // #555
+@gray-light:             lighten(@gray-base, 60%); // #999 \\ //lighten(@gray-base, 46.7%); // #777
+@gray-lighter:           lighten(@gray-base, 97.5%); // #f9f9f9 \\ //lighten(@gray-base, 93.5%); // #eee
 
 // Brand colors
 // -------------------------
 
 @brand-primary:         #993333;
+
+// Secondary Colors
+//
+// weight: 1
+//
+// Use these colors sparingly, as accents or contrasts. It is best to use these colors on thin or line elements and properties such as `borders`, `text`, etc.,
+// instead of block/thick elements such `background-color`, `nav buttons`, etc.
+//
+// Markup: secondary.html
+//
+// HideMarkup: true
+//
+// Styleguide style.color.secondary
+
+@dark-blue: #184866;
+@orange: #cc5d30;
+@green: #61a661;
 
 // Links
 // -------------------------
@@ -48,6 +86,8 @@
 @link-color:            #428bca;
 
 // Typography
+//
+// weight: 1
 //
 // Use and availability of fonts
 //
