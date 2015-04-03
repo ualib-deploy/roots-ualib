@@ -39288,13 +39288,14 @@ angular.module('manage.siteFeedback', [])
     })
 
 angular.module('manage.staffDirectory', [])
-    .controller('staffDirCtrl', ['$scope', '$http', 'sdFactory',
-        function staffDirCtrl($scope, $http, sdFactory){
+    .controller('staffDirCtrl', ['$scope', '$http', '$window', 'sdFactory',
+        function staffDirCtrl($scope, $http, $window, sdFactory){
             $scope.sortMode = 'lastname';
             $scope.filterBy = '';
             $scope.sortButton = 'last';
             $scope.Directory = {};
             $scope.selSubj = {};
+            $scope.hasAccess = $window.isAdmin;
 
             var cookies;
             $scope.GetCookie = function (name,c,C,i){
@@ -39443,9 +39444,7 @@ angular.module('manage.staffDirectory', [])
     .directive('staffDirectoryList', function() {
         return {
             restrict: 'AC',
-            scope: {
-                hasAccess: "@"
-            },
+            scope: {},
             controller: 'staffDirCtrl',
             templateUrl: 'staffDirectory/staffDirectory.tpl.html'
         };
