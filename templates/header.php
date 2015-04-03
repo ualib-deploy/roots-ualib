@@ -445,6 +445,13 @@
                                                         <p>Please contact Web Services for assistance </p>
                                                     </a>
                                                 </div>
+                                                <div class="col-xs-3">
+                                                    <a class="service-card" href="https://wwwdev2.lib.ua.edu/library-help/kacecontact-form/">
+                                                        <span class="fa fa-envelope"></span>
+                                                        <h4>Run into Issues?</h4>
+                                                        <p>Please contact Web Services for assistance </p>
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
                                     </li>
