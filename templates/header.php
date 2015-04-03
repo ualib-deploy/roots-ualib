@@ -12,6 +12,11 @@
             </div>
             <div class="collapse navbar-collapse">
                 <ul class="nav navbar-nav navbar-right">
+                  <li class="yamm-fw">
+                    <a href="#" class="dropdown-toggle icon-only" title="Laptop">
+                      <span class="fa fa-laptop"></span>
+                    </a>
+                  </li>
                     <li class="dropdown yamm-fw">
                         <a href="#" class="dropdown-toggle icon-only" title="My Account">
                             <span class="fa fa-user"></span>
