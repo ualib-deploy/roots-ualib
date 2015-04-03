@@ -12,11 +12,6 @@
             </div>
             <div class="collapse navbar-collapse">
                 <ul class="nav navbar-nav navbar-right">
-                  <li class="yamm-fw">
-                    <a href="#" class="dropdown-toggle icon-only" title="Laptop">
-                      <span class="fa fa-laptop"></span>
-                    </a>
-                  </li>
                     <li class="dropdown yamm-fw">
                         <a href="#" class="dropdown-toggle icon-only" title="My Account">
                             <span class="fa fa-user"></span>
@@ -24,7 +19,7 @@
                         <ul class="dropdown-menu">
                             <li>
                                 <div class="yamm-content">
-                                    <h2>My My Accounts</h2>
+                                    <h2>My Accounts</h2>
                                     <tabset  vertical="true" tab-class="col-sm-3" content-class="col-sm-9">
                                         <tab heading="My Library (Catalog)">
                                             <form>
@@ -441,13 +436,6 @@
                                                         <span class="fa fa-sign-in"></span>
                                                         <h4>Report a Login Problem</h4>
                                                         <p>Contact the libraries with problems accessing our online resources </p>
-                                                    </a>
-                                                </div>
-                                                <div class="col-xs-3">
-                                                    <a class="service-card" href="https://wwwdev2.lib.ua.edu/library-help/kacecontact-form/">
-                                                        <span class="fa fa-envelope"></span>
-                                                        <h4>Run into Issues?</h4>
-                                                        <p>Please contact Web Services for assistance </p>
                                                     </a>
                                                 </div>
                                                 <div class="col-xs-3">
