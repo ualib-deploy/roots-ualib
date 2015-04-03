@@ -38540,6 +38540,8 @@ angular.module('manage.manageHoursUsers', [])
             $scope.dataUL = {};
             $scope.dataUL.users = [];
             $scope.dataUL.locations = [];
+            $scope.user = {};
+            $scope.user.name = $window.userName;
 
             var cookies;
             $scope.GetCookie = function (name,c,C,i){
@@ -38579,8 +38581,6 @@ angular.module('manage.manageHoursUsers', [])
     }])
 
     .controller('hrsUserListCtrl', ['$scope', '$window', 'hmFactory', function hrsUserListCtrl($scope, $window, hmFactory) {
-        $scope.user = {};
-        $scope.user.name = $window.userName;
         $scope.expUser = -1;
         $scope.expUserIndex = -1;
         $scope.users = $window.users;
