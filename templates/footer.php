@@ -67,5 +67,7 @@
       University Libraries • Box 870266 • Tuscaloosa, AL 35487-0266 • (205) 348-6047
     </div>
   </div>
-  <?php //include "/srv/web/www/webapps/siteSurvey/loadForm.php"; ?>
+  <?php
+    include WEBAPPS_PATH . "siteSurvey/loadForm.php";
+  ?>
 </footer>

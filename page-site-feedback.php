@@ -13,9 +13,8 @@ if( !defined( 'ABSPATH' ) ) {
 <div id="content">
 
     <?php
-
-    include WEBAPPS_PATH . "libhours2/index_wp.php";
-
-	?>
+        include WEBAPPS_PATH . "siteSurvey/index_wp.php";
+    ?>
 
 </div><!-- end of #content -->
+

@@ -37899,7 +37899,7 @@ angular.module('hours.list', [])
             controller: 'ListCtrl',
             templateUrl: 'list/list.tpl.html'
         }
-    }]);;angular.module('manage.templates', ['manageHours/manageEx.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageUserGroups/manageUG.tpl.html']);
+    }]);;angular.module('manage.templates', ['manageHours/manageEx.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'siteFeedback/siteFeedback.tpl.html']);
 
 angular.module("manageHours/manageEx.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageHours/manageEx.tpl.html",
@@ -38268,6 +38268,34 @@ angular.module("manageUserGroups/manageUG.tpl.html", []).run(["$templateCache", 
     "</tabset>\n" +
     "");
 }]);
+
+angular.module("siteFeedback/siteFeedback.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("siteFeedback/siteFeedback.tpl.html",
+    "<h3>Received Feedback</h3>\n" +
+    "<div class=\"row\" ng-repeat=\"record in responses\">\n" +
+    "    <h4><a href=\"{{record.pageurl}}\">{{record.pageurl}}</a></h4>\n" +
+    "    <div class=\"col-xs-1\">\n" +
+    "        <button type=\"button\" class=\"btn btn-primary\"\n" +
+    "                ng-click=\"delete(record)\"\n" +
+    "                ng-show=\"<?php echo $isAdmin; ?>\">\n" +
+    "            Delete\n" +
+    "        </button>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-xs-1\">\n" +
+    "        Score: {{record.score}}\n" +
+    "    </div>\n" +
+    "    <div class=\"col-xs-2\">\n" +
+    "        {{record.when}}\n" +
+    "    </div>\n" +
+    "    <div class=\"col-xs-2\">\n" +
+    "        {{record.ip}}\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-12\">\n" +
+    "        Comments: {{record.comments}}\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "");
+}]);
 ;angular.module('manage', [
     'ngAnimate',
     'ui.bootstrap',
@@ -38275,11 +38303,13 @@ angular.module("manageUserGroups/manageUG.tpl.html", []).run(["$templateCache", 
     'manage.templates',
     'manage.manageHours',
     'manage.manageHoursUsers',
-    'manage.manageUserGroups'
+    'manage.manageUserGroups',
+    'manage.siteFeedback'
 ])
 
     .constant('HOURS_MANAGE_URL', '//wwwdev2.lib.ua.edu/libhours2/')
     .constant('USER_GROUPS_URL', '//wwwdev2.lib.ua.edu/userGroupsAdmin/')
+    .constant('SITE_FEEDBACK_URL', '//wwwdev2.lib.ua.edu/siteSurvey/')
 
 angular.module('manage.common', [
     'common.manage'
@@ -38298,12 +38328,19 @@ angular.module('common.manage', [])
             }
         }
     }])
-
     .factory('ugFactory', ['$http', 'USER_GROUPS_URL', function ugFactory($http, url){
         return {
             postData: function(params, data){
                 params = angular.isDefined(params) ? params : {};
                 return $http({method: 'POST', url: url, params: params, data: data})
+            }
+        }
+    }])
+    .factory('sfFactory', ['$http', 'SITE_FEEDBACK_URL', function sfFactory($http, url){
+        return {
+            getData: function(params){
+                params = angular.isDefined(params) ? params : {};
+                return $http({method: 'GET', url: url, params: params})
             }
         }
     }]);
@@ -38740,10 +38777,7 @@ angular.module('manage.manageHoursUsers', [])
                         var createdUser = {};
                         createdUser.name = user.login;
                         createdUser.uid = data.uid;
-                        if (user.admin)
-                            createdUser.role = "1";
-                        else
-                            createdUser.role = "0";
+                        createdUser.role = user.admin;
                         createdUser.access = [];
                         for (var i = 0; i < user.access.length; i++)
                             if (user.access[i])
@@ -38958,6 +38992,44 @@ angular.module('manage.manageUserGroups', [])
             scope: {},
             controller: 'userGroupsCtrl',
             templateUrl: 'manageUserGroups/manageUG.tpl.html'
+        };
+    })
+
+angular.module('manage.siteFeedback', [])
+    .controller('siteFeedbackCtrl', ['$scope', '$http', 'sfFactory',
+        function siteFeedbackCtrl($scope, $http, sfFactory){
+            $scope.responses = [];
+
+            var cookies;
+            $scope.GetCSRFCookie = function (name,c,C,i){
+                if(cookies){ return cookies[name]; }
+
+                c = document.cookie.split('; ');
+                cookies = {};
+
+                for(i=c.length-1; i>=0; i--){
+                    C = c[i].split('=');
+                    cookies[C[0]] = C[1];
+                }
+                return cookies[name];
+            };
+            $http.defaults.headers.post = { "X-CSRF-libSiteFeedback" : $scope.GetCSRFCookie("CSRF-libSiteFeedback") };
+
+            sfFactory.getData({json : 1})
+                .success(function(data) {
+                    console.dir(data);
+                    $scope.responses = data;
+                })
+                .error(function(data, status, headers, config) {
+                    console.log(data);
+                });
+        }])
+    .directive('siteFeedbackList', function() {
+        return {
+            restrict: 'AC',
+            scope: {},
+            controller: 'siteFeedbackCtrl',
+            templateUrl: 'siteFeedback/siteFeedback.tpl.html'
         };
     })
 ;angular.module('ualib.templates', ['../assets/js/_ualib-home.tpl.html']);
