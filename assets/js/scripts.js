@@ -38323,8 +38323,10 @@ angular.module("siteFeedback/siteFeedback.tpl.html", []).run(["$templateCache", 
 
 angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staffDirectory/staffDirectory.tpl.html",
+    "<h2>Library Staff Directory</h2>\n" +
+    "\n" +
     "<div>\n" +
-    "    <form id=\"fAddPerson\" ng-submit=\"addPerson()\">\n" +
+    "    <form ng-submit=\"addPerson()\">\n" +
     "        <input type=\"text\" class=\"form-control\" placeholder=\"First Name\" size=\"25\" maxlength=\"25\" ng-model=\"formData.first\" required>\n" +
     "        <input type=\"text\" class=\"form-control\" placeholder=\"Last Name\" size=\"25\" maxlength=\"25\" ng-model=\"formData.last\" required><br>\n" +
     "        <input type=\"text\" class=\"form-control\" placeholder=\"Email\" size=\"40\" maxlength=\"255\" ng-model=\"formData.email\" required>\n" +
@@ -38370,6 +38372,7 @@ angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCach
     "    <span ng-model=\"formResponse\">{{formResponse}}</span>\n" +
     "</div>\n" +
     "\n" +
+    "<h3>Full list</h3>\n" +
     "<div>\n" +
     "    <ul class=\"list-inline\">Sort By:\n" +
     "        <li><button type=\"button\" class=\"btn btn-primary\" ng-model=\"sortButton\" btn-radio=\"'first'\" ng-click=\"sortMode='firstname'\">First Name</button></li>\n" +
@@ -38382,7 +38385,7 @@ angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCach
     "    <dl ng-repeat=\"person in Directory.list | filter:{lastname:filterBy} | orderBy:sortMode\">\n" +
     "        <h4 ng-click=\"person.show = !person.show\"><a>{{person.firstname}} {{person.lastname}}</a>,\n" +
     "            <span style=\"font-size: 14px;\">{{person.title}} : {{person.department}}</span></h4>\n" +
-    "        <div class=\"personExp\" id=\"{{person.id}}\" ng-show=\"person.show && hasAccess\">\n" +
+    "        <div class=\"personExp\" id=\"{{person.id}}\" ng-show=\"person.show && hasAccess == 1\">\n" +
     "            <dt>Title</dt>\n" +
     "            <dd><input type=\"text\" class=\"form-control\" placeholder=\"{{person.title}}\" size=\"40\" maxlength=\"150\" ng-model=\"person.title\" required></dd>\n" +
     "            <dt>Rank</dt>\n" +
@@ -38420,7 +38423,7 @@ angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCach
     "                </div>\n" +
     "            </dd>\n" +
     "        </div>\n" +
-    "        <div class=\"personExp\" id=\"{{person.id}}\" ng-click=\"person.show = !person.show\" ng-show=\"person.show && !hasAccess\">\n" +
+    "        <div class=\"personExp\" id=\"{{person.id}}\" ng-click=\"person.show = !person.show\" ng-show=\"person.show && hasAccess == 0\">\n" +
     "            <dt>Title</dt>  <dd>{{person.title}}</dd>\n" +
     "            <dt ng-show=\"person.rank.length > 0\">Rank</dt>  <dd>{{person.rank}}</dd>\n" +
     "            <dt>Departent</dt>  <dd>{{person.department}}</dd>\n" +
