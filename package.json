@@ -13,9 +13,6 @@
       "type": "ECL-2"
     }
   ],
-  "scripts": {
-    "postinstall": "bower cache clean && bower install && grunt dev"
-  },
   "engines": {
     "node": ">= 0.10.0"
   },

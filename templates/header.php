@@ -13,7 +13,7 @@
             <div class="collapse navbar-collapse">
                 <ul class="nav navbar-nav navbar-right">
                     <li class="dropdown yamm-fw">
-                        <a href="#" class="dropdown-toggle icon-only" title="My Accounts">
+                        <a href="#" class="dropdown-toggle icon-only" title="My Account">
                             <span class="fa fa-user"></span>
                         </a>
                         <ul class="dropdown-menu">

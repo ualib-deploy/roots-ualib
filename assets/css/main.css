@@ -6290,6 +6290,7 @@ fieldset[disabled] .navbar-mega .btn-link:focus {
 }
 .navbar-mega .navbar-nav > li > a.icon-only {
   font-size: 20px;
+  padding-top: 29px;
   padding-bottom: 29px;
 }
 .navbar-mega .navbar-nav > li > a:hover.dropdown-toggle::before,
@@ -6458,6 +6459,7 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
 }
 .navbar-mega-inverse .navbar-nav > li > a.icon-only {
   font-size: 20px;
+  padding-top: 29px;
   padding-bottom: 29px;
 }
 .navbar-mega-inverse .navbar-nav > li > a:hover.dropdown-toggle::before,
