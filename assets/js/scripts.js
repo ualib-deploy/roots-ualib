@@ -37899,7 +37899,7 @@ angular.module('hours.list', [])
             controller: 'ListCtrl',
             templateUrl: 'list/list.tpl.html'
         }
-    }]);;angular.module('manage.templates', ['manageHours/manageEx.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'siteFeedback/siteFeedback.tpl.html']);
+    }]);;angular.module('manage.templates', ['manageHours/manageEx.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html']);
 
 angular.module("manageHours/manageEx.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageHours/manageEx.tpl.html",
@@ -38320,6 +38320,127 @@ angular.module("siteFeedback/siteFeedback.tpl.html", []).run(["$templateCache", 
     "</div>\n" +
     "");
 }]);
+
+angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("staffDirectory/staffDirectory.tpl.html",
+    "<div>\n" +
+    "    <form id=\"fAddPerson\" ng-submit=\"addPerson()\">\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"First Name\" size=\"25\" maxlength=\"25\" ng-model=\"formData.first\" required>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Last Name\" size=\"25\" maxlength=\"25\" ng-model=\"formData.last\" required><br>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Email\" size=\"40\" maxlength=\"255\" ng-model=\"formData.email\" required>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Title\" size=\"40\" maxlength=\"150\" ng-model=\"formData.title\" required><br>\n" +
+    "        <select class=\"form-control\" ng-model=\"formData.rank\" required>\n" +
+    "            <option value=\"0\">No Rank</option>\n" +
+    "            <option value=\"Prof.\">Professor</option>\n" +
+    "            <option value=\"Asso. Prof.\">Associate Professor</option>\n" +
+    "            <option value=\"Asst. Prof.\">Assistant Professor</option>\n" +
+    "        </select>\n" +
+    "        <select class=\"form-control\" ng-model=\"formData.dept\" required>\n" +
+    "            <option value=\"Acquisitions\">Acquisitions</option>\n" +
+    "            <option value=\"Annex Services\">Annex Services</option>\n" +
+    "            <option value=\"Area Computing Services\">Area Computing Services</option>\n" +
+    "            <option value=\"Business Library\">Business Library</option>\n" +
+    "            <option value=\"Business Office\">Business Office</option>\n" +
+    "            <option value=\"Cataloging &amp; Metadata Services\">Cataloging &amp; Metadata Services</option>\n" +
+    "            <option value=\"Collection Management\">Collection Management</option>\n" +
+    "            <option value=\"Digital Humanities Center\">Digital Humanities Center</option>\n" +
+    "            <option value=\"Digital Services\">Digital Services</option>\n" +
+    "            <option value=\"Education Library\">Education Library</option>\n" +
+    "            <option value=\"Electronic Resources\">Electronic Resources</option>\n" +
+    "            <option value=\"Gorgas Information Services\">Gorgas Information Services</option>\n" +
+    "            <option value=\"Gorgas Library, Circulation Department\">Gorgas Library, Circulation Department</option>\n" +
+    "            <option value=\"Government Documents\">Government Documents</option>\n" +
+    "            <option value=\"Health Sciences Library\">Health Sciences Library</option>\n" +
+    "            <option value=\"ILS &amp; E-Resources Management\">ILS &amp; E-Resources Management</option>\n" +
+    "            <option value=\"Interlibrary Loan\">Interlibrary Loan</option>\n" +
+    "            <option value=\"Library Administration\">Library Administration</option>\n" +
+    "            <option value=\"Music Library\">Music Library</option>\n" +
+    "            <option value=\"Office of Library Technology\">Office of Library Technology</option>\n" +
+    "            <option value=\"Sanford Media Center\">Sanford Media Center</option>\n" +
+    "            <option value=\"School of Social Work\">School of Social Work</option>\n" +
+    "            <option value=\"Science and Engineering Library\">Science and Engineering Library</option>\n" +
+    "            <option value=\"Special Collections\">Special Collections</option>\n" +
+    "            <option value=\"Web Infrastructure &amp; Application Development\">Web Infrastructure &amp; Application Development</option>\n" +
+    "            <option value=\"Web Services\">Web Services</option>\n" +
+    "        </select>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Phone\" size=\"8\" maxlength=\"8\" ng-model=\"formData.phone\" required>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Fax\" size=\"8\" maxlength=\"8\" ng-model=\"formData.fax\" required><br>\n" +
+    "        <button type=\"submit\" class=\"btn btn-primary\" ng-click=\"addPerson()\">Add New Person</button>\n" +
+    "    </form>\n" +
+    "    <span ng-model=\"formResponse\">{{formResponse}}</span>\n" +
+    "</div>\n" +
+    "\n" +
+    "<div>\n" +
+    "    <ul class=\"list-inline\">Sort By:\n" +
+    "        <li><button type=\"button\" class=\"btn btn-primary\" ng-model=\"sortButton\" btn-radio=\"'first'\" ng-click=\"sortMode='firstname'\">First Name</button></li>\n" +
+    "        <li><button type=\"button\" class=\"btn btn-primary\" ng-model=\"sortButton\" btn-radio=\"'last'\" ng-click=\"sortMode='lastname'\">Last Name</button></li>\n" +
+    "        <li><button type=\"button\" class=\"btn btn-primary\" ng-model=\"sortButton\" btn-radio=\"'title'\" ng-click=\"sortMode='title'\">Title</button></li>\n" +
+    "        <li><button type=\"button\" class=\"btn btn-primary\" ng-model=\"sortButton\" btn-radio=\"'dept'\" ng-click=\"sortMode='department'\">Department</button></li>\n" +
+    "        <li><input type=\"text\" placeholder=\"Filter by Last Name\" size=\"25\" maxlength=\"25\" ng-model=\"filterBy\"></li>\n" +
+    "    </ul>\n" +
+    "\n" +
+    "    <dl ng-repeat=\"person in Directory.list | filter:{lastname:filterBy} | orderBy:sortMode\">\n" +
+    "        <h4 ng-click=\"person.show = !person.show\"><a>{{person.firstname}} {{person.lastname}}</a>,\n" +
+    "            <span style=\"font-size: 14px;\">{{person.title}} : {{person.department}}</span></h4>\n" +
+    "        <div class=\"personExp\" id=\"{{person.id}}\" ng-show=\"person.show && hasAccess\">\n" +
+    "            <dt>Title</dt>\n" +
+    "            <dd><input type=\"text\" class=\"form-control\" placeholder=\"{{person.title}}\" size=\"40\" maxlength=\"150\" ng-model=\"person.title\" required></dd>\n" +
+    "            <dt>Rank</dt>\n" +
+    "            <dd><input type=\"text\" class=\"form-control\" placeholder=\"{{person.rank}}\" size=\"40\" maxlength=\"150\" ng-model=\"person.rank\"></dd>\n" +
+    "            <dt>Department</dt>\n" +
+    "            <dd><input type=\"text\" class=\"form-control\" placeholder=\"{{person.department}}\" size=\"40\" maxlength=\"150\" ng-model=\"person.department\" required></dd>\n" +
+    "            <dt>Division</dt>\n" +
+    "            <dd><input type=\"text\" class=\"form-control\" placeholder=\"{{person.division}}\" size=\"40\" maxlength=\"150\" ng-model=\"person.division\"></dd>\n" +
+    "            <dt>Phone</dt>\n" +
+    "            <dd><input type=\"text\" class=\"form-control\" placeholder=\"{{person.phone}}\" size=\"8\" maxlength=\"8\" ng-model=\"person.phone\" required></dd>\n" +
+    "            <dt>Email</dt>\n" +
+    "            <dd><input type=\"text\" class=\"form-control\" placeholder=\"{{person.email}}\" size=\"40\" maxlength=\"255\" ng-model=\"person.email\" required></dd>\n" +
+    "            <dt>Fax</dt>\n" +
+    "            <dd><input type=\"text\" class=\"form-control\" placeholder=\"{{person.fax}}\" size=\"8\" maxlength=\"8\" ng-model=\"person.fax\" required></dd>\n" +
+    "            <dt>&nbsp</dt><dd>\n" +
+    "                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"updatePerson(person)\">Update information</button>\n" +
+    "                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deletePerson(person, $index)\">\n" +
+    "                    Delete {{person.firstname}} {{person.lastname}} record\n" +
+    "                </button>\n" +
+    "            </dd>\n" +
+    "            <dt>Subjects</dt>\n" +
+    "            <dd>\n" +
+    "                <ul class=\"list-unstyled\">\n" +
+    "                    <li  ng-repeat=\"subject in person.subjects\">\n" +
+    "                        <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteSubject(person, subject.id, $index)\">\n" +
+    "                            Delete\n" +
+    "                        </button>\n" +
+    "                        <a href=\"{{subject.link}}\">{{subject.subject}}</a>\n" +
+    "                    </li>\n" +
+    "                </ul>\n" +
+    "                <div>\n" +
+    "                    <select class=\"form-control\" ng-model=\"selSubj\" ng-options=\"sub.subject for sub in Directory.subjects\">\n" +
+    "                    </select>\n" +
+    "                    <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addSubject(person)\">Add Subject</button>\n" +
+    "                </div>\n" +
+    "            </dd>\n" +
+    "        </div>\n" +
+    "        <div class=\"personExp\" id=\"{{person.id}}\" ng-click=\"person.show = !person.show\" ng-show=\"person.show && !hasAccess\">\n" +
+    "            <dt>Title</dt>  <dd>{{person.title}}</dd>\n" +
+    "            <dt ng-show=\"person.rank.length > 0\">Rank</dt>  <dd>{{person.rank}}</dd>\n" +
+    "            <dt>Departent</dt>  <dd>{{person.department}}</dd>\n" +
+    "            <dt ng-show=\"person.division.length > 0\">Division</dt>  <dd>{{person.division}}</dd>\n" +
+    "            <dt>Phone</dt>  <dd>{{person.phone}}</dd>\n" +
+    "            <dt>Email</dt>  <dd>{{person.email}}</dd>\n" +
+    "            <dt>Fax</dt>  <dd>{{person.fax}}</dd>\n" +
+    "            <dt>Subjects</dt>\n" +
+    "            <dd>\n" +
+    "                <ul class=\"list-inline\">\n" +
+    "                    <li ng-repeat=\"subject in person.subjects\">\n" +
+    "                        <a href=\"{{subject.link}}\">{{subject.subject}}</a>\n" +
+    "                    </li>\n" +
+    "                </ul>\n" +
+    "            </dd>\n" +
+    "        </div>\n" +
+    "    </dl>\n" +
+    "</div>\n" +
+    "");
+}]);
 ;angular.module('manage', [
     'ngAnimate',
     'ui.bootstrap',
@@ -38329,13 +38450,15 @@ angular.module("siteFeedback/siteFeedback.tpl.html", []).run(["$templateCache", 
     'manage.manageHoursUsers',
     'manage.manageUserGroups',
     'manage.siteFeedback',
-    'manage.manageOneSearch'
+    'manage.manageOneSearch',
+    'manage.staffDirectory'
 ])
 
     .constant('HOURS_MANAGE_URL', '//wwwdev2.lib.ua.edu/libhours2/')
     .constant('USER_GROUPS_URL', '//wwwdev2.lib.ua.edu/userGroupsAdmin/')
     .constant('SITE_FEEDBACK_URL', '//wwwdev2.lib.ua.edu/siteSurvey/')
     .constant('ONE_SEARCH_URL', '//wwwdev2.lib.ua.edu/oneSearch/')
+    .constant('STAFF_DIR_URL', '//wwwdev2.lib.ua.edu/staffDir/')
 
 angular.module('manage.common', [
     'common.manage'
@@ -38371,6 +38494,18 @@ angular.module('common.manage', [])
         }
     }])
     .factory('osFactory', ['$http', 'ONE_SEARCH_URL', function osFactory($http, url){
+        return {
+            getData: function(params){
+                params = angular.isDefined(params) ? params : {};
+                return $http({method: 'GET', url: url + "getJSON.php", params: params})
+            },
+            postData: function(params, data){
+                params = angular.isDefined(params) ? params : {};
+                return $http({method: 'POST', url: url + "processData.php", params: params, data: data})
+            }
+        }
+    }])
+    .factory('sdFactory', ['$http', 'STAFF_DIR_URL', function sdFactory($http, url){
         return {
             getData: function(params){
                 params = angular.isDefined(params) ? params : {};
@@ -39148,7 +39283,170 @@ angular.module('manage.siteFeedback', [])
             templateUrl: 'siteFeedback/siteFeedback.tpl.html'
         };
     })
-;angular.module('ualib.templates', ['../assets/js/_ualib-home.tpl.html']);
+
+angular.module('manage.staffDirectory', [])
+    .controller('staffDirCtrl', ['$scope', '$http', 'sdFactory',
+        function staffDirCtrl($scope, $http, sdFactory){
+            $scope.sortMode = 'lastname';
+            $scope.filterBy = '';
+            $scope.sortButton = 'last';
+            $scope.Directory = {};
+            $scope.selSubj = {};
+
+            var cookies;
+            $scope.GetCookie = function (name,c,C,i){
+                if(cookies){ return cookies[name]; }
+
+                c = document.cookie.split('; ');
+                cookies = {};
+
+                for(i=c.length-1; i>=0; i--){
+                    C = c[i].split('=');
+                    cookies[C[0]] = C[1];
+                }
+                return cookies[name];
+            };
+            $http.defaults.headers.post = { 'X-CSRF-libStaffDir' : $scope.GetCookie("CSRF-libStaffDir") };
+
+            sdFactory.getData()
+                .success(function(data) {
+                    console.dir(data);
+                    $scope.Directory = data;
+                    $scope.selSubj = $scope.Directory.subjects[0];
+                })
+                .error(function(data, status, headers, config) {
+                    console.log(data);
+                });
+
+            $scope.deletePerson = function(person, index){
+                if (confirm("Delete this record permanently?") == true){
+                    sdFactory.postData({delete : person.id}, {})
+                        .success(function(data, status, headers, config) {
+                            $scope.formResponse = data;
+                            $scope.formData = {};
+                            $scope.formData.rank = "0";
+                            $scope.formData.dept = "Acquisitions";
+                            $scope.Directory.list.splice(index, 1);
+                        })
+                        .error(function(data, status, headers, config) {
+                            $scope.formResponse = "Error: Could not delete person data! " + data;
+                        });
+                }
+            };
+            $scope.updatePerson = function(person){
+                sdFactory.postData({update : person.id}, person)
+                    .success(function(data, status, headers, config) {
+                        $scope.formResponse = "Person has been updated!";
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.formResponse = "Error: Person update failed! " + data;
+                    });
+            };
+            $scope.deleteSubject = function(person, subjectID, index){
+                if (confirm("Delete this subject from " + person.firstname + " " + person.lastname + "?") == true){
+                    sdFactory.postData({deleteSubject : subjectID}, {})
+                        .success(function(data, status, headers, config) {
+                            $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjects.splice(index, 1);
+                        })
+                        .error(function(data, status, headers, config) {
+                            $scope.subjResponse = "Error: Could not delete subject! " + data;
+                        });
+                }
+            };
+            $scope.addSubject = function(person){
+                if (person.newSubject > 0){
+                    sdFactory.postData({addSubject : 1}, person)
+                        .success(function(data, status, headers, config) {
+                            $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjects.push($scope.selSubj);
+                        })
+                        .error(function(data, status, headers, config) {
+                            $scope.subjResponse = "Error: Could not add subject! " + data;
+                        });
+                }
+            };
+
+            $scope.formData = {};
+            $scope.formData.first = "";
+            $scope.formData.last = "";
+            $scope.formData.email = "";
+            $scope.formData.title = "";
+            $scope.formData.phone = "";
+            $scope.formData.fax = "";
+            $scope.formData.rank = "0";
+            $scope.formData.dept = "Acquisitions";
+            $scope.formResponse = '';
+
+            $scope.isValidEmailAddress = function(emailAddress) {
+                var pattern = new RegExp(/^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i);
+                return pattern.test(emailAddress);
+            };
+
+            $scope.addPerson = function() {
+                $scope.formResponse = '';
+                if ( $scope.formData.first.length > 0 )
+                {
+                    if ( $scope.formData.last.length > 0 )
+                    {
+                        if ( $scope.isValidEmailAddress( $scope.formData.email) )
+                        {
+                            if ( $scope.formData.title.length > 0 )
+                            {
+                                if ( $scope.formData.phone.length >= 7 )
+                                {
+                                    if ( $scope.formData.fax.length >= 7 )
+                                    {
+                                        sdFactory.postData({}, $scope.formData)
+                                            .success(function(data, status, headers, config) {
+                                                if ((typeof data === 'object') && (data !== null)){
+                                                    var createdUser = {};
+                                                    createdUser.id = data.id;
+                                                    createdUser.lastname = $scope.formData.last;
+                                                    createdUser.firstname = $scope.formData.first;
+                                                    createdUser.title = $scope.formData.title;
+                                                    createdUser.rank = $scope.formData.rank;
+                                                    createdUser.department = $scope.formData.dept;
+                                                    createdUser.division = "";
+                                                    createdUser.phone = $scope.formData.phone;
+                                                    createdUser.email = $scope.formData.email;
+                                                    createdUser.fax = $scope.formData.fax;
+                                                    createdUser.subjects = [];
+                                                    createdUser.show = false;
+                                                    $scope.Directory.list.push(createdUser);
+
+                                                    $scope.formData = {};
+                                                    $scope.formData.rank = "0";
+                                                    $scope.formData.dept = "Acquisitions";
+                                                    $scope.formResponse = "Person has been added!";
+                                                } else
+                                                    $scope.formResponse = "Error: Person could not be added! " + data;
+                                            })
+                                            .error(function(data, status, headers, config) {
+                                                $scope.formResponse = "Error: Person Creation failed! " + data;
+                                            });
+                                    } else
+                                        alert("Fax number is too short!");
+                                } else
+                                    alert("Phone number is too short!");
+                            } else
+                                alert("Title is too short!");
+                        } else
+                            alert("User email is invalid!");
+                    } else
+                        alert("Last Name is too short!");
+                } else
+                    alert("First Name is too short!");
+            };
+        }])
+    .directive('staffDirectoryList', function() {
+        return {
+            restrict: 'AC',
+            scope: {
+                hasAccess: "@"
+            },
+            controller: 'staffDirCtrl',
+            templateUrl: 'staffDirectory/staffDirectory.tpl.html'
+        };
+    });angular.module('ualib.templates', ['../assets/js/_ualib-home.tpl.html']);
 
 angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("../assets/js/_ualib-home.tpl.html",
