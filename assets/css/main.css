@@ -403,7 +403,7 @@ fieldset[disabled] .btn-link {
 fieldset[disabled] .btn-link:hover,
 .btn-link[disabled]:focus,
 fieldset[disabled] .btn-link:focus {
-  color: #777777;
+  color: #999999;
   text-decoration: none;
 }
 .btn-lg,
@@ -441,6 +441,30 @@ input[type="submit"].btn-block,
 input[type="reset"].btn-block,
 input[type="button"].btn-block {
   width: 100%;
+}
+.btn-lg,
+.btn-group-lg > .btn,
+.btn-group-lg > .comment-form input[type="submit"] {
+  padding: 10px 16px;
+  font-size: 18px;
+  line-height: 1.3333333;
+  border-radius: 4px;
+}
+.btn-sm,
+.btn-group-sm > .btn,
+.btn-group-sm > .comment-form input[type="submit"] {
+  padding: 5px 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: 3px;
+}
+.btn-xs,
+.btn-group-xs > .btn,
+.btn-group-xs > .comment-form input[type="submit"] {
+  padding: 1px 5px;
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: 3px;
 }
 /*! normalize.css v3.0.2 | MIT License | git.io/normalize */
 html {
@@ -2719,7 +2743,7 @@ h6 .small,
 .h6 .small {
   font-weight: normal;
   line-height: 1;
-  color: #777777;
+  color: #999999;
 }
 h1,
 .h1,
@@ -2839,7 +2863,7 @@ mark,
   text-transform: capitalize;
 }
 .text-muted {
-  color: #777777;
+  color: #999999;
 }
 .text-primary {
   color: #993333;
@@ -2964,7 +2988,7 @@ dd {
 abbr[title],
 abbr[data-original-title] {
   cursor: help;
-  border-bottom: 1px dotted #777777;
+  border-bottom: 1px dotted #999999;
 }
 .initialism {
   font-size: 90%;
@@ -2987,7 +3011,7 @@ blockquote .small {
   display: block;
   font-size: 80%;
   line-height: 1.42857143;
-  color: #777777;
+  color: #999999;
 }
 blockquote footer:before,
 blockquote small:before,
@@ -3750,7 +3774,7 @@ table {
 caption {
   padding-top: 8px;
   padding-bottom: 8px;
-  color: #777777;
+  color: #999999;
   text-align: left;
 }
 th {
@@ -4074,7 +4098,7 @@ output {
   padding-top: 7px;
   font-size: 14px;
   line-height: 1.42857143;
-  color: #555555;
+  color: #666666;
 }
 .form-control,
 .comment-form input[type="text"],
@@ -4087,7 +4111,7 @@ output {
   padding: 6px 12px;
   font-size: 14px;
   line-height: 1.42857143;
-  color: #555555;
+  color: #666666;
   background-color: #ffffff;
   background-image: none;
   border: 1px solid #cccccc;
@@ -4736,7 +4760,7 @@ tbody.collapse.in {
 .dropdown-menu > .disabled > a,
 .dropdown-menu > .disabled > a:hover,
 .dropdown-menu > .disabled > a:focus {
-  color: #777777;
+  color: #999999;
 }
 .dropdown-menu > .disabled > a:hover,
 .dropdown-menu > .disabled > a:focus {
@@ -4765,7 +4789,7 @@ tbody.collapse.in {
   padding: 3px 20px;
   font-size: 12px;
   line-height: 1.42857143;
-  color: #777777;
+  color: #999999;
   white-space: nowrap;
 }
 .dropdown-backdrop {
@@ -5286,7 +5310,7 @@ select[multiple].input-group-sm > .input-group-btn > .comment-form input[type="s
   font-size: 14px;
   font-weight: normal;
   line-height: 1;
-  color: #555555;
+  color: #666666;
   text-align: center;
   background-color: #f9f9f9;
   border: 1px solid #cccccc;
@@ -5399,11 +5423,11 @@ select[multiple].input-group-sm > .input-group-btn > .comment-form input[type="s
   background-color: #f9f9f9;
 }
 .nav > li.disabled > a {
-  color: #777777;
+  color: #999999;
 }
 .nav > li.disabled > a:hover,
 .nav > li.disabled > a:focus {
-  color: #777777;
+  color: #999999;
   text-decoration: none;
   background-color: transparent;
   cursor: not-allowed;
@@ -5442,7 +5466,7 @@ select[multiple].input-group-sm > .input-group-btn > .comment-form input[type="s
 .nav-tabs > li.active > a,
 .nav-tabs > li.active > a:hover,
 .nav-tabs > li.active > a:focus {
-  color: #555555;
+  color: #666666;
   background-color: #ffffff;
   border: 1px solid #dddddd;
   border-bottom-color: transparent;
@@ -6266,7 +6290,6 @@ fieldset[disabled] .navbar-mega .btn-link:focus {
 }
 .navbar-mega .navbar-nav > li > a.icon-only {
   font-size: 20px;
-  padding-top: 29px;
   padding-bottom: 29px;
 }
 .navbar-mega .navbar-nav > li > a:hover.dropdown-toggle::before,
@@ -6435,7 +6458,6 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
 }
 .navbar-mega-inverse .navbar-nav > li > a.icon-only {
   font-size: 20px;
-  padding-top: 29px;
   padding-bottom: 29px;
 }
 .navbar-mega-inverse .navbar-nav > li > a:hover.dropdown-toggle::before,
@@ -6540,7 +6562,7 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
   color: #cccccc;
 }
 .breadcrumb > .active {
-  color: #777777;
+  color: #999999;
 }
 .pagination {
   display: inline-block;
@@ -6600,7 +6622,7 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
 .pagination > .disabled > a,
 .pagination > .disabled > a:hover,
 .pagination > .disabled > a:focus {
-  color: #777777;
+  color: #999999;
   background-color: #ffffff;
   border-color: #dddddd;
   cursor: not-allowed;
@@ -6669,7 +6691,7 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
 .pager .disabled > a:hover,
 .pager .disabled > a:focus,
 .pager .disabled > span {
-  color: #777777;
+  color: #999999;
   background-color: #ffffff;
   cursor: not-allowed;
 }
@@ -6700,11 +6722,11 @@ a.label:focus {
   top: -1px;
 }
 .label-default {
-  background-color: #777777;
+  background-color: #999999;
 }
 .label-default[href]:hover,
 .label-default[href]:focus {
-  background-color: #5e5e5e;
+  background-color: #808080;
 }
 .label-primary {
   background-color: #993333;
@@ -6752,7 +6774,7 @@ a.label:focus {
   vertical-align: baseline;
   white-space: nowrap;
   text-align: center;
-  background-color: #777777;
+  background-color: #999999;
   border-radius: 10px;
 }
 .badge:empty {
@@ -7111,7 +7133,7 @@ a.list-group-item:focus {
 .list-group-item.disabled:hover,
 .list-group-item.disabled:focus {
   background-color: #f9f9f9;
-  color: #777777;
+  color: #999999;
   cursor: not-allowed;
 }
 .list-group-item.disabled .list-group-item-heading,
@@ -7122,7 +7144,7 @@ a.list-group-item:focus {
 .list-group-item.disabled .list-group-item-text,
 .list-group-item.disabled:hover .list-group-item-text,
 .list-group-item.disabled:focus .list-group-item-text {
-  color: #777777;
+  color: #999999;
 }
 .list-group-item.active,
 .list-group-item.active:hover,
@@ -8539,7 +8561,7 @@ button.close {
   position: absolute;
   top: 30px;
   font-size: 30px;
-  color: #555555;
+  color: #666666;
 }
 .service-card > h1,
 .service-list > h1,
@@ -8762,7 +8784,7 @@ footer .footer-list > li > a {
 }
 footer .social-icons > li > a {
   padding: 15px;
-  color: #555555;
+  color: #666666;
 }
 footer .social-icons > li > a:hover {
   color: #428bca;
