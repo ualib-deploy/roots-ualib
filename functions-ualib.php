@@ -18,18 +18,6 @@ function ualib_child_endSession() {
 }
 
 function ualib_scripts() {
-  /*wp_register_script(
-    'angular',
-    '//ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js',
-    array( 'jquery' ),
-    true
-  );
-  wp_register_script(
-    'ui-bootstrap',
-    '//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.11.0.js',
-    array( 'angular' ),
-    true
-  );*/
   if ( is_page('hours') )
   {
     wp_enqueue_script(
