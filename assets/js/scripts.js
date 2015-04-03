@@ -38327,46 +38327,50 @@ angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCach
     "\n" +
     "<div>\n" +
     "    <form ng-submit=\"addPerson()\">\n" +
-    "        <input type=\"text\" class=\"form-control\" placeholder=\"First Name\" size=\"25\" maxlength=\"25\" ng-model=\"formData.first\" required>\n" +
-    "        <input type=\"text\" class=\"form-control\" placeholder=\"Last Name\" size=\"25\" maxlength=\"25\" ng-model=\"formData.last\" required><br>\n" +
-    "        <input type=\"text\" class=\"form-control\" placeholder=\"Email\" size=\"40\" maxlength=\"255\" ng-model=\"formData.email\" required>\n" +
-    "        <input type=\"text\" class=\"form-control\" placeholder=\"Title\" size=\"40\" maxlength=\"150\" ng-model=\"formData.title\" required><br>\n" +
-    "        <select class=\"form-control\" ng-model=\"formData.rank\" required>\n" +
-    "            <option value=\"0\">No Rank</option>\n" +
-    "            <option value=\"Prof.\">Professor</option>\n" +
-    "            <option value=\"Asso. Prof.\">Associate Professor</option>\n" +
-    "            <option value=\"Asst. Prof.\">Assistant Professor</option>\n" +
-    "        </select>\n" +
-    "        <select class=\"form-control\" ng-model=\"formData.dept\" required>\n" +
-    "            <option value=\"Acquisitions\">Acquisitions</option>\n" +
-    "            <option value=\"Annex Services\">Annex Services</option>\n" +
-    "            <option value=\"Area Computing Services\">Area Computing Services</option>\n" +
-    "            <option value=\"Business Library\">Business Library</option>\n" +
-    "            <option value=\"Business Office\">Business Office</option>\n" +
-    "            <option value=\"Cataloging &amp; Metadata Services\">Cataloging &amp; Metadata Services</option>\n" +
-    "            <option value=\"Collection Management\">Collection Management</option>\n" +
-    "            <option value=\"Digital Humanities Center\">Digital Humanities Center</option>\n" +
-    "            <option value=\"Digital Services\">Digital Services</option>\n" +
-    "            <option value=\"Education Library\">Education Library</option>\n" +
-    "            <option value=\"Electronic Resources\">Electronic Resources</option>\n" +
-    "            <option value=\"Gorgas Information Services\">Gorgas Information Services</option>\n" +
-    "            <option value=\"Gorgas Library, Circulation Department\">Gorgas Library, Circulation Department</option>\n" +
-    "            <option value=\"Government Documents\">Government Documents</option>\n" +
-    "            <option value=\"Health Sciences Library\">Health Sciences Library</option>\n" +
-    "            <option value=\"ILS &amp; E-Resources Management\">ILS &amp; E-Resources Management</option>\n" +
-    "            <option value=\"Interlibrary Loan\">Interlibrary Loan</option>\n" +
-    "            <option value=\"Library Administration\">Library Administration</option>\n" +
-    "            <option value=\"Music Library\">Music Library</option>\n" +
-    "            <option value=\"Office of Library Technology\">Office of Library Technology</option>\n" +
-    "            <option value=\"Sanford Media Center\">Sanford Media Center</option>\n" +
-    "            <option value=\"School of Social Work\">School of Social Work</option>\n" +
-    "            <option value=\"Science and Engineering Library\">Science and Engineering Library</option>\n" +
-    "            <option value=\"Special Collections\">Special Collections</option>\n" +
-    "            <option value=\"Web Infrastructure &amp; Application Development\">Web Infrastructure &amp; Application Development</option>\n" +
-    "            <option value=\"Web Services\">Web Services</option>\n" +
-    "        </select>\n" +
-    "        <input type=\"text\" class=\"form-control\" placeholder=\"Phone\" size=\"8\" maxlength=\"8\" ng-model=\"formData.phone\" required>\n" +
-    "        <input type=\"text\" class=\"form-control\" placeholder=\"Fax\" size=\"8\" maxlength=\"8\" ng-model=\"formData.fax\" required><br>\n" +
+    "        <form class=\"form-inline\">\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"First Name\" size=\"25\" maxlength=\"25\" ng-model=\"formData.first\" required>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Last Name\" size=\"25\" maxlength=\"25\" ng-model=\"formData.last\" required>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Email\" size=\"40\" maxlength=\"255\" ng-model=\"formData.email\" required>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Title\" size=\"40\" maxlength=\"150\" ng-model=\"formData.title\" required>\n" +
+    "        </form>\n" +
+    "        <form class=\"form-inline\">\n" +
+    "            <select class=\"form-control\" ng-model=\"formData.rank\" required>\n" +
+    "                <option value=\"0\">No Rank</option>\n" +
+    "                <option value=\"Prof.\">Professor</option>\n" +
+    "                <option value=\"Asso. Prof.\">Associate Professor</option>\n" +
+    "                <option value=\"Asst. Prof.\">Assistant Professor</option>\n" +
+    "            </select>\n" +
+    "            <select class=\"form-control\" ng-model=\"formData.dept\" required>\n" +
+    "                <option value=\"Acquisitions\">Acquisitions</option>\n" +
+    "                <option value=\"Annex Services\">Annex Services</option>\n" +
+    "                <option value=\"Area Computing Services\">Area Computing Services</option>\n" +
+    "                <option value=\"Business Library\">Business Library</option>\n" +
+    "                <option value=\"Business Office\">Business Office</option>\n" +
+    "                <option value=\"Cataloging &amp; Metadata Services\">Cataloging &amp; Metadata Services</option>\n" +
+    "                <option value=\"Collection Management\">Collection Management</option>\n" +
+    "                <option value=\"Digital Humanities Center\">Digital Humanities Center</option>\n" +
+    "                <option value=\"Digital Services\">Digital Services</option>\n" +
+    "                <option value=\"Education Library\">Education Library</option>\n" +
+    "                <option value=\"Electronic Resources\">Electronic Resources</option>\n" +
+    "                <option value=\"Gorgas Information Services\">Gorgas Information Services</option>\n" +
+    "                <option value=\"Gorgas Library, Circulation Department\">Gorgas Library, Circulation Department</option>\n" +
+    "                <option value=\"Government Documents\">Government Documents</option>\n" +
+    "                <option value=\"Health Sciences Library\">Health Sciences Library</option>\n" +
+    "                <option value=\"ILS &amp; E-Resources Management\">ILS &amp; E-Resources Management</option>\n" +
+    "                <option value=\"Interlibrary Loan\">Interlibrary Loan</option>\n" +
+    "                <option value=\"Library Administration\">Library Administration</option>\n" +
+    "                <option value=\"Music Library\">Music Library</option>\n" +
+    "                <option value=\"Office of Library Technology\">Office of Library Technology</option>\n" +
+    "                <option value=\"Sanford Media Center\">Sanford Media Center</option>\n" +
+    "                <option value=\"School of Social Work\">School of Social Work</option>\n" +
+    "                <option value=\"Science and Engineering Library\">Science and Engineering Library</option>\n" +
+    "                <option value=\"Special Collections\">Special Collections</option>\n" +
+    "                <option value=\"Web Infrastructure &amp; Application Development\">Web Infrastructure &amp; Application Development</option>\n" +
+    "                <option value=\"Web Services\">Web Services</option>\n" +
+    "            </select>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Phone\" size=\"8\" maxlength=\"8\" ng-model=\"formData.phone\" required>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Fax\" size=\"8\" maxlength=\"8\" ng-model=\"formData.fax\" required>\n" +
+    "        </form>\n" +
     "        <button type=\"submit\" class=\"btn btn-primary\" ng-click=\"addPerson()\">Add New Person</button>\n" +
     "    </form>\n" +
     "    <span ng-model=\"formResponse\">{{formResponse}}</span>\n" +
@@ -39358,15 +39362,13 @@ angular.module('manage.staffDirectory', [])
                 }
             };
             $scope.addSubject = function(person){
-                if (person.newSubject > 0){
-                    sdFactory.postData({addSubject : 1}, person)
-                        .success(function(data, status, headers, config) {
-                            $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjects.push($scope.selSubj);
-                        })
-                        .error(function(data, status, headers, config) {
-                            $scope.subjResponse = "Error: Could not add subject! " + data;
-                        });
-                }
+                sdFactory.postData({addSubject : 1}, person)
+                    .success(function(data, status, headers, config) {
+                        $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjects.push($scope.selSubj);
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.subjResponse = "Error: Could not add subject! " + data;
+                    });
             };
 
             $scope.formData = {};
