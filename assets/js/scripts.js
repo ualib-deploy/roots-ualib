@@ -38140,7 +38140,7 @@ angular.module("manageHours/manageUsers.tpl.html", []).run(["$templateCache", fu
     "            <div ng-show=\"isExpUser(user.uid)\">\n" +
     "                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"updateUser(user)\" ng-disabled=\"isLoading\"\n" +
     "                        ng-hide=\"expUserIndex == 0\">Save</button>\n" +
-    "                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteUser(user)\" ng-disabled=\"isLoading\"\n" +
+    "                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteUser(user, $index)\" ng-disabled=\"isLoading\"\n" +
     "                        ng-hide=\"expUserIndex == 0\">Delete</button><br>\n" +
     "                {{result}}\n" +
     "            </div>\n" +
@@ -38193,7 +38193,7 @@ angular.module("manageOneSearch/manageOneSearch.tpl.html", []).run(["$templateCa
     "<h4>Full list</h4>\n" +
     "<div class=\"row\">\n" +
     "    <div class=\"col-md-6\" ng-repeat=\"rec in recList.RecList\">\n" +
-    "        <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteRec(rec)\">Delete</button>\n" +
+    "        <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteRec(rec, $index)\">Delete</button>\n" +
     "        <span>{{rec.keyword}} = <a href=\"{{rec.link}}\">{{rec.description}}</a></span>\n" +
     "    </div>\n" +
     "</div>");
@@ -38834,14 +38834,14 @@ angular.module('manage.manageHoursUsers', [])
                 });
         };
 
-        $scope.deleteUser = function(user){
+        $scope.deleteUser = function(user, index){
             if (confirm("Are you sure you want to remove access for " + user.name + "?")){
                 $scope.isLoading = true;
                 hmFactory.postData("manageHours.php", {action : 10}, user)
                     .success(function(data) {
                         if (data == 1){
                             $scope.result = "User access deleted!";
-                            $scope.dataUL.users.splice(user);
+                            $scope.dataUL.users.splice(index, 1);
                         } else
                             $scope.result = "Error! Could not delete user access!";
                         $scope.isLoading = false;
@@ -38965,12 +38965,12 @@ angular.module('manage.manageOneSearch', [])
                         });
                 }
             };
-            $scope.deleteRec = function(rec){
+            $scope.deleteRec = function(rec, index){
                 if (confirm("Are you sure you want to delete " + rec.description + " link?")){
                     osFactory.postData({delRec : 1}, rec)
                         .success(function(data, status, headers, config) {
                             $scope.response = data;
-                            $scope.recList.RecList.splice(rec);
+                            $scope.recList.RecList.splice(index, 1);
                         })
                         .error(function(data, status, headers, config) {
                             $scope.response = "Error: Could not delete recommendation! " + data;
