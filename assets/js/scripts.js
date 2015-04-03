@@ -37899,7 +37899,7 @@ angular.module('hours.list', [])
             controller: 'ListCtrl',
             templateUrl: 'list/list.tpl.html'
         }
-    }]);;angular.module('manage.templates', ['manageHours/manageEx.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'siteFeedback/siteFeedback.tpl.html']);
+    }]);;angular.module('manage.templates', ['manageHours/manageEx.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'siteFeedback/siteFeedback.tpl.html']);
 
 angular.module("manageHours/manageEx.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageHours/manageEx.tpl.html",
@@ -38175,6 +38175,30 @@ angular.module("manageHours/manageUsers.tpl.html", []).run(["$templateCache", fu
     "");
 }]);
 
+angular.module("manageOneSearch/manageOneSearch.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("manageOneSearch/manageOneSearch.tpl.html",
+    "<h3>OneSearch Recommended Links</h3>\n" +
+    "\n" +
+    "<form class=\"form-inline\" ng-submit=\"addRecommendation()\">\n" +
+    "    <div class=\"form-group\">\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Keyword\" size=\"30\" maxlength=\"200\" ng-model=\"addRec.keyword\" required>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"http://www.example.com/\" size=\"30\" maxlength=\"1024\" ng-model=\"addRec.link\" required>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Link Title\" size=\"30\" maxlength=\"100\" ng-model=\"addRec.title\" required>\n" +
+    "        <button type=\"submit\" class=\"btn btn-primary\">Add Recommended Link</button>\n" +
+    "    </div>\n" +
+    "</form>\n" +
+    "<div ng-show=\"response.length > 0\">\n" +
+    "    {{response}}\n" +
+    "</div>\n" +
+    "\n" +
+    "<div ng-repeat=\"rec in recList.RecList\">\n" +
+    "    <div>\n" +
+    "        <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteRec(rec)\">Delete</button>\n" +
+    "        <span>{{rec.keyword}} = <a href=\"{{rec.link}}\">{{rec.description}}</a></span>\n" +
+    "    </div>\n" +
+    "</div>");
+}]);
+
 angular.module("manageUserGroups/manageUG.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageUserGroups/manageUG.tpl.html",
     "<tabset justified=\"true\">\n" +
@@ -38277,7 +38301,7 @@ angular.module("siteFeedback/siteFeedback.tpl.html", []).run(["$templateCache", 
     "    <div class=\"col-xs-1\">\n" +
     "        <button type=\"button\" class=\"btn btn-primary\"\n" +
     "                ng-click=\"delete(record)\"\n" +
-    "                ng-show=\"<?php echo $isAdmin; ?>\">\n" +
+    "                ng-show=\"false\">\n" +
     "            Delete\n" +
     "        </button>\n" +
     "    </div>\n" +
@@ -38304,12 +38328,14 @@ angular.module("siteFeedback/siteFeedback.tpl.html", []).run(["$templateCache", 
     'manage.manageHours',
     'manage.manageHoursUsers',
     'manage.manageUserGroups',
-    'manage.siteFeedback'
+    'manage.siteFeedback',
+    'manage.manageOneSearch'
 ])
 
     .constant('HOURS_MANAGE_URL', '//wwwdev2.lib.ua.edu/libhours2/')
     .constant('USER_GROUPS_URL', '//wwwdev2.lib.ua.edu/userGroupsAdmin/')
     .constant('SITE_FEEDBACK_URL', '//wwwdev2.lib.ua.edu/siteSurvey/')
+    .constant('ONE_SEARCH_URL', '//wwwdev2.lib.ua.edu/oneSearch/')
 
 angular.module('manage.common', [
     'common.manage'
@@ -38341,6 +38367,18 @@ angular.module('common.manage', [])
             getData: function(params){
                 params = angular.isDefined(params) ? params : {};
                 return $http({method: 'GET', url: url, params: params})
+            }
+        }
+    }])
+    .factory('osFactory', ['$http', 'ONE_SEARCH_URL', function osFactory($http, url){
+        return {
+            getData: function(params){
+                params = angular.isDefined(params) ? params : {};
+                return $http({method: 'GET', url: url + "getJSON.php", params: params})
+            },
+            postData: function(params, data){
+                params = angular.isDefined(params) ? params : {};
+                return $http({method: 'POST', url: url + "processData.php", params: params, data: data})
             }
         }
     }]);
@@ -38870,6 +38908,84 @@ angular.module('manage.manageHoursUsers', [])
         };
     })
 
+angular.module('manage.manageOneSearch', [])
+    .controller('manageOneSearchCtrl', ['$scope', '$http', 'osFactory',
+        function manageOneSearchCtrl($scope, $http, osFactory){
+            $scope.recList = [];
+            $scope.addRec = {};
+            $scope.addRec.keyword = "";
+            $scope.addRec.link = "";
+            $scope.addRec.title = "";
+            $scope.response = "";
+
+            var cookies;
+            $scope.GetCookie = function (name,c,C,i){
+                if(cookies){ return cookies[name]; }
+
+                c = document.cookie.split('; ');
+                cookies = {};
+
+                for(i=c.length-1; i>=0; i--){
+                    C = c[i].split('=');
+                    cookies[C[0]] = C[1];
+                }
+                return cookies[name];
+            };
+            $http.defaults.headers.post = { 'X-CSRF-libOneSearch' : $scope.GetCookie("CSRF-libOneSearch") };
+
+            osFactory.getData({recList : 1})
+                .success(function(data) {
+                    console.dir(data);
+                    $scope.recList = data;
+                })
+                .error(function(data, status, headers, config) {
+                    console.log(data);
+                });
+
+            $scope.addRecommendation = function(){
+                if ( ($scope.addRec.keyword.length > 0) && ($scope.addRec.link.length > 0) && ($scope.addRec.title.length > 0) )
+                {
+                    osFactory.postData({addRec : 1}, $scope.addRec)
+                        .success(function(data, status, headers, config) {
+                            if ((typeof data === 'object') && (data !== null)){
+                                var newRec = {};
+                                newRec.id = data.rid;
+                                newRec.linkid = data.lid;
+                                newRec.keyword = $scope.addRec.keyword;
+                                newRec.link = $scope.addRec.link;
+                                newRec.description = $scope.addRec.title;
+                                $scope.recList.push(newRec);
+                                $scope.response = data.text;
+                            } else
+                                $scope.response = data;
+                            console.dir(data);
+                        })
+                        .error(function(data, status, headers, config) {
+                            $scope.response = "Error: Could not add recommendation link! " + data;
+                        });
+                }
+            };
+            $scope.deleteRec = function(rec){
+                if (confirm("Are you sure you want to delete " + rec.description + " link?")){
+                    osFactory.postData({delRec : 1}, rec)
+                        success(function(data, status, headers, config) {
+                            $scope.response = data;
+                            $scope.recList.splice(rec);
+                        }).
+                        error(function(data, status, headers, config) {
+                            $scope.response = "Error: Could not delete recommendation! " + data;
+                        });
+                }
+            };
+        }])
+    .directive('siteFeedbackList', function() {
+        return {
+            restrict: 'AC',
+            scope: {},
+            controller: 'manageOneSearchCtrl',
+            templateUrl: 'manageOneSearch/manageOneSearch.tpl.html'
+        };
+    })
 angular.module('manage.manageUserGroups', [])
     .controller('userGroupsCtrl', ['$scope', '$http', '$window', 'ugFactory',
         function userGroupsCtrl($scope, $http, $window, ugFactory){
