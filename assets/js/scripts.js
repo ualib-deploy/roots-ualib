@@ -38371,8 +38371,8 @@ angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCach
     "    </ul>\n" +
     "\n" +
     "    <dl ng-repeat=\"person in Directory.list | filter:{lastname:filterBy} | orderBy:sortMode\">\n" +
-    "        <h4 ng-click=\"togglePerson(person)\"><a>{{person.firstname}} {{person.lastname}}</a>,\n" +
-    "            <span style=\"font-size: 14px;\">{{person.title}} : {{person.department}}</span></h4>\n" +
+    "        <h4 ng-click=\"togglePerson(person)\">{{person.firstname}} {{person.lastname}} <small>{{person.title}}</small>\n" +
+    "            : {{person.department}}</h4>\n" +
     "        <div class=\"personExp\" ng-show=\"person.show && hasAccess == 1\">\n" +
     "            <dt>Title</dt>\n" +
     "            <dd><input type=\"text\" class=\"form-control\" placeholder=\"{{person.title}}\" maxlength=\"150\" ng-model=\"person.title\" required></dd>\n" +
@@ -38411,7 +38411,7 @@ angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCach
     "                    </li>\n" +
     "                </ul>\n" +
     "                <div>\n" +
-    "                    <select class=\"form-control\" ng-model=\"selSubj\" ng-options=\"sub.subject for sub in Directory.subjects\">\n" +
+    "                    <select class=\"form-control\" ng-model=\"person.selSubj\" ng-options=\"sub.subject for sub in Directory.subjects\">\n" +
     "                    </select>\n" +
     "                    <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addSubject(person)\">Add Subject</button>\n" +
     "                    <p>{{person.subjResponse}}</p>\n" +
@@ -39322,7 +39322,6 @@ angular.module('manage.staffDirectory', [])
             $scope.filterBy = '';
             $scope.sortButton = 'last';
             $scope.Directory = {};
-            $scope.selSubj = {};
             $scope.hasAccess = $window.isAdmin;
             $scope.ranks = ranks;
             $scope.departments = departments;
@@ -39346,7 +39345,8 @@ angular.module('manage.staffDirectory', [])
                 .success(function(data) {
                     console.dir(data);
                     $scope.Directory = data;
-                    $scope.selSubj = $scope.Directory.subjects[0];
+                    for (var i = 0; i < $scope.Directory.list.length; i++)
+                        $scope.Directory.list[i].selSubj = $scope.Directory.subjects[0];
                 })
                 .error(function(data, status, headers, config) {
                     console.log(data);
@@ -39402,13 +39402,12 @@ angular.module('manage.staffDirectory', [])
                 }
             };
             $scope.addSubject = function(person){
-                person.newSubjID = $scope.selSubj.id;
                 sdFactory.postData({addSubject : 1}, person)
                     .success(function(data, status, headers, config) {
                         var newSubj = {};
-                        newSubj.id = $scope.selSubj.id;
-                        newSubj.subject = $scope.selSubj.subject;
-                        newSubj.link = $scope.selSubj.link;
+                        newSubj.id = person.selSubj.id;
+                        newSubj.subject = person.selSubj.subject;
+                        newSubj.link = person.selSubj.link;
                         $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjects.push(newSubj);
                         $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjResponse = "Subject Added!";
                         console.log(data);
@@ -39465,6 +39464,7 @@ angular.module('manage.staffDirectory', [])
                                                     createdUser.fax = $scope.formData.fax;
                                                     createdUser.subjects = [];
                                                     createdUser.show = false;
+                                                    createdUser.selSubj = $scope.Directory.subjects[0];
                                                     $scope.Directory.list.push(createdUser);
                                                     $scope.resetNewPersonForm();
                                                     $scope.formResponse = "Person has been added!";
