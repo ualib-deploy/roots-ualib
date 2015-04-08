@@ -38414,6 +38414,7 @@ angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCach
     "                    <select class=\"form-control\" ng-model=\"selSubj\" ng-options=\"sub.subject for sub in Directory.subjects\">\n" +
     "                    </select>\n" +
     "                    <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addSubject(person)\">Add Subject</button>\n" +
+    "                    <p>{{person.subjResponse}}</p>\n" +
     "                </div>\n" +
     "            </dd>\n" +
     "        </div>\n" +
@@ -39391,9 +39392,12 @@ angular.module('manage.staffDirectory', [])
                     sdFactory.postData({deleteSubject : subjectID}, {})
                         .success(function(data, status, headers, config) {
                             $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjects.splice(index, 1);
+                            $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjResponse = "Subject Deleted!";
+                            console.log(data);
                         })
                         .error(function(data, status, headers, config) {
-                            $scope.subjResponse = "Error: Could not delete subject! " + data;
+                            $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjResponse =
+                                "Error: Could not delete subject! " + data;
                         });
                 }
             };
@@ -39405,10 +39409,12 @@ angular.module('manage.staffDirectory', [])
                         newSubj.subject = $scope.selSubj.subject;
                         newSubj.link = $scope.selSubj.link;
                         $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjects.push(newSubj);
+                        $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjResponse = "Subject Added!";
                         console.log(data);
                     })
                     .error(function(data, status, headers, config) {
-                        $scope.subjResponse = "Error: Could not add subject! " + data;
+                        $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjResponse =
+                            "Error: Could not add subject! " + data;
                     });
             };
 
