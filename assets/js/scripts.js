@@ -38325,49 +38325,49 @@ angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCach
   $templateCache.put("staffDirectory/staffDirectory.tpl.html",
     "<h2>Library Staff Directory</h2>\n" +
     "\n" +
-    "<div>\n" +
-    "        <div class=\"row\">\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"firstName\">Firts Name</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"First Name\" maxlength=\"25\"\n" +
-    "                       ng-model=\"formData.first\" id=\"firstName\" required>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"lastName\">Last Name</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Last Name\" maxlength=\"25\"\n" +
-    "                       ng-model=\"formData.last\" id=\"lastName\" required>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"email\">Email</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Email\" maxlength=\"255\"\n" +
-    "                       ng-model=\"formData.email\" id=\"email\" required>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"title\">Title</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Title\" maxlength=\"150\"\n" +
-    "                       ng-model=\"formData.title\" id=\"title\" required>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"rank\">Rank</label>\n" +
-    "                <select class=\"form-control\" ng-model=\"formData.rank\" ng-options=\"rank for rank in ranks\" id=\"rank\">\n" +
-    "                </select>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-5 form-group\">\n" +
-    "                <label for=\"dept\">Department</label>\n" +
-    "                <select class=\"form-control\" ng-model=\"formData.dept\" ng-options=\"dept for dept in departments\" id=\"dept\">\n" +
-    "                </select>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
-    "                <label for=\"phone\">Phone</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Phone\" maxlength=\"8\"\n" +
-    "                       ng-model=\"formData.phone\" id=\"phone\" required>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
-    "                <label for=\"fax\">Fax</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Fax\" maxlength=\"8\" ng-model=\"formData.fax\" id=\"fax\">\n" +
-    "            </div>\n" +
+    "<div ng-show=\"hasAccess\">\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-3 form-group\">\n" +
+    "            <label for=\"firstName\">Firts Name</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"First Name\" maxlength=\"25\"\n" +
+    "                   ng-model=\"formData.first\" id=\"firstName\" required>\n" +
     "        </div>\n" +
-    "        <button type=\"submit\" class=\"btn btn-primary\" ng-click=\"addPerson()\">Add New Person</button>\n" +
+    "        <div class=\"col-md-3 form-group\">\n" +
+    "            <label for=\"lastName\">Last Name</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Last Name\" maxlength=\"25\"\n" +
+    "                   ng-model=\"formData.last\" id=\"lastName\" required>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-3 form-group\">\n" +
+    "            <label for=\"email\">Email</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Email\" maxlength=\"255\"\n" +
+    "                   ng-model=\"formData.email\" id=\"email\" required>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-3 form-group\">\n" +
+    "            <label for=\"title\">Title</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Title\" maxlength=\"150\"\n" +
+    "                   ng-model=\"formData.title\" id=\"title\" required>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-3 form-group\">\n" +
+    "            <label for=\"rank\">Rank</label>\n" +
+    "            <select class=\"form-control\" ng-model=\"formData.rank\" ng-options=\"rank for rank in ranks\" id=\"rank\">\n" +
+    "            </select>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-5 form-group\">\n" +
+    "            <label for=\"dept\">Department</label>\n" +
+    "            <select class=\"form-control\" ng-model=\"formData.dept\" ng-options=\"dept for dept in departments\" id=\"dept\">\n" +
+    "            </select>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-2 form-group\">\n" +
+    "            <label for=\"phone\">Phone</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Phone\" maxlength=\"8\"\n" +
+    "                   ng-model=\"formData.phone\" id=\"phone\" required>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-2 form-group\">\n" +
+    "            <label for=\"fax\">Fax</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Fax\" maxlength=\"8\" ng-model=\"formData.fax\" id=\"fax\">\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "    <button type=\"submit\" class=\"btn btn-primary\" ng-click=\"addPerson()\">Add New Person</button>\n" +
     "\n" +
     "    <span ng-model=\"formResponse\">{{formResponse}}</span>\n" +
     "</div>\n" +
