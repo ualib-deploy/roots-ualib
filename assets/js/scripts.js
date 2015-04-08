@@ -38382,7 +38382,7 @@ angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCach
     "    </ul>\n" +
     "\n" +
     "    <div class=\"row\" ng-repeat=\"person in Directory.list | filter:{lastname:filterBy} | orderBy:sortMode\"\n" +
-    "         ng-class=\"{sdOpen: person.show, sdOver: person.id == mOver}\" ng-mouseenter=\"setOver(person)\">\n" +
+    "         ng-class=\"{sdOpen: person.show, sdOver: person.id == mOver}\" ng-mouseover=\"setOver(person)\">\n" +
     "        <div class=\"col-md-8\">\n" +
     "            <h4 ng-click=\"togglePerson(person)\">\n" +
     "                <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"person.show\"></span>\n" +
