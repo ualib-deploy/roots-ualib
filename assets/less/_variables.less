@@ -133,11 +133,22 @@
 
 @border-radius-large:            4px;
 
+//== Buttons
+//
+//## For each of Bootstrap's buttons, define text, background and border color.
+@btn-primary-color:              #fff;
+@btn-primary-bg:                 #428bca;
+@btn-primary-border:             darken(@btn-primary-bg, 5%);
+
 // Grid settings
 // -------------------------
 
 @main-sm-columns:       @grid-columns;
 @sidebar-sm-columns:    4;
+
+// Navbar collapse
+//** Point at which the navbar becomes uncollapsed.
+@grid-float-breakpoint:     @screen-sm-max;
 
 //== Navbar
 //

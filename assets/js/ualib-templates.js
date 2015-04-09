@@ -4,7 +4,10 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
   $templateCache.put("../assets/js/_ualib-home.tpl.html",
     "<div class=\"home-slice\">\n" +
     "    <div class=\"row\">\n" +
-    "        <div class=\"col-sm-6\" style=\"padding: 15px; background-color: rgba(255,255,255,.9); display: table;\">\n" +
+    "      <div class=\"col-md-6 col-md-push-6\" style=\"padding: 15px; background-color: rgba(255,255,255,.9);\">\n" +
+    "        <div class=\"hours-list\"></div>\n" +
+    "      </div>\n" +
+    "        <div class=\"col-md-6 col-md-pull-6\" style=\"padding: 15px; background-color: rgba(255,255,255,.9); display: table;\">\n" +
     "            <div class=\"event-card\" style=\"display: table-row\">\n" +
     "                <div style=\"text-align: right; font-size: 20px; color: #999; display: table-cell; vertical-align: top; padding-right: 15px;\">          News        </div>\n" +
     "                <div style=\"display: table-cell; vertical-align: top;\">\n" +
@@ -61,9 +64,6 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-sm-6\">\n" +
-    "            <div style=\"padding: 15px; background-color: rgba(255,255,255,.9);\" class=\"hours-list\"></div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>");

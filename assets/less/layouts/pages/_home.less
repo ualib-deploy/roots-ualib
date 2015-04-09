@@ -10,6 +10,10 @@ html, body {
   > .wrap {
     position:relative;
     margin-top: 111px;
+
+    @media (max-width: @grid-float-breakpoint) {
+      margin-top: 0px;
+    }
   }
 }
 
@@ -21,17 +25,9 @@ html, body {
   background-size: cover;
   background-color: transparent;
 
-  > .home-slice{
-
-    /*padding-top: @home-card-gutter;
-    padding-bottom: @home-card-gutter;
-
-    > .row {
-      > div {
-        padding: @home-card-gutter;
-        background-color: rgba(255,255,255,.5);
-      }
-    }*/
+  .home-slice{
+    padding-top: 15px;
+    padding-bottom: 15px;
   }
 }
 

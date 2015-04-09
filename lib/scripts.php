@@ -22,6 +22,7 @@ function roots_scripts() {
   if (WP_ENV === 'development') {
     $assets = array(
       'css'       => '/assets/css/main.css',
+      'CDN'       => 'http://fonts.googleapis.com/css?family=Ubuntu:300,400,500|Oxygen:300,400,700|Open+Sans:300,400,500|EB+Garamond|Lato:300,400',
       'js'        => '/assets/js/scripts.js',
       'modernizr' => '/assets/vendor/modernizr/modernizr.js',
       'jquery'    => '//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.js'
@@ -38,6 +39,7 @@ function roots_scripts() {
   }
 
   wp_enqueue_style('roots_css', get_template_directory_uri() . $assets['css'], false, null);
+  wp_enqueue_style('roots_cdn', $assets['CDN'], false, null);
 
   /**
    * jQuery is loaded using the same method from HTML5 Boilerplate:
