@@ -375,15 +375,15 @@
                                 <p>Supplemental library collections located off campus</p>
                               </a>
                             </div>
-                            <div class="col-xs-12 col-sm-6 col-md-3">
-                              <a class="service-card" href="<?php echo site_url(); ?>/about-ua-libraries/libraries-policies/">
-                                <span class="fa fa-sitemap"></span>
-                                <h4>Policies</h4>
-                                <p>Learn about libraries' policies and procedures</p>
-                              </a>
-                            </div>
                           </div>
                           <div class="row">
+                              <div class="col-xs-12 col-sm-6 col-md-3">
+                                  <a class="service-card" href="<?php echo site_url(); ?>/about-ua-libraries/libraries-policies/">
+                                      <span class="fa fa-sitemap"></span>
+                                      <h4>Policies</h4>
+                                      <p>Learn about libraries' policies and procedures</p>
+                                  </a>
+                              </div>
                             <div class="col-xs-12 col-sm-6 col-md-3">
                               <a class="service-card" href="<?php echo site_url(); ?>/about-ua-libraries/social-media/">
                                 <span class="fa fa-users"></span>
