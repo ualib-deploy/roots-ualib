@@ -39635,7 +39635,7 @@ angular.module('manage.staffDirectory', [])
                 $animate.enter(spinner, titleElm[0]);
 
                 var loadingWatcher = scope.$watch(
-                    'allowedLibraries',
+                    'Directory',
                     function(newVal, oldVal){
                         if (scope.Directory.totalTime > 0){
                             $animate.leave(spinner);
