@@ -38362,7 +38362,7 @@ angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCach
   $templateCache.put("staffDirectory/staffDirectory.tpl.html",
     "<h2>Library Staff Directory</h2>\n" +
     "\n" +
-    "<div ng-show=\"hasAccess\">\n" +
+    "<div ng-show=\"hasAccess\" style=\"background-color:#f9f9f9;\">\n" +
     "    <div class=\"row\">\n" +
     "        <div class=\"col-md-3 form-group\">\n" +
     "            <label for=\"firstName\">Firts Name</label>\n" +
@@ -38384,12 +38384,12 @@ angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCach
     "            <input type=\"text\" class=\"form-control\" placeholder=\"Title\" maxlength=\"150\"\n" +
     "                   ng-model=\"formData.title\" id=\"title\" required>\n" +
     "        </div>\n" +
-    "        <div class=\"col-md-3 form-group\">\n" +
+    "        <div class=\"col-md-2 form-group\">\n" +
     "            <label for=\"rank\">Rank</label>\n" +
     "            <select class=\"form-control\" ng-model=\"formData.rank\" ng-options=\"rank for rank in ranks\" id=\"rank\">\n" +
     "            </select>\n" +
     "        </div>\n" +
-    "        <div class=\"col-md-5 form-group\">\n" +
+    "        <div class=\"col-md-4 form-group\">\n" +
     "            <label for=\"dept\">Department</label>\n" +
     "            <select class=\"form-control\" ng-model=\"formData.dept\" ng-options=\"dept for dept in departments\" id=\"dept\">\n" +
     "            </select>\n" +
@@ -38403,9 +38403,12 @@ angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCach
     "            <label for=\"fax\">Fax</label>\n" +
     "            <input type=\"text\" class=\"form-control\" placeholder=\"Fax\" maxlength=\"8\" ng-model=\"formData.fax\" id=\"fax\">\n" +
     "        </div>\n" +
+    "        <div class=\"col-md-2 form-group text-right\">\n" +
+    "            <label for=\"addButton\">&nbsp</label><br>\n" +
+    "            <button type=\"submit\" class=\"btn btn-primary\" ng-click=\"addPerson()\" id=\"addButton\">Add New Person</button>\n" +
+    "        </div>\n" +
     "    </div>\n" +
-    "    <button type=\"submit\" class=\"btn btn-primary\" ng-click=\"addPerson()\">Add New Person</button>\n" +
-    "    <span ng-model=\"formResponse\">{{formResponse}}</span>\n" +
+    "    <p ng-model=\"formResponse\">{{formResponse}}</p>\n" +
     "</div>\n" +
     "\n" +
     "<div>\n" +
