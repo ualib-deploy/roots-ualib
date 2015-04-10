@@ -1,147 +1,163 @@
+<?php
+include_once WEBAPPS_PATH . "userGroupsAdmin/constants.php";
+include_once WEBAPPS_PATH . "userGroupsAdmin/functions.php";
+
+$showAdminLink = false;
+if (($wpUser = gDoesUserHaveAccessWP( GROUP_ADMIN )) !== false){
+    $showAdminLink = true;
+}
+?>
 <header role="banner">
     <nav class="navbar navbar-static-top navbar-mega-inverse" role="navigation">
         <div class="container-fluid">
-          <div class="navbar-header">
-            <a class="navbar-brand" href="<?php echo get_settings('home'); ?>">
-              <img src="<?php print get_template_directory_uri(); ?>/assets/img/ualib-logo-textonly-inverse.png" class="hidden-xs" rel="home" alt="University of Alabama Libraries"/>
-              <span class="visible-xs">UA Libraries</span>
-            </a>
-          </div>
-          <div>
-            <ul class="nav navbar-nav navbar-right">
-              <li class="dropdown yamm-fw">
-                <a href="#" class="dropdown-toggle icon-only" title="My Accounts" ng-click="mainNavbarCollapsed = false;">
-                  <span class="fa fa-user"></span>
+            <div class="navbar-header">
+                <a class="navbar-brand" href="<?php echo get_settings('home'); ?>">
+                    <img src="<?php print get_template_directory_uri(); ?>/assets/img/ualib-logo-textonly-inverse.png" class="hidden-xs" rel="home" alt="University of Alabama Libraries"/>
+                    <span class="visible-xs">UA Libraries</span>
                 </a>
-                <ul class="dropdown-menu">
-                  <li>
-                    <div class="yamm-content">
-                      <h2>My Accounts</h2>
-                      <tabset  vertical="true" tab-class="col-sm-3" content-class="col-sm-9">
-                        <tab heading="My Library (Catalog)">
-                          <form>
-                            <div class="form-group">
-                              <label for="exampleInputEmail1">CWID</label>
-                              <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
-                            </div>
-                            <div class="form-group">
-                              <label for="exampleInputPassword1">Last Name</label>
-                              <input type="text" class="form-control" id="exampleInputPassword1" placeholder="Password">
-                            </div>
-                            <select class="form-control">
-                              <option selected="" value="1@UADB20021202141309">University of Alabama Libraries</option>
-                              <option value="1@AUBDB20011120113530">Auburn University Libraries</option>
-                              <option value="1@AUMDB20011120113546">Auburn University Montgomery</option>
-                              <option value="1@JACKDB20020808100014">Houston Cole Library</option>
-                              <option value="1@UABDB20020817181349">Mervyn H. Sterne Library</option>
-                            </select>
-                            <button type="submit" class="btn btn-default">Login to Library Catalog</button>
-                          </form>
-                        </tab>
-                        <tab heading="Interlibrary Loan (ILLiad)">
-                          <form>
-                            <div class="form-group">
-                              <label for="exampleInputEmail1">User</label>
-                              <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
-                            </div>
-                            <div class="form-group">
-                              <label for="exampleInputPassword1">Password</label>
-                              <input type="text" class="form-control" id="exampleInputPassword1" placeholder="Password">
-                            </div>
-                            <button type="submit" class="btn btn-default">Login to ILLiad</button>
-                          </form>
-                        </tab>
-                        <tab heading="Refworks">
-                          <form>
-                            <div class="form-group">
-                              <label for="exampleInputEmail1">User</label>
-                              <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
-                            </div>
-                            <div class="form-group">
-                              <label for="exampleInputPassword1">Password</label>
-                              <input type="text" class="form-control" id="exampleInputPassword1" placeholder="Password">
-                            </div>
-                            <button type="submit" class="btn btn-default">Login to Refworks</button>
-                          </form>
-                        </tab>
-                        <tab heading="Endnote">
-                          <form>
-                            <div class="form-group">
-                              <label for="exampleInputEmail1">Email</label>
-                              <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
-                            </div>
-                            <div class="form-group">
-                              <label for="exampleInputPassword1">Password</label>
-                              <input type="text" class="form-control" id="exampleInputPassword1" placeholder="Password">
-                            </div>
-                            <button type="submit" class="btn btn-default">Login to Endnote</button>
-                          </form>
-                        </tab>
-                        <tab heading="myBama">
-                          <form>
-                            <div class="form-group">
-                              <label for="exampleInputEmail1">myBama User</label>
-                              <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
-                            </div>
-                            <div class="form-group">
-                              <label for="exampleInputPassword1">Password</label>
-                              <input type="text" class="form-control" id="exampleInputPassword1" placeholder="Password">
-                            </div>
-                            <button type="submit" class="btn btn-default">Login to myBama</button>
-                          </form>
-                        </tab>
-                        <tab heading="Blackboard Learn">
-                          <form>
-                            <div class="form-group">
-                              <label for="exampleInputEmail1">myBama Id</label>
-                              <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
-                            </div>
-                            <div class="form-group">
-                              <label for="exampleInputPassword1">Password</label>
-                              <input type="text" class="form-control" id="exampleInputPassword1" placeholder="Password">
-                            </div>
-                            <button type="submit" class="btn btn-default">Login to Blackboard Learn</button>
-                          </form>
-                        </tab>
-                      </tabset>
-                    </div>
-                  </li>
-                </ul>
-              </li>
-              <li class="<?php if (is_front_page()) print 'dropdown-static ';?>dropdown yamm-fw">
-                  <a href="#" class="dropdown-toggle icon-only" ng-click="mainNavbarCollapsed = false;">
-                    <span class="fa fa-search"></span>
-                  </a>
-                <ul class="dropdown-menu">
-                  <li>
-                    <div class="yamm-content" ng-controller="OneSearchCtrl">
-                      <!--<form action="/sample-page/onesearch/">
-                          <div class="input-group input-group-lg">
-                              <input type="text" name="search" class="form-control onesearch-text" placeholder="Search all library resources">
-                              <div class="input-group-btn">
-                                  <button type="submit" class="btn btn-onesearch btn-primary"><span class="fa fa-search"></span></button>
-                              </div>
-                          </div>
-                      </form>-->
-                      <form ng-submit="search()">
-
-                        <suggest-one-search prompt="Search all library resources" model="searchText" search="search">
-
-                      </form>
-                    </div>
-                  </li>
-                </ul>
-              </li>
-              <li class="dropdown">
-                <button type="button" class="dropdown-toggle navbar-toggle collapsed icon-only"ng-click="mainNavbarCollapsed = !mainNavbarCollapsed">
-                  <span class="sr-only">Toggle navigation</span>
-                  <span class="fa fa-bars"></span>
-                </button>
-              </li>
-            </ul>
             </div>
-          <div class="collapse navbar-collapse" collapse="!mainNavbarCollapsed">
-              <ul class="nav navbar-nav navbar-right navbar-main">
+            <div>
+                <ul class="nav navbar-nav navbar-right">
+                    <?php if ($showAdminLink): ?>
+                        <li class="dropdown yamm-fw">
+                            <a href="<?php echo DOMAIN; ?>sample-page/user-groups-admin/" class="icon-only" title="WebApps Admin">
+                                <span class="fa fa-spin fa-cog"></span>
+                            </a>
+                        </li>
+                    <?php endif; ?>
+                    <li class="dropdown yamm-fw">
+                        <a href="#" class="dropdown-toggle icon-only" title="My Accounts" ng-click="mainNavbarCollapsed = false;">
+                            <span class="fa fa-user"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <div class="yamm-content">
+                                    <h2>My Accounts</h2>
+                                    <tabset  vertical="true" tab-class="col-sm-3" content-class="col-sm-9">
+                                        <tab heading="My Library (Catalog)">
+                                            <form>
+                                                <div class="form-group">
+                                                    <label for="exampleInputEmail1">CWID</label>
+                                                    <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="exampleInputPassword1">Last Name</label>
+                                                    <input type="text" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                                                </div>
+                                                <select class="form-control">
+                                                    <option selected="" value="1@UADB20021202141309">University of Alabama Libraries</option>
+                                                    <option value="1@AUBDB20011120113530">Auburn University Libraries</option>
+                                                    <option value="1@AUMDB20011120113546">Auburn University Montgomery</option>
+                                                    <option value="1@JACKDB20020808100014">Houston Cole Library</option>
+                                                    <option value="1@UABDB20020817181349">Mervyn H. Sterne Library</option>
+                                                </select>
+                                                <button type="submit" class="btn btn-default">Login to Library Catalog</button>
+                                            </form>
+                                        </tab>
+                                        <tab heading="Interlibrary Loan (ILLiad)">
+                                            <form>
+                                                <div class="form-group">
+                                                    <label for="exampleInputEmail1">User</label>
+                                                    <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="exampleInputPassword1">Password</label>
+                                                    <input type="text" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                                                </div>
+                                                <button type="submit" class="btn btn-default">Login to ILLiad</button>
+                                            </form>
+                                        </tab>
+                                        <tab heading="Refworks">
+                                            <form>
+                                                <div class="form-group">
+                                                    <label for="exampleInputEmail1">User</label>
+                                                    <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="exampleInputPassword1">Password</label>
+                                                    <input type="text" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                                                </div>
+                                                <button type="submit" class="btn btn-default">Login to Refworks</button>
+                                            </form>
+                                        </tab>
+                                        <tab heading="Endnote">
+                                            <form>
+                                                <div class="form-group">
+                                                    <label for="exampleInputEmail1">Email</label>
+                                                    <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="exampleInputPassword1">Password</label>
+                                                    <input type="text" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                                                </div>
+                                                <button type="submit" class="btn btn-default">Login to Endnote</button>
+                                            </form>
+                                        </tab>
+                                        <tab heading="myBama">
+                                            <form>
+                                                <div class="form-group">
+                                                    <label for="exampleInputEmail1">myBama User</label>
+                                                    <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="exampleInputPassword1">Password</label>
+                                                    <input type="text" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                                                </div>
+                                                <button type="submit" class="btn btn-default">Login to myBama</button>
+                                            </form>
+                                        </tab>
+                                        <tab heading="Blackboard Learn">
+                                            <form>
+                                                <div class="form-group">
+                                                    <label for="exampleInputEmail1">myBama Id</label>
+                                                    <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="exampleInputPassword1">Password</label>
+                                                    <input type="text" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                                                </div>
+                                                <button type="submit" class="btn btn-default">Login to Blackboard Learn</button>
+                                            </form>
+                                        </tab>
+                                    </tabset>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="<?php if (is_front_page()) print 'dropdown-static ';?>dropdown yamm-fw">
+                        <a href="#" class="dropdown-toggle icon-only" ng-click="mainNavbarCollapsed = false;">
+                            <span class="fa fa-search"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <div class="yamm-content" ng-controller="OneSearchCtrl">
+                                    <!--<form action="/sample-page/onesearch/">
+                                        <div class="input-group input-group-lg">
+                                            <input type="text" name="search" class="form-control onesearch-text" placeholder="Search all library resources">
+                                            <div class="input-group-btn">
+                                                <button type="submit" class="btn btn-onesearch btn-primary"><span class="fa fa-search"></span></button>
+                                            </div>
+                                        </div>
+                                    </form>-->
+                                    <form ng-submit="search()">
+
+                                        <suggest-one-search prompt="Search all library resources" model="searchText" search="search">
+
+                                    </form>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <button type="button" class="dropdown-toggle navbar-toggle collapsed icon-only"ng-click="mainNavbarCollapsed = !mainNavbarCollapsed">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="fa fa-bars"></span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="collapse navbar-collapse" collapse="!mainNavbarCollapsed">
+                <ul class="nav navbar-nav navbar-right navbar-main">
                     <li class="dropdown yamm-fw">
                         <a href="#" class="dropdown-toggle">Research Tools</a>
                         <ul class="dropdown-menu">
@@ -195,9 +211,9 @@
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="http://guides.lib.ua.edu/distance_learning">
                                                 <span class="fa fa-globe"></span>
-                                                    <h4>Distance Education</h4>
-                                                    <p>Information on research, writing, and key resources for distant learners</p>
-                                                </a>
+                                                <h4>Distance Education</h4>
+                                                <p>Information on research, writing, and key resources for distant learners</p>
+                                            </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="<?php echo site_url(); ?>/research-help/government-information/">
@@ -206,7 +222,7 @@
                                                 <p>Explore our large collection of U.S. Federal documents</p>
                                             </a>
                                         </div>
-                                        </div>
+                                    </div>
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="<?php echo site_url(); ?>/research-help/citation-finder/">
@@ -341,125 +357,125 @@
                             </li>
                         </ul>
                     </li>
-                  <li class="dropdown yamm-fw">
-                    <a href="#" class="dropdown-toggle">About</a>
-                    <ul class="dropdown-menu">
-                      <li>
-                        <div class="yamm-content">
-                          <div class="row">
-                              <div class="col-xs-12 col-sm-6 col-md-3">
-                                  <a class="service-card" href="<?php echo site_url(); ?>/sample-page/hours/">
-                                      <span class="fa fa-clock-o"></span>
-                                      <h4>Hours</h4>
-                                      <p>Library hours and locations</p>
-                                  </a>
-                              </div>
-                              <div class="col-xs-12 col-sm-6 col-md-3">
-                                  <a class="service-card" href="<?php echo site_url(); ?>/sample-page/staff-directory/">
-                                      <span class="fa fa-users"></span>
-                                      <h4>Directory</h4>
-                                      <p>UA Library Faculty and Staff</p>
-                                  </a>
-                              </div>
-                            <div class="col-xs-12 col-sm-6 col-md-3">
-                              <a class="service-card" href="<?php echo site_url(); ?>/services/library-information-for-current-students/about-the-libraries/">
-                                <span class="fa fa-university"></span>
-                                <h4>About the Libraries</h4>
-                                <p>Information about each of our branch libraries</p>
-                              </a>
-                            </div>
-                            <div class="col-xs-12 col-sm-6 col-md-3">
-                              <a class="service-card" href="<?php echo site_url(); ?>/about-ua-libraries/library-annex/">
-                                <span class="fa fa-building"></span>
-                                <h4>Library Annex</h4>
-                                <p>Supplemental library collections located off campus</p>
-                              </a>
-                            </div>
-                          </div>
-                          <div class="row">
-                              <div class="col-xs-12 col-sm-6 col-md-3">
-                                  <a class="service-card" href="<?php echo site_url(); ?>/about-ua-libraries/libraries-policies/">
-                                      <span class="fa fa-sitemap"></span>
-                                      <h4>Policies</h4>
-                                      <p>Learn about libraries' policies and procedures</p>
-                                  </a>
-                              </div>
-                            <div class="col-xs-12 col-sm-6 col-md-3">
-                              <a class="service-card" href="<?php echo site_url(); ?>/about-ua-libraries/social-media/">
-                                <span class="fa fa-users"></span>
-                                <h4>Social Media</h4>
-                                <p>Explore the libraries' multiple social media outlets </p>
-                              </a>
-                            </div>
-                            <div class="col-xs-12 col-sm-6 col-md-3">
-                              <a class="service-card" href="<?php echo site_url(); ?>/about-ua-libraries/support-ua-libraries/">
-                                <span class="fa fa-gift"></span>
-                                <h4>Support UA Libraries</h4>
-                                <p>Help strengthen the libraries' collections, services, and resources </p>
-                              </a>
-                            </div>
-                          </div>
-                        </div>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="dropdown yamm-fw">
-                    <a href="#" class="dropdown-toggle">Library Help</a>
-                    <ul class="dropdown-menu">
-                      <li>
-                        <div class="yamm-content">
-                          <div class="row">
-                            <div class="col-xs-12 col-sm-6 col-md-3">
-                              <a class="service-card" href="<?php echo site_url(); ?>/library-help/how-do-i/">
-                                <span class="fa fa-question-circle"></span>
-                                <h4>How Do I...</h4>
-                                <p>Frequently asked questions at the libraries</p>
-                              </a>
-                            </div>
-                            <div class="col-xs-12 col-sm-6 col-md-3">
-                              <a class="service-card" href="<?php echo site_url(); ?>/research-help/subject-specialists/">
-                                <span class="fa fa-comments"></span>
-                                <h4>Subject Specialists</h4>
-                                <p>Need research help? Reach out to your subject specialist</p>
-                              </a>
-                            </div>
-                            <div class="col-xs-12 col-sm-6 col-md-3">
-                              <a class="service-card" href="<?php echo site_url(); ?>/research-help/tutorials/">
-                                <span class="fa fa-magic"></span>
-                                <h4>Tutorials and Instructional Videos</h4>
-                                <p>Brief tutorials designed to help you use library services and resources</p>
-                              </a>
-                            </div>
-                            <div class="col-xs-12 col-sm-6 col-md-3">
-                              <a class="service-card" href="<?php echo site_url(); ?>/library-help/connect-to-a-wireless-network/">
-                                <span class="fa fa-wifi"></span>
-                                <h4>Connect to a Wireless Network</h4>
-                                <p>Access the Libraries' internet using a wireless connection</p>
-                              </a>
-                            </div>
-                          </div>
-                          <div class="row">
-                            <div class="col-xs-12 col-sm-6 col-md-3">
-                              <a class="service-card" href="<?php echo site_url(); ?>/library-help/report-a-login-problem/">
-                                <span class="fa fa-sign-in"></span>
-                                <h4>Report a Login Problem</h4>
-                                <p>Contact the libraries with problems accessing our online resources </p>
-                              </a>
-                            </div>
-                            <div class="col-xs-12 col-sm-6 col-md-3">
-                              <a class="service-card" href="<?php echo site_url(); ?>/library-help/kacecontact-form/">
-                                <span class="fa fa-envelope"></span>
-                                <h4>Run into Issues?</h4>
-                                <p>Please contact Web Services for assistance </p>
-                              </a>
-                            </div>
-                          </div>
-                        </div>
-                      </li>
-                    </ul>
-                  </li>
-            </ul>
-              </div>
+                    <li class="dropdown yamm-fw">
+                        <a href="#" class="dropdown-toggle">About</a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <div class="yamm-content">
+                                    <div class="row">
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="<?php echo site_url(); ?>/sample-page/hours/">
+                                                <span class="fa fa-clock-o"></span>
+                                                <h4>Hours</h4>
+                                                <p>Library hours and locations</p>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="<?php echo site_url(); ?>/sample-page/staff-directory/">
+                                                <span class="fa fa-users"></span>
+                                                <h4>Directory</h4>
+                                                <p>UA Library Faculty and Staff</p>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="<?php echo site_url(); ?>/services/library-information-for-current-students/about-the-libraries/">
+                                                <span class="fa fa-university"></span>
+                                                <h4>About the Libraries</h4>
+                                                <p>Information about each of our branch libraries</p>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="<?php echo site_url(); ?>/about-ua-libraries/library-annex/">
+                                                <span class="fa fa-building"></span>
+                                                <h4>Library Annex</h4>
+                                                <p>Supplemental library collections located off campus</p>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="<?php echo site_url(); ?>/about-ua-libraries/libraries-policies/">
+                                                <span class="fa fa-sitemap"></span>
+                                                <h4>Policies</h4>
+                                                <p>Learn about libraries' policies and procedures</p>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="<?php echo site_url(); ?>/about-ua-libraries/social-media/">
+                                                <span class="fa fa-users"></span>
+                                                <h4>Social Media</h4>
+                                                <p>Explore the libraries' multiple social media outlets </p>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="<?php echo site_url(); ?>/about-ua-libraries/support-ua-libraries/">
+                                                <span class="fa fa-gift"></span>
+                                                <h4>Support UA Libraries</h4>
+                                                <p>Help strengthen the libraries' collections, services, and resources </p>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="dropdown yamm-fw">
+                        <a href="#" class="dropdown-toggle">Library Help</a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <div class="yamm-content">
+                                    <div class="row">
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="<?php echo site_url(); ?>/library-help/how-do-i/">
+                                                <span class="fa fa-question-circle"></span>
+                                                <h4>How Do I...</h4>
+                                                <p>Frequently asked questions at the libraries</p>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="<?php echo site_url(); ?>/research-help/subject-specialists/">
+                                                <span class="fa fa-comments"></span>
+                                                <h4>Subject Specialists</h4>
+                                                <p>Need research help? Reach out to your subject specialist</p>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="<?php echo site_url(); ?>/research-help/tutorials/">
+                                                <span class="fa fa-magic"></span>
+                                                <h4>Tutorials and Instructional Videos</h4>
+                                                <p>Brief tutorials designed to help you use library services and resources</p>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="<?php echo site_url(); ?>/library-help/connect-to-a-wireless-network/">
+                                                <span class="fa fa-wifi"></span>
+                                                <h4>Connect to a Wireless Network</h4>
+                                                <p>Access the Libraries' internet using a wireless connection</p>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="<?php echo site_url(); ?>/library-help/report-a-login-problem/">
+                                                <span class="fa fa-sign-in"></span>
+                                                <h4>Report a Login Problem</h4>
+                                                <p>Contact the libraries with problems accessing our online resources </p>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="<?php echo site_url(); ?>/library-help/kacecontact-form/">
+                                                <span class="fa fa-envelope"></span>
+                                                <h4>Run into Issues?</h4>
+                                                <p>Please contact Web Services for assistance </p>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
 </header>
