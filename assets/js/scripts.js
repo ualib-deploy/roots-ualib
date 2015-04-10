@@ -37917,7 +37917,7 @@ angular.module("manageHours/manageEx.tpl.html", []).run(["$templateCache", funct
     "        <th class=\"text-center\">Action</th>\n" +
     "    </tr>\n" +
     "    </thead>\n" +
-    "    <tr ng-repeat=\"exception in allowedLibraries.exc[selLib].ex track by exception.id\" ng-click=\"expandExc(exception)\">\n" +
+    "    <tr ng-repeat=\"exception in allowedLibraries.exc[selLib].ex track by exception.id\" ng-click=\"expandExc($event, exception)\">\n" +
     "        <td style=\"width:30%\">\n" +
     "            <div ng-hide=\"isExpExc(exception.id)\">{{exception.desc}}</div>\n" +
     "            <div ng-show=\"isExpExc(exception.id)\"><input type=\"text\" class=\"form-control\" ng-model=\"exception.desc\" ng-required /></div>\n" +
@@ -37926,10 +37926,10 @@ angular.module("manageHours/manageEx.tpl.html", []).run(["$templateCache", funct
     "            <div ng-hide=\"isExpExc(exception.id)\">{{exception.datems | date : 'MMM d, y'}}</div>\n" +
     "            <div ng-show=\"isExpExc(exception.id)\">\n" +
     "\n" +
-    "                <input type=\"text\" class=\"form-control\" datepicker-popup=\"{{format}}\" show-button-bar=\"false\"\n" +
-    "                       ng-model=\"exception.datems\" is-open=\"dpOpen\" datepicker-options=\"dateOptions\"\n" +
-    "                       close-on-date-selection=\"false\" ng-required=\"true\"\n" +
-    "                       ng-focus=\"onExcFocus($event)\" ng-blur=\"onExcBlur($event)\" />\n" +
+    "                <input type=\"text\" class=\"form-control\" datepicker-popup=\"{{format}}\"\n" +
+    "                       ng-model=\"exception.datems\" is-open=\"exception.dp\"\n" +
+    "                       ng-required=\"true\" close-text=\"Close\"\n" +
+    "                       ng-focus=\"onExcFocus($event, $index)\" />\n" +
     "            </div>\n" +
     "        </td>\n" +
     "        <td class=\"text-center\">\n" +
@@ -37963,8 +37963,8 @@ angular.module("manageHours/manageEx.tpl.html", []).run(["$templateCache", funct
     "        <td class=\"text-center\">\n" +
     "\n" +
     "            <input type=\"text\" class=\"form-control\" datepicker-popup=\"{{format}}\" show-button-bar=\"false\"\n" +
-    "                   ng-model=\"newException.datems\" is-open=\"newException.datepicker\" datepicker-options=\"dateOptions\"\n" +
-    "                   close-on-date-selection=\"false\" ng-required=\"true\" placeholder=\"MM/DD/YYYY\" />\n" +
+    "                   ng-model=\"newException.datems\" is-open=\"newException.dp\" close-text=\"Close\"\n" +
+    "                   ng-required=\"true\" placeholder=\"MM/DD/YYYY\" ng-focus=\"onExcFocus($event)\" />\n" +
     "        </td>\n" +
     "        <td class=\"text-center\">\n" +
     "            <input type=\"text\" class=\"form-control\" ng-model=\"newException.days\" placeholder=\"Days\" ng-required />\n" +
@@ -38080,13 +38080,15 @@ angular.module("manageHours/manageSem.tpl.html", []).run(["$templateCache", func
     "        <th class=\"text-center\">Sat</th>\n" +
     "    </tr>\n" +
     "    </thead>\n" +
-    "    <tr ng-repeat=\"sem in allowedLibraries.sem[selLib].sem\" ng-click=\"expandSem(sem)\">\n" +
+    "    <tr ng-repeat=\"sem in allowedLibraries.sem[selLib].sem\" ng-click=\"expandSem($event, sem)\">\n" +
     "        <th scope=\"row\" ng-hide=\"isExpSem(sem.dsid)\">{{sem.name}}<br>\n" +
-    "            {{sem.startdate}}<br>{{sem.enddate}}\n" +
+    "            {{sem.startdate | date : 'MMM d, y'}}<br>{{sem.enddate}}\n" +
     "        </th>\n" +
     "        <th scope=\"row\" ng-show=\"isExpSem(sem.dsid)\">{{sem.name}}<br>\n" +
     "            <div class=\"input-group\">\n" +
-    "                <input type=\"text\" class=\"form-control dp\" size=\"8\" ng-minlength=\"8\" ng-maxlength=\"10\" ng-model=\"sem.startdate\" ng-required />\n" +
+    "                <input type=\"text\" class=\"form-control\" datepicker-popup=\"{{format}}\" size=\"3\"\n" +
+    "                       ng-model=\"sem.startdate\" is-open=\"sem.dp\" ng-required=\"true\" close-text=\"Close\"\n" +
+    "                       ng-focus=\"onSemFocus($event, $index)\" />\n" +
     "                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"saveChanges(sem)\" ng-disabled=\"loading\">Save</button>\n" +
     "                {{result}}\n" +
     "                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteSem(sem)\" ng-disabled=\"loading\">Delete {{sem.name}}</button>\n" +
@@ -38123,8 +38125,10 @@ angular.module("manageHours/manageSem.tpl.html", []).run(["$templateCache", func
     "    <tr>\n" +
     "        <th scope=\"row\">\n" +
     "            <div class=\"input-group\">\n" +
-    "                <input type=\"text\" class=\"form-control\" size=\"12\" ng-minlength=\"4\" ng-maxlength=\"32\" ng-model=\"newSemester.name\" placeholder=\"Semester Name\" ng-required /><br>\n" +
-    "                <input type=\"text\" class=\"form-control dp\" size=\"8\" ng-minlength=\"8\" ng-maxlength=\"10\" ng-model=\"newSemester.startdate\" placeholder=\"mm/dd/yyyy\" ng-required />\n" +
+    "                <input type=\"text\" class=\"form-control\" ng-minlength=\"4\" ng-maxlength=\"32\" ng-model=\"newSemester.name\" placeholder=\"Semester Name\" ng-required /><br>\n" +
+    "                <input type=\"text\" class=\"form-control\" datepicker-popup=\"{{format}}\"\n" +
+    "                       ng-model=\"newSemester.startdate\" is-open=\"newSemester.dp\" ng-required=\"true\" close-text=\"Close\"\n" +
+    "                       ng-focus=\"onSemFocus($event)\" />\n" +
     "            </div>\n" +
     "            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"createSem()\" ng-disabled=\"loading\">Create New Semester</button>\n" +
     "            {{result}}\n" +
@@ -38683,10 +38687,16 @@ angular.module('manage.manageHours', [])
             hmFactory.getData("semesters")
                 .success(function(data) {
                     console.dir(data);
-                    for (var lib = 0; lib < data.exc.length; lib++)
+                    for (var lib = 0; lib < data.exc.length; lib++){
                         for (var ex = 0; ex < data.exc[lib].ex.length; ex++){
                             data.exc[lib].ex[ex].datems = new Date(data.exc[lib].ex[ex].date * 1000);
+                            data.exc[lib].ex[ex].dp = false;
                         }
+                        for (var sem = 0; sem < data.sem[lib].sem.length; sem++){
+                            data.sem[lib].sem[sem].startdate = new Date(data.sem[lib].sem[sem].startdate);
+                            data.sem[lib].sem[sem].dp = false;
+                        }
+                    }
                     $scope.allowedLibraries = data;
                 })
                 .error(function(data, status, headers, config) {
@@ -38703,8 +38713,7 @@ angular.module('manage.manageHours', [])
                     active: false
                 }];
 
-            $scope.formats = ['dd-MMMM-yyyy', 'yyyy/MM/dd', 'dd.MM.yyyy', 'shortDate', 'MM/dd/yyyy'];
-            $scope.format = $scope.formats[4];
+            $scope.format = 'MM/dd/yyyy';
     }])
 
     .directive('manageHours', function($animate) {
@@ -38718,7 +38727,7 @@ angular.module('manage.manageHours', [])
                 //Preload the location of the boxe's title element (needs to be more dynamic in the future)
                 var titleElm = elm.find('h2');
                 //Enter the spinner animation, appending it to the title element
-                $animate.enter(spinner, titleElm);
+                $animate.enter(spinner, titleElm[0]);
 
                 var loadingWatcher = scope.$watch(
                     'allowedLibraries',
@@ -38739,6 +38748,7 @@ angular.module('manage.manageHours', [])
         $scope.weekHrs = [];
         $scope.loading = false;
         $scope.newSemester = {};
+        $scope.newSemester.dp = false;
         $scope.newSemester.dow = [];
 
         function init(){
@@ -38749,8 +38759,16 @@ angular.module('manage.manageHours', [])
             }
         }
         init();
+        $scope.onSemFocus = function($event, index){
+            $event.preventDefault();
+            $event.stopPropagation();
+            if (typeof index != 'undefined' && index >= 0)
+                $scope.allowedLibraries.sem[$scope.selLib].sem[index].dp = true;
+            else
+                $scope.newSemester.dp = true;
+        };
 
-        $scope.expandSem = function(semester){
+        $scope.expandSem = function($event, semester){
             if ($scope.expSem !== semester.dsid) {
                 $scope.result = "";
                 $scope.resultDel = "";
@@ -38768,6 +38786,9 @@ angular.module('manage.manageHours', [])
                         }
                     }
                 }
+            } else {
+                $event.preventDefault();
+                $event.stopPropagation();
             }
             $scope.expSem = semester.dsid;
         };
@@ -38841,32 +38862,24 @@ angular.module('manage.manageHours', [])
         $scope.newException = {};
         $scope.newException.from = -1;
         $scope.newException.to = 0;
-        $scope.newException.datepicker = false;
-        $scope.dpOpen = false;
+        $scope.newException.dp = false;
         $scope.expExc = -1;
-        $scope.blurCount = 0;
 
-        $scope.onExcFocus = function($event){
+        $scope.onExcFocus = function($event, index){
             $event.preventDefault();
             $event.stopPropagation();
-            $scope.dpOpen = true;
-            $scope.blurCount = 0;
-            console.log("focus = " + $scope.dpOpen);
+            if (typeof index != 'undefined' && index >= 0)
+                $scope.allowedLibraries.exc[$scope.selLib].ex[index].dp = true;
+            else
+                $scope.newException.dp = true;
         };
-        $scope.onExcBlur = function($event){
-            if ($scope.blurCount > 0){
-                $event.preventDefault();
-                $event.stopPropagation();
-                $scope.dpOpen = false;
-            }
-            $scope.blurCount++;
-            console.log("blur = " + $scope.dpOpen + ", count = " + $scope.blurCount);
-        };
-        $scope.expandExc = function(exception){
+        $scope.expandExc = function($event, exception){
             if ($scope.expExc != exception.id){
                 $scope.result = "";
                 $scope.resultDel = "";
-                $scope.dpOpen = false;
+            } else {
+                $event.preventDefault();
+                $event.stopPropagation();
             }
             $scope.expExc = exception.id;
         };
@@ -39608,7 +39621,7 @@ angular.module('manage.staffDirectory', [])
                     alert("First Name is too short!");
             };
         }])
-    .directive('staffDirectoryList', function() {
+    .directive('staffDirectoryList', function($animate) {
         return {
             restrict: 'AC',
             scope: {},
@@ -39619,7 +39632,7 @@ angular.module('manage.staffDirectory', [])
                 //Preload the location of the boxe's title element (needs to be more dynamic in the future)
                 var titleElm = elm.find('h2');
                 //Enter the spinner animation, appending it to the title element
-                $animate.enter(spinner, titleElm);
+                $animate.enter(spinner, titleElm[0]);
 
                 var loadingWatcher = scope.$watch(
                     'allowedLibraries',
