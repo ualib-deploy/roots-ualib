@@ -347,13 +347,20 @@
                       <li>
                         <div class="yamm-content">
                           <div class="row">
-                            <div class="col-xs-12 col-sm-6 col-md-3">
-                              <a class="service-card" href="<?php echo site_url(); ?>/sample-page/hours/">
-                                <span class="fa fa-clock-o"></span>
-                                <h4>Hours</h4>
-                                <p>Library hours and locations</p>
-                              </a>
-                            </div>
+                              <div class="col-xs-12 col-sm-6 col-md-3">
+                                  <a class="service-card" href="<?php echo site_url(); ?>/sample-page/hours/">
+                                      <span class="fa fa-clock-o"></span>
+                                      <h4>Hours</h4>
+                                      <p>Library hours and locations</p>
+                                  </a>
+                              </div>
+                              <div class="col-xs-12 col-sm-6 col-md-3">
+                                  <a class="service-card" href="<?php echo site_url(); ?>/sample-page/staff-directory/">
+                                      <span class="fa fa-users"></span>
+                                      <h4>Directory</h4>
+                                      <p>UA Library Faculty and Staff</p>
+                                  </a>
+                              </div>
                             <div class="col-xs-12 col-sm-6 col-md-3">
                               <a class="service-card" href="<?php echo site_url(); ?>/services/library-information-for-current-students/about-the-libraries/">
                                 <span class="fa fa-university"></span>
