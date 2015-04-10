@@ -6143,10 +6143,10 @@ fieldset[disabled] .navbar-inverse .btn-link:focus {
   color: #e5d8d8;
 }
 /*!
- * Yamm!3
- * Yet another megamenu for Bootstrap 3
- * 
+ * Yamm!3 - Yet another megamenu for Bootstrap 3
  * http://geedmo.github.com/yamm3
+ * 
+ * @geedmo - Licensed under the MIT license
  */
 .yamm .nav,
 .yamm .collapse,
@@ -6159,10 +6159,6 @@ fieldset[disabled] .navbar-inverse .btn-link:focus {
 }
 .yamm .dropdown-menu {
   left: auto;
-}
-.yamm .nav.navbar-right .dropdown-menu {
-  left: auto;
-  right: 0;
 }
 .yamm .yamm-content {
   padding: 20px 30px;
@@ -6694,11 +6690,6 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
 .navbar-mega .dropdown-menu,
 .navbar-mega-inverse .dropdown-menu {
   left: auto;
-}
-.navbar-mega .nav.navbar-right .dropdown-menu,
-.navbar-mega-inverse .nav.navbar-right .dropdown-menu {
-  left: auto;
-  right: 0;
 }
 .navbar-mega .yamm-content,
 .navbar-mega-inverse .yamm-content {

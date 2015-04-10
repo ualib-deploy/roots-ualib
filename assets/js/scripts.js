@@ -38723,12 +38723,11 @@ angular.module('manage.manageHours', [])
                 var loadingWatcher = scope.$watch(
                     'allowedLibraries',
                     function(newVal, oldVal){
-                        if (scope.allowedLibraries.length > 0){
+                        if (scope.allowedLibraries.totalTime > 0){
                             $animate.leave(spinner);
                             console.log("Hours loaded");
                         }
-                    },
-                    true
+                    }
                 );
             },
             templateUrl: 'manageHours/manageHours.tpl.html'
@@ -39614,6 +39613,24 @@ angular.module('manage.staffDirectory', [])
             restrict: 'AC',
             scope: {},
             controller: 'staffDirCtrl',
+            link: function(scope, elm, attrs){
+                //Preload the spinner element
+                var spinner = angular.element('<div id="loading-bar-spinner"><div class="spinner-icon"></div></div>');
+                //Preload the location of the boxe's title element (needs to be more dynamic in the future)
+                var titleElm = elm.find('h2');
+                //Enter the spinner animation, appending it to the title element
+                $animate.enter(spinner, titleElm);
+
+                var loadingWatcher = scope.$watch(
+                    'allowedLibraries',
+                    function(newVal, oldVal){
+                        if (scope.Directory.totalTime > 0){
+                            $animate.leave(spinner);
+                            console.log("Staff Directory loaded");
+                        }
+                    }
+                );
+            },
             templateUrl: 'staffDirectory/staffDirectory.tpl.html'
         };
     });angular.module('ualib.templates', ['../assets/js/_ualib-home.tpl.html']);
