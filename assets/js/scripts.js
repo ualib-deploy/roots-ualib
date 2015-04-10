@@ -38228,21 +38228,23 @@ angular.module("manageOneSearch/manageOneSearch.tpl.html", []).run(["$templateCa
     "    {{response}}\n" +
     "</div>\n" +
     "<div class=\"row\">\n" +
-    "    <div class=\"col-md-1\">\n" +
-    "        Filter by:\n" +
-    "    </div>\n" +
     "    <div class=\"col-md-3 form-group\">\n" +
-    "        <label for=\"filterK\">Keyword</label>\n" +
+    "        <label for=\"filterK\">Filter by Keyword</label>\n" +
     "        <input type=\"text\" class=\"form-control\" placeholder=\"Keyword\" id=\"filterK\" ng-model=\"filterKeyword\">\n" +
     "    </div>\n" +
     "    <div class=\"col-md-3 form-group\">\n" +
-    "        <label for=\"filterL\">Link</label>\n" +
+    "        <label for=\"filterLT\">Filter by Link Title</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Link Title\" id=\"filterLT\" ng-model=\"filterLinkTitle\">\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-3 form-group\">\n" +
+    "        <label for=\"filterL\">Filter by Link</label>\n" +
     "        <input type=\"text\" class=\"form-control\" placeholder=\"Link\" id=\"filterL\" ng-model=\"filterLink\">\n" +
     "    </div>\n" +
     "</div>\n" +
     "\n" +
     "<div class=\"row\">\n" +
-    "    <div class=\"col-md-6\" ng-repeat=\"rec in recList.RecList | filter:{keyword:filterKeyword} | filter:{link:filterLink}\">\n" +
+    "    <div class=\"col-md-6\"\n" +
+    "         ng-repeat=\"rec in recList.RecList | filter:{keyword:filterKeyword} | filter:{link:filterLink} | filter:{description:filterLinkTitle}\">\n" +
     "        <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteRec(rec, $index)\">Delete</button>\n" +
     "        <span>{{rec.keyword}} = <a href=\"{{rec.link}}\">{{rec.description}}</a></span>\n" +
     "    </div>\n" +
@@ -39191,6 +39193,7 @@ angular.module('manage.manageOneSearch', [])
             $scope.response = "";
             $scope.filterKeyword = '';
             $scope.filterLink = '';
+            $scope.filterLinkTitle = '';
 
             var cookies;
             $scope.GetCookie = function (name,c,C,i){
