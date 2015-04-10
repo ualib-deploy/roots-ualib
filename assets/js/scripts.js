@@ -37899,7 +37899,7 @@ angular.module('hours.list', [])
             controller: 'ListCtrl',
             templateUrl: 'list/list.tpl.html'
         }
-    }]);;angular.module('manage.templates', ['manageHours/manageEx.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html']);
+    }]);;angular.module('manage.templates', ['manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html']);
 
 angular.module("manageHours/manageEx.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageHours/manageEx.tpl.html",
@@ -37918,22 +37918,23 @@ angular.module("manageHours/manageEx.tpl.html", []).run(["$templateCache", funct
     "    </tr>\n" +
     "    </thead>\n" +
     "    <tr ng-repeat=\"exception in allowedLibraries.exc[selLib].ex track by exception.id\" ng-click=\"expandExc(exception)\">\n" +
-    "        <td>\n" +
+    "        <td style=\"width:30%\">\n" +
     "            <div ng-hide=\"isExpExc(exception.id)\">{{exception.desc}}</div>\n" +
-    "            <div ng-show=\"isExpExc(exception.id)\"><input type=\"text\" class=\"form-control\" size=\"30\" ng-model=\"exception.desc\" ng-required /></div>\n" +
+    "            <div ng-show=\"isExpExc(exception.id)\"><input type=\"text\" class=\"form-control\" ng-model=\"exception.desc\" ng-required /></div>\n" +
     "        </td>\n" +
     "        <td class=\"text-center\">\n" +
     "            <div ng-hide=\"isExpExc(exception.id)\">{{exception.datems | date : 'MMM d, y'}}</div>\n" +
     "            <div ng-show=\"isExpExc(exception.id)\">\n" +
     "\n" +
-    "                <input type=\"text\" class=\"form-control\" size=\"8\" datepicker-popup=\"{{format}}\" ng-click=\"toggleDP1($event)\" show-button-bar=\"false\"\n" +
-    "                       ng-model=\"exception.datems\" is-open=\"openedDP1\" datepicker-options=\"dateOptions\"\n" +
-    "                       close-on-date-selection=\"false\" ng-required=\"true\" />\n" +
+    "                <input type=\"text\" class=\"form-control\" datepicker-popup=\"{{format}}\" show-button-bar=\"false\"\n" +
+    "                       ng-model=\"exception.datems\" is-open=\"dpOpen\" datepicker-options=\"dateOptions\"\n" +
+    "                       close-on-date-selection=\"false\" ng-required=\"true\"\n" +
+    "                       ng-focus=\"onExcFocus($event)\" ng-blur=\"onExcBlur($event)\" />\n" +
     "            </div>\n" +
     "        </td>\n" +
     "        <td class=\"text-center\">\n" +
     "            <div ng-hide=\"isExpExc(exception.id)\">{{exception.days}}</div>\n" +
-    "            <div ng-show=\"isExpExc(exception.id)\"><input type=\"text\" class=\"form-control\" size=\"2\" ng-model=\"exception.days\" ng-required /></div>\n" +
+    "            <div ng-show=\"isExpExc(exception.id)\"><input type=\"text\" class=\"form-control\" ng-model=\"exception.days\" ng-required /></div>\n" +
     "        </td>\n" +
     "        <td class=\"text-center\">\n" +
     "            <div class=\"row\">\n" +
@@ -37957,24 +37958,30 @@ angular.module("manageHours/manageEx.tpl.html", []).run(["$templateCache", funct
     "    </tr>\n" +
     "    <tr>\n" +
     "        <td>\n" +
-    "            <input type=\"text\" class=\"form-control\" size=\"30\" ng-model=\"newException.desc\" placeholder=\"Exception Description\" ng-required />\n" +
+    "            <input type=\"text\" class=\"form-control\" ng-model=\"newException.desc\" placeholder=\"Exception Description\" ng-required />\n" +
     "        </td>\n" +
     "        <td class=\"text-center\">\n" +
     "\n" +
-    "            <input type=\"text\" class=\"form-control\" size=\"8\" datepicker-popup=\"{{format}}\" ng-click=\"toggleDP2($event)\" show-button-bar=\"false\"\n" +
-    "                   ng-model=\"newException.datems\" is-open=\"openedDP2\" datepicker-options=\"dateOptions\"\n" +
+    "            <input type=\"text\" class=\"form-control\" datepicker-popup=\"{{format}}\" show-button-bar=\"false\"\n" +
+    "                   ng-model=\"newException.datems\" is-open=\"newException.datepicker\" datepicker-options=\"dateOptions\"\n" +
     "                   close-on-date-selection=\"false\" ng-required=\"true\" placeholder=\"MM/DD/YYYY\" />\n" +
     "        </td>\n" +
     "        <td class=\"text-center\">\n" +
-    "            <input type=\"text\" class=\"form-control\" size=\"2\" ng-model=\"newException.days\" placeholder=\"Days\" ng-required />\n" +
+    "            <input type=\"text\" class=\"form-control\" ng-model=\"newException.days\" placeholder=\"Days\" ng-required />\n" +
     "        </td>\n" +
     "        <td class=\"text-center\">\n" +
-    "            <select class=\"form-control\" ng-model=\"newException.from\">\n" +
-    "                <option ng-repeat=\"hours in hrsFrom\" ng-selected=\"{{newException.from == hours.value}}\" ng-value=\"{{hours.value}}\">{{hours.name}}</option>\n" +
-    "            </select>\n" +
-    "            <select class=\"form-control\" ng-model=\"newException.to\">\n" +
-    "                <option ng-repeat=\"hours in hrsTo\" ng-selected=\"{{newException.to == hours.value}}\" ng-value=\"{{hours.value}}\">{{hours.name}}</option>\n" +
-    "            </select>\n" +
+    "            <div class=\"row\">\n" +
+    "                <div class=\"col-md-6\">\n" +
+    "                    <select class=\"form-control\" ng-model=\"newException.from\">\n" +
+    "                        <option ng-repeat=\"hours in hrsFrom\" ng-selected=\"{{newException.from == hours.value}}\" ng-value=\"{{hours.value}}\">{{hours.name}}</option>\n" +
+    "                    </select>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-6\">\n" +
+    "                    <select class=\"form-control\" ng-model=\"newException.to\">\n" +
+    "                        <option ng-repeat=\"hours in hrsTo\" ng-selected=\"{{newException.to == hours.value}}\" ng-value=\"{{hours.value}}\">{{hours.name}}</option>\n" +
+    "                    </select>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
     "        </td>\n" +
     "        <td class=\"text-right\">\n" +
     "            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"createExc()\" ng-disabled=\"loading\">Create Exception</button>\n" +
@@ -37982,6 +37989,32 @@ angular.module("manageHours/manageEx.tpl.html", []).run(["$templateCache", funct
     "        </td>\n" +
     "    </tr>\n" +
     "</table>\n" +
+    "");
+}]);
+
+angular.module("manageHours/manageHours.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("manageHours/manageHours.tpl.html",
+    "<h2><a href=\"../\">Hours</a> Management\n" +
+    "\n" +
+    "    <select class=\"form-control\" ng-model=\"selLib\">\n" +
+    "        <option ng-repeat=\"lib in allowedLibraries.sem\" ng-value=\"$index\" ng-selected=\"selLib == $index\">{{lib.library.name}}</option>\n" +
+    "    </select>\n" +
+    "\n" +
+    "</h2>\n" +
+    "<h2 class=\"text-center\">{{allowedLibraries.sem[selLib].library.name}}</h2>\n" +
+    "\n" +
+    "<tabset justified=\"true\">\n" +
+    "    <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
+    "        <div ng-show=\"tab.number == 0\">\n" +
+    "            <div semester-list>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "        <div ng-show=\"tab.number == 1\" >\n" +
+    "            <div exception-list>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </tab>\n" +
+    "</tabset>\n" +
     "");
 }]);
 
@@ -38325,50 +38358,49 @@ angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCach
   $templateCache.put("staffDirectory/staffDirectory.tpl.html",
     "<h2>Library Staff Directory</h2>\n" +
     "\n" +
-    "<div>\n" +
-    "        <div class=\"row\">\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"firstName\">Firts Name</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"First Name\" maxlength=\"25\"\n" +
-    "                       ng-model=\"formData.first\" id=\"firstName\" required>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"lastName\">Last Name</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Last Name\" maxlength=\"25\"\n" +
-    "                       ng-model=\"formData.last\" id=\"lastName\" required>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"email\">Email</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Email\" maxlength=\"255\"\n" +
-    "                       ng-model=\"formData.email\" id=\"email\" required>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"title\">Title</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Title\" maxlength=\"150\"\n" +
-    "                       ng-model=\"formData.title\" id=\"title\" required>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"rank\">Rank</label>\n" +
-    "                <select class=\"form-control\" ng-model=\"formData.rank\" ng-options=\"rank for rank in ranks\" id=\"rank\">\n" +
-    "                </select>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-5 form-group\">\n" +
-    "                <label for=\"dept\">Department</label>\n" +
-    "                <select class=\"form-control\" ng-model=\"formData.dept\" ng-options=\"dept for dept in departments\" id=\"dept\">\n" +
-    "                </select>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
-    "                <label for=\"phone\">Phone</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Phone\" maxlength=\"8\"\n" +
-    "                       ng-model=\"formData.phone\" id=\"phone\" required>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
-    "                <label for=\"fax\">Fax</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Fax\" maxlength=\"8\" ng-model=\"formData.fax\" id=\"fax\">\n" +
-    "            </div>\n" +
+    "<div ng-show=\"hasAccess\">\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-3 form-group\">\n" +
+    "            <label for=\"firstName\">Firts Name</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"First Name\" maxlength=\"25\"\n" +
+    "                   ng-model=\"formData.first\" id=\"firstName\" required>\n" +
     "        </div>\n" +
-    "        <button type=\"submit\" class=\"btn btn-primary\" ng-click=\"addPerson()\">Add New Person</button>\n" +
-    "\n" +
+    "        <div class=\"col-md-3 form-group\">\n" +
+    "            <label for=\"lastName\">Last Name</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Last Name\" maxlength=\"25\"\n" +
+    "                   ng-model=\"formData.last\" id=\"lastName\" required>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-3 form-group\">\n" +
+    "            <label for=\"email\">Email</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Email\" maxlength=\"255\"\n" +
+    "                   ng-model=\"formData.email\" id=\"email\" required>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-3 form-group\">\n" +
+    "            <label for=\"title\">Title</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Title\" maxlength=\"150\"\n" +
+    "                   ng-model=\"formData.title\" id=\"title\" required>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-3 form-group\">\n" +
+    "            <label for=\"rank\">Rank</label>\n" +
+    "            <select class=\"form-control\" ng-model=\"formData.rank\" ng-options=\"rank for rank in ranks\" id=\"rank\">\n" +
+    "            </select>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-5 form-group\">\n" +
+    "            <label for=\"dept\">Department</label>\n" +
+    "            <select class=\"form-control\" ng-model=\"formData.dept\" ng-options=\"dept for dept in departments\" id=\"dept\">\n" +
+    "            </select>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-2 form-group\">\n" +
+    "            <label for=\"phone\">Phone</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Phone\" maxlength=\"8\"\n" +
+    "                   ng-model=\"formData.phone\" id=\"phone\" required>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-2 form-group\">\n" +
+    "            <label for=\"fax\">Fax</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Fax\" maxlength=\"8\" ng-model=\"formData.fax\" id=\"fax\">\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "    <button type=\"submit\" class=\"btn btn-primary\" ng-click=\"addPerson()\">Add New Person</button>\n" +
     "    <span ng-model=\"formResponse\">{{formResponse}}</span>\n" +
     "</div>\n" +
     "\n" +
@@ -38383,15 +38415,15 @@ angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCach
     "\n" +
     "    <div class=\"row\" ng-repeat=\"person in Directory.list | filter:{lastname:filterBy} | orderBy:sortMode\"\n" +
     "         ng-class=\"{sdOpen: person.show, sdOver: person.id == mOver}\" ng-mouseover=\"setOver(person)\">\n" +
-    "        <div class=\"col-md-8\">\n" +
-    "            <h4 ng-click=\"togglePerson(person)\">\n" +
+    "        <div class=\"col-md-7\" ng-click=\"togglePerson(person)\">\n" +
+    "            <h4>\n" +
     "                <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"person.show\"></span>\n" +
     "                <span class=\"fa fa-fw fa-caret-down\" ng-show=\"person.show\"></span>\n" +
     "                {{person.firstname}} {{person.lastname}} <small>{{person.title}}</small>\n" +
     "            </h4>\n" +
     "        </div>\n" +
-    "        <div class=\"col-md-4\">\n" +
-    "            <h4 ng-click=\"togglePerson(person)\">{{person.department}}</h4>\n" +
+    "        <div class=\"col-md-5\" ng-click=\"togglePerson(person)\">\n" +
+    "            <h4>{{person.department}}</h4>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-12\" ng-show=\"person.show\">\n" +
     "            <div class=\"col-md-3\">\n" +
@@ -38652,10 +38684,11 @@ angular.module('manage.manageHours', [])
             hmFactory.getData({manage : 1})
                 .success(function(data) {
                     console.dir(data);
-                    $scope.allowedLibraries = data;
                     for (var lib = 0; lib < data.exc.length; lib++)
-                        for (var ex = 0; ex < data.exc[lib].ex.length; ex++)
+                        for (var ex = 0; ex < data.exc[lib].ex.length; ex++){
                             data.exc[lib].ex[ex].datems = new Date(data.exc[lib].ex[ex].date * 1000);
+                        }
+                    $scope.allowedLibraries = data;
                 })
                 .error(function(data, status, headers, config) {
                     console.log(data);
@@ -38674,6 +38707,15 @@ angular.module('manage.manageHours', [])
             $scope.formats = ['dd-MMMM-yyyy', 'yyyy/MM/dd', 'dd.MM.yyyy', 'shortDate', 'MM/dd/yyyy'];
             $scope.format = $scope.formats[4];
     }])
+
+    .directive('manageHours', function() {
+        return {
+            restrict: 'AC',
+            scope: {},
+            controller: 'manageHrsCtrl',
+            templateUrl: 'manageHours/manageHours.tpl.html'
+        };
+    })
 
     .controller('semListCtrl', ['$scope', 'hmFactory', function semListCtrl($scope, hmFactory) {
         $scope.expSem = -1;
@@ -38771,6 +38813,7 @@ angular.module('manage.manageHours', [])
 
     .directive('semesterList', function() {
         return {
+            require: '^manageHours',
             restrict: 'AC',
             controller: 'semListCtrl',
             templateUrl: 'manageHours/manageSem.tpl.html'
@@ -38781,33 +38824,33 @@ angular.module('manage.manageHours', [])
         $scope.newException = {};
         $scope.newException.from = -1;
         $scope.newException.to = 0;
+        $scope.newException.datepicker = false;
+        $scope.dpOpen = false;
         $scope.expExc = -1;
-        $scope.openedDP1 = false;
-        $scope.openedDP2 = false;
+        $scope.blurCount = 0;
 
-        $scope.toggleDP1 = function($event) {
+        $scope.onExcFocus = function($event){
             $event.preventDefault();
             $event.stopPropagation();
-            $scope.openedDP1 = !$scope.openedDP1;
+            $scope.dpOpen = true;
+            $scope.blurCount = 0;
+            console.log("focus = " + $scope.dpOpen);
         };
-        $scope.toggleDP2 = function($event) {
-            $event.preventDefault();
-            $event.stopPropagation();
-            $scope.openedDP2 = !$scope.openedDP2;
-        };
-        $scope.closeDP = function(){
-            $scope.result = "";
-            $scope.resultDel = "";
-            $scope.openedDP1 = false;
-            $scope.openedDP2 = false;
+        $scope.onExcBlur = function($event){
+            if ($scope.blurCount > 0){
+                $event.preventDefault();
+                $event.stopPropagation();
+                $scope.dpOpen = false;
+            }
+            $scope.blurCount++;
+            console.log("blur = " + $scope.dpOpen + ", count = " + $scope.blurCount);
         };
         $scope.expandExc = function(exception){
             if ($scope.expExc != exception.id){
                 $scope.result = "";
                 $scope.resultDel = "";
+                $scope.dpOpen = false;
             }
-            $scope.openedDP1 = false;
-            $scope.openedDP2 = false;
             $scope.expExc = exception.id;
         };
         $scope.isExpExc = function(excID){
@@ -38883,10 +38926,14 @@ angular.module('manage.manageHours', [])
                 });
         };
     }])
-    .directive('exceptionList', function() {
+    .directive('exceptionList', function($timeout) {
         return {
+            require: '^manageHours',
             restrict: 'AC',
             controller: 'exListCtrl',
+            link: function(scope, elem, attrs) {
+
+            },
             templateUrl: 'manageHours/manageEx.tpl.html'
         };
     })
@@ -39557,7 +39604,10 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
   $templateCache.put("../assets/js/_ualib-home.tpl.html",
     "<div class=\"home-slice\">\n" +
     "    <div class=\"row\">\n" +
-    "        <div class=\"col-sm-6\" style=\"padding: 15px; background-color: rgba(255,255,255,.9); display: table;\">\n" +
+    "      <div class=\"col-md-6 col-md-push-6\" style=\"padding: 15px; background-color: rgba(255,255,255,.9);\">\n" +
+    "        <div class=\"hours-list\"></div>\n" +
+    "      </div>\n" +
+    "        <div class=\"col-md-6 col-md-pull-6\" style=\"padding: 15px; background-color: rgba(255,255,255,.9); display: table;\">\n" +
     "            <div class=\"event-card\" style=\"display: table-row\">\n" +
     "                <div style=\"text-align: right; font-size: 20px; color: #999; display: table-cell; vertical-align: top; padding-right: 15px;\">          News        </div>\n" +
     "                <div style=\"display: table-cell; vertical-align: top;\">\n" +
@@ -39614,9 +39664,6 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-sm-6\">\n" +
-    "            <div style=\"padding: 15px; background-color: rgba(255,255,255,.9);\" class=\"hours-list\"></div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>");

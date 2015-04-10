@@ -6332,17 +6332,25 @@ fieldset[disabled] .navbar-mega .btn-link:focus {
 .navbar-mega .navbar-nav > li > a.icon-only,
 .navbar-mega .navbar-nav > li > button.icon-only {
   font-size: 20px;
-  padding-top: 29px;
+  padding-bottom: 29px;
+}
+.navbar-mega .navbar-nav > li > a.icon-only,
+.navbar-mega .navbar-nav > li > button.icon-only {
+  font-size: 20px;
   padding-bottom: 29px;
 }
 .navbar-mega .navbar-nav > li > a:hover.dropdown-toggle::before,
 .navbar-mega .navbar-nav > li > button:hover.dropdown-toggle::before,
 .navbar-mega .navbar-nav > li > a:focus.dropdown-toggle::before,
 .navbar-mega .navbar-nav > li > button:focus.dropdown-toggle::before,
+.navbar-mega .navbar-nav > li > a.active.dropdown-toggle::before,
+.navbar-mega .navbar-nav > li > button.active.dropdown-toggle::before,
 .navbar-mega .navbar-nav > li > a:hover.dropdown-toggle::after,
 .navbar-mega .navbar-nav > li > button:hover.dropdown-toggle::after,
 .navbar-mega .navbar-nav > li > a:focus.dropdown-toggle::after,
-.navbar-mega .navbar-nav > li > button:focus.dropdown-toggle::after {
+.navbar-mega .navbar-nav > li > button:focus.dropdown-toggle::after,
+.navbar-mega .navbar-nav > li > a.active.dropdown-toggle::after,
+.navbar-mega .navbar-nav > li > button.active.dropdown-toggle::after {
   background-color: #f9f9f9;
 }
 .navbar-mega .navbar-nav > li > a.dropdown-toggle::before,
@@ -6580,17 +6588,25 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
 .navbar-mega-inverse .navbar-nav > li > a.icon-only,
 .navbar-mega-inverse .navbar-nav > li > button.icon-only {
   font-size: 20px;
-  padding-top: 29px;
+  padding-bottom: 29px;
+}
+.navbar-mega-inverse .navbar-nav > li > a.icon-only,
+.navbar-mega-inverse .navbar-nav > li > button.icon-only {
+  font-size: 20px;
   padding-bottom: 29px;
 }
 .navbar-mega-inverse .navbar-nav > li > a:hover.dropdown-toggle::before,
 .navbar-mega-inverse .navbar-nav > li > button:hover.dropdown-toggle::before,
 .navbar-mega-inverse .navbar-nav > li > a:focus.dropdown-toggle::before,
 .navbar-mega-inverse .navbar-nav > li > button:focus.dropdown-toggle::before,
+.navbar-mega-inverse .navbar-nav > li > a.active.dropdown-toggle::before,
+.navbar-mega-inverse .navbar-nav > li > button.active.dropdown-toggle::before,
 .navbar-mega-inverse .navbar-nav > li > a:hover.dropdown-toggle::after,
 .navbar-mega-inverse .navbar-nav > li > button:hover.dropdown-toggle::after,
 .navbar-mega-inverse .navbar-nav > li > a:focus.dropdown-toggle::after,
-.navbar-mega-inverse .navbar-nav > li > button:focus.dropdown-toggle::after {
+.navbar-mega-inverse .navbar-nav > li > button:focus.dropdown-toggle::after,
+.navbar-mega-inverse .navbar-nav > li > a.active.dropdown-toggle::after,
+.navbar-mega-inverse .navbar-nav > li > button.active.dropdown-toggle::after {
   background-color: #993333;
 }
 .navbar-mega-inverse .navbar-nav > li > a.dropdown-toggle::before,
