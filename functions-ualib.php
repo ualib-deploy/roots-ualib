@@ -19,6 +19,7 @@ function ualib_scripts() {
     );
 }
 
+//TinyMCE commands
 remove_filter('the_content', 'wpautop');
 remove_filter('the_excerpt', 'wpautop');
 

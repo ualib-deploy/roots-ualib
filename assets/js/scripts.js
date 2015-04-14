@@ -38984,9 +38984,11 @@ angular.module('manage.manageDatabases', [])
                             } else {
                                 $scope.formResponse = "Error: Can not delete database! " + data;
                             }
+                            console.log(data);
                         })
                         .error(function(data, status, headers, config) {
                             $scope.formResponse = "Error: Could not delete database! " + data;
+                            console.log(data);
                         });
                 }
             };
@@ -38999,13 +39001,16 @@ angular.module('manage.manageDatabases', [])
                         } else {
                             $scope.formResponse = "Error: Can not update database! " + data;
                         }
+                        console.log(data);
                     })
                     .error(function(data, status, headers, config) {
                         $scope.formResponse = "Error: Could not update database! " + data;
+                        console.log(data);
                     });
             };
             $scope.createDB = function(){
                 $scope.newDB.updatedBy = $scope.updatedBy;
+                console.dir($scope.newDB);
                 dbFactory.postData({action : 3}, $scope.newDB)
                     .success(function(data, status, headers, config) {
                         if ((typeof data === 'object') && (data !== null)){
@@ -39024,9 +39029,11 @@ angular.module('manage.manageDatabases', [])
                         } else {
                             $scope.formResponse = "Error: Can not create database! " + data;
                         }
+                        console.dir(data);
                     })
                     .error(function(data, status, headers, config) {
                         $scope.formResponse = "Error: Could not create database! " + data;
+                        console.dir(data);
                     });
             };
 
@@ -39046,9 +39053,11 @@ angular.module('manage.manageDatabases', [])
                         } else {
                             $scope.formResponse = "Error: Can not add subject! " + data;
                         }
+                        console.dir(data);
                     })
                     .error(function(data, status, headers, config) {
                         $scope.formResponse = "Error: Could not add subject! " + data;
+                        console.dir(data);
                     });
             };
             $scope.deleteSubject = function(db,subject){
