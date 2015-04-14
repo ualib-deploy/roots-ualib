@@ -196,7 +196,7 @@ if (defined('GROUP_ADMIN'))
                                     </div>
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="<?php echo site_url(); ?>/research-help/subject-guides/">
+                                            <a class="service-card" href="http://guides.lib.ua.edu/">
                                                 <span class="fa fa-compass"></span>
                                                 <h4>Research Guides</h4>
                                                 <p>Explore subject and course specific resource in guides curated by UA librarians</p>

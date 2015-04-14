@@ -37659,7 +37659,6 @@ angular.module('ui.bootstrap.tabs', [])
 
 angular.module("calendar/calendar.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("calendar/calendar.tpl.html",
-    "<h2>{{calendar[libID - 1].library.name}} Calendar</h2>\n" +
     "<div class=\"calendar table-responsive\">\n" +
     "    <nav class=\"navbar navbar-default navbar-embedded\">\n" +
     "        <button type=\"button\" class=\"btn btn-default navbar-btn navbar-left\" ng-click=\"prevMonth()\">\n" +
@@ -37707,26 +37706,26 @@ angular.module("list/list.tpl.html", []).run(["$templateCache", function($templa
   $templateCache.put("list/list.tpl.html",
     "<h2>Hours <small>today</small></h2>\n" +
     "<div class=\"responsive-table\">\n" +
-    "  <table class=\"table table-hover\">\n" +
-    "    <tbody ng-repeat=\"lib in hoursList track by $index\">\n" +
-    "    <tr ng-click=\"selectLib(lib)\">\n" +
-    "      <td><a href=\"#\">{{lib.name}}</a></td>\n" +
-    "      <td>{{lib.hours}}</td>\n" +
-    "      <td><span ng-class=\"lib.status.css\">{{lib.status.text}}</span></td>\n" +
-    "      <td>\n" +
-    "        <span class=\"fa fa-lg fa-info-circle\" ng-if=\"lib.description\" tooltip=\"{{lib.description}}\"></span>\n" +
-    "      </td>\n" +
-    "    </tr>\n" +
-    "    <tr class=\"hours-list-child\" ng-repeat=\"child in lib.children track by $index\" ng-click=\"selectLib(child)\">\n" +
-    "      <td><a href=\"#\">{{child.name}}</a></td>\n" +
-    "      <td>{{child.hours}}</td>\n" +
-    "      <td><span ng-class=\"child.status.css\">{{child.status.text}}</span></td>\n" +
-    "      <td>\n" +
-    "        <span class=\"fa fa-lg fa-info-circle\" ng-if=\"child.description\" tooltip=\"{{child.description}}\"></span>\n" +
-    "      </td>\n" +
-    "    </tr>\n" +
-    "    </tbody>\n" +
-    "  </table>\n" +
+    "    <table class=\"table table-hover\">\n" +
+    "        <tbody ng-repeat=\"lib in hoursList track by $index\">\n" +
+    "            <tr ng-click=\"selectLib(lib)\">\n" +
+    "                <td>{{lib.name}}</td>\n" +
+    "                <td>{{lib.hours}}</td>\n" +
+    "                <td ng-class=\"lib.status.css\">{{lib.status.text}}</td>\n" +
+    "                <td>\n" +
+    "                    <span class=\"fa fa-lg fa-info-circle\" ng-if=\"lib.description\" tooltip=\"{{lib.description}}\"></span>\n" +
+    "                </td>\n" +
+    "            </tr>\n" +
+    "            <tr class=\"hours-list-child\" ng-repeat=\"child in lib.children track by $index\" ng-click=\"selectLib(child)\">\n" +
+    "                <td>{{child.name}}</td>\n" +
+    "                <td>{{child.hours}}</td>\n" +
+    "                <td ng-class=\"child.status.css\">{{child.status.text}}</td>\n" +
+    "                <td>\n" +
+    "                    <span class=\"fa fa-lg fa-info-circle\" ng-if=\"child.description\" tooltip=\"{{child.description}}\"></span>\n" +
+    "                </td>\n" +
+    "            </tr>\n" +
+    "        </tbody>\n" +
+    "    </table>\n" +
     "</div>");
 }]);
 ;angular.module('hours', [
@@ -37738,110 +37737,90 @@ angular.module("list/list.tpl.html", []).run(["$templateCache", function($templa
     'hours.calendar'
 ])
 
-.constant('HOURS_API_URL', '//wwwdev2.lib.ua.edu/libhours2/api/')
+.constant('JSON_URL', '//wwwdev2.lib.ua.edu/libhours2/api/')
 
-.controller('hoursCtrl', ['$scope', function hoursCtrl($scope){
-    $scope.libID = 1;
-}])
 
 
 
 angular.module('hours.calendar', [])
-    .constant('NUM_MONTHS', 6)
 
-    .controller('calendarCtrl', ['$scope', '$element', '$animate', 'hoursFactory', 'NUM_MONTHS',
-        function calendarCtrl($scope, $element, $animate, hoursFactory, nMonths){
+    .controller('calendarCtrl', ['$scope', 'hoursFactory', function calendarCtrl($scope, hoursFactory){
+        $scope.libID = 1;
         $scope.curMonth = 0;
         $scope.calendar = [];
-        var spinner = angular.element('<div id="loading-bar-spinner"><div class="spinner-icon"></div></div>');
-        var elm = $element.find('h2');
-        $animate.enter(spinner, elm, angular.element(elm[0].lastChild));
 
-        hoursFactory.getList("calendar/initial")
+        hoursFactory.getList("calendar")
             .success(function(data) {
-                console.log("Initial data loaded");
+                console.dir(data);
                 $scope.calendar = data;
-                $scope.processClasses(2);
-                hoursFactory.getList("calendar")
-                    .success(function(data) {
-                        $scope.calendar = data;
-                        $scope.processClasses(nMonths);
-                        $animate.leave(spinner);
-                        console.dir($scope.calendar);
-                    })
-                    .error(function(data, status, headers, config) {
-                        console.log('Error: ' + data);
-                    });
+                //determine class for each day
+                $scope.calendar.forEach(function(calendar){
+                    for (var m = 0; m < 6; m++)
+                        for (var w = 0; w < 6; w++)
+                            for (var d = 0; d < 7; d++){
+                                var className = "";
+                                var date = "";
+                                var hours = "";
+                                var exc = "";
+                                var dayClass = "";
+                                var day = calendar.cal[m].weeks[w][d];
+                                if (typeof day.date != "undefined")
+                                    date = day.date;
+                                if (typeof day.hours != "undefined")
+                                    hours = day.hours;
+                                if ((typeof day.exc != "undefined") && (day.exc != null))
+                                    exc = day.exc;
+                                if ((typeof day.today != "undefined") && (day.today))
+                                    dayClass = " today";
+
+                                if ((date.length == 0) && (hours.length == 0))
+                                    className = "prev-month";
+                                else
+                                if ((date.length > 0) && (exc.length > 0) && (hours != 'Closed'))
+                                    className = "exception" + dayClass;
+                                else
+                                if ((date.length > 0) && (exc.length > 0) && (hours == 'Closed'))
+                                    className = "exception closed" + dayClass;
+                                else
+                                if ((date.length > 0) && (exc.length == 0) && (hours == 'Closed'))
+                                    className = "closed" + dayClass;
+                                else
+                                if ((date.length > 0) && (exc.length == 0) && (hours != 'Closed'))
+                                    className = dayClass;
+                                else
+                                if ((date.length == 0) && (hours.length > 0) && (exc.length > 0) && (hours != 'Closed'))
+                                    className = "next-month exception";
+                                else
+                                if ((date.length == 0) && (hours.length > 0) && (exc.length > 0) && (hours == 'Closed'))
+                                    className = "next-month exception closed";
+                                else
+                                if ((date.length == 0) && (hours.length > 0) && (exc.length == 0) && (hours == 'Closed'))
+                                    className = "next-month closed";
+                                else
+                                if ((date.length == 0) && (hours.length > 0) && (exc.length == 0) && (hours != 'Closed'))
+                                    className = "next-month";
+
+                                calendar.cal[m].weeks[w][d].class = className;
+                            }
+                });
             })
             .error(function(data, status, headers, config) {
-                console.log('Initial Error: ' + data);
+                console.log(data);
             });
 
         $scope.nextMonth = function(){
-            if ($scope.curMonth < nMonths - 1)
+            if ($scope.curMonth < 5)
                 $scope.curMonth++;
         };
         $scope.prevMonth = function(){
             if ($scope.curMonth > 0)
                 $scope.curMonth--;
         };
-        //determine class for each day
-        $scope.processClasses = function(numMonths){
-            $scope.calendar.forEach(function(calendar){
-                for (var m = 0; m < numMonths; m++)
-                    for (var w = 0; w < 6; w++)
-                        for (var d = 0; d < 7; d++){
-                            var className = "";
-                            var date = "";
-                            var hours = "";
-                            var exc = "";
-                            var dayClass = "";
-                            var day = calendar.cal[m].weeks[w][d];
-                            if (typeof day.date != "undefined")
-                                date = day.date;
-                            if (typeof day.hours != "undefined")
-                                hours = day.hours;
-                            if ((typeof day.exc != "undefined") && (day.exc != null))
-                                exc = day.exc;
-                            if ((typeof day.today != "undefined") && (day.today))
-                                dayClass = " today";
-
-                            if ((date.length == 0) && (hours.length == 0))
-                                className = "prev-month";
-                            else
-                            if ((date.length > 0) && (exc.length > 0) && (hours != 'Closed'))
-                                className = "exception" + dayClass;
-                            else
-                            if ((date.length > 0) && (exc.length > 0) && (hours == 'Closed'))
-                                className = "exception closed" + dayClass;
-                            else
-                            if ((date.length > 0) && (exc.length == 0) && (hours == 'Closed'))
-                                className = "closed" + dayClass;
-                            else
-                            if ((date.length > 0) && (exc.length == 0) && (hours != 'Closed'))
-                                className = dayClass;
-                            else
-                            if ((date.length == 0) && (hours.length > 0) && (exc.length > 0) && (hours != 'Closed'))
-                                className = "next-month exception";
-                            else
-                            if ((date.length == 0) && (hours.length > 0) && (exc.length > 0) && (hours == 'Closed'))
-                                className = "next-month exception closed";
-                            else
-                            if ((date.length == 0) && (hours.length > 0) && (exc.length == 0) && (hours == 'Closed'))
-                                className = "next-month closed";
-                            else
-                            if ((date.length == 0) && (hours.length > 0) && (exc.length == 0) && (hours != 'Closed'))
-                                className = "next-month";
-
-                            calendar.cal[m].weeks[w][d].class = className;
-                        }
-            });
-        };
     }])
 
     .directive('hoursCalendar', [function(){
     return {
-        restrict: 'A',
+        restrict: 'AC',
         templateUrl: 'calendar/calendar.tpl.html',
         controller: 'calendarCtrl'
     }
@@ -37851,7 +37830,7 @@ angular.module('hours.common', [
 ])
 angular.module('common.hours', [])
 
-    .factory('hoursFactory', ['$http', 'HOURS_API_URL', function hoursFactory($http, url){
+    .factory('hoursFactory', ['$http', 'JSON_URL', function hoursFactory($http, url){
         return {
             getList: function(request){
                 return $http({method: 'GET', url: url + request, params : {}})
@@ -37865,6 +37844,7 @@ angular.module('hours.list', [])
         var spinner = angular.element('<div id="loading-bar-spinner"><div class="spinner-icon"></div></div>');
         var elm = $element.find('h2');
         $scope.hoursList = {};
+        $scope.libID = 1;
 
         $animate.enter(spinner, elm, angular.element(elm[0].lastChild));
 
@@ -37882,21 +37862,19 @@ angular.module('hours.list', [])
             var h = [];
 
             for (var i = 0, len = hours.length; i < len; i++){
-                var text = 'open';
-                var css = 'label label';
                 var status = {
-                    text: text,
-                    css: css+'-success'
+                    text: 'open',
+                    css: 'text-success'
                 };
 
-                if (hours[i].timeLeft <= 7200 && hours[i].timeLeft > 0){
+                if (hours[i].timeLeft <= 7200){
                     if (hours[i].isOpen) status.text = 'closing soon';
                     else status.text = 'opening soon';
-                    status.css = css+'-warning';
+                    status.css = 'text-warning';
                 }
                 else if (!hours[i].isOpen){
                     status.text = 'closed';
-                    status.css = css+'-danger';
+                    status.css = 'text-danger';
                 }
 
                 hours[i].status = status;
@@ -37918,8 +37896,8 @@ angular.module('hours.list', [])
     .directive('hoursList', [function hoursList(){
         return {
             restrict: 'AC',
-            templateUrl: 'list/list.tpl.html',
-            controller: 'ListCtrl'
+            controller: 'ListCtrl',
+            templateUrl: 'list/list.tpl.html'
         }
     }]);;angular.module('manage.templates', ['manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html']);
 
@@ -37929,109 +37907,135 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "\n" +
     "<div>\n" +
     "    <ul class=\"text-center list-inline\">Sort By:\n" +
-    "        <li><button type=\"button\" class=\"btn btn-primary\" ng-model=\"sortButton\" btn-radio=\"'title'\" ng-click=\"sortMode='Title'\">Title</button></li>\n" +
-    "        <li><button type=\"button\" class=\"btn btn-primary\" ng-model=\"sortButton\" btn-radio=\"'publisher'\" ng-click=\"sortMode='Publisher'\">Publisher</button></li>\n" +
-    "        <li><button type=\"button\" class=\"btn btn-primary\" ng-model=\"sortButton\" btn-radio=\"'vendor'\" ng-click=\"sortMode='Vendor'\">Vendor</button></li>\n" +
+    "        <li><button type=\"button\" class=\"btn btn-primary\" ng-model=\"sortButton\" btn-radio=\"'title'\" ng-click=\"sortMode='title'\">Title</button></li>\n" +
+    "        <li><button type=\"button\" class=\"btn btn-primary\" ng-model=\"sortButton\" btn-radio=\"'publisher'\" ng-click=\"sortMode='publisher'\">Publisher</button></li>\n" +
+    "        <li><button type=\"button\" class=\"btn btn-primary\" ng-model=\"sortButton\" btn-radio=\"'vendor'\" ng-click=\"sortMode='vendor'\">Vendor</button></li>\n" +
     "        <li><input type=\"text\" class=\"form-control\" placeholder=\"Filter by Title\" ng-model=\"filterBy\"></li>\n" +
     "    </ul>\n" +
     "\n" +
-    "    <div class=\"row\" ng-repeat=\"db in DBList.results | filter:{Title:filterBy} | orderBy:sortMode\"\n" +
+    "    <div class=\"row\" ng-repeat=\"db in DBList.databases | filter:{title:filterBy} | orderBy:sortMode\"\n" +
     "         ng-class=\"{sdOpen: db.show, sdOver: db.id == mOver}\" ng-mouseover=\"setOver(db)\">\n" +
     "        <div class=\"col-md-12\" ng-click=\"toggleDB(db)\">\n" +
     "            <h4>\n" +
     "                <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"db.show\"></span>\n" +
     "                <span class=\"fa fa-fw fa-caret-down\" ng-show=\"db.show\"></span>\n" +
-    "                <a href=\"{{db.URL}}\">{{db.Title}}</a>\n" +
-    "                <small>{{db.Publisher}} <span ng-show=\"db.Vendor.length > 0\">: {{db.Vendor}}</span></small>\n" +
+    "                <a href=\"{{db.url}}\">{{db.title}}</a>\n" +
+    "                <small>{{db.publisher}} <span ng-show=\"db.vendor.length > 0\">: {{db.vendor}}</span></small>\n" +
     "            </h4>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-12\" ng-show=\"db.show\">\n" +
     "            <div class=\"col-md-6 form-group\">\n" +
     "                <label for=\"{{db.id}}_title\">Title</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.Title}}\" ng-model=\"db.Title\"\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.title}}\" ng-model=\"db.title\"\n" +
     "                       id=\"{{db.id}}_title\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-3 form-group\">\n" +
     "                <label for=\"{{db.id}}_Publisher\">Publisher</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.Publisher}}\" ng-model=\"db.Publisher\"\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.publisher}}\" ng-model=\"db.publisher\"\n" +
     "                       id=\"{{db.id}}_Publisher\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-3 form-group\">\n" +
     "                <label for=\"{{db.id}}_Vendor\">Vendor</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.Vendor}}\" ng-model=\"db.Vendor\"\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.vendor}}\" ng-model=\"db.vendor\"\n" +
     "                       id=\"{{db.id}}_Vendor\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-6 form-group\">\n" +
     "                <label for=\"{{db.id}}_URL\">URL</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.URL}}\" ng-model=\"db.URL\"\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.url}}\" ng-model=\"db.url\"\n" +
     "                       id=\"{{db.id}}_URL\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-2 form-group\">\n" +
     "                <label for=\"{{db.id}}_Location\">Location</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.Location}}\" ng-model=\"db.Location\"\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.location}}\" ng-model=\"db.location\"\n" +
     "                       id=\"{{db.id}}_Location\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-1 form-group\">\n" +
-    "                <label for=\"{{db.id}}_Authenticate\">Authenticate</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.Authenticate}}\" ng-model=\"db.Authenticate\"\n" +
-    "                       id=\"{{db.id}}_Authenticate\">\n" +
+    "                <label for=\"{{db.id}}_NotInEDS\">Not in EDS</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.notInEDS}}\" ng-model=\"db.notInEDS\"\n" +
+    "                       id=\"{{db.id}}_NotInEDS\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-1 form-group\">\n" +
-    "                <label for=\"{{db.id}}_Full-text\">Full-text</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db['Full-text']}}\" ng-model=\"db['Full-text']\"\n" +
+    "                <label for=\"{{db.id}}_Full-text\">Fulltext</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.hasFullText}}\" ng-model=\"db.hasFullText\"\n" +
     "                       id=\"{{db.id}}_Full-text\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-1 form-group\">\n" +
-    "                <label for=\"{{db.id}}_Disable\">Disabled</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.Disable}}\" ng-model=\"db.Disable\"\n" +
-    "                       id=\"{{db.id}}_Disable\">\n" +
+    "                <label for=\"{{db.id}}_Authenticate\">Authenticate</label>\n" +
+    "                <input type=\"checkbox\" class=\"form-control\" ng-model=\"db.auth\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
+    "                       id=\"{{db.id}}_Authenticate\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-1 form-group\">\n" +
-    "                <label for=\"{{db.id}}_NotInEDS\">NotInEDS</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.NotInEDS}}\" ng-model=\"db.NotInEDS\"\n" +
-    "                       id=\"{{db.id}}_NotInEDS\">\n" +
+    "                <label for=\"{{db.id}}_Disable\">Disabled</label>\n" +
+    "                <input type=\"checkbox\" class=\"form-control\" ng-model=\"db.disabled\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
+    "                       id=\"{{db.id}}_Disable\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-6 form-group\">\n" +
     "                <label for=\"{{db.id}}_Coverage\">Coverage</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.Coverage}}\" ng-model=\"db.Coverage\"\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.coverage}}\" ng-model=\"db.coverage\"\n" +
     "                       id=\"{{db.id}}_Coverage\">\n" +
     "            </div>\n" +
-    "            <div class=\"col-md-4 form-group\">\n" +
+    "            <div class=\"col-md-6 form-group\">\n" +
     "                <label for=\"{{db.id}}_Notes\">Notes</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.Notes}}\" ng-model=\"db.Notes\"\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.notes}}\" ng-model=\"db.notes\"\n" +
     "                       id=\"{{db.id}}_Notes\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
-    "                <label for=\"{{db.id}}_alt_title\">Alt Search Title</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.alt_search_title}}\" ng-model=\"db.alt_search_title\"\n" +
-    "                       id=\"{{db.id}}_alt_title\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-12 form-group\">\n" +
     "                <label for=\"{{db.id}}_descr\">Database Description</label>\n" +
-    "                <textarea class=\"form-control\" rows=\"3\" id=\"{{db.id}}_descr\" ng-model=\"db['Database Description']\"></textarea>\n" +
+    "                <textarea class=\"form-control\" rows=\"3\" id=\"{{db.id}}_descr\" ng-model=\"db.description\"></textarea>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-2 form-group\">\n" +
     "                <label for=\"{{db.id}}_presented\">Presented by</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db['Presented by message']}}\" ng-model=\"db['Presented by message']\"\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.presentedBy}}\" ng-model=\"db.presentedBy\"\n" +
     "                       id=\"{{db.id}}_presented\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-2 form-group\">\n" +
     "                <label for=\"{{db.id}}_Audience1\">Audience One</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db['Audience One']}}\" ng-model=\"db['Audience One']\"\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.audience1}}\" ng-model=\"db.audience1\"\n" +
     "                       id=\"{{db.id}}_Audience1\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-2 form-group\">\n" +
     "                <label for=\"{{db.id}}_Audience2\">Audience Two</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db['Audience Two']}}\" ng-model=\"db['Audience Two']\"\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.audience2}}\" ng-model=\"db.audience2\"\n" +
     "                       id=\"{{db.id}}_Audience2\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"{{db.id}}_dAuthor\">Database Description Author</label>\n" +
-    "                <p id=\"{{db.id}}_dAuthor\">{{db['Database Description Author']}}</p>\n" +
+    "                <label for=\"{{db.id}}_dAuthor\">Description Author</label>\n" +
+    "                <p id=\"{{db.id}}_dAuthor\">{{db.descrAuthor}}</p>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-3 form-group\">\n" +
     "                <label for=\"{{db.id}}_date\">Last Modified</label>\n" +
-    "                <p id=\"{{db.id}}_date\">{{db['Date last modified']}}</p>\n" +
+    "                <p id=\"{{db.id}}_date\">{{db.lastModified}}</p>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-12\">\n" +
+    "                <div class=\"col-md-6 form-group\">\n" +
+    "                    <label for=\"{{db.id}}_subjects\">Subjects</label>\n" +
+    "                    <ul class=\"list-group\" id=\"{{db.id}}_subjects\">\n" +
+    "                        <li class=\"list-group-item\" ng-repeat=\"subject in db.subjects\">\n" +
+    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteSubject(db,subject)\">Delete</button>\n" +
+    "                            {{subject.subject}} : {{subject.type}}\n" +
+    "                        </li>\n" +
+    "                        <li class=\"list-group-item form-inline\">\n" +
+    "                            <select class=\"form-control\" ng-model=\"db.selSubj\" ng-options=\"sub.subject for sub in DBList.subjects\">\n" +
+    "                            </select>\n" +
+    "                            <input type=\"text\" class=\"form-control\" placeholder=\"1 or 2\" ng-model=\"db.subjType\">\n" +
+    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addSubject(db)\">Add Subject</button>\n" +
+    "                        </li>\n" +
+    "                    </ul>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-6 form-group\">\n" +
+    "                    <label for=\"{{db.id}}_types\">Types</label>\n" +
+    "                    <ul class=\"list-group\" id=\"{{db.id}}_types\">\n" +
+    "                        <li class=\"list-group-item\" ng-repeat=\"type in db.types\">\n" +
+    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteType(db,type)\">Delete</button>\n" +
+    "                            {{type.type}}\n" +
+    "                        </li>\n" +
+    "                        <li class=\"list-group-item form-inline\">\n" +
+    "                            <select class=\"form-control\" ng-model=\"db.selType\" ng-options=\"typ.type for typ in DBList.types\">\n" +
+    "                            </select>\n" +
+    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addType(db)\">Add Type</button>\n" +
+    "                        </li>\n" +
+    "                    </ul>\n" +
+    "                </div>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-12 text-center\">\n" +
     "                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"updateDB(db)\">Update information</button>\n" +
@@ -38039,6 +38043,132 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                    Delete {{db[0]}} database\n" +
     "                </button>\n" +
     "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "\n" +
+    "<h3>Create new Database</h3>\n" +
+    "<div class=\"row sdOpen\">\n" +
+    "    <div class=\"col-md-12\">\n" +
+    "        <div class=\"col-md-6 form-group\">\n" +
+    "            <label for=\"title\">Title</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Database Title\" ng-model=\"newDB.title\"\n" +
+    "                   id=\"title\">\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-3 form-group\">\n" +
+    "            <label for=\"Publisher\">Publisher</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Publisher\" ng-model=\"newDB.publisher\"\n" +
+    "                   id=\"Publisher\">\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-3 form-group\">\n" +
+    "            <label for=\"Vendor\">Vendor</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Vendor\" ng-model=\"newDB.vendor\"\n" +
+    "                   id=\"Vendor\">\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-6 form-group\">\n" +
+    "            <label for=\"URL\">URL</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"http://www.example.com/\" ng-model=\"newDB.url\"\n" +
+    "                   id=\"URL\">\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-2 form-group\">\n" +
+    "            <label for=\"Location\">Location</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Location\" ng-model=\"newDB.location\"\n" +
+    "                   id=\"Location\">\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-1 form-group\">\n" +
+    "            <label for=\"NotInEDS\">Not in EDS</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" ng-model=\"newDB.notInEDS\"\n" +
+    "                   id=\"NotInEDS\">\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-1 form-group\">\n" +
+    "            <label for=\"Full-text\">Fulltext</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" ng-model=\"newDB.hasFullText\"\n" +
+    "                   id=\"Full-text\">\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-1 form-group\">\n" +
+    "            <label for=\"Authenticate\">Authenticate</label>\n" +
+    "            <input type=\"checkbox\" class=\"form-control\" ng-model=\"newDB.auth\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
+    "                   id=\"Authenticate\">\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-1 form-group\">\n" +
+    "            <label for=\"Disable\">Disabled</label>\n" +
+    "            <input type=\"checkbox\" class=\"form-control\" ng-model=\"newDB.disabled\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
+    "                   id=\"Disable\">\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-6 form-group\">\n" +
+    "            <label for=\"Coverage\">Coverage</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Database Coverage\" ng-model=\"newDB.coverage\"\n" +
+    "                   id=\"Coverage\">\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-6 form-group\">\n" +
+    "            <label for=\"Notes\">Notes</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Notes\" ng-model=\"newDB.notes\"\n" +
+    "                   id=\"Notes\">\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-12 form-group\">\n" +
+    "            <label for=\"descr\">Database Description</label>\n" +
+    "            <textarea class=\"form-control\" rows=\"3\" id=\"descr\" ng-model=\"newDB.description\"></textarea>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-2 form-group\">\n" +
+    "            <label for=\"presented\">Presented by</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Presented By\" ng-model=\"newDB.presentedBy\"\n" +
+    "                   id=\"presented\">\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-2 form-group\">\n" +
+    "            <label for=\"Audience1\">Audience One</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Audience One\" ng-model=\"newDB.audience1\"\n" +
+    "                   id=\"Audience1\">\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-2 form-group\">\n" +
+    "            <label for=\"Audience2\">Audience Two</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Audience Two\" ng-model=\"newDB.audience2\"\n" +
+    "                   id=\"Audience2\">\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-3 form-group\">\n" +
+    "            <label for=\"dAuthor\">Description Author</label>\n" +
+    "            <p id=\"dAuthor\">{{updatedBy}}</p>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-3 form-group\">\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-12\">\n" +
+    "            <div class=\"col-md-6 form-group\">\n" +
+    "                <label for=\"subjects\">Subjects</label>\n" +
+    "                <ul class=\"list-group\" id=\"subjects\">\n" +
+    "                    <li class=\"list-group-item\" ng-repeat=\"subject in newDB.subjects\">\n" +
+    "                        <button type=\"button\" class=\"btn btn-primary\" ng-click=\"delSubjNewDB($index)\">Delete</button>\n" +
+    "                        {{subject.subject}} : {{subject.type}}\n" +
+    "                    </li>\n" +
+    "                    <li class=\"list-group-item row\">\n" +
+    "                        <div class=\"col-md-7\">\n" +
+    "                            <select class=\"form-control\" ng-model=\"newDB.selSubj\" ng-options=\"sub.subject for sub in DBList.subjects\">\n" +
+    "                            </select>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"col-md-2\">\n" +
+    "                            <input type=\"text\" class=\"form-control\" placeholder=\"1 or 2\" ng-model=\"newDB.subjType\">\n" +
+    "                        </div>\n" +
+    "                        <div class=\"col-md-3\">\n" +
+    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addSubjNewDB()\">Add Subject</button>\n" +
+    "                        </div>\n" +
+    "                    </li>\n" +
+    "                </ul>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-6 form-group\">\n" +
+    "                <label for=\"types\">Types</label>\n" +
+    "                <ul class=\"list-group\" id=\"types\">\n" +
+    "                    <li class=\"list-group-item\" ng-repeat=\"type in newDB.types\">\n" +
+    "                        <button type=\"button\" class=\"btn btn-primary\" ng-click=\"delTypeNewDB($index)\">Delete</button>\n" +
+    "                        {{type.type}}\n" +
+    "                    </li>\n" +
+    "                    <li class=\"list-group-item form-inline\">\n" +
+    "                        <select class=\"form-control\" ng-model=\"newDB.selType\" ng-options=\"typ.type for typ in DBList.types\">\n" +
+    "                        </select>\n" +
+    "                        <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addTypeNewDB()\">Add Type</button>\n" +
+    "                    </li>\n" +
+    "                </ul>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-12 text-center\">\n" +
+    "            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"createDB()\">Create Database Record</button>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
@@ -38388,15 +38518,15 @@ angular.module("manageOneSearch/manageOneSearch.tpl.html", []).run(["$templateCa
     "    {{response}}\n" +
     "</div>\n" +
     "<div class=\"row\">\n" +
-    "    <div class=\"col-md-3 form-group\">\n" +
+    "    <div class=\"col-md-4 form-group\">\n" +
     "        <label for=\"filterK\">Filter by Keyword</label>\n" +
     "        <input type=\"text\" class=\"form-control\" placeholder=\"Keyword\" id=\"filterK\" ng-model=\"filterKeyword\">\n" +
     "    </div>\n" +
-    "    <div class=\"col-md-3 form-group\">\n" +
+    "    <div class=\"col-md-4 form-group\">\n" +
     "        <label for=\"filterLT\">Filter by Link Title</label>\n" +
     "        <input type=\"text\" class=\"form-control\" placeholder=\"Link Title\" id=\"filterLT\" ng-model=\"filterLinkTitle\">\n" +
     "    </div>\n" +
-    "    <div class=\"col-md-3 form-group\">\n" +
+    "    <div class=\"col-md-4 form-group\">\n" +
     "        <label for=\"filterL\">Filter by Link</label>\n" +
     "        <input type=\"text\" class=\"form-control\" placeholder=\"Link\" id=\"filterL\" ng-model=\"filterLink\">\n" +
     "    </div>\n" +
@@ -38778,9 +38908,8 @@ angular.module('common.manage', [])
     }])
     .factory('dbFactory', ['$http', 'DATABASES_URL', function dbFactory($http, url){
         return {
-            getData: function(params){
-                params = angular.isDefined(params) ? params : {};
-                return $http({method: 'GET', url: url + "getJSON.php", params: params})
+            getData: function(){
+                return $http({method: 'GET', url: url + "api/all", params: {}})
             },
             postData: function(params, data){
                 params = angular.isDefined(params) ? params : {};
@@ -38790,13 +38919,17 @@ angular.module('common.manage', [])
     }])
 
 angular.module('manage.manageDatabases', [])
-    .controller('manageDBCtrl', ['$scope', '$http', 'dbFactory',
-        function manageDBCtrl($scope, $http, dbFactory){
+    .controller('manageDBCtrl', ['$scope', '$http', '$window', 'dbFactory',
+        function manageDBCtrl($scope, $http, $window, dbFactory){
             $scope.DBList = {};
             $scope.sortMode = 'Title';
             $scope.filterBy = '';
             $scope.sortButton = 'title';
             $scope.mOver = 0;
+            $scope.newDB = {};
+            $scope.newDB.subjects = [];
+            $scope.newDB.types = [];
+            $scope.updatedBy = $window.userName;
 
             var cookies;
             $scope.GetCookie = function (name,c,C,i){
@@ -38814,13 +38947,19 @@ angular.module('manage.manageDatabases', [])
             };
             $http.defaults.headers.post = { 'X-CSRF-libDatabases' : $scope.GetCookie("CSRF-libDatabases") };
 
-            dbFactory.getData({all: 1})
+            dbFactory.getData()
                 .success(function(data) {
                     console.dir(data);
-                    for (var i = 0; i < data.results.length; i++){
-                        data.results[i].show = false;
-                        data.results[i].class = "";
+                    for (var i = 0; i < data.databases.length; i++){
+                        data.databases[i].show = false;
+                        data.databases[i].class = "";
+                        data.databases[i].selSubj = data.subjects[0];
+                        data.databases[i].subjType = 1;
+                        data.databases[i].selType = data.types[0];
                     }
+                    $scope.newDB.selSubj = data.subjects[0];
+                    $scope.newDB.subjType = 1;
+                    $scope.newDB.selType = data.types[0];
                     $scope.DBList = data;
                 })
                 .error(function(data, status, headers, config) {
@@ -38828,11 +38967,161 @@ angular.module('manage.manageDatabases', [])
                 });
 
             $scope.toggleDB = function(db){
-                $scope.DBList.results[$scope.DBList.results.indexOf(db)].show =
-                    !$scope.DBList.results[$scope.DBList.results.indexOf(db)].show;
+                $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].show =
+                    !$scope.DBList.databases[$scope.DBList.databases.indexOf(db)].show;
             };
             $scope.setOver = function(db){
                 $scope.mOver = db.id;
+            };
+
+            $scope.deleteDB = function(db){
+                if (confirm("Delete " + db.title  + " permanently?") == true){
+                    dbFactory.postData({action : 1}, db)
+                        .success(function(data, status, headers, config) {
+                            if (data == 1){
+                                $scope.DBList.databases.splice($scope.DBList.databases.indexOf(db), 1);
+                                $scope.formResponse = "Database has been deleted.";
+                            } else {
+                                $scope.formResponse = "Error: Can not delete database! " + data;
+                            }
+                        })
+                        .error(function(data, status, headers, config) {
+                            $scope.formResponse = "Error: Could not delete database! " + data;
+                        });
+                }
+            };
+            $scope.updateDB = function(db){
+                db.updatedBy = $scope.updatedBy;
+                dbFactory.postData({action : 2}, db)
+                    .success(function(data, status, headers, config) {
+                        if (data == 1){
+                            $scope.formResponse = "Database has been updated.";
+                        } else {
+                            $scope.formResponse = "Error: Can not update database! " + data;
+                        }
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.formResponse = "Error: Could not update database! " + data;
+                    });
+            };
+            $scope.createDB = function(){
+                $scope.newDB.updatedBy = $scope.updatedBy;
+                dbFactory.postData({action : 3}, $scope.newDB)
+                    .success(function(data, status, headers, config) {
+                        if ((typeof data === 'object') && (data !== null)){
+                            var newDB = {};
+                            newDB = angular.copy($scope.newDB);
+                            newDB.id = data.id;
+                            newDB.subjects = angular.copy(data.subjects);
+                            newDB.types = angular.copy(data.types);
+                            newDB.show = false;
+                            newDB.class = "";
+                            newDB.selSubj = data.subjects[0];
+                            newDB.subjType = 1;
+                            newDB.selType = data.types[0];
+                            $scope.DBList.databases.push(newDB);
+                            $scope.formResponse = "Database has been created.";
+                        } else {
+                            $scope.formResponse = "Error: Can not create database! " + data;
+                        }
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.formResponse = "Error: Could not create database! " + data;
+                    });
+            };
+
+            $scope.addSubject = function(db){
+                var newSubject = {};
+                newSubject.dbid = db.id;
+                newSubject.type = db.subjType;
+                newSubject.sid = db.selSubj.sid;
+                newSubject.subject = db.selSubj.subject;
+                newSubject.updatedBy = $scope.updatedBy;
+                dbFactory.postData({action : 4}, newSubject)
+                    .success(function(data, status, headers, config) {
+                        if ((typeof data === 'object') && (data !== null)){
+                            newSubject.id = data.id;
+                            $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].subjects.push(newSubject);
+                            $scope.formResponse = "Subject has been added.";
+                        } else {
+                            $scope.formResponse = "Error: Can not add subject! " + data;
+                        }
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.formResponse = "Error: Could not add subject! " + data;
+                    });
+            };
+            $scope.deleteSubject = function(db,subject){
+                dbFactory.postData({action : 5}, subject)
+                    .success(function(data, status, headers, config) {
+                        if (data == 1){
+                            $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].subjects.splice(
+                                $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].subjects.indexOf(subject),1
+                            );
+                            $scope.formResponse = "Subject has been deleted.";
+                        } else {
+                            $scope.formResponse = "Error: Can not delete subject! " + data;
+                        }
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.formResponse = "Error: Could not delete subject! " + data;
+                    });
+            };
+            $scope.addType = function(db){
+                var newType = {};
+                newType.dbid = db.id;
+                newType.tid = db.selType.tid;
+                newType.type = db.selType.type;
+                newType.updatedBy = $scope.updatedBy;
+                dbFactory.postData({action : 6}, newType)
+                    .success(function(data, status, headers, config) {
+                        if ((typeof data === 'object') && (data !== null)){
+                            newType.id = data.id;
+                            $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].types.push(newType);
+                            $scope.formResponse = "Type has been added.";
+                        } else {
+                            $scope.formResponse = "Error: Can not add type! " + data;
+                        }
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.formResponse = "Error: Could not add type! " + data;
+                    });
+            };
+            $scope.deleteType = function(db,type){
+                dbFactory.postData({action : 7}, type)
+                    .success(function(data, status, headers, config) {
+                        if (data == 1){
+                            $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].types.splice(
+                                $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].types.indexOf(type),1
+                            );
+                            $scope.formResponse = "Type has been deleted.";
+                        } else {
+                            $scope.formResponse = "Error: Can not delete type! " + data;
+                        }
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.formResponse = "Error: Could not delete type! " + data;
+                    });
+            };
+
+            $scope.delSubjNewDB = function(index){
+                $scope.newDB.subjects.splice(index, 1);
+            };
+            $scope.addSubjNewDB = function(){
+                var newSubject = {};
+                newSubject.type = $scope.newDB.subjType;
+                newSubject.sid = $scope.newDB.selSubj.sid;
+                newSubject.subject = $scope.newDB.selSubj.subject;
+                $scope.newDB.subjects.push(newSubject);
+            };
+            $scope.delTypeNewDB = function(index){
+                $scope.newDB.types.splice(index, 1);
+            };
+            $scope.addTypeNewDB = function(){
+                var newType = {};
+                newType.tid = $scope.newDB.selType.tid;
+                newType.type = $scope.newDB.selType.type;
+                $scope.newDB.types.push(newType);
             };
         }])
 
@@ -38850,9 +39139,9 @@ angular.module('manage.manageDatabases', [])
                 $animate.enter(spinner, titleElm[0]);
 
                 var loadingWatcher = scope.$watch(
-                    'DBList',
+                    'DBList.totalTime',
                     function(newVal, oldVal){
-                        if (scope.DBList.totalTime > 0){
+                        if (newVal != oldVal){
                             $animate.leave(spinner);
                             console.log("Databases loaded");
                         }
