@@ -37659,6 +37659,7 @@ angular.module('ui.bootstrap.tabs', [])
 
 angular.module("calendar/calendar.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("calendar/calendar.tpl.html",
+    "<h2>{{calendar[libID - 1].library.name}} Calendar</h2>\n" +
     "<div class=\"calendar table-responsive\">\n" +
     "    <nav class=\"navbar navbar-default navbar-embedded\">\n" +
     "        <button type=\"button\" class=\"btn btn-default navbar-btn navbar-left\" ng-click=\"prevMonth()\">\n" +
@@ -37706,26 +37707,26 @@ angular.module("list/list.tpl.html", []).run(["$templateCache", function($templa
   $templateCache.put("list/list.tpl.html",
     "<h2>Hours <small>today</small></h2>\n" +
     "<div class=\"responsive-table\">\n" +
-    "    <table class=\"table table-hover\">\n" +
-    "        <tbody ng-repeat=\"lib in hoursList track by $index\">\n" +
-    "            <tr ng-click=\"selectLib(lib)\">\n" +
-    "                <td>{{lib.name}}</td>\n" +
-    "                <td>{{lib.hours}}</td>\n" +
-    "                <td ng-class=\"lib.status.css\">{{lib.status.text}}</td>\n" +
-    "                <td>\n" +
-    "                    <span class=\"fa fa-lg fa-info-circle\" ng-if=\"lib.description\" tooltip=\"{{lib.description}}\"></span>\n" +
-    "                </td>\n" +
-    "            </tr>\n" +
-    "            <tr class=\"hours-list-child\" ng-repeat=\"child in lib.children track by $index\" ng-click=\"selectLib(child)\">\n" +
-    "                <td>{{child.name}}</td>\n" +
-    "                <td>{{child.hours}}</td>\n" +
-    "                <td ng-class=\"child.status.css\">{{child.status.text}}</td>\n" +
-    "                <td>\n" +
-    "                    <span class=\"fa fa-lg fa-info-circle\" ng-if=\"child.description\" tooltip=\"{{child.description}}\"></span>\n" +
-    "                </td>\n" +
-    "            </tr>\n" +
-    "        </tbody>\n" +
-    "    </table>\n" +
+    "  <table class=\"table table-hover\">\n" +
+    "    <tbody ng-repeat=\"lib in hoursList track by $index\">\n" +
+    "    <tr ng-click=\"selectLib(lib)\">\n" +
+    "      <td><a href=\"#\">{{lib.name}}</a></td>\n" +
+    "      <td>{{lib.hours}}</td>\n" +
+    "      <td><span ng-class=\"lib.status.css\">{{lib.status.text}}</span></td>\n" +
+    "      <td>\n" +
+    "        <span class=\"fa fa-lg fa-info-circle\" ng-if=\"lib.description\" tooltip=\"{{lib.description}}\"></span>\n" +
+    "      </td>\n" +
+    "    </tr>\n" +
+    "    <tr class=\"hours-list-child\" ng-repeat=\"child in lib.children track by $index\" ng-click=\"selectLib(child)\">\n" +
+    "      <td><a href=\"#\">{{child.name}}</a></td>\n" +
+    "      <td>{{child.hours}}</td>\n" +
+    "      <td><span ng-class=\"child.status.css\">{{child.status.text}}</span></td>\n" +
+    "      <td>\n" +
+    "        <span class=\"fa fa-lg fa-info-circle\" ng-if=\"child.description\" tooltip=\"{{child.description}}\"></span>\n" +
+    "      </td>\n" +
+    "    </tr>\n" +
+    "    </tbody>\n" +
+    "  </table>\n" +
     "</div>");
 }]);
 ;angular.module('hours', [
@@ -37737,90 +37738,110 @@ angular.module("list/list.tpl.html", []).run(["$templateCache", function($templa
     'hours.calendar'
 ])
 
-.constant('JSON_URL', '//wwwdev2.lib.ua.edu/libhours2/api/')
+.constant('HOURS_API_URL', '//wwwdev2.lib.ua.edu/libhours2/api/')
 
+.controller('hoursCtrl', ['$scope', function hoursCtrl($scope){
+    $scope.libID = 1;
+}])
 
 
 
 angular.module('hours.calendar', [])
+    .constant('NUM_MONTHS', 6)
 
-    .controller('calendarCtrl', ['$scope', 'hoursFactory', function calendarCtrl($scope, hoursFactory){
-        $scope.libID = 1;
+    .controller('calendarCtrl', ['$scope', '$element', '$animate', 'hoursFactory', 'NUM_MONTHS',
+        function calendarCtrl($scope, $element, $animate, hoursFactory, nMonths){
         $scope.curMonth = 0;
         $scope.calendar = [];
+        var spinner = angular.element('<div id="loading-bar-spinner"><div class="spinner-icon"></div></div>');
+        var elm = $element.find('h2');
+        $animate.enter(spinner, elm, angular.element(elm[0].lastChild));
 
-        hoursFactory.getList("calendar")
+        hoursFactory.getList("calendar/initial")
             .success(function(data) {
-                console.dir(data);
+                console.log("Initial data loaded");
                 $scope.calendar = data;
-                //determine class for each day
-                $scope.calendar.forEach(function(calendar){
-                    for (var m = 0; m < 6; m++)
-                        for (var w = 0; w < 6; w++)
-                            for (var d = 0; d < 7; d++){
-                                var className = "";
-                                var date = "";
-                                var hours = "";
-                                var exc = "";
-                                var dayClass = "";
-                                var day = calendar.cal[m].weeks[w][d];
-                                if (typeof day.date != "undefined")
-                                    date = day.date;
-                                if (typeof day.hours != "undefined")
-                                    hours = day.hours;
-                                if ((typeof day.exc != "undefined") && (day.exc != null))
-                                    exc = day.exc;
-                                if ((typeof day.today != "undefined") && (day.today))
-                                    dayClass = " today";
-
-                                if ((date.length == 0) && (hours.length == 0))
-                                    className = "prev-month";
-                                else
-                                if ((date.length > 0) && (exc.length > 0) && (hours != 'Closed'))
-                                    className = "exception" + dayClass;
-                                else
-                                if ((date.length > 0) && (exc.length > 0) && (hours == 'Closed'))
-                                    className = "exception closed" + dayClass;
-                                else
-                                if ((date.length > 0) && (exc.length == 0) && (hours == 'Closed'))
-                                    className = "closed" + dayClass;
-                                else
-                                if ((date.length > 0) && (exc.length == 0) && (hours != 'Closed'))
-                                    className = dayClass;
-                                else
-                                if ((date.length == 0) && (hours.length > 0) && (exc.length > 0) && (hours != 'Closed'))
-                                    className = "next-month exception";
-                                else
-                                if ((date.length == 0) && (hours.length > 0) && (exc.length > 0) && (hours == 'Closed'))
-                                    className = "next-month exception closed";
-                                else
-                                if ((date.length == 0) && (hours.length > 0) && (exc.length == 0) && (hours == 'Closed'))
-                                    className = "next-month closed";
-                                else
-                                if ((date.length == 0) && (hours.length > 0) && (exc.length == 0) && (hours != 'Closed'))
-                                    className = "next-month";
-
-                                calendar.cal[m].weeks[w][d].class = className;
-                            }
-                });
+                $scope.processClasses(2);
+                hoursFactory.getList("calendar")
+                    .success(function(data) {
+                        $scope.calendar = data;
+                        $scope.processClasses(nMonths);
+                        $animate.leave(spinner);
+                        console.dir($scope.calendar);
+                    })
+                    .error(function(data, status, headers, config) {
+                        console.log('Error: ' + data);
+                    });
             })
             .error(function(data, status, headers, config) {
-                console.log(data);
+                console.log('Initial Error: ' + data);
             });
 
         $scope.nextMonth = function(){
-            if ($scope.curMonth < 5)
+            if ($scope.curMonth < nMonths - 1)
                 $scope.curMonth++;
         };
         $scope.prevMonth = function(){
             if ($scope.curMonth > 0)
                 $scope.curMonth--;
         };
+        //determine class for each day
+        $scope.processClasses = function(numMonths){
+            $scope.calendar.forEach(function(calendar){
+                for (var m = 0; m < numMonths; m++)
+                    for (var w = 0; w < 6; w++)
+                        for (var d = 0; d < 7; d++){
+                            var className = "";
+                            var date = "";
+                            var hours = "";
+                            var exc = "";
+                            var dayClass = "";
+                            var day = calendar.cal[m].weeks[w][d];
+                            if (typeof day.date != "undefined")
+                                date = day.date;
+                            if (typeof day.hours != "undefined")
+                                hours = day.hours;
+                            if ((typeof day.exc != "undefined") && (day.exc != null))
+                                exc = day.exc;
+                            if ((typeof day.today != "undefined") && (day.today))
+                                dayClass = " today";
+
+                            if ((date.length == 0) && (hours.length == 0))
+                                className = "prev-month";
+                            else
+                            if ((date.length > 0) && (exc.length > 0) && (hours != 'Closed'))
+                                className = "exception" + dayClass;
+                            else
+                            if ((date.length > 0) && (exc.length > 0) && (hours == 'Closed'))
+                                className = "exception closed" + dayClass;
+                            else
+                            if ((date.length > 0) && (exc.length == 0) && (hours == 'Closed'))
+                                className = "closed" + dayClass;
+                            else
+                            if ((date.length > 0) && (exc.length == 0) && (hours != 'Closed'))
+                                className = dayClass;
+                            else
+                            if ((date.length == 0) && (hours.length > 0) && (exc.length > 0) && (hours != 'Closed'))
+                                className = "next-month exception";
+                            else
+                            if ((date.length == 0) && (hours.length > 0) && (exc.length > 0) && (hours == 'Closed'))
+                                className = "next-month exception closed";
+                            else
+                            if ((date.length == 0) && (hours.length > 0) && (exc.length == 0) && (hours == 'Closed'))
+                                className = "next-month closed";
+                            else
+                            if ((date.length == 0) && (hours.length > 0) && (exc.length == 0) && (hours != 'Closed'))
+                                className = "next-month";
+
+                            calendar.cal[m].weeks[w][d].class = className;
+                        }
+            });
+        };
     }])
 
     .directive('hoursCalendar', [function(){
     return {
-        restrict: 'AC',
+        restrict: 'A',
         templateUrl: 'calendar/calendar.tpl.html',
         controller: 'calendarCtrl'
     }
@@ -37830,7 +37851,7 @@ angular.module('hours.common', [
 ])
 angular.module('common.hours', [])
 
-    .factory('hoursFactory', ['$http', 'JSON_URL', function hoursFactory($http, url){
+    .factory('hoursFactory', ['$http', 'HOURS_API_URL', function hoursFactory($http, url){
         return {
             getList: function(request){
                 return $http({method: 'GET', url: url + request, params : {}})
@@ -37844,7 +37865,6 @@ angular.module('hours.list', [])
         var spinner = angular.element('<div id="loading-bar-spinner"><div class="spinner-icon"></div></div>');
         var elm = $element.find('h2');
         $scope.hoursList = {};
-        $scope.libID = 1;
 
         $animate.enter(spinner, elm, angular.element(elm[0].lastChild));
 
@@ -37862,19 +37882,21 @@ angular.module('hours.list', [])
             var h = [];
 
             for (var i = 0, len = hours.length; i < len; i++){
+                var text = 'open';
+                var css = 'label label';
                 var status = {
-                    text: 'open',
-                    css: 'text-success'
+                    text: text,
+                    css: css+'-success'
                 };
 
-                if (hours[i].timeLeft <= 7200){
+                if (hours[i].timeLeft <= 7200 && hours[i].timeLeft > 0){
                     if (hours[i].isOpen) status.text = 'closing soon';
                     else status.text = 'opening soon';
-                    status.css = 'text-warning';
+                    status.css = css+'-warning';
                 }
                 else if (!hours[i].isOpen){
                     status.text = 'closed';
-                    status.css = 'text-danger';
+                    status.css = css+'-danger';
                 }
 
                 hours[i].status = status;
@@ -37896,10 +37918,133 @@ angular.module('hours.list', [])
     .directive('hoursList', [function hoursList(){
         return {
             restrict: 'AC',
-            controller: 'ListCtrl',
-            templateUrl: 'list/list.tpl.html'
+            templateUrl: 'list/list.tpl.html',
+            controller: 'ListCtrl'
         }
-    }]);;angular.module('manage.templates', ['manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html']);
+    }]);;angular.module('manage.templates', ['manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html']);
+
+angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("manageDatabases/manageDatabases.tpl.html",
+    "<h2>Manage Databases</h2>\n" +
+    "\n" +
+    "<div>\n" +
+    "    <ul class=\"text-center list-inline\">Sort By:\n" +
+    "        <li><button type=\"button\" class=\"btn btn-primary\" ng-model=\"sortButton\" btn-radio=\"'title'\" ng-click=\"sortMode='Title'\">Title</button></li>\n" +
+    "        <li><button type=\"button\" class=\"btn btn-primary\" ng-model=\"sortButton\" btn-radio=\"'publisher'\" ng-click=\"sortMode='Publisher'\">Publisher</button></li>\n" +
+    "        <li><button type=\"button\" class=\"btn btn-primary\" ng-model=\"sortButton\" btn-radio=\"'vendor'\" ng-click=\"sortMode='Vendor'\">Vendor</button></li>\n" +
+    "        <li><input type=\"text\" class=\"form-control\" placeholder=\"Filter by Title\" ng-model=\"filterBy\"></li>\n" +
+    "    </ul>\n" +
+    "\n" +
+    "    <div class=\"row\" ng-repeat=\"db in DBList.results | filter:{Title:filterBy} | orderBy:sortMode\"\n" +
+    "         ng-class=\"{sdOpen: db.show, sdOver: db.id == mOver}\" ng-mouseover=\"setOver(db)\">\n" +
+    "        <div class=\"col-md-12\" ng-click=\"toggleDB(db)\">\n" +
+    "            <h4>\n" +
+    "                <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"db.show\"></span>\n" +
+    "                <span class=\"fa fa-fw fa-caret-down\" ng-show=\"db.show\"></span>\n" +
+    "                <a href=\"{{db.URL}}\">{{db.Title}}</a>\n" +
+    "                <small>{{db.Publisher}} <span ng-show=\"db.Vendor.length > 0\">: {{db.Vendor}}</span></small>\n" +
+    "            </h4>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-12\" ng-show=\"db.show\">\n" +
+    "            <div class=\"col-md-6 form-group\">\n" +
+    "                <label for=\"{{db.id}}_title\">Title</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.Title}}\" ng-model=\"db.Title\"\n" +
+    "                       id=\"{{db.id}}_title\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-3 form-group\">\n" +
+    "                <label for=\"{{db.id}}_Publisher\">Publisher</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.Publisher}}\" ng-model=\"db.Publisher\"\n" +
+    "                       id=\"{{db.id}}_Publisher\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-3 form-group\">\n" +
+    "                <label for=\"{{db.id}}_Vendor\">Vendor</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.Vendor}}\" ng-model=\"db.Vendor\"\n" +
+    "                       id=\"{{db.id}}_Vendor\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-6 form-group\">\n" +
+    "                <label for=\"{{db.id}}_URL\">URL</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.URL}}\" ng-model=\"db.URL\"\n" +
+    "                       id=\"{{db.id}}_URL\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2 form-group\">\n" +
+    "                <label for=\"{{db.id}}_Location\">Location</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.Location}}\" ng-model=\"db.Location\"\n" +
+    "                       id=\"{{db.id}}_Location\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-1 form-group\">\n" +
+    "                <label for=\"{{db.id}}_Authenticate\">Authenticate</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.Authenticate}}\" ng-model=\"db.Authenticate\"\n" +
+    "                       id=\"{{db.id}}_Authenticate\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-1 form-group\">\n" +
+    "                <label for=\"{{db.id}}_Full-text\">Full-text</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db['Full-text']}}\" ng-model=\"db['Full-text']\"\n" +
+    "                       id=\"{{db.id}}_Full-text\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-1 form-group\">\n" +
+    "                <label for=\"{{db.id}}_Disable\">Disabled</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.Disable}}\" ng-model=\"db.Disable\"\n" +
+    "                       id=\"{{db.id}}_Disable\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-1 form-group\">\n" +
+    "                <label for=\"{{db.id}}_NotInEDS\">NotInEDS</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.NotInEDS}}\" ng-model=\"db.NotInEDS\"\n" +
+    "                       id=\"{{db.id}}_NotInEDS\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-6 form-group\">\n" +
+    "                <label for=\"{{db.id}}_Coverage\">Coverage</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.Coverage}}\" ng-model=\"db.Coverage\"\n" +
+    "                       id=\"{{db.id}}_Coverage\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-4 form-group\">\n" +
+    "                <label for=\"{{db.id}}_Notes\">Notes</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.Notes}}\" ng-model=\"db.Notes\"\n" +
+    "                       id=\"{{db.id}}_Notes\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2 form-group\">\n" +
+    "                <label for=\"{{db.id}}_alt_title\">Alt Search Title</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.alt_search_title}}\" ng-model=\"db.alt_search_title\"\n" +
+    "                       id=\"{{db.id}}_alt_title\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-12 form-group\">\n" +
+    "                <label for=\"{{db.id}}_descr\">Database Description</label>\n" +
+    "                <textarea class=\"form-control\" rows=\"3\" id=\"{{db.id}}_descr\" ng-model=\"db['Database Description']\"></textarea>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2 form-group\">\n" +
+    "                <label for=\"{{db.id}}_presented\">Presented by</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db['Presented by message']}}\" ng-model=\"db['Presented by message']\"\n" +
+    "                       id=\"{{db.id}}_presented\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2 form-group\">\n" +
+    "                <label for=\"{{db.id}}_Audience1\">Audience One</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db['Audience One']}}\" ng-model=\"db['Audience One']\"\n" +
+    "                       id=\"{{db.id}}_Audience1\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2 form-group\">\n" +
+    "                <label for=\"{{db.id}}_Audience2\">Audience Two</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db['Audience Two']}}\" ng-model=\"db['Audience Two']\"\n" +
+    "                       id=\"{{db.id}}_Audience2\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-3 form-group\">\n" +
+    "                <label for=\"{{db.id}}_dAuthor\">Database Description Author</label>\n" +
+    "                <p id=\"{{db.id}}_dAuthor\">{{db['Database Description Author']}}</p>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-3 form-group\">\n" +
+    "                <label for=\"{{db.id}}_date\">Last Modified</label>\n" +
+    "                <p id=\"{{db.id}}_date\">{{db['Date last modified']}}</p>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-12 text-center\">\n" +
+    "                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"updateDB(db)\">Update information</button>\n" +
+    "                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteDB(db)\">\n" +
+    "                    Delete {{db[0]}} database\n" +
+    "                </button>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "\n" +
+    "");
+}]);
 
 angular.module("manageHours/manageEx.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageHours/manageEx.tpl.html",
@@ -38216,7 +38361,7 @@ angular.module("manageOneSearch/manageOneSearch.tpl.html", []).run(["$templateCa
   $templateCache.put("manageOneSearch/manageOneSearch.tpl.html",
     "<h3>OneSearch Recommended Links Management</h3>\n" +
     "\n" +
-    "<form class=\"form-inline\" ng-submit=\"addRecommendation()\">\n" +
+    "<form ng-submit=\"addRecommendation()\">\n" +
     "    <div class=\"row\">\n" +
     "        <div class=\"col-md-3 form-group\">\n" +
     "            <label for=\"K\">Keyword</label>\n" +
@@ -38565,7 +38710,8 @@ angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCach
     'manage.manageUserGroups',
     'manage.siteFeedback',
     'manage.manageOneSearch',
-    'manage.staffDirectory'
+    'manage.staffDirectory',
+    'manage.manageDatabases'
 ])
 
     .constant('HOURS_MANAGE_URL', '//wwwdev2.lib.ua.edu/libhours2/')
@@ -38573,6 +38719,7 @@ angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCach
     .constant('SITE_FEEDBACK_URL', '//wwwdev2.lib.ua.edu/siteSurvey/')
     .constant('ONE_SEARCH_URL', '//wwwdev2.lib.ua.edu/oneSearch/')
     .constant('STAFF_DIR_URL', '//wwwdev2.lib.ua.edu/staffDir/')
+    .constant('DATABASES_URL', '//wwwdev2.lib.ua.edu/databases/')
 
 angular.module('manage.common', [
     'common.manage'
@@ -38628,7 +38775,94 @@ angular.module('common.manage', [])
                 return $http({method: 'POST', url: url + "processData.php", params: params, data: data})
             }
         }
-    }]);
+    }])
+    .factory('dbFactory', ['$http', 'DATABASES_URL', function dbFactory($http, url){
+        return {
+            getData: function(params){
+                params = angular.isDefined(params) ? params : {};
+                return $http({method: 'GET', url: url + "getJSON.php", params: params})
+            },
+            postData: function(params, data){
+                params = angular.isDefined(params) ? params : {};
+                return $http({method: 'POST', url: url + "processData.php", params: params, data: data})
+            }
+        }
+    }])
+
+angular.module('manage.manageDatabases', [])
+    .controller('manageDBCtrl', ['$scope', '$http', 'dbFactory',
+        function manageDBCtrl($scope, $http, dbFactory){
+            $scope.DBList = {};
+            $scope.sortMode = 'Title';
+            $scope.filterBy = '';
+            $scope.sortButton = 'title';
+            $scope.mOver = 0;
+
+            var cookies;
+            $scope.GetCookie = function (name,c,C,i){
+                if(cookies){ return cookies[name]; }
+
+                c = document.cookie.split('; ');
+                cookies = {};
+
+                for(i=c.length-1; i>=0; i--){
+                    C = c[i].split('=');
+                    cookies[C[0]] = C[1];
+                }
+
+                return cookies[name];
+            };
+            $http.defaults.headers.post = { 'X-CSRF-libDatabases' : $scope.GetCookie("CSRF-libDatabases") };
+
+            dbFactory.getData({all: 1})
+                .success(function(data) {
+                    console.dir(data);
+                    for (var i = 0; i < data.results.length; i++){
+                        data.results[i].show = false;
+                        data.results[i].class = "";
+                    }
+                    $scope.DBList = data;
+                })
+                .error(function(data, status, headers, config) {
+                    console.log(data);
+                });
+
+            $scope.toggleDB = function(db){
+                $scope.DBList.results[$scope.DBList.results.indexOf(db)].show =
+                    !$scope.DBList.results[$scope.DBList.results.indexOf(db)].show;
+            };
+            $scope.setOver = function(db){
+                $scope.mOver = db.id;
+            };
+        }])
+
+    .directive('databasesManageList', function($animate) {
+        return {
+            restrict: 'A',
+            scope: {},
+            controller: 'manageDBCtrl',
+            link: function(scope, elm, attrs){
+                //Preload the spinner element
+                var spinner = angular.element('<div id="loading-bar-spinner"><div class="spinner-icon"></div></div>');
+                //Preload the location of the boxe's title element (needs to be more dynamic in the future)
+                var titleElm = elm.find('h2');
+                //Enter the spinner animation, appending it to the title element
+                $animate.enter(spinner, titleElm[0]);
+
+                var loadingWatcher = scope.$watch(
+                    'DBList',
+                    function(newVal, oldVal){
+                        if (scope.DBList.totalTime > 0){
+                            $animate.leave(spinner);
+                            console.log("Databases loaded");
+                        }
+                    },
+                    true
+                );
+            },
+            templateUrl: 'manageDatabases/manageDatabases.tpl.html'
+        };
+    })
 
 angular.module('manage.manageHours', [])
     .constant('HOURS_FROM', [

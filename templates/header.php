@@ -1,10 +1,11 @@
 <?php
-include_once WEBAPPS_PATH . "userGroupsAdmin/constants.php";
-include_once WEBAPPS_PATH . "userGroupsAdmin/functions.php";
+@include_once WEBAPPS_PATH . "userGroupsAdmin/constants.php";
+@include_once WEBAPPS_PATH . "userGroupsAdmin/functions.php";
 
 $showAdminLink = false;
-if (($wpUser = gDoesUserHaveAccessWP( GROUP_ADMIN )) !== false){
-    $showAdminLink = true;
+if (defined('GROUP_ADMIN'))
+    if (($wpUser = gDoesUserHaveAccessWP( GROUP_ADMIN )) !== false){
+        $showAdminLink = true;
 }
 ?>
 <header role="banner">
