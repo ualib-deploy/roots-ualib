@@ -28286,7 +28286,7 @@ angular.module('angular.filter', [
 
   'a8m.filter-watcher'
 ]);
-})( window, window.angular );;angular.module('ualib.ui.templates', ['page/templates/page-section.tpl.html', 'page/templates/page.tpl.html', 'stepcard/templates/step-card.tpl.html', 'stepcard/templates/step.tpl.html', 'tabs/templates/tab.tpl.html', 'tabs/templates/tabset.tpl.html', 'tmp.tpl.html']);
+})( window, window.angular );;angular.module('ualib.ui.templates', ['page/templates/page-section.tpl.html', 'page/templates/page.tpl.html', 'stepcard/templates/step-card.tpl.html', 'stepcard/templates/step.tpl.html', 'tabs/templates/tab.tpl.html', 'tabs/templates/tabset.tpl.html']);
 
 angular.module("page/templates/page-section.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("page/templates/page-section.tpl.html",
@@ -28350,134 +28350,11 @@ angular.module("tabs/templates/tabset.tpl.html", []).run(["$templateCache", func
     "    </div>\n" +
     "</div>");
 }]);
-
-angular.module("tmp.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("tmp.tpl.html",
-    "<div class=\"container home-slice\">\n" +
-    "    <div class=\"row\">\n" +
-    "        <div class=\"col-sm-6\" style=\"padding: 15px; background-color: rgba(255,255,255,.9); display: table;\">\n" +
-    "            <div class=\"event-card\" style=\"display: table-row\">\n" +
-    "                <div style=\"text-align: right; font-size: 20px; color: #999; display: table-cell; vertical-align: top; padding-right: 15px;\">          News        </div>\n" +
-    "                <div style=\"display: table-cell; vertical-align: top;\">\n" +
-    "                    <div class=\"media\">\n" +
-    "                        <div class=\"media-left\">\n" +
-    "                            <a href=\"#\">\n" +
-    "                                <div class=\"media-object\" style=\"background-color: #999; height: 64px; width: 64px;\"/>\n" +
-    "                            </a>\n" +
-    "                        </div>\n" +
-    "                        <div class=\"media-body\">\n" +
-    "                            <h4 class=\"media-heading\">Visiting Poet To Give Reading on UA Campus</h4>\n" +
-    "                            The Coal Royalty Fund of the English Department at the University of Alabama presents Cathy Park Hong.\n" +
-    "                        </div>\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "            </div>\n" +
-    "            <div class=\"event-card\" style=\"display: table-row\">\n" +
-    "                <div style=\"text-align: right; font-size: 20px; color: #999; display: table-cell; vertical-align: top; padding-right: 15px;\">          Events        </div>\n" +
-    "                <div style=\"display: table-cell; vertical-align: top;\">\n" +
-    "                    <div class=\"media\">\n" +
-    "                        <div class=\"media-left\">\n" +
-    "                            <a href=\"#\">\n" +
-    "                                <div class=\"media-object\" style=\"background-color: #999; height: 64px; width: 64px;\"/>\n" +
-    "                            </a>\n" +
-    "                        </div>\n" +
-    "                        <div class=\"media-body\">\n" +
-    "                            <h4 class=\"media-heading\">UA Eco-Health Workshop</h4>\n" +
-    "                            Sponsored by: Office for Research and Economic Development/ Office for Sponsored Programs\n" +
-    "                        </div>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"media\">\n" +
-    "                        <div class=\"media-left\">\n" +
-    "                            <a href=\"#\">\n" +
-    "                                <div class=\"media-object\" style=\"background-color: #999; height: 64px; width: 64px;\"/>\n" +
-    "                            </a>\n" +
-    "                        </div>\n" +
-    "                        <div class=\"media-body\">\n" +
-    "                            <h4 class=\"media-heading\">Visiting Poet To Give Reading on UA Campus</h4>\n" +
-    "                            Sponsored by: Office for Sponsored Programs/Office for Research and Economic Development\n" +
-    "                        </div>\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "            </div>\n" +
-    "            <div class=\"event-card\" style=\"display: table-row\">\n" +
-    "                <div style=\"text-align: right; font-size: 20px; color: #999; display: table-cell; vertical-align: top; padding-right: 15px;\">          Exhibits        </div>\n" +
-    "                <div style=\"display: table-cell; vertical-align: top;\">\n" +
-    "                    <div class=\"media\">\n" +
-    "                        <div class=\"media-left\">\n" +
-    "                            <a href=\"#\">\n" +
-    "                                <div class=\"media-object\" style=\"background-color: #999; height: 64px; width: 64px;\"/>\n" +
-    "                            </a>\n" +
-    "                        </div>\n" +
-    "                        <div class=\"media-body\">              Lorem ipsum dolor sit amet, consectetur adipiscing elit.              Donec vitae.            </div>\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-sm-6\"></div>\n" +
-    "    </div>\n" +
-    "    <div class=\"row\">\n" +
-    "        <div class=\"col-sm-6\" style=\"background-color: rgba(255, 255, 255, 0.9); display: table; color: #999; margin-top: 30px; padding-bottom:15px;\">\n" +
-    "            <h3>Available Computers</h3>\n" +
-    "            <div class=\"col-xs-2 text-center\">\n" +
-    "                <div class=\"row\">\n" +
-    "                    <div class=\"col-xs-12\" style=\"font-size: 20px;\">\n" +
-    "                        <small>Gorgas</small>\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "                <div class=\"row\">\n" +
-    "                    <div class=\"col-xs-12\" style=\"font-size: 40px; color:#333333;\">97</div>\n" +
-    "                </div>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-xs-2 text-center\">\n" +
-    "                <div class=\"row\">\n" +
-    "                    <div class=\"col-xs-12\" style=\"font-size: 20px;\">\n" +
-    "                        <small>Rodgers</small>\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "                <div class=\"row\">\n" +
-    "                    <div class=\"col-xs-12\" style=\"font-size: 40px; color:#333333;\">15</div>\n" +
-    "                </div>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-xs-2 text-center\">\n" +
-    "                <div class=\"row\">\n" +
-    "                    <div class=\"col-xs-12\" style=\"font-size: 20px;\">\n" +
-    "                        <small>McLure</small>\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "                <div class=\"row\">\n" +
-    "                    <div class=\"col-xs-12\" style=\"font-size: 40px; color:#333333;\">36</div>\n" +
-    "                </div>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-xs-2 text-center\">\n" +
-    "                <div class=\"row\">\n" +
-    "                    <div class=\"col-xs-12\" style=\"font-size: 20px;\">\n" +
-    "                        <small>Bruno</small>\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "                <div class=\"row\">\n" +
-    "                    <div class=\"col-xs-12\" style=\"font-size: 40px; color:#333333;\">21</div>\n" +
-    "                </div>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-xs-4 text-center\">\n" +
-    "                <div class=\"row\">\n" +
-    "                    <div class=\"col-xs-12\" style=\"font-size: 20px;\">\n" +
-    "                        <small>Sanford Media</small>\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "                <div class=\"row\">\n" +
-    "                    <div class=\"col-xs-12\" style=\"font-size: 40px; color:#333333;\">2</div>\n" +
-    "                </div>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "    </div>\n" +
-    "    <div class=\"col-sm-6\"></div>\n" +
-    "</div>");
-}]);
 ;/*
  * angular-ui-bootstrap
  * http://angular-ui.github.io/bootstrap/
 
- * Version: 0.12.1 - 2015-04-14
+ * Version: 0.12.1 - 2015-04-15
  * License: MIT
  */
 angular.module("ui.bootstrap", ["ui.bootstrap.tpls", "ui.bootstrap.transition","ui.bootstrap.collapse","ui.bootstrap.accordion","ui.bootstrap.alert","ui.bootstrap.bindHtml","ui.bootstrap.buttons","ui.bootstrap.carousel","ui.bootstrap.dateparser","ui.bootstrap.position","ui.bootstrap.datepicker","ui.bootstrap.modal","ui.bootstrap.pagination","ui.bootstrap.tooltip","ui.bootstrap.popover","ui.bootstrap.progressbar","ui.bootstrap.rating","ui.bootstrap.timepicker","ui.bootstrap.typeahead"]);
@@ -32231,7 +32108,6 @@ angular.module('ualib.ui')
             restrict: 'AC',
             link: function(scope, elm){
                 elm.bind('click', function(ev){
-                    ev.preventDefault();
                     ev.stopPropagation();
                 });
 
@@ -32725,9 +32601,7 @@ angular.module('ualib.ui')
                 node.tagName.toLowerCase() === 'data-tab-heading'
                 );
         }
-    })
-
-;;angular.module('oneSearch.templates', ['bento/bento.tpl.html', 'common/directives/suggest/suggest.tpl.html', 'common/engines/acumen/acumen.tpl.html', 'common/engines/catalog/catalog.tpl.html', 'common/engines/databases/databases.tpl.html', 'common/engines/ejournals/ejournals.tpl.html', 'common/engines/google-cs/google-cs.tpl.html', 'common/engines/recommend/recommend.tpl.html', 'common/engines/scout/scout.tpl.html']);
+    });;angular.module('oneSearch.templates', ['bento/bento.tpl.html', 'common/directives/suggest/suggest.tpl.html', 'common/engines/acumen/acumen.tpl.html', 'common/engines/catalog/catalog.tpl.html', 'common/engines/databases/databases.tpl.html', 'common/engines/ejournals/ejournals.tpl.html', 'common/engines/google-cs/google-cs.tpl.html', 'common/engines/recommend/recommend.tpl.html', 'common/engines/scout/scout.tpl.html']);
 
 angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("bento/bento.tpl.html",
@@ -33437,7 +33311,7 @@ angular.module('oneSearch.common')
                         }
                 };
                 $scope.onFocus = function(){
-                    if ($scope.model.length > 2){
+                    if (angular.isDefined($scope.model) && $scope.model.length > 2){
                         $scope.selected = false;
                     }
                 };
@@ -34083,7 +33957,16 @@ angular.module('common.oneSearch', [])
         $scope.searchText;
         $scope.search = function(){
             if ($scope.searchText){
-                $location.path('/bento/'+$scope.searchText);
+                // Compensate for when not on home page
+                // Since WP pages aren't loaded as angular routes, we must detect if there is no '#/PATH' present
+                // after the URI (or that it's not a 'bento' route), then send the browser to a pre-build URL.
+                if (!$location.path() || $location.path().indexOf('/bento') < 0){
+                    var url = '//' + $location.host() + '#/bento/'+$scope.searchText;
+                    window.location = url; //Angular 1.2.8 $location is too limited...
+                }
+                else{
+                    $location.path('/bento/'+$scope.searchText);
+                }
             }
         }
 

@@ -26,7 +26,7 @@ if (defined('GROUP_ADMIN'))
                             </a>
                         </li>
                     <?php endif; ?>
-                    <li class="dropdown yamm-fw">
+                    <li class="dropdown yamm-fw" dropdown-sticky>
                         <a href="#" class="dropdown-toggle icon-only" title="My Accounts" ng-click="mainNavbarCollapsed = false;">
                             <span class="fa fa-user"></span>
                         </a>
@@ -125,7 +125,7 @@ if (defined('GROUP_ADMIN'))
                             </li>
                         </ul>
                     </li>
-                    <li class="<?php if (is_front_page()) print 'dropdown-static ';?>dropdown yamm-fw">
+                    <li class="<?php if (is_front_page()) print 'dropdown-static ';?>dropdown yamm-fw"  dropdown-sticky>
                         <a href="#" class="dropdown-toggle icon-only" ng-click="mainNavbarCollapsed = false;">
                             <span class="fa fa-search"></span>
                         </a>
