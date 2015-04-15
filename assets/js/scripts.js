@@ -35947,13 +35947,13 @@ angular.module("common/engines/databases/databases.tpl.html", []).run(["$templat
     "<div class=\"media\">\n" +
     "    <div class=\"media-body\">\n" +
     "        <h4 class=\"media-heading\">\n" +
-    "            <a ng-href=\"{{item[5]}}\" title=\"{{item[0]}}\">{{item[0] | truncate: 40: '...': true}}</a>\n" +
+    "            <a ng-href=\"{{item.url}}\" title=\"{{item.title}}\">{{item.title | truncate: 40: '...': true}}</a>\n" +
     "        </h4>\n" +
     "        <div class=\"details-context\">\n" +
-    "            <span ng-if=\"item[14]\" ng-bind-html=\"item[14]\"></span>\n" +
+    "            <span ng-if=\"item.coverage\" ng-bind-html=\"item.coverage\"></span>\n" +
     "        </div>\n" +
     "        <p>\n" +
-    "            {{item[15] | truncate: 125: '...'}}\n" +
+    "            {{item.description | truncate: 125: '...'}}\n" +
     "        </p>\n" +
     "    </div>\n" +
     "</div>");
@@ -36082,6 +36082,7 @@ angular.module("common/engines/scout/scout.tpl.html", []).run(["$templateCache",
  */
 angular.module('oneSearch', [
     'ngRoute',
+    'ngResource',
     'ngAnimate',
     'ngSanitize',
     'ui.bootstrap',
@@ -36091,7 +36092,7 @@ angular.module('oneSearch', [
     'oneSearch.bento'
 ])
     // The URL to the backend JSON resource handler
-    .constant('ONE_SEARCH_URL', 'https://wwwdev2.lib.ua.edu/oneSearch/getJSON.php')
+    .constant('ONE_SEARCH_URL', '//wwwdev2.lib.ua.edu/oneSearch/getJSON.php')
 
     // Default search parameters
     .value('SearchParams', {
@@ -36197,7 +36198,7 @@ angular.module('oneSearch.bento', [])
             //  Iterate over the Promises for each engine returned by the oneSearch.searchAll() function
             angular.forEach(engines, function(engine, name){
                 engine.response
-                    .success(function(data){ // If $http call was a success
+                    .$promise.then(function(data){ // If $http call was a success
 
                         // User the engine's results getter to get the results object
                         // The results getter is defined by the JSON path defined by the
@@ -36234,8 +36235,7 @@ angular.module('oneSearch.bento', [])
                             self.engines[name].tpl = oneSearch.getEngineTemplate(engine);
                             self.engines[name].controller = oneSearch.getEngineController(engine);
                         }
-                    })
-                    .error(function(msg){
+                    }, function(msg){
                         // If error code return from $http, iterate through boxes object
                         // and remove any instance engine from a box's "engines" array
                         removeFromBoxes(name);
@@ -36554,7 +36554,7 @@ angular.module('engines.acumen', [])
                 for (var i = 0, len = items.length; i < len; i++) {
                     if (items[i].type) {
                         //console.log(items[i].type);
-                        if (items[i].type[0] == 'text' && items[i].details.genre) items[i].type = items[i].details.genre.sort().shift();
+                        if (items[i].type[0] == 'text' && items[i].details && items[i].details.genre) items[i].type = items[i].details.genre.sort().shift();
                         else items[i].type = items[i].type.sort().shift();
                     }
                 }
@@ -36626,8 +36626,8 @@ angular.module('engines.databases', [])
     .config(['oneSearchProvider', function(oneSearchProvider){
         oneSearchProvider.engine('databases', {
             id: 2,
-            resultsPath: 'Databases.results',
-            totalsPath: 'Databases.total',
+            resultsPath: 'Databases.databases',
+            totalsPath: 'Databases.totalResults',
             templateUrl: 'common/engines/databases/databases.tpl.html'
         })
     }])
@@ -36730,7 +36730,7 @@ angular.module('engines.libguides', [])
             resultsPath: 'GoogleCS.items',
             totalsPath: 'GoogleCS.searchInformation.totalResults',
             filterQuery: 'site:guides.lib.ua.edu',
-            templateUrl: 'common/engines/libguides/libguides.tpl.html'
+            templateUrl: 'common/engines/google-cs/google-cs.tpl.html'
         })
     }])
 angular.module('engines.recommend', [])
@@ -36990,10 +36990,13 @@ angular.module('common.mediaTypes', [])
  */
 angular.module('common.oneSearch', [])
 
+    .factory('Search', ['$resource', function($resource){
+        return $resource("//wwwdev2.lib.ua.edu/oneSearch/api/search/:s/engine/:engine/limit/:pp");
+    }])
+
     .provider('oneSearch', ['mediaTypesProvider', function oneSearchProvider(mediaTypesProvider){
         //private object that holds registered engines
         var _engines = {};
-
 
         //function to allow engines to register as searchable
         this.engine = function(name, engine){
@@ -37001,7 +37004,6 @@ angular.module('common.oneSearch', [])
                 var defaults = {
                     id: null, resultsPath: null, totalsPath: null, mediaTypes: null, templateUrl: null, filterQuery: null, controller: null
                 };
-
 
                 var e = angular.extend(defaults, engine);
                 if (e.id){
@@ -37023,7 +37025,7 @@ angular.module('common.oneSearch', [])
             }
         };
 
-        this.$get = ['$http', '$parse', 'enginesTemplateFactory', 'SearchParams', 'ONE_SEARCH_URL', function($http, $parse, enginesTemplateFactory, SearchParams, url){
+        this.$get = ['$http', '$parse', 'enginesTemplateFactory', 'SearchParams', 'ONE_SEARCH_URL', 'Search', function($http, $parse, enginesTemplateFactory, SearchParams, url, Search){
 
             return {
                 engines: _engines, // Expose engines at Service level
@@ -37052,7 +37054,7 @@ angular.module('common.oneSearch', [])
                         });*/
 
                         // Store the $http response promise in the engine's object with key 'response
-                        engine.response = $http({method: 'GET', url: url, params: p});
+                        engine.response = Search.get(p); //$http({method: 'GET', url: url, params: p});
 
                         // Create results getter function from given results JSON path
                         if (angular.isDefined(engine.resultsPath)){
@@ -37070,6 +37072,41 @@ angular.module('common.oneSearch', [])
 
                     // Return all engines with response promises, and getter functions
                     return _engines;
+                },
+                search: function(engName, params, search_url){
+                    search_url = angular.isDefined(search_url) ? search_url : url;
+                    var engine = _engines[engName];
+                    var p = {engine: engine.id};
+
+                    //Extend local parameters by global params.
+                    angular.extend(p, params);
+
+                    //if filterQuery present, add it to query
+                    // TODO: add proper REST support by accepting filter queries as objects and not just strings
+                    if (engine.filterQuery !== null){
+                        p.s += ' ' + engine.filterQuery;
+                    }
+
+                    /*console.log({
+                     engine: engine,
+                     params: p
+                     });*/
+
+                    // Store the $http response promise in the engine's object with key 'response
+                    engine.response = $http({method: 'GET', url: search_url, params: p});
+
+                    // Create results getter function from given results JSON path
+                    if (angular.isDefined(engine.resultsPath)){
+                        engine.getResults = $parse(engine.resultsPath);
+                    }
+
+                    // Create results getter function from given results JSON path
+                    if (angular.isDefined(engine.totalsPath)){
+                        engine.getTotal = $parse(engine.totalsPath);
+                    }
+
+                    // Put engine's object in private _engines object
+                    return engine;
                 },
                 getEngineTemplate: function(engine){
                     return enginesTemplateFactory.get(engine);
