@@ -1,8 +1,8 @@
 {
   "name": "roots-ualib",
-  "version": "1.7.0",
-  "homepage": "http://roots.io",
-  "license": "MIT",
+  "version": "1.8.0",
+  "homepage": "https://github.com/ualibweb/roots-ualib",
+  "license": "ECL-2.0",
   "private": true,
   "ignore": [
     "**/.*",
@@ -15,19 +15,19 @@
     "bootstrap": "3.3.2",
     "respond": "1.4.2",
     "fontawesome": "~4.3.0",
+    "angular": ">=1 <1.3.0",
+    "angular-route": ">=1 <1.3.0",
+    "angular-resource": ">=1 <1.3.0",
+    "angular-animate": ">=1 <1.3.0",
+    "angular-sanitize": ">=1 <1.3.0",
+    "angular-filter": "~0.5.4",
     "yamm3": "https://github.com/geedmo/yamm3.git#~1.0.0",
     "ualib-ui": "https://github.com/ualibweb/ui-components.git",
-    "ualib-hours": "https://github.com/ualibweb/hours_ui.git",
     "onesearch": "https://github.com/ualibweb/oneSearch_ui.git",
-    "manage": "https://github.com/ualibweb/manage_ui.git",
-    "angular": "1.3.0",
-    "angular-route": "1.3.0",
-    "angular-ui-bootstrap-bower": "~0.12.1",
-    "angular-filter": "~0.5.4",
-    "angular-animate": "1.3.0",
-    "angular-sanitize": "1.3.0"
+    "ualib-hours": "https://github.com/ualibweb/hours_ui.git",
+    "manage": "https://github.com/bkrylov/manage_ui.git"
   },
   "resolutions": {
-    "angular": "1.3.0"
+    "angular": "1.2.28"
   }
 }

@@ -244,7 +244,7 @@
 
         &:hover,
         &:focus,
-        &.active{
+        &:active{
           &.dropdown-toggle::before,
           &.dropdown-toggle::after{
             background-color: @hover-color;
@@ -284,15 +284,17 @@
       }
 
       &.open {
+
+        > a, > button {
+          &.dropdown-toggle::before,
+          &.dropdown-toggle::after{
+            background-color: @hover-color;
+          }
+        }
         > a {
           &:not(.icon-only){
             &::before, &::after{
               width: 14px;
-            }
-          }
-          &.icon-only {
-            &::before, &::after{
-              background-color: @hover-color;
             }
           }
         }
@@ -300,10 +302,6 @@
         > button {
           color: @hover-color;
           background-color: @color;
-
-          &::before, &::after{
-            background-color: @hover-color;
-          }
         }
       }
     }
