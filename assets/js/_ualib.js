@@ -4,7 +4,8 @@ angular.module('ualib', [
     'ualib.ui',
     'hours',
     'oneSearch',
-    'manage'
+    'manage',
+    'databases'
 ])
 
     .config(['$routeProvider', function($routeProvider, $location) {

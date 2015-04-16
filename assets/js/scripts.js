@@ -37132,7 +37132,8 @@ $(document).ready(UTIL.loadEvents);
     'ualib.ui',
     'hours',
     'oneSearch',
-    'manage'
+    'manage',
+    'databases'
 ])
 
     .config(['$routeProvider', function($routeProvider, $location) {
