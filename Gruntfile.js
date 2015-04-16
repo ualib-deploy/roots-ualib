@@ -20,6 +20,8 @@ module.exports = function(grunt) {
         '<%= bower.directory %>/ualib-hours/dist/hours.js',
         '<%= bower.directory %>/manage/dist/manage-templates.js',
         '<%= bower.directory %>/manage/dist/manage.js',
+        '<%= bower.directory %>/databases/dist/databases-templates.js',
+        '<%= bower.directory %>/databases/dist/databases.js',
         'assets/js/ualib-templates.js',
         'assets/js/plugins/*.js',
         'assets/js/_*.js'
