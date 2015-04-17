@@ -34250,29 +34250,14 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "\n" +
     "<div>\n" +
     "    <div class=\"text-center row form-inline\">\n" +
-    "        <div class=\"col-md-5 form-group text-right\">\n" +
-    "            <label for=\"sortBy\">Sort By</label>\n" +
-    "            <div id=\"sortBy\">\n" +
-    "                <button type=\"button\" class=\"btn btn-primary\" ng-model=\"sortButton\" btn-radio=\"'title'\"\n" +
-    "                        ng-click=\"sortMode='title'\">\n" +
-    "                    Title\n" +
-    "                </button>\n" +
-    "                <button type=\"button\" class=\"btn btn-primary\" ng-model=\"sortButton\" btn-radio=\"'publisher'\"\n" +
-    "                        ng-click=\"sortMode='publisher'\">\n" +
-    "                    Publisher\n" +
-    "                </button>\n" +
-    "                <button type=\"button\" class=\"btn btn-primary\" ng-model=\"sortButton\" btn-radio=\"'vendor'\"\n" +
-    "                        ng-click=\"sortMode='vendor'\">\n" +
-    "                    Vendor\n" +
-    "                </button>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-7 form-group text-left\">\n" +
+    "        <div class=\"col-md-12 form-group\">\n" +
     "            <label for=\"filterBy\">Filter by</label>\n" +
     "            <div id=\"filterBy\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Title\" ng-model=\"titleFilter\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Subject\" ng-model=\"subjectFilter\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Media Type\" ng-model=\"typeFilter\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Title starts with\" ng-model=\"titleStartFilter\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"titleFilter\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Description contains\" ng-model=\"descrFilter\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Subjects contain\" ng-model=\"subjectFilter\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Media Types contain\" ng-model=\"typeFilter\">\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
@@ -34282,10 +34267,13 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                    boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\"></pagination>\n" +
     "    </div>\n" +
     "    <div class=\"row\"\n" +
-    "         ng-repeat=\"db in filteredDB = (DBList.databases | filter:{title:titleFilter}\n" +
+    "         ng-repeat=\"db in filteredDB = (DBList.databases | filter:{title:titleStartFilter}:startTitle\n" +
+    "                                                         | filter:{title:titleFilter}\n" +
+    "                                                         | filter:{description:descrFilter}\n" +
     "                                                         | filter:{subjects:subjectFilter}\n" +
-    "                                                         | filter:{types:typeFilter})\n" +
-    "        | startFrom:(currentPage-1)*perPage | limitTo:perPage | orderBy:sortMode\"\n" +
+    "                                                         | filter:{types:typeFilter}\n" +
+    "                                                         | orderBy:'title')\n" +
+    "        | startFrom:(currentPage-1)*perPage | limitTo:perPage\"\n" +
     "         ng-class=\"{sdOpen: db.show, sdOver: db.id == mOver}\" ng-mouseover=\"setOver(db)\">\n" +
     "        <div class=\"col-md-12\" ng-click=\"toggleDB(db)\">\n" +
     "            <h4>\n" +
@@ -35322,9 +35310,10 @@ angular.module('common.manage', [])
             }
         }
     }])
-    .factory('dbFactory', ['$http', 'DATABASES_URL', function dbFactory($http, url){
+    .factory('mdbFactory', ['$http', 'DATABASES_URL', function mdbFactory($http, url){
         return {
             getData: function(){
+                console.log(url + "api/all");
                 return $http({method: 'GET', url: url + "api/all", params: {}})
             },
             postData: function(params, data){
@@ -35335,14 +35324,14 @@ angular.module('common.manage', [])
     }])
 
 angular.module('manage.manageDatabases', [])
-    .controller('manageDBCtrl', ['$scope', '$http', '$window', 'dbFactory',
-        function manageDBCtrl($scope, $http, $window, dbFactory){
+    .controller('manageDBCtrl', ['$scope', '$http', '$window', 'mdbFactory',
+        function manageDBCtrl($scope, $http, $window, mdbFactory){
             $scope.DBList = {};
-            $scope.sortMode = 'Title';
             $scope.titleFilter = '';
+            $scope.titleStartFilter = '';
+            $scope.descrFilter = '';
             $scope.subjectFilter = '';
             $scope.typeFilter = '';
-            $scope.sortButton = 'title';
             $scope.mOver = 0;
             $scope.newDB = {};
             $scope.newDB.subjects = [];
@@ -35368,7 +35357,7 @@ angular.module('manage.manageDatabases', [])
             };
             $http.defaults.headers.post = { 'X-CSRF-libDatabases' : $scope.GetCookie("CSRF-libDatabases") };
 
-            dbFactory.getData()
+            mdbFactory.getData()
                 .success(function(data) {
                     console.dir(data);
                     for (var i = 0; i < data.databases.length; i++){
@@ -35387,6 +35376,13 @@ angular.module('manage.manageDatabases', [])
                     console.log(data);
                 });
 
+            $scope.startTitle = function(actual, expected){
+                if (!expected)
+                    return true;
+                if (actual.toLowerCase().indexOf(expected.toLowerCase()) == 0)
+                    return true;
+                return false;
+            };
             $scope.toggleDB = function(db){
                 $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].show =
                     !$scope.DBList.databases[$scope.DBList.databases.indexOf(db)].show;
@@ -36688,15 +36684,15 @@ angular.module("dbList/databasesMain.tpl.html", []).run(["$templateCache", funct
 angular.module("dbList/dbList.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("dbList/dbList.tpl.html",
     "<div ng-show=\"dbList.searchText.length > 0\">\n" +
-    "    <h3>Searched for: {{dbList.searchText}}, found {{filteredDB.length}} results</h3>\n" +
     "    <div class=\"text-center row form-inline\">\n" +
     "        <div class=\"col-md-12 form-group text-left\">\n" +
-    "            <label for=\"filterBy\">Filter by</label>\n" +
+    "            <label for=\"filterBy\">Filter <small>{{filteredDB.length}}</small> results by</label>\n" +
     "            <div id=\"filterBy\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Title\" ng-model=\"dbList.titleFilter\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Description\" ng-model=\"dbList.descrFilter\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Subject\" ng-model=\"dbList.subjectFilter\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Media Type\" ng-model=\"dbList.typeFilter\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Title starts with\" ng-model=\"dbList.titleStartFilter\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"dbList.titleFilter\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Description contains\" ng-model=\"dbList.descrFilter\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Subjects contain\" ng-model=\"dbList.subjectFilter\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Media Types contain\" ng-model=\"dbList.typeFilter\">\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
@@ -36707,10 +36703,13 @@ angular.module("dbList/dbList.tpl.html", []).run(["$templateCache", function($te
     "    </div>\n" +
     "    <div class=\"row\"\n" +
     "         ng-repeat=\"db in filteredDB = (dbList.databases | filter:{filterBy:dbList.searchText}:compareTitle\n" +
+    "                                                         | filter:{title:dbList.titleStartFilter}:startTitle\n" +
     "                                                         | filter:{title:dbList.titleFilter}:compareTitle\n" +
     "                                                         | filter:{description:dbList.descrFilter}:compareTitle\n" +
     "                                                         | filter:{subjects:dbList.subjectFilter}:compareTitle\n" +
-    "                                                         | filter:{types:dbList.typeFilter}:compareTitle)\n" +
+    "                                                         | filter:{types:dbList.typeFilter}:compareTitle\n" +
+    "                                                         | filter:{disabled:0}\n" +
+    "                                                         | orderBy:'title')\n" +
     "        | startFrom:(currentPage-1)*perPage | limitTo:perPage\"\n" +
     "         ng-class=\"{sdOpen: db.show, sdOver: db.id == mOver}\" ng-mouseover=\"setOver(db)\">\n" +
     "        <div class=\"col-md-12\" ng-click=\"toggleDB(db)\">\n" +
@@ -36722,85 +36721,56 @@ angular.module("dbList/dbList.tpl.html", []).run(["$templateCache", function($te
     "            </h4>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-12\" ng-show=\"db.show\">\n" +
-    "            <div class=\"col-md-6 form-group\">\n" +
-    "                <label for=\"{{db.id}}_title\">Title</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.title}}\" ng-model=\"db.title\"\n" +
-    "                       id=\"{{db.id}}_title\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"{{db.id}}_Publisher\">Publisher</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.publisher}}\" ng-model=\"db.publisher\"\n" +
-    "                       id=\"{{db.id}}_Publisher\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"{{db.id}}_Vendor\">Vendor</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.vendor}}\" ng-model=\"db.vendor\"\n" +
-    "                       id=\"{{db.id}}_Vendor\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-6 form-group\">\n" +
-    "                <label for=\"{{db.id}}_URL\">URL</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.url}}\" ng-model=\"db.url\"\n" +
-    "                       id=\"{{db.id}}_URL\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
-    "                <label for=\"{{db.id}}_Location\">Location</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.location}}\" ng-model=\"db.location\"\n" +
-    "                       id=\"{{db.id}}_Location\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-1 form-group\">\n" +
-    "                <label for=\"{{db.id}}_NotInEDS\">Not in EDS</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.notInEDS}}\" ng-model=\"db.notInEDS\"\n" +
-    "                       id=\"{{db.id}}_NotInEDS\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-1 form-group\">\n" +
-    "                <label for=\"{{db.id}}_Full-text\">Fulltext</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.hasFullText}}\" ng-model=\"db.hasFullText\"\n" +
-    "                       id=\"{{db.id}}_Full-text\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-1 form-group\">\n" +
-    "                <label for=\"{{db.id}}_Authenticate\">Authenticate</label>\n" +
-    "                <input type=\"checkbox\" class=\"form-control\" ng-model=\"db.auth\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
-    "                       id=\"{{db.id}}_Authenticate\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-1 form-group\">\n" +
-    "                <label for=\"{{db.id}}_Disable\">Disabled</label>\n" +
-    "                <input type=\"checkbox\" class=\"form-control\" ng-model=\"db.disabled\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
-    "                       id=\"{{db.id}}_Disable\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-6 form-group\">\n" +
-    "                <label for=\"{{db.id}}_Coverage\">Coverage</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.coverage}}\" ng-model=\"db.coverage\"\n" +
-    "                       id=\"{{db.id}}_Coverage\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-6 form-group\">\n" +
-    "                <label for=\"{{db.id}}_Notes\">Notes</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.notes}}\" ng-model=\"db.notes\"\n" +
-    "                       id=\"{{db.id}}_Notes\">\n" +
-    "            </div>\n" +
     "            <div class=\"col-md-12 form-group\">\n" +
     "                <label for=\"{{db.id}}_descr\">Database Description</label>\n" +
-    "                <textarea class=\"form-control\" rows=\"3\" id=\"{{db.id}}_descr\" ng-model=\"db.description\"></textarea>\n" +
+    "                <p id=\"{{db.id}}_descr\">{{db.description}}</p>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-3 form-group\" ng-show=\"db.coverage\">\n" +
+    "                <label for=\"{{db.id}}_Coverage\">Coverage</label>\n" +
+    "                <p id=\"{{db.id}}_Coverage\">{{db.coverage}}</p>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-3 form-group\" ng-show=\"db.publisher\">\n" +
+    "                <label for=\"{{db.id}}_Publisher\">Publisher</label>\n" +
+    "                <p id=\"{{db.id}}_Publisher\">{{db.publisher}}</p>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-3 form-group\" ng-show=\"db.vendor\">\n" +
+    "                <label for=\"{{db.id}}_Vendor\">Vendor</label>\n" +
+    "                <p id=\"{{db.id}}_Vendor\">{{db.vendor}}</p>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-3 form-group\" ng-show=\"db.notes\">\n" +
+    "                <label for=\"{{db.id}}_Notes\">Notes</label>\n" +
+    "                <p id=\"{{db.id}}_Notes\">{{db.notes}}</p>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2 form-group\" ng-show=\"db.location\">\n" +
+    "                <label for=\"{{db.id}}_Location\">Location</label>\n" +
+    "                <p id=\"{{db.id}}_Location\">{{db.location}}</p>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-2 form-group\">\n" +
+    "                <label for=\"{{db.id}}_NotInEDS\">Not in EDS</label>\n" +
+    "                <p id=\"{{db.id}}_NotInEDS\">{{db.notInEDS}}<span ng-hide=\"db.notInEDS\">In EDS</span></p>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2 form-group\">\n" +
+    "                <label for=\"{{db.id}}_Full-text\">Fulltext</label>\n" +
+    "                <p id=\"{{db.id}}_Full-text\">{{db.hasFullText}}<span ng-hide=\"db.hasFullText\">No</span></p>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2 form-group\">\n" +
+    "                <label for=\"{{db.id}}_Authenticate\">Authenticate</label>\n" +
+    "                <input type=\"checkbox\" class=\"form-control\" ng-model=\"db.auth\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
+    "                       id=\"{{db.id}}_Authenticate\" disabled>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2 form-group\" ng-show=\"db.presentedBy\">\n" +
     "                <label for=\"{{db.id}}_presented\">Presented by</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.presentedBy}}\" ng-model=\"db.presentedBy\"\n" +
-    "                       id=\"{{db.id}}_presented\">\n" +
+    "                <p id=\"{{db.id}}_presented\">{{db.presentedBy}}</p>\n" +
     "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
-    "                <label for=\"{{db.id}}_Audience1\">Audience One</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.audience1}}\" ng-model=\"db.audience1\"\n" +
-    "                       id=\"{{db.id}}_Audience1\">\n" +
+    "            <div class=\"col-md-2 form-group\" ng-show=\"db.audience1 || db.audience2\">\n" +
+    "                <label for=\"{{db.id}}_Audience1\">Audience</label>\n" +
+    "                <p id=\"{{db.id}}_Audience1\">{{db.audience1}} <span ng-show=\"db.audience2\">, {{db.audience2}}</span></p>\n" +
     "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
-    "                <label for=\"{{db.id}}_Audience2\">Audience Two</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.audience2}}\" ng-model=\"db.audience2\"\n" +
-    "                       id=\"{{db.id}}_Audience2\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
+    "            <div class=\"col-md-2 form-group\" ng-show=\"db.descrAuthor\">\n" +
     "                <label for=\"{{db.id}}_dAuthor\">Description Author</label>\n" +
     "                <p id=\"{{db.id}}_dAuthor\">{{db.descrAuthor}}</p>\n" +
     "            </div>\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
+    "            <div class=\"col-md-2 form-group\" ng-show=\"db.lastModified\">\n" +
     "                <label for=\"{{db.id}}_date\">Last Modified</label>\n" +
     "                <p id=\"{{db.id}}_date\">{{db.lastModified}}</p>\n" +
     "            </div>\n" +
@@ -36839,12 +36809,13 @@ angular.module("dbList/dbListMain.tpl.html", []).run(["$templateCache", function
     "\n" +
     "<form ng-submit=\"search()\">\n" +
     "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-10\">\n" +
+    "        <div class=\"col-md-4\">\n" +
     "            <input type=\"text\" class=\"form-control\" placeholder=\"Search Databases\" ng-model=\"dbList.searchText\">\n" +
     "        </div>\n" +
     "        <div class=\"col-md-2\">\n" +
     "            <button type=\"submit\" class=\"btn btn-primary\">\n" +
-    "                Search\n" +
+    "                <span ng-show=\"dbList.searchText.length == 0\">Search</span>\n" +
+    "                <span ng-hide=\"dbList.searchText.length == 0\">Update URL</span>\n" +
     "            </button>\n" +
     "        </div>\n" +
     "    </div>\n" +
@@ -36876,6 +36847,7 @@ angular.module("dbList/dbListMain.tpl.html", []).run(["$templateCache", function
         $scope.dbList = {};
         $scope.dbList.searchText = '';
         $scope.dbList.titleFilter = '';
+        $scope.dbList.titleStartFilter = '';
         $scope.dbList.descrFilter = '';
         $scope.dbList.subjectFilter = '';
         $scope.dbList.typeFilter = '';
@@ -36893,6 +36865,8 @@ angular.module("dbList/dbListMain.tpl.html", []).run(["$templateCache", function
                     $scope.dbList.searchText = $routeParams.s;
                 if (typeof $routeParams.t !== 'undefined')
                     $scope.dbList.titleFilter = $routeParams.t;
+                if (typeof $routeParams.ts !== 'undefined')
+                    $scope.dbList.titleStartFilter = $routeParams.ts;
                 if (typeof $routeParams.d !== 'undefined')
                     $scope.dbList.descrFilter = $routeParams.d;
                 if (typeof $routeParams.fs !== 'undefined')
@@ -36929,7 +36903,7 @@ angular.module('common.databases', [])
 angular.module('databases.list', [])
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider
-            .when('/databases/:s?/title/:t?/descr/:d?/fs/:fs?/ft/:ft?', {
+            .when('/databases/:s?/title/:t?/ts/:ts?/descr/:d?/fs/:fs?/ft/:ft?', {
                 templateUrl: 'dbList/dbListMain.tpl.html',
                 controller: 'databasesCtrl'
             })
@@ -36943,6 +36917,9 @@ angular.module('databases.list', [])
                     newPath += '/title/';
                     if ($scope.dbList.titleFilter)
                         newPath = newPath + $scope.dbList.titleFilter + '/';
+                    newPath += 'ts/';
+                    if ($scope.dbList.titleStartFilter)
+                        newPath = newPath + $scope.dbList.titleStartFilter + '/';
                     newPath += 'descr/';
                     if ($scope.dbList.descrFilter)
                         newPath = newPath + $scope.dbList.descrFilter + '/';
@@ -36961,6 +36938,8 @@ angular.module('databases.list', [])
                     $scope.dbList.searchText = currentRoute.params.s;
                 if (typeof currentRoute.params.t !== 'undefined')
                     $scope.dbList.titleFilter = currentRoute.params.t;
+                if (typeof currentRoute.params.ts !== 'undefined')
+                    $scope.dbList.titleStartFilter = currentRoute.params.ts;
                 if (typeof currentRoute.params.d !== 'undefined')
                     $scope.dbList.descrFilter = currentRoute.params.d;
                 if (typeof currentRoute.params.fs !== 'undefined')
@@ -36980,6 +36959,13 @@ angular.module('databases.list', [])
             if (!expected)
                 return true;
             if (actual.toLowerCase().indexOf(expected.toLowerCase()) > -1)
+                return true;
+            return false;
+        };
+        $scope.startTitle = function(actual, expected){
+            if (!expected)
+                return true;
+            if (actual.toLowerCase().indexOf(expected.toLowerCase()) == 0)
                 return true;
             return false;
         };
