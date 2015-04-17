@@ -166,13 +166,6 @@ if (defined('GROUP_ADMIN'))
                                 <div class="yamm-content">
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="<?php echo site_url(); ?>/sample-page/search/">
-                                                <span class="fa fa-search"></span>
-                                                <h4>OneSearch</h4>
-                                                <p>Search everything the University Libraries’ offers from one place</p>
-                                            </a>
-                                        </div>
-                                        <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="<?php echo site_url(); ?>/research-help/scout/">
                                                 <span class="fa fa-binoculars"></span>
                                                 <h4>Scout</h4>
@@ -180,7 +173,7 @@ if (defined('GROUP_ADMIN'))
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="<?php echo site_url(); ?>/research-help/databases/">
+                                            <a class="service-card" href="<?php echo site_url(); ?>sample-page/databases/#/databases/title/ts/descr/fs/ft/">
                                                 <span class="fa fa-database"></span>
                                                 <h4>Databases</h4>
                                                 <p>Organized collections of articles, journals, and published materials</p>
@@ -193,8 +186,6 @@ if (defined('GROUP_ADMIN'))
                                                 <p>Search for scholarly literature through a Google web search</p>
                                             </a>
                                         </div>
-                                    </div>
-                                    <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="http://guides.lib.ua.edu/">
                                                 <span class="fa fa-compass"></span>
@@ -202,6 +193,8 @@ if (defined('GROUP_ADMIN'))
                                                 <p>Explore subject and course specific resource in guides curated by UA librarians</p>
                                             </a>
                                         </div>
+                                    </div>
+                                    <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="<?php echo site_url(); ?>/research-help/e-resources/">
                                                 <span class="fa fa-bolt"></span>
@@ -223,8 +216,6 @@ if (defined('GROUP_ADMIN'))
                                                 <p>Explore our large collection of U.S. Federal documents</p>
                                             </a>
                                         </div>
-                                    </div>
-                                    <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="<?php echo site_url(); ?>/research-help/citation-finder/">
                                                 <span class="fa fa-quote-left"></span>
@@ -232,6 +223,8 @@ if (defined('GROUP_ADMIN'))
                                                 <p>A quick tool to help you locate articles with citation information</p>
                                             </a>
                                         </div>
+                                    </div>
+                                    <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="<?php echo site_url(); ?>/libraries-and-collections/campus-libraries/music-library/music-library-search/">
                                                 <span class="fa fa-music"></span>
