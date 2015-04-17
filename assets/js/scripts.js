@@ -34284,125 +34284,137 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "            </h4>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-12\" ng-show=\"db.show\">\n" +
-    "            <div class=\"col-md-6 form-group\">\n" +
-    "                <label for=\"{{db.id}}_title\">Title</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.title}}\" ng-model=\"db.title\"\n" +
-    "                       id=\"{{db.id}}_title\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"{{db.id}}_Publisher\">Publisher</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.publisher}}\" ng-model=\"db.publisher\"\n" +
-    "                       id=\"{{db.id}}_Publisher\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"{{db.id}}_Vendor\">Vendor</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.vendor}}\" ng-model=\"db.vendor\"\n" +
-    "                       id=\"{{db.id}}_Vendor\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-6 form-group\">\n" +
-    "                <label for=\"{{db.id}}_URL\">URL</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.url}}\" ng-model=\"db.url\"\n" +
-    "                       id=\"{{db.id}}_URL\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
-    "                <label for=\"{{db.id}}_Location\">Location</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.location}}\" ng-model=\"db.location\"\n" +
-    "                       id=\"{{db.id}}_Location\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-1 form-group\">\n" +
-    "                <label for=\"{{db.id}}_NotInEDS\">Not in EDS</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.notInEDS}}\" ng-model=\"db.notInEDS\"\n" +
-    "                       id=\"{{db.id}}_NotInEDS\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-1 form-group\">\n" +
-    "                <label for=\"{{db.id}}_Full-text\">Fulltext</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.hasFullText}}\" ng-model=\"db.hasFullText\"\n" +
-    "                       id=\"{{db.id}}_Full-text\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-1 form-group\">\n" +
-    "                <label for=\"{{db.id}}_Authenticate\">Authenticate</label>\n" +
-    "                <input type=\"checkbox\" class=\"form-control\" ng-model=\"db.auth\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
-    "                       id=\"{{db.id}}_Authenticate\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-1 form-group\">\n" +
-    "                <label for=\"{{db.id}}_Disable\">Disabled</label>\n" +
-    "                <input type=\"checkbox\" class=\"form-control\" ng-model=\"db.disabled\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
-    "                       id=\"{{db.id}}_Disable\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-6 form-group\">\n" +
-    "                <label for=\"{{db.id}}_Coverage\">Coverage</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.coverage}}\" ng-model=\"db.coverage\"\n" +
-    "                       id=\"{{db.id}}_Coverage\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-6 form-group\">\n" +
-    "                <label for=\"{{db.id}}_Notes\">Notes</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.notes}}\" ng-model=\"db.notes\"\n" +
-    "                       id=\"{{db.id}}_Notes\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-12 form-group\">\n" +
-    "                <label for=\"{{db.id}}_descr\">Database Description</label>\n" +
-    "                <textarea class=\"form-control\" rows=\"3\" id=\"{{db.id}}_descr\" ng-model=\"db.description\"></textarea>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
-    "                <label for=\"{{db.id}}_presented\">Presented by</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.presentedBy}}\" ng-model=\"db.presentedBy\"\n" +
-    "                       id=\"{{db.id}}_presented\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
-    "                <label for=\"{{db.id}}_Audience1\">Audience One</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.audience1}}\" ng-model=\"db.audience1\"\n" +
-    "                       id=\"{{db.id}}_Audience1\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
-    "                <label for=\"{{db.id}}_Audience2\">Audience Two</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"{{db.audience2}}\" ng-model=\"db.audience2\"\n" +
-    "                       id=\"{{db.id}}_Audience2\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"{{db.id}}_dAuthor\">Description Author</label>\n" +
-    "                <p id=\"{{db.id}}_dAuthor\">{{db.descrAuthor}}</p>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"{{db.id}}_date\">Last Modified</label>\n" +
-    "                <p id=\"{{db.id}}_date\">{{db.lastModified}}</p>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-12\">\n" +
+    "            <form ng-submit=\"updateDB(db)\">\n" +
     "                <div class=\"col-md-6 form-group\">\n" +
-    "                    <label for=\"{{db.id}}_subjects\">Subjects</label>\n" +
-    "                    <ul class=\"list-group\" id=\"{{db.id}}_subjects\">\n" +
-    "                        <li class=\"list-group-item\" ng-repeat=\"subject in db.subjects\">\n" +
-    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteSubject(db,subject)\">Delete</button>\n" +
-    "                            {{subject.subject}} : {{subject.type}}\n" +
-    "                        </li>\n" +
-    "                        <li class=\"list-group-item form-inline\">\n" +
-    "                            <select class=\"form-control\" ng-model=\"db.selSubj\" ng-options=\"sub.subject for sub in DBList.subjects\">\n" +
-    "                            </select>\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"1 or 2\" ng-model=\"db.subjType\">\n" +
-    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addSubject(db)\">Add Subject</button>\n" +
-    "                        </li>\n" +
-    "                    </ul>\n" +
+    "                    <label for=\"{{db.id}}_title\">Title</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.title}}\" ng-model=\"db.title\"\n" +
+    "                           id=\"{{db.id}}_title\" required>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-2 form-group\">\n" +
+    "                    <label for=\"{{db.id}}_Publisher\">Publisher</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.publisher}}\" ng-model=\"db.publisher\"\n" +
+    "                           id=\"{{db.id}}_Publisher\">\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-2 form-group\">\n" +
+    "                    <label for=\"{{db.id}}_Vendor\">Vendor</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.vendor}}\" ng-model=\"db.vendor\"\n" +
+    "                           id=\"{{db.id}}_Vendor\">\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-2 form-group\">\n" +
+    "                    <label for=\"{{db.id}}_Format\">Format</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.format}}\" ng-model=\"db.format\"\n" +
+    "                           id=\"{{db.id}}_Format\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-6 form-group\">\n" +
-    "                    <label for=\"{{db.id}}_types\">Types</label>\n" +
-    "                    <ul class=\"list-group\" id=\"{{db.id}}_types\">\n" +
-    "                        <li class=\"list-group-item\" ng-repeat=\"type in db.types\">\n" +
-    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteType(db,type)\">Delete</button>\n" +
-    "                            {{type.type}}\n" +
-    "                        </li>\n" +
-    "                        <li class=\"list-group-item form-inline\">\n" +
-    "                            <select class=\"form-control\" ng-model=\"db.selType\" ng-options=\"typ.type for typ in DBList.types\">\n" +
-    "                            </select>\n" +
-    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addType(db)\">Add Type</button>\n" +
-    "                        </li>\n" +
-    "                    </ul>\n" +
+    "                    <label for=\"{{db.id}}_URL\">URL</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.url}}\" ng-model=\"db.url\"\n" +
+    "                           id=\"{{db.id}}_URL\" required>\n" +
     "                </div>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-12 text-center\">\n" +
-    "                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"updateDB(db)\">Update information</button>\n" +
-    "                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteDB(db)\">\n" +
-    "                    Delete {{db[0]}} database\n" +
-    "                </button>\n" +
-    "            </div>\n" +
+    "                <div class=\"col-md-2 form-group\">\n" +
+    "                    <label for=\"{{db.id}}_Location\">Location</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.location}}\" ng-model=\"db.location\"\n" +
+    "                           id=\"{{db.id}}_Location\">\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-2 form-group\">\n" +
+    "                    <label for=\"{{db.id}}_NotInEDS\">Not in EDS</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.notInEDS}}\" ng-model=\"db.notInEDS\"\n" +
+    "                           id=\"{{db.id}}_NotInEDS\">\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-1 form-group\">\n" +
+    "                    <label for=\"{{db.id}}_Full-text\">Fulltext</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.hasFullText}}\" ng-model=\"db.hasFullText\"\n" +
+    "                           id=\"{{db.id}}_Full-text\">\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-1 form-group\">\n" +
+    "                    <label for=\"{{db.id}}_Authenticate\">Authenticate</label>\n" +
+    "                    <input type=\"checkbox\" class=\"form-control\" ng-model=\"db.auth\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
+    "                           id=\"{{db.id}}_Authenticate\">\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-6 form-group\">\n" +
+    "                    <label for=\"{{db.id}}_Coverage\">Coverage</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.coverage}}\" ng-model=\"db.coverage\"\n" +
+    "                           id=\"{{db.id}}_Coverage\" required>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-6 form-group\">\n" +
+    "                    <label for=\"{{db.id}}_Notes\">Notes</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.notes}}\" ng-model=\"db.notes\"\n" +
+    "                           id=\"{{db.id}}_Notes\">\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-12 form-group\">\n" +
+    "                    <label for=\"{{db.id}}_descr\">Database Description</label>\n" +
+    "                    <textarea class=\"form-control\" rows=\"3\" id=\"{{db.id}}_descr\" ng-model=\"db.description\" required></textarea>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-2 form-group\">\n" +
+    "                    <label for=\"{{db.id}}_presented\">Presented by</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.presentedBy}}\" ng-model=\"db.presentedBy\"\n" +
+    "                           id=\"{{db.id}}_presented\">\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-2 form-group\">\n" +
+    "                    <label for=\"{{db.id}}_Audience1\">Audience One</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.audience1}}\" ng-model=\"db.audience1\"\n" +
+    "                           id=\"{{db.id}}_Audience1\">\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-2 form-group\">\n" +
+    "                    <label for=\"{{db.id}}_Audience2\">Audience Two</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.audience2}}\" ng-model=\"db.audience2\"\n" +
+    "                           id=\"{{db.id}}_Audience2\">\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-2 form-group\">\n" +
+    "                    <label for=\"{{db.id}}_dAuthor\">Description Author</label>\n" +
+    "                    <p id=\"{{db.id}}_dAuthor\">{{db.descrAuthor}}</p>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-2 form-group\">\n" +
+    "                    <label for=\"{{db.id}}_date\">Last Modified</label>\n" +
+    "                    <p id=\"{{db.id}}_date\">{{db.lastModified}}</p>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-1 form-group\">\n" +
+    "                    <label for=\"{{db.id}}_Disable\">Disabled</label>\n" +
+    "                    <input type=\"checkbox\" class=\"form-control\" ng-model=\"db.disabled\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
+    "                           id=\"{{db.id}}_Disable\">\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-1 form-group\">\n" +
+    "                    <label for=\"{{db.id}}_tmpDisable\">TmpDisable</label>\n" +
+    "                    <input type=\"checkbox\" class=\"form-control\" ng-model=\"db.tmpDisabled\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
+    "                           id=\"{{db.id}}_tmpDisable\">\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-12\">\n" +
+    "                    <div class=\"col-md-6 form-group\">\n" +
+    "                        <label for=\"{{db.id}}_subjects\">Subjects</label>\n" +
+    "                        <ul class=\"list-group\" id=\"{{db.id}}_subjects\">\n" +
+    "                            <li class=\"list-group-item\" ng-repeat=\"subject in db.subjects\">\n" +
+    "                                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteSubject(db,subject)\">Delete</button>\n" +
+    "                                {{subject.subject}} : {{subject.type}}\n" +
+    "                            </li>\n" +
+    "                            <li class=\"list-group-item form-inline\">\n" +
+    "                                <select class=\"form-control\" ng-model=\"db.selSubj\" ng-options=\"sub.subject for sub in DBList.subjects\">\n" +
+    "                                </select>\n" +
+    "                                <input type=\"text\" class=\"form-control\" placeholder=\"1 or 2\" ng-model=\"db.subjType\">\n" +
+    "                                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addSubject(db)\">Add Subject</button>\n" +
+    "                            </li>\n" +
+    "                        </ul>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-6 form-group\">\n" +
+    "                        <label for=\"{{db.id}}_types\">Types</label>\n" +
+    "                        <ul class=\"list-group\" id=\"{{db.id}}_types\">\n" +
+    "                            <li class=\"list-group-item\" ng-repeat=\"type in db.types\">\n" +
+    "                                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteType(db,type)\">Delete</button>\n" +
+    "                                {{type.type}}\n" +
+    "                            </li>\n" +
+    "                            <li class=\"list-group-item form-inline\">\n" +
+    "                                <select class=\"form-control\" ng-model=\"db.selType\" ng-options=\"typ.type for typ in DBList.types\">\n" +
+    "                                </select>\n" +
+    "                                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addType(db)\">Add Type</button>\n" +
+    "                            </li>\n" +
+    "                        </ul>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-12 text-center\">\n" +
+    "                    <button type=\"submit\" class=\"btn btn-primary\">Update information</button>\n" +
+    "                    <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteDB(db)\">\n" +
+    "                        Delete {{db[0]}} database\n" +
+    "                    </button>\n" +
+    "                </div>\n" +
+    "            </form>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
@@ -34412,130 +34424,142 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "</div>\n" +
     "\n" +
     "<h3>Create new Database</h3>\n" +
-    "<div class=\"row sdOpen\">\n" +
-    "    <div class=\"col-md-12\">\n" +
-    "        <div class=\"col-md-6 form-group\">\n" +
-    "            <label for=\"title\">Title</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Database Title\" ng-model=\"newDB.title\"\n" +
-    "                   id=\"title\">\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"Publisher\">Publisher</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Publisher\" ng-model=\"newDB.publisher\"\n" +
-    "                   id=\"Publisher\">\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"Vendor\">Vendor</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Vendor\" ng-model=\"newDB.vendor\"\n" +
-    "                   id=\"Vendor\">\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-6 form-group\">\n" +
-    "            <label for=\"URL\">URL</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"http://www.example.com/\" ng-model=\"newDB.url\"\n" +
-    "                   id=\"URL\">\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-2 form-group\">\n" +
-    "            <label for=\"Location\">Location</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Location\" ng-model=\"newDB.location\"\n" +
-    "                   id=\"Location\">\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-1 form-group\">\n" +
-    "            <label for=\"NotInEDS\">Not in EDS</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" ng-model=\"newDB.notInEDS\"\n" +
-    "                   id=\"NotInEDS\">\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-1 form-group\">\n" +
-    "            <label for=\"Full-text\">Fulltext</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" ng-model=\"newDB.hasFullText\"\n" +
-    "                   id=\"Full-text\">\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-1 form-group\">\n" +
-    "            <label for=\"Authenticate\">Authenticate</label>\n" +
-    "            <input type=\"checkbox\" class=\"form-control\" ng-model=\"newDB.auth\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
-    "                   id=\"Authenticate\">\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-1 form-group\">\n" +
-    "            <label for=\"Disable\">Disabled</label>\n" +
-    "            <input type=\"checkbox\" class=\"form-control\" ng-model=\"newDB.disabled\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
-    "                   id=\"Disable\">\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-6 form-group\">\n" +
-    "            <label for=\"Coverage\">Coverage</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Database Coverage\" ng-model=\"newDB.coverage\"\n" +
-    "                   id=\"Coverage\">\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-6 form-group\">\n" +
-    "            <label for=\"Notes\">Notes</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Notes\" ng-model=\"newDB.notes\"\n" +
-    "                   id=\"Notes\">\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-12 form-group\">\n" +
-    "            <label for=\"descr\">Database Description</label>\n" +
-    "            <textarea class=\"form-control\" rows=\"3\" id=\"descr\" ng-model=\"newDB.description\"></textarea>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-2 form-group\">\n" +
-    "            <label for=\"presented\">Presented by</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Presented By\" ng-model=\"newDB.presentedBy\"\n" +
-    "                   id=\"presented\">\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-2 form-group\">\n" +
-    "            <label for=\"Audience1\">Audience One</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Audience One\" ng-model=\"newDB.audience1\"\n" +
-    "                   id=\"Audience1\">\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-2 form-group\">\n" +
-    "            <label for=\"Audience2\">Audience Two</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Audience Two\" ng-model=\"newDB.audience2\"\n" +
-    "                   id=\"Audience2\">\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"dAuthor\">Description Author</label>\n" +
-    "            <p id=\"dAuthor\">{{updatedBy}}</p>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-3 form-group\">\n" +
-    "        </div>\n" +
+    "<form ng-submit=\"createDB()\">\n" +
+    "    <div class=\"row sdOpen\">\n" +
     "        <div class=\"col-md-12\">\n" +
     "            <div class=\"col-md-6 form-group\">\n" +
-    "                <label for=\"subjects\">Subjects</label>\n" +
-    "                <ul class=\"list-group\" id=\"subjects\">\n" +
-    "                    <li class=\"list-group-item\" ng-repeat=\"subject in newDB.subjects\">\n" +
-    "                        <button type=\"button\" class=\"btn btn-primary\" ng-click=\"delSubjNewDB($index)\">Delete</button>\n" +
-    "                        {{subject.subject}} : {{subject.type}}\n" +
-    "                    </li>\n" +
-    "                    <li class=\"list-group-item row\">\n" +
-    "                        <div class=\"col-md-7\">\n" +
-    "                            <select class=\"form-control\" ng-model=\"newDB.selSubj\" ng-options=\"sub.subject for sub in DBList.subjects\">\n" +
-    "                            </select>\n" +
-    "                        </div>\n" +
-    "                        <div class=\"col-md-2\">\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"1 or 2\" ng-model=\"newDB.subjType\">\n" +
-    "                        </div>\n" +
-    "                        <div class=\"col-md-3\">\n" +
-    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addSubjNewDB()\">Add Subject</button>\n" +
-    "                        </div>\n" +
-    "                    </li>\n" +
-    "                </ul>\n" +
+    "                <label for=\"title\">Title</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Database Title\" ng-model=\"newDB.title\"\n" +
+    "                       id=\"title\" required>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2 form-group\">\n" +
+    "                <label for=\"Publisher\">Publisher</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Publisher\" ng-model=\"newDB.publisher\"\n" +
+    "                       id=\"Publisher\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2 form-group\">\n" +
+    "                <label for=\"Vendor\">Vendor</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Vendor\" ng-model=\"newDB.vendor\"\n" +
+    "                       id=\"Vendor\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2 form-group\">\n" +
+    "                <label for=\"Format\">Format</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Format\" ng-model=\"newDB.format\"\n" +
+    "                       id=\"Format\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-6 form-group\">\n" +
-    "                <label for=\"types\">Types</label>\n" +
-    "                <ul class=\"list-group\" id=\"types\">\n" +
-    "                    <li class=\"list-group-item\" ng-repeat=\"type in newDB.types\">\n" +
-    "                        <button type=\"button\" class=\"btn btn-primary\" ng-click=\"delTypeNewDB($index)\">Delete</button>\n" +
-    "                        {{type.type}}\n" +
-    "                    </li>\n" +
-    "                    <li class=\"list-group-item form-inline\">\n" +
-    "                        <select class=\"form-control\" ng-model=\"newDB.selType\" ng-options=\"typ.type for typ in DBList.types\">\n" +
-    "                        </select>\n" +
-    "                        <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addTypeNewDB()\">Add Type</button>\n" +
-    "                    </li>\n" +
-    "                </ul>\n" +
+    "                <label for=\"URL\">URL</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"http://www.example.com/\" ng-model=\"newDB.url\"\n" +
+    "                       id=\"URL\" required>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2 form-group\">\n" +
+    "                <label for=\"Location\">Location</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Location\" ng-model=\"newDB.location\"\n" +
+    "                       id=\"Location\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2 form-group\">\n" +
+    "                <label for=\"NotInEDS\">Not in EDS</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" ng-model=\"newDB.notInEDS\"\n" +
+    "                       id=\"NotInEDS\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-1 form-group\">\n" +
+    "                <label for=\"Full-text\">Fulltext</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" ng-model=\"newDB.hasFullText\"\n" +
+    "                       id=\"Full-text\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-1 form-group\">\n" +
+    "                <label for=\"Authenticate\">Authenticate</label>\n" +
+    "                <input type=\"checkbox\" class=\"form-control\" ng-model=\"newDB.auth\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
+    "                       id=\"Authenticate\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-6 form-group\">\n" +
+    "                <label for=\"Coverage\">Coverage</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Database Coverage\" ng-model=\"newDB.coverage\"\n" +
+    "                       id=\"Coverage\" required>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-6 form-group\">\n" +
+    "                <label for=\"Notes\">Notes</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Notes\" ng-model=\"newDB.notes\"\n" +
+    "                       id=\"Notes\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-12 form-group\">\n" +
+    "                <label for=\"descr\">Database Description</label>\n" +
+    "                <textarea class=\"form-control\" rows=\"3\" id=\"descr\" ng-model=\"newDB.description\" required></textarea>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2 form-group\">\n" +
+    "                <label for=\"presented\">Presented by</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Presented By\" ng-model=\"newDB.presentedBy\"\n" +
+    "                       id=\"presented\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2 form-group\">\n" +
+    "                <label for=\"Audience1\">Audience One</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Audience One\" ng-model=\"newDB.audience1\"\n" +
+    "                       id=\"Audience1\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2 form-group\">\n" +
+    "                <label for=\"Audience2\">Audience Two</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Audience Two\" ng-model=\"newDB.audience2\"\n" +
+    "                       id=\"Audience2\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2 form-group\">\n" +
+    "                <label for=\"dAuthor\">Description Author</label>\n" +
+    "                <p id=\"dAuthor\">{{updatedBy}}</p>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2 form-group\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-1 form-group\">\n" +
+    "                <label for=\"Disable\">Disabled</label>\n" +
+    "                <input type=\"checkbox\" class=\"form-control\" ng-model=\"newDB.disabled\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
+    "                       id=\"Disable\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-1 form-group\">\n" +
+    "                <label for=\"tmpDisable\">TmpDisable</label>\n" +
+    "                <input type=\"checkbox\" class=\"form-control\" ng-model=\"newDB.tmpDisabled\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
+    "                       id=\"tmpDisable\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-12\">\n" +
+    "                <div class=\"col-md-6 form-group\">\n" +
+    "                    <label for=\"subjects\">Subjects</label>\n" +
+    "                    <ul class=\"list-group\" id=\"subjects\">\n" +
+    "                        <li class=\"list-group-item\" ng-repeat=\"subject in newDB.subjects\">\n" +
+    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"delSubjNewDB($index)\">Delete</button>\n" +
+    "                            {{subject.subject}} : {{subject.type}}\n" +
+    "                        </li>\n" +
+    "                        <li class=\"list-group-item row\">\n" +
+    "                            <div class=\"col-md-7\">\n" +
+    "                                <select class=\"form-control\" ng-model=\"newDB.selSubj\" ng-options=\"sub.subject for sub in DBList.subjects\">\n" +
+    "                                </select>\n" +
+    "                            </div>\n" +
+    "                            <div class=\"col-md-2\">\n" +
+    "                                <input type=\"text\" class=\"form-control\" placeholder=\"1 or 2\" ng-model=\"newDB.subjType\">\n" +
+    "                            </div>\n" +
+    "                            <div class=\"col-md-3\">\n" +
+    "                                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addSubjNewDB()\">Add Subject</button>\n" +
+    "                            </div>\n" +
+    "                        </li>\n" +
+    "                    </ul>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-6 form-group\">\n" +
+    "                    <label for=\"types\">Types</label>\n" +
+    "                    <ul class=\"list-group\" id=\"types\">\n" +
+    "                        <li class=\"list-group-item\" ng-repeat=\"type in newDB.types\">\n" +
+    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"delTypeNewDB($index)\">Delete</button>\n" +
+    "                            {{type.type}}\n" +
+    "                        </li>\n" +
+    "                        <li class=\"list-group-item form-inline\">\n" +
+    "                            <select class=\"form-control\" ng-model=\"newDB.selType\" ng-options=\"typ.type for typ in DBList.types\">\n" +
+    "                            </select>\n" +
+    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addTypeNewDB()\">Add Type</button>\n" +
+    "                        </li>\n" +
+    "                    </ul>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-12 text-center\">\n" +
+    "                <button type=\"submit\" class=\"btn btn-primary\">Create Database Record</button>\n" +
     "            </div>\n" +
     "        </div>\n" +
-    "        <div class=\"col-md-12 text-center\">\n" +
-    "            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"createDB()\">Create Database Record</button>\n" +
-    "        </div>\n" +
     "    </div>\n" +
-    "</div>\n" +
+    "</form>\n" +
     "\n" +
     "");
 }]);
@@ -35393,7 +35417,7 @@ angular.module('manage.manageDatabases', [])
 
             $scope.deleteDB = function(db){
                 if (confirm("Delete " + db.title  + " permanently?") == true){
-                    dbFactory.postData({action : 1}, db)
+                    mdbFactory.postData({action : 1}, db)
                         .success(function(data, status, headers, config) {
                             if (data == 1){
                                 $scope.DBList.databases.splice($scope.DBList.databases.indexOf(db), 1);
@@ -35401,34 +35425,38 @@ angular.module('manage.manageDatabases', [])
                             } else {
                                 $scope.formResponse = "Error: Can not delete database! " + data;
                             }
+                            alert($scope.formResponse);
                             console.log(data);
                         })
                         .error(function(data, status, headers, config) {
                             $scope.formResponse = "Error: Could not delete database! " + data;
+                            alert($scope.formResponse);
                             console.log(data);
                         });
                 }
             };
             $scope.updateDB = function(db){
                 db.updatedBy = $scope.updatedBy;
-                dbFactory.postData({action : 2}, db)
+                mdbFactory.postData({action : 2}, db)
                     .success(function(data, status, headers, config) {
                         if (data == 1){
                             $scope.formResponse = "Database has been updated.";
                         } else {
                             $scope.formResponse = "Error: Can not update database! " + data;
                         }
+                        alert($scope.formResponse);
                         console.log(data);
                     })
                     .error(function(data, status, headers, config) {
                         $scope.formResponse = "Error: Could not update database! " + data;
+                        alert($scope.formResponse);
                         console.log(data);
                     });
             };
             $scope.createDB = function(){
                 $scope.newDB.updatedBy = $scope.updatedBy;
                 console.dir($scope.newDB);
-                dbFactory.postData({action : 3}, $scope.newDB)
+                mdbFactory.postData({action : 3}, $scope.newDB)
                     .success(function(data, status, headers, config) {
                         if ((typeof data === 'object') && (data !== null)){
                             var newDB = {};
@@ -35446,10 +35474,12 @@ angular.module('manage.manageDatabases', [])
                         } else {
                             $scope.formResponse = "Error: Can not create database! " + data;
                         }
+                        alert($scope.formResponse);
                         console.dir(data);
                     })
                     .error(function(data, status, headers, config) {
                         $scope.formResponse = "Error: Could not create database! " + data;
+                        alert($scope.formResponse);
                         console.dir(data);
                     });
             };
@@ -35461,7 +35491,7 @@ angular.module('manage.manageDatabases', [])
                 newSubject.sid = db.selSubj.sid;
                 newSubject.subject = db.selSubj.subject;
                 newSubject.updatedBy = $scope.updatedBy;
-                dbFactory.postData({action : 4}, newSubject)
+                mdbFactory.postData({action : 4}, newSubject)
                     .success(function(data, status, headers, config) {
                         if ((typeof data === 'object') && (data !== null)){
                             newSubject.id = data.id;
@@ -35480,7 +35510,7 @@ angular.module('manage.manageDatabases', [])
                     });
             };
             $scope.deleteSubject = function(db,subject){
-                dbFactory.postData({action : 5}, subject)
+                mdbFactory.postData({action : 5}, subject)
                     .success(function(data, status, headers, config) {
                         if (data == 1){
                             $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].subjects.splice(
@@ -35501,7 +35531,7 @@ angular.module('manage.manageDatabases', [])
                 newType.tid = db.selType.tid;
                 newType.type = db.selType.type;
                 newType.updatedBy = $scope.updatedBy;
-                dbFactory.postData({action : 6}, newType)
+                mdbFactory.postData({action : 6}, newType)
                     .success(function(data, status, headers, config) {
                         if ((typeof data === 'object') && (data !== null)){
                             newType.id = data.id;
@@ -35518,7 +35548,7 @@ angular.module('manage.manageDatabases', [])
                     });
             };
             $scope.deleteType = function(db,type){
-                dbFactory.postData({action : 7}, type)
+                mdbFactory.postData({action : 7}, type)
                     .success(function(data, status, headers, config) {
                         if (data == 1){
                             $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].types.splice(
@@ -35544,7 +35574,14 @@ angular.module('manage.manageDatabases', [])
                 newSubject.subject = $scope.newDB.selSubj.subject;
                 if (typeof $scope.newDB.subjects == 'undefined')
                     $scope.newDB.subjects = [];
-                $scope.newDB.subjects.push(newSubject);
+                var isPresent = false;
+                for (var i = 0; i < $scope.newDB.subjects.length; i++)
+                    if ($scope.newDB.subjects[i].sid == newSubject.sid){
+                        isPresent = true;
+                        break;
+                    }
+                if (!isPresent)
+                    $scope.newDB.subjects.push(newSubject);
             };
             $scope.delTypeNewDB = function(index){
                 $scope.newDB.types.splice(index, 1);
@@ -35555,7 +35592,14 @@ angular.module('manage.manageDatabases', [])
                 newType.type = $scope.newDB.selType.type;
                 if (typeof $scope.newDB.types == 'undefined')
                     $scope.newDB.types = [];
-                $scope.newDB.types.push(newType);
+                var isPresent = false;
+                for (var i = 0; i < $scope.newDB.types.length; i++)
+                    if ($scope.newDB.types[i].tid == newType.tid){
+                        isPresent = true;
+                        break;
+                    }
+                if (!isPresent)
+                    $scope.newDB.types.push(newType);
             };
         }])
 
