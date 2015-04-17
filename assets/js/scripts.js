@@ -34251,7 +34251,7 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "<div>\n" +
     "    <div class=\"text-center row form-inline\">\n" +
     "        <div class=\"col-md-12 form-group\">\n" +
-    "            <label for=\"filterBy\">Filter by</label>\n" +
+    "            <label for=\"filterBy\">Filter <small>{{filteredDB.length}}</small> results by</label>\n" +
     "            <div id=\"filterBy\">\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Title starts with\" ng-model=\"titleStartFilter\">\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"titleFilter\">\n" +
