@@ -34643,7 +34643,7 @@ angular.module("manageHours/manageEx.tpl.html", []).run(["$templateCache", funct
     "        </td>\n" +
     "        <td class=\"text-center\">\n" +
     "            <div ng-hide=\"isExpExc(exception.id)\">{{exception.datems | date : 'MMM d, y'}}</div>\n" +
-    "            <div ng-show=\"isExpExc(exception.id)\">\n" +
+    "            <div ng-if=\"isExpExc(exception.id)\">\n" +
     "\n" +
     "                <input type=\"text\" class=\"form-control\" datepicker-popup=\"{{format}}\"\n" +
     "                       ng-model=\"exception.datems\" is-open=\"exception.dp\"\n" +
@@ -34653,7 +34653,7 @@ angular.module("manageHours/manageEx.tpl.html", []).run(["$templateCache", funct
     "        </td>\n" +
     "        <td class=\"text-center\">\n" +
     "            <div ng-hide=\"isExpExc(exception.id)\">{{exception.days}}</div>\n" +
-    "            <div ng-show=\"isExpExc(exception.id)\"><input type=\"text\" class=\"form-control\" ng-model=\"exception.days\" ng-required /></div>\n" +
+    "            <div ng-if=\"isExpExc(exception.id)\"><input type=\"text\" class=\"form-control\" ng-model=\"exception.days\" ng-required /></div>\n" +
     "        </td>\n" +
     "        <td class=\"text-center\">\n" +
     "            <div class=\"row\">\n" +
@@ -34816,7 +34816,7 @@ angular.module("manageHours/manageSem.tpl.html", []).run(["$templateCache", func
     "            <div ng-hide=\"isExpSem(sem.dsid)\">\n" +
     "                {{day.hours}}\n" +
     "            </div>\n" +
-    "            <div ng-show=\"isExpSem(sem.dsid)\">\n" +
+    "            <div ng-if=\"isExpSem(sem.dsid)\">\n" +
     "                <select class=\"form-control\" ng-model=\"day.from\">\n" +
     "                    <option ng-repeat=\"hours in hrsFrom\" ng-selected=\"{{day.from == hours.value}}\" ng-value=\"{{hours.value}}\">{{hours.name}}</option>\n" +
     "                </select>\n" +
