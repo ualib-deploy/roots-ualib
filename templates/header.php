@@ -3,8 +3,8 @@
 @include_once WEBAPPS_PATH . "userGroupsAdmin/functions.php";
 
 $showAdminLink = false;
-if (defined('GROUP_ADMIN'))
-    if (($wpUser = gDoesUserHaveAccessWP( GROUP_ADMIN )) !== false){
+if (defined('GROUP_ANY_WEBAPP'))
+    if (($wpUser = gDoesUserHaveAccessWP( GROUP_ANY_WEBAPP )) !== false){
         $showAdminLink = true;
 }
 ?>
