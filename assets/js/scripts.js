@@ -36873,11 +36873,19 @@ angular.module("dbList/dbList.tpl.html", []).run(["$templateCache", function($te
     "    </div>\n" +
     "    <div class=\"cold-md-12 form-group\">\n" +
     "        <label for=\"selectST\" ng-click=\"subTypSelOpen = !subTypSelOpen\">\n" +
-    "            <span class=\"fa fa-fw fa-caret-right\" ng-show=\"subTypSelOpen\"></span>\n" +
-    "            <span class=\"fa fa-fw fa-caret-down\" ng-show=\"!subTypSelOpen\"></span>\n" +
+    "            <span class=\"fa fa-fw fa-caret-right\" ng-show=\"!subTypSelOpen\"></span>\n" +
+    "            <span class=\"fa fa-fw fa-caret-down\" ng-show=\"subTypSelOpen\"></span>\n" +
     "            <a>\n" +
     "                Select Subjects and Media Types\n" +
     "            </a>\n" +
+    "            <label class=\"btn btn-default\" btn-checkbox ng-repeat=\"subject in dbList.subjects | filter:{selected:'true'}\"\n" +
+    "                   ng-model=\"subject.selected\" ng-click=\"updateStatus(subject)\">\n" +
+    "                {{subject.subject}}\n" +
+    "            </label>\n" +
+    "            <label class=\"btn btn-default\" btn-checkbox ng-repeat=\"type in dbList.types | filter:{selected:'true'}\"\n" +
+    "                   ng-model=\"type.selected\" ng-click=\"updateTypes(type)\">\n" +
+    "                {{type.type}}\n" +
+    "            </label>\n" +
     "        </label>\n" +
     "        <div id=\"selectST\" ng-show=\"subTypSelOpen\">\n" +
     "            <div class=\"col-md-8\">\n" +
@@ -37079,25 +37087,28 @@ angular.module("dbList/dbListMain.tpl.html", []).run(["$templateCache", function
                 if (typeof $routeParams.ft !== 'undefined')
                     $scope.dbList.typeFilter = $routeParams.ft;
                 if (typeof $routeParams.sub !== 'undefined'){
-                    $scope.subTypSelOpen = true;
                     var subNames = $routeParams.sub.split("/");
                     for (var i = 0; i < subNames.length; i++)
                         for (var j = 0; j < $scope.dbList.subjects.length; j++)
                             if (subNames[i] === $scope.dbList.subjects[j].subject){
-                                $scope.selectedSubjects.push($scope.dbList.subjects[j]);
+                                if ($scope.selectedSubjects.indexOf($scope.dbList.subjects[j]) < 0)
+                                    $scope.selectedSubjects.push($scope.dbList.subjects[j]);
                                 $scope.dbList.subjects[j].selected = true;
                             }
                 }
                 if (typeof $routeParams.typ !== 'undefined'){
-                    $scope.subTypSelOpen = true;
                     var subNames = $routeParams.typ.split("/");
                     for (var i = 0; i < subNames.length; i++)
                         for (var j = 0; j < $scope.dbList.types.length; j++)
                             if (subNames[i] === $scope.dbList.types[j].type){
-                                $scope.selectedTypes.push($scope.dbList.types[j]);
+                                if ($scope.selectedTypes.indexOf($scope.dbList.types[j]) < 0)
+                                    $scope.selectedTypes.push($scope.dbList.types[j]);
                                 $scope.dbList.types[j].selected = true;
                             }
                 }
+                if (typeof $routeParams.o !== 'undefined')
+                    if ($routeParams.o.indexOf('true') === 0)
+                        $scope.subTypSelOpen = true;
                 console.dir($scope.dbList);
             })
             .error(function(msg){
@@ -37136,15 +37147,15 @@ angular.module('databases.list', ['ngSanitize'])
                 templateUrl: 'dbList/dbListMain.tpl.html',
                 controller: 'databasesCtrl'
             })
-            .when('/databases/:t?/ts/:ts?/d/:d?/fs/:fs?/sub/:sub*\/typ/:typ*\/ft/:ft?', {
+            .when('/databases/:t?/ts/:ts?/d/:d?/fs/:fs?/sub/:sub*\/typ/:typ*\/ft/:ft?/o/:o', {
                 templateUrl: 'dbList/dbListMain.tpl.html',
                 controller: 'databasesCtrl'
             })
-            .when('/databases/:t?/ts/:ts?/d/:d?/fs/:fs?/sub/:sub*\/ft/:ft?', {
+            .when('/databases/:t?/ts/:ts?/d/:d?/fs/:fs?/sub/:sub*\/ft/:ft?o/:o', {
                 templateUrl: 'dbList/dbListMain.tpl.html',
                 controller: 'databasesCtrl'
             })
-            .when('/databases/:t?/ts/:ts?/d/:d?/fs/:fs?/typ/:typ*\/ft/:ft?', {
+            .when('/databases/:t?/ts/:ts?/d/:d?/fs/:fs?/typ/:typ*\/ft/:ft?o/:o', {
                 templateUrl: 'dbList/dbListMain.tpl.html',
                 controller: 'databasesCtrl'
             })
@@ -37178,6 +37189,8 @@ angular.module('databases.list', ['ngSanitize'])
                 newPath += 'ft/';
                 if ($scope.dbList.typeFilter)
                     newPath = newPath + $scope.dbList.typeFilter + '/';
+                if ($scope.selectedSubjects.length > 0 || $scope.selectedTypes.length > 0)
+                    newPath = newPath + 'o/' + $scope.subTypSelOpen;
                 $location.path(newPath);
                 console.log(newPath)
             }
@@ -37185,22 +37198,32 @@ angular.module('databases.list', ['ngSanitize'])
             $rootScope.$on('$routeChangeSuccess', function(event, currentRoute){
                 if (typeof currentRoute.params.t !== 'undefined')
                     $scope.dbList.titleFilter = currentRoute.params.t;
+                else
+                    $scope.dbList.titleFilter = '';
                 if (typeof currentRoute.params.ts !== 'undefined')
                     $scope.dbList.titleStartFilter = currentRoute.params.ts;
+                else
+                    $scope.dbList.titleStartFilter = '';
                 if (typeof currentRoute.params.d !== 'undefined')
                     $scope.dbList.descrFilter = currentRoute.params.d;
+                else
+                    $scope.dbList.descrFilter = '';
                 if (typeof currentRoute.params.fs !== 'undefined')
                     $scope.dbList.subjectFilter = currentRoute.params.fs;
+                else
+                    $scope.dbList.subjectFilter = '';
                 if (typeof currentRoute.params.ft !== 'undefined')
                     $scope.dbList.typeFilter = currentRoute.params.ft;
+                else
+                    $scope.dbList.typeFilter = '';
                 for (var i = 0; i < $scope.dbList.subjects.length; i++){
                     $scope.dbList.subjects[i].selected = false;
                 }
                 for (var i = 0; i < $scope.dbList.types.length; i++){
                     $scope.dbList.types[i].selected = false;
                 }
+                $scope.selectedSubjects = [];
                 if (typeof currentRoute.params.sub !== 'undefined'){
-                    $scope.subTypSelOpen = true;
                     var subNames = currentRoute.params.sub.split("/");
                     for (var i = 0; i < subNames.length; i++)
                         for (var j = 0; j < $scope.dbList.subjects.length; j++)
@@ -37210,8 +37233,8 @@ angular.module('databases.list', ['ngSanitize'])
                                 $scope.dbList.subjects[j].selected = true;
                             }
                 }
+                $scope.selectedTypes = [];
                 if (typeof currentRoute.params.typ !== 'undefined'){
-                    $scope.subTypSelOpen = true;
                     var subNames = currentRoute.params.typ.split("/");
                     for (var i = 0; i < subNames.length; i++)
                         for (var j = 0; j < $scope.dbList.types.length; j++)
@@ -37221,6 +37244,11 @@ angular.module('databases.list', ['ngSanitize'])
                                 $scope.dbList.types[j].selected = true;
                             }
                 }
+                if (typeof currentRoute.params.o !== 'undefined')
+                    if (currentRoute.params.o.indexOf('true') === 0)
+                        $scope.subTypSelOpen = true;
+                    else
+                        $scope.subTypSelOpen = false;
                 console.log("$routeChangeSuccess");
             });
         }])
