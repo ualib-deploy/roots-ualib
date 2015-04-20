@@ -36856,18 +36856,26 @@ angular.module("dbList/dbList.tpl.html", []).run(["$templateCache", function($te
     "    <div class=\"col-md-12 form-group text-left\">\n" +
     "        <label for=\"filterBy\">Filter <small>{{filteredDB.length}}</small> results by</label>\n" +
     "        <div id=\"filterBy\">\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Title starts with\" ng-model=\"dbList.titleStartFilter\">\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"dbList.titleFilter\">\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Description contains\" ng-model=\"dbList.descrFilter\">\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Subjects contain\" ng-model=\"dbList.subjectFilter\">\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Media Types contain\" ng-model=\"dbList.typeFilter\">\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Title starts with\" ng-model=\"dbList.titleStartFilter\"\n" +
+    "                   ng-change=\"\">\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"dbList.titleFilter\"\n" +
+    "                   ng-change=\"\">\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Description contains\" ng-model=\"dbList.descrFilter\"\n" +
+    "                   ng-change=\"\">\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Subjects contain\" ng-model=\"dbList.subjectFilter\"\n" +
+    "                   ng-change=\"\">\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Media Types contain\" ng-model=\"dbList.typeFilter\"\n" +
+    "                   ng-change=\"\">\n" +
+    "            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"updateURL()\">\n" +
+    "                Update URL\n" +
+    "            </button>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "    <div class=\"cold-md-12 form-group\">\n" +
     "        <label for=\"selectST\" ng-click=\"subTypSelOpen = !subTypSelOpen\">\n" +
+    "            <span class=\"fa fa-fw fa-caret-right\" ng-show=\"subTypSelOpen\"></span>\n" +
+    "            <span class=\"fa fa-fw fa-caret-down\" ng-show=\"!subTypSelOpen\"></span>\n" +
     "            <a>\n" +
-    "                <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"subTypSelOpen\"></span>\n" +
-    "                <span class=\"fa fa-fw fa-caret-down\" ng-show=\"subTypSelOpen\"></span>\n" +
     "                Select Subjects and Media Types\n" +
     "            </a>\n" +
     "        </label>\n" +
@@ -36903,8 +36911,7 @@ angular.module("dbList/dbList.tpl.html", []).run(["$templateCache", function($te
     "                boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\"></pagination>\n" +
     "</div>\n" +
     "<div class=\"row\"\n" +
-    "     ng-repeat=\"db in filteredDB = (dbList.databases | filter:{filterBy:dbList.searchText}:compareTitle\n" +
-    "                                                     | filter:{title:dbList.titleStartFilter}:startTitle\n" +
+    "     ng-repeat=\"db in filteredDB = (dbList.databases | filter:{title:dbList.titleStartFilter}:startTitle\n" +
     "                                                     | filter:{title:dbList.titleFilter}:compareTitle\n" +
     "                                                     | filter:{description:dbList.descrFilter}:compareTitle\n" +
     "                                                     | filter:{subjects:dbList.subjectFilter}:compareTitle\n" +
@@ -36932,12 +36939,12 @@ angular.module("dbList/dbList.tpl.html", []).run(["$templateCache", function($te
     "            <p ng-bind-html=\"db.description\"></p>\n" +
     "            <h4 ng-show=\"primarySubj.length > 0\"><small>Primary Subjects:</small>\n" +
     "                <small ng-repeat=\"subject in primarySubj = (db.subjects | filter:{type:'1'})\">\n" +
-    "                    {{subject.subject}}<span ng-hide=\"$index == primarySubj.length-1\">, </span>\n" +
+    "                    {{subject.subject}}<span ng-hide=\"$index == primarySubj.length-1\"> | </span>\n" +
     "                </small>\n" +
     "            </h4>\n" +
     "            <h4><small>Media Types:</small>\n" +
     "                <small ng-repeat=\"type in db.types\">\n" +
-    "                    {{type.type}}<span ng-hide=\"$index == db.types.length-1\">, </span>\n" +
+    "                    {{type.type}}<span ng-hide=\"$index == db.types.length-1\"> | </span>\n" +
     "                </small>\n" +
     "            </h4>\n" +
     "        </div>\n" +
@@ -37009,20 +37016,6 @@ angular.module("dbList/dbList.tpl.html", []).run(["$templateCache", function($te
 
 angular.module("dbList/dbListMain.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("dbList/dbListMain.tpl.html",
-    "<form ng-submit=\"search()\">\n" +
-    "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-6\">\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Search Databases\" ng-model=\"dbList.searchText\">\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-2\">\n" +
-    "            <button type=\"submit\" class=\"btn btn-primary\">\n" +
-    "                <span ng-show=\"dbList.searchText.length == 0\">Search</span>\n" +
-    "                <span ng-hide=\"dbList.searchText.length == 0\">Update URL</span>\n" +
-    "            </button>\n" +
-    "        </div>\n" +
-    "    </div>\n" +
-    "</form>\n" +
-    "\n" +
     "<div databases-list></div>\n" +
     "");
 }]);
@@ -37049,7 +37042,6 @@ angular.module("dbList/dbListMain.tpl.html", []).run(["$templateCache", function
     .controller('mainDatabasesCtrl', ['$scope', '$routeParams', 'dbFactory', 'PROXY_PREPEND_URL',
     function($scope, $routeParams, dbFactory, proxyURL){
         $scope.dbList = {};
-        $scope.dbList.searchText = '';
         $scope.dbList.titleFilter = '';
         $scope.dbList.titleStartFilter = '';
         $scope.dbList.descrFilter = '';
@@ -37057,6 +37049,7 @@ angular.module("dbList/dbListMain.tpl.html", []).run(["$templateCache", function
         $scope.dbList.typeFilter = '';
         $scope.selectedSubjects = [];
         $scope.selectedTypes = [];
+        $scope.subTypSelOpen = false;
 
         //need to load all databases only once
         dbFactory.getData("all")
@@ -37071,13 +37064,10 @@ angular.module("dbList/dbListMain.tpl.html", []).run(["$templateCache", function
                     data.databases[i].show = false;
                     data.databases[i].primary = true;
                     data.databases[i].class = "";
-                    data.databases[i].filterBy = data.databases[i].title + data.databases[i].description;
                     if (data.databases[i].auth == '1')
                         data.databases[i].url = proxyURL + data.databases[i].url;
                 }
                 $scope.dbList = data;
-                if (typeof $routeParams.s !== 'undefined')
-                    $scope.dbList.searchText = $routeParams.s;
                 if (typeof $routeParams.t !== 'undefined')
                     $scope.dbList.titleFilter = $routeParams.t;
                 if (typeof $routeParams.ts !== 'undefined')
@@ -37089,6 +37079,7 @@ angular.module("dbList/dbListMain.tpl.html", []).run(["$templateCache", function
                 if (typeof $routeParams.ft !== 'undefined')
                     $scope.dbList.typeFilter = $routeParams.ft;
                 if (typeof $routeParams.sub !== 'undefined'){
+                    $scope.subTypSelOpen = true;
                     var subNames = $routeParams.sub.split("/");
                     for (var i = 0; i < subNames.length; i++)
                         for (var j = 0; j < $scope.dbList.subjects.length; j++)
@@ -37098,6 +37089,7 @@ angular.module("dbList/dbListMain.tpl.html", []).run(["$templateCache", function
                             }
                 }
                 if (typeof $routeParams.typ !== 'undefined'){
+                    $scope.subTypSelOpen = true;
                     var subNames = $routeParams.typ.split("/");
                     for (var i = 0; i < subNames.length; i++)
                         for (var j = 0; j < $scope.dbList.types.length; j++)
@@ -37136,23 +37128,23 @@ angular.module('common.databases', [])
 angular.module('databases.list', ['ngSanitize'])
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider
-            .when('/databases/:s?', {
+            .when('/databases/:t?', {
                 templateUrl: 'dbList/dbListMain.tpl.html',
                 controller: 'databasesCtrl'
             })
-            .when('/databases/:s?/title/:t?/ts/:ts?/d/:d?/fs/:fs?/ft/:ft?', {
+            .when('/databases/:t?/ts/:ts?/d/:d?/fs/:fs?/ft/:ft?', {
                 templateUrl: 'dbList/dbListMain.tpl.html',
                 controller: 'databasesCtrl'
             })
-            .when('/databases/:s?/title/:t?/ts/:ts?/d/:d?/fs/:fs?/sub/:sub*\/typ/:typ*\/ft/:ft?', {
+            .when('/databases/:t?/ts/:ts?/d/:d?/fs/:fs?/sub/:sub*\/typ/:typ*\/ft/:ft?', {
                 templateUrl: 'dbList/dbListMain.tpl.html',
                 controller: 'databasesCtrl'
             })
-            .when('/databases/:s?/title/:t?/ts/:ts?/d/:d?/fs/:fs?/sub/:sub*\/ft/:ft?', {
+            .when('/databases/:t?/ts/:ts?/d/:d?/fs/:fs?/sub/:sub*\/ft/:ft?', {
                 templateUrl: 'dbList/dbListMain.tpl.html',
                 controller: 'databasesCtrl'
             })
-            .when('/databases/:s?/title/:t?/ts/:ts?/d/:d?/fs/:fs?/typ/:typ*\/ft/:ft?', {
+            .when('/databases/:t?/ts/:ts?/d/:d?/fs/:fs?/typ/:typ*\/ft/:ft?', {
                 templateUrl: 'dbList/dbListMain.tpl.html',
                 controller: 'databasesCtrl'
             })
@@ -37160,41 +37152,37 @@ angular.module('databases.list', ['ngSanitize'])
     .controller('databasesCtrl', ['$scope', '$location', '$rootScope',
         function($scope, $location, $rootScope){
 
-            $scope.search = function(){
-                if ($scope.dbList.searchText){
-                    var newPath = '/databases/' + $scope.dbList.searchText;
-                    newPath += '/title/';
-                    if ($scope.dbList.titleFilter)
-                        newPath = newPath + $scope.dbList.titleFilter + '/';
-                    newPath += 'ts/';
-                    if ($scope.dbList.titleStartFilter)
-                        newPath = newPath + $scope.dbList.titleStartFilter + '/';
-                    newPath += 'd/';
-                    if ($scope.dbList.descrFilter)
-                        newPath = newPath + $scope.dbList.descrFilter + '/';
-                    newPath += 'fs/';
-                    if ($scope.dbList.subjectFilter)
-                        newPath = newPath + $scope.dbList.subjectFilter + '/';
-                    if ($scope.selectedSubjects.length > 0){
-                        newPath += 'sub/';
-                        for (var i = 0; i < $scope.selectedSubjects.length; i++)
-                            newPath = newPath + $scope.selectedSubjects[i].subject + '/';
-                    }
-                    if ($scope.selectedTypes.length > 0){
-                        newPath += 'typ/';
-                        for (var i = 0; i < $scope.selectedTypes.length; i++)
-                            newPath = newPath + $scope.selectedTypes[i].type + '/';
-                    }
-                    newPath += 'ft/';
-                    if ($scope.dbList.typeFilter)
-                        newPath = newPath + $scope.dbList.typeFilter + '/';
-                    $location.path(newPath);
+            $scope.updateURL = function(){
+                var newPath = '/databases/';
+                if ($scope.dbList.titleFilter)
+                    newPath = newPath + $scope.dbList.titleFilter + '/';
+                newPath += 'ts/';
+                if ($scope.dbList.titleStartFilter)
+                    newPath = newPath + $scope.dbList.titleStartFilter + '/';
+                newPath += 'd/';
+                if ($scope.dbList.descrFilter)
+                    newPath = newPath + $scope.dbList.descrFilter + '/';
+                newPath += 'fs/';
+                if ($scope.dbList.subjectFilter)
+                    newPath = newPath + $scope.dbList.subjectFilter + '/';
+                if ($scope.selectedSubjects.length > 0){
+                    newPath += 'sub/';
+                    for (var i = 0; i < $scope.selectedSubjects.length; i++)
+                        newPath = newPath + $scope.selectedSubjects[i].subject + '/';
                 }
+                if ($scope.selectedTypes.length > 0){
+                    newPath += 'typ/';
+                    for (var i = 0; i < $scope.selectedTypes.length; i++)
+                        newPath = newPath + $scope.selectedTypes[i].type + '/';
+                }
+                newPath += 'ft/';
+                if ($scope.dbList.typeFilter)
+                    newPath = newPath + $scope.dbList.typeFilter + '/';
+                $location.path(newPath);
+                console.log(newPath)
             }
 
             $rootScope.$on('$routeChangeSuccess', function(event, currentRoute){
-                if ($scope.dbList.searchText !== currentRoute.params.s)
-                    $scope.dbList.searchText = currentRoute.params.s;
                 if (typeof currentRoute.params.t !== 'undefined')
                     $scope.dbList.titleFilter = currentRoute.params.t;
                 if (typeof currentRoute.params.ts !== 'undefined')
@@ -37205,24 +37193,35 @@ angular.module('databases.list', ['ngSanitize'])
                     $scope.dbList.subjectFilter = currentRoute.params.fs;
                 if (typeof currentRoute.params.ft !== 'undefined')
                     $scope.dbList.typeFilter = currentRoute.params.ft;
+                for (var i = 0; i < $scope.dbList.subjects.length; i++){
+                    $scope.dbList.subjects[i].selected = false;
+                }
+                for (var i = 0; i < $scope.dbList.types.length; i++){
+                    $scope.dbList.types[i].selected = false;
+                }
                 if (typeof currentRoute.params.sub !== 'undefined'){
+                    $scope.subTypSelOpen = true;
                     var subNames = currentRoute.params.sub.split("/");
                     for (var i = 0; i < subNames.length; i++)
                         for (var j = 0; j < $scope.dbList.subjects.length; j++)
                             if (subNames[i] === $scope.dbList.subjects[j].subject){
-                                $scope.selectedSubjects.push($scope.dbList.subjects[j]);
+                                if ($scope.selectedSubjects.indexOf($scope.dbList.subjects[j]) < 0)
+                                    $scope.selectedSubjects.push($scope.dbList.subjects[j]);
                                 $scope.dbList.subjects[j].selected = true;
                             }
                 }
                 if (typeof currentRoute.params.typ !== 'undefined'){
+                    $scope.subTypSelOpen = true;
                     var subNames = currentRoute.params.typ.split("/");
                     for (var i = 0; i < subNames.length; i++)
                         for (var j = 0; j < $scope.dbList.types.length; j++)
                             if (subNames[i] === $scope.dbList.types[j].type){
-                                $scope.selectedTypes.push($scope.dbList.types[j]);
+                                if ($scope.selectedTypes.indexOf($scope.dbList.types[j]) < 0)
+                                    $scope.selectedTypes.push($scope.dbList.types[j]);
                                 $scope.dbList.types[j].selected = true;
                             }
                 }
+                console.log("$routeChangeSuccess");
             });
         }])
 
@@ -37230,7 +37229,6 @@ angular.module('databases.list', ['ngSanitize'])
         $scope.currentPage = 1;
         $scope.maxPageSize = 10;
         $scope.perPage = 20;
-        $scope.subTypSelOpen = false;
 
         $scope.compareTitle = function(actual, expected){
             if (!expected)
@@ -37287,6 +37285,7 @@ angular.module('databases.list', ['ngSanitize'])
             if (value)
                 $scope.selectedSubjects = angular.copy($scope.dbList.subjects);
             $scope.updatePrimaryStatus();
+            $scope.updateURL();
         };
         $scope.selectAllTypes = function(value){
             $scope.selectedTypes = [];
@@ -37294,6 +37293,7 @@ angular.module('databases.list', ['ngSanitize'])
                 $scope.dbList.types[i].selected = value;
             if (value)
                 $scope.selectedTypes = angular.copy($scope.dbList.types);
+            $scope.updateURL();
         };
         $scope.updateStatus = function(subject){
             var index = $scope.selectedSubjects.indexOf(subject);
@@ -37302,6 +37302,7 @@ angular.module('databases.list', ['ngSanitize'])
             else
                 $scope.selectedSubjects.push(subject);
             $scope.updatePrimaryStatus();
+            $scope.updateURL();
         };
         $scope.updateTypes = function(type){
             var index = $scope.selectedTypes.indexOf(type);
@@ -37309,6 +37310,7 @@ angular.module('databases.list', ['ngSanitize'])
                 $scope.selectedTypes.splice(index, 1);
             else
                 $scope.selectedTypes.push(type);
+            $scope.updateURL();
         };
         $scope.updatePrimaryStatus = function(){
             if ($scope.selectedSubjects.length == 0)
