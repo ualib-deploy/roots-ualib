@@ -34242,7 +34242,7 @@ angular.module('hours.list', [])
             templateUrl: 'list/list.tpl.html',
             controller: 'ListCtrl'
         }
-    }]);;angular.module('manage.templates', ['manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html']);
+    }]);;angular.module('manage.templates', ['manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWabApps.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html']);
 
 angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageDatabases/manageDatabases.tpl.html",
@@ -35081,19 +35081,18 @@ angular.module("manageUserGroups/manageUG.tpl.html", []).run(["$templateCache", 
     "");
 }]);
 
-angular.module("manageUserGroups/viewMyWebApps.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("manageUserGroups/viewMyWebApps.tpl.html",
-    "<h2>Web Applications : {{userName}}</h2>\n" +
+angular.module("manageUserGroups/viewMyWabApps.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("manageUserGroups/viewMyWabApps.tpl.html",
+    "<h2>My Web Applications</h2>\n" +
     "\n" +
     "<div class=\"form-group\">\n" +
-    "    <label for=\"webapps\">Back-End access links</label>\n" +
+    "    <label for=\"webapps\">Web Application Back-End access links</label>\n" +
     "    <ul class=\"list-group\" id=\"webapps\">\n" +
     "        <li class=\"list-group-item\" ng-repeat=\"app in apps\">\n" +
     "            <a href=\"{{app.link}}\">{{app.appName}}</a>\n" +
     "        </li>\n" +
     "    </ul>\n" +
-    "</div>\n" +
-    "");
+    "</div>");
 }]);
 
 angular.module("siteFeedback/siteFeedback.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -36539,13 +36538,10 @@ angular.module('manage.manageUserGroups', [])
             templateUrl: 'manageUserGroups/manageUG.tpl.html'
         };
     })
-
-angular.module('manage.manageUserGroups', [])
     .controller('myWebAppsCtrl', ['$scope', '$window',
         function myWebAppsCtrl($scope, $window){
             $scope.apps = $window.apps;
             $scope.userName = $window.userName;
-
         }])
     .directive('viewMyWebApps', function() {
         return {
@@ -36555,7 +36551,6 @@ angular.module('manage.manageUserGroups', [])
             templateUrl: 'manageUserGroups/viewMyWebApps.tpl.html'
         };
     })
-
 angular.module('manage.siteFeedback', [])
     .controller('siteFeedbackCtrl', ['$scope', '$http', 'sfFactory',
         function siteFeedbackCtrl($scope, $http, sfFactory){
