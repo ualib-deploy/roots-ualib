@@ -36872,6 +36872,20 @@ angular.module("dbList/dbList.tpl.html", []).run(["$templateCache", function($te
     "        </div>\n" +
     "    </div>\n" +
     "    <div class=\"cold-md-12 form-group\">\n" +
+    "        <h4 ng-show=\"selSubj.length > 0 || selTypes.length > 0\">\n" +
+    "\n" +
+    "            <label class=\"btn btn-default\" btn-checkbox ng-repeat=\"subject in selSubj = (dbList.subjects | filter:{selected:'true'})\"\n" +
+    "                   ng-model=\"subject.selected\" ng-click=\"updateStatus(subject)\">\n" +
+    "                {{subject.subject}}<span class=\"fa fa-fw fa-close\"></span>\n" +
+    "            </label>\n" +
+    "            <span ng-show=\"selTypes.length > 0\">\n" +
+    "                <span ng-show=\"selSubj.length > 0\"> | </span>\n" +
+    "            </span>\n" +
+    "            <label class=\"btn btn-default\" btn-checkbox ng-repeat=\"type in selTypes = (dbList.types | filter:{selected:'true'})\"\n" +
+    "                   ng-model=\"type.selected\" ng-click=\"updateTypes(type)\">\n" +
+    "                {{type.type}}<span class=\"fa fa-fw fa-close\"></span>\n" +
+    "            </label>\n" +
+    "        </h4>\n" +
     "        <label for=\"selectST\">\n" +
     "            <span class=\"fa fa-fw fa-caret-right\" ng-show=\"!dbList.subTypSelOpen\"></span>\n" +
     "            <a ng-click=\"toggleSubjectsTypes(true)\" ng-show=\"!dbList.subTypSelOpen\">\n" +
@@ -36881,14 +36895,6 @@ angular.module("dbList/dbList.tpl.html", []).run(["$templateCache", function($te
     "            <a ng-click=\"toggleSubjectsTypes(false)\" ng-show=\"dbList.subTypSelOpen\">\n" +
     "                Close Subjects and Media Types pane\n" +
     "            </a>\n" +
-    "            <label class=\"btn btn-default\" btn-checkbox ng-repeat=\"subject in dbList.subjects | filter:{selected:'true'}\"\n" +
-    "                   ng-model=\"subject.selected\" ng-click=\"updateStatus(subject)\">\n" +
-    "                {{subject.subject}}<span class=\"fa fa-fw fa-close\"></span>\n" +
-    "            </label>\n" +
-    "            <label class=\"btn btn-default\" btn-checkbox ng-repeat=\"type in dbList.types | filter:{selected:'true'}\"\n" +
-    "                   ng-model=\"type.selected\" ng-click=\"updateTypes(type)\">\n" +
-    "                {{type.type}}<span class=\"fa fa-fw fa-close\"></span>\n" +
-    "            </label>\n" +
     "        </label>\n" +
     "        <div id=\"selectST\" ng-show=\"isOpenSubTyp()\">\n" +
     "            <div class=\"col-md-8\">\n" +
@@ -36948,12 +36954,12 @@ angular.module("dbList/dbList.tpl.html", []).run(["$templateCache", function($te
     "        </div>\n" +
     "        <div class=\"col-md-12\">\n" +
     "            <p ng-bind-html=\"db.description\"></p>\n" +
-    "            <h4 ng-show=\"primarySubj.length > 0\"><small>Primary Subjects:</small>\n" +
+    "            <h4 ng-show=\"primarySubj.length > 0\">\n" +
     "                <small ng-repeat=\"subject in primarySubj = (db.subjects | filter:{type:'1'})\">\n" +
     "                    {{subject.subject}}<span ng-hide=\"$index == primarySubj.length-1\"> | </span>\n" +
     "                </small>\n" +
     "            </h4>\n" +
-    "            <h4><small>Media Types:</small>\n" +
+    "            <h4>\n" +
     "                <small ng-repeat=\"type in db.types\">\n" +
     "                    {{type.type}}<span ng-hide=\"$index == db.types.length-1\"> | </span>\n" +
     "                </small>\n" +
@@ -37266,7 +37272,7 @@ angular.module('databases.list', ['ngSanitize'])
     .controller('dbListCtrl', ['$scope', function dbListCtrl($scope){
         $scope.currentPage = 1;
         $scope.maxPageSize = 10;
-        $scope.perPage = 20;
+        $scope.perPage = 10;
 
         $scope.compareTitle = function(actual, expected){
             if (!expected)
