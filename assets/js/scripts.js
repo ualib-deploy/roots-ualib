@@ -36854,7 +36854,7 @@ angular.module("dbList/dbList.tpl.html", []).run(["$templateCache", function($te
   $templateCache.put("dbList/dbList.tpl.html",
     "<div class=\"row form-inline\">\n" +
     "    <div class=\"col-md-12 form-group text-left\">\n" +
-    "        <label for=\"filterBy\">Filter <small>{{filteredDB.length}}</small> results by</label>\n" +
+    "        <label for=\"filterBy\">Filter <strong>{{filteredDB.length}}</strong> results by</label>\n" +
     "        <div id=\"filterBy\">\n" +
     "            <input type=\"text\" class=\"form-control\" placeholder=\"Title starts with\" ng-model=\"dbList.titleStartFilter\"\n" +
     "                   ng-change=\"\">\n" +
@@ -36940,7 +36940,7 @@ angular.module("dbList/dbList.tpl.html", []).run(["$templateCache", function($te
     "    | startFrom:(currentPage-1)*perPage | limitTo:perPage\"\n" +
     "     ng-class=\"{sdOpen: db.show, sdOver: db.id == mOver}\" ng-mouseover=\"setOver(db)\">\n" +
     "    <div class=\"col-md-12\" ng-click=\"toggleDB(db)\">\n" +
-    "        <div class=\"col-md-10\">\n" +
+    "        <div class=\"col-md-11\">\n" +
     "            <h4>\n" +
     "                <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"db.show\"></span>\n" +
     "                <span class=\"fa fa-fw fa-caret-down\" ng-show=\"db.show\"></span>\n" +
@@ -36949,8 +36949,10 @@ angular.module("dbList/dbList.tpl.html", []).run(["$templateCache", function($te
     "                <small>{{db.coverage}}</small>\n" +
     "            </h4>\n" +
     "        </div>\n" +
-    "        <div class=\"col-md-2 text-right\">\n" +
-    "            <small ng-show=\"db.primary && dbList.selectedSubjects.length > 0\">RECOMMENDED</small>\n" +
+    "        <div class=\"col-md-1\">\n" +
+    "            <span ng-show=\"db.primary && dbList.selectedSubjects.length > 0\" popover=\"Recommended\" popover-trigger=\"mouseenter\">\n" +
+    "                <span class=\"fa fa-fw fa-check\"></span>\n" +
+    "            </span>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-12\">\n" +
     "            <div class=\"col-md-1\">\n" +
@@ -37140,12 +37142,36 @@ angular.module("dbList/dbListMain.tpl.html", []).run(["$templateCache", function
                 if (typeof $routeParams.o !== 'undefined')
                     if ($routeParams.o.indexOf('true') === 0)
                         $scope.dbList.subTypSelOpen = true;
+                $scope.updatePrimaryStatus();
                 console.dir($scope.dbList);
             })
             .error(function(msg){
                 console.log(msg);
             });
 
+        $scope.updatePrimaryStatus = function(){
+            if ($scope.dbList.selectedSubjects.length == 0)
+                for (var i = 0; i < $scope.dbList.databases.length; i++)
+                    $scope.dbList.databases[i].primary = true;
+            else
+                for (var i = 0; i < $scope.dbList.databases.length; i++){
+                    $scope.dbList.databases[i].primary = true;
+                    for (var t = 0; t < $scope.dbList.selectedSubjects.length; t++){
+                        var isPresent = false;
+                        for (var j = 0; j < $scope.dbList.databases[i].subjects.length; j++)
+                            if ($scope.dbList.selectedSubjects[t].sid === $scope.dbList.databases[i].subjects[j].sid &&
+                                $scope.dbList.databases[i].subjects[j].type == '1'){
+                                isPresent = true;
+                                break;
+                            }
+                        if (!isPresent){
+                            $scope.dbList.databases[i].primary = false;
+                            break;
+                        }
+                    }
+                }
+
+        };
     }])
     .directive('databasesMain', [function databasesMain(){
         return {
@@ -37367,29 +37393,6 @@ angular.module('databases.list', ['ngSanitize'])
             else
                 $scope.dbList.selectedTypes.push(type);
             $scope.updateURL();
-        };
-        $scope.updatePrimaryStatus = function(){
-            if ($scope.dbList.selectedSubjects.length == 0)
-                for (var i = 0; i < $scope.dbList.databases.length; i++)
-                    $scope.dbList.databases[i].primary = true;
-            else
-                for (var i = 0; i < $scope.dbList.databases.length; i++){
-                    $scope.dbList.databases[i].primary = true;
-                    for (var t = 0; t < $scope.dbList.selectedSubjects.length; t++){
-                        var isPresent = false;
-                        for (var j = 0; j < $scope.dbList.databases[i].subjects.length; j++)
-                            if ($scope.dbList.selectedSubjects[t].sid === $scope.dbList.databases[i].subjects[j].sid &&
-                                $scope.dbList.databases[i].subjects[j].type == '1'){
-                                isPresent = true;
-                                break;
-                            }
-                        if (!isPresent){
-                            $scope.dbList.databases[i].primary = false;
-                            break;
-                        }
-                    }
-                }
-
         };
         $scope.toggleSubjectsTypes = function(value){
             $scope.dbList.subTypSelOpen = value;
