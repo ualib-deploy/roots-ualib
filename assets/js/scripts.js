@@ -36953,17 +36953,29 @@ angular.module("dbList/dbList.tpl.html", []).run(["$templateCache", function($te
     "            <small ng-show=\"db.primary && dbList.selectedSubjects.length > 0\">RECOMMENDED</small>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-12\">\n" +
-    "            <p ng-bind-html=\"db.description\"></p>\n" +
-    "            <h4 ng-show=\"primarySubj.length > 0\">\n" +
-    "                <small ng-repeat=\"subject in primarySubj = (db.subjects | filter:{type:'1'})\">\n" +
-    "                    {{subject.subject}}<span ng-hide=\"$index == primarySubj.length-1\"> | </span>\n" +
-    "                </small>\n" +
-    "            </h4>\n" +
-    "            <h4>\n" +
-    "                <small ng-repeat=\"type in db.types\">\n" +
-    "                    {{type.type}}<span ng-hide=\"$index == db.types.length-1\"> | </span>\n" +
-    "                </small>\n" +
-    "            </h4>\n" +
+    "            <div class=\"col-md-1\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-10\">\n" +
+    "                <p ng-bind-html=\"db.description\" style=\"text-align: justify;\"></p>\n" +
+    "                <p ng-show=\"primarySubj.length > 0\">\n" +
+    "                    <small ng-repeat=\"subject in primarySubj = (db.subjects | filter:{type:'1'})\">\n" +
+    "                        {{subject.subject}}\n" +
+    "                        <span ng-hide=\"$index == primarySubj.length-1\">\n" +
+    "                            <small><span class=\"fa fa-fw fa-ellipsis-h\"></span></small>\n" +
+    "                        </span>\n" +
+    "                    </small>\n" +
+    "                </p>\n" +
+    "                <p>\n" +
+    "                    <small ng-repeat=\"type in db.types\">\n" +
+    "                        {{type.type}}\n" +
+    "                        <span ng-hide=\"$index == db.types.length-1\">\n" +
+    "                            <small><span class=\"fa fa-fw fa-ellipsis-h\"></span></small>\n" +
+    "                        </span>\n" +
+    "                    </small>\n" +
+    "                </p>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-1\">\n" +
+    "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "    <div class=\"col-md-12\" ng-show=\"db.show\">\n" +
