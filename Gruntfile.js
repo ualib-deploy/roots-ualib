@@ -22,6 +22,8 @@ module.exports = function(grunt) {
         '<%= bower.directory %>/manage/dist/manage.js',
         '<%= bower.directory %>/databases/dist/databases-templates.js',
         '<%= bower.directory %>/databases/dist/databases.js',
+        '<%= bower.directory %>/musicSearch/dist/musicSearch-templates.js',
+        '<%= bower.directory %>/musicSearch/dist/musicSearch.js',
         'assets/js/ualib-templates.js',
         'assets/js/plugins/*.js',
         'assets/js/_*.js'

@@ -34276,23 +34276,23 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "            <div id=\"sortBy\">\n" +
     "                <button type=\"button\" class=\"btn btn-primary\" ng-model=\"sortButton\" btn-radio=\"0\" ng-click=\"sortBy(0)\">\n" +
     "                    Title\n" +
-    "                    <span class=\"fa fa-fw long-arrow-down\" ng-show=\"!sortModes[sortMode].reverse\"></span>\n" +
-    "                    <span class=\"fa fa-fw long-arrow-up\" ng-show=\"sortModes[sortMode].reverse\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[sortMode].reverse\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[sortMode].reverse\"></span>\n" +
     "                </button>\n" +
     "                <button type=\"button\" class=\"btn btn-primary\" ng-model=\"sortButton\" btn-radio=\"1\" ng-click=\"sortBy(1)\">\n" +
     "                    Creation Date\n" +
-    "                    <span class=\"fa fa-fw long-arrow-down\" ng-show=\"!sortModes[sortMode].reverse\"></span>\n" +
-    "                    <span class=\"fa fa-fw long-arrow-up\" ng-show=\"sortModes[sortMode].reverse\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[sortMode].reverse\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[sortMode].reverse\"></span>\n" +
     "                </button>\n" +
     "                <button type=\"button\" class=\"btn btn-primary\" ng-model=\"sortButton\" btn-radio=\"2\" ng-click=\"sortBy(2)\">\n" +
     "                    Last Modified\n" +
-    "                    <span class=\"fa fa-fw long-arrow-down\" ng-show=\"!sortModes[sortMode].reverse\"></span>\n" +
-    "                    <span class=\"fa fa-fw long-arrow-up\" ng-show=\"sortModes[sortMode].reverse\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[sortMode].reverse\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[sortMode].reverse\"></span>\n" +
     "                </button>\n" +
     "                <button type=\"button\" class=\"btn btn-primary\" ng-model=\"sortButton\" btn-radio=\"3\" ng-click=\"sortBy(3)\">\n" +
     "                    Temporary Disabled\n" +
-    "                    <span class=\"fa fa-fw long-arrow-down\" ng-show=\"!sortModes[sortMode].reverse\"></span>\n" +
-    "                    <span class=\"fa fa-fw long-arrow-up\" ng-show=\"sortModes[sortMode].reverse\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[sortMode].reverse\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[sortMode].reverse\"></span>\n" +
     "                </button>\n" +
     "            </div>\n" +
     "        </div>\n" +
@@ -34724,7 +34724,7 @@ angular.module("manageHours/manageEx.tpl.html", []).run(["$templateCache", funct
 
 angular.module("manageHours/manageHours.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageHours/manageHours.tpl.html",
-    "<h2><a href=\"../\">Hours</a> Management\n" +
+    "<h2>Hours Management\n" +
     "\n" +
     "    <select class=\"form-control\" ng-model=\"selLib\" ng-options=\"lib.name for lib in allowedLibraries.libraries\">\n" +
     "    </select>\n" +
@@ -37436,7 +37436,181 @@ angular.module('databases.list', ['ngSanitize'])
             return input.slice(start);
         }
     })
-;angular.module('ualib.templates', ['../assets/js/_ualib-home.tpl.html']);
+;angular.module('ualib.musicSearch.templates', ['musicSearch.tpl.html']);
+
+angular.module("musicSearch.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("musicSearch.tpl.html",
+    "<h2>Music Video Database Search</h2>\n" +
+    "\n" +
+    "<form ng-submit=\"search()\">\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-6\">\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Search music and video database\" ng-model=\"searchText\">\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-6\">\n" +
+    "            <button type=\"submit\" class=\"btn btn-primary\">\n" +
+    "                Search\n" +
+    "                <span class=\"fa fa-fw fa-search\"></span>\n" +
+    "            </button>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</form>\n" +
+    "\n" +
+    "<div class=\"col-md-12 form-group form-inline\">\n" +
+    "    <label for=\"filterBy\">Filter <strong>{{ms.results.length}}</strong> results by</label>\n" +
+    "    <div id=\"filterBy\">\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Title\" ng-model=\"titleFilter\">\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Description\" ng-model=\"descrFilter\">\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Genre\" ng-model=\"genreFilter\">\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Language\" ng-model=\"languageFilter\">\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Keywords\" ng-model=\"keywordsFilter\">\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "\n" +
+    "<div class=\"text-center\">\n" +
+    "    <pagination total-items=\"filteredResults.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
+    "                boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\"></pagination>\n" +
+    "</div>\n" +
+    "\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-12\" ng-repeat=\"item in filteredResults = (ms.results\n" +
+    "                                                         | filter:{title:titleFilter}:compare\n" +
+    "                                                         | filter:{notes:descrFilter}:compare\n" +
+    "                                                         | filter:{genre:genreFilter}:compare\n" +
+    "                                                         | filter:{language:languageFilter}:compare\n" +
+    "                                                         | filter:{title:keywordsFilter}:compare\n" +
+    "                                                         | orderBy:'title')\n" +
+    "                                                     | startFrom:(currentPage-1)*perPage | limitTo:perPage\">\n" +
+    "        <div class=\"col-md-12\">\n" +
+    "            <div class=\"col-md-10\">\n" +
+    "                <h4>\n" +
+    "                    {{item.title}}\n" +
+    "                    <small>{{item.genre}}</small>\n" +
+    "                    <small ng-show=\"item.genre && item.series_title\"><span class=\"fa fa-fw fa-ellipsis-v\"></span></small>\n" +
+    "                    <small>{{item.series_title}}</small>\n" +
+    "                </h4>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2\">\n" +
+    "                <span>\n" +
+    "                    <h4><small>{{item.call_number}}</small></h4>\n" +
+    "                </span>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-12\">\n" +
+    "                <div class=\"col-md-1\">\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-8\">\n" +
+    "                    <p style=\"text-align: justify;\">{{item.notes}}</p>\n" +
+    "                    <p><small>{{item.keywords}}</small></p>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-1\">\n" +
+    "                    {{item.language}}\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-2\">\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "        <br>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "\n" +
+    "<div class=\"text-center\">\n" +
+    "    <pagination total-items=\"filteredResults.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
+    "                boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\"></pagination>\n" +
+    "</div>\n" +
+    "\n" +
+    "");
+}]);
+;angular.module('ualib.musicSearch', [
+    'ngRoute',
+    'ngResource',
+    'ngAnimate',
+    'ui.bootstrap',
+    'ualib.musicSearch.templates'
+])
+
+    .config(['$routeProvider', function($routeProvider){
+        $routeProvider.when('/musicSearch/:tk?/s/:s', {
+            templateUrl: 'musicSearch.tpl.html',
+            controller: 'musicSearchCtrl',
+            resolve: {
+                mSearch: ['$resource', function($resource){
+                    return $resource('https://wwwdev2.lib.ua.edu/musicsearch/api/search/:tk',{tk:'@sText'});
+                }],
+                mShowAll: ['$resource', function($resource){
+                    return $resource('https://wwwdev2.lib.ua.edu/musicsearch/api/showall');
+                }]
+            }
+        });
+    }])
+
+    .controller('musicSearchCtrl', ['$scope', '$location', 'mSearch', 'mShowAll', function($scope, $location, mSearch, mShowAll){
+        $scope.ms = {};
+        $scope.searchText = '';
+        $scope.currentPage = 1;
+        $scope.maxPageSize = 10;
+        $scope.perPage = 10;
+        $scope.titleFilter = '';
+        $scope.descrFilter = '';
+        $scope.keywordsFilter = '';
+        $scope.genreFilter = '';
+        $scope.languageFilter = '';
+
+        $scope.search = function(){
+            var newPath = '/musicSearch/';
+            if ($scope.searchText)
+                newPath = newPath + $scope.searchText + '/';
+
+            newPath = newPath + 's/' + $scope.perPage;
+
+            $location.path(newPath);
+        }
+
+        $scope.$on('$routeChangeSuccess', function(event, currentRoute){
+            if (typeof currentRoute.params.tk !== 'undefined')
+                $scope.searchText = currentRoute.params.tk;
+            else
+                $scope.searchText = '';
+            if (typeof currentRoute.params.s !== 'undefined')
+                $scope.perPage = currentRoute.params.s;
+            else
+                $scope.perPage = 10;
+
+            if ($scope.searchText)
+                mSearch.get({tk:$scope.searchText})
+                    .$promise.then(function(data){
+                        $scope.ms = data;
+                        console.dir($scope.ms);
+                    }, function(){
+                        console.log('musicSearch Error 1 -- Come on, put in proper error handling already');
+                    });
+            else
+                mShowAll.get()
+                    .$promise.then(function(data){
+                        $scope.ms = data;
+                        console.dir($scope.ms);
+                    }, function(){
+                        console.log('musicSearch Error 2 -- Come on, put in proper error handling already');
+                    });
+        });
+
+        $scope.compare = function(actual, expected){
+            if (!expected)
+                return true;
+            if (actual.toLowerCase().indexOf(expected.toLowerCase()) > -1)
+                return true;
+            return false;
+        };
+    }])
+    .filter('startFrom', function() {
+        return function(input, start) {
+            if (typeof input === 'undefined')
+                return null;
+            start = +start; //parse to int
+            return input.slice(start);
+        }
+    });
+
+angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.templates', ['../assets/js/_ualib-home.tpl.html']);
 
 angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("../assets/js/_ualib-home.tpl.html",
@@ -37576,7 +37750,8 @@ $(document).ready(UTIL.loadEvents);
     'hours',
     'oneSearch',
     'manage',
-    'databases'
+    'databases',
+    'musicSearch'
 ])
 
     .config(['$routeProvider', function($routeProvider, $location) {

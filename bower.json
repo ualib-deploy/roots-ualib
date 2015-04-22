@@ -26,7 +26,8 @@
     "onesearch": "https://github.com/ualibweb/oneSearch_ui.git",
     "ualib-hours": "https://github.com/ualibweb/hours_ui.git",
     "manage": "https://github.com/ualibweb/manage_ui.git",
-    "databases": "https://github.com/ualibweb/databases_ui.git"
+    "databases": "https://github.com/ualibweb/databases_ui.git",
+    "musicSearch": "https://github.com/ualibweb/musicSearch_ui.git"
   },
   "resolutions": {
     "angular": ">=1 <1.3.0",

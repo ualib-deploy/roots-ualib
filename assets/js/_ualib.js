@@ -5,7 +5,8 @@ angular.module('ualib', [
     'hours',
     'oneSearch',
     'manage',
-    'databases'
+    'databases',
+    'musicSearch'
 ])
 
     .config(['$routeProvider', function($routeProvider, $location) {
