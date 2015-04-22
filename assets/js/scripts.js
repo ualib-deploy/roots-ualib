@@ -37529,7 +37529,7 @@ angular.module("musicSearch.tpl.html", []).run(["$templateCache", function($temp
 ])
 
     .config(['$routeProvider', function($routeProvider){
-        $routeProvider.when('/musicSearch/:tk?/s/:s', {
+        $routeProvider.when('/musicSearch/:tk?/show/:show', {
             templateUrl: 'musicSearch.tpl.html',
             controller: 'musicSearchCtrl',
             resolve: {
@@ -37560,7 +37560,7 @@ angular.module("musicSearch.tpl.html", []).run(["$templateCache", function($temp
             if ($scope.searchText)
                 newPath = newPath + $scope.searchText + '/';
 
-            newPath = newPath + 's/' + $scope.perPage;
+            newPath = newPath + 'show/' + $scope.perPage;
 
             $location.path(newPath);
         }
