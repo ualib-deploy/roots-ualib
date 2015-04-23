@@ -35261,7 +35261,7 @@ angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCach
     "                        <form class=\"form-inline\">\n" +
     "                            <select class=\"form-control\" ng-model=\"person.selSubj\" ng-options=\"sub.subject for sub in Directory.subjects\">\n" +
     "                            </select>\n" +
-    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addSubject(person)\">Add Subject</button>\n" +
+    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addSubject(person)\">Assign Subject</button>\n" +
     "                            <p>{{person.subjResponse}}</p>\n" +
     "                        </form>\n" +
     "                    </dd>\n" +
@@ -36294,7 +36294,7 @@ angular.module('manage.manageHoursUsers', [])
                             $scope.result = "User access deleted!";
                             $scope.dataUL.users.splice(index, 1);
                         } else
-                            $scope.result = "Error! Could not delete user access!";
+                            $scope.result = "Error! Could not delete user access!" + data;
                         $scope.isLoading = false;
                     })
                     .error(function(data, status, headers, config) {
