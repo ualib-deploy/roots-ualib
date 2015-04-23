@@ -34714,6 +34714,9 @@ angular.module("manageHours/manageEx.tpl.html", []).run(["$templateCache", funct
     "            </div>\n" +
     "        </td>\n" +
     "        <td class=\"text-right\">\n" +
+    "            <label for=\"isGlobal\">Create For All Libraries</label>\n" +
+    "            <input type=\"checkbox\" ng-model=\"newException.isGlobal\" id=\"isGlobal\">\n" +
+    "            <br>\n" +
     "            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"createExc()\" ng-disabled=\"loading\">Create Exception</button>\n" +
     "            <br>{{result}}\n" +
     "        </td>\n" +
@@ -35180,8 +35183,9 @@ angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCach
     "                                                        | filter:{lastname:lastNameFilter}\n" +
     "                                                        | filter:{firstname:firstNameFilter}\n" +
     "                                                        | filter:{title:titleFilter}\n" +
-    "                                                        | filter:{department:deptFilter})\n" +
-    "                                | startFrom:(currentPage-1)*perPage | limitTo:perPage | orderBy:sortMode\"\n" +
+    "                                                        | filter:{department:deptFilter}\n" +
+    "                                                        | orderBy:sortMode)\n" +
+    "                                | startFrom:(currentPage-1)*perPage | limitTo:perPage\"\n" +
     "         ng-class=\"{sdOpen: person.show, sdOver: person.id == mOver}\" ng-mouseover=\"setOver(person)\">\n" +
     "        <div class=\"col-md-7\" ng-click=\"togglePerson(person)\">\n" +
     "            <h4>\n" +
@@ -36033,6 +36037,7 @@ angular.module('manage.manageHours', [])
         $scope.newException.from = -1;
         $scope.newException.to = 0;
         $scope.newException.dp = false;
+        $scope.newException.isGlobal = false;
         $scope.expExc = -1;
 
         $scope.onExcFocus = function($event, index){
@@ -36060,6 +36065,7 @@ angular.module('manage.manageHours', [])
         };
         $scope.updateExc = function(exception){
             $scope.loading = true;
+            exception.lid = $scope.selLib.lid;
             hmFactory.postData({action : 4}, exception)
                 .success(function(data) {
                     if ( data == 1){
@@ -36076,6 +36082,7 @@ angular.module('manage.manageHours', [])
         $scope.deleteExc = function(exception, index){
             if (confirm("Are you sure you want to delete " + exception.desc + " exception?")){
                 $scope.loading = true;
+                exception.lid = $scope.selLib.lid;
                 hmFactory.postData({action : 5}, exception)
                     .success(function(data) {
                         if ( data == 1){
@@ -36097,19 +36104,27 @@ angular.module('manage.manageHours', [])
             hmFactory.postData({action : 6}, $scope.newException)
                 .success(function(data) {
                     if ((typeof data === 'object') && (data !== null)){
-                        $scope.result = "Exception created";
-                        var newExc = {};
-                        newExc.id = data.id;
-                        newExc.datems = $scope.newException.datems;
-                        newExc.days = $scope.newException.days;
-                        newExc.desc = $scope.newException.desc;
-                        newExc.from = $scope.newException.from;
-                        newExc.to = $scope.newException.to;
-                        newExc.dp = false;
-                        $scope.allowedLibraries.exc[$scope.selLib.index].push(newExc);
+                        var i = 0;
+                        for (i = 0; i < data.length; i++){
+                            var newExc = {};
+                            newExc.id = data[i].id;
+                            newExc.datems = $scope.newException.datems;
+                            newExc.days = $scope.newException.days;
+                            newExc.desc = $scope.newException.desc;
+                            newExc.from = $scope.newException.from;
+                            newExc.to = $scope.newException.to;
+                            newExc.dp = false;
+                            var l = 0;
+                            for (l = 0; l < $scope.allowedLibraries.libraries.length; l++)
+                                if ($scope.allowedLibraries.libraries[l].lid === data[i].lid)
+                                    break;
+                            $scope.allowedLibraries.exc[$scope.allowedLibraries.libraries[l].index].push(newExc);
+                        }
+                        $scope.result = "Created exceptions count: " + i;
                     }else
                         $scope.result = "Error! Could not create an exception!";
                     $scope.loading = false;
+                    console.log(data);
                 })
                 .error(function(data, status, headers, config) {
                     $scope.loading = false;
@@ -36118,7 +36133,7 @@ angular.module('manage.manageHours', [])
 
         $scope.deleteOldExc = function(){
             $scope.loading = true;
-            hmFactory.postData({action : 7}, $scope.selLib.lid)
+            hmFactory.postData({action : 7}, $scope.selLib)
                 .success(function(data) {
                     if ((typeof data === 'object') && (data !== null)){
                         $scope.expExc = -1;
@@ -37219,11 +37234,11 @@ angular.module('databases.list', ['ngSanitize'])
                 templateUrl: 'dbList/dbListMain.tpl.html',
                 controller: 'databasesCtrl'
             })
-            .when('/databases/:t?/ts/:ts?/d/:d?/fs/:fs?/sub/:sub*\/ft/:ft?o/:o', {
+            .when('/databases/:t?/ts/:ts?/d/:d?/fs/:fs?/sub/:sub*\/ft/:ft?/o/:o', {
                 templateUrl: 'dbList/dbListMain.tpl.html',
                 controller: 'databasesCtrl'
             })
-            .when('/databases/:t?/ts/:ts?/d/:d?/fs/:fs?/typ/:typ*\/ft/:ft?o/:o', {
+            .when('/databases/:t?/ts/:ts?/d/:d?/fs/:fs?/typ/:typ*\/ft/:ft?/o/:o', {
                 templateUrl: 'dbList/dbListMain.tpl.html',
                 controller: 'databasesCtrl'
             })
@@ -37500,7 +37515,7 @@ angular.module("musicSearch.tpl.html", []).run(["$templateCache", function($temp
     "                </div>\n" +
     "                <div class=\"col-md-8\">\n" +
     "                    <p style=\"text-align: justify;\">{{item.notes}}</p>\n" +
-    "                    <p><small>{{item.keywords}}</small></p>\n" +
+    "                    <p ng-show=\"item.keywords\"><small>Keywords: </small> {{item.keywords}}</p>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-1\">\n" +
     "                    {{item.language}}\n" +
