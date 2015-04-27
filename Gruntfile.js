@@ -12,6 +12,7 @@ module.exports = function(grunt) {
         '<%= bower.directory %>/angular-animate/angular-animate.js',
         '<%= bower.directory %>/angular-sanitize/angular-sanitize.js',
         '<%= bower.directory %>/angular-filter/dist/angular-filter.js',
+        '<%= bower.directory %>/angular-ui-utils/ui-utils.js',
         '<%= bower.directory %>/ualib-ui/dist/ualib-ui-templates.js',
         '<%= bower.directory %>/ualib-ui/dist/ualib-ui.js',
         '<%= bower.directory %>/onesearch/dist/onesearch-templates.js',
@@ -24,8 +25,8 @@ module.exports = function(grunt) {
         '<%= bower.directory %>/databases/dist/databases.js',
         '<%= bower.directory %>/musicSearch/dist/musicSearch-templates.js',
         '<%= bower.directory %>/musicSearch/dist/musicSearch.js',
-        '<%= bower.directory %>/staffdir/dist/staffdir-templates.js',
-        '<%= bower.directory %>/staffdir/dist/staffdir.js',
+        '<%= bower.directory %>/ualib_staffdir/dist/staffdir-templates.js',
+        '<%= bower.directory %>/ualib_staffdir/dist/staffdir.js',
         'assets/js/ualib-templates.js',
         'assets/js/plugins/*.js',
         'assets/js/_*.js'
@@ -36,7 +37,7 @@ module.exports = function(grunt) {
         '<%= bower.directory %>/onesearch/src/**/*.less',
         '<%= bower.directory %>/ualib-ui/src/**/*.less',
         '<%= bower.directory %>/ualib-hours/src/**/*.less',
-        '<%= bower.directory %>/staff-dir/src/**/*.css'
+        '<%= bower.directory %>/ualib_staffdir/dist/staffdir.css'
     ];
 
 

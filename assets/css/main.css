@@ -8926,7 +8926,8 @@ body {
   padding-top: 15px;
   padding-bottom: 15px;
 }
-.bento {
+.bento,
+.staffdir {
   background-image: none;
   background-color: #ffffff;
 }
@@ -9565,5 +9566,178 @@ a[href^="https"]:not(.source-link):after {
   -webkit-transition: opacity  .2s .1s;
   -o-transition: opacity  .2s .1s;
      transition: opacity  .2s .1s;
+}
+/*# sourceMappingURL=/wp-content/themes/roots/assets/css/main.css.map */
+.thumbnail > img,
+.thumbnail a > img,
+.carousel-inner > .item > img,
+.carousel-inner > .item > a > img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.btn-group-lg > .btn {
+  padding: 10px 16px;
+  font-size: 18px;
+  line-height: 1.3333333;
+  border-radius: 4px;
+}
+.btn-group-sm > .btn {
+  padding: 5px 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: 3px;
+}
+.btn-group-xs > .btn {
+  padding: 1px 5px;
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: 3px;
+}
+.dl-horizontal dd:before,
+.dl-horizontal dd:after,
+.container:before,
+.container:after,
+.container-fluid:before,
+.container-fluid:after,
+.row:before,
+.row:after,
+.form-horizontal .form-group:before,
+.form-horizontal .form-group:after,
+.btn-toolbar:before,
+.btn-toolbar:after,
+.btn-group-vertical > .btn-group:before,
+.btn-group-vertical > .btn-group:after,
+.nav:before,
+.nav:after,
+.navbar:before,
+.navbar:after,
+.navbar-header:before,
+.navbar-header:after,
+.navbar-collapse:before,
+.navbar-collapse:after,
+.pager:before,
+.pager:after,
+.panel-body:before,
+.panel-body:after,
+.modal-footer:before,
+.modal-footer:after {
+  content: " ";
+  display: table;
+}
+.dl-horizontal dd:after,
+.container:after,
+.container-fluid:after,
+.row:after,
+.form-horizontal .form-group:after,
+.btn-toolbar:after,
+.btn-group-vertical > .btn-group:after,
+.nav:after,
+.navbar:after,
+.navbar-header:after,
+.navbar-collapse:after,
+.pager:after,
+.panel-body:after,
+.modal-footer:after {
+  clear: both;
+}
+/**
+* TEMPORARY for demo purposes
+**/
+.staff-directory-listing th .sortable:after,
+.staff-directory-listing th .sortable-reverse:after {
+  padding-left: 5px;
+  display: inline-block;
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-transform: translate(0, 0);
+      -ms-transform: translate(0, 0);
+       -o-transform: translate(0, 0);
+          transform: translate(0, 0);
+  color: #333333;
+}
+.staff-directory-listing th .sortable:after {
+  content: "\f0d7";
+}
+.staff-directory-listing th .sortable-reverse:after {
+  content: "\f0d8";
+}
+.staff-directory-listing th > .dropdown {
+  display: inline-block;
+}
+.staff-directory-listing th > .dropdown > .dropdown-toggle {
+  padding: 0 22px 0 5px;
+  border: none;
+  color: #999999;
+}
+.staff-directory-listing th > .dropdown > .dropdown-toggle::before,
+.staff-directory-listing th > .dropdown > .dropdown-toggle::after {
+  width: 6px;
+  top: 55%;
+  color: #999999;
+}
+.staff-directory-listing th > .dropdown > .dropdown-toggle::before {
+  right: 11px;
+}
+.staff-directory-listing th > .dropdown > .dropdown-toggle::after {
+  right: 7px;
+}
+.staff-directory-listing th > .dropdown.open > .dropdown-toggle::before {
+  right: 12px;
+}
+.staff-directory-listing th > .dropdown.open > .dropdown-toggle::after {
+  right: 7px;
+}
+.staff-directory-listing th > .dropdown.open > .dropdown-toggle::before,
+.staff-directory-listing th > .dropdown.open > .dropdown-toggle::after {
+  width: 10px;
+}
+.form-group-separator {
+  text-align: center;
+}
+.form-group-separator::before,
+.form-group-separator::after {
+  content: ' ';
+  top: 55%;
+  position: absolute;
+  width: 42%;
+  border-bottom: 1px solid #ccc;
+}
+.form-group-separator::after {
+  right: 0;
+}
+.staff-card-container {
+  max-width: 450px;
+  background-color: #f9f9f9;
+}
+.staff-card-container .staff-card-detail > h6 {
+  color: #666666;
+  font-size: 1.1em;
+  border-bottom: 1px solid #dfdfdf;
+}
+@media (max-width: 767px) {
+  .staff-card-container .staff-card-detail > h6 {
+    border-bottom: none;
+  }
+}
+.staff-card-container .name-plate {
+  margin-bottom: 30px;
+}
+.staff-card-container .name {
+  font-size: 1.5em;
+  font-weight: 700;
+}
+.staff-card-container .title {
+  font-size: 1.1em;
+  font-weight: 700;
+}
+.staff-card-container .department {
+  font-size: 1.1em;
+}
+.clear-ri {
+  clear: left;
 }
 /*# sourceMappingURL=main.css.map */

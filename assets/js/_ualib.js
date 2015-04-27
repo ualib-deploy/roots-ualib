@@ -6,7 +6,8 @@ angular.module('ualib', [
     'oneSearch',
     'manage',
     'databases',
-    'musicSearch'
+    'musicSearch',
+    'ualib.staffdir'
 ])
 
     .config(['$routeProvider', function($routeProvider, $location) {
