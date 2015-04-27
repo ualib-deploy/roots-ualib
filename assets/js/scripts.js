@@ -32640,11 +32640,7 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "    <div class=\"row\">\n" +
     "        <div class=\"col-sm-4\">\n" +
     "            <div class=\"bento-box\" bento-box=\"databases\">\n" +
-    "                <h2>Databases\n" +
-    "                    <small>\n" +
-    "                        [<a href=\"{{domain}}sample-page/databases/#/databases/ts/d/{{s}}/fs/ft/\">more</a>]\n" +
-    "                    </small>\n" +
-    "                </h2>\n" +
+    "                <h2>Databases</h2>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"col-sm-4\">\n" +
@@ -32929,8 +32925,8 @@ angular.module('oneSearch', [
     'oneSearch.templates',
     'oneSearch.bento'
 ])
-    // The URL to the main website
-    .constant('UALIB_DOMAIN', '//wwwdev2.lib.ua.edu/')
+    // The URL to the backend JSON resource handler
+    .constant('ONE_SEARCH_URL', '//wwwdev2.lib.ua.edu/oneSearch/getJSON.php')
 
     // Default search parameters
     .value('SearchParams', {
@@ -33110,11 +33106,6 @@ angular.module('oneSearch.bento', [])
  *  </div>
  */
 
-    .controller('bentoBoxCtrl', ['$scope', '$routeParams', 'UALIB_DOMAIN', function($scope, $routeParams, domain){
-        // Updates total results links
-        $scope.domain = domain;
-        $scope.s = $routeParams.s;
-    }])
     .directive('bentoBox', ['$rootScope', '$controller', '$compile', '$animate', 'Bento', function($rootScope, $controller, $compile, $animate, Bento){
         return {
             restrict: 'A', //The directive always requires and attribute, so disallow class use to avoid conflict
@@ -33218,8 +33209,7 @@ angular.module('oneSearch.bento', [])
                     // Destroy this box's watcher (no need to waste the cycles)
                     boxWatcher();
                 }
-            },
-            controller: 'bentoBoxCtrl'
+            }
         }
     }])
 /**
@@ -33869,7 +33859,7 @@ angular.module('common.oneSearch', [])
             }
         };
 
-        this.$get = ['$http', '$parse', 'enginesTemplateFactory', 'SearchParams', 'Search', function($http, $parse, enginesTemplateFactory, SearchParams, Search){
+        this.$get = ['$http', '$parse', 'enginesTemplateFactory', 'SearchParams', 'ONE_SEARCH_URL', 'Search', function($http, $parse, enginesTemplateFactory, SearchParams, url, Search){
 
             return {
                 engines: _engines, // Expose engines at Service level
@@ -33918,8 +33908,7 @@ angular.module('common.oneSearch', [])
                     return _engines;
                 },
                 search: function(engName, params, search_url){
-                    if (!angular.isDefined(search_url))
-                        console.log("Error: URL is not defined!");
+                    search_url = angular.isDefined(search_url) ? search_url : url;
                     var engine = _engines[engName];
                     var p = {engine: engine.id};
 
@@ -34063,7 +34052,7 @@ angular.module("list/list.tpl.html", []).run(["$templateCache", function($templa
 }]);
 ;angular.module('hours', [
     'ngAnimate',
-    'ui.bootstrap',
+    'ualib.ui',
     'hours.common',
     'hours.templates',
     'hours.list',

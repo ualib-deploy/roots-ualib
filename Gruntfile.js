@@ -24,6 +24,8 @@ module.exports = function(grunt) {
         '<%= bower.directory %>/databases/dist/databases.js',
         '<%= bower.directory %>/musicSearch/dist/musicSearch-templates.js',
         '<%= bower.directory %>/musicSearch/dist/musicSearch.js',
+        '<%= bower.directory %>/staffdir/dist/staffdir-templates.js',
+        '<%= bower.directory %>/staffdir/dist/staffdir.js',
         'assets/js/ualib-templates.js',
         'assets/js/plugins/*.js',
         'assets/js/_*.js'
@@ -33,7 +35,8 @@ module.exports = function(grunt) {
         'assets/less/main.less',
         '<%= bower.directory %>/onesearch/src/**/*.less',
         '<%= bower.directory %>/ualib-ui/src/**/*.less',
-        '<%= bower.directory %>/ualib-hours/src/**/*.less'
+        '<%= bower.directory %>/ualib-hours/src/**/*.less',
+        '<%= bower.directory %>/staff-dir/src/**/*.css'
     ];
 
 
@@ -62,7 +65,7 @@ module.exports = function(grunt) {
                     // To enable, set sourceMap to true and update sourceMapRootpath based on your install
                     sourceMap: true,
                     sourceMapFilename: 'assets/css/main.css.map',
-                    sourceMapRootpath: '/app/themes/roots/'
+                    sourceMapRootpath: '/wp-content/themes/roots/'
                 }
             },
             build: {
