@@ -365,7 +365,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="<?php echo site_url(); ?>/sample-page/staff-directory/">
+                                            <a class="service-card" href="<?php echo site_url(); ?>/#/staffdir">
                                                 <span class="fa fa-users"></span>
                                                 <h4>Directory</h4>
                                                 <p>UA Library Faculty and Staff</p>
