@@ -9647,6 +9647,9 @@ a[href^="https"]:not(.source-link):after {
 /**
 * TEMPORARY for demo purposes
 **/
+.staff-directory-listing th {
+  white-space: nowrap;
+}
 .staff-directory-listing th .sortable:after,
 .staff-directory-listing th .sortable-reverse:after {
   padding-left: 5px;
@@ -9698,19 +9701,10 @@ a[href^="https"]:not(.source-link):after {
 .staff-directory-listing th > .dropdown.open > .dropdown-toggle::after {
   width: 10px;
 }
-.form-group-separator {
-  text-align: center;
-}
-.form-group-separator::before,
-.form-group-separator::after {
-  content: ' ';
-  top: 55%;
-  position: absolute;
-  width: 42%;
-  border-bottom: 1px solid #ccc;
-}
-.form-group-separator::after {
-  right: 0;
+@media (min-width: 768px) {
+  .facets-form.form-inline {
+    padding-bottom: 15px;
+  }
 }
 .staff-card-container {
   max-width: 450px;

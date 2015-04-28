@@ -22,7 +22,7 @@ function roots_scripts() {
   if (WP_ENV === 'development') {
     $assets = array(
       'css'       => '/assets/css/main.css',
-      'CDN'       => 'https://fonts.googleapis.com/css?family=Ubuntu:300,400,500|Oxygen:300,400,700|Open+Sans:300,400,500|EB+Garamond|Lato:300,400',
+      'CDN'       => '//fonts.googleapis.com/css?family=Ubuntu:300,400,500,700|Oxygen:300,400,700|Open+Sans:300,400,600,700|EB+Garamond|Lato:300,400,700',
       'js'        => '/assets/js/scripts.js',
       'modernizr' => '/assets/vendor/modernizr/modernizr.js',
       'jquery'    => '//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.js'
