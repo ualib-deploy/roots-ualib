@@ -36488,7 +36488,7 @@ angular.module("list/list.tpl.html", []).run(["$templateCache", function($templa
 }]);
 ;angular.module('hours', [
     'ngAnimate',
-    'ualib.ui',
+    'ui.bootstrap',
     'hours.common',
     'hours.templates',
     'hours.list',
@@ -36701,23 +36701,23 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "            <div id=\"sortBy\">\n" +
     "                <button type=\"button\" class=\"btn btn-primary\" ng-model=\"sortButton\" btn-radio=\"0\" ng-click=\"sortBy(0)\">\n" +
     "                    Title\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[sortMode].reverse\"></span>\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[sortMode].reverse\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[0].reverse\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[0].reverse\"></span>\n" +
     "                </button>\n" +
     "                <button type=\"button\" class=\"btn btn-primary\" ng-model=\"sortButton\" btn-radio=\"1\" ng-click=\"sortBy(1)\">\n" +
     "                    Creation Date\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[sortMode].reverse\"></span>\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[sortMode].reverse\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[1].reverse\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[1].reverse\"></span>\n" +
     "                </button>\n" +
     "                <button type=\"button\" class=\"btn btn-primary\" ng-model=\"sortButton\" btn-radio=\"2\" ng-click=\"sortBy(2)\">\n" +
     "                    Last Modified\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[sortMode].reverse\"></span>\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[sortMode].reverse\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[2].reverse\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[2].reverse\"></span>\n" +
     "                </button>\n" +
     "                <button type=\"button\" class=\"btn btn-primary\" ng-model=\"sortButton\" btn-radio=\"3\" ng-click=\"sortBy(3)\">\n" +
     "                    Temporary Disabled\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[sortMode].reverse\"></span>\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[sortMode].reverse\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[3].reverse\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[3].reverse\"></span>\n" +
     "                </button>\n" +
     "            </div>\n" +
     "        </div>\n" +
