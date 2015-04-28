@@ -36798,7 +36798,7 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Authenticate\">Authenticate</label>\n" +
     "                    <input type=\"checkbox\" class=\"form-control\" ng-model=\"db.auth\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
-    "                           id=\"{{db.id}}_Authenticate\">\n" +
+    "                           id=\"{{db.id}}_Authenticate\" ng-checked=\"db.auth == 1\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-6 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Coverage\">Coverage</label>\n" +
@@ -36849,12 +36849,12 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Disable\">Disabled</label>\n" +
     "                    <input type=\"checkbox\" class=\"form-control\" ng-model=\"db.disabled\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
-    "                           id=\"{{db.id}}_Disable\">\n" +
+    "                           id=\"{{db.id}}_Disable\" ng-checked=\"db.disabled == 1\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{db.id}}_tmpDisable\">TmpDisable</label>\n" +
     "                    <input type=\"checkbox\" class=\"form-control\" ng-model=\"db.tmpDisabled\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
-    "                           id=\"{{db.id}}_tmpDisable\">\n" +
+    "                           id=\"{{db.id}}_tmpDisable\" ng-checked=\"db.tmpDisabled == 1\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-12\">\n" +
     "                    <div class=\"col-md-6 form-group\">\n" +
