@@ -1,5 +1,5 @@
 # roots-ualib
-The Word Press Roots.io child theme for the University of Alabama Libraries
+The Word Press Roots.io theme for the University of Alabama Libraries
 
 ## Dependencies
 - [NodeJS](http://nodejs.org/)
