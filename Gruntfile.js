@@ -207,6 +207,17 @@ module.exports = function(grunt) {
                     '*.php'
                 ]
             }
+        },
+        lessToSass: {
+            lessVars: {
+                files: [{
+                    expand: true,
+                    cwd: 'assets/less',
+                    src: ['_variables.less'],
+                    ext: '.scss',
+                    dest: 'assets/sass'
+                }]
+            }
         }
     });
 
@@ -230,4 +241,5 @@ module.exports = function(grunt) {
         'modernizr',
         'version'
     ]);
+    grunt.registerTask('lessVarsToSass', ['lessToSass:lessVars']);
 };

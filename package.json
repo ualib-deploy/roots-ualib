@@ -1,6 +1,7 @@
 {
   "name": "roots-ualib",
-  "version": "1.10.3",
+  "version": "1.11.0",
+  "private": true,
   "repository": {
     "type": "git",
     "url": "https://github.com/ualibweb/roots-ualib.git"
@@ -32,6 +33,7 @@
     "grunt-contrib-copy": "~0.8.0",
     "grunt-bump": "~0.3.0",
     "grunt-html2js": "~0.3.0",
-    "grunt-bower-concat": "~0.4.0"
+    "grunt-bower-concat": "~0.4.0",
+    "grunt-less-to-sass": "0.0.10"
   }
 }
