@@ -21,7 +21,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                 <ul class="nav navbar-nav navbar-right">
                     <?php if ($showAdminLink): ?>
                         <li class="dropdown yamm-fw">
-                            <a href="<?php echo DOMAIN; ?>sample-page/user-groups-admin/" class="icon-only" title="WebApps Admin">
+                            <a href="<?php echo site_url(); ?>/sample-page/user-groups-admin/" class="icon-only" title="WebApps Admin">
                                 <span class="fa fa-spin fa-cog"></span>
                             </a>
                         </li>

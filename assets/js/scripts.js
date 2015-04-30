@@ -36416,14 +36416,16 @@ angular.module('common.oneSearch', [])
 
 angular.module("calendar/calendar.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("calendar/calendar.tpl.html",
-    "<h2>{{calendar[libID - 1].library.name}} Calendar</h2>\n" +
+    "<h2>{{calendar.cal[libID - 1].library.name}} Calendar</h2>\n" +
     "<div class=\"calendar table-responsive\">\n" +
     "    <nav class=\"navbar navbar-default navbar-embedded\">\n" +
-    "        <button type=\"button\" class=\"btn btn-default navbar-btn navbar-left\" ng-click=\"prevMonth()\">\n" +
+    "        <button type=\"button\" class=\"btn btn-default navbar-btn navbar-left\" ng-click=\"prevMonth()\"\n" +
+    "                ng-disabled=\"curMonth == 0\">\n" +
     "            <span class=\"fa fa-angle-left\"></span>\n" +
     "        </button>\n" +
-    "        <p class=\"navbar-text navbar-center\">{{calendar[libID - 1].cal[curMonth].month}}</p>\n" +
-    "        <button type=\"button\" class=\"btn btn-default navbar-btn navbar-right\" ng-click=\"nextMonth()\">\n" +
+    "        <p class=\"navbar-text navbar-center\">{{calendar.cal[libID - 1].calendar[curMonth].month}}</p>\n" +
+    "        <button type=\"button\" class=\"btn btn-default navbar-btn navbar-right\" ng-click=\"nextMonth()\"\n" +
+    "                ng-disabled=\"curMonth == nMonths - 1\">\n" +
     "            <span class=\"fa fa-angle-right\"></span>\n" +
     "        </button>\n" +
     "    </nav>\n" +
@@ -36440,7 +36442,7 @@ angular.module("calendar/calendar.tpl.html", []).run(["$templateCache", function
     "        </tr>\n" +
     "        </thead>\n" +
     "        <tbody>\n" +
-    "            <tr ng-repeat=\"week in calendar[libID - 1].cal[curMonth].weeks\">\n" +
+    "            <tr ng-repeat=\"week in calendar.cal[libID - 1].calendar[curMonth].weeks\">\n" +
     "                <td ng-repeat=\"day in week\" ng-class=\"day.class\">\n" +
     "                    <div style=\"width:100%;height:100%;\" popover=\"{{day.exc}}\" popover-trigger=\"mouseenter\" popover-placement=\"top\">\n" +
     "                        <div class=\"date\">\n" +
@@ -36510,26 +36512,18 @@ angular.module('hours.calendar', [])
         function calendarCtrl($scope, $element, $animate, hoursFactory, nMonths){
         $scope.curMonth = 0;
         $scope.calendar = [];
+        $scope.nMonths = nMonths;
         var spinner = angular.element('<div id="loading-bar-spinner"><div class="spinner-icon"></div></div>');
         var elm = $element.find('h2');
         $animate.enter(spinner, elm, angular.element(elm[0].lastChild));
 
-        hoursFactory.getList("calendar/initial")
+        hoursFactory.getList("calendar")
             .success(function(data) {
-                console.log("Initial data loaded");
                 $scope.calendar = data;
-                $scope.processClasses(2);
-                hoursFactory.getList("calendar")
-                    .success(function(data) {
-                        $scope.calendar = data;
-                        $scope.processClasses(nMonths);
-                        $animate.leave(spinner);
-                        console.dir($scope.calendar);
-                    })
-                    .error(function(data, status, headers, config) {
-                        console.log('Error: ' + data);
-                    });
-            })
+                $scope.processClasses(nMonths);
+                $animate.leave(spinner);
+                console.dir($scope.calendar);
+             })
             .error(function(data, status, headers, config) {
                 console.log('Initial Error: ' + data);
             });
@@ -36544,7 +36538,7 @@ angular.module('hours.calendar', [])
         };
         //determine class for each day
         $scope.processClasses = function(numMonths){
-            $scope.calendar.forEach(function(calendar){
+            $scope.calendar.cal.forEach(function(calendar){
                 for (var m = 0; m < numMonths; m++)
                     for (var w = 0; w < 6; w++)
                         for (var d = 0; d < 7; d++){
@@ -36553,7 +36547,7 @@ angular.module('hours.calendar', [])
                             var hours = "";
                             var exc = "";
                             var dayClass = "";
-                            var day = calendar.cal[m].weeks[w][d];
+                            var day = calendar.calendar[m].weeks[w][d];
                             if (typeof day.date != "undefined")
                                 date = day.date;
                             if (typeof day.hours != "undefined")
@@ -36564,7 +36558,7 @@ angular.module('hours.calendar', [])
                                 dayClass = " today";
 
                             if ((date.length == 0) && (hours.length == 0))
-                                className = "prev-month";
+                                className = "prev-month" + dayClass;
                             else
                             if ((date.length > 0) && (exc.length > 0) && (hours != 'Closed'))
                                 className = "exception" + dayClass;
@@ -36590,7 +36584,7 @@ angular.module('hours.calendar', [])
                             if ((date.length == 0) && (hours.length > 0) && (exc.length == 0) && (hours != 'Closed'))
                                 className = "next-month";
 
-                            calendar.cal[m].weeks[w][d].class = className;
+                            calendar.calendar[m].weeks[w][d].class = className;
                         }
             });
         };
@@ -36798,7 +36792,7 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Authenticate\">Authenticate</label>\n" +
     "                    <input type=\"checkbox\" class=\"form-control\" ng-model=\"db.auth\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
-    "                           id=\"{{db.id}}_Authenticate\" ng-checked=\"db.auth == 1\">\n" +
+    "                           id=\"{{db.id}}_Authenticate\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-6 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Coverage\">Coverage</label>\n" +
@@ -36849,12 +36843,12 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Disable\">Disabled</label>\n" +
     "                    <input type=\"checkbox\" class=\"form-control\" ng-model=\"db.disabled\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
-    "                           id=\"{{db.id}}_Disable\" ng-checked=\"db.disabled == 1\">\n" +
+    "                           id=\"{{db.id}}_Disable\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{db.id}}_tmpDisable\">TmpDisable</label>\n" +
     "                    <input type=\"checkbox\" class=\"form-control\" ng-model=\"db.tmpDisabled\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
-    "                           id=\"{{db.id}}_tmpDisable\" ng-checked=\"db.tmpDisabled == 1\">\n" +
+    "                           id=\"{{db.id}}_tmpDisable\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-12\">\n" +
     "                    <div class=\"col-md-6 form-group\">\n" +

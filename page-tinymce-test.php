@@ -289,7 +289,7 @@ if (is_user_logged_in()){
                     $scope.arrElements.push($scope.element);
                 }
                 console.dir($scope.arrElements);
-                $http.post("//wwwdev2.lib.ua.edu/editContent/", $scope.arrElements)
+                $http.post("<?php echo site_url(); ?>/editContent/", $scope.arrElements)
                     .success(function(data) {
                         if (data == 1){
                             $scope.result = "Saved";

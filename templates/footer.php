@@ -6,29 +6,29 @@
         <div class="col-sm-4">
           <h4>Quick Links</h4>
           <ul class="footer-list">
-            <li><a href="https://wwwdev2.lib.ua.edu/about-ua-libraries/contact-us/">University Libraries’ Maps and Contact Information</a></li>
-            <li><a href="https://wwwdev2.lib.ua.edu/about-ua-libraries/libraries-policies/access-to-and-usage-of-electronic-resources/">Access to and Usage of Electronic Resources</a></li>
-            <li><a href="https://wwwdev2.lib.ua.edu/services/disability-services/physical-access/">Physical Access</a></li>
-            <li><a href="https://wwwdev2.lib.ua.edu/about-ua-libraries/libraries-policies/">Libraries' Policies</a></li>
-            <li><a href="https://wwwdev2.lib.ua.edu/about-ua-libraries/privacy-and-cookies/">Privacy and Cookies</a></li>
-            <li><a href="https://wwwdev2.lib.ua.edu/about-ua-libraries/site-map/">Site Map</a></li>
-            <li><a href="https://wwwdev2.lib.ua.edu/about-ua-libraries/copyright-statement/">Copyright Statement</a></li>
-            <li><a href="https://wwwdev2.lib.ua.edu/about-ua-libraries/support-ua-libraries/">Support UA Libraries</a></li>
+            <li><a href="<?php echo site_url(); ?>/about-ua-libraries/contact-us/">University Libraries’ Maps and Contact Information</a></li>
+            <li><a href="<?php echo site_url(); ?>/about-ua-libraries/libraries-policies/access-to-and-usage-of-electronic-resources/">Access to and Usage of Electronic Resources</a></li>
+            <li><a href="<?php echo site_url(); ?>/services/disability-services/physical-access/">Physical Access</a></li>
+            <li><a href="<?php echo site_url(); ?>/about-ua-libraries/libraries-policies/">Libraries' Policies</a></li>
+            <li><a href="<?php echo site_url(); ?>/about-ua-libraries/privacy-and-cookies/">Privacy and Cookies</a></li>
+            <li><a href="<?php echo site_url(); ?>/about-ua-libraries/site-map/">Site Map</a></li>
+            <li><a href="<?php echo site_url(); ?>/about-ua-libraries/copyright-statement/">Copyright Statement</a></li>
+            <li><a href="<?php echo site_url(); ?>/about-ua-libraries/support-ua-libraries/">Support UA Libraries</a></li>
           </ul>
         </div>
 
         <div class="col-sm-4">
           <h4>Libraries &amp; Collections</h4>
           <ul class="footer-list">
-            <li><a href="https://wwwdev2.lib.ua.edu/services/information-for-faculty/distance-education-faculty/gorgas-library/">Gorgas Library</a></li>
-            <li><a href="https://wwwdev2.lib.ua.edu/services/information-for-faculty/distance-education-faculty/rodgers-library-for-science-engineering/">Rodgers Library for Science &amp; Engineering</a></li>
-            <li><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/campus-libraries/music-library/">Music Library</a></li>
-            <li><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/collections/a-s-williams-collection/">A.S. Williams Collection</a></li>
-            <li><a href="https://wwwdev2.lib.ua.edu/services/sanford-media-center/">Sanford Media Center</a></li>
-            <li><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/campus-libraries/map-library-place-names-research-center/">Map Library &amp; Place Names Research Center</a></li>
-            <li><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/campus-libraries/hoole-library/">Hoole Library</a></li>
-            <li><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/campus-libraries/health-sciences-library/">Health Sciences Library</a></li>
-            <li><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/campus-libraries/bounds-law-library/">Bounds Law Library</a></li>
+            <li><a href="<?php echo site_url(); ?>/services/information-for-faculty/distance-education-faculty/gorgas-library/">Gorgas Library</a></li>
+            <li><a href="<?php echo site_url(); ?>/services/information-for-faculty/distance-education-faculty/rodgers-library-for-science-engineering/">Rodgers Library for Science &amp; Engineering</a></li>
+            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/campus-libraries/music-library/">Music Library</a></li>
+            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/collections/a-s-williams-collection/">A.S. Williams Collection</a></li>
+            <li><a href="<?php echo site_url(); ?>/services/sanford-media-center/">Sanford Media Center</a></li>
+            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/campus-libraries/map-library-place-names-research-center/">Map Library &amp; Place Names Research Center</a></li>
+            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/campus-libraries/hoole-library/">Hoole Library</a></li>
+            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/campus-libraries/health-sciences-library/">Health Sciences Library</a></li>
+            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/campus-libraries/bounds-law-library/">Bounds Law Library</a></li>
           </ul>
         </div>
 

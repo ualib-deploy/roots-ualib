@@ -1,5 +1,4 @@
 <?php
-
 define( 'WEBAPPS_PATH', '/srv/web/www/webapps/' );
 
 function ualib_child_startSession() {
