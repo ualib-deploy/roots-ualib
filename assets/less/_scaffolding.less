@@ -64,21 +64,45 @@ img {
 
 .@{content-container-class}{
   a:not(.no-icon){
-    &[href^="http"]:after,
+    /*&[href^="http"]:after,
     &[href^="https"]:after{
       .link-icon-after(@icon-ext-link);
+    }*/
+
+    &[href^="http"],
+    &[href^="https"]{
+      &:not([href*="ua.edu"]):after{
+        .link-icon-after(@icon-ext-link);
+      }
     }
 
-    &[href$=".pdf"]:before{
-      .link-icon-before(@icon-pdf);
+    &[href$=".pdf"]{
+      &::before{
+        .link-icon-before(@icon-pdf);
+      }
+      &::after{
+        display: none;
+      }
     }
-    &[href$=".doc"]:before,
-    &[href$=".docx"]:before{
-      .link-icon-before(@icon-word);
+
+    &[href$=".doc"],
+    &[href$=".docx"]{
+      &::before{
+        .link-icon-before(@icon-word);
+      }
+      &::after{
+        display: none;
+      }
     }
-    &[href$=".xls"]:before,
-    &[href$=".xlsx"]:before{
-      .link-icon-before(@icon-excel);
+
+    &[href$=".xls"],
+    &[href$=".xlsx"]{
+      &::before{
+        .link-icon-before(@icon-excel);
+      }
+      &::after{
+        display: none;
+      }
     }
   }
 }

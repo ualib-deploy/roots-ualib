@@ -37469,7 +37469,7 @@ angular.module("manageUserGroups/manageUG.tpl.html", []).run(["$templateCache", 
     "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"updateUser(user)\" ng-disabled=\"isLoading\"\n" +
     "                                    ng-show=\"$index > 0\">Save</button>\n" +
     "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteUser(user, $index)\" ng-disabled=\"isLoading\"\n" +
-    "                                    ng-show=\"$index > 0\">Remove</button><br>\n" +
+    "                                    ng-show=\"$index > 0\">Remove All</button><br>\n" +
     "                            {{result}}\n" +
     "                        </div>\n" +
     "                    </td>\n" +
