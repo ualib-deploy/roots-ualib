@@ -39392,6 +39392,7 @@ angular.module("dbList/dbList.tpl.html", []).run(["$templateCache", function($te
     "                <a href=\"{{db.url}}\" ng-hide=\"db.tmpDisabled == '1'\">{{db.title}}</a>\n" +
     "                <span ng-show=\"db.tmpDisabled == '1'\">{{db.title}}</span>\n" +
     "                <small>{{db.coverage}}</small>\n" +
+    "                <span class=\"dbStatus\">{{db.status}}</span>\n" +
     "            </h4>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-1\">\n" +
