@@ -37,7 +37,8 @@ module.exports = function(grunt) {
         '<%= bower.directory %>/onesearch/src/**/*.less',
         '<%= bower.directory %>/ualib-ui/src/**/*.less',
         '<%= bower.directory %>/ualib-hours/src/**/*.less',
-        '<%= bower.directory %>/ualib_staffdir/dist/staffdir.css'
+        '<%= bower.directory %>/ualib_staffdir/dist/staffdir.css',
+        '<%= bower.directory %>/manage/dist/manage.css'
     ];
 
 
