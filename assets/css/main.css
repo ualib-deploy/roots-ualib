@@ -2658,14 +2658,7 @@ img {
   max-width: 100%;
   height: auto;
 }
-.wrap a:not(.no-icon) {
-  /*&[href^="http"]:after,
-    &[href^="https"]:after{
-      .link-icon-after(@icon-ext-link);
-    }*/
-}
-.wrap a:not(.no-icon)[href^="http"]:not([href*="ua.edu"]):after,
-.wrap a:not(.no-icon)[href^="https"]:not([href*="ua.edu"]):after {
+.wrap a:not(.no-icon).external-link:after {
   content: "\f08e";
   font-family: FontAwesome;
   font-size: .80em;
@@ -2684,9 +2677,6 @@ img {
   font-size: inherit;
   padding-right: 5px;
 }
-.wrap a:not(.no-icon)[href$=".pdf"]::after {
-  display: none;
-}
 .wrap a:not(.no-icon)[href$=".doc"]::before,
 .wrap a:not(.no-icon)[href$=".docx"]::before {
   content: "\f1c2";
@@ -2698,10 +2688,6 @@ img {
   font-size: inherit;
   padding-right: 5px;
 }
-.wrap a:not(.no-icon)[href$=".doc"]::after,
-.wrap a:not(.no-icon)[href$=".docx"]::after {
-  display: none;
-}
 .wrap a:not(.no-icon)[href$=".xls"]::before,
 .wrap a:not(.no-icon)[href$=".xlsx"]::before {
   content: "\f1c3";
@@ -2712,10 +2698,6 @@ img {
   text-decoration: none;
   font-size: inherit;
   padding-right: 5px;
-}
-.wrap a:not(.no-icon)[href$=".xls"]::after,
-.wrap a:not(.no-icon)[href$=".xlsx"]::after {
-  display: none;
 }
 h1,
 h2,
