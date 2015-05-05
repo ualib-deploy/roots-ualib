@@ -37482,7 +37482,7 @@ angular.module("manageHours/manageSem.tpl.html", []).run(["$templateCache", func
     "    </thead>\n" +
     "    <tr ng-repeat=\"sem in semData\" ng-click=\"expandSem($event, sem)\">\n" +
     "        <th scope=\"row\" ng-hide=\"isExpSem(sem.dsid)\">{{sem.name}}<br>\n" +
-    "            {{sem.startdate | date : 'MMM d, y'}}<br>{{sem.enddate}}\n" +
+    "            {{sem.startdate | date : 'MMM d, y'}}<br>{{sem.enddate | date : 'MMM d, y'}}\n" +
     "        </th>\n" +
     "        <th scope=\"row\" ng-if=\"isExpSem(sem.dsid)\">{{sem.name}}<br>\n" +
     "            <div class=\"input-group\">\n" +
@@ -38500,6 +38500,15 @@ angular.module('manage.manageHours', [])
             };
             $http.defaults.headers.post = { 'X-CSRF-libHours' : $scope.GetCookie("CSRF-libHours") };
 
+            $scope.initSemesters = function(semesters){
+                for (var sem = 0; sem < semesters.length; sem++){
+                    semesters[sem].startdate = new Date(semesters[sem].startdate);
+                    semesters[sem].enddate = new Date(semesters[sem].enddate);
+                    semesters[sem].dp = false;
+                }
+                return semesters;
+            };
+
             hmFactory.getData("semesters")
                 .success(function(data) {
                     console.dir(data);
@@ -38509,10 +38518,7 @@ angular.module('manage.manageHours', [])
                             data.exc[lib][ex].datems = new Date(data.exc[lib][ex].date * 1000);
                             data.exc[lib][ex].dp = false;
                         }
-                        for (var sem = 0; sem < data.sem[lib].length; sem++){
-                            data.sem[lib][sem].startdate = new Date(data.sem[lib][sem].startdate);
-                            data.sem[lib][sem].dp = false;
-                        }
+                        data.sem[lib] = $scope.initSemesters(data.sem[lib]);
                     }
                     $scope.allowedLibraries = data;
                 })
@@ -38567,14 +38573,12 @@ angular.module('manage.manageHours', [])
         $scope.newSemester.dp = false;
         $scope.newSemester.dow = [];
 
-        function init(){
-            for (var day = 0; day < 7; day++) {
-                $scope.newSemester.dow[day] = {};
-                $scope.newSemester.dow[day].from = -1;
-                $scope.newSemester.dow[day].to = 0;
-            }
+        for (var day = 0; day < 7; day++) {
+            $scope.newSemester.dow[day] = {};
+            $scope.newSemester.dow[day].from = -1;
+            $scope.newSemester.dow[day].to = 0;
         }
-        init();
+
         $scope.onSemFocus = function($event, index){
             $event.preventDefault();
             $event.stopPropagation();
@@ -38616,11 +38620,13 @@ angular.module('manage.manageHours', [])
 
         $scope.saveChanges = function(semester){
             semester.lid = $scope.selLib.lid;
+            semester.libName = $scope.selLib.name;
             $scope.loading = true;
             hmFactory.postData({action : 1}, semester)
                 .success(function(data) {
-                    if (data == 1){
-                        $scope.result = "Saved";
+                    if ((typeof data === 'object') && (data !== null)){
+                        $scope.result = "Semester updated";
+                        $scope.allowedLibraries.sem[$scope.selLib.index] = $scope.initSemesters(data);
                     } else
                         $scope.result = "Error! Could not save data!";
                     $scope.loading = false;
@@ -38633,11 +38639,12 @@ angular.module('manage.manageHours', [])
             if (confirm("Are you sure you want to delete " + semester.name + " semester?")){
                 $scope.loading = true;
                 semester.lid = $scope.selLib.lid;
+                semester.libName = $scope.selLib.name;
                 hmFactory.postData({action : 3}, semester)
                     .success(function(data) {
-                        if (data == 1){
+                        if ((typeof data === 'object') && (data !== null)){
                             $scope.result = "Semester deleted";
-                            $scope.allowedLibraries.sem[$scope.selLib.index].splice(index, 1);
+                            $scope.allowedLibraries.sem[$scope.selLib.index] = $scope.initSemesters(data);
                         } else
                             $scope.result = "Error! Could not delete semester!";
                         $scope.loading = false;
@@ -38655,11 +38662,7 @@ angular.module('manage.manageHours', [])
                 .success(function(data) {
                     if ((typeof data === 'object') && (data !== null)){
                         $scope.result = "Semester created";
-                        for (var sem = 0; sem < data.length; sem++){
-                            data[sem].startdate = new Date(data[sem].startdate);
-                            data[sem].dp = false;
-                        }
-                        $scope.allowedLibraries.sem[$scope.selLib.index] = data;
+                        $scope.allowedLibraries.sem[$scope.selLib.index] = $scope.initSemesters(data);
                     }else
                         $scope.result = "Error! Could not create semester!";
                     $scope.loading = false;
