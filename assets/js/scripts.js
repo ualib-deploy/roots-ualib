@@ -38042,7 +38042,6 @@ angular.module('common.manage', [])
     .factory('tokenFactory', ['$http', function tokenFactory($http){
         return function(tokenName){
             var cookies;
-            var xTokenName = 'X-' + tokenName;
             this.GetCookie = function (name,c,C,i){
                 if(cookies){ return cookies[name]; }
                 c = document.cookie.split('; ');
@@ -38053,8 +38052,8 @@ angular.module('common.manage', [])
                 }
                 return cookies[name];
             };
-
-            $http.defaults.headers.post = { xTokenName : this.GetCookie(tokenName) };
+            var header = { ["X-" + tokenName] : this.GetCookie(tokenName) };
+            $http.defaults.headers.post = header;
         }
     }])
 
