@@ -38038,6 +38038,26 @@ angular.module('manage.common', [
 ])
 angular.module('common.manage', [])
 
+
+    .factory('tokenFactory', ['$http', function tokenFactory($http){
+        return function(tokenName){
+            var cookies;
+            var xTokenName = 'X-' + tokenName;
+            this.GetCookie = function (name,c,C,i){
+                if(cookies){ return cookies[name]; }
+                c = document.cookie.split('; ');
+                cookies = {};
+                for(i=c.length-1; i>=0; i--){
+                    C = c[i].split('=');
+                    cookies[C[0]] = C[1];
+                }
+                return cookies[name];
+            };
+
+            $http.defaults.headers.post = { xTokenName : this.GetCookie(tokenName) };
+        }
+    }])
+
     .factory('hmFactory', ['$http', 'HOURS_MANAGE_URL', function hmFactory($http, url){
         return {
             getData: function(pPoint){
@@ -38101,8 +38121,8 @@ angular.module('common.manage', [])
     }])
 
 angular.module('manage.manageDatabases', [])
-    .controller('manageDBCtrl', ['$scope', '$http', '$window', 'mdbFactory',
-        function manageDBCtrl($scope, $http, $window, mdbFactory){
+    .controller('manageDBCtrl', ['$scope', '$http', '$window', 'tokenFactory', 'mdbFactory',
+        function manageDBCtrl($scope, $http, $window, tokenFactory, mdbFactory){
             $scope.DBList = {};
             $scope.titleFilter = '';
             $scope.titleStartFilter = '';
@@ -38135,21 +38155,7 @@ angular.module('manage.manageDatabases', [])
             //primary, secondary
             $scope.subjectValues = [ 1, 2 ];
 
-            var cookies;
-            $scope.GetCookie = function (name,c,C,i){
-                if(cookies){ return cookies[name]; }
-
-                c = document.cookie.split('; ');
-                cookies = {};
-
-                for(i=c.length-1; i>=0; i--){
-                    C = c[i].split('=');
-                    cookies[C[0]] = C[1];
-                }
-
-                return cookies[name];
-            };
-            $http.defaults.headers.post = { 'X-CSRF-libDatabases' : $scope.GetCookie("CSRF-libDatabases") };
+            tokenFactory("CSRF-libDatabases");
 
             mdbFactory.getData()
                 .success(function(data) {
@@ -38436,11 +38442,6 @@ angular.module('manage.manageHours', [])
     .constant('HOURS_FROM', [
         {name:'Closed', value:'-1'},
         {name:'Midnight', value:'0'},
-        {name:'1:00 am', value:'100'},
-        {name:'2:00 am', value:'200'},
-        {name:'3:00 am', value:'300'},
-        {name:'4:00 am', value:'400'},
-        {name:'5:00 am', value:'500'},
         {name:'6:00 am', value:'600'},
         {name:'7:00 am', value:'700'},
         {name:'7:30 am', value:'730'},
@@ -38450,13 +38451,16 @@ angular.module('manage.manageHours', [])
         {name:'10:00 am', value:'1000'},
         {name:'11:00 am', value:'1100'},
         {name:'Noon', value:'1200'},
-        {name:'1:00 pm', value:'1300'},
+        {name:'1:00 pm', value:'1300'}
     ])
     .constant('HOURS_TO', [
-        {name:'Closed', value:'0'},
         {name:'1:00 am', value:'100'},
         {name:'2:00 am', value:'200'},
         {name:'3:00 am', value:'300'},
+        {name:'8:00 am', value:'800'},
+        {name:'9:00 am', value:'900'},
+        {name:'10:00 am', value:'1000'},
+        {name:'11:00 am', value:'1100'},
         {name:'Noon', value:'1200'},
         {name:'1:00 pm', value:'1300'},
         {name:'2:00 pm', value:'1400'},
@@ -38476,29 +38480,15 @@ angular.module('manage.manageHours', [])
     ])
     .constant('DP_FORMAT', 'MM/dd/yyyy')
 
-    .controller('manageHrsCtrl', ['$scope', '$http', '$animate', 'hmFactory', 'HOURS_FROM', 'HOURS_TO', 'DP_FORMAT',
-        function manageHrsCtrl($scope, $http, $animate, hmFactory, hoursFrom, hoursTo, dpFormat){
+    .controller('manageHrsCtrl', ['$scope', '$http', '$animate', 'tokenFactory', 'hmFactory', 'HOURS_FROM', 'HOURS_TO', 'DP_FORMAT',
+        function manageHrsCtrl($scope, $http, $animate, tokenFactory, hmFactory, hoursFrom, hoursTo, dpFormat){
             $scope.allowedLibraries = [];
             $scope.format = dpFormat;
             $scope.hrsFrom = hoursFrom;
             $scope.hrsTo = hoursTo;
             $scope.selLib = {};
 
-            var cookies;
-            $scope.GetCookie = function (name,c,C,i){
-                if(cookies){ return cookies[name]; }
-
-                c = document.cookie.split('; ');
-                cookies = {};
-
-                for(i=c.length-1; i>=0; i--){
-                    C = c[i].split('=');
-                    cookies[C[0]] = C[1];
-                }
-
-                return cookies[name];
-            };
-            $http.defaults.headers.post = { 'X-CSRF-libHours' : $scope.GetCookie("CSRF-libHours") };
+            tokenFactory("CSRF-libHours");
 
             $scope.initSemesters = function(semesters){
                 for (var sem = 0; sem < semesters.length; sem++){
@@ -38815,8 +38805,8 @@ angular.module('manage.manageHours', [])
     })
 
 angular.module('manage.manageHoursUsers', [])
-    .controller('manageHrsUsersCtrl', ['$scope', '$http', '$window', '$animate', 'hmFactory',
-        function manageHrsUsersCtrl($scope, $http, $window, $animate, hmFactory){
+    .controller('manageHrsUsersCtrl', ['$scope', '$http', '$window', '$animate', 'tokenFactory', 'hmFactory',
+        function manageHrsUsersCtrl($scope, $http, $window, $animate, tokenFactory, hmFactory){
             $scope.isLoading = true;
             $scope.dataUL = {};
             $scope.dataUL.users = [];
@@ -38824,21 +38814,7 @@ angular.module('manage.manageHoursUsers', [])
             $scope.user = {};
             $scope.user.name = $window.userName;
 
-            var cookies;
-            $scope.GetCookie = function (name,c,C,i){
-                if(cookies){ return cookies[name]; }
-
-                c = document.cookie.split('; ');
-                cookies = {};
-
-                for(i=c.length-1; i>=0; i--){
-                    C = c[i].split('=');
-                    cookies[C[0]] = C[1];
-                }
-
-                return cookies[name];
-            };
-            $http.defaults.headers.post = { 'X-CSRF-libHours' : $scope.GetCookie("CSRF-libHours") };
+            tokenFactory("CSRF-libHours");
 
             hmFactory.getData("users")
                 .success(function(data){
@@ -39010,8 +38986,8 @@ angular.module('manage.manageHoursUsers', [])
     })
 
 angular.module('manage.manageOneSearch', [])
-    .controller('manageOneSearchCtrl', ['$scope', '$http', 'osFactory',
-        function manageOneSearchCtrl($scope, $http, osFactory){
+    .controller('manageOneSearchCtrl', ['$scope', '$http', 'tokenFactory', 'osFactory',
+        function manageOneSearchCtrl($scope, $http, tokenFactory, osFactory){
             $scope.recList = [];
             $scope.addRec = {};
             $scope.addRec.keyword = "";
@@ -39022,20 +38998,7 @@ angular.module('manage.manageOneSearch', [])
             $scope.filterLink = '';
             $scope.filterLinkTitle = '';
 
-            var cookies;
-            $scope.GetCookie = function (name,c,C,i){
-                if(cookies){ return cookies[name]; }
-
-                c = document.cookie.split('; ');
-                cookies = {};
-
-                for(i=c.length-1; i>=0; i--){
-                    C = c[i].split('=');
-                    cookies[C[0]] = C[1];
-                }
-                return cookies[name];
-            };
-            $http.defaults.headers.post = { 'X-CSRF-libOneSearch' : $scope.GetCookie("CSRF-libOneSearch") };
+            tokenFactory("CSRF-libOneSearch");
 
             osFactory.getData({recList : 1})
                 .success(function(data) {
@@ -39091,8 +39054,8 @@ angular.module('manage.manageOneSearch', [])
         };
     })
 angular.module('manage.manageUserGroups', [])
-    .controller('userGroupsCtrl', ['$scope', '$http', '$window', 'ugFactory',
-        function userGroupsCtrl($scope, $http, $window, ugFactory){
+    .controller('userGroupsCtrl', ['$scope', '$http', '$window', 'tokenFactory', 'ugFactory',
+        function userGroupsCtrl($scope, $http, $window, tokenFactory, ugFactory){
         $scope.expUser = -1;
         $scope.users = $window.users;
         $scope.apps = $window.apps;
@@ -39112,21 +39075,7 @@ angular.module('manage.manageUserGroups', [])
                 active: false
             }];
 
-        var cookies;
-        $scope.GetCSRFCookie = function (name,c,C,i){
-            if(cookies){ return cookies[name]; }
-
-            c = document.cookie.split('; ');
-            cookies = {};
-
-            for(i=c.length-1; i>=0; i--){
-                C = c[i].split('=');
-                cookies[C[0]] = C[1];
-            }
-
-            return cookies[name];
-        };
-        $http.defaults.headers.post = { "X-CSRF-libAdmin" : $scope.GetCSRFCookie("CSRF-libAdmin") };
+        tokenFactory("CSRF-libAdmin");
 
         $scope.expandUser = function(user){
             $scope.result = "";
@@ -39228,24 +39177,11 @@ angular.module('manage.manageUserGroups', [])
         };
     })
 angular.module('manage.siteFeedback', [])
-    .controller('siteFeedbackCtrl', ['$scope', '$http', 'sfFactory',
-        function siteFeedbackCtrl($scope, $http, sfFactory){
+    .controller('siteFeedbackCtrl', ['$scope', '$http', 'tokenFactory', 'sfFactory',
+        function siteFeedbackCtrl($scope, $http, tokenFactory, sfFactory){
             $scope.responses = [];
 
-            var cookies;
-            $scope.GetCSRFCookie = function (name,c,C,i){
-                if(cookies){ return cookies[name]; }
-
-                c = document.cookie.split('; ');
-                cookies = {};
-
-                for(i=c.length-1; i>=0; i--){
-                    C = c[i].split('=');
-                    cookies[C[0]] = C[1];
-                }
-                return cookies[name];
-            };
-            $http.defaults.headers.post = { "X-CSRF-libSiteFeedback" : $scope.GetCSRFCookie("CSRF-libSiteFeedback") };
+            tokenFactory("CSRF-libSiteFeedback");
 
             sfFactory.getData({json : 1})
                 .success(function(data) {
@@ -39300,8 +39236,8 @@ angular.module('manage.staffDirectory', [])
         "Web Services"
     ])
 
-    .controller('staffDirCtrl', ['$scope', '$http', '$window', 'sdFactory', 'STAFF_DIR_RANKS', 'STAFF_DIR_DEPTS', 'STAFF_DIR_URL',
-        function staffDirCtrl($scope, $http, $window, sdFactory, ranks, departments, appUrl){
+    .controller('staffDirCtrl', ['$scope', '$http', '$window', 'tokenFactory', 'sdFactory', 'STAFF_DIR_RANKS', 'STAFF_DIR_DEPTS', 'STAFF_DIR_URL',
+        function staffDirCtrl($scope, $http, $window, tokenFactory, sdFactory, ranks, departments, appUrl){
             $scope.sortMode = 'lastname';
             $scope.lastNameFilter = '';
             $scope.firstNameFilter = '';
@@ -39317,20 +39253,7 @@ angular.module('manage.staffDirectory', [])
             $scope.maxPageSize = 10;
             $scope.perPage = 15;
 
-            var cookies;
-            $scope.GetCookie = function (name,c,C,i){
-                if(cookies){ return cookies[name]; }
-
-                c = document.cookie.split('; ');
-                cookies = {};
-
-                for(i=c.length-1; i>=0; i--){
-                    C = c[i].split('=');
-                    cookies[C[0]] = C[1];
-                }
-                return cookies[name];
-            };
-            $http.defaults.headers.post = { 'X-CSRF-libStaffDir' : $scope.GetCookie("CSRF-libStaffDir") };
+            tokenFactory("CSRF-libStaffDir");
 
             sdFactory.getData()
                 .success(function(data) {
