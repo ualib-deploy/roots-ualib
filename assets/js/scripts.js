@@ -38052,7 +38052,8 @@ angular.module('common.manage', [])
                 }
                 return cookies[name];
             };
-            var header = { ["X-" + tokenName] : this.GetCookie(tokenName) };
+            var header = {};
+            header["X-" + tokenName] = this.GetCookie(tokenName);
             $http.defaults.headers.post = header;
         }
     }])
@@ -38119,8 +38120,8 @@ angular.module('common.manage', [])
     }])
 
 angular.module('manage.manageDatabases', [])
-    .controller('manageDBCtrl', ['$scope', '$http', '$window', 'tokenFactory', 'mdbFactory',
-        function manageDBCtrl($scope, $http, $window, tokenFactory, mdbFactory){
+    .controller('manageDBCtrl', ['$scope', '$window', 'tokenFactory', 'mdbFactory',
+        function manageDBCtrl($scope, $window, tokenFactory, mdbFactory){
             $scope.DBList = {};
             $scope.titleFilter = '';
             $scope.titleStartFilter = '';
@@ -38478,8 +38479,8 @@ angular.module('manage.manageHours', [])
     ])
     .constant('DP_FORMAT', 'MM/dd/yyyy')
 
-    .controller('manageHrsCtrl', ['$scope', '$http', '$animate', 'tokenFactory', 'hmFactory', 'HOURS_FROM', 'HOURS_TO', 'DP_FORMAT',
-        function manageHrsCtrl($scope, $http, $animate, tokenFactory, hmFactory, hoursFrom, hoursTo, dpFormat){
+    .controller('manageHrsCtrl', ['$scope', '$animate', 'tokenFactory', 'hmFactory', 'HOURS_FROM', 'HOURS_TO', 'DP_FORMAT',
+        function manageHrsCtrl($scope, $animate, tokenFactory, hmFactory, hoursFrom, hoursTo, dpFormat){
             $scope.allowedLibraries = [];
             $scope.format = dpFormat;
             $scope.hrsFrom = hoursFrom;
@@ -38803,8 +38804,8 @@ angular.module('manage.manageHours', [])
     })
 
 angular.module('manage.manageHoursUsers', [])
-    .controller('manageHrsUsersCtrl', ['$scope', '$http', '$window', '$animate', 'tokenFactory', 'hmFactory',
-        function manageHrsUsersCtrl($scope, $http, $window, $animate, tokenFactory, hmFactory){
+    .controller('manageHrsUsersCtrl', ['$scope', '$window', '$animate', 'tokenFactory', 'hmFactory',
+        function manageHrsUsersCtrl($scope, $window, $animate, tokenFactory, hmFactory){
             $scope.isLoading = true;
             $scope.dataUL = {};
             $scope.dataUL.users = [];
@@ -38984,8 +38985,8 @@ angular.module('manage.manageHoursUsers', [])
     })
 
 angular.module('manage.manageOneSearch', [])
-    .controller('manageOneSearchCtrl', ['$scope', '$http', 'tokenFactory', 'osFactory',
-        function manageOneSearchCtrl($scope, $http, tokenFactory, osFactory){
+    .controller('manageOneSearchCtrl', ['$scope', 'tokenFactory', 'osFactory',
+        function manageOneSearchCtrl($scope, tokenFactory, osFactory){
             $scope.recList = [];
             $scope.addRec = {};
             $scope.addRec.keyword = "";
@@ -39052,8 +39053,8 @@ angular.module('manage.manageOneSearch', [])
         };
     })
 angular.module('manage.manageUserGroups', [])
-    .controller('userGroupsCtrl', ['$scope', '$http', '$window', 'tokenFactory', 'ugFactory',
-        function userGroupsCtrl($scope, $http, $window, tokenFactory, ugFactory){
+    .controller('userGroupsCtrl', ['$scope', '$window', 'tokenFactory', 'ugFactory',
+        function userGroupsCtrl($scope, $window, tokenFactory, ugFactory){
         $scope.expUser = -1;
         $scope.users = $window.users;
         $scope.apps = $window.apps;
@@ -39175,8 +39176,8 @@ angular.module('manage.manageUserGroups', [])
         };
     })
 angular.module('manage.siteFeedback', [])
-    .controller('siteFeedbackCtrl', ['$scope', '$http', 'tokenFactory', 'sfFactory',
-        function siteFeedbackCtrl($scope, $http, tokenFactory, sfFactory){
+    .controller('siteFeedbackCtrl', ['$scope', 'tokenFactory', 'sfFactory',
+        function siteFeedbackCtrl($scope, tokenFactory, sfFactory){
             $scope.responses = [];
 
             tokenFactory("CSRF-libSiteFeedback");
@@ -39234,8 +39235,8 @@ angular.module('manage.staffDirectory', [])
         "Web Services"
     ])
 
-    .controller('staffDirCtrl', ['$scope', '$http', '$window', 'tokenFactory', 'sdFactory', 'STAFF_DIR_RANKS', 'STAFF_DIR_DEPTS', 'STAFF_DIR_URL',
-        function staffDirCtrl($scope, $http, $window, tokenFactory, sdFactory, ranks, departments, appUrl){
+    .controller('staffDirCtrl', ['$scope', '$window', 'tokenFactory', 'sdFactory', 'STAFF_DIR_RANKS', 'STAFF_DIR_DEPTS', 'STAFF_DIR_URL',
+        function staffDirCtrl($scope, $window, tokenFactory, sdFactory, ranks, departments, appUrl){
             $scope.sortMode = 'lastname';
             $scope.lastNameFilter = '';
             $scope.firstNameFilter = '';
