@@ -36921,7 +36921,7 @@ angular.module('hours.list', [])
             templateUrl: 'list/list.tpl.html',
             controller: 'ListCtrl'
         }
-    }]);;angular.module('manage.templates', ['manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html']);
+    }]);;angular.module('manage.templates', ['manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html']);
 
 angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageDatabases/manageDatabases.tpl.html",
@@ -37666,6 +37666,162 @@ angular.module("manageOneSearch/manageOneSearch.tpl.html", []).run(["$templateCa
     "</div>");
 }]);
 
+angular.module("manageSoftware/manageSoftware.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("manageSoftware/manageSoftware.tpl.html",
+    "<h2>Manage Software List</h2>\n" +
+    "\n" +
+    "<div>\n" +
+    "    <div class=\"row form-inline\">\n" +
+    "        <div class=\"form-group\">\n" +
+    "            <label for=\"filterBy\">Filter <small>{{filteredSW.length}}</small> results by</label>\n" +
+    "            <div id=\"filterBy\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"titleFilter\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Description contains\" ng-model=\"descrFilter\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Locations contain\" ng-model=\"locationFilter\">\n" +
+    "            </div>\n" +
+    "            <label for=\"sortBy\">Sort by</label>\n" +
+    "            <div id=\"sortBy\">\n" +
+    "                <button type=\"button\" class=\"btn btn-primary\" ng-model=\"sortButton\" btn-radio=\"0\" ng-click=\"sortBy(0)\">\n" +
+    "                    Title\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[0].reverse\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[0].reverse\"></span>\n" +
+    "                </button>\n" +
+    "                <button type=\"button\" class=\"btn btn-primary\" ng-model=\"sortButton\" btn-radio=\"1\" ng-click=\"sortBy(1)\">\n" +
+    "                    Location\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[1].reverse\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[1].reverse\"></span>\n" +
+    "                </button>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"text-center\">\n" +
+    "        <pagination total-items=\"filteredSW.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
+    "                    boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredSW.length > 0\"></pagination>\n" +
+    "    </div>\n" +
+    "    <div class=\"row\"\n" +
+    "         ng-repeat=\"sw in filteredSW = (SWList.software | filter:{title:titleFilter}\n" +
+    "                                                        | filter:{description:descrFilter}\n" +
+    "                                                        | filter:{locations:locationFilter}\n" +
+    "                                                        | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\n" +
+    "        | startFrom:(currentPage-1)*perPage | limitTo:perPage\"\n" +
+    "         ng-class=\"{sdOpen: sw.show, sdOver: sw.sid == mOver}\" ng-mouseover=\"setOver(sw)\">\n" +
+    "        <div class=\"col-md-12\" ng-click=\"toggleSW(sw)\">\n" +
+    "            <h4>\n" +
+    "                <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"sw.show\"></span>\n" +
+    "                <span class=\"fa fa-fw fa-caret-down\" ng-show=\"sw.show\"></span>\n" +
+    "                {{sw.title}}\n" +
+    "                <small>{{sw.version}}</small>\n" +
+    "            </h4>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-12\" ng-show=\"sw.show\">\n" +
+    "            <form ng-submit=\"updateSW(sw)\">\n" +
+    "                <div class=\"col-md-6 form-group\">\n" +
+    "                    <label for=\"{{sw.sid}}_title\">Title</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{sw.title}}\" ng-model=\"sw.title\"\n" +
+    "                           id=\"{{sw.sid}}_title\">\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-6 form-group\">\n" +
+    "                    <label for=\"{{sw.sid}}_ver\">Version</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{sw.version}}\" ng-model=\"sw.version\"\n" +
+    "                           id=\"{{sw.sid}}_ver\">\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-12 form-group\">\n" +
+    "                    <label for=\"{{sw.sid}}_descr\">Description</label>\n" +
+    "                    <textarea class=\"form-control\" rows=\"3\" id=\"{{sw.sid}}_descr\" ng-model=\"sw.description\" ></textarea>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-1 form-group\">\n" +
+    "                    <label for=\"{{sw.sid}}_Disable\">Disabled</label>\n" +
+    "                    <input type=\"checkbox\" class=\"form-control\" ng-model=\"db.disabled\" ng-true-value=\"1\" ng-false-value=\"0\"\n" +
+    "                           id=\"{{sw.sid}}_Disable\">\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-6 form-group\">\n" +
+    "                    <label for=\"{{sw.sid}}_loc\">Locations</label>\n" +
+    "                    <ul class=\"list-group\" id=\"{{sw.sid}}_loc\">\n" +
+    "                        <li class=\"list-group-item\" ng-repeat=\"location in sw.locations\">\n" +
+    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteLocation(sw,location)\">Delete</button>\n" +
+    "                            {{location.name}}\n" +
+    "                        </li>\n" +
+    "                        <li class=\"list-group-item col-md-12\">\n" +
+    "                            <div class=\"col-md-9\">\n" +
+    "                                <select class=\"form-control\" ng-model=\"sw.selLoc\" ng-options=\"loc.name for loc in SWList.locations\">\n" +
+    "                                </select>\n" +
+    "                            </div>\n" +
+    "                            <div class=\"col-md-3\">\n" +
+    "                                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addLocation(sw)\">Add Location</button>\n" +
+    "                            </div>\n" +
+    "                        </li>\n" +
+    "                    </ul>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-12 text-center\">\n" +
+    "                    <button type=\"submit\" class=\"btn btn-primary\">Update information</button>\n" +
+    "                    <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteSW(sw)\">\n" +
+    "                        Delete {{sw.title}} software\n" +
+    "                    </button>\n" +
+    "                </div>\n" +
+    "            </form>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div class=\"text-center\">\n" +
+    "    <pagination total-items=\"filteredSW.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
+    "                boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredSW.length > 0\"></pagination>\n" +
+    "</div>\n" +
+    "<div class=\"text-center\">\n" +
+    "    <h4 ng-show=\"filteredSW.length == 0\">Nothing found</h4>\n" +
+    "</div>\n" +
+    "\n" +
+    "<h3>Add New Software</h3>\n" +
+    "<form ng-submit=\"createSW()\">\n" +
+    "    <div class=\"row sdOpen\">\n" +
+    "        <div class=\"col-md-12\">\n" +
+    "            <div class=\"col-md-6 form-group\">\n" +
+    "                <label for=\"title\">Title</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Software Title\" ng-model=\"newSW.title\"\n" +
+    "                       id=\"title\" required>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-6 form-group\">\n" +
+    "                <label for=\"version\">Version</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Software Version\" ng-model=\"newSW.version\"\n" +
+    "                       id=\"version\" required>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-12 form-group\">\n" +
+    "                <label for=\"descr\">Description</label>\n" +
+    "                <textarea class=\"form-control\" rows=\"3\" id=\"descr\" ng-model=\"newSW.description\" required></textarea>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-1 form-group\">\n" +
+    "                <label for=\"Disable\">Disabled</label>\n" +
+    "                <input type=\"checkbox\" class=\"form-control\" ng-model=\"newSW.disabled\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
+    "                       id=\"Disable\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-6 form-group\">\n" +
+    "                <label for=\"locations\">Locations</label>\n" +
+    "                <ul class=\"list-group\" id=\"locations\">\n" +
+    "                    <li class=\"list-group-item\" ng-repeat=\"location in newSW.locations\">\n" +
+    "                        <button type=\"button\" class=\"btn btn-primary\" ng-click=\"delLocNewSW($index)\">Delete</button>\n" +
+    "                        {{location.name}}\n" +
+    "                    </li>\n" +
+    "                    <li class=\"list-group-item col-md-12\">\n" +
+    "                        <div class=\"col-md-9\">\n" +
+    "                            <select class=\"form-control\" ng-model=\"newSW.selLoc\" ng-options=\"loc.name for loc in SWList.locations\">\n" +
+    "                            </select>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"col-md-3\">\n" +
+    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addLocNewSW()\">Add Location</button>\n" +
+    "                        </div>\n" +
+    "                    </li>\n" +
+    "                </ul>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-12 text-center\">\n" +
+    "                <button type=\"submit\" class=\"btn btn-primary\">Create Software Record</button>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</form>\n" +
+    "\n" +
+    "");
+}]);
+
 angular.module("manageUserGroups/manageUG.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageUserGroups/manageUG.tpl.html",
     "<h2>Web Applications Admin Interface</h2>\n" +
@@ -38023,7 +38179,8 @@ angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCach
     'manage.siteFeedback',
     'manage.manageOneSearch',
     'manage.staffDirectory',
-    'manage.manageDatabases'
+    'manage.manageDatabases',
+    'manage.manageSoftware'
 ])
 
     .constant('HOURS_MANAGE_URL', '//wwwdev2.lib.ua.edu/libhours2/')
@@ -38032,6 +38189,7 @@ angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCach
     .constant('ONE_SEARCH_URL', '//wwwdev2.lib.ua.edu/oneSearch/')
     .constant('STAFF_DIR_URL', '//wwwdev2.lib.ua.edu/staffDir/')
     .constant('DATABASES_URL', '//wwwdev2.lib.ua.edu/databases/')
+    .constant('SOFTWARE_URL', '//wwwdev2.lib.ua.edu/softwareList/')
 
 angular.module('manage.common', [
     'common.manage'
@@ -38108,6 +38266,17 @@ angular.module('common.manage', [])
         }
     }])
     .factory('mdbFactory', ['$http', 'DATABASES_URL', function mdbFactory($http, url){
+        return {
+            getData: function(){
+                return $http({method: 'GET', url: url + "api/all", params: {}})
+            },
+            postData: function(params, data){
+                params = angular.isDefined(params) ? params : {};
+                return $http({method: 'POST', url: url + "processData.php", params: params, data: data})
+            }
+        }
+    }])
+    .factory('swFactory', ['$http', 'SOFTWARE_URL', function swFactory($http, url){
         return {
             getData: function(){
                 return $http({method: 'GET', url: url + "api/all", params: {}})
@@ -39052,6 +39221,228 @@ angular.module('manage.manageOneSearch', [])
             templateUrl: 'manageOneSearch/manageOneSearch.tpl.html'
         };
     })
+angular.module('manage.manageSoftware', [])
+    .controller('manageSWCtrl', ['$scope', 'tokenFactory', 'swFactory',
+        function manageSWCtrl($scope, tokenFactory, swFactory){
+            $scope.SWList = {};
+            $scope.titleFilter = '';
+            $scope.descrFilter = '';
+            $scope.locationFilter = '';
+            $scope.sortMode = 0;
+            $scope.sortModes = [
+                {by:'title', reverse:false},
+                {by:'location', reverse:false}
+            ];
+            $scope.sortButton = $scope.sortMode;
+            $scope.mOver = 0;
+            $scope.newSW = {};
+            $scope.newSW.locations = [];
+            $scope.currentPage = 1;
+            $scope.maxPageSize = 10;
+            $scope.perPage = 20;
+
+            tokenFactory("CSRF-libSoftware");
+
+            swFactory.getData()
+                .success(function(data) {
+                    console.dir(data);
+                    for (var i = 0; i < data.software.length; i++){
+                        data.software[i].show = false;
+                        data.software[i].class = "";
+                        data.software[i].selLoc = data.locations[0];
+                    }
+                    $scope.newSW.selLoc = data.locations[0];
+                    $scope.SWList = data;
+                })
+                .error(function(data, status, headers, config) {
+                    console.log(data);
+                });
+
+            $scope.startTitle = function(actual, expected){
+                if (!expected)
+                    return true;
+                if (actual.toLowerCase().indexOf(expected.toLowerCase()) == 0)
+                    return true;
+                return false;
+            };
+            $scope.toggleSW = function(sw){
+                $scope.SWList.software[$scope.SWList.software.indexOf(sw)].show =
+                    !$scope.SWList.software[$scope.SWList.software.indexOf(sw)].show;
+            };
+            $scope.setOver = function(sw){
+                $scope.mOver = sw.sid;
+            };
+            $scope.sortBy = function(by){
+                if ($scope.sortMode === by)
+                    $scope.sortModes[by].reverse = !$scope.sortModes[by].reverse;
+                else
+                    $scope.sortMode = by;
+            };
+
+            $scope.deleteSW = function(sw){
+                if (confirm("Delete " + sw.title  + " permanently?") == true){
+                    swFactory.postData({action : 1}, sw)
+                        .success(function(data, status, headers, config) {
+                            if (data == 1){
+                                $scope.SWList.software.splice($scope.SWList.software.indexOf(sw), 1);
+                                $scope.formResponse = "Software has been deleted.";
+                            } else {
+                                $scope.formResponse = "Error: Can not delete software! " + data;
+                            }
+                            alert($scope.formResponse);
+                            console.log(data);
+                        })
+                        .error(function(data, status, headers, config) {
+                            $scope.formResponse = "Error: Could not delete software! " + data;
+                            alert($scope.formResponse);
+                            console.log(data);
+                        });
+                }
+            };
+            $scope.updateSW = function(sw){
+                if (sw.title.length < 1){
+                    alert("Form error: Please fill out Title field!");
+                    return false;
+                }
+                swFactory.postData({action : 2}, sw)
+                    .success(function(data, status, headers, config) {
+                        if (data == 1){
+                            $scope.formResponse = "Software has been updated.";
+                        } else {
+                            $scope.formResponse = "Error: Can not update software! " + data;
+                        }
+                        alert($scope.formResponse);
+                        console.log(data);
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.formResponse = "Error: Could not update software! " + data;
+                        alert($scope.formResponse);
+                        console.log(data);
+                    });
+            };
+            $scope.createSW = function(){
+                console.dir($scope.newSW);
+                swFactory.postData({action : 3}, $scope.newSW)
+                    .success(function(data, status, headers, config) {
+                        if ((typeof data === 'object') && (data !== null)){
+                            var newSW = {};
+                            newSW = angular.copy($scope.newSW);
+                            newSW.sid = data.id;
+                            newSW.locations = angular.copy(data.locations);
+                            newSW.show = false;
+                            newSW.class = "";
+                            newSW.selLoc = data.locations[0];
+                            $scope.SWList.software.push(newSW);
+                            $scope.formResponse = "Software has been added.";
+                        } else {
+                            $scope.formResponse = "Error: Can not add software! " + data;
+                        }
+                        alert($scope.formResponse);
+                        console.dir(data);
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.formResponse = "Error: Could not add software! " + data;
+                        alert($scope.formResponse);
+                        console.dir(data);
+                    });
+            };
+
+            $scope.addLocation = function(sw){
+                var newLoc = {};
+                newLoc.sid = sw.sid;
+                newLoc.lid = sw.selLoc.lid;
+                newLoc.name = sw.selLoc.name;
+                swFactory.postData({action : 4}, newLoc)
+                    .success(function(data, status, headers, config) {
+                        if ((typeof data === 'object') && (data !== null)){
+                            newLoc.id = data.id;
+                            if (typeof $scope.SWList.software[$scope.SWList.software.indexOf(sw)].locations == 'undefined')
+                                $scope.SWList.software[$scope.SWList.software.indexOf(sw)].locations = [];
+                            $scope.SWList.software[$scope.SWList.software.indexOf(sw)].locations.push(newLoc);
+                            $scope.formResponse = "Location has been added.";
+                        } else {
+                            $scope.formResponse = "Error: Can not add location! " + data;
+                        }
+                        console.dir(data);
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.formResponse = "Error: Could not add location! " + data;
+                        console.dir(data);
+                    });
+            };
+            $scope.deleteLocation = function(sw, location){
+                swFactory.postData({action : 5}, location)
+                    .success(function(data, status, headers, config) {
+                        if (data == 1){
+                            $scope.SWList.software[$scope.SWList.software.indexOf(sw)].locations.splice(
+                                $scope.SWList.software[$scope.SWList.software.indexOf(sw)].locations.indexOf(location),1
+                            );
+                            $scope.formResponse = "Location has been deleted.";
+                        } else {
+                            $scope.formResponse = "Error: Can not delete location! " + data;
+                        }
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.formResponse = "Error: Could not delete location! " + data;
+                    });
+            };
+
+            $scope.delLocNewSW = function(index){
+                $scope.newSW.locations.splice(index, 1);
+            };
+            $scope.addLocNewSW = function(){
+                var newLocation = {};
+                newLocation.lid = $scope.newSW.selLoc.lid;
+                newLocation.name = $scope.newSW.selLoc.name;
+                if (typeof $scope.newSW.locations == 'undefined')
+                    $scope.newSW.locations = [];
+                var isPresent = false;
+                for (var i = 0; i < $scope.newSW.locations.length; i++)
+                    if ($scope.newSW.locations[i].lid == newLocation.lid){
+                        isPresent = true;
+                        break;
+                    }
+                if (!isPresent)
+                    $scope.newSW.locations.push(newLocation);
+            };
+        }])
+
+    .directive('softwareManageList', function($animate) {
+        return {
+            restrict: 'A',
+            scope: {},
+            controller: 'manageSWCtrl',
+            link: function(scope, elm, attrs){
+                //Preload the spinner element
+                var spinner = angular.element('<div id="loading-bar-spinner"><div class="spinner-icon"></div></div>');
+                //Preload the location of the boxe's title element (needs to be more dynamic in the future)
+                var titleElm = elm.find('h2');
+                //Enter the spinner animation, appending it to the title element
+                $animate.enter(spinner, titleElm[0]);
+
+                var loadingWatcher = scope.$watch(
+                    'SWList.totalTime',
+                    function(newVal, oldVal){
+                        if (newVal != oldVal){
+                            $animate.leave(spinner);
+                            console.log("Software loaded");
+                        }
+                    },
+                    true
+                );
+            },
+            templateUrl: 'manageSoftware/manageSoftware.tpl.html'
+        };
+    })
+    .filter('startFrom', function() {
+        return function(input, start) {
+            start = +start; //parse to int
+            if (typeof input == 'undefined')
+                return input;
+            return input.slice(start);
+        }
+    })
+
 angular.module('manage.manageUserGroups', [])
     .controller('userGroupsCtrl', ['$scope', '$window', 'tokenFactory', 'ugFactory',
         function userGroupsCtrl($scope, $window, tokenFactory, ugFactory){
