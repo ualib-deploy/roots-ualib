@@ -32309,7 +32309,7 @@ angular.module("page/templates/page.tpl.html", []).run(["$templateCache", functi
     "<div class=\"row\" ng-cloak>\n" +
     "  <div class=\"col-md-9\" ng-transclude></div>\n" +
     "  <div class=\"col-md-3 page-section-menu\">\n" +
-    "    <div ui-scrollfix=\"-30\">\n" +
+    "    <div ui-scrollfix>\n" +
     "      <ul class=\"nav nav-pills nav-stacked\">\n" +
     "        <li ng-repeat=\"section in menu\" du-scrollspy=\"{{section.link}}\">\n" +
     "          <a ng-href=\"#{{section.link}}\" du-smooth-scroll>\n" +

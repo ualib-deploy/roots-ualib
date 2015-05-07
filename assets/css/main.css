@@ -9594,6 +9594,9 @@ a[href^="https"]:not(.source-link):after {
 .page-with-menu.loaded {
   opacity: 1;
 }
+.page-section-menu {
+  font-size: 17px;
+}
 /*# sourceMappingURL=/wp-content/themes/roots/assets/css/main.css.map */
 .scrollfix {
   position: fixed;
