@@ -4829,6 +4829,32 @@ tbody.collapse.in {
   position: relative;
   padding-right: 30px;
 }
+.dropdown .dropdown-toggle.btn-default::before,
+.dropdown .dropdown-toggle.btn-default::after {
+  background-color: #666666;
+}
+.dropdown .dropdown-toggle.btn-primary::before,
+.dropdown .dropdown-toggle.btn-primary::after,
+.dropdown .dropdown-toggle.comment-form input[type="submit"]::before,
+.dropdown .dropdown-toggle.comment-form input[type="submit"]::after {
+  background-color: #ffffff;
+}
+.dropdown .dropdown-toggle.btn-success::before,
+.dropdown .dropdown-toggle.btn-success::after {
+  background-color: #ffffff;
+}
+.dropdown .dropdown-toggle.btn-info::before,
+.dropdown .dropdown-toggle.btn-info::after {
+  background-color: #ffffff;
+}
+.dropdown .dropdown-toggle.btn-warning::before,
+.dropdown .dropdown-toggle.btn-warning::after {
+  background-color: #ffffff;
+}
+.dropdown .dropdown-toggle.btn-danger::before,
+.dropdown .dropdown-toggle.btn-danger::after {
+  background-color: #ffffff;
+}
 .dropdown .dropdown-toggle.icon-only::before,
 .dropdown .dropdown-toggle.icon-only::after {
   /* close icon */
@@ -4841,7 +4867,6 @@ tbody.collapse.in {
   margin-top: -1px;
   left: 50%;
   margin-left: -10px;
-  background: #777;
   opacity: 0;
   /* Force Hardware Acceleration in WebKit */
   -webkit-transform: translateZ(0);
@@ -4878,7 +4903,6 @@ tbody.collapse.in {
   -ms-transform-origin: 50% 50%;
   -o-transform-origin: 50% 50%;
   transform-origin: 50% 50%;
-  background: #777;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   -webkit-transition: width 0.3s, -webkit-transform 0.3s;
@@ -5595,6 +5619,9 @@ select[multiple].input-group-sm > .input-group-btn > .comment-form input[type="s
   margin-top: -1px;
   border-top-right-radius: 0;
   border-top-left-radius: 0;
+}
+.nav > li > a {
+  color: #993333;
 }
 .navbar {
   position: relative;
@@ -6346,14 +6373,10 @@ fieldset[disabled] .navbar-mega .btn-link:focus {
 .navbar-mega .navbar-nav > li > button:hover.dropdown-toggle::before,
 .navbar-mega .navbar-nav > li > a:focus.dropdown-toggle::before,
 .navbar-mega .navbar-nav > li > button:focus.dropdown-toggle::before,
-.navbar-mega .navbar-nav > li > a:active.dropdown-toggle::before,
-.navbar-mega .navbar-nav > li > button:active.dropdown-toggle::before,
 .navbar-mega .navbar-nav > li > a:hover.dropdown-toggle::after,
 .navbar-mega .navbar-nav > li > button:hover.dropdown-toggle::after,
 .navbar-mega .navbar-nav > li > a:focus.dropdown-toggle::after,
-.navbar-mega .navbar-nav > li > button:focus.dropdown-toggle::after,
-.navbar-mega .navbar-nav > li > a:active.dropdown-toggle::after,
-.navbar-mega .navbar-nav > li > button:active.dropdown-toggle::after {
+.navbar-mega .navbar-nav > li > button:focus.dropdown-toggle::after {
   background-color: #f9f9f9;
 }
 .navbar-mega .navbar-nav > li > a.dropdown-toggle::before,
@@ -6600,14 +6623,10 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
 .navbar-mega-inverse .navbar-nav > li > button:hover.dropdown-toggle::before,
 .navbar-mega-inverse .navbar-nav > li > a:focus.dropdown-toggle::before,
 .navbar-mega-inverse .navbar-nav > li > button:focus.dropdown-toggle::before,
-.navbar-mega-inverse .navbar-nav > li > a:active.dropdown-toggle::before,
-.navbar-mega-inverse .navbar-nav > li > button:active.dropdown-toggle::before,
 .navbar-mega-inverse .navbar-nav > li > a:hover.dropdown-toggle::after,
 .navbar-mega-inverse .navbar-nav > li > button:hover.dropdown-toggle::after,
 .navbar-mega-inverse .navbar-nav > li > a:focus.dropdown-toggle::after,
-.navbar-mega-inverse .navbar-nav > li > button:focus.dropdown-toggle::after,
-.navbar-mega-inverse .navbar-nav > li > a:active.dropdown-toggle::after,
-.navbar-mega-inverse .navbar-nav > li > button:active.dropdown-toggle::after {
+.navbar-mega-inverse .navbar-nav > li > button:focus.dropdown-toggle::after {
   background-color: #993333;
 }
 .navbar-mega-inverse .navbar-nav > li > a.dropdown-toggle::before,
