@@ -39256,8 +39256,8 @@ angular.module('manage.manageOneSearch', [])
         };
     })
 angular.module('manage.manageSoftware', ['ngFileUpload'])
-    .controller('manageSWCtrl', ['$scope', 'Upload', 'tokenFactory', 'swFactory', 'SOFTWARE_URL',
-        function manageSWCtrl($scope, Upload, tokenFactory, swFactory, appURL){
+    .controller('manageSWCtrl', ['$scope', '$timeout', 'Upload', 'tokenFactory', 'swFactory', 'SOFTWARE_URL',
+        function manageSWCtrl($scope, $timeout, Upload, tokenFactory, swFactory, appURL){
             $scope.SWList = {};
             $scope.titleFilter = '';
             $scope.descrFilter = '';
