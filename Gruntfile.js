@@ -14,6 +14,7 @@ module.exports = function(grunt) {
         '<%= bower.directory %>/angular-filter/dist/angular-filter.js',
         '<%= bower.directory %>/angular-ui-utils/ui-utils.js',
         '<%= bower.directory %>/ng-file-upload/ng-file-upload-all.js',
+        '<%= bower.directory %>/angular-scroll/angular-scroll.js',
         '<%= bower.directory %>/ualib-ui/dist/ualib-ui-templates.js',
         '<%= bower.directory %>/ualib-ui/dist/ualib-ui.js',
         '<%= bower.directory %>/onesearch/dist/onesearch-templates.js',
