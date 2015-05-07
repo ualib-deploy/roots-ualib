@@ -37748,17 +37748,22 @@ angular.module("manageSoftware/manageSoftware.tpl.html", []).run(["$templateCach
     "                        </li>\n" +
     "                    </ul>\n" +
     "                </div>\n" +
-    "                <div class=\"col-md-2 form-group\">\n" +
+    "                <div class=\"col-md-3 form-group\">\n" +
+    "                    <label for=\"{{sw.sid}}_icon\">Upload Icon</label>\n" +
+    "                    <input type=\"file\" ng-file-select=\"onFileSelect($files)\"\n" +
+    "                           id=\"{{sw.sid}}_icon\">\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{sw.sid}}_win\">Windows</label>\n" +
     "                    <input type=\"checkbox\" class=\"form-control\" ng-model=\"sw.os[0]\"\n" +
     "                           id=\"{{sw.sid}}_win\">\n" +
     "                </div>\n" +
-    "                <div class=\"col-md-2 form-group\">\n" +
+    "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{sw.sid}}_mac\">Apple Mac</label>\n" +
     "                    <input type=\"checkbox\" class=\"form-control\" ng-model=\"sw.os[1]\"\n" +
     "                           id=\"{{sw.sid}}_mac\">\n" +
     "                </div>\n" +
-    "                <div class=\"col-md-2 form-group\">\n" +
+    "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{sw.sid}}_unix\">Unix/Linux</label>\n" +
     "                    <input type=\"checkbox\" class=\"form-control\" ng-model=\"sw.os[2]\"\n" +
     "                           id=\"{{sw.sid}}_unix\">\n" +
@@ -37782,7 +37787,7 @@ angular.module("manageSoftware/manageSoftware.tpl.html", []).run(["$templateCach
     "</div>\n" +
     "\n" +
     "<h3>Add New Software</h3>\n" +
-    "<form ng-submit=\"createSW()\">\n" +
+    "<form name=\"addNewSW\" ng-submit=\"createSW()\">\n" +
     "    <div class=\"row sdOpen\">\n" +
     "        <div class=\"col-md-12\">\n" +
     "            <div class=\"col-md-6 form-group\">\n" +
@@ -37817,20 +37822,29 @@ angular.module("manageSoftware/manageSoftware.tpl.html", []).run(["$templateCach
     "                    </li>\n" +
     "                </ul>\n" +
     "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
+    "            <div class=\"col-md-1 form-group\">\n" +
     "                <label for=\"win\">Windows</label>\n" +
     "                <input type=\"checkbox\" class=\"form-control\" ng-model=\"newSW.os[0]\"\n" +
     "                       id=\"win\">\n" +
     "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
+    "            <div class=\"col-md-1 form-group\">\n" +
     "                <label for=\"mac\">Apple Mac</label>\n" +
     "                <input type=\"checkbox\" class=\"form-control\" ng-model=\"newSW.os[1]\"\n" +
     "                       id=\"mac\">\n" +
     "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
+    "            <div class=\"col-md-1 form-group\">\n" +
     "                <label for=\"unix\">Unix/Linux</label>\n" +
     "                <input type=\"checkbox\" class=\"form-control\" ng-model=\"newSW.os[2]\"\n" +
     "                       id=\"unix\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-3 form-group\">\n" +
+    "                <label for=\"up\">Upload Icon</label>\n" +
+    "                <input type=\"file\" ngf-select=\"\" ng-model=\"newSW.picFile\" accept=\"image/*\"\n" +
+    "                       ngf-change=\"generateThumb(newSW.picFile[0], $files)\" id=\"up\">\n" +
+    "                <img ng-show=\"newSW.picFile[0] != null\" ngf-src=\"newSW.picFile[0]\" class=\"thumb\">\n" +
+    "                <span class=\"progress\" ng-show=\"newSW.picFile[0].progress >= 0\">\n" +
+    "                    <div class=\"ng-binding\" style=\"width:{{newSW.picFile[0].progress}}%\" ng-bind=\"newSW.picFile[0].progress + '%'\"></div>\n" +
+    "                </span>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-12 text-center\">\n" +
     "                <button type=\"submit\" class=\"btn btn-primary\">Create Software Record</button>\n" +
@@ -39241,9 +39255,9 @@ angular.module('manage.manageOneSearch', [])
             templateUrl: 'manageOneSearch/manageOneSearch.tpl.html'
         };
     })
-angular.module('manage.manageSoftware', [])
-    .controller('manageSWCtrl', ['$scope', 'tokenFactory', 'swFactory',
-        function manageSWCtrl($scope, tokenFactory, swFactory){
+angular.module('manage.manageSoftware', ['ngFileUpload'])
+    .controller('manageSWCtrl', ['$scope', 'Upload', 'tokenFactory', 'swFactory', 'SOFTWARE_URL',
+        function manageSWCtrl($scope, Upload, tokenFactory, swFactory, appURL){
             $scope.SWList = {};
             $scope.titleFilter = '';
             $scope.descrFilter = '';
@@ -39257,6 +39271,9 @@ angular.module('manage.manageSoftware', [])
             $scope.mOver = 0;
             $scope.newSW = {};
             $scope.newSW.os = [];
+            $scope.newSW.os[0] = false;
+            $scope.newSW.os[1] = false;
+            $scope.newSW.os[2] = false;
             $scope.newSW.locations = [];
             $scope.currentPage = 1;
             $scope.maxPageSize = 10;
@@ -39310,12 +39327,10 @@ angular.module('manage.manageSoftware', [])
                             } else {
                                 $scope.formResponse = "Error: Can not delete software! " + data;
                             }
-                            alert($scope.formResponse);
                             console.log(data);
                         })
                         .error(function(data, status, headers, config) {
                             $scope.formResponse = "Error: Could not delete software! " + data;
-                            alert($scope.formResponse);
                             console.log(data);
                         });
                 }
@@ -39332,40 +39347,53 @@ angular.module('manage.manageSoftware', [])
                         } else {
                             $scope.formResponse = "Error: Can not update software! " + data;
                         }
-                        alert($scope.formResponse);
                         console.log(data);
                     })
                     .error(function(data, status, headers, config) {
                         $scope.formResponse = "Error: Could not update software! " + data;
-                        alert($scope.formResponse);
                         console.log(data);
                     });
             };
             $scope.createSW = function(){
                 console.dir($scope.newSW);
-                swFactory.postData({action : 3}, $scope.newSW)
-                    .success(function(data, status, headers, config) {
-                        if ((typeof data === 'object') && (data !== null)){
+                $scope.newSW.picFile.upload = Upload.upload({
+                    url: appURL + 'processData.php?action=3',
+                    method: 'POST',
+                    fields: {
+                        title: $scope.newSW.title,
+                        version: $scope.newSW.version,
+                        description: $scope.newSW.description,
+                        os: $scope.newSW.os,
+                        locations: $scope.newSW.locations
+                    },
+                    file: $scope.newSW.picFile,
+                    fileFormDataName: 'addNewSW'
+                });
+                $scope.newSW.picFile.upload.then(function(response) {
+                    $timeout(function() {
+                        if ((typeof response.data === 'object') && (response.data !== null)){
                             var newSW = {};
                             newSW = angular.copy($scope.newSW);
-                            newSW.sid = data.id;
-                            newSW.locations = angular.copy(data.locations);
+                            newSW.sid = response.data.id;
+                            newSW.locations = angular.copy(response.data.locations);
                             newSW.show = false;
                             newSW.class = "";
-                            newSW.selLoc = data.locations[0];
+                            newSW.selLoc = response.data.locations[0];
                             $scope.SWList.software.push(newSW);
                             $scope.formResponse = "Software has been added.";
                         } else {
                             $scope.formResponse = "Error: Can not add software! " + data;
                         }
-                        alert($scope.formResponse);
-                        console.dir(data);
-                    })
-                    .error(function(data, status, headers, config) {
-                        $scope.formResponse = "Error: Could not add software! " + data;
-                        alert($scope.formResponse);
-                        console.dir(data);
+                        console.dir(response.data);
                     });
+                }, function(response) {
+                    if (response.status > 0)
+                        $scope.formResponse = response.status + ': ' + response.data;
+                });
+                $scope.newSW.picFile.upload.progress(function(evt) {
+                    // Math.min is to fix IE which reports 200% sometimes
+                    $scope.newSW.picFile.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+                });
             };
 
             $scope.addLocation = function(sw){
@@ -39426,7 +39454,24 @@ angular.module('manage.manageSoftware', [])
                 if (!isPresent)
                     $scope.newSW.locations.push(newLocation);
             };
-        }])
+
+            $scope.generateThumb = function(file) {
+                if (file != null) {
+                    if ($scope.fileReaderSupported && file.type.indexOf('image') > -1) {
+                        $timeout(function() {
+                            var fileReader = new FileReader();
+                            fileReader.readAsDataURL(file);
+                            fileReader.onload = function(e) {
+                                $timeout(function() {
+                                    file.dataUrl = e.target.result;
+                                });
+                            }
+                        });
+                    }
+                }
+            };
+
+    }])
 
     .directive('softwareManageList', function($animate) {
         return {
