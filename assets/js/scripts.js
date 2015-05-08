@@ -39397,22 +39397,26 @@ angular.module("manageSoftware/manageSoftware.tpl.html", []).run(["$templateCach
     "        | startFrom:(currentPage-1)*perPage | limitTo:perPage\"\n" +
     "         ng-class=\"{sdOpen: sw.show, sdOver: sw.sid == mOver}\" ng-mouseover=\"setOver(sw)\">\n" +
     "        <div class=\"col-md-12\" ng-click=\"toggleSW(sw)\">\n" +
-    "            <div class=\"col-md-1\">\n" +
-    "                <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"sw.show\"></span>\n" +
-    "                <span class=\"fa fa-fw fa-caret-down\" ng-show=\"sw.show\"></span>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-2\">\n" +
-    "                <img ng-hide=\"sw.picFile[0] != null\" src=\"{{appURL}}icons/{{sw.sid}}.png\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
-    "                <img ng-show=\"sw.picFile[0] != null\" ngf-src=\"sw.picFile[0]\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-9\">\n" +
-    "                <h4>\n" +
-    "                    {{sw.title}}\n" +
-    "                </h4>\n" +
-    "            </div>\n" +
+    "            <table class=\"table\">\n" +
+    "                <tr>\n" +
+    "                    <td style=\"width: 15px;\">\n" +
+    "                        <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"sw.show\"></span>\n" +
+    "                        <span class=\"fa fa-fw fa-caret-down\" ng-show=\"sw.show\"></span>\n" +
+    "                    </td>\n" +
+    "                    <td style=\"width:64px\">\n" +
+    "                        <img ng-hide=\"sw.picFile[0] != null\" src=\"{{appURL}}icons/{{sw.sid}}.png\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
+    "                        <img ng-show=\"sw.picFile[0] != null\" ngf-src=\"sw.picFile[0]\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
+    "                    </td>\n" +
+    "                    <td>\n" +
+    "                        <h4>\n" +
+    "                            {{sw.title}}\n" +
+    "                        </h4>\n" +
+    "                    </td>\n" +
+    "                </tr>\n" +
+    "            </table>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-12\" ng-show=\"sw.show\">\n" +
-    "            <form ng-submit=\"updateSW(sw)\">\n" +
+    "            <form name=\"editSW{{sw.sid}}\" ng-submit=\"updateSW(sw)\">\n" +
     "                <div class=\"col-md-3 form-group\">\n" +
     "                    <label for=\"{{sw.sid}}_up\">Upload Icon</label>\n" +
     "                    <input type=\"file\" ngf-select=\"\" ng-model=\"sw.picFile\" accept=\"image/*\"\n" +
@@ -39523,18 +39527,18 @@ angular.module("manageSoftware/manageSoftware.tpl.html", []).run(["$templateCach
     "                <input type=\"file\" ngf-select=\"\" ng-model=\"newSW.picFile\" accept=\"image/*\"\n" +
     "                       ngf-change=\"generateThumb(newSW.picFile[0], $files)\" id=\"up\">\n" +
     "            </div>\n" +
-    "            <div class=\"col-md-6 form-group\">\n" +
-    "                <label for=\"title\">Title</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Software Title\" ng-model=\"newSW.title\"\n" +
-    "                       id=\"title\">\n" +
-    "            </div>\n" +
     "            <div class=\"col-md-3 form-group\">\n" +
     "                <label for=\"icon\">Icon</label>\n" +
     "                <span class=\"progress\" ng-show=\"newSW.picFile[0].progress >= 0\">\n" +
     "                    <div class=\"ng-binding\" style=\"width:{{newSW.picFile[0].progress}}%\" ng-bind=\"newSW.picFile[0].progress + '%'\"></div>\n" +
     "                </span>\n" +
     "                <img ng-show=\"newSW.picFile[0] != null\" ngf-src=\"newSW.picFile[0]\" class=\"thumb\" width=\"64px\" height=\"64px\"\n" +
-    "                       id=\"icon\">\n" +
+    "                     id=\"icon\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-6 form-group\">\n" +
+    "                <label for=\"title\">Title</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Software Title\" ng-model=\"newSW.title\"\n" +
+    "                       id=\"title\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-6 form-group\">\n" +
     "                <label for=\"descr\">Description</label>\n" +
@@ -41123,8 +41127,12 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                 });
                 sw.picFile.upload.then(function(response) {
                     $timeout(function() {
-                        if (response.data == 1){
-                            $scope.formResponse = "Software has been updated.";
+                        if ((typeof response.data === 'object') && (response.data !== null)){
+                            $scope.formResponse = "Software has been updated, ";
+                            if (response.data.iconUploaded)
+                                $scope.formResponse += "Icon uploaded.";
+                            else
+                                $scope.formResponse += "Icon has not changed.";
                         } else {
                             $scope.formResponse = "Error: Can not update software! " + response.data;
                         }
