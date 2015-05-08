@@ -41147,10 +41147,9 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                 }
             };
             $scope.updateSW = function(sw){
-                if (sw.title.length < 1){
-                    alert("Form error: Please fill out Title field!");
+                $scope.SWList.software[$scope.SWList.software.indexOf(sw)].formResponse = $scope.validateSW(sw);
+                if ($scope.SWList.software[$scope.SWList.software.indexOf(sw)].formResponse.length > 0)
                     return false;
-                }
                 if (typeof sw.picFile === 'undefined'){
                     swFactory.postData({action : 21}, sw)
                         .success(function(data, status, headers, config) {
@@ -41164,7 +41163,8 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                             console.log(data);
                         })
                         .error(function(data, status, headers, config) {
-                            $scope.formResponse = "Error: Could not delete software! " + data;
+                            $scope.SWList.software[$scope.SWList.software.indexOf(sw)].formResponse =
+                                "Error: Could not delete software! " + data;
                             console.log(data);
                         });
                 } else {
@@ -41202,9 +41202,12 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             };
             $scope.createSW = function(){
                 if (typeof $scope.newSW.picFile === 'undefined'){
-                    alert("Please select icon file (.png)!");
+                    $scope.newSW.formResponse = "Please select icon file (.png)!";
                     return false;
                 }
+                $scope.newSW.formResponse = $scope.validateSW($scope.newSW);
+                if ($scope.newSW.formResponse.length > 0)
+                    return false;
                 $scope.newSW.picFile.upload = Upload.upload({
                     url: appURL + 'processData.php?action=3',
                     method: 'POST',
@@ -41246,6 +41249,22 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                     // Math.min is to fix IE which reports 200% sometimes
                     $scope.newSW.picFile.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
                 });
+            };
+            $scope.validateSW = function(sw){
+                if (sw.title.length < 1)
+                    return "Form error: Please fill out Title!";
+                if (sw.description.length < 1)
+                    return "Form error: Please fill out Description!";
+                if (sw.details.length < 1)
+                    return "Form error: Please fill out Details!";
+                if (sw.versions.length < 1)
+                    return "Form error: Please add a version!";
+                if (sw.locations.length < 1)
+                    return "Form error: Please add a location!";
+                if (sw.links.length < 1)
+                    return "Form error: Please add a link!";
+
+                return "";
             };
 
             $scope.addVersion = function(sw){
