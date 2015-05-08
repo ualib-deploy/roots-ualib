@@ -41123,6 +41123,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                     fields: {
                         title: $scope.newSW.title,
                         description: $scope.newSW.description,
+                        details: $scope.newSW.details,
                         versions: $scope.newSW.versions,
                         locations: $scope.newSW.locations,
                         links: $scope.newSW.links
