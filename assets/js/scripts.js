@@ -30714,7 +30714,7 @@ angular.module('ui.utils',  [
 ;/**!
  * AngularJS file upload/drop directive and service with progress and abort
  * @author  Danial  <danial.farid@gmail.com>
- * @version 4.1.4
+ * @version 4.2.0
  */
 (function () {
 
@@ -30741,7 +30741,7 @@ if (window.XMLHttpRequest && !window.XMLHttpRequest.__isFileAPIShim) {
 
 var ngFileUpload = angular.module('ngFileUpload', []);
 
-ngFileUpload.version = '4.1.4';
+ngFileUpload.version = '4.2.0';
 ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, $timeout) {
     function sendHttp(config) {
         config.method = config.method || 'POST';
@@ -30909,6 +30909,9 @@ ngFileUpload.directive('ngfSelect', ['$parse', '$timeout', '$compile',
     }]);
 
 function linkFileSelect(scope, elem, attr, ngModel, $parse, $timeout, $compile) {
+	if (elem.attr('__ngf_gen__')) {
+		return;
+	}
     function isInputTypeFile() {
         return elem[0].tagName.toLowerCase() === 'input' && elem.attr('type') && elem.attr('type').toLowerCase() === 'file';
     }
@@ -30944,11 +30947,11 @@ function linkFileSelect(scope, elem, attr, ngModel, $parse, $timeout, $compile) 
         if (!$parse(attr.ngfMultiple)(scope)) fileElem.attr('multiple', undefined);
         if (attr['accept']) fileElem.attr('accept', attr['accept']);
         if (attr.ngfCapture) fileElem.attr('capture', $parse(attr.ngfCapture)(scope));
-        if (attr.ngfDisabled) fileElem.attr('disabled', $parse(attr.ngfDisabled)(scope));
-        var isInput = isInputTypeFile()
+//        if (attr.ngDisabled) fileElem.attr('disabled', $parse(attr.disabled)(scope));
         for (var i = 0; i < elem[0].attributes.length; i++) {
             var attribute = elem[0].attributes[i];
-            if (isInput || (attribute.name !== 'type' && attribute.name !== 'class' && 
+            if ((isInputTypeFile() && attribute.name !== 'type') 
+            		|| (attribute.name !== 'type' && attribute.name !== 'class' && 
             		attribute.name !== 'id' && attribute.name !== 'style')) {
             	fileElem.attr(attribute.name, attribute.value);
             }
@@ -30965,13 +30968,17 @@ function linkFileSelect(scope, elem, attr, ngModel, $parse, $timeout, $compile) 
         if (isInputTypeFile()) {
             elem.replaceWith(fileElem);
             elem = fileElem;
+            fileElem.attr('__ngf_gen__', true);
+            $compile(elem)(scope);
         } else {
-            fileElem.css('display', 'none').attr('tabindex', '-1').attr('__ngf_gen__', true);
+            fileElem.css('visibility', 'hidden').css('position', 'absolute')
+            		.css('width', '1').css('height', '1').css('z-index', '-100000')
+            		.attr('tabindex', '-1');
             if (elem.__ngf_ref_elem__) {elem.__ngf_ref_elem__.remove();}
             elem.__ngf_ref_elem__ = fileElem;
             document.body.appendChild(fileElem[0]);
         }
-
+        
         return fileElem;
     }
 
@@ -31004,7 +31011,6 @@ function linkFileSelect(scope, elem, attr, ngModel, $parse, $timeout, $compile) 
         	}
         }
     }
-
     if (window.FileAPI && window.FileAPI.ngfFixIE) {
         window.FileAPI.ngfFixIE(elem, createFileInput, bindAttrToFileInput, changeFn, resetModel);
     } else {
@@ -31059,11 +31065,10 @@ function linkDrop(scope, elem, attr, ngModel, $parse, $timeout, $location) {
     var stopPropagation = $parse(attr.ngfStopPropagation);
     var dragOverDelay = 1;
     var accept = $parse(attr.ngfAccept);
-    var disabled = $parse(attr.ngfDisabled);
     var actualDragOverClass;
 
     elem[0].addEventListener('dragover', function (evt) {
-        if (disabled(scope)) return;
+        if (elem.attr('disabled')) return;
         evt.preventDefault();
         if (stopPropagation(scope)) evt.stopPropagation();
         // handling dragover events from the Chrome download bar
@@ -31078,19 +31083,19 @@ function linkDrop(scope, elem, attr, ngModel, $parse, $timeout, $location) {
         elem.addClass(actualDragOverClass);
     }, false);
     elem[0].addEventListener('dragenter', function (evt) {
-        if (disabled(scope)) return;
+        if (elem.attr('disabled')) return;
         evt.preventDefault();
         if (stopPropagation(scope)) evt.stopPropagation();
     }, false);
     elem[0].addEventListener('dragleave', function () {
-        if (disabled(scope)) return;
+        if (elem.attr('disabled')) return;
         leaveTimeout = $timeout(function () {
             elem.removeClass(actualDragOverClass);
             actualDragOverClass = null;
         }, dragOverDelay || 1);
     }, false);
     elem[0].addEventListener('drop', function (evt) {
-        if (disabled(scope)) return;
+        if (elem.attr('disabled')) return;
         evt.preventDefault();
         if (stopPropagation(scope)) evt.stopPropagation();
         elem.removeClass(actualDragOverClass);
@@ -31222,24 +31227,27 @@ function linkDrop(scope, elem, attr, ngModel, $parse, $timeout, $location) {
     }
 }
 
-ngFileUpload.directive('ngfSrc', ['$parse', '$timeout', function ($parse, $timeout) {
+ngFileUpload.directive('ngfSrc', ['$parse', '$timeout', '$parse', function ($parse, $timeout, $parse) {
 	return {
 		restrict: 'AE',
 		link: function (scope, elem, attr, file) {
 			if (window.FileReader) {
 				scope.$watch(attr.ngfSrc, function(file) {
-					if (file) {
+					if (file &&
+							validate(scope, $parse, attr, file, null) &&
+							(!window.FileAPI || navigator.userAgent.indexOf('MSIE 8') === -1 || file.size < 20000) && 
+							(!window.FileAPI || navigator.userAgent.indexOf('MSIE 9') === -1 || file.size < 4000000)) {
 						$timeout(function() {
 							var fileReader = new FileReader();
 							fileReader.readAsDataURL(file);
 							fileReader.onload = function(e) {
 								$timeout(function() {
-									elem.attr('src', e.target.result);
+									elem.attr('src', e.target.result);										
 								});
 							}
 						});
 					} else {
-						elem.attr('src', '');
+						elem.attr('src', attr.ngfDefaultSrc || '');
 					}
 				});
 			}
@@ -31321,7 +31329,7 @@ function globStringToRegex(str) {
  * AngularJS file upload/drop directive and service with progress and abort
  * FileAPI Flash shim for old browsers not supporting FormData 
  * @author  Danial  <danial.farid@gmail.com>
- * @version 4.1.4
+ * @version 4.2.0
  */
 
 (function() {
@@ -31438,7 +31446,7 @@ if ((window.XMLHttpRequest && !window.FormData) || (window.FileAPI && FileAPI.fo
 						if (xhr.onreadystatechange) xhr.onreadystatechange();
 						if (xhr.onload) xhr.onload();
 					},
-					fileprogress: function(e) {
+					progress: function(e) {
 						e.target = xhr;
 						xhr.__listeners['progress'] && xhr.__listeners['progress'](e);
 						xhr.__total = e.total;
@@ -31579,7 +31587,8 @@ if ((window.XMLHttpRequest && !window.FormData) || (window.FileAPI && FileAPI.fo
 							.css('top', getOffset(elem[0]).top + 'px').css('left', getOffset(elem[0]).left + 'px')
 							.css('width', elem[0].offsetWidth + 'px').css('height', elem[0].offsetHeight + 'px')
 							.css('filter', 'alpha(opacity=0)').css('display', elem.css('display'))
-							.css('overflow', 'hidden').css('z-index', '900000');
+							.css('overflow', 'hidden').css('z-index', '900000')
+							.css('visibility', 'visible');
 				}
 			}
 			function getOffset(obj) {
@@ -39417,7 +39426,7 @@ angular.module("manageSoftware/manageSoftware.tpl.html", []).run(["$templateCach
     "        </div>\n" +
     "        <div class=\"col-md-12\" ng-show=\"sw.show\">\n" +
     "            <form name=\"editSW{{sw.sid}}\" ng-submit=\"updateSW(sw)\">\n" +
-    "                <div class=\"col-md-3 form-group\">\n" +
+    "                <div class=\"col-md-6 form-group\">\n" +
     "                    <label for=\"{{sw.sid}}_up\">Upload Icon</label>\n" +
     "                    <input type=\"file\" ngf-select=\"\" ng-model=\"sw.picFile\" accept=\"image/*\"\n" +
     "                           ngf-change=\"generateThumb(sw.picFile[0], $files)\" id=\"{{sw.sid}}_up\">\n" +
@@ -39438,11 +39447,13 @@ angular.module("manageSoftware/manageSoftware.tpl.html", []).run(["$templateCach
     "                    <label for=\"{{sw.sid}}_det\">Details (Get it)</label>\n" +
     "                    <textarea class=\"form-control\" rows=\"2\" id=\"{{sw.sid}}_det\" ng-model=\"sw.details\" ></textarea>\n" +
     "                </div>\n" +
-    "                <div class=\"col-md-6 form-group\">\n" +
+    "                <div class=\"col-md-4 form-group\">\n" +
     "                    <label for=\"{{sw.sid}}_ver\">Versions</label>\n" +
     "                    <ul class=\"list-group\" id=\"{{sw.sid}}_ver\">\n" +
     "                        <li class=\"list-group-item\" ng-repeat=\"version in sw.versions\">\n" +
-    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteVersion(sw,version)\">Delete</button>\n" +
+    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteVersion(sw,version)\">\n" +
+    "                                <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                            </button>\n" +
     "                            {{version.version}}\n" +
     "                            <span class=\"fa fa-fw fa-windows\" ng-show=\"version.os == 1\"></span>\n" +
     "                            <span class=\"fa fa-fw fa-apple\" ng-show=\"version.os == 2\"></span>\n" +
@@ -39452,39 +39463,47 @@ angular.module("manageSoftware/manageSoftware.tpl.html", []).run(["$templateCach
     "                            <div class=\"col-md-6\">\n" +
     "                                <input type=\"text\" class=\"form-control\" placeholder=\"Version\" ng-model=\"sw.newVer.version\">\n" +
     "                            </div>\n" +
-    "                            <div class=\"col-md-3\">\n" +
+    "                            <div class=\"col-md-4\">\n" +
     "                                <select class=\"form-control\" ng-model=\"sw.newVer.selOS\" ng-options=\"opSys.name for opSys in os\">\n" +
     "                                </select>\n" +
     "                            </div>\n" +
-    "                            <div class=\"col-md-3\">\n" +
-    "                                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addVersion(sw)\">Add Version</button>\n" +
+    "                            <div class=\"col-md-2\">\n" +
+    "                                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addVersion(sw)\">\n" +
+    "                                    <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "                                </button>\n" +
     "                            </div>\n" +
     "                        </li>\n" +
     "                    </ul>\n" +
     "                </div>\n" +
-    "                <div class=\"col-md-6 form-group\">\n" +
+    "                <div class=\"col-md-4 form-group\">\n" +
     "                    <label for=\"{{sw.sid}}_loc\">Locations</label>\n" +
     "                    <ul class=\"list-group\" id=\"{{sw.sid}}_loc\">\n" +
     "                        <li class=\"list-group-item\" ng-repeat=\"location in sw.locations\">\n" +
-    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteLocation(sw,location)\">Delete</button>\n" +
+    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteLocation(sw,location)\">\n" +
+    "                                <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                            </button>\n" +
     "                            {{location.name}}\n" +
     "                        </li>\n" +
     "                        <li class=\"list-group-item col-md-12\">\n" +
-    "                            <div class=\"col-md-9\">\n" +
+    "                            <div class=\"col-md-10\">\n" +
     "                                <select class=\"form-control\" ng-model=\"sw.selLoc\" ng-options=\"loc.name for loc in SWList.locations\">\n" +
     "                                </select>\n" +
     "                            </div>\n" +
-    "                            <div class=\"col-md-3\">\n" +
-    "                                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addLocation(sw)\">Add Location</button>\n" +
+    "                            <div class=\"col-md-2\">\n" +
+    "                                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addLocation(sw)\">\n" +
+    "                                    <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "                                </button>\n" +
     "                            </div>\n" +
     "                        </li>\n" +
     "                    </ul>\n" +
     "                </div>\n" +
-    "                <div class=\"col-md-6 form-group\">\n" +
+    "                <div class=\"col-md-4 form-group\">\n" +
     "                    <label for=\"{{sw.sid}}_links\">Links (Use it)</label>\n" +
     "                    <ul class=\"list-group\" id=\"{{sw.sid}}_links\">\n" +
     "                        <li class=\"list-group-item\" ng-repeat=\"link in sw.links\">\n" +
-    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteLink(sw,link)\">Delete</button>\n" +
+    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteLink(sw,link)\">\n" +
+    "                                <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                            </button>\n" +
     "                            <a href=\"{{link.url}}\">{{link.title}}</a>\n" +
     "                        </li>\n" +
     "                        <li class=\"list-group-item col-md-12\">\n" +
@@ -39495,7 +39514,9 @@ angular.module("manageSoftware/manageSoftware.tpl.html", []).run(["$templateCach
     "                                <input type=\"text\" class=\"form-control\" placeholder=\"http://www.example.com/\" ng-model=\"sw.newLink.url\">\n" +
     "                            </div>\n" +
     "                            <div class=\"col-md-2\">\n" +
-    "                                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addLink(sw)\">Add Link</button>\n" +
+    "                                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addLink(sw)\">\n" +
+    "                                    <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "                                </button>\n" +
     "                            </div>\n" +
     "                        </li>\n" +
     "                    </ul>\n" +
@@ -39505,6 +39526,7 @@ angular.module("manageSoftware/manageSoftware.tpl.html", []).run(["$templateCach
     "                    <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteSW(sw)\">\n" +
     "                        Delete {{sw.title}} software\n" +
     "                    </button>\n" +
+    "                    {{sw.formResponse}}\n" +
     "                </div>\n" +
     "            </form>\n" +
     "        </div>\n" +
@@ -39548,11 +39570,13 @@ angular.module("manageSoftware/manageSoftware.tpl.html", []).run(["$templateCach
     "                <label for=\"det\">Details (Get it)</label>\n" +
     "                <textarea class=\"form-control\" rows=\"2\" id=\"det\" ng-model=\"newSW.details\" ></textarea>\n" +
     "            </div>\n" +
-    "            <div class=\"col-md-6 form-group\">\n" +
+    "            <div class=\"col-md-4 form-group\">\n" +
     "                <label for=\"ver\">Versions</label>\n" +
     "                <ul class=\"list-group\" id=\"ver\">\n" +
     "                    <li class=\"list-group-item\" ng-repeat=\"version in newSW.versions\">\n" +
-    "                        <button type=\"button\" class=\"btn btn-primary\" ng-click=\"delNewSWVer(version)\">Delete</button>\n" +
+    "                        <button type=\"button\" class=\"btn btn-primary\" ng-click=\"delNewSWVer(version)\">\n" +
+    "                            <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                        </button>\n" +
     "                        {{version.version}}\n" +
     "                        <span class=\"fa fa-fw fa-windows\" ng-show=\"version.os == 1\"></span>\n" +
     "                        <span class=\"fa fa-fw fa-apple\" ng-show=\"version.os == 2\"></span>\n" +
@@ -39562,39 +39586,47 @@ angular.module("manageSoftware/manageSoftware.tpl.html", []).run(["$templateCach
     "                        <div class=\"col-md-6\">\n" +
     "                            <input type=\"text\" class=\"form-control\" placeholder=\"Version\" ng-model=\"newSW.newVer.version\">\n" +
     "                        </div>\n" +
-    "                        <div class=\"col-md-3\">\n" +
+    "                        <div class=\"col-md-4\">\n" +
     "                            <select class=\"form-control\" ng-model=\"newSW.newVer.selOS\" ng-options=\"opSys.name for opSys in os\">\n" +
     "                            </select>\n" +
     "                        </div>\n" +
-    "                        <div class=\"col-md-3\">\n" +
-    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addNewSWVer()\">Add Version</button>\n" +
+    "                        <div class=\"col-md-2\">\n" +
+    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addNewSWVer()\">\n" +
+    "                                <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "                            </button>\n" +
     "                        </div>\n" +
     "                    </li>\n" +
     "                </ul>\n" +
     "            </div>\n" +
-    "            <div class=\"col-md-6 form-group\">\n" +
+    "            <div class=\"col-md-4 form-group\">\n" +
     "                <label for=\"loc\">Locations</label>\n" +
     "                <ul class=\"list-group\" id=\"loc\">\n" +
     "                    <li class=\"list-group-item\" ng-repeat=\"location in newSW.locations\">\n" +
-    "                        <button type=\"button\" class=\"btn btn-primary\" ng-click=\"delNewSWLoc(location)\">Delete</button>\n" +
+    "                        <button type=\"button\" class=\"btn btn-primary\" ng-click=\"delNewSWLoc(location)\">\n" +
+    "                            <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                        </button>\n" +
     "                        {{location.name}}\n" +
     "                    </li>\n" +
     "                    <li class=\"list-group-item col-md-12\">\n" +
-    "                        <div class=\"col-md-9\">\n" +
+    "                        <div class=\"col-md-10\">\n" +
     "                            <select class=\"form-control\" ng-model=\"newSW.selLoc\" ng-options=\"loc.name for loc in SWList.locations\">\n" +
     "                            </select>\n" +
     "                        </div>\n" +
-    "                        <div class=\"col-md-3\">\n" +
-    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addNewSWLoc()\">Add Location</button>\n" +
+    "                        <div class=\"col-md-2\">\n" +
+    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addNewSWLoc()\">\n" +
+    "                                <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "                            </button>\n" +
     "                        </div>\n" +
     "                    </li>\n" +
     "                </ul>\n" +
     "            </div>\n" +
-    "            <div class=\"col-md-6 form-group\">\n" +
+    "            <div class=\"col-md-4 form-group\">\n" +
     "                <label for=\"links\">Links (Use it)</label>\n" +
     "                <ul class=\"list-group\" id=\"links\">\n" +
     "                    <li class=\"list-group-item\" ng-repeat=\"link in newSW.links\">\n" +
-    "                        <button type=\"button\" class=\"btn btn-primary\" ng-click=\"delNewSWLink(link)\">Delete</button>\n" +
+    "                        <button type=\"button\" class=\"btn btn-primary\" ng-click=\"delNewSWLink(link)\">\n" +
+    "                            <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                        </button>\n" +
     "                        <a href=\"{{link.url}}\">{{link.title}}</a>\n" +
     "                    </li>\n" +
     "                    <li class=\"list-group-item col-md-12\">\n" +
@@ -39605,13 +39637,16 @@ angular.module("manageSoftware/manageSoftware.tpl.html", []).run(["$templateCach
     "                            <input type=\"text\" class=\"form-control\" placeholder=\"http://www.example.com/\" ng-model=\"newSW.newLink.url\">\n" +
     "                        </div>\n" +
     "                        <div class=\"col-md-2\">\n" +
-    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addNewSWLink()\">Add Link</button>\n" +
+    "                            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"addNewSWLink()\">\n" +
+    "                                <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "                            </button>\n" +
     "                        </div>\n" +
     "                    </li>\n" +
     "                </ul>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-12 text-center\">\n" +
     "                <button type=\"submit\" class=\"btn btn-primary\">Create Software Record</button>\n" +
+    "                {{newSW.formResponse}}\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
@@ -41116,38 +41151,60 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                     alert("Form error: Please fill out Title field!");
                     return false;
                 }
-                sw.picFile.upload = Upload.upload({
-                    url: appURL + 'processData.php?action=2',
-                    method: 'POST',
-                    fields: {
-                        sw: sw
-                    },
-                    file: sw.picFile,
-                    fileFormDataName: 'editSW' + sw.sid
-                });
-                sw.picFile.upload.then(function(response) {
-                    $timeout(function() {
-                        if ((typeof response.data === 'object') && (response.data !== null)){
-                            $scope.formResponse = "Software has been updated, ";
-                            if (response.data.iconUploaded)
-                                $scope.formResponse += "Icon uploaded.";
-                            else
-                                $scope.formResponse += "Icon has not changed.";
-                        } else {
-                            $scope.formResponse = "Error: Can not update software! " + response.data;
-                        }
-                        console.log(response.data);
+                if (typeof sw.picFile === 'undefined'){
+                    swFactory.postData({action : 21}, sw)
+                        .success(function(data, status, headers, config) {
+                            if ((typeof data === 'object') && (data !== null)){
+                                $scope.SWList.software[$scope.SWList.software.indexOf(sw)].formResponse =
+                                    "Software has been updated, Icon has not changed.";
+                            } else {
+                                $scope.SWList.software[$scope.SWList.software.indexOf(sw)].formResponse =
+                                    "Error: Can not update software! " + data;
+                            }
+                            console.log(data);
+                        })
+                        .error(function(data, status, headers, config) {
+                            $scope.formResponse = "Error: Could not delete software! " + data;
+                            console.log(data);
+                        });
+                } else {
+                    sw.picFile.upload = Upload.upload({
+                        url: appURL + 'processData.php?action=2',
+                        method: 'POST',
+                        fields: {
+                            sw: sw
+                        },
+                        file: sw.picFile,
+                        fileFormDataName: 'editSW' + sw.sid
                     });
-                }, function(response) {
-                    if (response.status > 0)
-                        $scope.formResponse = response.status + ': ' + response.data;
-                });
-                sw.picFile.upload.progress(function(evt) {
-                    // Math.min is to fix IE which reports 200% sometimes
-                    sw.picFile.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
-                });
+                    sw.picFile.upload.then(function(response) {
+                        $timeout(function() {
+                            if ((typeof response.data === 'object') && (response.data !== null)){
+                                $scope.SWList.software[$scope.SWList.software.indexOf(sw)].formResponse = "Software has been updated, ";
+                                if (response.data.iconUploaded)
+                                    $scope.SWList.software[$scope.SWList.software.indexOf(sw)].formResponse += "Icon uploaded.";
+                                else
+                                    $scope.SWList.software[$scope.SWList.software.indexOf(sw)].formResponse += "Icon has not changed.";
+                            } else {
+                                $scope.SWList.software[$scope.SWList.software.indexOf(sw)].formResponse = "Error: Can not update software! " + response.data;
+                            }
+                            console.log(response.data);
+                        });
+                    }, function(response) {
+                        if (response.status > 0)
+                            $scope.SWList.software[$scope.SWList.software.indexOf(sw)].formResponse = response.status + ': ' + response.data;
+                    });
+                    sw.picFile.upload.progress(function(evt) {
+                        // Math.min is to fix IE which reports 200% sometimes
+                        sw.picFile.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+                    });
+                }
             };
             $scope.createSW = function(){
+                if (typeof $scope.newSW.picFile === 'undefined'){
+                    alert("Please select icon file (.png)!");
+                    return false;
+                }
                 $scope.newSW.picFile.upload = Upload.upload({
                     url: appURL + 'processData.php?action=3',
                     method: 'POST',
@@ -41175,15 +41232,15 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                             newSW.newVer.selOS = $scope.os[0];
                             newSW.newLink = {};
                             $scope.SWList.software.push(newSW);
-                            $scope.formResponse = "Software has been added.";
+                            $scope.newSW.formResponse = "Software has been added.";
                         } else {
-                            $scope.formResponse = "Error: Can not add software! " + response.data;
+                            $scope.newSW.formResponse = "Error: Can not add software! " + response.data;
                         }
                         console.dir(response.data);
                     });
                 }, function(response) {
                     if (response.status > 0)
-                        $scope.formResponse = response.status + ': ' + response.data;
+                        $scope.newSW.formResponse = response.status + ': ' + response.data;
                 });
                 $scope.newSW.picFile.upload.progress(function(evt) {
                     // Math.min is to fix IE which reports 200% sometimes
