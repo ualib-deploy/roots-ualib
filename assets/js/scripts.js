@@ -39397,13 +39397,19 @@ angular.module("manageSoftware/manageSoftware.tpl.html", []).run(["$templateCach
     "        | startFrom:(currentPage-1)*perPage | limitTo:perPage\"\n" +
     "         ng-class=\"{sdOpen: sw.show, sdOver: sw.sid == mOver}\" ng-mouseover=\"setOver(sw)\">\n" +
     "        <div class=\"col-md-12\" ng-click=\"toggleSW(sw)\">\n" +
-    "            <h4>\n" +
+    "            <div class=\"col-md-1\">\n" +
     "                <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"sw.show\"></span>\n" +
     "                <span class=\"fa fa-fw fa-caret-down\" ng-show=\"sw.show\"></span>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2\">\n" +
     "                <img ng-hide=\"sw.picFile[0] != null\" src=\"{{appURL}}icons/{{sw.sid}}.png\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
     "                <img ng-show=\"sw.picFile[0] != null\" ngf-src=\"sw.picFile[0]\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
-    "                {{sw.title}}\n" +
-    "            </h4>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-9\">\n" +
+    "                <h4>\n" +
+    "                    {{sw.title}}\n" +
+    "                </h4>\n" +
+    "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-12\" ng-show=\"sw.show\">\n" +
     "            <form ng-submit=\"updateSW(sw)\">\n" +
@@ -39514,17 +39520,21 @@ angular.module("manageSoftware/manageSoftware.tpl.html", []).run(["$templateCach
     "        <div class=\"col-md-12\">\n" +
     "            <div class=\"col-md-3 form-group\">\n" +
     "                <label for=\"up\">Upload Icon</label>\n" +
-    "                <img ng-show=\"newSW.picFile[0] != null\" ngf-src=\"newSW.picFile[0]\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
     "                <input type=\"file\" ngf-select=\"\" ng-model=\"newSW.picFile\" accept=\"image/*\"\n" +
     "                       ngf-change=\"generateThumb(newSW.picFile[0], $files)\" id=\"up\">\n" +
-    "                <span class=\"progress\" ng-show=\"newSW.picFile[0].progress >= 0\">\n" +
-    "                    <div class=\"ng-binding\" style=\"width:{{newSW.picFile[0].progress}}%\" ng-bind=\"newSW.picFile[0].progress + '%'\"></div>\n" +
-    "                </span>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-6 form-group\">\n" +
     "                <label for=\"title\">Title</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Software Title\" ng-model=\"newSW.title\"\n" +
     "                       id=\"title\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-3 form-group\">\n" +
+    "                <label for=\"icon\">Icon</label>\n" +
+    "                <span class=\"progress\" ng-show=\"newSW.picFile[0].progress >= 0\">\n" +
+    "                    <div class=\"ng-binding\" style=\"width:{{newSW.picFile[0].progress}}%\" ng-bind=\"newSW.picFile[0].progress + '%'\"></div>\n" +
+    "                </span>\n" +
+    "                <img ng-show=\"newSW.picFile[0] != null\" ngf-src=\"newSW.picFile[0]\" class=\"thumb\" width=\"64px\" height=\"64px\"\n" +
+    "                       id=\"icon\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-6 form-group\">\n" +
     "                <label for=\"descr\">Description</label>\n" +
@@ -41102,19 +41112,32 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                     alert("Form error: Please fill out Title field!");
                     return false;
                 }
-                swFactory.postData({action : 2}, sw)
-                    .success(function(data, status, headers, config) {
-                        if (data == 1){
+                sw.picFile.upload = Upload.upload({
+                    url: appURL + 'processData.php?action=2',
+                    method: 'POST',
+                    fields: {
+                        sw: sw
+                    },
+                    file: sw.picFile,
+                    fileFormDataName: 'editSW' + sw.sid
+                });
+                sw.picFile.upload.then(function(response) {
+                    $timeout(function() {
+                        if (response.data == 1){
                             $scope.formResponse = "Software has been updated.";
                         } else {
-                            $scope.formResponse = "Error: Can not update software! " + data;
+                            $scope.formResponse = "Error: Can not update software! " + response.data;
                         }
-                        console.log(data);
-                    })
-                    .error(function(data, status, headers, config) {
-                        $scope.formResponse = "Error: Could not update software! " + data;
-                        console.log(data);
+                        console.log(response.data);
                     });
+                }, function(response) {
+                    if (response.status > 0)
+                        $scope.formResponse = response.status + ': ' + response.data;
+                });
+                sw.picFile.upload.progress(function(evt) {
+                    // Math.min is to fix IE which reports 200% sometimes
+                    sw.picFile.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+                });
             };
             $scope.createSW = function(){
                 $scope.newSW.picFile.upload = Upload.upload({
@@ -41130,8 +41153,10 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                     $timeout(function() {
                         if ((typeof response.data === 'object') && (response.data !== null)){
                             var newSW = {};
-                            newSW = angular.copy($scope.newSW);
                             newSW.sid = response.data.id;
+                            newSW.title = $scope.newSW.title;
+                            newSW.description = $scope.newSW.description;
+                            newSW.details = $scope.newSW.details;
                             newSW.versions = angular.copy(response.data.versions);
                             newSW.links = angular.copy(response.data.links);
                             newSW.locations = angular.copy(response.data.locations);
@@ -41144,9 +41169,9 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                             $scope.SWList.software.push(newSW);
                             $scope.formResponse = "Software has been added.";
                         } else {
-                            $scope.formResponse = "Error: Can not add software! " + data;
+                            $scope.formResponse = "Error: Can not add software! " + response.data;
                         }
-                        console.dir(response);
+                        console.dir(response.data);
                     });
                 }, function(response) {
                     if (response.status > 0)
@@ -41159,20 +41184,22 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             };
 
             $scope.addVersion = function(sw){
-                var newVer = {};
-                newVer.vid = -1;
-                newVer.sid = sw.sid;
-                newVer.version = sw.newVer.version;
-                newVer.os = sw.newVer.selOS.value;
-                var isPresent = false;
-                for (var i = 0; i < sw.versions.length; i++)
-                    if (sw.versions[i].version === newVer.version &&
-                        sw.versions[i].os === newVer.os){
-                        isPresent = true;
-                        break;
-                    }
-                if (!isPresent)
-                    $scope.SWList.software[$scope.SWList.software.indexOf(sw)].versions.push(newVer);
+                if (sw.newVer.version.length > 0){
+                    var newVer = {};
+                    newVer.vid = -1;
+                    newVer.sid = sw.sid;
+                    newVer.version = sw.newVer.version;
+                    newVer.os = sw.newVer.selOS.value;
+                    var isPresent = false;
+                    for (var i = 0; i < sw.versions.length; i++)
+                        if (sw.versions[i].version === newVer.version &&
+                            sw.versions[i].os === newVer.os){
+                            isPresent = true;
+                            break;
+                        }
+                    if (!isPresent)
+                        $scope.SWList.software[$scope.SWList.software.indexOf(sw)].versions.push(newVer);
+                }
             };
             $scope.deleteVersion = function(sw, version){
                 $scope.SWList.software[$scope.SWList.software.indexOf(sw)].versions.splice(
@@ -41199,20 +41226,22 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                 );
             };
             $scope.addLink = function(sw){
-                var newLink = {};
-                newLink.linkid = -1;
-                newLink.sid = sw.sid;
-                newLink.title = sw.newLink.title;
-                newLink.url = sw.newLink.url;
-                var isPresent = false;
-                for (var i = 0; i < sw.links.length; i++)
-                    if (sw.links[i].title === newLink.title &&
-                        sw.links[i].url === newLink.url){
-                        isPresent = true;
-                        break;
-                    }
-                if (!isPresent)
-                    $scope.SWList.software[$scope.SWList.software.indexOf(sw)].links.push(newLink);
+                if (sw.newLink.title.length > 0 && sw.newLink.url.length > 11){
+                    var newLink = {};
+                    newLink.linkid = -1;
+                    newLink.sid = sw.sid;
+                    newLink.title = sw.newLink.title;
+                    newLink.url = sw.newLink.url;
+                    var isPresent = false;
+                    for (var i = 0; i < sw.links.length; i++)
+                        if (sw.links[i].title === newLink.title &&
+                            sw.links[i].url === newLink.url){
+                            isPresent = true;
+                            break;
+                        }
+                    if (!isPresent)
+                        $scope.SWList.software[$scope.SWList.software.indexOf(sw)].links.push(newLink);
+                }
             };
             $scope.deleteLink = function(sw, link){
                 $scope.SWList.software[$scope.SWList.software.indexOf(sw)].links.splice(
@@ -41230,18 +41259,20 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                 $scope.newSW.links.splice($scope.newSW.links.indexOf(link), 1);
             };
             $scope.addNewSWVer = function(){
-                var newVersion = {};
-                newVersion.version = $scope.newSW.newVer.version;
-                newVersion.os = $scope.newSW.newVer.selOS.value;
-                var isPresent = false;
-                for (var i = 0; i < $scope.newSW.versions.length; i++)
-                    if ($scope.newSW.versions[i].version == newVersion.version &&
-                        $scope.newSW.versions[i].os == newVersion.os){
-                        isPresent = true;
-                        break;
-                    }
-                if (!isPresent)
-                    $scope.newSW.versions.push(newVersion);
+                if ($scope.newSW.newVer.version.length > 0){
+                    var newVersion = {};
+                    newVersion.version = $scope.newSW.newVer.version;
+                    newVersion.os = $scope.newSW.newVer.selOS.value;
+                    var isPresent = false;
+                    for (var i = 0; i < $scope.newSW.versions.length; i++)
+                        if ($scope.newSW.versions[i].version == newVersion.version &&
+                            $scope.newSW.versions[i].os == newVersion.os){
+                            isPresent = true;
+                            break;
+                        }
+                    if (!isPresent)
+                        $scope.newSW.versions.push(newVersion);
+                }
             };
             $scope.addNewSWLoc = function(){
                 var newLocation = {};
@@ -41257,18 +41288,20 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                     $scope.newSW.locations.push(newLocation);
             };
             $scope.addNewSWLink = function(){
-                var newLink = {};
-                newLink.title = $scope.newSW.newLink.title;
-                newLink.url = $scope.newSW.newLink.url;
-                var isPresent = false;
-                for (var i = 0; i < $scope.newSW.links.length; i++)
-                    if ($scope.newSW.links[i].title == newLink.title &&
-                        $scope.newSW.links[i].url == newLink.url){
-                        isPresent = true;
-                        break;
-                    }
-                if (!isPresent)
-                    $scope.newSW.links.push(newLink);
+                if ($scope.newSW.newLink.title.length > 0 && $scope.newSW.newLink.url.length > 11){
+                    var newLink = {};
+                    newLink.title = $scope.newSW.newLink.title;
+                    newLink.url = $scope.newSW.newLink.url;
+                    var isPresent = false;
+                    for (var i = 0; i < $scope.newSW.links.length; i++)
+                        if ($scope.newSW.links[i].title == newLink.title &&
+                            $scope.newSW.links[i].url == newLink.url){
+                            isPresent = true;
+                            break;
+                        }
+                    if (!isPresent)
+                        $scope.newSW.links.push(newLink);
+                }
             };
 
             $scope.generateThumb = function(file) {
