@@ -41121,12 +41121,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                     url: appURL + 'processData.php?action=3',
                     method: 'POST',
                     fields: {
-                        title: $scope.newSW.title,
-                        description: $scope.newSW.description,
-                        details: $scope.newSW.details,
-                        versions: $scope.newSW.versions,
-                        locations: $scope.newSW.locations,
-                        links: $scope.newSW.links
+                        sw: $scope.newSW
                     },
                     file: $scope.newSW.picFile,
                     fileFormDataName: 'addNewSW'
