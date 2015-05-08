@@ -39400,7 +39400,8 @@ angular.module("manageSoftware/manageSoftware.tpl.html", []).run(["$templateCach
     "            <h4>\n" +
     "                <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"sw.show\"></span>\n" +
     "                <span class=\"fa fa-fw fa-caret-down\" ng-show=\"sw.show\"></span>\n" +
-    "                <img ng-show=\"sw.picFile[0] != null\" ngf-src=\"sw.picFile[0]\" class=\"thumb\">\n" +
+    "                <img ng-hide=\"sw.picFile[0] != null\" src=\"{{appURL}}icons/{{sw.sid}}.png\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
+    "                <img ng-show=\"sw.picFile[0] != null\" ngf-src=\"sw.picFile[0]\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
     "                {{sw.title}}\n" +
     "            </h4>\n" +
     "        </div>\n" +
@@ -39513,11 +39514,12 @@ angular.module("manageSoftware/manageSoftware.tpl.html", []).run(["$templateCach
     "        <div class=\"col-md-12\">\n" +
     "            <div class=\"col-md-3 form-group\">\n" +
     "                <label for=\"up\">Upload Icon</label>\n" +
+    "                <img ng-show=\"newSW.picFile[0] != null\" ngf-src=\"newSW.picFile[0]\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
     "                <input type=\"file\" ngf-select=\"\" ng-model=\"newSW.picFile\" accept=\"image/*\"\n" +
     "                       ngf-change=\"generateThumb(newSW.picFile[0], $files)\" id=\"up\">\n" +
-    "                    <span class=\"progress\" ng-show=\"newSW.picFile[0].progress >= 0\">\n" +
-    "                        <div class=\"ng-binding\" style=\"width:{{newSW.picFile[0].progress}}%\" ng-bind=\"newSW.picFile[0].progress + '%'\"></div>\n" +
-    "                    </span>\n" +
+    "                <span class=\"progress\" ng-show=\"newSW.picFile[0].progress >= 0\">\n" +
+    "                    <div class=\"ng-binding\" style=\"width:{{newSW.picFile[0].progress}}%\" ng-bind=\"newSW.picFile[0].progress + '%'\"></div>\n" +
+    "                </span>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-6 form-group\">\n" +
     "                <label for=\"title\">Title</label>\n" +
@@ -41022,6 +41024,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                 {name:'Apple Mac', value:2},
                 {name:'Unix/Lunix', value:3}
             ];
+            $scope.appURL = appURL;
 
             $scope.newSW = {};
             $scope.newSW.versions = [];
@@ -41114,7 +41117,6 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                     });
             };
             $scope.createSW = function(){
-                console.dir($scope.newSW);
                 $scope.newSW.picFile.upload = Upload.upload({
                     url: appURL + 'processData.php?action=3',
                     method: 'POST',
@@ -41134,10 +41136,15 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                             var newSW = {};
                             newSW = angular.copy($scope.newSW);
                             newSW.sid = response.data.id;
+                            newSW.versions = angular.copy(response.data.versions);
+                            newSW.links = angular.copy(response.data.links);
                             newSW.locations = angular.copy(response.data.locations);
                             newSW.show = false;
                             newSW.class = "";
                             newSW.selLoc = response.data.locations[0];
+                            newSW.newVer = {};
+                            newSW.newVer.selOS = $scope.os[0];
+                            newSW.newLink = {};
                             $scope.SWList.software.push(newSW);
                             $scope.formResponse = "Software has been added.";
                         } else {
