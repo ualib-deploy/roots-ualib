@@ -39762,7 +39762,12 @@ angular.module("manageSoftware/manageSoftwareLocCat.tpl.html", []).run(["$templa
     "                    {{location.lid}}\n" +
     "                </td>\n" +
     "                <td>\n" +
-    "                    {{location.name}}\n" +
+    "                    <span ng-hide=\"selLocation == location.lid\">\n" +
+    "                        {{location.name}}\n" +
+    "                    </span>\n" +
+    "                    <span ng-show=\"selLocation == location.lid\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Location Name\" ng-model=\"location.name\">\n" +
+    "                    </span>\n" +
     "                </td>\n" +
     "                <td>\n" +
     "                    <div ng-show=\"selLocation == location.lid\">\n" +
@@ -39805,7 +39810,12 @@ angular.module("manageSoftware/manageSoftwareLocCat.tpl.html", []).run(["$templa
     "                    {{category.cid}}\n" +
     "                </td>\n" +
     "                <td>\n" +
-    "                    {{category.name}}\n" +
+    "                    <span ng-hide=\"selCategory == category.cid\">\n" +
+    "                        {{category.name}}\n" +
+    "                    </span>\n" +
+    "                    <span ng-show=\"selCategory == category.cid\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Category Name\" ng-model=\"category.name\">\n" +
+    "                    </span>\n" +
     "                </td>\n" +
     "                <td>\n" +
     "                    <div ng-show=\"selCategory == category.cid\">\n" +
