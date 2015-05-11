@@ -22,6 +22,9 @@ function ualib_scripts() {
 remove_filter('the_content', 'wpautop');
 remove_filter('the_excerpt', 'wpautop');
 
+//disable tinyMCE visual editor for all users
+//add_filter('user_can_richedit' , create_function('' , 'return false;') , 50);
+
 add_action('init', 'ualib_child_startSession', 1);
 add_action('wp_logout', 'ualib_child_endSession');
 add_action('wp_login', 'ualib_child_endSession');
