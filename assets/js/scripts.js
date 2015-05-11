@@ -39166,6 +39166,7 @@ angular.module("manageHours/manageLoc.tpl.html", []).run(["$templateCache", func
 
 angular.module("manageHours/manageSem.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageHours/manageSem.tpl.html",
+    "<p><strong>*</strong> Set From and To hours to Midnight in order to indicate Open 24 hours.\n" +
     "<table class=\"table table-hover table-condensed\" ng-repeat=\"semData in allowedLibraries.sem\" ng-if=\"$index == selLib.index\">\n" +
     "    <thead>\n" +
     "    <tr>\n" +
@@ -39225,7 +39226,7 @@ angular.module("manageHours/manageSem.tpl.html", []).run(["$templateCache", func
     "        <th scope=\"row\">\n" +
     "            <div class=\"input-group\">\n" +
     "                <input type=\"text\" class=\"form-control\" ng-minlength=\"4\" ng-maxlength=\"32\" ng-model=\"newSemester.name\" placeholder=\"Semester Name\" ng-required /><br>\n" +
-    "                <input type=\"text\" class=\"form-control\" datepicker-popup=\"{{format}}\"\n" +
+    "                <input type=\"text\" class=\"form-control\" datepicker-popup=\"{{format}}\" placeholder=\"Start Date (MM/DD/YYYY)\"\n" +
     "                       ng-model=\"newSemester.startdate\" is-open=\"newSemester.dp\" ng-required=\"true\" close-text=\"Close\"\n" +
     "                       ng-focus=\"onSemFocus($event)\" />\n" +
     "            </div>\n" +
@@ -39428,7 +39429,7 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                        <span class=\"fa fa-fw fa-caret-down\" ng-show=\"sw.show\"></span>\n" +
     "                    </td>\n" +
     "                    <td style=\"width:64px\">\n" +
-    "                        <img ng-hide=\"sw.picFile[0] != null\" src=\"{{appURL}}icons/{{sw.sid}}.png\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
+    "                        <img ng-hide=\"sw.picFile[0] != null\" src=\"{{sw.icon}}\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
     "                        <img ng-show=\"sw.picFile[0] != null\" ngf-src=\"sw.picFile[0]\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
     "                    </td>\n" +
     "                    <td>\n" +
@@ -39740,9 +39741,9 @@ angular.module("manageSoftware/manageSoftwareLocCat.tpl.html", []).run(["$templa
     "        <table class=\"table table-hover\">\n" +
     "            <thead>\n" +
     "            <tr>\n" +
-    "                <td>ID</td>\n" +
-    "                <td>Name</td>\n" +
-    "                <td>Action</td>\n" +
+    "                <th>ID</th>\n" +
+    "                <th>Name</th>\n" +
+    "                <th>Action</th>\n" +
     "            </tr>\n" +
     "            </thead>\n" +
     "            <tbody>\n" +
@@ -39788,9 +39789,9 @@ angular.module("manageSoftware/manageSoftwareLocCat.tpl.html", []).run(["$templa
     "        <table class=\"table table-hover\">\n" +
     "            <thead>\n" +
     "            <tr>\n" +
-    "                <td>ID</td>\n" +
-    "                <td>Name</td>\n" +
-    "                <td>Action</td>\n" +
+    "                <th>ID</th>\n" +
+    "                <th>Name</th>\n" +
+    "                <th>Action</th>\n" +
     "            </tr>\n" +
     "            </thead>\n" +
     "            <tbody>\n" +
@@ -40622,7 +40623,7 @@ angular.module('manage.manageDatabases', [])
 
 angular.module('manage.manageHours', [])
     .constant('HOURS_FROM', [
-        {name:'Closed', value:'-1'},
+        {name:'Closed 24hrs', value:'-1'},
         {name:'Midnight', value:'0'},
         {name:'6:00 am', value:'600'},
         {name:'7:00 am', value:'700'},
@@ -41257,8 +41258,11 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                         data.software[i].selLoc = data.locations[0];
                         data.software[i].selCat = data.categories[0];
                         data.software[i].newVer = {};
+                        data.software[i].newVer.version = '';
                         data.software[i].newVer.selOS = $scope.os[0];
                         data.software[i].newLink = {};
+                        data.software[i].newLink.title = '';
+                        data.software[i].newLink.url = '';
                     }
                     $scope.newSW.selLoc = data.locations[0];
                     $scope.newSW.selCat = data.categories[0];
@@ -41325,6 +41329,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             $scope.newSW.locations = [];
             $scope.newSW.categories = [];
             $scope.newSW.newVer = {};
+            $scope.newSW.newVer.version = '';
             $scope.newSW.newVer.selOS = $scope.os[0];
             $scope.newSW.newLink = {};
             $scope.newSW.newLink.title = "LibGuide";
@@ -41467,8 +41472,11 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                             newSW.selLoc = response.data.locations[0];
                             newSW.selCat = response.data.categories[0];
                             newSW.newVer = {};
+                            newSW.newVer.version = '';
                             newSW.newVer.selOS = $scope.os[0];
                             newSW.newLink = {};
+                            newSW.newLink.title = '';
+                            newSW.newLink.url = '';
                             $scope.SWList.software.push(newSW);
                             $scope.newSW.formResponse = "Software has been added.";
                         } else {
