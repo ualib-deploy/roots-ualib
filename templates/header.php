@@ -119,7 +119,6 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                     <label for="passwordMyBama">Password</label>
                                                     <input type="password" class="form-control" id="passwordMyBama" name="pass" placeholder="Password">
                                                 </div>
-                                                <input type="hidden" name="user" value="">
                                                 <input type="hidden" name="uuid" value=""/>
                                                 <button type="submit" class="btn btn-default">Login to myBama</button>
                                             </form>
