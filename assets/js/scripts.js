@@ -38620,7 +38620,7 @@ angular.module('hours.list', [])
             templateUrl: 'list/list.tpl.html',
             controller: 'ListCtrl'
         }
-    }]);;angular.module('manage.templates', ['manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html']);
+    }]);;angular.module('manage.templates', ['manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageNews/manageExhibitionsList.tpl.html', 'manageNews/manageNews.tpl.html', 'manageNews/manageNewsList.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html']);
 
 angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageDatabases/manageDatabases.tpl.html",
@@ -38628,7 +38628,7 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "\n" +
     "<div>\n" +
     "    <div class=\"row form-inline\">\n" +
-    "        <div class=\"form-group\">\n" +
+    "        <div class=\"form-group col-md-12\">\n" +
     "            <label for=\"filterBy\">Filter <small>{{filteredDB.length}}</small> results by</label>\n" +
     "            <div id=\"filterBy\">\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Title starts with\" ng-model=\"titleStartFilter\">\n" +
@@ -39102,6 +39102,8 @@ angular.module("manageHours/manageHours.tpl.html", []).run(["$templateCache", fu
     "</h2>\n" +
     "<h2 class=\"text-center\">{{selLib.name}}</h2>\n" +
     "\n" +
+    "<p><strong>*</strong> Set From and To hours to Midnight in order to indicate Open 24 hours.\n" +
+    "\n" +
     "<tabset justified=\"true\">\n" +
     "    <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
     "        <div ng-if=\"tab.number == 0\">\n" +
@@ -39163,7 +39165,6 @@ angular.module("manageHours/manageLoc.tpl.html", []).run(["$templateCache", func
 
 angular.module("manageHours/manageSem.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageHours/manageSem.tpl.html",
-    "<p><strong>*</strong> Set From and To hours to Midnight in order to indicate Open 24 hours.\n" +
     "<table class=\"table table-hover table-condensed\" ng-repeat=\"semData in allowedLibraries.sem\" ng-if=\"$index == selLib.index\">\n" +
     "    <thead>\n" +
     "    <tr>\n" +
@@ -39309,6 +39310,395 @@ angular.module("manageHours/manageUsers.tpl.html", []).run(["$templateCache", fu
     "");
 }]);
 
+angular.module("manageNews/manageExhibitionsList.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("manageNews/manageExhibitionsList.tpl.html",
+    "<div>\n" +
+    "    <div class=\"row form-inline\">\n" +
+    "        <div class=\"form-group col-md-12\">\n" +
+    "            <label for=\"filterBy\">Filter <small>{{filteredExh.length}}</small> results by</label>\n" +
+    "            <div id=\"filterBy\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"titleFilter\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Description contains\" ng-model=\"descrFilter\">\n" +
+    "            </div>\n" +
+    "            <label for=\"sortBy\">Sort by</label>\n" +
+    "            <div id=\"sortBy\">\n" +
+    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"0\" ng-click=\"sortBy(0)\">\n" +
+    "                    Title\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[0].reverse\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[0].reverse\"></span>\n" +
+    "                </button>\n" +
+    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"1\" ng-click=\"sortBy(1)\">\n" +
+    "                    Date Active From\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[1].reverse\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[1].reverse\"></span>\n" +
+    "                </button>\n" +
+    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"2\" ng-click=\"sortBy(2)\">\n" +
+    "                    Date Active Until\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[2].reverse\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[2].reverse\"></span>\n" +
+    "                </button>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"text-center\">\n" +
+    "        <pagination total-items=\"filteredExh.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
+    "                    boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredExh.length > 0\"></pagination>\n" +
+    "    </div>\n" +
+    "    <div class=\"row\"\n" +
+    "         ng-repeat=\"exh in filteredExh = (data.exhibitions | filter:{title:titleFilter}\n" +
+    "                                                            | filter:{description:descrFilter}\n" +
+    "                                                            | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\n" +
+    "        | startFrom:(currentPage-1)*perPage | limitTo:perPage\"\n" +
+    "         ng-class=\"{sdOpen: exh.show, sdOver: exh.sid == mOver}\" ng-mouseover=\"setOver(exh)\">\n" +
+    "        <div class=\"col-md-12\" ng-click=\"toggleExhibitions(exh)\">\n" +
+    "            <table class=\"table\">\n" +
+    "                <tr>\n" +
+    "                    <td style=\"width: 15px;\">\n" +
+    "                        <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"exh.show\"></span>\n" +
+    "                        <span class=\"fa fa-fw fa-caret-down\" ng-show=\"exh.show\"></span>\n" +
+    "                    </td>\n" +
+    "                    <td style=\"width:64px\">\n" +
+    "                        <img ng-hide=\"exh.picFile[0] != null\" src=\"{{exh.img}}\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
+    "                        <img ng-show=\"exh.picFile[0] != null\" ngf-src=\"exh.picFile[0]\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
+    "                    </td>\n" +
+    "                    <td>\n" +
+    "                        <div class=\"col-md-8\">\n" +
+    "                            <h4>\n" +
+    "                                {{exh.title}}\n" +
+    "                            </h4>\n" +
+    "                            <h4 style=\"text-align: justify;\"><small>{{exh.description}}</small></h4>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"col-md-2\">\n" +
+    "                            <h5>{{exh.activeFrom | date : 'MMM d, y'}}</h5>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"col-md-2\">\n" +
+    "                            <h5>{{exh.activeUntil | date : 'MMM d, y'}}</h5>\n" +
+    "                        </div>\n" +
+    "                    </td>\n" +
+    "                </tr>\n" +
+    "            </table>\n" +
+    "        </div>\n" +
+    "        <div ng-show=\"exh.show\">\n" +
+    "            <form name=\"editNewsExh{{exh.sid}}\" ng-submit=\"updateExhibition(exh)\">\n" +
+    "                <div class=\"col-md-12\">\n" +
+    "                    <div class=\"col-md-6 form-group\">\n" +
+    "                        <label for=\"{{exh.sid}}_up\">Upload Icon</label>\n" +
+    "                        <input type=\"file\" ngf-select=\"\" ng-model=\"exh.picFile\" accept=\"image/png\"\n" +
+    "                               ngf-change=\"generateThumb(exh.picFile[0], $files)\" id=\"{{exh.sid}}_up\">\n" +
+    "                        <span class=\"progress\" ng-show=\"exh.picFile[0].progress >= 0\">\n" +
+    "                            <div class=\"ng-binding\" style=\"width:{{exh.picFile[0].progress}}%\" ng-bind=\"exh.picFile[0].progress + '%'\"></div>\n" +
+    "                        </span>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-6 form-group\">\n" +
+    "                        <label for=\"{{exh.sid}}_title\">Title</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{exh.title}}\" ng-model=\"exh.title\"\n" +
+    "                               id=\"{{exh.sid}}_title\">\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-12\">\n" +
+    "                    <div class=\"col-md-12 form-group\">\n" +
+    "                        <label for=\"{{exh.sid}}_descr\">Description</label>\n" +
+    "                        <textarea class=\"form-control\" rows=\"3\" id=\"{{exh.sid}}_descr\" ng-model=\"exh.description\" ></textarea>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-12\">\n" +
+    "                    <div class=\"col-md-4 form-group\">\n" +
+    "                        <label for=\"{{exh.sid}}_from\">Active From</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" id=\"{{exh.sid}}_from\" datepicker-popup=\"{{dpFormat}}\"\n" +
+    "                               ng-model=\"exh.activeFrom\" is-open=\"exh.dpFrom\" ng-required=\"true\" close-text=\"Close\"\n" +
+    "                               ng-focus=\"onExhDPFocusFrom($event, $index)\"/>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-4 form-group\">\n" +
+    "                        <label for=\"{{exh.sid}}_until\">Active Until</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" id=\"{{exh.sid}}_until\" datepicker-popup=\"{{dpFormat}}\"\n" +
+    "                               ng-model=\"exh.activeUntil\" is-open=\"exh.dpUntil\" ng-required=\"true\" close-text=\"Close\"\n" +
+    "                               ng-focus=\"onExhDPFocusUntil($event, $index)\"/>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-4 form-group\">\n" +
+    "                        <label for=\"{{exh.sid}}_contact\">Contact Person</label>\n" +
+    "                        <select class=\"form-control\" id=\"{{exh.sid}}_contact\" ng-options=\"people.fullName for people in data.people\"\n" +
+    "                                ng-model=\"exh.contactID\">\n" +
+    "                        </select>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-12 text-center\">\n" +
+    "                    <button type=\"submit\" class=\"btn btn-success\">Update information</button>\n" +
+    "                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteExhibition(exh)\">\n" +
+    "                        Delete Exhibition\n" +
+    "                    </button>\n" +
+    "                    {{exh.formResponse}}\n" +
+    "                </div>\n" +
+    "            </form>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div class=\"text-center\">\n" +
+    "    <pagination total-items=\"filteredExh.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
+    "                boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredExh.length > 0\"></pagination>\n" +
+    "</div>\n" +
+    "<div class=\"text-center\">\n" +
+    "    <h4 ng-show=\"filteredExh.length == 0\">Nothing found</h4>\n" +
+    "</div>\n" +
+    "\n" +
+    "<h3>Add Exhibition Record</h3>\n" +
+    "<form name=\"addNewsExh\" ng-submit=\"createExhibition()\">\n" +
+    "    <div class=\"row sdOpen\">\n" +
+    "        <div class=\"col-md-12\">\n" +
+    "            <div class=\"col-md-6 form-group\">\n" +
+    "                <label for=\"up\">Upload Icon</label>\n" +
+    "                <input type=\"file\" ngf-select=\"\" ng-model=\"newExh.picFile\" accept=\"image/png\"\n" +
+    "                       ngf-change=\"generateThumb(newExh.picFile[0], $files)\" id=\"up\">\n" +
+    "                        <span class=\"progress\" ng-show=\"newExh.picFile[0].progress >= 0\">\n" +
+    "                            <div class=\"ng-binding\" style=\"width:{{newExh.picFile[0].progress}}%\" ng-bind=\"newExh.picFile[0].progress + '%'\"></div>\n" +
+    "                        </span>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-6 form-group\">\n" +
+    "                <label for=\"title\">Title</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Enter Title\" ng-model=\"newExh.title\"\n" +
+    "                       id=\"title\">\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-12\">\n" +
+    "            <div class=\"col-md-12 form-group\">\n" +
+    "                <label for=\"descr\">Description</label>\n" +
+    "                <textarea class=\"form-control\" rows=\"3\" id=\"descr\" ng-model=\"newExh.description\" ></textarea>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-12\">\n" +
+    "            <div class=\"col-md-4 form-group\">\n" +
+    "                <label for=\"from\">Active From</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" id=\"from\" datepicker-popup=\"{{dpFormat}}\"\n" +
+    "                       ng-model=\"newExh.activeFrom\" is-open=\"newExh.dpFrom\" ng-required=\"true\" close-text=\"Close\"\n" +
+    "                       ng-focus=\"onExhDPFocusFrom($event)\"/>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-4 form-group\">\n" +
+    "                <label for=\"until\">Active Until</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" id=\"until\" datepicker-popup=\"{{dpFormat}}\"\n" +
+    "                       ng-model=\"newExh.activeUntil\" is-open=\"newExh.dpUntil\" ng-required=\"true\" close-text=\"Close\"\n" +
+    "                       ng-focus=\"onExhDPFocusUntil($event)\"/>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-4 form-group\">\n" +
+    "                <label for=\"contact\">Contact Person</label>\n" +
+    "                <select class=\"form-control\" id=\"contact\" ng-options=\"people.fullName for people in data.people\"\n" +
+    "                        ng-model=\"newExh.contactID\">\n" +
+    "                </select>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-12 text-center\">\n" +
+    "            <button type=\"submit\" class=\"btn btn-success\">Create Exhibition Record</button>\n" +
+    "            {{newExh.formResponse}}\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</form>\n" +
+    "\n" +
+    "");
+}]);
+
+angular.module("manageNews/manageNews.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("manageNews/manageNews.tpl.html",
+    "<h2>Manage News and Exhibitions</h2>\n" +
+    "\n" +
+    "<tabset justified=\"true\">\n" +
+    "    <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
+    "        <div ng-if=\"tab.number == 0\">\n" +
+    "            <div manage-news-list>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "        <div ng-if=\"tab.number == 1\" >\n" +
+    "            <div manage-exhibitions-list>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </tab>\n" +
+    "</tabset>\n" +
+    "");
+}]);
+
+angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("manageNews/manageNewsList.tpl.html",
+    "<div>\n" +
+    "    <div class=\"row form-inline\">\n" +
+    "        <div class=\"form-group col-md-12\">\n" +
+    "            <label for=\"filterBy\">Filter <small>{{filteredNews.length}}</small> results by</label>\n" +
+    "            <div id=\"filterBy\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"titleFilter\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Description contains\" ng-model=\"descrFilter\">\n" +
+    "            </div>\n" +
+    "            <label for=\"sortBy\">Sort by</label>\n" +
+    "            <div id=\"sortBy\">\n" +
+    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"0\" ng-click=\"sortBy(0)\">\n" +
+    "                    Title\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[0].reverse\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[0].reverse\"></span>\n" +
+    "                </button>\n" +
+    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"1\" ng-click=\"sortBy(1)\">\n" +
+    "                    Date Active From\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[1].reverse\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[1].reverse\"></span>\n" +
+    "                </button>\n" +
+    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"2\" ng-click=\"sortBy(2)\">\n" +
+    "                    Date Active Until\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[2].reverse\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[2].reverse\"></span>\n" +
+    "                </button>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"text-center\">\n" +
+    "        <pagination total-items=\"filteredNews.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
+    "                    boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredNews.length > 0\"></pagination>\n" +
+    "    </div>\n" +
+    "    <div class=\"row\"\n" +
+    "         ng-repeat=\"news in filteredNews = (data.news | filter:{title:titleFilter}\n" +
+    "                                                      | filter:{description:descrFilter}\n" +
+    "                                                      | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\n" +
+    "        | startFrom:(currentPage-1)*perPage | limitTo:perPage\"\n" +
+    "         ng-class=\"{sdOpen: news.show, sdOver: news.sid == mOver}\" ng-mouseover=\"setOver(news)\">\n" +
+    "        <div class=\"col-md-12\" ng-click=\"toggleNews(news)\">\n" +
+    "            <table class=\"table\">\n" +
+    "                <tr>\n" +
+    "                    <td style=\"width: 15px;\">\n" +
+    "                        <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"news.show\"></span>\n" +
+    "                        <span class=\"fa fa-fw fa-caret-down\" ng-show=\"news.show\"></span>\n" +
+    "                    </td>\n" +
+    "                    <td style=\"width:64px\">\n" +
+    "                        <img ng-hide=\"news.picFile[0] != null\" src=\"{{news.img}}\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
+    "                        <img ng-show=\"news.picFile[0] != null\" ngf-src=\"news.picFile[0]\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
+    "                    </td>\n" +
+    "                    <td>\n" +
+    "                        <div class=\"col-md-8\">\n" +
+    "                            <h4>\n" +
+    "                                {{news.title}}\n" +
+    "                            </h4>\n" +
+    "                            <h4 style=\"text-align: justify;\"><small>{{news.description}}</small></h4>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"col-md-2\">\n" +
+    "                            <h5>{{news.activeFrom | date : 'MMM d, y'}}</h5>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"col-md-2\">\n" +
+    "                            <h5>{{news.activeUntil | date : 'MMM d, y'}}</h5>\n" +
+    "                        </div>\n" +
+    "                    </td>\n" +
+    "                </tr>\n" +
+    "            </table>\n" +
+    "        </div>\n" +
+    "        <div ng-show=\"news.show\">\n" +
+    "            <form name=\"editNewsExh{{news.sid}}\" ng-submit=\"updateNews(news)\">\n" +
+    "                <div class=\"col-md-12\">\n" +
+    "                    <div class=\"col-md-6 form-group\">\n" +
+    "                        <label for=\"{{news.sid}}_up\">Upload Icon</label>\n" +
+    "                        <input type=\"file\" ngf-select=\"\" ng-model=\"news.picFile\" accept=\"image/png\"\n" +
+    "                               ngf-change=\"generateThumb(news.picFile[0], $files)\" id=\"{{news.sid}}_up\">\n" +
+    "                        <span class=\"progress\" ng-show=\"news.picFile[0].progress >= 0\">\n" +
+    "                            <div class=\"ng-binding\" style=\"width:{{news.picFile[0].progress}}%\" ng-bind=\"news.picFile[0].progress + '%'\"></div>\n" +
+    "                        </span>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-6 form-group\">\n" +
+    "                        <label for=\"{{news.sid}}_title\">Title</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{news.title}}\" ng-model=\"news.title\"\n" +
+    "                               id=\"{{news.sid}}_title\">\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-12\">\n" +
+    "                    <div class=\"col-md-12 form-group\">\n" +
+    "                        <label for=\"{{news.sid}}_descr\">Description</label>\n" +
+    "                        <textarea class=\"form-control\" rows=\"3\" id=\"{{news.sid}}_descr\" ng-model=\"news.description\" ></textarea>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-12\">\n" +
+    "                    <div class=\"col-md-4 form-group\">\n" +
+    "                        <label for=\"{{news.sid}}_from\">Active From</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" id=\"{{news.sid}}_from\" datepicker-popup=\"{{dpFormat}}\"\n" +
+    "                               ng-model=\"news.activeFrom\" is-open=\"news.dpFrom\" ng-required=\"true\" close-text=\"Close\"\n" +
+    "                               ng-focus=\"onNewsDPFocusFrom($event, $index)\"/>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-4 form-group\">\n" +
+    "                        <label for=\"{{news.sid}}_until\">Active Until</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" id=\"{{news.sid}}_until\" datepicker-popup=\"{{dpFormat}}\"\n" +
+    "                               ng-model=\"news.activeUntil\" is-open=\"news.dpUntil\" ng-required=\"true\" close-text=\"Close\"\n" +
+    "                               ng-focus=\"onNewsDPFocusUntil($event, $index)\"/>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-4 form-group\">\n" +
+    "                        <label for=\"{{news.sid}}_contact\">Contact Person</label>\n" +
+    "                        <select class=\"form-control\" id=\"{{news.sid}}_contact\" ng-options=\"people.fullName for people in data.people\"\n" +
+    "                                ng-model=\"news.contactID\">\n" +
+    "                        </select>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-12 text-center\">\n" +
+    "                    <button type=\"submit\" class=\"btn btn-success\">Update information</button>\n" +
+    "                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteNews(news)\">\n" +
+    "                        Delete News\n" +
+    "                    </button>\n" +
+    "                    {{news.formResponse}}\n" +
+    "                </div>\n" +
+    "            </form>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div class=\"text-center\">\n" +
+    "    <pagination total-items=\"filteredNews.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
+    "                boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredNews.length > 0\"></pagination>\n" +
+    "</div>\n" +
+    "<div class=\"text-center\">\n" +
+    "    <h4 ng-show=\"filteredNews.length == 0\">Nothing found</h4>\n" +
+    "</div>\n" +
+    "\n" +
+    "<h3>Add News Record</h3>\n" +
+    "<form name=\"addNewsExh\" ng-submit=\"createNews()\">\n" +
+    "    <div class=\"row sdOpen\">\n" +
+    "        <div class=\"col-md-12\">\n" +
+    "            <div class=\"col-md-6 form-group\">\n" +
+    "                <label for=\"up\">Upload Icon</label>\n" +
+    "                <input type=\"file\" ngf-select=\"\" ng-model=\"newNews.picFile\" accept=\"image/png\"\n" +
+    "                       ngf-change=\"generateThumb(newNews.picFile[0], $files)\" id=\"up\">\n" +
+    "                        <span class=\"progress\" ng-show=\"newNews.picFile[0].progress >= 0\">\n" +
+    "                            <div class=\"ng-binding\" style=\"width:{{newNews.picFile[0].progress}}%\" ng-bind=\"newNews.picFile[0].progress + '%'\"></div>\n" +
+    "                        </span>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-6 form-group\">\n" +
+    "                <label for=\"title\">Title</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Enter Title\" ng-model=\"newNews.title\"\n" +
+    "                       id=\"title\">\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-12\">\n" +
+    "            <div class=\"col-md-12 form-group\">\n" +
+    "                <label for=\"descr\">Description</label>\n" +
+    "                <textarea class=\"form-control\" rows=\"3\" id=\"descr\" ng-model=\"newNews.description\" ></textarea>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-12\">\n" +
+    "            <div class=\"col-md-4 form-group\">\n" +
+    "                <label for=\"from\">Active From</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" id=\"from\" datepicker-popup=\"{{dpFormat}}\"\n" +
+    "                       ng-model=\"newNews.activeFrom\" is-open=\"newNews.dpFrom\" ng-required=\"true\" close-text=\"Close\"\n" +
+    "                       ng-focus=\"onNewsDPFocusFrom($event)\"/>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-4 form-group\">\n" +
+    "                <label for=\"until\">Active Until</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" id=\"until\" datepicker-popup=\"{{dpFormat}}\"\n" +
+    "                       ng-model=\"newNews.activeUntil\" is-open=\"newNews.dpUntil\" ng-required=\"true\" close-text=\"Close\"\n" +
+    "                       ng-focus=\"onNewsDPFocusUntil($event)\"/>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-4 form-group\">\n" +
+    "                <label for=\"contact\">Contact Person</label>\n" +
+    "                <select class=\"form-control\" id=\"contact\" ng-options=\"people.fullName for people in data.people\"\n" +
+    "                        ng-model=\"newNews.contactID\">\n" +
+    "                </select>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-12 text-center\">\n" +
+    "            <button type=\"submit\" class=\"btn btn-success\">Create News Record</button>\n" +
+    "            {{newNews.formResponse}}\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</form>\n" +
+    "\n" +
+    "");
+}]);
+
 angular.module("manageOneSearch/manageOneSearch.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageOneSearch/manageOneSearch.tpl.html",
     "<h3>OneSearch Recommended Links Management</h3>\n" +
@@ -39386,7 +39776,7 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
   $templateCache.put("manageSoftware/manageSoftwareList.tpl.html",
     "<div>\n" +
     "    <div class=\"row form-inline\">\n" +
-    "        <div class=\"form-group\">\n" +
+    "        <div class=\"form-group col-md-12\">\n" +
     "            <label for=\"filterBy\">Filter <small>{{filteredSW.length}}</small> results by</label>\n" +
     "            <div id=\"filterBy\">\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"titleFilter\">\n" +
@@ -39442,7 +39832,7 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                <div class=\"col-md-12\">\n" +
     "                    <div class=\"col-md-6 form-group\">\n" +
     "                        <label for=\"{{sw.sid}}_up\">Upload Icon</label>\n" +
-    "                        <input type=\"file\" ngf-select=\"\" ng-model=\"sw.picFile\" accept=\"image/*\"\n" +
+    "                        <input type=\"file\" ngf-select=\"\" ng-model=\"sw.picFile\" accept=\"image/png\"\n" +
     "                               ngf-change=\"generateThumb(sw.picFile[0], $files)\" id=\"{{sw.sid}}_up\">\n" +
     "                        <span class=\"progress\" ng-show=\"sw.picFile[0].progress >= 0\">\n" +
     "                            <div class=\"ng-binding\" style=\"width:{{sw.picFile[0].progress}}%\" ng-bind=\"sw.picFile[0].progress + '%'\"></div>\n" +
@@ -40194,7 +40584,8 @@ angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCach
     'manage.manageOneSearch',
     'manage.staffDirectory',
     'manage.manageDatabases',
-    'manage.manageSoftware'
+    'manage.manageSoftware',
+    'manage.manageNews'
 ])
 
     .constant('HOURS_MANAGE_URL', '//wwwdev2.lib.ua.edu/libhours2/')
@@ -40204,6 +40595,8 @@ angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCach
     .constant('STAFF_DIR_URL', '//wwwdev2.lib.ua.edu/staffDir/')
     .constant('DATABASES_URL', '//wwwdev2.lib.ua.edu/databases/')
     .constant('SOFTWARE_URL', '//wwwdev2.lib.ua.edu/softwareList/')
+    .constant('FORMS_URL', '//wwwdev2.lib.ua.edu/form/')
+    .constant('NEWS_URL', '//wwwdev2.lib.ua.edu/newsApp/')
 
 angular.module('manage.common', [
     'common.manage'
@@ -40291,6 +40684,17 @@ angular.module('common.manage', [])
         }
     }])
     .factory('swFactory', ['$http', 'SOFTWARE_URL', function swFactory($http, url){
+        return {
+            getData: function(){
+                return $http({method: 'GET', url: url + "api/all", params: {}})
+            },
+            postData: function(params, data){
+                params = angular.isDefined(params) ? params : {};
+                return $http({method: 'POST', url: url + "processData.php", params: params, data: data})
+            }
+        }
+    }])
+    .factory('newsFactory', ['$http', 'NEWS_URL', function newsFactory($http, url){
         return {
             getData: function(){
                 return $http({method: 'GET', url: url + "api/all", params: {}})
@@ -41164,6 +41568,493 @@ angular.module('manage.manageHoursUsers', [])
             restrict: 'AC',
             controller: 'hrsLocationsCtrl',
             templateUrl: 'manageHours/manageLoc.tpl.html'
+        };
+    })
+
+angular.module('manage.manageNews', ['ngFileUpload'])
+    .controller('manageNewsCtrl', ['$scope', '$window', '$timeout', 'tokenFactory', 'newsFactory',
+        function manageNewsCtrl($scope, $window, $timeout, tokenFactory, newsFactory){
+            $scope.data = {};
+            $scope.dpFormat = 'MM/dd/yyyy';
+            $scope.newNews = {};
+            $scope.newNews.creator = $window.author;
+            $scope.newExh = {};
+            $scope.newExh.creator = $window.author;
+            $scope.sortModes = [
+                {by:'title', reverse:false},
+                {by:'activeFrom', reverse:false},
+                {by:'activeUntil', reverse:false}
+            ];
+
+            tokenFactory("CSRF-libNews");
+
+            newsFactory.getData()
+                .success(function(data) {
+                    console.dir(data);
+                    for (var i = 0; i < data.news.length; i++){
+                        data.news[i].activeFrom = new Date(data.news[i].activeFrom * 1000);
+                        data.news[i].activeUntil = new Date(data.news[i].activeUntil * 1000);
+                        for (var j = 0; j < data.people.length; j++)
+                            if (data.news[i].contactID.uid === data.people[j].uid){
+                                data.news[i].contactID = data.people[j];
+                                break;
+                            }
+                        data.news[i].show = false;
+                        data.news[i].class = "";
+                        data.news[i].dpFrom = false;
+                        data.news[i].dpUntil = false;
+                    }
+                    for (var i = 0; i < data.exhibitions.length; i++){
+                        data.exhibitions[i].activeFrom = new Date(data.exhibitions[i].activeFrom * 1000);
+                        data.exhibitions[i].activeUntil = new Date(data.exhibitions[i].activeUntil * 1000);
+                        for (var j = 0; j < data.people.length; j++)
+                            if (data.exhibitions[i].contactID.uid === data.people[j].uid){
+                                data.exhibitions[i].contactID = data.people[j];
+                                break;
+                            }
+                        data.exhibitions[i].show = false;
+                        data.exhibitions[i].class = "";
+                        data.exhibitions[i].dpFrom = false;
+                        data.exhibitions[i].dpUntil = false;
+                    }
+                    $scope.newNews.contactID = data.people[0];
+                    $scope.newExh.contactID = data.people[0];
+                    $scope.data = data;
+                })
+                .error(function(data, status, headers, config) {
+                    console.log(data);
+                });
+
+            $scope.tabs = [
+                { name: 'News',
+                    number: 0,
+                    active: true
+                },
+                { name: 'Exhibitions',
+                    number: 1,
+                    active: false
+                }];
+            
+            $scope.validateNews = function(news){
+                if (news.title.length < 1)
+                    return "Form error: Please fill out Title!";
+                if (news.description.length < 1)
+                    return "Form error: Please fill out Description!";
+
+                return "";
+            };
+            $scope.generateThumb = function(file) {
+                if (file != null) {
+                    if ($scope.fileReaderSupported && file.type.indexOf('image') > -1) {
+                        $timeout(function() {
+                            var fileReader = new FileReader();
+                            fileReader.readAsDataURL(file);
+                            fileReader.onload = function(e) {
+                                $timeout(function() {
+                                    file.dataUrl = e.target.result;
+                                });
+                            }
+                        });
+                    }
+                }
+            };
+        }])
+
+    .directive('newsExhibitionsMain', function($animate) {
+        return {
+            restrict: 'A',
+            scope: {},
+            controller: 'manageNewsCtrl',
+            link: function(scope, elm, attrs){
+                //Preload the spinner element
+                var spinner = angular.element('<div id="loading-bar-spinner"><div class="spinner-icon"></div></div>');
+                //Preload the location of the boxe's title element (needs to be more dynamic in the future)
+                var titleElm = elm.find('h2');
+                //Enter the spinner animation, appending it to the title element
+                $animate.enter(spinner, titleElm[0]);
+
+                var loadingWatcher = scope.$watch(
+                    'data.totalTime',
+                    function(newVal, oldVal){
+                        if (newVal != oldVal){
+                            $animate.leave(spinner);
+                            console.log("News data loaded");
+                        }
+                    },
+                    true
+                );
+            },
+            templateUrl: 'manageNews/manageNews.tpl.html'
+        };
+    })
+
+    .controller('manageNewsListCtrl', ['$scope', '$timeout', 'Upload', 'newsFactory', 'NEWS_URL',
+        function manageNewsListCtrl($scope, $timeout, Upload, newsFactory, appURL){
+            $scope.titleFilter = '';
+            $scope.descrFilter = '';
+            $scope.sortMode = 0;
+            $scope.sortButton = $scope.sortMode;
+            $scope.mOver = 0;
+            $scope.appURL = appURL;
+
+            $scope.newNews.type = 0; // news
+            $scope.newNews.activeFrom = new Date();
+            $scope.newNews.activeUntil = new Date();
+            $scope.newNews.dpFrom = false;
+            $scope.newNews.dpUntil = false;
+
+            $scope.currentPage = 1;
+            $scope.maxPageSize = 10;
+            $scope.perPage = 20;
+
+            $scope.onNewsDPFocusFrom = function($event, index){
+                $event.preventDefault();
+                $event.stopPropagation();
+                if (typeof index != 'undefined' && index >= 0)
+                    $scope.data.news[index].dpFrom = true;
+                else
+                    $scope.newNews.dpFrom = true;
+            };
+            $scope.onNewsDPFocusUntil = function($event, index){
+                $event.preventDefault();
+                $event.stopPropagation();
+                if (typeof index != 'undefined' && index >= 0)
+                    $scope.data.news[index].dpUntil = true;
+                else
+                    $scope.newNews.dpUntil = true;
+            };
+
+            $scope.toggleNews = function(news){
+                $scope.data.news[$scope.data.news.indexOf(news)].show =
+                    !$scope.data.news[$scope.data.news.indexOf(news)].show;
+            };
+            $scope.setOver = function(news){
+                $scope.mOver = news.nid;
+            };
+            $scope.sortBy = function(by){
+                if ($scope.sortMode === by)
+                    $scope.sortModes[by].reverse = !$scope.sortModes[by].reverse;
+                else
+                    $scope.sortMode = by;
+            };
+
+            $scope.deleteNews = function(news){
+                if (confirm("Delete " + news.title  + " permanently?") == true){
+                    newsFactory.postData({action : 1}, news)
+                        .success(function(data, status, headers, config) {
+                            if (data == 1){
+                                $scope.data.news.splice($scope.data.news.indexOf(news), 1);
+                                $scope.formResponse = "News item has been deleted.";
+                            } else {
+                                $scope.formResponse = "Error: Can not delete news item! " + data;
+                            }
+                            console.log(data);
+                        })
+                        .error(function(data, status, headers, config) {
+                            $scope.formResponse = "Error: Could not delete news item! " + data;
+                            console.log(data);
+                        });
+                }
+            };
+            $scope.updateNews = function(news){
+                $scope.data.news[$scope.data.news.indexOf(news)].formResponse = $scope.validateNews(news);
+                if ($scope.data.news[$scope.data.news.indexOf(news)].formResponse.length > 0)
+                    return false;
+                news.tsFrom = news.activeFrom.valueOf() / 1000;
+                news.tsUntil = news.activeUntil.valueOf() / 1000;
+                if (typeof news.picFile === 'undefined'){
+                    newsFactory.postData({action : 21}, news)
+                        .success(function(data, status, headers, config) {
+                            if ((typeof data === 'object') && (data !== null)){
+                                $scope.data.news[$scope.data.news.indexOf(news)].formResponse =
+                                    "News has been updated, Icon has not changed.";
+                            } else {
+                                $scope.data.news[$scope.data.news.indexOf(news)].formResponse =
+                                    "Error: Can not update news! " + data;
+                            }
+                            console.log(data);
+                        })
+                        .error(function(data, status, headers, config) {
+                            $scope.data.news[$scope.data.news.indexOf(news)].formResponse =
+                                "Error: Could not update news! " + data;
+                            console.log(data);
+                        });
+                } else {
+                    news.picFile.upload = Upload.upload({
+                        url: appURL + 'processData.php?action=2',
+                        method: 'POST',
+                        fields: {
+                            news: news
+                        },
+                        file: news.picFile,
+                        fileFormDataName: 'editNewsExh' + news.nid
+                    });
+                    news.picFile.upload.then(function(response) {
+                        $timeout(function() {
+                            if ((typeof response.data === 'object') && (response.data !== null)){
+                                $scope.data.news[$scope.data.news.indexOf(news)].formResponse = "News has been updated, ";
+                                if (response.data.iconUploaded)
+                                    $scope.data.news[$scope.data.news.indexOf(news)].formResponse += "Icon uploaded.";
+                                else
+                                    $scope.data.news[$scope.data.news.indexOf(news)].formResponse += "Icon has not changed.";
+                            } else {
+                                $scope.data.news[$scope.data.news.indexOf(news)].formResponse = 
+                                    "Error: Can not update news! " + response.data;
+                            }
+                            console.log(response.data);
+                        });
+                    }, function(response) {
+                        if (response.status > 0)
+                            $scope.data.news[$scope.data.news.indexOf(news)].formResponse = response.status + ': ' + response.data;
+                    });
+                    news.picFile.upload.progress(function(evt) {
+                        // Math.min is to fix IE which reports 200% sometimes
+                        news.picFile.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+                    });
+                }
+            };
+            $scope.createNews = function(){
+                if (typeof $scope.newNews.picFile === 'undefined'){
+                    $scope.newNews.formResponse = "Please select icon file (.png)!";
+                    return false;
+                }
+                $scope.newNews.formResponse = $scope.validateNews($scope.newNews);
+                if ($scope.newNews.formResponse.length > 0)
+                    return false;
+                $scope.newNews.tsFrom = $scope.newNews.activeFrom.valueOf() / 1000;
+                $scope.newNews.tsUntil = $scope.newNews.activeUntil.valueOf() / 1000;
+                $scope.newNews.picFile.upload = Upload.upload({
+                    url: appURL + 'processData.php?action=3',
+                    method: 'POST',
+                    fields: {
+                        news: $scope.newNews
+                    },
+                    file: $scope.newNews.picFile,
+                    fileFormDataName: 'addNewsExh'
+                });
+                $scope.newNews.picFile.upload.then(function(response) {
+                    $timeout(function() {
+                        if ((typeof response.data === 'object') && (response.data !== null)){
+                            var newNews = {};
+                            newNews.nid = response.data.id;
+                            newNews.title = $scope.newNews.title;
+                            newNews.description = $scope.newNews.description;
+                            newNews.show = false;
+                            newNews.class = "";
+                            $scope.data.news.push(newNews);
+                            $scope.newNews.formResponse = "News has been added.";
+                        } else {
+                            $scope.newNews.formResponse = "Error: Can not add news! " + response.data;
+                        }
+                        console.dir(response.data);
+                    });
+                }, function(response) {
+                    if (response.status > 0)
+                        $scope.newNews.formResponse = response.status + ': ' + response.data;
+                });
+                $scope.newNews.picFile.upload.progress(function(evt) {
+                    // Math.min is to fix IE which reports 200% sometimes
+                    $scope.newNews.picFile.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+                });
+            };
+        }])
+
+    .directive('manageNewsList', function() {
+        return {
+            restrict: 'A',
+            controller: 'manageNewsListCtrl',
+            link: function(scope, elm, attrs){
+
+            },
+            templateUrl: 'manageNews/manageNewsList.tpl.html'
+        };
+    })
+    .filter('startFrom', function() {
+        return function(input, start) {
+            start = +start; //parse to int
+            if (typeof input == 'undefined')
+                return input;
+            return input.slice(start);
+        }
+    })
+    .controller('manageExhListCtrl', ['$scope', '$timeout', 'Upload', 'newsFactory', 'NEWS_URL',
+        function manageExhListCtrl($scope, $timeout, Upload, newsFactory, appURL){
+            $scope.titleFilter = '';
+            $scope.descrFilter = '';
+            $scope.sortMode = 0;
+            $scope.sortButton = $scope.sortMode;
+            $scope.mOver = 0;
+            $scope.appURL = appURL;
+
+            $scope.newExh.type = 1;//exhibition
+            $scope.newExh.activeFrom = new Date();
+            $scope.newExh.activeUntil = new Date();
+            $scope.newExh.dpFrom = false;
+            $scope.newExh.dpUntil = false;
+
+            $scope.currentPage = 1;
+            $scope.maxPageSize = 10;
+            $scope.perPage = 20;
+
+            $scope.onExhDPFocusFrom = function($event, index){
+                $event.preventDefault();
+                $event.stopPropagation();
+                if (typeof index != 'undefined' && index >= 0)
+                    $scope.data.exhibitions[index].dpFrom = true;
+                else
+                    $scope.newExh.dpFrom = true;
+            };
+            $scope.onExhDPFocusUntil = function($event, index){
+                $event.preventDefault();
+                $event.stopPropagation();
+                if (typeof index != 'undefined' && index >= 0)
+                    $scope.data.exhibitions[index].dpUntil = true;
+                else
+                    $scope.newExh.dpUntil = true;
+            };
+
+            $scope.toggleExhibitions = function(exh){
+                $scope.data.exhibitions[$scope.data.exhibitions.indexOf(exh)].show =
+                    !$scope.data.exhibitions[$scope.data.exhibitions.indexOf(exh)].show;
+            };
+            $scope.setOver = function(exh){
+                $scope.mOver = exh.nid;
+            };
+            $scope.sortBy = function(by){
+                if ($scope.sortMode === by)
+                    $scope.sortModes[by].reverse = !$scope.sortModes[by].reverse;
+                else
+                    $scope.sortMode = by;
+            };
+
+            $scope.deleteExhibition = function(exh){
+                if (confirm("Delete " + exh.title  + " permanently?") == true){
+                    newsFactory.postData({action : 1}, exh)
+                        .success(function(data, status, headers, config) {
+                            if (data == 1){
+                                $scope.data.exhibitions.splice($scope.data.exhibitions.indexOf(exh), 1);
+                                $scope.formResponse = "Exhibition item has been deleted.";
+                            } else {
+                                $scope.formResponse = "Error: Can not delete exhibition item! " + data;
+                            }
+                            console.log(data);
+                        })
+                        .error(function(data, status, headers, config) {
+                            $scope.formResponse = "Error: Could not delete Exhibition item! " + data;
+                            console.log(data);
+                        });
+                }
+            };
+            $scope.updateExhibition = function(exh){
+                $scope.data.exhibitions[$scope.data.exhibitions.indexOf(exh)].formResponse = $scope.validateNews(exh);
+                if ($scope.data.exhibitions[$scope.data.exhibitions.indexOf(exh)].formResponse.length > 0)
+                    return false;
+                exh.tsFrom = exh.activeFrom.valueOf() / 1000;
+                exh.tsUntil = exh.activeUntil.valueOf() / 1000;
+                if (typeof exh.picFile === 'undefined'){
+                    newsFactory.postData({action : 21}, exh)
+                        .success(function(data, status, headers, config) {
+                            if ((typeof data === 'object') && (data !== null)){
+                                $scope.data.exhibitions[$scope.data.exhibitions.indexOf(exh)].formResponse =
+                                    "Exhibition has been updated, Icon has not changed.";
+                            } else {
+                                $scope.data.exhibitions[$scope.data.exhibitions.indexOf(exh)].formResponse =
+                                    "Error: Can not update Exhibition! " + data;
+                            }
+                            console.log(data);
+                        })
+                        .error(function(data, status, headers, config) {
+                            $scope.data.exhibitions[$scope.data.exhibitions.indexOf(exh)].formResponse =
+                                "Error: Could not update Exhibition! " + data;
+                            console.log(data);
+                        });
+                } else {
+                    exh.picFile.upload = Upload.upload({
+                        url: appURL + 'processData.php?action=2',
+                        method: 'POST',
+                        fields: {
+                            news: exh
+                        },
+                        file: exh.picFile,
+                        fileFormDataName: 'editNewsExh' + exh.nid
+                    });
+                    exh.picFile.upload.then(function(response) {
+                        $timeout(function() {
+                            if ((typeof response.data === 'object') && (response.data !== null)){
+                                $scope.data.exhibitions[$scope.data.exhibitions.indexOf(exh)].formResponse = "Exhibition has been updated, ";
+                                if (response.data.iconUploaded)
+                                    $scope.data.exhibitions[$scope.data.exhibitions.indexOf(exh)].formResponse += "Icon uploaded.";
+                                else
+                                    $scope.data.exhibitions[$scope.data.exhibitions.indexOf(exh)].formResponse += "Icon has not changed.";
+                            } else {
+                                $scope.data.exhibitions[$scope.data.exhibitions.indexOf(exh)].formResponse =
+                                    "Error: Can not update Exhibition! " + response.data;
+                            }
+                            console.log(response.data);
+                        });
+                    }, function(response) {
+                        if (response.status > 0)
+                            $scope.data.exhibitions[$scope.data.exhibitions.indexOf(exh)].formResponse = response.status + ': ' + response.data;
+                    });
+                    exh.picFile.upload.progress(function(evt) {
+                        // Math.min is to fix IE which reports 200% sometimes
+                        exh.picFile.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+                    });
+                }
+            };
+            $scope.createExhibition = function(){
+                if (typeof $scope.newExh.picFile === 'undefined'){
+                    $scope.newExh.formResponse = "Please select icon file (.png)!";
+                    return false;
+                }
+                $scope.newExh.formResponse = $scope.validateNews($scope.newExh);
+                if ($scope.newExh.formResponse.length > 0)
+                    return false;
+                $scope.newExh.tsFrom = $scope.newExh.activeFrom.valueOf() / 1000;
+                $scope.newExh.tsUntil = $scope.newExh.activeUntil.valueOf() / 1000;
+                $scope.newExh.picFile.upload = Upload.upload({
+                    url: appURL + 'processData.php?action=3',
+                    method: 'POST',
+                    fields: {
+                        news: $scope.newExh
+                    },
+                    file: $scope.newExh.picFile,
+                    fileFormDataName: 'addNewsExh'
+                });
+                $scope.newExh.picFile.upload.then(function(response) {
+                    $timeout(function() {
+                        if ((typeof response.data === 'object') && (response.data !== null)){
+                            var newExh = {};
+                            newExh.nid = response.data.id;
+                            newExh.title = $scope.newExh.title;
+                            newExh.description = $scope.newExh.description;
+                            newExh.show = false;
+                            newExh.class = "";
+                            $scope.data.exhibitions.push(newExh);
+                            $scope.newExh.formResponse = "Exhibition has been added.";
+                        } else {
+                            $scope.newExh.formResponse = "Error: Can not add Exhibition! " + response.data;
+                        }
+                        console.dir(response.data);
+                    });
+                }, function(response) {
+                    if (response.status > 0)
+                        $scope.newExh.formResponse = response.status + ': ' + response.data;
+                });
+                $scope.newExh.picFile.upload.progress(function(evt) {
+                    // Math.min is to fix IE which reports 200% sometimes
+                    $scope.newExh.picFile.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+                });
+            };
+        }])
+    .directive('manageExhibitionsList', function() {
+        return {
+            restrict: 'A',
+            controller: 'manageExhListCtrl',
+            link: function(scope, elm, attrs){
+
+            },
+            templateUrl: 'manageNews/manageExhibitionsList.tpl.html'
         };
     })
 
