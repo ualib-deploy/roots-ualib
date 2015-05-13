@@ -38777,16 +38777,17 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                           id=\"{{db.id}}_Audience2\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
-    "                    <label for=\"{{db.id}}_dAuthor\">Updated by</label>\n" +
-    "                    <p id=\"{{db.id}}_dAuthor\">{{db.updatedBy}}</p>\n" +
+    "                    <label for=\"{{db.id}}_updatedBy\">Updated by</label>\n" +
+    "                    <p id=\"{{db.id}}_updatedBy\">{{db.updatedBy}}</p>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
-    "                    <label for=\"{{db.id}}_date1\">Date Created</label>\n" +
-    "                    <p id=\"{{db.id}}_date1\">{{db.dateCreated}}</p>\n" +
+    "                    <label for=\"{{db.id}}_dAuthor\">Description Author</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.descrAuthor}}\" ng-model=\"db.descrAuthor\"\n" +
+    "                           id=\"{{db.id}}_dAuthor\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
-    "                    <label for=\"{{db.id}}_date2\">Last Modified</label>\n" +
-    "                    <p id=\"{{db.id}}_date2\">{{db.lastModified}}</p>\n" +
+    "                    <label for=\"{{db.id}}_date1\">Created/Modified</label>\n" +
+    "                    <p id=\"{{db.id}}_date1\">{{db.dateCreated}}<br>{{db.lastModified}}</p>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Disable\">Disabled</label>\n" +
@@ -38906,9 +38907,9 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                       id=\"Coverage\" required>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"Notes\">Notes</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Notes\" ng-model=\"newDB.notes\"\n" +
-    "                       id=\"Notes\">\n" +
+    "                <label for=\"dAuthor\">Description Author</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Enter Author Name\" ng-model=\"newDB.descrAuthor\"\n" +
+    "                       id=\"dAuthor\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-3 form-group\">\n" +
     "                <label for=\"Status\">Status</label>\n" +
@@ -38934,11 +38935,10 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Audience Two\" ng-model=\"newDB.audience2\"\n" +
     "                       id=\"Audience2\">\n" +
     "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
-    "                <label for=\"dAuthor\">Description Author</label>\n" +
-    "                <p id=\"dAuthor\">{{newDB.updatedBy}}</p>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
+    "            <div class=\"col-md-4 form-group\">\n" +
+    "                <label for=\"Notes\">Notes</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Notes\" ng-model=\"newDB.notes\"\n" +
+    "                       id=\"Notes\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-1 form-group\">\n" +
     "                <label for=\"Disable\">Disabled</label>\n" +
@@ -39721,16 +39721,8 @@ angular.module("manageNews/viewNewsEventsExhibitions.tpl.html", []).run(["$templ
     "<div class=\"event-card\" style=\"display: table-row\" ng-show=\"data.events.length > 0\">\n" +
     "    <div style=\"text-align: right; font-size: 20px; color: #999; display: table-cell; vertical-align: top; padding-right: 15px;\">          Events        </div>\n" +
     "    <div style=\"display: table-cell; vertical-align: top;\">\n" +
-    "        <div class=\"media\">\n" +
-    "            <div class=\"media-left\">\n" +
-    "                <a href=\"#\">\n" +
-    "                    <div class=\"media-object\" style=\"background-color: #999; height: 64px; width: 64px;\"/>\n" +
-    "                </a>\n" +
-    "            </div>\n" +
-    "            <div class=\"media-body\">\n" +
-    "                <h4 class=\"media-heading\">UA Eco-Health Workshop</h4>\n" +
-    "                Sponsored by: Office for Research and Economic Development/ Office for Sponsored Programs\n" +
-    "            </div>\n" +
+    "        <div class=\"media\" ng-repeat=\"event in data.events\">\n" +
+    "\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
@@ -42112,7 +42104,6 @@ angular.module('manage.manageNews', ['ngFileUpload'])
         };
     })
 
-
     .controller('viewNEECtrl', ['$scope', '$timeout', 'newsFactory',
         function viewNEECtrl($scope, $timeout, newsFactory){
             $scope.data = {};
@@ -42126,8 +42117,10 @@ angular.module('manage.manageNews', ['ngFileUpload'])
                     console.log(data);
                 });
 
-        }])
+            //events will be pulled from XML feed
+            //http://events.ua.edu/category/22/feed
 
+        }])
     .directive('viewNewsEventsExhibitions', function() {
         return {
             restrict: 'AC',
