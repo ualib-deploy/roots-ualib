@@ -44338,7 +44338,7 @@ angular.module('staffdir', ['ualib.staffdir']);
 
 angular.module("software-list/software-list.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("software-list/software-list.tpl.html",
-    "<div class=\"page-header\"><h1>Software</h1></div>\n" +
+    "<div class=\"page-header\"><h1>Libraries' Software List</h1></div>\n" +
     "\n" +
     "<div class=\"row\">\n" +
     "    <div class=\"col-md-3 col-md-push-9\">\n" +
@@ -44393,9 +44393,7 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
     "\n" +
     "        <div class=\"media\" ng-repeat=\"item in filteredSoft = (software.software | filter:soft.cat | filter:soft.loc | filter:soft.search | filterBy:['os']:soft.os)\">\n" +
     "            <div class=\"media-left\">\n" +
-    "                <a href=\"#\">\n" +
-    "                    <img class=\"media-object\" ng-src=\"{{item.icon}}\" alt=\"{{item.title}}\" title=\"{{item.title}}\">\n" +
-    "                </a>\n" +
+    "                <img class=\"media-object\" ng-src=\"{{item.icon}}\" alt=\"{{item.title}}\" title=\"{{item.title}}\">\n" +
     "            </div>\n" +
     "            <div class=\"media-body\">\n" +
     "                <h4 class=\"media-heading\">\n" +
@@ -44410,9 +44408,13 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
     "                    {{item.description}}\n" +
     "                </div>\n" +
     "                <div class=\"details hidden-xs\">\n" +
-    "                    <div class=\"software-links pull-left\" style=\"color: #333;\">\n" +
+    "                    <div class=\"software-links pull-left\">\n" +
     "                        <h5>Tutorials &amp; Guides</h5>\n" +
-    "                        <a ng-repeat=\"link in item.links\" ng-href=\"{{link.url}}\">{{link.title}}</a>\n" +
+    "                        <ul>\n" +
+    "                            <li ng-repeat=\"link in item.links\">\n" +
+    "                                <a ng-href=\"{{link.url}}\">{{link.title}}</a>\n" +
+    "                            </li>\n" +
+    "                        </ul>\n" +
     "                    </div>\n" +
     "                    <div class=\"pull-left\">\n" +
     "                        <h5>Who can use it</h5>\n" +
