@@ -39380,7 +39380,7 @@ angular.module("manageNews/manageExhibitionsList.tpl.html", []).run(["$templateC
     "            </table>\n" +
     "        </div>\n" +
     "        <div ng-show=\"exh.show\">\n" +
-    "            <form name=\"editExibition{{exh.sid}}\" ng-submit=\"updateExhibition(exh)\">\n" +
+    "            <form name=\"editNewsExh{{exh.sid}}\" ng-submit=\"updateExhibition(exh)\">\n" +
     "                <div class=\"col-md-12\">\n" +
     "                    <div class=\"col-md-6 form-group\">\n" +
     "                        <label for=\"{{exh.sid}}_up\">Upload Icon</label>\n" +
@@ -39442,7 +39442,7 @@ angular.module("manageNews/manageExhibitionsList.tpl.html", []).run(["$templateC
     "</div>\n" +
     "\n" +
     "<h3>Add Exhibition Record</h3>\n" +
-    "<form name=\"addNewExhibition\" ng-submit=\"createExhibition()\">\n" +
+    "<form name=\"addNewsExh\" ng-submit=\"createExhibition()\">\n" +
     "    <div class=\"row sdOpen\">\n" +
     "        <div class=\"col-md-12\">\n" +
     "            <div class=\"col-md-6 form-group\">\n" +
@@ -39584,7 +39584,7 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "            </table>\n" +
     "        </div>\n" +
     "        <div ng-show=\"news.show\">\n" +
-    "            <form name=\"editNews{{news.sid}}\" ng-submit=\"updateNews(news)\">\n" +
+    "            <form name=\"editNewsExh{{news.sid}}\" ng-submit=\"updateNews(news)\">\n" +
     "                <div class=\"col-md-12\">\n" +
     "                    <div class=\"col-md-6 form-group\">\n" +
     "                        <label for=\"{{news.sid}}_up\">Upload Icon</label>\n" +
@@ -39646,7 +39646,7 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "</div>\n" +
     "\n" +
     "<h3>Add News Record</h3>\n" +
-    "<form name=\"addNewNews\" ng-submit=\"createNews()\">\n" +
+    "<form name=\"addNewsExh\" ng-submit=\"createNews()\">\n" +
     "    <div class=\"row sdOpen\">\n" +
     "        <div class=\"col-md-12\">\n" +
     "            <div class=\"col-md-6 form-group\">\n" +
@@ -41575,10 +41575,11 @@ angular.module('manage.manageNews', ['ngFileUpload'])
     .controller('manageNewsCtrl', ['$scope', '$window', '$timeout', 'tokenFactory', 'newsFactory',
         function manageNewsCtrl($scope, $window, $timeout, tokenFactory, newsFactory){
             $scope.data = {};
-            $scope.author = $window.author;
             $scope.dpFormat = 'MM/dd/yyyy';
             $scope.newNews = {};
+            $scope.newNews.creator = $window.author;
             $scope.newExh = {};
+            $scope.newExh.creator = $window.author;
             $scope.sortModes = [
                 {by:'title', reverse:false},
                 {by:'activeFrom', reverse:false},
@@ -41759,6 +41760,8 @@ angular.module('manage.manageNews', ['ngFileUpload'])
                 $scope.data.news[$scope.data.news.indexOf(news)].formResponse = $scope.validateNews(news);
                 if ($scope.data.news[$scope.data.news.indexOf(news)].formResponse.length > 0)
                     return false;
+                news.tsFrom = news.activeFrom.valueOf() / 1000;
+                news.tsUntil = news.activeUntil.valueOf() / 1000;
                 if (typeof news.picFile === 'undefined'){
                     newsFactory.postData({action : 21}, news)
                         .success(function(data, status, headers, config) {
@@ -41784,7 +41787,7 @@ angular.module('manage.manageNews', ['ngFileUpload'])
                             news: news
                         },
                         file: news.picFile,
-                        fileFormDataName: 'editNews' + news.nid
+                        fileFormDataName: 'editNewsExh' + news.nid
                     });
                     news.picFile.upload.then(function(response) {
                         $timeout(function() {
@@ -41818,6 +41821,8 @@ angular.module('manage.manageNews', ['ngFileUpload'])
                 $scope.newNews.formResponse = $scope.validateNews($scope.newNews);
                 if ($scope.newNews.formResponse.length > 0)
                     return false;
+                $scope.newNews.tsFrom = $scope.newNews.activeFrom.valueOf() / 1000;
+                $scope.newNews.tsUntil = $scope.newNews.activeUntil.valueOf() / 1000;
                 $scope.newNews.picFile.upload = Upload.upload({
                     url: appURL + 'processData.php?action=3',
                     method: 'POST',
@@ -41825,7 +41830,7 @@ angular.module('manage.manageNews', ['ngFileUpload'])
                         news: $scope.newNews
                     },
                     file: $scope.newNews.picFile,
-                    fileFormDataName: 'addNewNews'
+                    fileFormDataName: 'addNewsExh'
                 });
                 $scope.newNews.picFile.upload.then(function(response) {
                     $timeout(function() {
@@ -41944,6 +41949,8 @@ angular.module('manage.manageNews', ['ngFileUpload'])
                 $scope.data.exhibitions[$scope.data.exhibitions.indexOf(exh)].formResponse = $scope.validateNews(exh);
                 if ($scope.data.exhibitions[$scope.data.exhibitions.indexOf(exh)].formResponse.length > 0)
                     return false;
+                exh.tsFrom = exh.activeFrom.valueOf() / 1000;
+                exh.tsUntil = exh.activeUntil.valueOf() / 1000;
                 if (typeof exh.picFile === 'undefined'){
                     newsFactory.postData({action : 21}, exh)
                         .success(function(data, status, headers, config) {
@@ -41966,10 +41973,10 @@ angular.module('manage.manageNews', ['ngFileUpload'])
                         url: appURL + 'processData.php?action=2',
                         method: 'POST',
                         fields: {
-                            exh: exh
+                            news: exh
                         },
                         file: exh.picFile,
-                        fileFormDataName: 'editExibition' + exh.nid
+                        fileFormDataName: 'editNewsExh' + exh.nid
                     });
                     exh.picFile.upload.then(function(response) {
                         $timeout(function() {
@@ -42003,14 +42010,16 @@ angular.module('manage.manageNews', ['ngFileUpload'])
                 $scope.newExh.formResponse = $scope.validateNews($scope.newExh);
                 if ($scope.newExh.formResponse.length > 0)
                     return false;
+                $scope.newExh.tsFrom = $scope.newExh.activeFrom.valueOf() / 1000;
+                $scope.newExh.tsUntil = $scope.newExh.activeUntil.valueOf() / 1000;
                 $scope.newExh.picFile.upload = Upload.upload({
                     url: appURL + 'processData.php?action=3',
                     method: 'POST',
                     fields: {
-                        exh: $scope.newExh
+                        news: $scope.newExh
                     },
                     file: $scope.newExh.picFile,
-                    fileFormDataName: 'addNewExhibition'
+                    fileFormDataName: 'addNewsExh'
                 });
                 $scope.newExh.picFile.upload.then(function(response) {
                     $timeout(function() {
