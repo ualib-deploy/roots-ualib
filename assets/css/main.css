@@ -8914,6 +8914,23 @@ footer .social-icons.nav-justified > li {
   display: table-cell;
   width: 1%;
 }
+.page-slice {
+  padding-top: 15px;
+  padding-bottom: 30px;
+  margin-bottom: 15px;
+}
+.slice {
+  text-align: center;
+}
+.slice.page-slice-striped:nth-child(odd) {
+  background-color: #f0f0f0;
+}
+.slice > h2 {
+  margin-bottom: 60px;
+}
+.slice > .nav-pills {
+  margin-bottom: 15px;
+}
 html,
 body {
   min-height: 100%;
@@ -9031,10 +9048,11 @@ footer > .sub-footer {
   background-color: rgba(102,0,0,.3);*/
 }
 .slice,
+.page-slice,
 .head-slice {
   padding-top: 15px;
   padding-bottom: 30px;
-  margin-bottom: 30px;
+  margin-bottom: 15px;
 }
 .slice {
   text-align: center;
