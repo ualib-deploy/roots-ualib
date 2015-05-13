@@ -8940,20 +8940,23 @@ body {
 }
 .home,
 .bento,
-.staffdir {
+.staffdir,
+.software {
   height: 100%;
   width: 100%;
 }
 .home > .wrap,
 .bento > .wrap,
-.staffdir > .wrap {
+.staffdir > .wrap,
+.software > .wrap {
   position: relative;
   margin-top: 111px;
 }
 @media (max-width: 991px) {
   .home > .wrap,
   .bento > .wrap,
-  .staffdir > .wrap {
+  .staffdir > .wrap,
+  .software > .wrap {
     margin-top: 0px;
   }
 }
@@ -8968,7 +8971,8 @@ body {
   padding-bottom: 15px;
 }
 .bento,
-.staffdir {
+.staffdir,
+.software {
   background-image: none;
   background-color: #ffffff;
 }
@@ -9826,7 +9830,6 @@ a[href^="https"]:not(.source-link):after {
 }
 .software-list-container .details ul {
   list-style-type: none;
-  padding-left: 0;
 }
 /*# sourceMappingURL=dist/ualib.softwareList.css.map */
 /*# sourceMappingURL=/wp-content/themes/roots/assets/css/main.css.map */
