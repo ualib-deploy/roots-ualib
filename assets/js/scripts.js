@@ -39729,7 +39729,7 @@ angular.module("manageNews/viewNewsEventsExhibitions.tpl.html", []).run(["$templ
     "            </div>\n" +
     "            <div class=\"media-body\">\n" +
     "                <h4 class=\"media-heading\">{{news.title}}</h4>\n" +
-    "                {{news.description}}\n" +
+    "                {{news.blurb}}\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
@@ -39753,7 +39753,7 @@ angular.module("manageNews/viewNewsEventsExhibitions.tpl.html", []).run(["$templ
     "            </div>\n" +
     "            <div class=\"media-body\">\n" +
     "                <h4 class=\"media-heading\">{{exh.title}}</h4>\n" +
-    "                {{exh.description}}\n" +
+    "                {{exh.blurb}}\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
