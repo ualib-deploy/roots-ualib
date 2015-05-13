@@ -39397,8 +39397,12 @@ angular.module("manageNews/manageExhibitionsList.tpl.html", []).run(["$templateC
     "                    </div>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-12\">\n" +
-    "                    <div class=\"col-md-12 form-group\">\n" +
-    "                        <label for=\"{{exh.sid}}_descr\">Description</label>\n" +
+    "                    <div class=\"col-md-3 form-group\">\n" +
+    "                        <label for=\"{{exh.sid}}_blurb\">Short Description</label>\n" +
+    "                        <textarea class=\"form-control\" rows=\"3\" id=\"{{exh.sid}}_blurb\" ng-model=\"exh.blurb\" ></textarea>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-9 form-group\">\n" +
+    "                        <label for=\"{{exh.sid}}_descr\">Detailed Description</label>\n" +
     "                        <textarea class=\"form-control\" rows=\"3\" id=\"{{exh.sid}}_descr\" ng-model=\"exh.description\" ></textarea>\n" +
     "                    </div>\n" +
     "                </div>\n" +
@@ -39460,8 +39464,12 @@ angular.module("manageNews/manageExhibitionsList.tpl.html", []).run(["$templateC
     "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-12\">\n" +
-    "            <div class=\"col-md-12 form-group\">\n" +
-    "                <label for=\"descr\">Description</label>\n" +
+    "            <div class=\"col-md-3 form-group\">\n" +
+    "                <label for=\"blurb\">Short Description</label>\n" +
+    "                <textarea class=\"form-control\" rows=\"3\" id=\"blurb\" ng-model=\"newExh.blurb\" ></textarea>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-9 form-group\">\n" +
+    "                <label for=\"descr\">Detailed Description</label>\n" +
     "                <textarea class=\"form-control\" rows=\"3\" id=\"descr\" ng-model=\"newExh.description\" ></textarea>\n" +
     "            </div>\n" +
     "        </div>\n" +
@@ -39601,8 +39609,12 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                    </div>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-12\">\n" +
-    "                    <div class=\"col-md-12 form-group\">\n" +
-    "                        <label for=\"{{news.sid}}_descr\">Description</label>\n" +
+    "                    <div class=\"col-md-3 form-group\">\n" +
+    "                        <label for=\"{{news.sid}}_blurb\">Short Description</label>\n" +
+    "                        <textarea class=\"form-control\" rows=\"3\" id=\"{{news.sid}}_blurb\" ng-model=\"news.blurb\" ></textarea>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-9 form-group\">\n" +
+    "                        <label for=\"{{news.sid}}_descr\">Detailed Description</label>\n" +
     "                        <textarea class=\"form-control\" rows=\"3\" id=\"{{news.sid}}_descr\" ng-model=\"news.description\" ></textarea>\n" +
     "                    </div>\n" +
     "                </div>\n" +
@@ -39664,8 +39676,12 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-12\">\n" +
-    "            <div class=\"col-md-12 form-group\">\n" +
-    "                <label for=\"descr\">Description</label>\n" +
+    "            <div class=\"col-md-3 form-group\">\n" +
+    "                <label for=\"blurb\">Short Description</label>\n" +
+    "                <textarea class=\"form-control\" rows=\"3\" id=\"blurb\" ng-model=\"newNews.blurb\" ></textarea>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-9 form-group\">\n" +
+    "                <label for=\"descr\">Detailed Description</label>\n" +
     "                <textarea class=\"form-control\" rows=\"3\" id=\"descr\" ng-model=\"newNews.description\" ></textarea>\n" +
     "            </div>\n" +
     "        </div>\n" +
