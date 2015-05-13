@@ -29,7 +29,8 @@
     "manage": "https://github.com/ualibweb/manage_ui.git",
     "databases": "https://github.com/ualibweb/databases_ui.git",
     "musicSearch": "https://github.com/ualibweb/musicSearch_ui.git",
-    "ualib_staffdir": "https://github.com/ualibweb/staffdir_ui.git"
+    "ualib_staffdir": "https://github.com/ualibweb/staffdir_ui.git",
+    "ualib-softwareList": "https://github.com/ualibweb/softwareList_ui.git"
   },
   "resolutions": {
     "angular": ">=1 <1.3.0",

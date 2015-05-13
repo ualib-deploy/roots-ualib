@@ -29,6 +29,8 @@ module.exports = function(grunt) {
         '<%= bower.directory %>/musicSearch/dist/musicSearch.js',
         '<%= bower.directory %>/ualib_staffdir/dist/staffdir-templates.js',
         '<%= bower.directory %>/ualib_staffdir/dist/staffdir.js',
+        '<%= bower.directory %>/ualib-softwareList/dist/ualib.softwareList-templates.js',
+        '<%= bower.directory %>/ualib-softwareList/dist/ualib.softwareList.js',
         'assets/js/ualib-templates.js',
         'assets/js/plugins/*.js',
         'assets/js/_*.js'
@@ -40,6 +42,7 @@ module.exports = function(grunt) {
         '<%= bower.directory %>/ualib-ui/src/**/*.less',
         '<%= bower.directory %>/ualib-hours/src/**/*.less',
         '<%= bower.directory %>/ualib_staffdir/dist/staffdir.css',
+        '<%= bower.directory %>/ualib-softwareList/dist/ualib.softwareList.css',
         '<%= bower.directory %>/manage/dist/manage.css',
         '<%= bower.directory %>/databases/dist/databases.css'
     ];

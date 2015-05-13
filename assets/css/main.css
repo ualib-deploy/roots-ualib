@@ -9811,6 +9811,25 @@ a[href^="https"]:not(.source-link):after {
   clear: left;
 }
 /*# sourceMappingURL=/wp-content/themes/roots/assets/css/main.css.map */
+.software-list-container .media img {
+  width: 64px;
+  height: 64px;
+}
+.software-list-container .software-versions {
+  padding-left: 15px;
+}
+.software-list-container .details > div {
+  padding-right: 15px;
+}
+.software-list-container .details .software-links a {
+  padding-right: 15px;
+}
+.software-list-container .details ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+/*# sourceMappingURL=dist/ualib.softwareList.css.map */
+/*# sourceMappingURL=/wp-content/themes/roots/assets/css/main.css.map */
 .sdOpen {
   background-color: #f9f9f9;
 }

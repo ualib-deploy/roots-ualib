@@ -7,7 +7,8 @@ angular.module('ualib', [
     'manage',
     'databases',
     'musicSearch',
-    'ualib.staffdir'
+    'ualib.staffdir',
+    'ualib.softwareList'
 ])
 
     .config(['$routeProvider', function($routeProvider, $location) {

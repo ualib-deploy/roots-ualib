@@ -44236,6 +44236,185 @@ angular.module('staffdir', ['ualib.staffdir']);
                 };
             }
         };
+    }]);;angular.module('ualib.softwareList.templates', ['software-list/software-list.tpl.html']);
+
+angular.module("software-list/software-list.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("software-list/software-list.tpl.html",
+    "<div class=\"page-header\"><h1>Software</h1></div>\n" +
+    "\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-3 col-md-push-9\">\n" +
+    "        <form>\n" +
+    "            <div class=\"form-group\">\n" +
+    "                <input type=\"text\" class=\"form-control\" ng-model=\"soft.search\" placeholder=\"Search software, locations, etc...\" ng-change=\"update()\">\n" +
+    "            </div>\n" +
+    "            <div class=\"form-group\">\n" +
+    "                <div class=\"btn-group btn-group-justified\">\n" +
+    "                    <label class=\"btn btn-default active\" ng-model=\"soft.os\" btn-radio=\"''\" ng-change=\"update()\" uncheckable>All</label>\n" +
+    "                    <label class=\"btn btn-default\" ng-model=\"soft.os\" btn-radio=\"'1'\" ng-change=\"update()\" uncheckable><span class=\"fa fa-fw fa-windows\"></span></label>\n" +
+    "                    <label class=\"btn btn-default\" ng-model=\"soft.os\" btn-radio=\"'2'\" ng-change=\"update()\" uncheckable><span class=\"fa fa-fw fa-apple\"></span></label>\n" +
+    "                    <label class=\"btn btn-default\" ng-model=\"soft.os\" btn-radio=\"'3'\" ng-change=\"update()\" uncheckable><span class=\"fa fa-fw fa-linux\"></span></label>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "            <div class=\"form-group hidden-xs\">\n" +
+    "                <h5>Locations</h5>\n" +
+    "                <div class=\"radio\">\n" +
+    "                    <label>\n" +
+    "                        <input type=\"radio\" value=\"\" ng-model=\"soft.loc\" ng-change=\"update()\" checked>\n" +
+    "                        All Locations\n" +
+    "                    </label>\n" +
+    "                </div>\n" +
+    "                <div class=\"radio\" ng-repeat=\"loc in software.locations\">\n" +
+    "                    <label>\n" +
+    "                        <input type=\"radio\" value=\"{{loc.name}}\" ng-model=\"soft.loc\" ng-change=\"update()\">\n" +
+    "                        {{loc.name}}\n" +
+    "                    </label>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "            <div class=\"form-group hidden-xs\">\n" +
+    "                <h5>Categories</h5>\n" +
+    "                <div class=\"radio\">\n" +
+    "                    <label>\n" +
+    "                        <input type=\"radio\" value=\"\" ng-model=\"soft.cat\" ng-change=\"update()\">\n" +
+    "                        All categories\n" +
+    "                    </label>\n" +
+    "                </div>\n" +
+    "                <div class=\"radio\" ng-repeat=\"cat in software.categories\">\n" +
+    "                    <label>\n" +
+    "                        <input type=\"radio\" value=\"{{cat.name}}\" ng-model=\"soft.cat\" ng-change=\"update()\">\n" +
+    "                        {{cat.name}}\n" +
+    "                    </label>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </form>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-9 col-md-pull-3 software-list-container\">\n" +
+    "        <div class=\"text-center\">\n" +
+    "            <pagination total-items=\"filteredSoft.length\" ng-model=\"soft.page\" max-size=\"10\" class=\"pagination-sm\" boundary-links=\"true\" items-per-page=\"soft.perPage\" ng-change=\"update()\" ng-if=\"filteredSoft.length > soft.perPage\"></pagination>\n" +
+    "        </div>\n" +
+    "\n" +
+    "        <div class=\"media\" ng-repeat=\"item in filteredSoft = (software.software | filter:soft.cat | filter:soft.loc | filter:soft.search | filterBy:['os']:soft.os)\">\n" +
+    "            <div class=\"media-left\">\n" +
+    "                <a href=\"#\">\n" +
+    "                    <img class=\"media-object\" ng-src=\"{{item.icon}}\" alt=\"{{item.title}}\" title=\"{{item.title}}\">\n" +
+    "                </a>\n" +
+    "            </div>\n" +
+    "            <div class=\"media-body\">\n" +
+    "                <h4 class=\"media-heading\">\n" +
+    "                    {{item.title}}\n" +
+    "                    <small ng-repeat=\"ver in item.versions\" class=\"software-versions\"><span class=\"fa fa-{{ver.osName}} text-muted\"></span> {{ver.version}}</small>\n" +
+    "                </h4>\n" +
+    "\n" +
+    "                <div class=\"details-context\">\n" +
+    "                    <span ng-repeat=\"loc in item.locations\">{{loc.name}}</span>\n" +
+    "                </div>\n" +
+    "                <div>\n" +
+    "                    {{item.description}}\n" +
+    "                </div>\n" +
+    "                <div class=\"details hidden-xs\">\n" +
+    "                    <div class=\"software-links pull-left\" style=\"color: #333;\">\n" +
+    "                        <h5>Tutorials &amp; Guides</h5>\n" +
+    "                        <a ng-repeat=\"link in item.links\" ng-href=\"{{link.url}}\">{{link.title}}</a>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"pull-left\">\n" +
+    "                        <h5>Who can use it</h5>\n" +
+    "                        <span ng-bind-html=\"item.details\"></span>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "\n" +
+    "        <div class=\"text-center\">\n" +
+    "            <pagination total-items=\"filteredSoft.length\" ng-model=\"soft.page\" max-size=\"10\" class=\"pagination-sm\" boundary-links=\"true\" items-per-page=\"soft.perPage\" ng-change=\"update()\" ng-if=\"filteredSoft.length > soft.perPage\"></pagination>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>");
+}]);
+;angular.module('ualib.softwareList', [
+    'ngRoute',
+    'ngResource',
+    'ngSanitize',
+    'angular.filter',
+    'ui.bootstrap',
+    'ualib.ui',
+    'ualib.softwareList.templates'
+]);;angular.module('ualib.softwareList')
+
+    .factory('softwareFactory', ['$resource', function($resource){
+        return $resource('https://wwwdev2.lib.ua.edu/softwareList/api/:software');
+    }]);;angular.module('ualib.softwareList')
+
+    .config(['$routeProvider', function($routeProvider){
+        $routeProvider
+            .when('/software', {
+                reloadOnSearch: false,
+                resolve: {
+                    software: function(softwareFactory){
+                        return softwareFactory.get({software: 'all'}, function(data){
+                            for (var i = 0, len = data.software.length; i < len; i++){
+
+                                // insert OS string names for easier ng-repeat filtering
+                                var os = [];
+                                for (var x = 0, l = data.software[i].versions.length; x < l; x++){
+                                    os.push(data.software[i].versions[x].os);
+                                    switch (data.software[i].versions[x].os){
+                                        case '3':
+                                            data.software[i].versions[x].osName = 'linux';
+                                            break;
+                                        case '2':
+                                            data.software[i].versions[x].osName = 'apple';
+                                            break;
+                                        default:
+                                            data.software[i].versions[x].osName = 'windows';
+                                    }
+                                }
+                                data.software[i].os = os.join('');
+                            }
+                            return data;
+                        }, function(data, status, headers, config) {
+                            console.log('ERROR: software list');
+                            console.log({
+                                data: data,
+                                status: status,
+                                headers: headers,
+                                config: config
+                            });
+                        });
+                    }
+                },
+                templateUrl: 'software-list/software-list.tpl.html',
+                controller: 'SoftwareListCtrl'
+            });
+    }])
+
+    .controller('SoftwareListCtrl', ['$scope', 'software', '$location', function($scope, software, $location){
+        var params = $location.search();
+        var soft = $scope.soft = {};
+        var defaults = {
+            os: '',
+            search: '',
+            cat: '',
+            loc: '',
+            page: 1,
+            perPage: 20
+        };
+        angular.copy(defaults, $scope.soft);
+        angular.extend($scope.soft, params);
+
+        $scope.software = software;
+
+
+        $scope.update = function(){
+            var q = {};
+            angular.forEach(soft, function(val, key){
+               if (angular.isDefined(val) && val !== ''){
+                   q[key] = val;
+               }
+            });
+            $location.search(q);
+        };
+
+
     }]);;angular.module('ualib.templates', ['../assets/js/_ualib-home.tpl.html']);
 
 angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -44378,7 +44557,8 @@ $(document).ready(UTIL.loadEvents);
     'manage',
     'databases',
     'musicSearch',
-    'ualib.staffdir'
+    'ualib.staffdir',
+    'ualib.softwareList'
 ])
 
     .config(['$routeProvider', function($routeProvider, $location) {
