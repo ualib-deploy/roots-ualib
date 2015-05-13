@@ -39102,7 +39102,7 @@ angular.module("manageHours/manageHours.tpl.html", []).run(["$templateCache", fu
     "</h2>\n" +
     "<h2 class=\"text-center\">{{selLib.name}}</h2>\n" +
     "\n" +
-    "<p><strong>*</strong> Set From and To hours to Midnight in order to indicate Open 24 hours.\n" +
+    "<p><strong>*</strong> Set From and To hours to Midnight in order to indicate Open 24 hours.</p>\n" +
     "\n" +
     "<tabset justified=\"true\">\n" +
     "    <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
