@@ -43394,9 +43394,9 @@ angular.module('manage.submittedForms', [])
     .controller('customFormCtrl', ['$scope', 'formFactory',
     function customFormCtrl($scope, formFactory){
 
-        $scope.submit = function(form){
-            console.dir(form);
-            formFactory.submitForm(form)
+        $scope.submit = function(event){
+            console.dir(event.target);
+            formFactory.submitForm(event.target)
                 .success(function(data) {
                     if (data == 1)
                         $scope.formResponse = "Your request submitted successfully, thank you!";
