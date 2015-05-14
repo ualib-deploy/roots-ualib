@@ -30714,7 +30714,7 @@ angular.module('ui.utils',  [
 ;/**!
  * AngularJS file upload/drop directive and service with progress and abort
  * @author  Danial  <danial.farid@gmail.com>
- * @version 4.2.0
+ * @version 4.2.1
  */
 (function () {
 
@@ -30741,7 +30741,7 @@ if (window.XMLHttpRequest && !window.XMLHttpRequest.__isFileAPIShim) {
 
 var ngFileUpload = angular.module('ngFileUpload', []);
 
-ngFileUpload.version = '4.2.0';
+ngFileUpload.version = '4.2.1';
 ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, $timeout) {
     function sendHttp(config) {
         config.method = config.method || 'POST';
@@ -31227,7 +31227,7 @@ function linkDrop(scope, elem, attr, ngModel, $parse, $timeout, $location) {
     }
 }
 
-ngFileUpload.directive('ngfSrc', ['$parse', '$timeout', '$parse', function ($parse, $timeout, $parse) {
+ngFileUpload.directive('ngfSrc', ['$parse', '$timeout', function ($parse, $timeout) {
 	return {
 		restrict: 'AE',
 		link: function (scope, elem, attr, file) {
@@ -31329,7 +31329,7 @@ function globStringToRegex(str) {
  * AngularJS file upload/drop directive and service with progress and abort
  * FileAPI Flash shim for old browsers not supporting FormData 
  * @author  Danial  <danial.farid@gmail.com>
- * @version 4.2.0
+ * @version 4.2.1
  */
 
 (function() {
@@ -38620,7 +38620,7 @@ angular.module('hours.list', [])
             templateUrl: 'list/list.tpl.html',
             controller: 'ListCtrl'
         }
-    }]);;angular.module('manage.templates', ['manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageNews/manageExhibitionsList.tpl.html', 'manageNews/manageNews.tpl.html', 'manageNews/manageNewsList.tpl.html', 'manageNews/viewNewsEventsExhibitions.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html']);
+    }]);;angular.module('manage.templates', ['manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageNews/manageExhibitionsList.tpl.html', 'manageNews/manageNews.tpl.html', 'manageNews/manageNewsList.tpl.html', 'manageNews/viewNewsEventsExhibitions.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html', 'submittedForms/submittedForms.tpl.html']);
 
 angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageDatabases/manageDatabases.tpl.html",
@@ -40634,6 +40634,82 @@ angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCach
     "\n" +
     "");
 }]);
+
+angular.module("submittedForms/submittedForms.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("submittedForms/submittedForms.tpl.html",
+    "<h2>Manage Submitted Forms</h2>\n" +
+    "\n" +
+    "<div>\n" +
+    "    <div class=\"row form-inline\">\n" +
+    "        <div class=\"form-group col-md-12\">\n" +
+    "            <label for=\"filterBy\">Filter <small>{{filteredForms.length}}</small> results by</label>\n" +
+    "            <div id=\"filterBy\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"titleFilter\">\n" +
+    "            </div>\n" +
+    "            <label for=\"sortBy\">Sort by</label>\n" +
+    "            <div id=\"sortBy\">\n" +
+    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"0\" ng-click=\"sortBy(0)\">\n" +
+    "                    Title\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[0].reverse\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[0].reverse\"></span>\n" +
+    "                </button>\n" +
+    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"1\" ng-click=\"sortBy(1)\">\n" +
+    "                    Status\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[1].reverse\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[1].reverse\"></span>\n" +
+    "                </button>\n" +
+    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"2\" ng-click=\"sortBy(2)\">\n" +
+    "                    Date Submitted\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[2].reverse\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[2].reverse\"></span>\n" +
+    "                </button>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"text-center\">\n" +
+    "        <pagination total-items=\"filteredForms.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
+    "                    boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredNews.length > 0\"></pagination>\n" +
+    "    </div>\n" +
+    "    <div class=\"row\"\n" +
+    "         ng-repeat=\"form in filteredForms = (data.forms | filter:{title:titleFilter}\n" +
+    "                                                         | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\n" +
+    "        | startFrom:(currentPage-1)*perPage | limitTo:perPage\"\n" +
+    "         ng-class=\"{sdOpen: form.show, sdOver: form.sid == mOver}\" ng-mouseover=\"setOver(form)\">\n" +
+    "        <div class=\"col-md-12\" ng-click=\"toggleForms(form)\">\n" +
+    "            <div class=\"col-md-10\">\n" +
+    "                <h4>\n" +
+    "                    <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"form.show\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-caret-down\" ng-show=\"form.show\"></span>\n" +
+    "                    {{form.title}}\n" +
+    "                    <small>{{form.status}}</small>\n" +
+    "                </h4>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2\">\n" +
+    "                <h5>{{form.created}}</h5>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-12\" ng-show=\"form.show\">\n" +
+    "            <div class=\"col-md-6 panel panel-default\" ng-repeat=\"field in form.fields\">\n" +
+    "                <div class=\"panel-heading\">\n" +
+    "                    <h4 class=\"panel-title\">{{field.name}}</h4>\n" +
+    "                </div>\n" +
+    "                <div class=\"panel-body\">\n" +
+    "                    {{field.value}}\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div class=\"text-center\">\n" +
+    "    <pagination total-items=\"filteredForms.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
+    "                boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredNews.length > 0\"></pagination>\n" +
+    "</div>\n" +
+    "<div class=\"text-center\">\n" +
+    "    <h4 ng-show=\"filteredForms.length == 0\">Nothing found</h4>\n" +
+    "</div>\n" +
+    "");
+}]);
 ;angular.module('manage', [
     'ngAnimate',
     'ui.bootstrap',
@@ -40647,7 +40723,8 @@ angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCach
     'manage.staffDirectory',
     'manage.manageDatabases',
     'manage.manageSoftware',
-    'manage.manageNews'
+    'manage.manageNews',
+    'manage.submittedForms'
 ])
 
     .constant('HOURS_MANAGE_URL', '//wwwdev2.lib.ua.edu/libhours2/')
@@ -40764,6 +40841,20 @@ angular.module('common.manage', [])
             postData: function(params, data){
                 params = angular.isDefined(params) ? params : {};
                 return $http({method: 'POST', url: url + "processData.php", params: params, data: data})
+            }
+        }
+    }])
+    .factory('formFactory', ['$http', 'FORMS_URL', function formFactory($http, url){
+        return {
+            getData: function(){
+                return $http({method: 'GET', url: url + "api/all", params: {}})
+            },
+            postData: function(params, data){
+                params = angular.isDefined(params) ? params : {};
+                return $http({method: 'POST', url: url + "processData.php", params: params, data: data})
+            },
+            submitForm: function(data){
+                return $http({method: 'GET', url: url + "api/process", params: {}, data: data})
             }
         }
     }])
@@ -43222,7 +43313,104 @@ angular.module('manage.staffDirectory', [])
             start = +start; //parse to int
             return input.slice(start);
         }
-    });angular.module('databases.templates', ['dbList/databasesMain.tpl.html', 'dbList/dbList.tpl.html', 'dbList/dbListMain.tpl.html']);
+    })
+angular.module('manage.submittedForms', [])
+    .controller('manageSubFormsCtrl', ['$scope', '$timeout', 'tokenFactory', 'formFactory',
+        function manageSubFormsCtrl($scope, $timeout, tokenFactory, formFactory){
+            $scope.data = {};
+            $scope.currentPage = 1;
+            $scope.maxPageSize = 10;
+            $scope.perPage = 20;
+            $scope.titleFilter = '';
+            $scope.sortModes = [
+                {by:'title', reverse:false},
+                {by:'status', reverse:false},
+                {by:'created', reverse:false}
+            ];
+            $scope.sortMode = 0;
+            $scope.sortButton = $scope.sortMode;
+            $scope.mOver = 0;
+
+            tokenFactory("CSRF-libForms");
+
+            formFactory.getData()
+                .success(function(data) {
+                    console.dir(data);
+                    for (var i = 0; i < data.forms.length; i++){
+                        data.forms[i].show = false;
+                        data.forms[i].class = "";
+                    }
+                    $scope.data = data;
+                })
+                .error(function(data, status, headers, config) {
+                    console.log(data);
+                });
+
+            $scope.setOver = function(form){
+                $scope.mOver = form.fid;
+            };
+            $scope.toggleForms = function(form){
+                $scope.data.forms[$scope.data.forms.indexOf(form)].show =
+                    !$scope.data.forms[$scope.data.forms.indexOf(form)].show;
+            };
+        }])
+
+    .directive('submittedFormsList', function($animate) {
+        return {
+            restrict: 'AC',
+            scope: {},
+            controller: 'manageSubFormsCtrl',
+            link: function(scope, elm, attrs){
+                //Preload the spinner element
+                var spinner = angular.element('<div id="loading-bar-spinner"><div class="spinner-icon"></div></div>');
+                //Preload the location of the boxe's title element (needs to be more dynamic in the future)
+                var titleElm = elm.find('h2');
+                //Enter the spinner animation, appending it to the title element
+                $animate.enter(spinner, titleElm[0]);
+
+                var loadingWatcher = scope.$watch(
+                    'data.totalTime',
+                    function(newVal, oldVal){
+                        if (newVal != oldVal){
+                            $animate.leave(spinner);
+                            console.log("Forms data loaded");
+                        }
+                    },
+                    true
+                );
+            },
+            templateUrl: 'submittedForms/submittedForms.tpl.html'
+        };
+    })
+    .filter('startFrom', function() {
+        return function(input, start) {
+            start = +start; //parse to int
+            if (typeof input == 'undefined')
+                return input;
+            return input.slice(start);
+        }
+    })
+
+    .controller('customFormCtrl', ['$scope', 'formFactory',
+    function customFormCtrl($scope, formFactory){
+
+        $scope.submit = function(form){
+            console.dir(form);
+            formFactory.submitForm(form)
+                .success(function(data) {
+                    if (data == 1)
+                        $scope.formResponse = "Your request submitted successfully, thank you!";
+                    else
+                        $scope.formResponse = "Error: " + data;
+                    console.log(data);
+                })
+                .error(function(data, status, headers, config) {
+                    $scope.formResponse = "Error! " + data;
+                    console.log(data);
+                });
+
+        };
+    }]);angular.module('databases.templates', ['dbList/databasesMain.tpl.html', 'dbList/dbList.tpl.html', 'dbList/dbListMain.tpl.html']);
 
 angular.module("dbList/databasesMain.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("dbList/databasesMain.tpl.html",
@@ -43365,17 +43553,16 @@ angular.module("dbList/dbList.tpl.html", []).run(["$templateCache", function($te
     "            <label for=\"{{db.id}}_Publisher\">Publisher</label>\n" +
     "            <p id=\"{{db.id}}_Publisher\">{{db.publisher}}</p>\n" +
     "        </div>\n" +
-    "        <div class=\"col-md-2 form-group\" ng-show=\"db.vendor\">\n" +
-    "            <label for=\"{{db.id}}_Vendor\">Vendor</label>\n" +
-    "            <p id=\"{{db.id}}_Vendor\">{{db.vendor}}</p>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-2 form-group\" ng-show=\"db.location\">\n" +
+    "        <div class=\"col-md-2 form-group\" ng-show=\"db.location && db.location != 'UA, Remote'\">\n" +
     "            <label for=\"{{db.id}}_Location\">Location</label>\n" +
     "            <p id=\"{{db.id}}_Location\">{{db.location}}</p>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-2 form-group\">\n" +
-    "            <label for=\"{{db.id}}_NotInEDS\">Not in EDS</label>\n" +
-    "            <p id=\"{{db.id}}_NotInEDS\">{{db.notInEDS}}<span ng-hide=\"db.notInEDS\">In EDS</span></p>\n" +
+    "            <label for=\"{{db.id}}_NotInEDS\">Scout Availability</label>\n" +
+    "            <p id=\"{{db.id}}_NotInEDS\">\n" +
+    "                <span ng-show=\"db.notInEDS\">Not Available</span>\n" +
+    "                <span ng-hide=\"db.notInEDS\">Available</span>\n" +
+    "            </p>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-2 form-group\">\n" +
     "            <label for=\"{{db.id}}_Full-text\">Fulltext</label>\n" +
@@ -43388,32 +43575,6 @@ angular.module("dbList/dbList.tpl.html", []).run(["$templateCache", function($te
     "        <div class=\"col-md-2 form-group\" ng-show=\"db.audience1 || db.audience2\">\n" +
     "            <label for=\"{{db.id}}_Audience1\">Audience</label>\n" +
     "            <p id=\"{{db.id}}_Audience1\">{{db.audience1}} <span ng-show=\"db.audience2\">, {{db.audience2}}</span></p>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-12\">\n" +
-    "            <div class=\"col-md-4 form-group\" ng-show=\"primarySubjects.length > 0\">\n" +
-    "                <label for=\"{{db.id}}_subjectsP\">Primary Subjects</label>\n" +
-    "                <ul class=\"list-group\" id=\"{{db.id}}_subjectsP\">\n" +
-    "                    <li class=\"list-group-item\" ng-repeat=\"subject in primarySubjects = (db.subjects | filter:{type:'1'})\">\n" +
-    "                        {{subject.subject}}\n" +
-    "                    </li>\n" +
-    "                </ul>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-4 form-group\" ng-show=\"secondarySubjects.length > 0\">\n" +
-    "                <label for=\"{{db.id}}_subjectsS\">Secondary Subjects</label>\n" +
-    "                <ul class=\"list-group\" id=\"{{db.id}}_subjectsS\">\n" +
-    "                    <li class=\"list-group-item\" ng-repeat=\"subject in secondarySubjects = (db.subjects | filter:{type:'2'})\">\n" +
-    "                        {{subject.subject}}\n" +
-    "                    </li>\n" +
-    "                </ul>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-4 form-group\">\n" +
-    "                <label for=\"{{db.id}}_types\">Media Types</label>\n" +
-    "                <ul class=\"list-group\" id=\"{{db.id}}_types\">\n" +
-    "                    <li class=\"list-group-item\" ng-repeat=\"type in db.types\">\n" +
-    "                        {{type.type}}\n" +
-    "                    </li>\n" +
-    "                </ul>\n" +
-    "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
