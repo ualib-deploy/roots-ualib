@@ -40854,7 +40854,7 @@ angular.module('common.manage', [])
                 return $http({method: 'POST', url: url + "processData.php", params: params, data: data})
             },
             submitForm: function(data){
-                return $http({method: 'GET', url: url + "api/process", params: {}, data: data})
+                return $http({method: 'POST', url: url + "api/process", params: {}, data: data})
             }
         }
     }])
