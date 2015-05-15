@@ -43396,7 +43396,8 @@ angular.module('manage.submittedForms', [])
 
         $scope.submit = function(event){
             var form = {};
-            form.length = event.target.length;
+            form.length = event.target.length - 1;
+            form.url = event.target.baseURI;
             //copy every field but the submit button
             for (var i = 0; i < event.target.length - 1; i++){
                 form[i] = {};
