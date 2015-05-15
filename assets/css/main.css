@@ -9632,10 +9632,10 @@ a[href^="https"]:not(.source-link):after {
   position: relative;
 }
 .tabset-vertical > .tab-content > .tab-pane {
-  position: absolute;
+  /*position: absolute;*/
   top: 0;
   width: 75%;
-  display: block;
+  /*display: block;*/
   opacity: 0;
   -webkit-transition: opacity  .2s 0s;
   -o-transition: opacity  .2s 0s;

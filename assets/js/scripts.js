@@ -32373,7 +32373,7 @@ angular.module("tabs/templates/tabset.tpl.html", []).run(["$templateCache", func
  * angular-ui-bootstrap
  * http://angular-ui.github.io/bootstrap/
 
- * Version: 0.12.1 - 2015-05-07
+ * Version: 0.12.1 - 2015-05-15
  * License: MIT
  */
 angular.module("ui.bootstrap", ["ui.bootstrap.tpls", "ui.bootstrap.transition","ui.bootstrap.collapse","ui.bootstrap.accordion","ui.bootstrap.alert","ui.bootstrap.bindHtml","ui.bootstrap.buttons","ui.bootstrap.carousel","ui.bootstrap.dateparser","ui.bootstrap.position","ui.bootstrap.datepicker","ui.bootstrap.modal","ui.bootstrap.pagination","ui.bootstrap.tooltip","ui.bootstrap.popover","ui.bootstrap.progressbar","ui.bootstrap.rating","ui.bootstrap.timepicker","ui.bootstrap.typeahead"]);
@@ -43404,9 +43404,9 @@ angular.module('manage.submittedForms', [])
                 form[i] = {};
                 form[i].name = event.target[i].name;
                 form[i].value = event.target[i].value;
-                if (event.target[i].type == 'checkbox')
+                if (event.target[i].type == 'checkbox' || event.target[i].type == 'radio')
                     if (!event.target[i].checked)
-                        form[i].value = "unchecked";
+                        form[i].value = "";
             }
             formFactory.submitForm(form)
                 .success(function(data) {
