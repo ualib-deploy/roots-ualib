@@ -43398,11 +43398,15 @@ angular.module('manage.submittedForms', [])
             var form = {};
             form.length = event.target.length - 1;
             form.url = event.target.baseURI;
+            console.dir(event.target);
             //copy every field but the submit button
             for (var i = 0; i < event.target.length - 1; i++){
                 form[i] = {};
                 form[i].name = event.target[i].name;
                 form[i].value = event.target[i].value;
+                if (event.target[i].type == 'checkbox')
+                    if (!event.target[i].checked)
+                        form[i].value = "unchecked";
             }
             formFactory.submitForm(form)
                 .success(function(data) {
