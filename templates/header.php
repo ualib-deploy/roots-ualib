@@ -8,7 +8,7 @@ if (defined('GROUP_ANY_WEBAPP'))
         $showAdminLink = true;
 }
 ?>
-<header role="banner">
+<header class="page-row" role="banner">
     <nav class="navbar navbar-static-top navbar-mega-inverse" role="navigation">
         <div class="container-fluid">
             <div class="navbar-header">

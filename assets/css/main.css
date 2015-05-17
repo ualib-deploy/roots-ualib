@@ -6429,15 +6429,19 @@ fieldset[disabled] .navbar-mega .btn-link:focus {
   border-top: none;
   border-radius: 0;
 }
+.navbar-mega .navbar-nav .dropdown-menu .yamm-content {
+  /*a {
+          &:hover,
+          &:focus {
+            background-color: darken(@gray-lighter, 5%);
+            text-decoration: none;
+          }
+        }*/
+}
 .navbar-mega .navbar-nav .dropdown-menu .yamm-content > h2:first-child {
   margin-top: 0;
   margin-bottom: 15px;
   border-bottom: 1px solid #dfdfdf;
-}
-.navbar-mega .navbar-nav .dropdown-menu .yamm-content a:hover,
-.navbar-mega .navbar-nav .dropdown-menu .yamm-content a:focus {
-  background-color: #ececec;
-  text-decoration: none;
 }
 @media (min-width: 768px) and (max-width: 991px) {
   .navbar-mega .navbar-nav .dropdown-menu .yamm-content .col-sm-6:nth-child(2n+1) {
@@ -6679,15 +6683,19 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
   border-top: none;
   border-radius: 0;
 }
+.navbar-mega-inverse .navbar-nav .dropdown-menu .yamm-content {
+  /*a {
+          &:hover,
+          &:focus {
+            background-color: darken(@gray-lighter, 5%);
+            text-decoration: none;
+          }
+        }*/
+}
 .navbar-mega-inverse .navbar-nav .dropdown-menu .yamm-content > h2:first-child {
   margin-top: 0;
   margin-bottom: 15px;
   border-bottom: 1px solid #dfdfdf;
-}
-.navbar-mega-inverse .navbar-nav .dropdown-menu .yamm-content a:hover,
-.navbar-mega-inverse .navbar-nav .dropdown-menu .yamm-content a:focus {
-  background-color: #ececec;
-  text-decoration: none;
 }
 @media (min-width: 768px) and (max-width: 991px) {
   .navbar-mega-inverse .navbar-nav .dropdown-menu .yamm-content .col-sm-6:nth-child(2n+1) {
@@ -8806,7 +8814,7 @@ button.close {
 a.service-card:hover,
 a.service-card:active,
 a.service-card:focus {
-  background-color: #f9f9f9;
+  background-color: #ececec;
   text-decoration: none;
   color: #333333;
 }
@@ -8834,7 +8842,7 @@ a.service-card:focus {
 .service-list > ul > li > a:hover,
 .service-list > ul > li > a:active,
 .service-list > ul > li > a:focus {
-  background-color: #f9f9f9;
+  background-color: #ececec;
   text-decoration: none;
   color: #333333;
 }
@@ -8876,6 +8884,21 @@ figure.alignnone {
     float: right;
     margin-left: 10px;
   }
+}
+html,
+body {
+  height: 100%;
+}
+body {
+  display: table;
+  width: 100%;
+}
+.page-row {
+  display: table-row;
+  height: 1px;
+}
+.page-row-expanded {
+  height: 100%;
 }
 .main {
   position: relative;
@@ -8945,18 +8968,18 @@ body {
   height: 100%;
   width: 100%;
 }
-.home > .wrap,
-.bento > .wrap,
-.staffdir > .wrap,
-.software > .wrap {
+.home > .wrap main,
+.bento > .wrap main,
+.staffdir > .wrap main,
+.software > .wrap main {
   position: relative;
   margin-top: 111px;
 }
 @media (max-width: 991px) {
-  .home > .wrap,
-  .bento > .wrap,
-  .staffdir > .wrap,
-  .software > .wrap {
+  .home > .wrap main,
+  .bento > .wrap main,
+  .staffdir > .wrap main,
+  .software > .wrap main {
     margin-top: 0px;
   }
 }

@@ -14,9 +14,9 @@
 
   <?php //if (is_front_page()) get_template_part('templates/home-tmp'); ?>
 
-  <div class="wrap">
-    <div class="container" role="document">
-      <div class="content row">
+  <div class="wrap page-row page-row-expanded">
+    <div role="document">
+      <div class="content container">
         <main class="main" role="main">
           <?php
               include roots_template_path();
