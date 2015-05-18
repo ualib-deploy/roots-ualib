@@ -22,7 +22,7 @@ function ualib_scripts() {
 remove_filter('the_content', 'wpautop');
 remove_filter('the_excerpt', 'wpautop');
 function myextensionTinyMCE($init) {
-    $ext = 'span[id|name|class|style],div[id|name|class|style]';
+    $ext = 'span[id|name|class|style],div[id|name|class|style],p[id|name|class|style]';
 
     if ( isset( $init['extended_valid_elements'] ) ) {
         $init['extended_valid_elements'] .= ',' . $ext;
