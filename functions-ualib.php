@@ -24,6 +24,11 @@ remove_filter('the_excerpt', 'wpautop');
 function myextensionTinyMCE($init) {
     $ext = 'span[id|name|class|style],div[id|name|class|style],p[id|name|class|style]';
 
+    if ( isset( $init['valid_elements'] ) ) {
+        $init['valid_elements'] .= ',' . $ext;
+    } else {
+        $init['valid_elements'] = $ext;
+    }
     if ( isset( $init['extended_valid_elements'] ) ) {
         $init['extended_valid_elements'] .= ',' . $ext;
     } else {
