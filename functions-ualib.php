@@ -21,6 +21,19 @@ function ualib_scripts() {
 //TinyMCE commands
 remove_filter('the_content', 'wpautop');
 remove_filter('the_excerpt', 'wpautop');
+function myextensionTinyMCE($init) {
+    $ext = 'span[id|name|class|style],div[id|name|class|style]';
+
+    if ( isset( $init['extended_valid_elements'] ) ) {
+        $init['extended_valid_elements'] .= ',' . $ext;
+    } else {
+        $init['extended_valid_elements'] = $ext;
+    }
+
+    return $init;
+}
+
+add_filter('tiny_mce_before_init', 'myextensionTinyMCE' );
 
 //disable tinyMCE visual editor for all users
 //add_filter('user_can_richedit' , create_function('' , 'return false;') , 50);
