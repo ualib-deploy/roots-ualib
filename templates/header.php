@@ -67,6 +67,32 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                 </div>
                                             </form>
                                         </tab>
+                                        <tab heading="EasyProxy Login">
+                                            <form action="https://login.libdata.lib.ua.edu/login" method="post" name="login">
+                                                <div class="form-group col-sm-6">
+                                                    <label for="formfields1">
+                                                        User Login
+                                                    </label>
+                                                    <input type="hidden" name="url" value="^U">
+                                                    <input type="text" class="form-control" id="formfields1" name="user" placeholder="Enter Your Login">
+                                                </div>
+                                                <div class="form-group col-sm-6">
+                                                    <label for="formfields2">Password</label>
+                                                    <input type="password" class="form-control" id="formfields2" name="pass" placeholder="Enter Password">
+                                                </div>
+                                                <div class="form-group col-sm-12">
+                                                    <label for="auth">Login Type</label>
+                                                    <select name="auth" id="auth" class="form-control">
+                                                        <option value="UA" selected="selected">myBama ID</option>
+                                                        <option value="UAB">BlazerID</option>
+                                                        <option value="UAH">Charger ID</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-sm-12">
+                                                     <button type="submit" class="btn btn-default" id="loginBtn">Login to EasyProxy</button>
+                                                </div>
+                                            </form>
+                                        </tab>
                                         <tab heading="Interlibrary Loan (ILLiad)">
                                             <form method="post" name="Logon" action="https://ua.illiad.oclc.org/illiad/illiad.dll">
                                                 <input type="hidden" name="ILLiadForm" value="Logon">
