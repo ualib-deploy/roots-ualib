@@ -22,18 +22,13 @@ function ualib_scripts() {
 remove_filter('the_content', 'wpautop');
 remove_filter('the_excerpt', 'wpautop');
 function myextensionTinyMCE($init) {
-    $ext = 'span[id|name|class|style],div[id|name|class|style],p[id|name|class|style]';
+    $valid = '*[*]';
+    $invalid = 'script';
 
-    if ( isset( $init['valid_elements'] ) ) {
-        $init['valid_elements'] .= ',' . $ext;
-    } else {
-        $init['valid_elements'] = $ext;
-    }
-    if ( isset( $init['extended_valid_elements'] ) ) {
-        $init['extended_valid_elements'] .= ',' . $ext;
-    } else {
-        $init['extended_valid_elements'] = $ext;
-    }
+    $init['valid_elements'] = $valid;
+    $init['extended_valid_elements'] = $valid;
+
+    $init['invalid_elements'] = $invalid;
 
     return $init;
 }
