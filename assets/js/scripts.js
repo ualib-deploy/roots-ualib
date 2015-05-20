@@ -42780,6 +42780,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                     var newLink = {};
                     newLink.linkid = -1;
                     newLink.sid = sw.sid;
+                    newLink.description = sw.newLink.description;
                     newLink.title = sw.newLink.title;
                     newLink.url = sw.newLink.url;
                     var isPresent = false;
