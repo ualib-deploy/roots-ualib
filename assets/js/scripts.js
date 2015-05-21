@@ -43569,7 +43569,7 @@ angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", f
     "                <h5>Title starts with</h5>\n" +
     "                <div class=\"facet-group alphanum-group\">\n" +
     "                    <div class=\"btn-group\">\n" +
-    "                        <label class=\"btn btn-default\" ng-repeat=\"na in numAlpha\" ng-model=\"db.startsWith\" btn-radio=\"'{{na}}'\" uncheckable>{{na}}</label>\n" +
+    "                        <label class=\"btn btn-default\" ng-repeat=\"na in numAlpha\" ng-model=\"db.startsWith\" btn-radio=\"'{{na}}'\" ng-disabled=\"startsWithDisabled[na]\" uncheckable>{{na}}</label>\n" +
     "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
@@ -43597,14 +43597,14 @@ angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", f
     "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
+    "            <div class=\"form-group\">\n" +
+    "                <button type=\"button\" class=\"btn btn-block btn-primary\" ng-click=\"resetFilters()\"><span class=\"fa fa-fw fa-refresh\"></span> Reset filters</button>\n" +
+    "            </div>\n" +
     "        </form>\n" +
     "    </div>\n" +
     "    <div class=\"col-md-9 col-md-pull-3 dbware-list-container\">\n" +
-    "        <!--<div class=\"text-center\">\n" +
-    "            <pagination total-items=\"totalItems\" ng-model=\"db.page\" max-size=\"10\" class=\"pagination-sm\" boundary-links=\"true\" items-per-page=\"db.perPage\" ng-change=\"update()\" ng-if=\"filteredDB.length > db.perPage\"></pagination>\n" +
-    "        </div>-->\n" +
     "\n" +
-    "        <div class=\"media\" ng-repeat=\"item in filteredDB | limitTo:20\">\n" +
+    "        <div class=\"media\" ng-repeat=\"item in filteredDB | after:(pager.page-1)*pager.perPage | limitTo:20\">\n" +
     "            <div class=\"media-body\">\n" +
     "                <h4 class=\"media-heading\">\n" +
     "                    <a ng-href=\"{{DB_PROXY_PREPEND_URL}}{{item.url}}\" title=\"{{item.title}}\"> {{item.title}}</a>  <small>{{item.coverage}}</small>\n" +
@@ -43624,9 +43624,12 @@ angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", f
     "            </div>\n" +
     "        </div>\n" +
     "\n" +
-    "\n" +
     "        <div class=\"text-center\">\n" +
-    "            <pagination total-items=\"filteredDB.length\" ng-model=\"db.page\" max-size=\"10\" class=\"pagination-sm\" boundary-links=\"true\" items-per-page=\"db.perPage\" ng-change=\"update()\" ng-if=\"filteredDB.length > db.perPage\"></pagination>\n" +
+    "            <pagination class=\"pagination-sm\" ng-model=\"pager.page\" total-items=\"pager.totalItems\" max-size=\"pager.maxSize\" boundary-links=\"true\" rotate=\"false\" items-per-page=\"pager.perPage\" ng-change=\"pageChange()\" ng-if=\"pager.totalItems > pager.perPage\"></pagination>\n" +
+    "        </div>\n" +
+    "\n" +
+    "        <div class=\"alert alert-warning text-center\" role=\"alert\" ng-show=\"pager.totalItems < 1\">\n" +
+    "            <h2>No results found <span ng-if=\"db.search\"> for \"{{db.search}}\"</span></h2>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>");
@@ -43637,6 +43640,7 @@ angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", f
     'ngAnimate',
     'ui.bootstrap',
     'angular.filter',
+    'duScroll',
     'ualib.ui',
     'databases.templates'
 ])
@@ -43661,7 +43665,6 @@ angular.module('ualib.databases')
                     databaseList: function(dbFactory){
                         return dbFactory.get({db: 'all'})
                             .$promise.then(function(data){
-                                var alphabet = "abcdefghijklmnopqrstuvwxyz".split("");
 
                                 return data;
                             }, function(data, status, headers, config) {
@@ -43680,8 +43683,9 @@ angular.module('ualib.databases')
             })
     }])
 
-    .controller('DatabasesListCtrl', ['$scope', 'databaseList', '$filter', function($scope, dbList, $filter){
+    .controller('DatabasesListCtrl', ['$scope', 'databaseList', '$filter' ,'$location' ,'$document', function($scope, dbList, $filter, $location, $document){
         var databases = [];
+
         $scope.numAlpha = "abcdefghijklmnopqrstuvwxyz".toUpperCase().split("");
         $scope.numAlpha.unshift('0-9');
 
@@ -43690,23 +43694,16 @@ angular.module('ualib.databases')
             $scope.subjects = data.subjects;
             $scope.types = data.types;
 
-            $scope.db = {
-                subjects: {},
-                types: {},
-                search: '',
-                startsWith: '',
-                page: 1,
-                perPage: 20
-            };
+            $scope.resetFilters();
+            paramsToScope();
 
             $scope.totalItems = data.totalRecords;
-            $scope.numPages = Math.ceil(data.totalRecords / $scope.db.perPage);
-
+            processStartsWith(databases);
             processFacets(databases);
         });
 
 
-        $scope.$watch('db', function(newVal, oldVal){
+        var filterWatcher = $scope.$watch('db', function(newVal, oldVal){
             var filtered = databases;
 
             filtered = $filter('orderBy')(filtered, function(item){
@@ -43716,7 +43713,7 @@ angular.module('ualib.databases')
             }, true);
 
             if (newVal.startsWith){
-                var sw = '^['+newVal.startsWith+']';
+                var sw = newVal.startsWith.indexOf('-') == -1 ? "^"+newVal.startsWith+".+$" : '^['+newVal.startsWith+'].+$';
                 filtered = $filter('filter')(filtered, function(item){
                     return $filter('test')(item.title, sw, 'i');
                 });
@@ -43728,10 +43725,17 @@ angular.module('ualib.databases')
             }
             filtered = $filter('orderBy')(filtered, 'title');
 
-            processFacets(filtered);
             $scope.filteredDB = filtered;
-            $scope.totalItems = $scope.filteredDB.length;
-            //$scope.numPages = Math.ceil($scope.totalItems / $scope.db.perpage);
+            $scope.pager.totalItems = $scope.filteredDB.length;
+            $scope.pager.page = 1;
+
+            var newParams = angular.extend({}, newVal, {page: $scope.pager.page});
+
+            processFacets(filtered);
+            scopeToParams(newParams);
+            if (newVal.startsWith === null || newVal.startsWith === ''){
+                processStartsWith(filtered);
+            }
 
         }, true);
 
@@ -43761,6 +43765,30 @@ angular.module('ualib.databases')
                 }).length === types.length;
         };
 
+        $scope.resetFilters = function(){
+            $scope.db = {
+                subjects: {},
+                types: {},
+                search: '',
+                startsWith: ''
+            };
+            $scope.pager = {
+                page: 1,
+                perPage: 20,
+                maxSize: 10,
+                totalItems: 0
+            };
+        };
+
+        $scope.pageChange = function(){
+            scopeToParams({page: $scope.pager.page});
+            $document.duScrollTo(0, 30, 500, function (t) { return (--t)*t*t+1 });
+        };
+
+        $scope.$on('$destroy', function(){
+            filterWatcher();
+        });
+
         function processFacets(databases){
             var subjAvail = [];
             var typeAvail = [];
@@ -43789,6 +43817,70 @@ angular.module('ualib.databases')
                 var t = type;
                 t.disabled = typeAvail.indexOf(t.tid) == -1;
                 return t;
+            });
+        }
+
+        function processStartsWith(databases){
+            $scope.startsWithDisabled = {};
+
+            $scope.numAlpha.map(function(startsWith){
+                var sw = startsWith.indexOf('-') == -1 ? "^"+startsWith+".+$" : '^['+startsWith+'].+$';
+                for (var i = 0, len = databases.length; i < len; i++){
+                    if ($filter('test')(databases[i].title, sw, 'i')){
+                        return;
+                    }
+                }
+                $scope.startsWithDisabled[startsWith] = true;
+            });
+        }
+
+        function scopeToParams(scopeVals){
+            angular.forEach(scopeVals, function(val, key){
+                var newParam = {};
+
+                if (angular.isDefined(val) && val !== ''){
+                    if (angular.isObject(val)){
+                        val = Object.keys(val).filter(function(f){
+                            return val[f];
+                        }).join(",");
+                       if (val.length > 0){
+                           $location.search(key, val);
+                       }
+                       else{
+                           $location.search(key, null);
+                       }
+                    }
+                    else if (!(key === 'search' && val.length < 3)){
+                        $location.search(key, val);
+                    }
+                    else{
+                        $location.search(key, null);
+                    }
+                }
+                else{
+                    $location.search(key, null);
+                }
+            });
+        }
+
+        function paramsToScope(){
+            var params = $location.search();
+            angular.forEach(params, function(val, key){
+                if (key === 'page'){
+                    $scope.pager.page = val;
+                }
+                else {
+                    if (angular.isDefined(val) && val !== ''){
+                        if (key == 'subjects' || key == 'types'){
+                            var filters = {};
+                            val.split(',').forEach(function(filter){
+                                filters[filter] = true;
+                            });
+                            val = filters;
+                        }
+                        $scope.db[key] = val;
+                    }
+                }
             });
         }
     }]);
