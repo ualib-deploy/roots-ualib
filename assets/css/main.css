@@ -8964,14 +8964,16 @@ body {
 .home,
 .bento,
 .staffdir,
-.software {
+.software,
+.databases {
   height: 100%;
   width: 100%;
 }
 .home > .wrap main,
 .bento > .wrap main,
 .staffdir > .wrap main,
-.software > .wrap main {
+.software > .wrap main,
+.databases > .wrap main {
   position: relative;
   margin-top: 111px;
 }
@@ -8979,7 +8981,8 @@ body {
   .home > .wrap main,
   .bento > .wrap main,
   .staffdir > .wrap main,
-  .software > .wrap main {
+  .software > .wrap main,
+  .databases > .wrap main {
     margin-top: 0px;
   }
 }
@@ -8995,7 +8998,8 @@ body {
 }
 .bento,
 .staffdir,
-.software {
+.software,
+.databases {
   background-image: none;
   background-color: #ffffff;
 }
@@ -9863,7 +9867,22 @@ a[href^="https"]:not(.source-link):after {
   background-color: #f9f9f9;
 }
 /*# sourceMappingURL=/wp-content/themes/roots/assets/css/main.css.map */
-.dbStatus {
-  color: #cc5d30;
+.facets-form .facet-group {
+  max-height: 300px;
+  overflow-y: auto;
 }
+.facets-form .facet-group.alphanum-group .btn-group {
+  text-align: center;
+}
+.facets-form .facet-group.alphanum-group .btn-group > .btn {
+  float: none;
+  padding: 3px 6px;
+  border-color: transparent;
+  color: #993333;
+}
+.facets-form .facet-group.alphanum-group .btn-group > .btn:first-child:not(:last-child):not(.dropdown-toggle) {
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0;
+}
+/*# sourceMappingURL=dist/databases-ui.css.map */
 /*# sourceMappingURL=main.css.map */

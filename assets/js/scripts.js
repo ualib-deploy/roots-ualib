@@ -43552,562 +43552,248 @@ angular.module('manage.submittedForms', [])
                 });
 
         };
-    }]);angular.module('databases.templates', ['dbList/databasesMain.tpl.html', 'dbList/dbList.tpl.html', 'dbList/dbListMain.tpl.html']);
+    }]);angular.module('databases.templates', ['databases/databases-list.tpl.html']);
 
-angular.module("dbList/databasesMain.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("dbList/databasesMain.tpl.html",
-    "<div ng-view></div>");
-}]);
-
-angular.module("dbList/dbList.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("dbList/dbList.tpl.html",
-    "<div class=\"row form-inline\">\n" +
-    "    <div class=\"col-md-12 form-group text-left\">\n" +
-    "        <label for=\"filterBy\">Filter <strong>{{filteredDB.length}}</strong> results by</label>\n" +
-    "        <div id=\"filterBy\">\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Title starts with\" ng-model=\"dbList.titleStartFilter\"\n" +
-    "                   ng-change=\"\">\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"dbList.titleFilter\"\n" +
-    "                   ng-change=\"\">\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Description contains\" ng-model=\"dbList.descrFilter\"\n" +
-    "                   ng-change=\"\">\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Subjects contain\" ng-model=\"dbList.subjectFilter\"\n" +
-    "                   ng-change=\"\">\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Media Types contain\" ng-model=\"dbList.typeFilter\"\n" +
-    "                   ng-change=\"\">\n" +
-    "            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"updateURL()\">\n" +
-    "                Update URL\n" +
-    "            </button>\n" +
-    "        </div>\n" +
-    "    </div>\n" +
-    "    <div class=\"cold-md-12 form-group\">\n" +
-    "        <h4 ng-show=\"selSubj.length > 0 || selTypes.length > 0\">\n" +
+angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("databases/databases-list.tpl.html",
+    "<div class=\"page-header\"><h1>Databases</h1></div>\n" +
     "\n" +
-    "            <label class=\"btn btn-default\" btn-checkbox ng-repeat=\"subject in selSubj = (dbList.subjects | filter:{selected:'true'})\"\n" +
-    "                   ng-model=\"subject.selected\" ng-click=\"updateStatus(subject)\">\n" +
-    "                {{subject.subject}}<span class=\"fa fa-fw fa-close\"></span>\n" +
-    "            </label>\n" +
-    "            <span ng-show=\"selTypes.length > 0\">\n" +
-    "                <span ng-show=\"selSubj.length > 0\"> | </span>\n" +
-    "            </span>\n" +
-    "            <label class=\"btn btn-default\" btn-checkbox ng-repeat=\"type in selTypes = (dbList.types | filter:{selected:'true'})\"\n" +
-    "                   ng-model=\"type.selected\" ng-click=\"updateTypes(type)\">\n" +
-    "                {{type.type}}<span class=\"fa fa-fw fa-close\"></span>\n" +
-    "            </label>\n" +
-    "        </h4>\n" +
-    "        <label for=\"selectST\">\n" +
-    "            <span class=\"fa fa-fw fa-caret-right\" ng-show=\"!dbList.subTypSelOpen\"></span>\n" +
-    "            <a ng-click=\"toggleSubjectsTypes(true)\" ng-show=\"!dbList.subTypSelOpen\">\n" +
-    "                Open Subjects and Media Types pane\n" +
-    "            </a>\n" +
-    "            <span class=\"fa fa-fw fa-caret-down\" ng-show=\"dbList.subTypSelOpen\"></span>\n" +
-    "            <a ng-click=\"toggleSubjectsTypes(false)\" ng-show=\"dbList.subTypSelOpen\">\n" +
-    "                Close Subjects and Media Types pane\n" +
-    "            </a>\n" +
-    "        </label>\n" +
-    "        <div id=\"selectST\" ng-show=\"isOpenSubTyp()\">\n" +
-    "            <div class=\"col-md-8\">\n" +
-    "                <div class=\"text-center\">\n" +
-    "                    <button type=\"button\" class=\"btn btn-primary\" ng-click=\"selectAllSubjects(false)\">\n" +
-    "                        Deselect All Subjects\n" +
-    "                    </button>\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-3 col-md-push-9\">\n" +
+    "        <form class=\"facets-form\">\n" +
+    "            <div class=\"form-group\">\n" +
+    "                <input type=\"text\" class=\"form-control\" ng-model=\"db.search\" placeholder=\"Search databases\">\n" +
+    "            </div>\n" +
+    "\n" +
+    "            <div class=\"form-group hidden-xs\">\n" +
+    "                <h5>Title starts with</h5>\n" +
+    "                <div class=\"facet-group alphanum-group\">\n" +
+    "                    <div class=\"btn-group\">\n" +
+    "                        <label class=\"btn btn-default\" ng-repeat=\"na in numAlpha\" ng-model=\"db.startsWith\" btn-radio=\"'{{na}}'\" uncheckable>{{na}}</label>\n" +
+    "                    </div>\n" +
     "                </div>\n" +
-    "                <label class=\"btn btn-default\" btn-checkbox ng-repeat=\"subject in dbList.subjects\"\n" +
-    "                        ng-model=\"subject.selected\" ng-click=\"updateStatus(subject)\">\n" +
-    "                    {{subject.subject}}\n" +
-    "                </label>\n" +
     "            </div>\n" +
-    "            <div class=\"col-md-4\">\n" +
-    "                <div class=\"text-center\">\n" +
-    "                    <button type=\"button\" class=\"btn btn-primary\" ng-click=\"selectAllTypes(false)\">\n" +
-    "                        Deselect All Types\n" +
-    "                    </button>\n" +
+    "\n" +
+    "            <div class=\"form-group hidden-xs\">\n" +
+    "                <h5>Subjects</h5>\n" +
+    "                <div class=\"facet-group\">\n" +
+    "                    <div class=\"radio\" ng-class=\"{'disabled': subj.disabled}\" ng-repeat=\"subj in subjects\">\n" +
+    "                        <label>\n" +
+    "                            <input type=\"checkbox\" ng-model=\"db.subjects[subj.subject]\" ng-disabled=\"subj.disabled\">\n" +
+    "                            {{subj.subject}}\n" +
+    "                        </label>\n" +
+    "                    </div>\n" +
     "                </div>\n" +
-    "                <label class=\"btn btn-default\" btn-checkbox ng-repeat=\"type in dbList.types\"\n" +
-    "                        ng-model=\"type.selected\" ng-click=\"updateTypes(type)\">\n" +
-    "                    {{type.type}}\n" +
-    "                </label>\n" +
     "            </div>\n" +
-    "        </div>\n" +
-    "    </div>\n" +
-    "</div>\n" +
     "\n" +
-    "<div class=\"text-center\">\n" +
-    "    <pagination total-items=\"filteredDB.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
-    "                boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\"></pagination>\n" +
-    "</div>\n" +
-    "<div class=\"row\"\n" +
-    "     ng-repeat=\"db in filteredDB = (dbList.databases | filter:{title:dbList.titleStartFilter}:startTitle\n" +
-    "                                                     | filter:{title:dbList.titleFilter}:compareTitle\n" +
-    "                                                     | filter:{description:dbList.descrFilter}:compareTitle\n" +
-    "                                                     | filter:{subjects:dbList.subjectFilter}:compareTitle\n" +
-    "                                                     | filter:{types:dbList.typeFilter}:compareTitle\n" +
-    "                                                     | filter:{disabled:0}\n" +
-    "                                                     | filter:{subjects:dbList.selectedSubjects}:filterSubjects\n" +
-    "                                                     | filter:{types:dbList.selectedTypes}:filterTypes\n" +
-    "                                                     | orderBy:['-primary','title'])\n" +
-    "    | startFrom:(currentPage-1)*perPage | limitTo:perPage\"\n" +
-    "     ng-class=\"{sdOpen: db.show, sdOver: db.id == mOver}\" ng-mouseover=\"setOver(db)\">\n" +
-    "    <div class=\"col-md-12\" ng-click=\"toggleDB(db)\">\n" +
-    "        <div class=\"col-md-11\">\n" +
-    "            <h4>\n" +
-    "                <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"db.show\"></span>\n" +
-    "                <span class=\"fa fa-fw fa-caret-down\" ng-show=\"db.show\"></span>\n" +
-    "                <a href=\"{{db.url}}\" ng-hide=\"db.tmpDisabled == '1'\">{{db.title}}</a>\n" +
-    "                <span ng-show=\"db.tmpDisabled == '1'\">{{db.title}}</span>\n" +
-    "                <small>{{db.coverage}}</small>\n" +
-    "                <span class=\"dbStatus\">{{db.status}}</span>\n" +
-    "            </h4>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-1\">\n" +
-    "            <span ng-show=\"db.primary && dbList.selectedSubjects.length > 0\" popover=\"Recommended\" popover-trigger=\"mouseenter\">\n" +
-    "                <span class=\"fa fa-fw fa-check\"></span>\n" +
-    "            </span>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-12\">\n" +
-    "            <div class=\"col-md-1\">\n" +
+    "            <div class=\"form-group hidden-xs\">\n" +
+    "                <h5>Types</h5>\n" +
+    "                <div class=\"facet-group\">\n" +
+    "                    <div class=\"radio\" ng-class=\"{'disabled': type.disabled}\" ng-repeat=\"type in types\">\n" +
+    "                        <label>\n" +
+    "                            <input type=\"checkbox\" ng-model=\"db.types[type.type]\"  ng-disabled=\"type.disabled\">\n" +
+    "                            {{type.type}}\n" +
+    "                        </label>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
     "            </div>\n" +
-    "            <div class=\"col-md-10\">\n" +
-    "                <p ng-bind-html=\"db.description\" style=\"text-align: justify;\"></p>\n" +
-    "                <p ng-show=\"primarySubj.length > 0\">\n" +
-    "                    <small ng-repeat=\"subject in primarySubj = (db.subjects | filter:{type:'1'})\">\n" +
-    "                        {{subject.subject}}\n" +
-    "                        <span ng-hide=\"$index == primarySubj.length-1\">\n" +
-    "                            <small><span class=\"fa fa-fw fa-ellipsis-h\"></span></small>\n" +
-    "                        </span>\n" +
-    "                    </small>\n" +
-    "                </p>\n" +
-    "                <p>\n" +
-    "                    <small ng-repeat=\"type in db.types\">\n" +
-    "                        {{type.type}}\n" +
-    "                        <span ng-hide=\"$index == db.types.length-1\">\n" +
-    "                            <small><span class=\"fa fa-fw fa-ellipsis-h\"></span></small>\n" +
-    "                        </span>\n" +
-    "                    </small>\n" +
-    "                </p>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-1\">\n" +
-    "            </div>\n" +
-    "        </div>\n" +
+    "        </form>\n" +
     "    </div>\n" +
-    "    <div class=\"col-md-12\" ng-show=\"db.show\">\n" +
-    "        <div class=\"col-md-2 form-group\" ng-show=\"db.publisher\">\n" +
-    "            <label for=\"{{db.id}}_Publisher\">Publisher</label>\n" +
-    "            <p id=\"{{db.id}}_Publisher\">{{db.publisher}}</p>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-2 form-group\" ng-show=\"db.location && db.location != 'UA, Remote'\">\n" +
-    "            <label for=\"{{db.id}}_Location\">Location</label>\n" +
-    "            <p id=\"{{db.id}}_Location\">{{db.location}}</p>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-2 form-group\">\n" +
-    "            <label for=\"{{db.id}}_NotInEDS\">Scout Availability</label>\n" +
-    "            <p id=\"{{db.id}}_NotInEDS\">\n" +
-    "                <span ng-show=\"db.notInEDS\">Not Available</span>\n" +
-    "                <span ng-hide=\"db.notInEDS\">Available</span>\n" +
-    "            </p>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-2 form-group\">\n" +
-    "            <label for=\"{{db.id}}_Full-text\">Fulltext</label>\n" +
-    "            <p id=\"{{db.id}}_Full-text\">{{db.hasFullText}}<span ng-hide=\"db.hasFullText\">No</span></p>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-2 form-group\" ng-show=\"db.presentedBy\">\n" +
-    "            <label for=\"{{db.id}}_presented\">Presented by</label>\n" +
-    "            <p id=\"{{db.id}}_presented\">{{db.presentedBy}}</p>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-2 form-group\" ng-show=\"db.audience1 || db.audience2\">\n" +
-    "            <label for=\"{{db.id}}_Audience1\">Audience</label>\n" +
-    "            <p id=\"{{db.id}}_Audience1\">{{db.audience1}} <span ng-show=\"db.audience2\">, {{db.audience2}}</span></p>\n" +
-    "        </div>\n" +
-    "    </div>\n" +
-    "</div>\n" +
-    "<div class=\"text-center\">\n" +
-    "    <pagination total-items=\"filteredDB.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
-    "                boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\"></pagination>\n" +
-    "</div>\n" +
+    "    <div class=\"col-md-9 col-md-pull-3 dbware-list-container\">\n" +
+    "        <!--<div class=\"text-center\">\n" +
+    "            <pagination total-items=\"totalItems\" ng-model=\"db.page\" max-size=\"10\" class=\"pagination-sm\" boundary-links=\"true\" items-per-page=\"db.perPage\" ng-change=\"update()\" ng-if=\"filteredDB.length > db.perPage\"></pagination>\n" +
+    "        </div>-->\n" +
     "\n" +
-    "");
+    "        <div class=\"media\" ng-repeat=\"item in filteredDB | limitTo:20\">\n" +
+    "            <div class=\"media-body\">\n" +
+    "                <h4 class=\"media-heading\">\n" +
+    "                    <a ng-href=\"{{DB_PROXY_PREPEND_URL}}{{item.url}}\" title=\"{{item.title}}\"> {{item.title}}</a>  <small>{{item.coverage}}</small>\n" +
+    "                </h4>\n" +
+    "                <div class=\"details-context\">\n" +
+    "                    <span ng-repeat=\"subj in item.subjects | where:{type:1}\">{{subj.subject}}</span>\n" +
+    "                </div>\n" +
+    "                <div class=\"details-context\">\n" +
+    "                    <span ng-repeat=\"type in item.types\">{{type.type}}</span>\n" +
+    "                </div>\n" +
+    "                <p>{{item.description}}</p>\n" +
+    "\n" +
+    "                <div class=\"details-context\">\n" +
+    "                    <span ng-if=\"item.audience1\">{{item.audience1}}</span>\n" +
+    "                    <span ng-if=\"item.audience2\">{{item.audience2}}</span>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "\n" +
+    "\n" +
+    "        <div class=\"text-center\">\n" +
+    "            <pagination total-items=\"filteredDB.length\" ng-model=\"db.page\" max-size=\"10\" class=\"pagination-sm\" boundary-links=\"true\" items-per-page=\"db.perPage\" ng-change=\"update()\" ng-if=\"filteredDB.length > db.perPage\"></pagination>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>");
 }]);
-
-angular.module("dbList/dbListMain.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("dbList/dbListMain.tpl.html",
-    "<div databases-list></div>\n" +
-    "");
-}]);
-;angular.module('databases', [
+;angular.module('ualib.databases', [
     'ngRoute',
+    'ngResource',
     'ngAnimate',
     'ui.bootstrap',
-    'databases.common',
-    'databases.templates',
-    'databases.list'
+    'angular.filter',
+    'ualib.ui',
+    'databases.templates'
 ])
 
-    .constant('DATABASES_API_URL', '//wwwdev2.lib.ua.edu/databases/api/')
-    .constant('PROXY_PREPEND_URL', 'http://libdata.lib.ua.edu/login?url=')
-
-    .factory('dbFactory', ['$http', 'DATABASES_API_URL', function dbFactory($http, url){
-        return {
-            getData: function(request){
-                return $http({method: 'GET', url: url + request, params: {}})
-            }
-        }
-    }])
-
-    .controller('mainDatabasesCtrl', ['$scope', '$routeParams', 'dbFactory', 'PROXY_PREPEND_URL',
-    function($scope, $routeParams, dbFactory, proxyURL){
-        $scope.dbList = {};
-
-        //need to load all databases only once
-        dbFactory.getData("all")
-            .success(function(data){
-                for (var i = 0; i < data.subjects.length; i++)
-                    data.subjects[i].selected = false;
-                for (var i = 0; i < data.types.length; i++)
-                    data.types[i].selected = false;
-
-                for (var i = 0; i < data.databases.length; i++){
-                    data.databases[i].show = false;
-                    data.databases[i].primary = true;
-                    data.databases[i].class = "";
-                    if (data.databases[i].auth == '1')
-                        data.databases[i].url = proxyURL + data.databases[i].url;
-                }
-                $scope.dbList = data;
-                $scope.dbList.selectedSubjects = [];
-                $scope.dbList.selectedTypes = [];
-                $scope.dbList.subTypSelOpen = false;
-
-                if (typeof $routeParams.t !== 'undefined')
-                    $scope.dbList.titleFilter = $routeParams.t;
-                else
-                    $scope.dbList.titleFilter = '';
-
-                if (typeof $routeParams.ts !== 'undefined')
-                    $scope.dbList.titleStartFilter = $routeParams.ts;
-                else
-                    $scope.dbList.titleStartFilter = '';
-
-                if (typeof $routeParams.d !== 'undefined')
-                    $scope.dbList.descrFilter = $routeParams.d;
-                else
-                    $scope.dbList.descrFilter = '';
-
-                if (typeof $routeParams.fs !== 'undefined')
-                    $scope.dbList.subjectFilter = $routeParams.fs;
-                else
-                    $scope.dbList.subjectFilter = '';
-
-                if (typeof $routeParams.ft !== 'undefined')
-                    $scope.dbList.typeFilter = $routeParams.ft;
-                else
-                    $scope.dbList.typeFilter = '';
-
-                if (typeof $routeParams.sub !== 'undefined'){
-                    var subNames = $routeParams.sub.split("/");
-                    for (var i = 0; i < subNames.length; i++)
-                        for (var j = 0; j < $scope.dbList.subjects.length; j++)
-                            if (subNames[i] === $scope.dbList.subjects[j].subject){
-                                if ($scope.dbList.selectedSubjects.indexOf($scope.dbList.subjects[j]) < 0)
-                                    $scope.dbList.selectedSubjects.push($scope.dbList.subjects[j]);
-                                $scope.dbList.subjects[j].selected = true;
-                            }
-                }
-                if (typeof $routeParams.typ !== 'undefined'){
-                    var subNames = $routeParams.typ.split("/");
-                    for (var i = 0; i < subNames.length; i++)
-                        for (var j = 0; j < $scope.dbList.types.length; j++)
-                            if (subNames[i] === $scope.dbList.types[j].type){
-                                if ($scope.dbList.selectedTypes.indexOf($scope.dbList.types[j]) < 0)
-                                    $scope.dbList.selectedTypes.push($scope.dbList.types[j]);
-                                $scope.dbList.types[j].selected = true;
-                            }
-                }
-                if (typeof $routeParams.o !== 'undefined')
-                    if ($routeParams.o.indexOf('true') === 0)
-                        $scope.dbList.subTypSelOpen = true;
-                $scope.updatePrimaryStatus();
-                console.dir($scope.dbList);
-            })
-            .error(function(msg){
-                console.log(msg);
-            });
-
-        $scope.updatePrimaryStatus = function(){
-            if ($scope.dbList.selectedSubjects.length == 0)
-                for (var i = 0; i < $scope.dbList.databases.length; i++)
-                    $scope.dbList.databases[i].primary = true;
-            else
-                for (var i = 0; i < $scope.dbList.databases.length; i++){
-                    $scope.dbList.databases[i].primary = true;
-                    for (var t = 0; t < $scope.dbList.selectedSubjects.length; t++){
-                        var isPresent = false;
-                        for (var j = 0; j < $scope.dbList.databases[i].subjects.length; j++)
-                            if ($scope.dbList.selectedSubjects[t].sid === $scope.dbList.databases[i].subjects[j].sid &&
-                                $scope.dbList.databases[i].subjects[j].type == '1'){
-                                isPresent = true;
-                                break;
-                            }
-                        if (!isPresent){
-                            $scope.dbList.databases[i].primary = false;
-                            break;
-                        }
-                    }
-                }
-
-        };
-    }])
-    .directive('databasesMain', [function databasesMain(){
-        return {
-            restrict: 'A',
-            controller: 'mainDatabasesCtrl',
-            link: function(scope, elm, attrs){
-            },
-            templateUrl: 'dbList/databasesMain.tpl.html'
-        }
-    }])
+    .constant('DB_PROXY_PREPEND_URL', 'http://libdata.lib.ua.edu/login?url=');
 
 
 
 
+angular.module('ualib.databases')
 
-angular.module('databases.common', [
-    'common.databases'
-])
-angular.module('common.databases', [])
+    .factory('dbFactory', ['$resource', function($resource){
+        return $resource('https://wwwdev2.lib.ua.edu/databases/api/:db');
+    }]);
+angular.module('ualib.databases')
 
-
-angular.module('databases.list', ['ngSanitize'])
-    .config(['$routeProvider', function($routeProvider) {
+    .config(['$routeProvider', function($routeProvider){
         $routeProvider
-            .when('/databases/:t?', {
-                templateUrl: 'dbList/dbListMain.tpl.html',
-                controller: 'databasesCtrl'
-            })
-            .when('/databases/:t?/ts/:ts?/d/:d?/fs/:fs?/ft/:ft?', {
-                templateUrl: 'dbList/dbListMain.tpl.html',
-                controller: 'databasesCtrl'
-            })
-            .when('/databases/:t?/ts/:ts?/d/:d?/fs/:fs?/sub/:sub*\/typ/:typ*\/ft/:ft?/o/:o', {
-                templateUrl: 'dbList/dbListMain.tpl.html',
-                controller: 'databasesCtrl'
-            })
-            .when('/databases/:t?/ts/:ts?/d/:d?/fs/:fs?/sub/:sub*\/ft/:ft?/o/:o', {
-                templateUrl: 'dbList/dbListMain.tpl.html',
-                controller: 'databasesCtrl'
-            })
-            .when('/databases/:t?/ts/:ts?/d/:d?/fs/:fs?/typ/:typ*\/ft/:ft?/o/:o', {
-                templateUrl: 'dbList/dbListMain.tpl.html',
-                controller: 'databasesCtrl'
+            .when('/databases', {
+                reloadOnSearch: false,
+                resolve: {
+                    databaseList: function(dbFactory){
+                        return dbFactory.get({db: 'all'})
+                            .$promise.then(function(data){
+                                var alphabet = "abcdefghijklmnopqrstuvwxyz".split("");
+
+                                return data;
+                            }, function(data, status, headers, config) {
+                                console.log('ERROR: databases');
+                                console.log({
+                                    data: data,
+                                    status: status,
+                                    headers: headers,
+                                    config: config
+                                });
+                            });
+                    }
+                },
+                templateUrl: 'databases/databases-list.tpl.html',
+                controller: 'DatabasesListCtrl'
             })
     }])
-    .controller('databasesCtrl', ['$scope', '$location', '$rootScope',
-        function($scope, $location, $rootScope){
 
-            $scope.updateURL = function(){
-                var newPath = '/databases/';
-                if ($scope.dbList.titleFilter)
-                    newPath = newPath + $scope.dbList.titleFilter + '/';
-                newPath += 'ts/';
-                if ($scope.dbList.titleStartFilter)
-                    newPath = newPath + $scope.dbList.titleStartFilter + '/';
-                newPath += 'd/';
-                if ($scope.dbList.descrFilter)
-                    newPath = newPath + $scope.dbList.descrFilter + '/';
-                newPath += 'fs/';
-                if ($scope.dbList.subjectFilter)
-                    newPath = newPath + $scope.dbList.subjectFilter + '/';
-                if ($scope.dbList.selectedSubjects.length > 0){
-                    newPath += 'sub/';
-                    for (var i = 0; i < $scope.dbList.selectedSubjects.length; i++)
-                        newPath = newPath + $scope.dbList.selectedSubjects[i].subject + '/';
-                }
-                if ($scope.dbList.selectedTypes.length > 0){
-                    newPath += 'typ/';
-                    for (var i = 0; i < $scope.dbList.selectedTypes.length; i++)
-                        newPath = newPath + $scope.dbList.selectedTypes[i].type + '/';
-                }
-                newPath += 'ft/';
-                if ($scope.dbList.typeFilter)
-                    newPath = newPath + $scope.dbList.typeFilter + '/';
-                if ($scope.dbList.selectedSubjects.length > 0 || $scope.dbList.selectedTypes.length > 0)
-                    newPath = newPath + 'o/' + $scope.dbList.subTypSelOpen;
-                $location.path(newPath);
+    .controller('DatabasesListCtrl', ['$scope', 'databaseList', '$filter', function($scope, dbList, $filter){
+        var databases = [];
+        $scope.numAlpha = "abcdefghijklmnopqrstuvwxyz".toUpperCase().split("");
+        $scope.numAlpha.unshift('0-9');
+
+        dbList.$promise.then(function(data){
+            databases = data.databases;
+            $scope.subjects = data.subjects;
+            $scope.types = data.types;
+
+            $scope.db = {
+                subjects: {},
+                types: {},
+                search: '',
+                startsWith: '',
+                page: 1,
+                perPage: 20
+            };
+
+            $scope.totalItems = data.totalRecords;
+            $scope.numPages = Math.ceil(data.totalRecords / $scope.db.perPage);
+
+            processFacets(databases);
+        });
+
+
+        $scope.$watch('db', function(newVal, oldVal){
+            var filtered = databases;
+
+            filtered = $filter('orderBy')(filtered, function(item){
+                return item.subjects.filter(function(subj){
+                    return (subj.type == 1 && newVal.subjects[subj.subject]);
+                }).length
+            }, true);
+
+            if (newVal.startsWith){
+                var sw = '^['+newVal.startsWith+']';
+                filtered = $filter('filter')(filtered, function(item){
+                    return $filter('test')(item.title, sw, 'i');
+                });
             }
+            filtered = $filter('filter')(filtered, $scope.filterBySubject);
+            filtered = $filter('filter')(filtered, $scope.filterByType);
+            if (newVal.search.length > 2){
+                filtered = $filter('filter')(filtered, newVal.search);
+            }
+            filtered = $filter('orderBy')(filtered, 'title');
 
-            $rootScope.$on('$routeChangeSuccess', function(event, currentRoute){
-                if (typeof currentRoute.params.t !== 'undefined')
-                    $scope.dbList.titleFilter = currentRoute.params.t;
-                else
-                    $scope.dbList.titleFilter = '';
-                if (typeof currentRoute.params.ts !== 'undefined')
-                    $scope.dbList.titleStartFilter = currentRoute.params.ts;
-                else
-                    $scope.dbList.titleStartFilter = '';
-                if (typeof currentRoute.params.d !== 'undefined')
-                    $scope.dbList.descrFilter = currentRoute.params.d;
-                else
-                    $scope.dbList.descrFilter = '';
-                if (typeof currentRoute.params.fs !== 'undefined')
-                    $scope.dbList.subjectFilter = currentRoute.params.fs;
-                else
-                    $scope.dbList.subjectFilter = '';
-                if (typeof currentRoute.params.ft !== 'undefined')
-                    $scope.dbList.typeFilter = currentRoute.params.ft;
-                else
-                    $scope.dbList.typeFilter = '';
+            processFacets(filtered);
+            $scope.filteredDB = filtered;
+            $scope.totalItems = $scope.filteredDB.length;
+            //$scope.numPages = Math.ceil($scope.totalItems / $scope.db.perpage);
 
-                for (var i = 0; i < $scope.dbList.subjects.length; i++)
-                    $scope.dbList.subjects[i].selected = false;
-                for (var i = 0; i < $scope.dbList.types.length; i++)
-                    $scope.dbList.types[i].selected = false;
+        }, true);
 
-                $scope.dbList.selectedSubjects.splice(0, $scope.dbList.selectedSubjects.length);
-                if (typeof currentRoute.params.sub !== 'undefined'){
-                    var subNames = currentRoute.params.sub.split("/");
-                    for (var i = 0; i < subNames.length; i++)
-                        for (var j = 0; j < $scope.dbList.subjects.length; j++)
-                            if (subNames[i] === $scope.dbList.subjects[j].subject){
-                                $scope.dbList.subjects[j].selected = true;
-                                if ($scope.dbList.selectedSubjects.indexOf($scope.dbList.subjects[j]) < 0)
-                                    $scope.dbList.selectedSubjects.push($scope.dbList.subjects[j]);
-                            }
-                }
-                $scope.dbList.selectedTypes.splice(0, $scope.dbList.selectedTypes.length);
-                if (typeof currentRoute.params.typ !== 'undefined'){
-                    var subNames = currentRoute.params.typ.split("/");
-                    for (var i = 0; i < subNames.length; i++)
-                        for (var j = 0; j < $scope.dbList.types.length; j++)
-                            if (subNames[i] === $scope.dbList.types[j].type){
-                                $scope.dbList.types[j].selected = true;
-                                if ($scope.dbList.selectedTypes.indexOf($scope.dbList.types[j]) < 0)
-                                    $scope.dbList.selectedTypes.push($scope.dbList.types[j]);
-                            }
-                }
-                $scope.dbList.subTypSelOpen = false;
-                if (typeof currentRoute.params.o !== 'undefined')
-                    if (currentRoute.params.o.indexOf('true') === 0)
-                        $scope.dbList.subTypSelOpen = true;
+        $scope.primarySubjects = function(item){
+            return item.subjects.filter(function(subj){
+                return (parseInt(subj.type) === 1 && $scope.db.subjects[subj.subject]);
+            }).length;
+        };
+
+        $scope.filterBySubject = function(item){
+            var subjects = Object.keys($scope.db.subjects).filter(function(key){
+                return $scope.db.subjects[key];
             });
-        }])
 
-    .controller('dbListCtrl', ['$scope', function dbListCtrl($scope){
-        $scope.currentPage = 1;
-        $scope.maxPageSize = 10;
-        $scope.perPage = 10;
-
-        $scope.compareTitle = function(actual, expected){
-            if (!expected)
-                return true;
-            if (actual.toLowerCase().indexOf(expected.toLowerCase()) > -1)
-                return true;
-            return false;
+            return item.subjects.filter(function(itemSubj){
+                    return $scope.db.subjects[itemSubj.subject];
+                }).length === subjects.length;
         };
-        $scope.filterSubjects = function(actual, expected){
-            if (expected.length == 0)
-                return true;
 
-            for (var t = 0; t < expected.length; t++){
-                var isPresent = false;
-                for (var i = 0; i < actual.length; i++)
-                    if (expected[t].sid == actual[i].sid){
-                        isPresent = true;
-                        break;
+        $scope.filterByType = function(item){
+            var types = Object.keys($scope.db.types).filter(function(key){
+                return $scope.db.types[key];
+            });
+
+            return item.types.filter(function(itemSubj){
+                    return $scope.db.types[itemSubj.type];
+                }).length === types.length;
+        };
+
+        function processFacets(databases){
+            var subjAvail = [];
+            var typeAvail = [];
+
+            for (var i = 0, len = databases.length; i < len; i++){
+                databases[i].subjects.map(function(subj){
+                    if (subjAvail.indexOf(subj.sid) == -1){
+                        subjAvail.push(subj.sid);
                     }
-                if (!isPresent)
-                    return false;
+                });
+                databases[i].types.map(function(type){
+                    if (typeAvail.indexOf(type.tid) == -1){
+                        typeAvail.push(type.tid);
+                    }
+                });
+
             }
 
-            return true;
-        };
-        $scope.filterTypes = function(actual, expected){
-            if (expected.length == 0)
-                return true;
+            $scope.subjects.map(function(subject){
+                var s = subject;
+                s.disabled = subjAvail.indexOf(s.sid) == -1;
+                return s;
+            });
 
-            for (var t = 0; t < expected.length; t++){
-                var isPresent = false;
-                for (var i = 0; i < actual.length; i++)
-                    if (expected[t].tid == actual[i].tid){
-                        isPresent = true;
-                        break;
-                    }
-                if (!isPresent)
-                    return false;
-            }
-            return true;
-        };
-        $scope.startTitle = function(actual, expected){
-            if (!expected)
-                return true;
-            if (actual.toLowerCase().indexOf(expected.toLowerCase()) == 0)
-                return true;
-            return false;
-        };
-
-        $scope.selectAllSubjects = function(value){
-            $scope.dbList.selectedSubjects.splice(0, $scope.dbList.selectedSubjects.length);
-            for (var i = 0; i < $scope.dbList.subjects.length; i++)
-                $scope.dbList.subjects[i].selected = value;
-            if (value)
-                $scope.dbList.selectedSubjects = angular.copy($scope.dbList.subjects);
-            $scope.updatePrimaryStatus();
-            $scope.updateURL();
-        };
-        $scope.selectAllTypes = function(value){
-            $scope.dbList.selectedTypes.splice(0, $scope.dbList.selectedTypes.length);
-            for (var i = 0; i < $scope.dbList.types.length; i++)
-                $scope.dbList.types[i].selected = value;
-            if (value)
-                $scope.dbList.selectedTypes = angular.copy($scope.dbList.types);
-            $scope.updateURL();
-        };
-        $scope.updateStatus = function(subject){
-            var index = $scope.dbList.selectedSubjects.indexOf(subject);
-            if (index > -1)
-                $scope.dbList.selectedSubjects.splice(index, 1);
-            else
-                $scope.dbList.selectedSubjects.push(subject);
-            $scope.updatePrimaryStatus();
-            $scope.updateURL();
-        };
-        $scope.updateTypes = function(type){
-            var index = $scope.dbList.selectedTypes.indexOf(type);
-            if (index > -1)
-                $scope.dbList.selectedTypes.splice(index, 1);
-            else
-                $scope.dbList.selectedTypes.push(type);
-            $scope.updateURL();
-        };
-        $scope.toggleSubjectsTypes = function(value){
-            $scope.dbList.subTypSelOpen = value;
-            $scope.updateURL();
-        };
-        $scope.isOpenSubTyp = function(){
-            return $scope.dbList.subTypSelOpen;
-        };
-
-        $scope.toggleDB = function(db){
-            $scope.dbList.databases[$scope.dbList.databases.indexOf(db)].show =
-                !$scope.dbList.databases[$scope.dbList.databases.indexOf(db)].show;
-        };
-    }])
-
-    .directive('databasesList', [function databasesList(){
-        return {
-            restrict: 'A',
-            controller: 'dbListCtrl',
-            link: function(scope, elm, attrs){
-            },
-            templateUrl: 'dbList/dbList.tpl.html'
+            $scope.types.map(function(type){
+                var t = type;
+                t.disabled = typeAvail.indexOf(t.tid) == -1;
+                return t;
+            });
         }
-    }])
-    .filter('startFrom', function() {
-        return function(input, start) {
-            if (typeof input === 'undefined')
-                return null;
-            start = +start; //parse to int
-            return input.slice(start);
-        }
-    })
+    }]);
+
+
 ;angular.module('ualib.musicSearch.templates', ['musicSearch.tpl.html']);
 
 angular.module("musicSearch.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -44912,7 +44598,7 @@ $(document).ready(UTIL.loadEvents);
     'hours',
     'oneSearch',
     'manage',
-    'databases',
+    'ualib.databases',
     'musicSearch',
     'ualib.staffdir',
     'ualib.softwareList'

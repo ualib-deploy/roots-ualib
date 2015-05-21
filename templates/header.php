@@ -215,7 +215,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="<?php echo site_url(); ?>/sample-page/databases/#/databases">
+                                            <a class="service-card" href="<?php echo site_url(); ?>#/databases">
                                                 <span class="fa fa-database"></span>
                                                 <h4>Databases</h4>
                                                 <p>Organized collections of articles, journals, and published materials</p>

@@ -5,7 +5,7 @@ angular.module('ualib', [
     'hours',
     'oneSearch',
     'manage',
-    'databases',
+    'ualib.databases',
     'musicSearch',
     'ualib.staffdir',
     'ualib.softwareList'
