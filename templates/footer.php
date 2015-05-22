@@ -48,12 +48,12 @@
        </div>
 
         <div class="col-xs-12 col-sm-3">
-            <a class="service-card href="wwwdev2.lib.ua.edu/about-ua-libraries/social-media/">
+            <a class="service-card" href="wwwdev2.lib.ua.edu/about-ua-libraries/social-media/">
           <ul class="nav nav-pills nav-justified social-icons">
-            <li><span class="fa fa-fw fa-2x fa-twitter"></span></a></li>
-            <li><span class="fa fa-fw fa-2x fa-instagram"></span></a></li>
-            <li><span class="fa fa-fw fa-2x fa-facebook"></span></a></li>
-            <li><span class="fa fa-fw fa-2x fa-youtube"></span></a></li>
+            <li><span class="fa fa-fw fa-2x fa-twitter"></span></li>
+            <li><span class="fa fa-fw fa-2x fa-instagram"></span></li>
+            <li><span class="fa fa-fw fa-2x fa-facebook"></span></li>
+            <li><span class="fa fa-fw fa-2x fa-youtube"></span></li>
           </ul>
             </a>
 
