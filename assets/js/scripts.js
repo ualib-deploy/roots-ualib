@@ -43562,7 +43562,12 @@ angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", f
     "    <div class=\"col-md-3 col-md-push-9\">\n" +
     "        <form class=\"facets-form\">\n" +
     "            <div class=\"form-group\">\n" +
-    "                <input type=\"text\" class=\"form-control\" ng-model=\"db.search\" placeholder=\"Search databases\">\n" +
+    "                <span class=\"page-header\">\n" +
+    "                    <h4>Filter Databases By</h4>\n" +
+    "                </span>\n" +
+    "            </div>\n" +
+    "            <div class=\"form-group\">\n" +
+    "                <input type=\"text\" class=\"form-control\" ng-model=\"db.search\" placeholder=\"Keyword search\">\n" +
     "            </div>\n" +
     "\n" +
     "            <div class=\"form-group hidden-xs\">\n" +
@@ -43580,7 +43585,7 @@ angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", f
     "                    <div class=\"radio\" ng-class=\"{'disabled': subj.disabled}\" ng-repeat=\"subj in subjects\">\n" +
     "                        <label>\n" +
     "                            <input type=\"checkbox\" ng-model=\"db.subjects[subj.subject]\" ng-disabled=\"subj.disabled\">\n" +
-    "                            {{subj.subject}}\n" +
+    "                            {{subj.subject}} ({{subj.total}})\n" +
     "                        </label>\n" +
     "                    </div>\n" +
     "                </div>\n" +
@@ -43592,7 +43597,7 @@ angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", f
     "                    <div class=\"radio\" ng-class=\"{'disabled': type.disabled}\" ng-repeat=\"type in types\">\n" +
     "                        <label>\n" +
     "                            <input type=\"checkbox\" ng-model=\"db.types[type.type]\"  ng-disabled=\"type.disabled\">\n" +
-    "                            {{type.type}}\n" +
+    "                            {{type.type}} ({{type.total}})\n" +
     "                        </label>\n" +
     "                    </div>\n" +
     "                </div>\n" +
@@ -43602,24 +43607,41 @@ angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", f
     "            </div>\n" +
     "        </form>\n" +
     "    </div>\n" +
-    "    <div class=\"col-md-9 col-md-pull-3 dbware-list-container\">\n" +
+    "    <div class=\"col-md-9 col-md-pull-3 databases-list-container\">\n" +
+    "        <p>\n" +
+    "        Showing {{pager.page}}-{{pager.page*pager.perPage}} of {{pager.totalItems}} results\n" +
+    "        <ol class=\"breadcrumb\" ng-if=\"activeFilters.startsWith || activeFilters.subjects || activeFilters.types\">\n" +
+    "            <li ng-if=\"activeFilters.startsWith\"><strong>Starts with:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"db.startsWith = ''\">\"{{db.startsWith}}\" <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "            <li ng-if=\"activeFilters.subjects\"><strong>Subjects:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"db.subjects[subject] = false\" ng-repeat=\"(subject, key) in db.subjects\">{{subject}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "            <li ng-if=\"activeFilters.types\"><strong>Types:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"db.types[type] = false\" ng-repeat=\"(type, key) in db.types\">{{type}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "        </ol>\n" +
+    "        </p>\n" +
     "\n" +
-    "        <div class=\"media\" ng-repeat=\"item in filteredDB | after:(pager.page-1)*pager.perPage | limitTo:20\">\n" +
+    "        <div class=\"media\" ng-repeat=\"item in filteredDB | filter:{disabled: 0} | after:(pager.page-1)*pager.perPage | limitTo:20\">\n" +
     "            <div class=\"media-body\">\n" +
     "                <h4 class=\"media-heading\">\n" +
-    "                    <a ng-href=\"{{DB_PROXY_PREPEND_URL}}{{item.url}}\" title=\"{{item.title}}\"> {{item.title}}</a>  <small>{{item.coverage}}</small>\n" +
+    "                    <a ng-href=\"{{DB_PROXY_PREPEND_URL}}{{item.url}}\" title=\"{{item.title}}\"> {{item.title}}</a>\n" +
+    "                    <!--<small ng-if=\"item.presentedBy\">({{item.presentedBy}})</small>-->\n" +
+    "                    <small>{{item.coverage}}</small>\n" +
+    "                    <small>\n" +
+    "                        <span class=\"label label-success\" ng-if=\"item.hasFullText == 'A'\">All Full Text</span>\n" +
+    "                        <span class=\"label label-info\" ng-if=\"item.hasFullText == 'P'\">Primarily Full Text</span>\n" +
+    "                        <span class=\"label label-warning\" ng-if=\"item.hasFullText == 'S'\">Some Full Text</span>\n" +
+    "                        <span class=\"label label-danger\" ng-if=\"item.hasFullText == 'N'\">No Full Text</span>\n" +
+    "                    </small>\n" +
     "                </h4>\n" +
-    "                <div class=\"details-context\">\n" +
-    "                    <span ng-repeat=\"subj in item.subjects | where:{type:1}\">{{subj.subject}}</span>\n" +
-    "                </div>\n" +
-    "                <div class=\"details-context\">\n" +
-    "                    <span ng-repeat=\"type in item.types\">{{type.type}}</span>\n" +
-    "                </div>\n" +
+    "\n" +
     "                <p>{{item.description}}</p>\n" +
     "\n" +
-    "                <div class=\"details-context\">\n" +
-    "                    <span ng-if=\"item.audience1\">{{item.audience1}}</span>\n" +
-    "                    <span ng-if=\"item.audience2\">{{item.audience2}}</span>\n" +
+    "\n" +
+    "                <div ng-if=\"item.location\">\n" +
+    "                    <strong>Access:</strong> {{item.location}}\n" +
+    "                </div>\n" +
+    "                <div ng-if=\"(item.subjects | where:{type:1}).length > 0\">\n" +
+    "                    <strong>Primary subjects: </strong><span ng-repeat=\"subj in item.subjects | where:{type:1}\">{{subj.subject}}</span>\n" +
+    "                </div>\n" +
+    "                <div ng-if=\"item.types\">\n" +
+    "                    <strong>Types of material: </strong><span ng-repeat=\"type in item.types\">{{type.type}}</span>\n" +
     "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
@@ -43660,7 +43682,6 @@ angular.module('ualib.databases')
     .config(['$routeProvider', function($routeProvider){
         $routeProvider
             .when('/databases', {
-                reloadOnSearch: false,
                 resolve: {
                     databaseList: function(dbFactory){
                         return dbFactory.get({db: 'all'})
@@ -43683,7 +43704,7 @@ angular.module('ualib.databases')
             })
     }])
 
-    .controller('DatabasesListCtrl', ['$scope', 'databaseList', '$filter' ,'$location' ,'$document', function($scope, dbList, $filter, $location, $document){
+    .controller('DatabasesListCtrl', ['$scope', 'databaseList', '$filter' ,'$location' ,'$document', '$route', function($scope, dbList, $filter, $location, $document, $route){
         var databases = [];
 
         $scope.numAlpha = "abcdefghijklmnopqrstuvwxyz".toUpperCase().split("");
@@ -43698,7 +43719,7 @@ angular.module('ualib.databases')
             paramsToScope();
 
             $scope.totalItems = data.totalRecords;
-            processStartsWith(databases);
+            //processStartsWith(databases);
             processFacets(databases);
         });
 
@@ -43727,15 +43748,19 @@ angular.module('ualib.databases')
 
             $scope.filteredDB = filtered;
             $scope.pager.totalItems = $scope.filteredDB.length;
-            $scope.pager.page = 1;
+            //$scope.pager.page = 1;
+            var numPages =  Math.floor($scope.pager.totalItems / $scope.pager.maxSize);
+            if (numPages < $scope.pager.page){
+                $scope.pager.page = numPages || 1;
+            }
 
             var newParams = angular.extend({}, newVal, {page: $scope.pager.page});
 
             processFacets(filtered);
             scopeToParams(newParams);
-            if (newVal.startsWith === null || newVal.startsWith === ''){
+            /*if (newVal.startsWith === null || newVal.startsWith === ''){
                 processStartsWith(filtered);
-            }
+            }*/
 
         }, true);
 
@@ -43781,6 +43806,7 @@ angular.module('ualib.databases')
         };
 
         $scope.pageChange = function(){
+
             scopeToParams({page: $scope.pager.page});
             $document.duScrollTo(0, 30, 500, function (t) { return (--t)*t*t+1 });
         };
@@ -43791,31 +43817,45 @@ angular.module('ualib.databases')
 
         function processFacets(databases){
             var subjAvail = [];
+            var subjCount = {};
+
             var typeAvail = [];
+            var typeCount = {};
+
+            $location.replace();
 
             for (var i = 0, len = databases.length; i < len; i++){
                 databases[i].subjects.map(function(subj){
                     if (subjAvail.indexOf(subj.sid) == -1){
                         subjAvail.push(subj.sid);
+                        subjCount[subj.sid] = 1;
+                    }
+                    else{
+                        subjCount[subj.sid]++;
                     }
                 });
                 databases[i].types.map(function(type){
                     if (typeAvail.indexOf(type.tid) == -1){
                         typeAvail.push(type.tid);
+                        typeCount[type.tid] = 1;
+                    }
+                    else{
+                        typeCount[type.tid]++;
                     }
                 });
-
             }
 
             $scope.subjects.map(function(subject){
                 var s = subject;
                 s.disabled = subjAvail.indexOf(s.sid) == -1;
+                s.total = subjCount[subject.sid] || 0;
                 return s;
             });
 
             $scope.types.map(function(type){
                 var t = type;
                 t.disabled = typeAvail.indexOf(t.tid) == -1;
+                t.total = typeCount[type.tid] || 0;
                 return t;
             });
         }
@@ -43865,6 +43905,7 @@ angular.module('ualib.databases')
 
         function paramsToScope(){
             var params = $location.search();
+            $scope.activeFilters = params;
             angular.forEach(params, function(val, key){
                 if (key === 'page'){
                     $scope.pager.page = val;
