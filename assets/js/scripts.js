@@ -43609,15 +43609,21 @@ angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", f
     "    </div>\n" +
     "    <div class=\"col-md-9 col-md-pull-3 databases-list-container\">\n" +
     "        <p>\n" +
-    "        Showing {{pager.page}}-{{pager.page*pager.perPage}} of {{pager.totalItems}} results\n" +
-    "        <ol class=\"breadcrumb\" ng-if=\"activeFilters.startsWith || activeFilters.subjects || activeFilters.types\">\n" +
+    "        Showing {{pager.firstItem}}-{{pager.lastItem}} of {{pager.totalItems}} results\n" +
+    "        <div ng-if=\"activeFilters.startsWith || activeFilters.subjects || activeFilters.types\">\n" +
+    "\n" +
+    "        <ol class=\"breadcrumb\">\n" +
     "            <li ng-if=\"activeFilters.startsWith\"><strong>Starts with:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"db.startsWith = ''\">\"{{db.startsWith}}\" <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
     "            <li ng-if=\"activeFilters.subjects\"><strong>Subjects:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"db.subjects[subject] = false\" ng-repeat=\"(subject, key) in db.subjects\">{{subject}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
     "            <li ng-if=\"activeFilters.types\"><strong>Types:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"db.types[type] = false\" ng-repeat=\"(type, key) in db.types\">{{type}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "            <li class=\"pull-right\"><button type=\"button\" style=\"padding: 2px 6px;\" class=\"btn btn-primary btn-small\" title=\"Reset filters\" ng-click=\"resetFilters()\"><i class=\"fa fa-refresh\"></i></button></li>\n" +
     "        </ol>\n" +
+    "        </div>\n" +
+    "\n" +
+    "\n" +
     "        </p>\n" +
     "\n" +
-    "        <div class=\"media\" ng-repeat=\"item in filteredDB | filter:{disabled: 0} | after:(pager.page-1)*pager.perPage | limitTo:20\">\n" +
+    "        <div class=\"media\" ng-repeat=\"item in filteredDB | after:(pager.page-1)*pager.perPage | limitTo:20\">\n" +
     "            <div class=\"media-body\">\n" +
     "                <h4 class=\"media-heading\">\n" +
     "                    <a ng-href=\"{{DB_PROXY_PREPEND_URL}}{{item.url}}\" title=\"{{item.title}}\"> {{item.title}}</a>\n" +
@@ -43674,7 +43680,7 @@ angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", f
 
 angular.module('ualib.databases')
 
-    .factory('dbFactory', ['$resource', function($resource){
+    .factory('databasesFactory', ['$resource', function($resource){
         return $resource('https://wwwdev2.lib.ua.edu/databases/api/:db');
     }]);
 angular.module('ualib.databases')
@@ -43682,9 +43688,10 @@ angular.module('ualib.databases')
     .config(['$routeProvider', function($routeProvider){
         $routeProvider
             .when('/databases', {
+                reloadOnSearch: false,
                 resolve: {
-                    databaseList: function(dbFactory){
-                        return dbFactory.get({db: 'all'})
+                    databases: function(databasesFactory){
+                        return databasesFactory.get({db: 'all'})
                             .$promise.then(function(data){
 
                                 return data;
@@ -43704,13 +43711,13 @@ angular.module('ualib.databases')
             })
     }])
 
-    .controller('DatabasesListCtrl', ['$scope', 'databaseList', '$filter' ,'$location' ,'$document', '$route', function($scope, dbList, $filter, $location, $document, $route){
+    .controller('DatabasesListCtrl', ['$scope', 'databases', '$filter' ,'$location' ,'$document', '$route', function($scope, db, $filter, $location, $document, $route){
         var databases = [];
 
         $scope.numAlpha = "abcdefghijklmnopqrstuvwxyz".toUpperCase().split("");
         $scope.numAlpha.unshift('0-9');
 
-        dbList.$promise.then(function(data){
+        db.$promise.then(function(data){
             databases = data.databases;
             $scope.subjects = data.subjects;
             $scope.types = data.types;
@@ -43719,19 +43726,23 @@ angular.module('ualib.databases')
             paramsToScope();
 
             $scope.totalItems = data.totalRecords;
-            //processStartsWith(databases);
+            processStartsWith(databases);
             processFacets(databases);
         });
 
+        $scope.$on('$locationChangeSuccess', function(){
+            paramsToScope();
+        });
 
         var filterWatcher = $scope.$watch('db', function(newVal, oldVal){
             var filtered = databases;
 
-            filtered = $filter('orderBy')(filtered, function(item){
-                return item.subjects.filter(function(subj){
-                    return (subj.type == 1 && newVal.subjects[subj.subject]);
-                }).length
-            }, true);
+            filtered = $filter('filter')(filtered, filterBySubject);
+            filtered = $filter('filter')(filtered, filterByType);
+
+            if (newVal.search.length > 2){
+                filtered = $filter('filter')(filtered, newVal.search);
+            }
 
             if (newVal.startsWith){
                 var sw = newVal.startsWith.indexOf('-') == -1 ? "^"+newVal.startsWith+".+$" : '^['+newVal.startsWith+'].+$';
@@ -43739,16 +43750,32 @@ angular.module('ualib.databases')
                     return $filter('test')(item.title, sw, 'i');
                 });
             }
-            filtered = $filter('filter')(filtered, $scope.filterBySubject);
-            filtered = $filter('filter')(filtered, $scope.filterByType);
-            if (newVal.search.length > 2){
-                filtered = $filter('filter')(filtered, newVal.search);
-            }
+
             filtered = $filter('orderBy')(filtered, 'title');
+
+            // Set position for stable sort
+            for (var i = 0, len = filtered.length; i < len; i++){
+                filtered[i].position = i;
+            }
+
+            filtered.sort(function(a, b){
+                var aNum = countPrimarySubjects(a, newVal.subjects);
+                var bNum = countPrimarySubjects(b, newVal.subjects);
+
+                if (aNum === bNum){
+                    return a.position - b.position;
+                }
+                if (aNum > bNum){
+                    return -1;
+                }
+                return 1;
+            });
+
 
             $scope.filteredDB = filtered;
             $scope.pager.totalItems = $scope.filteredDB.length;
-            //$scope.pager.page = 1;
+            $scope.pager.firstItem = (($scope.pager.page-1)*$scope.pager.perPage)+1;
+            $scope.pager.lastItem = $scope.pager.page*($scope.pager.totalItems < $scope.pager.mazSize ? $scope.pager.totalItems : $scope.pager.perPage);
             var numPages =  Math.floor($scope.pager.totalItems / $scope.pager.maxSize);
             if (numPages < $scope.pager.page){
                 $scope.pager.page = numPages || 1;
@@ -43758,19 +43785,12 @@ angular.module('ualib.databases')
 
             processFacets(filtered);
             scopeToParams(newParams);
-            /*if (newVal.startsWith === null || newVal.startsWith === ''){
-                processStartsWith(filtered);
-            }*/
+
 
         }, true);
 
-        $scope.primarySubjects = function(item){
-            return item.subjects.filter(function(subj){
-                return (parseInt(subj.type) === 1 && $scope.db.subjects[subj.subject]);
-            }).length;
-        };
 
-        $scope.filterBySubject = function(item){
+        function filterBySubject(item){
             var subjects = Object.keys($scope.db.subjects).filter(function(key){
                 return $scope.db.subjects[key];
             });
@@ -43780,7 +43800,7 @@ angular.module('ualib.databases')
                 }).length === subjects.length;
         };
 
-        $scope.filterByType = function(item){
+        function filterByType(item){
             var types = Object.keys($scope.db.types).filter(function(key){
                 return $scope.db.types[key];
             });
@@ -43822,7 +43842,6 @@ angular.module('ualib.databases')
             var typeAvail = [];
             var typeCount = {};
 
-            $location.replace();
 
             for (var i = 0, len = databases.length; i < len; i++){
                 databases[i].subjects.map(function(subj){
@@ -43874,11 +43893,21 @@ angular.module('ualib.databases')
             });
         }
 
+        function countPrimarySubjects(db, subjects){
+            return db.subjects.filter(function(subj){
+                return (parseInt(subj.type) === 1 && subjects[subj.subject]);
+            }).length;
+        }
+
         function scopeToParams(scopeVals){
             angular.forEach(scopeVals, function(val, key){
                 var newParam = {};
 
                 if (angular.isDefined(val) && val !== ''){
+                    console.log({
+                        key: key,
+                        val: val
+                    });
                     if (angular.isObject(val)){
                         val = Object.keys(val).filter(function(f){
                             return val[f];
@@ -43905,8 +43934,30 @@ angular.module('ualib.databases')
 
         function paramsToScope(){
             var params = $location.search();
+            var scopeFacets = $scope.db;
             $scope.activeFilters = params;
-            angular.forEach(params, function(val, key){
+
+            if (params['page']){
+                $scope.pager.page = params['page'];
+            }
+
+            angular.forEach(scopeFacets, function(val, key){
+                if (angular.isDefined(params[key])){
+                    if (key == 'subjects' || key == 'types' && val){
+                        var filters = {};
+                        params[key].split(',').forEach(function(filter){
+                            filters[filter] = true;
+                        });
+                        val = filters;
+                    }
+                    scopeFacets[key] = val;
+                }
+                else{
+                    scopeFacets[key] = angular.isObject(val) ? {} : '';
+                }
+            });
+            $scope.db = scopeFacets
+            /*angular.forEach(params, function(val, key){
                 if (key === 'page'){
                     $scope.pager.page = val;
                 }
@@ -43921,9 +43972,41 @@ angular.module('ualib.databases')
                         }
                         $scope.db[key] = val;
                     }
+                    else {
+                        if (angular.isObject($scope.db[key])){
+                            $scope.db[key] = {};
+                        }
+                        else{
+                            $scope.db[key] = '';
+                        }
+                    }
                 }
-            });
+            });*/
         }
+
+        // Adopted from http://stackoverflow.com/questions/4994201/is-object-empty
+        var hasOwnProperty = Object.prototype.hasOwnProperty;
+
+        function facetsActive(obj) {
+
+            // null and undefined are "empty"
+            if (obj == null) return true;
+
+            // Assume if it has a length property with a non-zero value
+            // that that property is correct.
+            if (obj.length > 0)    return false;
+            if (obj.length === 0)  return true;
+
+            // Otherwise, does it have any properties of its own? And are those properties "truthy"
+            // Note that this doesn't handle
+            // toString and valueOf enumeration bugs in IE < 9
+            for (var key in obj) {
+                if (hasOwnProperty.call(obj, key) && key) return true;
+            }
+
+            return false;
+        }
+
     }]);
 
 
