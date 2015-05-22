@@ -1,15 +1,28 @@
-.page-slice{
+// Page Slices
+//
+// Use the `.page-slice` class to distinguish separate content sections of a page.
+//
+// Note that `.page-slice` is built into the [page with menus](section-layout.html#layout-pages_submenus)layout component
+//
+// Markup: page-slice.html
+//
+// CodeTemplate:
+//  <div class="page-slice">
+//    <h2>Page slice title</h2>
+//    <p>...</p>
+//  </div>
+//
+// Icon: fa-align-justify
+//
+// MenuBlurb:
+// Easily format sections of a page
+//
+// Styleguide layout.page-slice
+
+.slice, .page-slice{
   padding-top: 15px;
   padding-bottom: 30px;
   margin-bottom: 15px;
-}
-
-.slice{
-  text-align: center;
-
-  &.page-slice-striped:nth-child(odd){
-    background-color: #f0f0f0;
-  }
 
   > h2{
     margin-bottom: 60px;
@@ -18,4 +31,28 @@
   > .nav-pills{
     margin-bottom: 15px;
   }
+
+}
+
+// Striped Page Slices
+//
+// Sometimes pages have many content sections. To help delineate before pages with many content sections you
+// can use the `.page-slice-striped` class along side the `.page-slice` to create page slices with alternating background colors.
+//
+// Markup: page-slice-striped.html
+//
+// CodeTemplate:
+//  <div class="page-slice page-slice-striped">
+//    <h2>Page slice title</h2>
+//    <p>...</p>
+//  </div>
+//
+// Styleguide layout.page-slice.striped
+.page-slice-striped:nth-child(odd){
+  background-color: #f0f0f0;
+}
+
+// Depricated - should be removed.
+.slice{
+  text-align: center;
 }
