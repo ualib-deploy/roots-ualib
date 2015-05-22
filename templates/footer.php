@@ -30,7 +30,7 @@
             <li><a href="<?php echo site_url(); ?>/libraries-and-collections/campus-libraries/health-sciences-library/">Health Sciences Library</a></li>
             <li><a href="<?php echo site_url(); ?>/libraries-and-collections/campus-libraries/map-library-place-names-research-center/">Map Library &amp; Place Names Research Center</a></li>
             <li><a href="http://wrc.ua.edu/library.cfm">Summersell Library</a></li>
-            <li><s href="http://cis.ua.edu/undergraduates/resources/readingroom/">William E. Winter Reading Room</li>
+            <li><a href="http://cis.ua.edu/undergraduates/resources/readingroom/">William E. Winter Reading Room</li>
           </ul>
         </div>
 
@@ -55,6 +55,7 @@
             <li><span class="fa fa-fw fa-2x fa-facebook"></span></a></li>
             <li><span class="fa fa-fw fa-2x fa-youtube"></span></a></li>
           </ul>
+            </a>
 
 
           <a href="http://www.ua.edu">
