@@ -269,27 +269,27 @@ if (defined('GROUP_ANY_WEBAPP'))
                                     </div>
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-list">
+                                            <div class="service-list">
                                                 <span class="fa fa-music"></span>
                                                 <h4>Music Library</h4>
                                                   <ul>
-                                                     <li><a href="<?php echo site_url(); ?>/libraries-and-collections/campus-libraries/music-library/music-library-search/">Video Database Search</a></li>
-                                                     <li><a href="http://guides.lib.ua.edu/visualperformingarts">Research Guides</a></li>
-                                                     <li><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/music-library/">Home</a></li>
+                                                     <li class="menu-video-database-search"><a href="<a href=https://wwwdev2.lib.ua.edu/libraries-and-collections/campus-libraries/music-library/music-library-search/">>Video Database Search</a></li>
+                                                     <li class="menu-research-guides"><a href="https://guides.lib.ua.edu/visualperformingarts">Research Guides</a></li>
+                                                     <li class="menu-home"><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/music-library/">Home</a></li>
                                                   </ul>
-                                            </a>
-                                        </div>
+                                            </div>
+
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-list">
+                                            <div class="service-list">
                                                 <span class="fa fa-search-plus"></span>
                                                 <h4>Division of Special Collections</h4>
                                                   <ul>
-                                                      <li><a href="http://acumen.lib.ua.edu/home">Acumen Digital Archives"</li>
-                                                      <li><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/hoole-library/">Hoole Special Collections</a></li>
-                                                      <li><a href="http://lib.ua.edu/williamscollection">Williams Collection</a></li>
+                                                      <li class="menu-acumen"><a href="http://acumen.lib.ua.edu/home">Acumen Digital Archives</a></li>
+                                                      <li class="menu-hoole"><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/hoole-library/">Hoole Special Collections</a></li>
+                                                      <li class=menu-williams"><a href="http://lib.ua.edu/williamscollection">Williams Collection</a></li>
                                                   </ul>
-                                            </a>
-                                        </div>
+                                            </div>
+
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="http://refworks.ua.edu">
                                                 <span class="fa fa-folder"></span>
