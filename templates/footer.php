@@ -3,7 +3,7 @@
     <div class="container">
       <?php dynamic_sidebar('sidebar-footer'); ?>
       <div class="row">
-        <div class="col-sm-4">
+        <div class="col-sm-3">
           <h4>Quick Links</h4>
           <ul class="footer-list">
             <li><a href="<?php echo site_url(); ?>/about-ua-libraries/contact-us/">University Libraries’ Maps and Contact Information</a></li>
@@ -17,22 +17,38 @@
           </ul>
         </div>
 
-        <div class="col-sm-4">
-          <h4>Libraries &amp; Collections</h4>
+        <div class="col-sm-3">
+          <h4>Libraries</h4>
           <ul class="footer-list">
-            <li><a href="<?php echo site_url(); ?>/services/information-for-faculty/distance-education-faculty/gorgas-library/">Gorgas Library</a></li>
-            <li><a href="<?php echo site_url(); ?>/services/information-for-faculty/distance-education-faculty/rodgers-library-for-science-engineering/">Rodgers Library for Science &amp; Engineering</a></li>
-            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/campus-libraries/music-library/">Music Library</a></li>
-            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/collections/a-s-williams-collection/">A.S. Williams Collection</a></li>
+            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/gorgas-library/">Amelia Gayle Gorgas Library</a></li>
+            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/bruno/">Angelo Bruno Business Library</a></li>
+            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/mclure-education-library//">McLure Education Library</a></li>
+            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/rodgers-science-and-engineering-library/">Rodgers Library for Science &amp; Engineering</a></li>
+            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/hoole-library/">W.S. Hoole Special Collections Library</a></li>
+            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/music-library/">Music Library</a></li>
             <li><a href="<?php echo site_url(); ?>/services/sanford-media-center/">Sanford Media Center</a></li>
-            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/campus-libraries/map-library-place-names-research-center/">Map Library &amp; Place Names Research Center</a></li>
-            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/campus-libraries/hoole-library/">Hoole Library</a></li>
-            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/campus-libraries/health-sciences-library/">Health Sciences Library</a></li>
+            <li><a href="<?php echo site_url(); ?>/services/digital-humanities-center/">Alabama Digital Humanities Center</a></li>
             <li><a href="<?php echo site_url(); ?>/libraries-and-collections/campus-libraries/bounds-law-library/">Bounds Law Library</a></li>
+            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/campus-libraries/health-sciences-library/">Health Sciences Library</a></li>
+            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/campus-libraries/map-library-place-names-research-center/">Map Library &amp; Place Names Research Center</a></li>
+            <li><a href="http://wrc.ua.edu/library.cfm">Summersell Library</a></li>
           </ul>
         </div>
 
-        <div class="col-xs-12 col-sm-4">
+        <div class="col-sm-3" >
+          <h4>Collections</h4>
+          <ul class="footer-list">
+            <li><a href="http://lib.ua.edu/williamscollection/">A.S. Williams Collection</a></li>
+            <li><a href="https://wwwdev2.lib.ua.edu/collections/wade-hall-collection/">Wade Hall Collection</a></li>
+            <li><a href="https://wwwdev2.lib.ua.edu/collections/the-david-walker-lupton-african-american-cookbook-collection/">Lupton Collection</a></li>
+            <li><a href="https://wwwdev2.lib.ua.edu/collections/map-collections/">Map Collection</a></li>
+            <li><a href="https://wwwdev2.lib.ua.edu/collections/rare-book-collection/">Rare Book Collection</a></li>
+            <li><a href="https://wwwdev2.lib.ua.edu/collections/university-archives/">University Archives and Records Management</a></li>
+            <li><a href="https://wwwdev2.lib.ua.edu/collections/major-collections-summaries/">More collections...</a></li>
+          </ul>
+       </div>
+
+        <div class="col-xs-12 col-sm-3">
           <ul class="nav nav-pills nav-justified social-icons">
             <li><a href="http://www.twitter.com"><span class="fa fa-fw fa-2x fa-twitter"></span></a></li>
             <li><a href="http://www.instagram.com"><span class="fa fa-fw fa-2x fa-instagram"></span></a></li>

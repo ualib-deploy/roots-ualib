@@ -208,10 +208,17 @@ if (defined('GROUP_ANY_WEBAPP'))
                                 <div class="yamm-content">
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="<?php echo site_url(); ?>/research-help/scout/">
+                                            <a class="service-card" href="http://eds.b.ebscohost.com/eds/search/basic?sid=f15ac0b4-26cf-40b7-851e-0def37af899c%40sessionmgr113&vid=0&hid=121">
                                                 <span class="fa fa-binoculars"></span>
                                                 <h4>Scout</h4>
                                                 <p>Search for books, articles, and more</p>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="http://library.ua.edu/vwebv/searchBasic">
+                                                 <span class="fa fa-search"></span>
+                                                 <h4>Libraries' Catalog</h4>
+                                                 <p>Search the classic catalog</p>
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
@@ -228,6 +235,9 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                 <p>Search for scholarly literature through a Google web search</p>
                                             </a>
                                         </div>
+
+                                    </div>
+                                    <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="http://guides.lib.ua.edu/">
                                                 <span class="fa fa-compass"></span>
@@ -235,8 +245,6 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                 <p>Explore subject and course specific resource in guides curated by UA librarians</p>
                                             </a>
                                         </div>
-                                    </div>
-                                    <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="<?php echo site_url(); ?>/research-help/e-resources/">
                                                 <span class="fa fa-bolt"></span>
@@ -258,27 +266,28 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                 <p>Explore our large collection of U.S. Federal documents</p>
                                             </a>
                                         </div>
-                                        <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="<?php echo site_url(); ?>/research-help/citation-finder/">
-                                                <span class="fa fa-quote-left"></span>
-                                                <h4>Citation Finder</h4>
-                                                <p>A quick tool to help you locate articles with citation information</p>
-                                            </a>
-                                        </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="<?php echo site_url(); ?>/libraries-and-collections/campus-libraries/music-library/music-library-search/">
+                                            <a class="service-list">
                                                 <span class="fa fa-music"></span>
-                                                <h4>Music Library Search</h4>
-                                                <p>Thousands of music resources, including audio and video recordings</p>
+                                                <h4>Music Library</h4>
+                                                  <ul>
+                                                     <li><a href="<?php echo site_url(); ?>/libraries-and-collections/campus-libraries/music-library/music-library-search/">Video Database Search</a></li>
+                                                     <li><a href="http://guides.lib.ua.edu/visualperformingarts">Research Guides</a></li>
+                                                     <li><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/music-library/">Home</a></li>
+                                                  </ul>
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="http://acumen.lib.ua.edu/home">
+                                            <a class="service-list">
                                                 <span class="fa fa-search-plus"></span>
-                                                <h4>Digital Archives</h4>
-                                                <p>Access student research, digitized historical material, and more</p>
+                                                <h4>Division of Special Collections</h4>
+                                                  <ul>
+                                                      <li><a href="http://acumen.lib.ua.edu/home">Acumen Digital Archives"</li>
+                                                      <li><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/hoole-library/">Hoole Special Collections</a></li>
+                                                      <li><a href="http://lib.ua.edu/williamscollection">Williams Collection</a></li>
+                                                  </ul>
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
@@ -287,6 +296,15 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                 <h4>RefWorks</h4>
                                                 <p>Save citations, organize your research, and create bibliographies</p>
                                             </a>
+                                        </div>
+                                        <div class="col-xs-3 col-sm-6 col-md-3">
+                                            <div class="col-xs-12 col-sm-6 col-md-3">
+                                                <a class="service-card" href="<?php echo site_url(); ?>/research-help/citation-finder/">
+                                                    <span class="fa fa-quote-left"></span>
+                                                    <h4>Citation Finder</h4>
+                                                    <p>A quick tool to help you locate articles with citation information</p>
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -306,13 +324,13 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                 <ul>
                                                     <li><a href="<?php echo site_url(); ?>/services/photocopying/">Print, Scan, Copy</a></li>
                                                     <li class="menu-computer-availability"><a href="<?php echo site_url(); ?>/services/computer-availability/computer-availability/">Computer Availability</a></li>
-                                                    <li class="menu-laptop-computers"><a href="<?php echo site_url(); ?>/services/computer-availability/laptop-computers/">Laptop Computers</a></li>
+                                                    <li class="menu-laptop-computers"><a href="<?php echo site_url(); ?>/services/computer-availability/laptop-computers/">Equipment</a></li>
                                                     <li class="menu-library-software-list"><a href="<?php echo site_url(); ?>/services/computer-availability/library-software-list/">Library Software List</a></li>
 
                                                 </ul>
                                             </div>
                                             <a class="service-card" href="<?php echo site_url(); ?>/services/circulation-services/">
-                                                <span class="fa fa-calendar"></span>
+                                                <span class="fa fa-book"></span>
                                                 <h4>Borrow, Renew, and Course Reserves</h4>
                                                 <p>Checkout library resources and locate instructor provided materials for your courses</p>
                                             </a>
@@ -344,7 +362,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                             <div class="row">
                                                 <div class="col-sm-12 col-md-4">
                                                     <a class="service-card" href=" <?php echo site_url(); ?>/services/find-a-place-to-study/">
-                                                        <span class="fa fa-book"></span>
+                                                        <span class="fa fa-lightbulb-o"></span>
                                                         <h4>Find a Place to Study</h4>
                                                         <p>Find the best spaces to study at libraries, listed by noise level </p>
                                                     </a>
@@ -438,7 +456,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="<?php echo site_url(); ?>/about-ua-libraries/social-media/">
-                                                <span class="fa fa-users"></span>
+                                                <span class="fa fa-share-alt"></span>
                                                 <h4>Social Media</h4>
                                                 <p>Explore the libraries' multiple social media outlets </p>
                                             </a>
