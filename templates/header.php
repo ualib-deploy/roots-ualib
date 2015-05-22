@@ -275,7 +275,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                   <ul>
                                                      <li class="menu-video-database-search"><a href=https://wwwdev2.lib.ua.edu/libraries-and-collections/campus-libraries/music-library/music-library-search/">Video Database Search</a></li>
                                                      <li class="menu-research-guides"><a href="https://guides.lib.ua.edu/visualperformingarts">Research Guides</a></li>
-                                                     <li class="menu-home"><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/music-library/">Home</a></li>
+                                                     <li class="menu-home"><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/music-library/">Music Library Home</a></li>
                                                   </ul>
                                             </div>
                                         </div>
@@ -299,14 +299,12 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                 <p>Save citations, organize your research, and create bibliographies</p>
                                             </a>
                                         </div>
-                                        <div class="col-xs-3 col-sm-6 col-md-3">
-                                            <div class="col-xs-12 col-sm-6 col-md-3">
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
                                                 <a class="service-card" href="<?php echo site_url(); ?>/research-help/citation-finder/">
                                                     <span class="fa fa-quote-left"></span>
                                                     <h4>Citation Finder</h4>
                                                     <p>A quick tool to help you locate articles with citation information</p>
                                                 </a>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
