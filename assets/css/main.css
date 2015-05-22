@@ -8940,22 +8940,25 @@ footer .social-icons.nav-justified > li {
   display: table-cell;
   width: 1%;
 }
+.slice,
 .page-slice {
   padding-top: 15px;
   padding-bottom: 30px;
   margin-bottom: 15px;
 }
-.slice {
-  text-align: center;
-}
-.slice.page-slice-striped:nth-child(odd) {
-  background-color: #f0f0f0;
-}
-.slice > h2 {
+.slice > h2,
+.page-slice > h2 {
   margin-bottom: 60px;
 }
-.slice > .nav-pills {
+.slice > .nav-pills,
+.page-slice > .nav-pills {
   margin-bottom: 15px;
+}
+.page-slice-striped:nth-child(odd) {
+  background-color: #f0f0f0;
+}
+.slice {
+  text-align: center;
 }
 html,
 body {
