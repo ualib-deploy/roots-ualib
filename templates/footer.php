@@ -55,7 +55,7 @@
             <li><span class="fa fa-fw fa-2x fa-facebook"></span></a></li>
             <li><span class="fa fa-fw fa-2x fa-youtube"></span></a></li>
           </ul>
-            </a>
+
 
           <a href="http://www.ua.edu">
               <img src="<?php print get_template_directory_uri(); ?>/assets/img/ua-capstone-logo.png" class="img-responsive" style="margin: 15px 0;"/>
