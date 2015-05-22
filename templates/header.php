@@ -273,11 +273,12 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                 <span class="fa fa-music"></span>
                                                 <h4>Music Library</h4>
                                                   <ul>
-                                                     <li class="menu-video-database-search"><a href="<a href=https://wwwdev2.lib.ua.edu/libraries-and-collections/campus-libraries/music-library/music-library-search/">>Video Database Search</a></li>
+                                                     <li class="menu-video-database-search"><a href=https://wwwdev2.lib.ua.edu/libraries-and-collections/campus-libraries/music-library/music-library-search/">Video Database Search</a></li>
                                                      <li class="menu-research-guides"><a href="https://guides.lib.ua.edu/visualperformingarts">Research Guides</a></li>
                                                      <li class="menu-home"><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/music-library/">Home</a></li>
                                                   </ul>
                                             </div>
+                                        </div>
 
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <div class="service-list">
@@ -289,6 +290,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                       <li class=menu-williams"><a href="http://lib.ua.edu/williamscollection">Williams Collection</a></li>
                                                   </ul>
                                             </div>
+                                        </div>
 
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="http://refworks.ua.edu">
