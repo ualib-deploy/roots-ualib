@@ -208,7 +208,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                 <div class="yamm-content">
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="http://eds.b.ebscohost.com/eds/search/basic?sid=f15ac0b4-26cf-40b7-851e-0def37af899c%40sessionmgr113&vid=0&hid=121">
+                                            <a class="service-card" href="http://lib.ua.edu/scout/">
                                                 <span class="fa fa-binoculars"></span>
                                                 <h4>Scout</h4>
                                                 <p>Search for books, articles, and more</p>
@@ -261,7 +261,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="<?php echo site_url(); ?>/research-help/government-information/">
-                                                <span class="fa fa-university"></span>
+                                                <span class="fa fa-bar-chart"></span>
                                                 <h4>Government Information, Statistics, and Data</h4>
                                                 <p>Explore our large collection of U.S. Federal documents</p>
                                             </a>

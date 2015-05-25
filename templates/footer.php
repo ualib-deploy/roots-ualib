@@ -11,7 +11,7 @@
             <li><a href="<?php echo site_url(); ?>/services/disability-services/physical-access/">Physical Access</a></li>
             <li><a href="<?php echo site_url(); ?>/about-ua-libraries/libraries-policies/">Libraries' Policies</a></li>
             <li><a href="<?php echo site_url(); ?>/about-ua-libraries/privacy-and-cookies/">Privacy and Cookies</a></li>
-            <li><a href="<?php echo site_url(); ?>/about-ua-libraries/site-map/">Site Map</a></li>
+            <li><a href="https://wwwdev2.lib.ua.edu/site-map">Site Map</a></li>
             <li><a href="<?php echo site_url(); ?>/about-ua-libraries/copyright-statement/">Copyright Statement</a></li>
             <li><a href="<?php echo site_url(); ?>/about-ua-libraries/support-ua-libraries/">Support UA Libraries</a></li>
           </ul>
@@ -30,7 +30,19 @@
             <li><a href="<?php echo site_url(); ?>/libraries-and-collections/campus-libraries/health-sciences-library/">Health Sciences Library</a></li>
             <li><a href="<?php echo site_url(); ?>/libraries-and-collections/campus-libraries/map-library-place-names-research-center/">Map Library &amp; Place Names Research Center</a></li>
             <li><a href="http://wrc.ua.edu/library.cfm">Summersell Library</a></li>
-            <li><a href="http://cis.ua.edu/undergraduates/resources/readingroom/">William E. Winter Reading Room</li>
+            <li><a href="http://cis.ua.edu/undergraduates/resources/readingroom/">William E. Winter Reading Room</a></li>
+            <div class="dropdown">
+                    <button class="btn btn-default btn-xs dropdown-toggle"  type="button">
+                        More libraries...
+                    </button>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="http://wwwdev2.lib.ua.edu/libraries-and-collections/campus-libraries/bounds-law-library/">Bounds Law Library</a></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="http://wwwdev2.lib.ua.edu/libraries-and-collections/campus-libraries/health-sciences-library/">Health Sciences Library</a></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="http://wwwdev2.lib.ua.edu/libraries-and-collections/campus-libraries/map-library-place-names-research-center/">Map Library & Place Names Research Center</a></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="http://wrc.ua.edu/library.cfm">Summersell Library</a></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="http://cis.ua.edu/undergraduates/resources/readingroom/"></a></li>
+                    </ul>
+                </div>
           </ul>
         </div>
 
@@ -43,7 +55,7 @@
             <li><a href="https://wwwdev2.lib.ua.edu/collections/map-collections/">Map Collection</a></li>
             <li><a href="https://wwwdev2.lib.ua.edu/collections/rare-book-collection/">Rare Book Collection</a></li>
             <li><a href="https://wwwdev2.lib.ua.edu/collections/university-archives/">University Archives and Records Management</a></li>
-            <li><a href="https://wwwdev2.lib.ua.edu/collections/major-collections-summaries/">More Collections...</a></li>
+            <li><i><a href="https://wwwdev2.lib.ua.edu/collections/major-collections-summaries/">More Collections...</a></i></li>
           </ul>
        </div>
 
