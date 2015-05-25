@@ -26,14 +26,9 @@
             <li><a href="<?php echo site_url(); ?>/libraries-and-collections/rodgers-science-and-engineering-library/">Rodgers Library for Science &amp; Engineering</a></li>
             <li><a href="<?php echo site_url(); ?>/libraries-and-collections/hoole-library/">W.S. Hoole Special Collections Library</a></li>
             <li><a href="<?php echo site_url(); ?>/libraries-and-collections/music-library/">Music Library</a></li>
-            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/campus-libraries/bounds-law-library/">Bounds Law Library</a></li>
-            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/campus-libraries/health-sciences-library/">Health Sciences Library</a></li>
-            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/campus-libraries/map-library-place-names-research-center/">Map Library &amp; Place Names Research Center</a></li>
-            <li><a href="http://wrc.ua.edu/library.cfm">Summersell Library</a></li>
-            <li><a href="http://cis.ua.edu/undergraduates/resources/readingroom/">William E. Winter Reading Room</a></li>
             <div class="dropdown">
                     <button class="btn btn-default btn-xs dropdown-toggle"  type="button">
-                        More libraries...
+                        More Libraries...
                     </button>
                     <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
                         <li role="presentation"><a role="menuitem" tabindex="-1" href="http://wwwdev2.lib.ua.edu/libraries-and-collections/campus-libraries/bounds-law-library/">Bounds Law Library</a></li>
