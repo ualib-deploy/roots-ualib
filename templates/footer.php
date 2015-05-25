@@ -31,11 +31,11 @@
                         More Libraries...
                     </button>
                     <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="http://wwwdev2.lib.ua.edu/libraries-and-collections/campus-libraries/bounds-law-library/">Bounds Law Library</a></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="http://wwwdev2.lib.ua.edu/libraries-and-collections/campus-libraries/health-sciences-library/">Health Sciences Library</a></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="http://wwwdev2.lib.ua.edu/libraries-and-collections/campus-libraries/map-library-place-names-research-center/">Map Library & Place Names Research Center</a></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="http://www.library.law.ua.edu/">Bounds Law Library</a></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="http://cchs.ua.edu/library/">Health Sciences Library</a></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="http://maplibrary.ua.edu/">Map Library & Place Names Research Center</a></li>
                         <li role="presentation"><a role="menuitem" tabindex="-1" href="http://wrc.ua.edu/library.cfm">Summersell Library</a></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="http://cis.ua.edu/undergraduates/resources/readingroom/"></a></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="http://cis.ua.edu/undergraduates/resources/readingroom/">William E. Winter Reading Room</a></li>
                     </ul>
                 </div>
           </ul>
