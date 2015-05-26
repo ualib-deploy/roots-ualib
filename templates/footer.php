@@ -28,7 +28,7 @@
             <li><a href="<?php echo site_url(); ?>/libraries-and-collections/music-library/">Music Library</a></li>
           </ul>
               <ul class="footer-list">
-                  ... Always visible list....
+
               </ul>
               <ul class="footer-list" collapse="!isCollapsed">
                   <li role="presentation"><a role="menuitem" tabindex="-1" href="http://www.library.law.ua.edu/">Bounds Law Library</a></li>
@@ -38,7 +38,7 @@
                   <li role="presentation"><a role="menuitem" tabindex="-1" href="http://cis.ua.edu/undergraduates/resources/readingroom/">William E. Winter Reading Room</a></li>
               </ul>
               <button class="btn btn-default btn-xs"  type="button" ng-click="isCollapsed = !isCollapsed">
-                  {{!isCollapsed ? 'More' : 'Less'}} More Libraries...
+                  {{!isCollapsed ? 'More' : 'Less'}} Libraries...
               </button>
 
         </div>
