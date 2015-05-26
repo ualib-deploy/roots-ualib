@@ -26,19 +26,21 @@
             <li><a href="<?php echo site_url(); ?>/libraries-and-collections/rodgers-science-and-engineering-library/">Rodgers Library for Science &amp; Engineering</a></li>
             <li><a href="<?php echo site_url(); ?>/libraries-and-collections/hoole-library/">W.S. Hoole Special Collections Library</a></li>
             <li><a href="<?php echo site_url(); ?>/libraries-and-collections/music-library/">Music Library</a></li>
-            <div class="dropdown">
-                    <button class="btn btn-default btn-xs dropdown-toggle"  type="button">
-                        More Libraries...
-                    </button>
-                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="http://www.library.law.ua.edu/">Bounds Law Library</a></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="http://cchs.ua.edu/library/">Health Sciences Library</a></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="http://maplibrary.ua.edu/">Map Library & Place Names Research Center</a></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="http://wrc.ua.edu/library.cfm">Summersell Library</a></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="http://cis.ua.edu/undergraduates/resources/readingroom/">William E. Winter Reading Room</a></li>
-                    </ul>
-                </div>
           </ul>
+              <ul class="footer-list">
+                  ... Always visible list....
+              </ul>
+              <ul class="footer-list" collapse="!isCollapsed">
+                  <li role="presentation"><a role="menuitem" tabindex="-1" href="http://www.library.law.ua.edu/">Bounds Law Library</a></li>
+                  <li role="presentation"><a role="menuitem" tabindex="-1" href="http://cchs.ua.edu/library/">Health Sciences Library</a></li>
+                  <li role="presentation"><a role="menuitem" tabindex="-1" href="http://maplibrary.ua.edu/">Map Library & Place Names Research Center</a></li>
+                  <li role="presentation"><a role="menuitem" tabindex="-1" href="http://wrc.ua.edu/library.cfm">Summersell Library</a></li>
+                  <li role="presentation"><a role="menuitem" tabindex="-1" href="http://cis.ua.edu/undergraduates/resources/readingroom/">William E. Winter Reading Room</a></li>
+              </ul>
+              <button class="btn btn-default btn-xs"  type="button" ng-click="isCollapsed = !isCollapsed">
+                  {{!isCollapsed ? 'More' : 'Less'}} More Libraries...
+              </button>
+
         </div>
 
         <div class="col-sm-3" >

@@ -273,7 +273,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                 <span class="fa fa-music"></span>
                                                 <h4>Music Library</h4>
                                                   <ul>
-                                                     <li class="menu-video-database-search"><a href=https://wwwdev2.lib.ua.edu/libraries-and-collections/campus-libraries/music-library/music-library-search/">Video Database Search</a></li>
+                                                     <li class="menu-video-database-search"><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/campus-libraries/music-library/music-library-search/">Video Database Search</a></li>
                                                      <li class="menu-research-guides"><a href="https://guides.lib.ua.edu/visualperformingarts">Research Guides</a></li>
                                                      <li class="menu-home"><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/music-library/">Music Library Home</a></li>
                                                   </ul>
