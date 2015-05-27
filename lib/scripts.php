@@ -15,6 +15,15 @@
  * - You're not logged in as an administrator
  */
 function roots_scripts() {
+
+    $CDN = array(
+        'angular'   => 'https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.28/angular.js',
+        'angular-animate'   => 'https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.28/angular-animate.js',
+        'angular-route'   => 'https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.28/angular-route.js',
+        'angular-resource'   => 'https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.28/angular-resource.js',
+        'angular-sanitize'   => 'https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.28/angular-sanitize.js'
+    );
+
   /**
    * The build task in Grunt renames production assets with a hash
    * Read the asset names from assets-manifest.json
@@ -27,6 +36,7 @@ function roots_scripts() {
       'modernizr' => '/assets/vendor/modernizr/modernizr.js',
       'jquery'    => '//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.js'
     );
+
   } else {
     $get_assets = file_get_contents(get_template_directory() . '/assets/manifest.json');
     $assets     = json_decode($get_assets, true);
@@ -47,10 +57,12 @@ function roots_scripts() {
    * Grab Google CDN's latest jQuery with a protocol relative URL; fallback to local if offline
    * It's kept in the header instead of footer to avoid conflicts with plugins.
    */
-  if (!is_admin() && current_theme_supports('jquery-cdn')) {
-    wp_deregister_script('jquery');
-    wp_register_script('jquery', $assets['jquery'], array(), null, true);
-    add_filter('script_loader_src', 'roots_jquery_local_fallback', 10, 2);
+  if (!is_admin()) {
+      if (current_theme_supports('jquery-cdn')){
+          wp_deregister_script('jquery');
+          wp_register_script('jquery', $assets['jquery'], array(), null, true);
+          add_filter('script_loader_src', 'roots_jquery_local_fallback', 10, 2);
+      }
   }
 
   if (is_single() && comments_open() && get_option('thread_comments')) {
@@ -59,7 +71,14 @@ function roots_scripts() {
 
   wp_enqueue_script('modernizr', get_template_directory_uri() . $assets['modernizr'], array(), null, true);
   wp_enqueue_script('jquery');
-  wp_enqueue_script('roots_js', get_template_directory_uri() . $assets['js'], array(), null, true);
+
+    foreach($CDN as $name => $_cnd){
+        wp_enqueue_script($name, $_cnd, array(), null, true);
+    }
+
+    wp_enqueue_script('roots_js', get_template_directory_uri() . $assets['js'], array(), null, true);
+
+
 }
 add_action('wp_enqueue_scripts', 'roots_scripts', 100);
 

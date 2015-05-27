@@ -27,5 +27,9 @@ angular.module('ualib', [
     .run(['$routeParams', '$location', '$rootScope', function($routeParams, $location, $rootScope){
         $rootScope.$on('$routeChangeSuccess', function(e, current, pre) {
             $rootScope.appClass = $location.path().split('/')[1];
+            if ($rootScope.appClass === 'home'){
+                $rootScope.appClass = 'front-page';
+            }
+            $rootScope.appClass += ' webapp';
         });
     }]);

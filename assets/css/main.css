@@ -2564,7 +2564,7 @@ html {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 body {
-  font-family: 'Lato', sans-serif;
+  font-family: 'Open Sans', sans-serif;
   font-size: 14px;
   line-height: 1.42857143;
   color: #333333;
@@ -2714,7 +2714,7 @@ h6,
 .h4,
 .h5,
 .h6 {
-  font-family: 'Oxygen', sans-serif;
+  font-family: 'Lato', sans-serif;
   font-weight: 400;
   line-height: 1.1;
   color: inherit;
@@ -3048,6 +3048,15 @@ address {
   margin-bottom: 20px;
   font-style: normal;
   line-height: 1.42857143;
+}
+mark,
+.mark,
+.ui-match {
+  background-color: #FCE467;
+}
+mark,
+.mark {
+  padding: .2em;
 }
 code,
 kbd,
@@ -8035,7 +8044,7 @@ button.close {
   z-index: 1070;
   display: block;
   visibility: visible;
-  font-family: 'Lato', sans-serif;
+  font-family: 'Open Sans', sans-serif;
   font-size: 12px;
   font-weight: normal;
   line-height: 1.4;
@@ -8142,7 +8151,7 @@ button.close {
   display: none;
   max-width: 276px;
   padding: 1px;
-  font-family: 'Lato', sans-serif;
+  font-family: 'Open Sans', sans-serif;
   font-size: 14px;
   font-weight: normal;
   line-height: 1.42857143;
@@ -8942,13 +8951,12 @@ footer .social-icons.nav-justified > li {
 }
 .slice,
 .page-slice {
-  padding-top: 15px;
-  padding-bottom: 30px;
+  padding: 15px;
   margin-bottom: 15px;
 }
 .slice > h2,
 .page-slice > h2 {
-  margin-bottom: 60px;
+  margin-bottom: 30px;
 }
 .slice > .nav-pills,
 .page-slice > .nav-pills {
@@ -8964,48 +8972,36 @@ html,
 body {
   min-height: 100%;
 }
-.home,
-.bento,
-.staffdir,
-.software,
-.databases {
+.webapp {
   height: 100%;
   width: 100%;
 }
-.home > .wrap main,
-.bento > .wrap main,
-.staffdir > .wrap main,
-.software > .wrap main,
-.databases > .wrap main {
+.webapp > .wrap main {
   position: relative;
   margin-top: 111px;
 }
 @media (max-width: 991px) {
-  .home > .wrap main,
-  .bento > .wrap main,
-  .staffdir > .wrap main,
-  .software > .wrap main,
-  .databases > .wrap main {
+  .webapp > .wrap main {
     margin-top: 0px;
   }
 }
-.home {
+.front-page {
   background: url('../img/quad-sunset-lg.jpg') no-repeat center center fixed;
   -webkit-background-size: cover;
   background-size: cover;
   background-color: transparent;
 }
-.home .home-slice {
+.front-page .home-slice {
   padding-top: 15px;
   padding-bottom: 15px;
 }
-.bento,
-.staffdir,
-.software,
-.databases {
+/*
+// TODO: put in proper method to only show background image on home page with web apps.
+.bento, .staffdir, .software, .databases {
   background-image: none;
-  background-color: #ffffff;
-}
+  background-color: @body-bg;
+
+}*/
 /**
  * Your styles here
  */
