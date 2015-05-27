@@ -8956,13 +8956,13 @@ footer .social-icons.nav-justified > li {
 }
 .slice > h2,
 .page-slice > h2 {
-  margin-bottom: 30px;
+  margin-bottom: 15px;
 }
 .slice > .nav-pills,
 .page-slice > .nav-pills {
   margin-bottom: 15px;
 }
-.page-slice-striped:nth-child(odd) {
+.page-slice-striped:nth-child(even) {
   background-color: #f0f0f0;
 }
 .slice {
@@ -9081,7 +9081,6 @@ footer > .sub-footer {
   background-color: rgba(102,0,0,.3);*/
 }
 .slice,
-.page-slice,
 .head-slice {
   padding-top: 15px;
   padding-bottom: 30px;
