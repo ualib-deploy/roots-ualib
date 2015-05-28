@@ -9672,6 +9672,32 @@ a[href^="https"]:not(.source-link):after {
      transition: opacity  .2s .1s;
 }
 /*# sourceMappingURL=/wp-content/themes/roots/assets/css/main.css.map */
+.library-hours-today {
+  position: relative;
+  height: 80px;
+  opacity: 0;
+  -o-transition: all 0.2s;
+  -webkit-transition: all 0.2s;
+  transition: all 0.2s;
+}
+.library-hours-today.loaded {
+  opacity: 1;
+}
+/*# sourceMappingURL=/wp-content/themes/roots/assets/css/main.css.map */
+.hours-list {
+  position: relative;
+  max-width: 650px;
+}
+.hours-list .fa-info-circle:hover {
+  cursor: help;
+}
+.hours-list-child {
+  color: #555;
+}
+.hours-list-child > td:first-of-type {
+  padding-left: 30px !important;
+}
+/*# sourceMappingURL=/wp-content/themes/roots/assets/css/main.css.map */
 .thumbnail > img,
 .thumbnail a > img,
 .carousel-inner > .item > img,
