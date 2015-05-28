@@ -6,7 +6,7 @@ $showAdminLink = false;
 if (defined('GROUP_ANY_WEBAPP'))
     if (($wpUser = gDoesUserHaveAccessWP( GROUP_ANY_WEBAPP )) !== false){
         $showAdminLink = true;
-}
+    }
 ?>
 <header class="page-row" role="banner">
     <nav class="navbar navbar-static-top navbar-mega-inverse" role="navigation">
@@ -89,7 +89,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                     </select>
                                                 </div>
                                                 <div class="col-sm-12">
-                                                     <button type="submit" class="btn btn-default" id="loginBtn">Login to EasyProxy</button>
+                                                    <button type="submit" class="btn btn-default" id="loginBtn">Login to EasyProxy</button>
                                                 </div>
                                             </form>
                                         </tab>
@@ -216,9 +216,9 @@ if (defined('GROUP_ANY_WEBAPP'))
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="http://library.ua.edu/vwebv/searchBasic">
-                                                 <span class="fa fa-search"></span>
-                                                 <h4>Libraries' Catalog</h4>
-                                                 <p>Search the classic catalog</p>
+                                                <span class="fa fa-search"></span>
+                                                <h4>Libraries' Catalog</h4>
+                                                <p>Search the classic catalog</p>
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
@@ -272,11 +272,11 @@ if (defined('GROUP_ANY_WEBAPP'))
                                             <div class="service-list">
                                                 <span class="fa fa-music"></span>
                                                 <h4>Music Library</h4>
-                                                  <ul>
-                                                     <li class="menu-video-database-search"><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/campus-libraries/music-library/music-library-search/">Video Database Search</a></li>
-                                                     <li class="menu-research-guides"><a href="https://guides.lib.ua.edu/visualperformingarts">Research Guides</a></li>
-                                                     <li class="menu-home"><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/music-library/">Music Library Home</a></li>
-                                                  </ul>
+                                                <ul>
+                                                    <li class="menu-video-database-search"><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/campus-libraries/music-library/music-library-search/">Video Database Search</a></li>
+                                                    <li class="menu-research-guides"><a href="https://guides.lib.ua.edu/visualperformingarts">Research Guides</a></li>
+                                                    <li class="menu-home"><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/music-library/">Music Library Home</a></li>
+                                                </ul>
                                             </div>
                                         </div>
 
@@ -284,11 +284,11 @@ if (defined('GROUP_ANY_WEBAPP'))
                                             <div class="service-list">
                                                 <span class="fa fa-search-plus"></span>
                                                 <h4>Division of Special Collections</h4>
-                                                  <ul>
-                                                      <li class="menu-acumen"><a href="http://acumen.lib.ua.edu/home">Acumen Digital Archives</a></li>
-                                                      <li class="menu-hoole"><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/hoole-library/">Hoole Special Collections</a></li>
-                                                      <li class=menu-williams"><a href="http://lib.ua.edu/williamscollection">Williams Collection</a></li>
-                                                  </ul>
+                                                <ul>
+                                                    <li class="menu-acumen"><a href="http://acumen.lib.ua.edu/home">Acumen Digital Archives</a></li>
+                                                    <li class="menu-hoole"><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/hoole-library/">Hoole Special Collections</a></li>
+                                                    <li class=menu-williams"><a href="http://lib.ua.edu/williamscollection">Williams Collection</a></li>
+                                                </ul>
                                             </div>
                                         </div>
 
@@ -300,11 +300,11 @@ if (defined('GROUP_ANY_WEBAPP'))
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                                <a class="service-card" href="<?php echo site_url(); ?>/research-help/citation-finder/">
-                                                    <span class="fa fa-quote-left"></span>
-                                                    <h4>Citation Finder</h4>
-                                                    <p>A quick tool to help you locate articles with citation information</p>
-                                                </a>
+                                            <a class="service-card" href="<?php echo site_url(); ?>/research-help/citation-finder/">
+                                                <span class="fa fa-quote-left"></span>
+                                                <h4>Citation Finder</h4>
+                                                <p>A quick tool to help you locate articles with citation information</p>
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
