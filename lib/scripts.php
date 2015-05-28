@@ -17,11 +17,11 @@
 function roots_scripts() {
 
     $CDN = array(
-        'angular'   => 'https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.28/angular.js',
-        'angular-animate'   => 'https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.28/angular-animate.js',
-        'angular-route'   => 'https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.28/angular-route.js',
-        'angular-resource'   => 'https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.28/angular-resource.js',
-        'angular-sanitize'   => 'https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.28/angular-sanitize.js'
+        'angular'   => '//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.28/angular.js',
+        'angular-animate'   => '//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.28/angular-animate.js',
+        'angular-route'   => '//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.28/angular-route.js',
+        'angular-resource'   => '//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.28/angular-resource.js',
+        'angular-sanitize'   => '//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.28/angular-sanitize.js'
     );
 
   /**
