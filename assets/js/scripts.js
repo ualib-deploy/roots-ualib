@@ -12356,9 +12356,11 @@ angular.module("calendar/calendar.tpl.html", []).run(["$templateCache", function
     "            <span class=\"fa fa-angle-right\"></span>\n" +
     "        </button>\n" +
     "    </nav>\n" +
-    "    <div class=\"cal-month\">\n" +
-    "        <div class=\"cal-week\" ng-repeat=\"week in calendar.weeks\">\n" +
-    "            <div class=\"cal-day\" ng-repeat=\"day in week\" hours-calendar-day day=day\"></div>\n" +
+    "    <div class=\"col-month-cotnainer\">\n" +
+    "        <div class=\"cal-month\" ng-repeat=\"month in cal.calendar\">\n" +
+    "            <div class=\"cal-week\" ng-repeat=\"week in month.calendar.weeks\">\n" +
+    "                <!--<div class=\"cal-day\" ng-repeat=\"day in week\" hours-calendar-day day=day\"></div>-->\n" +
+    "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "    <!--\n" +
@@ -12457,47 +12459,82 @@ angular.module('hours', ['ualib.hours']);
 angular.module('hours.calendar', [])
     .constant('NUM_MONTHS', 6)
 
-    .service('CalendarService', ['hoursFactory', '$rootScope', '$location', function(hoursFactory, $rootScope, $location){
+    .service('CalendarService', ['hoursFactory', '$rootScope', '$location', '$q', '$filter', function(hoursFactory, $rootScope, $location, $q, $filter){
         var self = this;
         var calData;
-        this.cal = {
+        this.calendar = {};
+        this.params = {
             lid: 0,
             month: 0,
             library: ''
         };
 
-        // query the API resource to get all calendar data
-        this.query = function(){
-            // Using .query() instead of .get() since calendar resource is an Array
-            // See "Returns" section of $resource Usage docs: https://code.angularjs.org/1.2.28/docs/api/ngResource/service/$resource#usage
-            return hoursFactory.query({view: 'calendar'}, function(data){
-                console.log(data);
-                return data;
-            }, function(data, status, headers, config) {
-                console.log('Initial Error: ' + data);
-            });
+        // initialize sync of URI query params an the API resource to get all calendar data
+        this.init = function(){
+            var deferred = $q.defer();
+
+            hoursFactory.get({view: 'calendar'})
+                .$promise
+                .then(function(data){
+                    paramsToService();
+                    calData = data;
+                    deferred.resolve();
+                }, function(data, status, headers, config) {
+                    console.log('Initial Error: ' + data);
+                    deferred.reject('Hours Calendar Error' + data);
+                });
+
+            return deferred.promise;
         };
 
-        function paramsToService(){
-            var params = $location.search();
+
+
+        function getCalendar(){
+            var calendar = $filter('filter');
+
 
         }
 
+
+
     }])
-    .controller('CalendarCtrl', ['$scope', '$element', '$animate', '$location', 'CalendarService', function calendarCtrl($scope, $element, $animate, $location, CalendarService){
-        var self = this; //Avoid scope conflicts in closure statements
-        var calData = [];
-        $scope.curMonth = 0;
-        $scope.cal = CalendarService;
+    .controller('CalendarCtrl', ['$scope', '$element', '$animate', '$location', '$filter', 'hoursFactory', function CalendarCtrl($scope, $element, $animate, $location, $filter, hoursFactory){
+        var calData;
+        $scope.cal;
+        $scope.params = {
+            lid: 0,
+            month: 0,
+            library: 'gorgas'
+        };
 
-        /*$scope.cal.query()
-            .$promise.then(function(data){
-                $scope.calendar = data;
-            });*/
+        hoursFactory.get({view: 'calendar'})
+            .$promise
+            .then(function(data){
+                paramsToService();
+                calData = data.cal;
+                processCalendar(calData);
+            }, function(data, status, headers, config) {
+                console.log('Initial Error: ' + data);
+            });
 
-        function paramsToScope(){
-            $scope.cal.lid = $location.search('lid') || 0;
-            $scope.cal.month = $location.search('month') || 0;
+        $scope.$on('$locationChangeSuccess', function(){
+            paramsToService();
+        });
+
+        function processCalendar(cal){
+            cal = $filter('filterBy')(cal, ['library.name'], $scope.params.library);
+
+        }
+
+        function paramsToService(){
+            var params = $location.search();
+            var _scope = $scope.params;
+            for (var prop in params){
+                if (_scope.hasOwnProperty(prop)){
+                    _scope[prop] = params[prop];
+                }
+            }
+            $scope.params = _scope;
         }
 
         /*var spinner = angular.element('<div id="loading-bar-spinner"><div class="spinner-icon"></div></div>');
@@ -12662,7 +12699,14 @@ angular.module('ualib.hours')
                 var library = angular.isDefined($scope.library) ? $scope.library : 'gorgas';
                 hoursFactory.get({view: 'today'},
                     function(data){
-                        var lib = $filter('filter')(data.libraries, {name: library});
+                        var libraries = [];
+                        for (var lib in data.libraries){
+                            libraries.push(data.libraries[lib]);
+                            if (data.libraries[lib].hasOwnProperty('children')){
+                                libraries = libraries.concat(data.libraries[lib]['children']);
+                            }
+                        }
+                        var lib = $filter('filter')(libraries, {name: $scope.library});
                         $scope.today = setStatus(lib[0]);
                         $element.addClass('loaded');
 
