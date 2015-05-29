@@ -8914,7 +8914,7 @@ footer .social-icons > a > li {
   padding: 15px;
   color: #666666;
 }
-footer .social-icons > ul:hover {
+footer .social-icons > a:hover {
   color: #428bca;
 }
 .slice,

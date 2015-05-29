@@ -60,7 +60,7 @@
             <a href="https://wwwdev2.lib.ua.edu/about-ua-libraries/social-media/">
               <ul class="nav nav-pills nav-justified social-icons">
 
-                  <li><span class="fa fa-fw fa-2x fa-twitter"></a></span></li>
+                  <li><span class="fa fa-fw fa-2x fa-twitter"></span></li>
                   <li><span class="fa fa-fw fa-2x fa-instagram"></span></li>
                   <li><span class="fa fa-fw fa-2x fa-facebook"></span></li>
                   <li><span class="fa fa-fw fa-2x fa-youtube"></span></li>
