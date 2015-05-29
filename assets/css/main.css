@@ -8910,7 +8910,7 @@ footer .social-icons.nav-justified > li {
   display: table-cell;
   width: 1%;
 }
-footer .social-icons > a > li {
+footer a > .social-icons {
   padding: 15px;
   color: #666666;
 }
