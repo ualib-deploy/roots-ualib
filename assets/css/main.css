@@ -8949,6 +8949,13 @@ footer .social-icons.nav-justified > li {
   display: table-cell;
   width: 1%;
 }
+footer a > .social-icons {
+  padding: 15px;
+  color: #666666;
+}
+footer a:hover .social-icons {
+  color: #428bca;
+}
 .slice,
 .page-slice {
   padding: 15px;
@@ -9055,13 +9062,6 @@ footer .footer-list > li {
 footer .footer-list > li > a {
   display: block;
   font-size: 14px;
-}
-footer .social-icons > li > a {
-  padding: 15px;
-  color: #666666;
-}
-footer .social-icons > li > a:hover {
-  color: #428bca;
 }
 footer > .sub-footer {
   background-color: #ddd;
