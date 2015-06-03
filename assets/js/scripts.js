@@ -5699,12 +5699,14 @@ angular.module('duScroll', [
   .value('duScrollOffset', 0)
   //Default easing function for scroll animation
   .value('duScrollEasing', duScrollDefaultEasing)
+  //Which events on the container (such as body) should cancel scroll animations
+  .value('duScrollCancelOnEvents', 'scroll mousedown mousewheel touchmove keydown')
   //Whether or not to activate the last scrollspy, when page/container bottom is reached
   .value('duScrollBottomSpy', false);
 
 
 angular.module('duScroll.scrollHelpers', ['duScroll.requestAnimation'])
-.run(["$window", "$q", "cancelAnimation", "requestAnimation", "duScrollEasing", "duScrollDuration", "duScrollOffset", function($window, $q, cancelAnimation, requestAnimation, duScrollEasing, duScrollDuration, duScrollOffset) {
+.run(["$window", "$q", "cancelAnimation", "requestAnimation", "duScrollEasing", "duScrollDuration", "duScrollOffset", "duScrollCancelOnEvents", function($window, $q, cancelAnimation, requestAnimation, duScrollEasing, duScrollDuration, duScrollOffset, duScrollCancelOnEvents) {
   'use strict';
 
   var proto = {};
@@ -5752,10 +5754,11 @@ angular.module('duScroll.scrollHelpers', ['duScroll.requestAnimation'])
     var startTime = null, progress = 0;
     var el = this;
 
-    var cancelOnEvents = 'scroll mousedown mousewheel touchmove keydown';
     var cancelScrollAnimation = function($event) {
       if (!$event || (progress && $event.which > 0)) {
-        el.unbind(cancelOnEvents, cancelScrollAnimation);
+        if(duScrollCancelOnEvents) {
+          el.unbind(duScrollCancelOnEvents, cancelScrollAnimation);
+        }
         cancelAnimation(scrollAnimation);
         deferred.reject();
         scrollAnimation = null;
@@ -5790,7 +5793,9 @@ angular.module('duScroll.scrollHelpers', ['duScroll.requestAnimation'])
       if(percent < 1) {
         scrollAnimation = requestAnimation(animationStep);
       } else {
-        el.unbind(cancelOnEvents, cancelScrollAnimation);
+        if(duScrollCancelOnEvents) {
+          el.unbind(duScrollCancelOnEvents, cancelScrollAnimation);
+        }
         scrollAnimation = null;
         deferred.resolve();
       }
@@ -5799,7 +5804,9 @@ angular.module('duScroll.scrollHelpers', ['duScroll.requestAnimation'])
     //Fix random mobile safari bug when scrolling to top by hitting status bar
     el.duScrollTo(startLeft, startTop);
 
-    el.bind(cancelOnEvents, cancelScrollAnimation);
+    if(duScrollCancelOnEvents) {
+      el.bind(duScrollCancelOnEvents, cancelScrollAnimation);
+    }
 
     scrollAnimation = requestAnimation(animationStep);
     return deferred.promise;
@@ -16643,13 +16650,13 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                         data.software[i].newLoc.selLoc = data.locations[0];
                         data.software[i].newLoc.devices = [];
                         for (var j = 0; j < data.devices.length; j++)
-                            data.software[i].newLoc.devices[j] = false;
+                            data.software[i].newLoc.devices[j] = true;
                         data.software[i].newLink = {};
                     }
                     $scope.newSW.newLoc.selLoc = data.locations[0];
                     $scope.newSW.newLoc.devices = [];
                     for (var j = 0; j < data.devices.length; j++)
-                        $scope.newSW.newLoc.devices[j] = false;
+                        $scope.newSW.newLoc.devices[j] = true;
                     $scope.newSW.selCat = data.categories[0];
                     $scope.SWList = data;
                 })
@@ -16933,7 +16940,10 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                     for (var i = 0; i < $scope.SWList.devices.length; i++)
                         if (sw.newLoc.devices[i])
                             newLoc.devices += parseInt($scope.SWList.devices[i].did);
-                    $scope.SWList.software[$scope.SWList.software.indexOf(sw)].versions[$scope.SWList.software[$scope.SWList.software.indexOf(sw)].versions.indexOf(version)].locations.push(newLoc);
+                    if (newLoc.devices > 0)
+                        $scope.SWList.software[$scope.SWList.software.indexOf(sw)].versions[$scope.SWList.software[$scope.SWList.software.indexOf(sw)].versions.indexOf(version)].locations.push(newLoc);
+                    else
+                        alert("Please select at least one device type!");
                 }
             };
             $scope.deleteLocation = function(sw, version, location){
@@ -17033,7 +17043,10 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                     for (var i = 0; i < $scope.SWList.devices.length; i++)
                         if ($scope.newSW.newLoc.devices[i])
                             newLoc.devices += parseInt($scope.SWList.devices[i].did);
-                    $scope.newSW.versions[$scope.newSW.versions.indexOf(version)].locations.push(newLoc);
+                    if (newLoc.devices > 0)
+                        $scope.newSW.versions[$scope.newSW.versions.indexOf(version)].locations.push(newLoc);
+                    else
+                        alert("Please select at least one device type!");
                 }
             };
             $scope.addNewSWCat = function(){
@@ -18927,34 +18940,6 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "    </div>\n" +
     "</div>");
 }]);
-;/*
-(function() {
-    tinymce.create('tinymce.plugins.typekit', {
-        setup : function(ed) {
-            ed.onInit.add(function(ed, evt) {
-
-                // Load a script from a specific URL using the global script loader
-                tinymce.ScriptLoader.load('somescript.js');
-
-                // Load a script using a unique instance of the script loader
-                var scriptLoader = new tinymce.dom.ScriptLoader();
-
-                scriptLoader.load('somescript.js');
-
-            });
-        },
-    getInfo: function() {
-    return {
-        longname:  'TypeKit',
-        author:    'Thomas Griffin',
-        authorurl: 'https://thomasgriffin.io',
-        infourl:   'https://twitter.com/jthomasgriffin',
-        version:   '1.0'
-    };
-}
-});
-tinymce.PluginManager.add('typekit', tinymce.plugins.typekit);
-})();*/
 ;/* ========================================================================
  * DOM-based Routing
  * Based on http://goo.gl/EUTi53 by Paul Irish
