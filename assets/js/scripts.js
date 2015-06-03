@@ -16650,13 +16650,13 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                         data.software[i].newLoc.selLoc = data.locations[0];
                         data.software[i].newLoc.devices = [];
                         for (var j = 0; j < data.devices.length; j++)
-                            data.software[i].newLoc.devices[j] = true;
+                            data.software[i].newLoc.devices[j] = false;
                         data.software[i].newLink = {};
                     }
                     $scope.newSW.newLoc.selLoc = data.locations[0];
                     $scope.newSW.newLoc.devices = [];
                     for (var j = 0; j < data.devices.length; j++)
-                        $scope.newSW.newLoc.devices[j] = true;
+                        $scope.newSW.newLoc.devices[j] = false;
                     $scope.newSW.selCat = data.categories[0];
                     $scope.SWList = data;
                 })
