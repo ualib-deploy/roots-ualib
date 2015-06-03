@@ -14192,10 +14192,10 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                                                     ng-show=\"(($index == 0 || $index == 2) && version.os == 1) ||\n" +
     "                                                              (($index == 1 || $index == 3) && version.os == 2)\">\n" +
     "                                                    <input type=\"checkbox\" ng-model=\"version.newLoc.devices[$index]\">\n" +
-    "                                                    <span ng-show=\"$index <= 2\">\n" +
+    "                                                    <span ng-show=\"$index <= 1\">\n" +
     "                                                        <span class=\"fa fa-fw fa-desktop\"></span>\n" +
     "                                                    </span>\n" +
-    "                                                    <span ng-show=\"$index > 2\">\n" +
+    "                                                    <span ng-show=\"$index > 1\">\n" +
     "                                                        <span class=\"fa fa-fw fa-laptop\"></span>\n" +
     "                                                    </span>\n" +
     "                                                </div>\n" +
@@ -14389,10 +14389,10 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                                                ng-show=\"(($index == 0 || $index == 2) && version.os == 1) ||\n" +
     "                                                         (($index == 1 || $index == 3) && version.os == 2)\">\n" +
     "                                            <input type=\"checkbox\" ng-model=\"version.newLoc.devices[$index]\">\n" +
-    "                                                    <span ng-show=\"$index <= 2\">\n" +
+    "                                                    <span ng-show=\"$index <= 1\">\n" +
     "                                                        <span class=\"fa fa-fw fa-desktop\"></span>\n" +
     "                                                    </span>\n" +
-    "                                                    <span ng-show=\"$index > 2\">\n" +
+    "                                                    <span ng-show=\"$index > 1\">\n" +
     "                                                        <span class=\"fa fa-fw fa-laptop\"></span>\n" +
     "                                                    </span>\n" +
     "                                        </div>\n" +
