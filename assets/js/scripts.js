@@ -17820,19 +17820,27 @@ angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", f
     "\n" +
     "        <div class=\"media\" ng-repeat=\"item in filteredDB | after:(pager.page-1)*pager.perPage | limitTo:20\">\n" +
     "            <div class=\"media-body\">\n" +
-    "                <h4 class=\"media-heading\">\n" +
-    "                    <a ng-href=\"{{DB_PROXY_PREPEND_URL}}{{item.url}}\" title=\"{{item.title}}\"> {{item.title}}</a>\n" +
-    "                    <!--<small ng-if=\"item.presentedBy\">({{item.presentedBy}})</small>-->\n" +
-    "                    <small>{{item.coverage}}</small>\n" +
-    "                    <small>\n" +
-    "                        <span class=\"label label-success\" ng-if=\"item.hasFullText == 'A'\">All Full Text</span>\n" +
-    "                        <span class=\"label label-info\" ng-if=\"item.hasFullText == 'P'\">Primarily Full Text</span>\n" +
-    "                        <span class=\"label label-warning\" ng-if=\"item.hasFullText == 'S'\">Some Full Text</span>\n" +
-    "                        <span class=\"label label-danger\" ng-if=\"item.hasFullText == 'N'\">No Full Text</span>\n" +
-    "                    </small>\n" +
-    "                </h4>\n" +
+    "                <div class=\"row\">\n" +
+    "                    <div class=\"col-md-10\">\n" +
+    "                        <h4 class=\"media-heading\">\n" +
+    "                            <a ng-href=\"{{DB_PROXY_PREPEND_URL}}{{item.url}}\" title=\"{{item.title}}\"> {{item.title}}</a>\n" +
+    "                            <!--<small ng-if=\"item.presentedBy\">({{item.presentedBy}})</small>-->\n" +
+    "                            <small>{{item.coverage}}</small>\n" +
+    "                        </h4>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-2 text-right\">\n" +
+    "                        <h4 class=\"media-heading\">\n" +
+    "                            <small>\n" +
+    "                                <span class=\"label label-success\" ng-if=\"item.hasFullText == 'A'\">All Full Text</span>\n" +
+    "                                <span class=\"label label-info\" ng-if=\"item.hasFullText == 'P'\">Primarily Full Text</span>\n" +
+    "                                <span class=\"label label-warning\" ng-if=\"item.hasFullText == 'S'\">Some Full Text</span>\n" +
+    "                                <span class=\"label label-danger\" ng-if=\"item.hasFullText == 'N'\">No Full Text</span>\n" +
+    "                            </small>\n" +
+    "                        </h4>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
     "\n" +
-    "                <p>{{item.description}}</p>\n" +
+    "                <p style=\"text-align: justify;\">{{item.description}}</p>\n" +
     "\n" +
     "\n" +
     "                <div ng-if=\"item.location\">\n" +
@@ -18099,10 +18107,6 @@ angular.module('ualib.databases')
                 var newParam = {};
 
                 if (angular.isDefined(val) && val !== ''){
-                    console.log({
-                        key: key,
-                        val: val
-                    });
                     if (angular.isObject(val)){
                         val = Object.keys(val).filter(function(f){
                             return val[f];
