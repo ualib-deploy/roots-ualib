@@ -14159,7 +14159,7 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                                                </button>\n" +
     "                                                {{loc.name}}\n" +
     "                                            </div>\n" +
-    "                                            <div class=\"col-md-6\">\n" +
+    "                                            <div class=\"col-md-5\">\n" +
     "                                                <div class=\"col-md-6\" ng-show=\"checkDevices(loc.devices, 1)\">\n" +
     "                                                    <span class=\"fa fa-fw fa-windows\"></span>\n" +
     "                                                    <span class=\"fa fa-fw fa-desktop\"></span>\n" +
@@ -14177,6 +14177,9 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                                                    <span class=\"fa fa-fw fa-laptop\"></span>\n" +
     "                                                </div>\n" +
     "                                            </div>\n" +
+    "                                            <div class=\"col-md-1\">\n" +
+    "\n" +
+    "                                            </div>\n" +
     "                                        </li>\n" +
     "                                        <li class=\"list-group-item col-md-12\">\n" +
     "                                            <div class=\"col-md-6\">\n" +
@@ -14189,20 +14192,10 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                                                     ng-show=\"(($index == 0 || $index == 2) && version.os == 1) ||\n" +
     "                                                              (($index == 1 || $index == 3) && version.os == 2)\">\n" +
     "                                                    <input type=\"checkbox\" ng-model=\"version.newLoc.devices[$index]\">\n" +
-    "                                                    <span ng-show=\"$index == 0\">\n" +
-    "                                                        <span class=\"fa fa-fw fa-windows\"></span>\n" +
+    "                                                    <span ng-show=\"$index <= 2\">\n" +
     "                                                        <span class=\"fa fa-fw fa-desktop\"></span>\n" +
     "                                                    </span>\n" +
-    "                                                    <span ng-show=\"$index == 1\">\n" +
-    "                                                        <span class=\"fa fa-fw fa-apple\"></span>\n" +
-    "                                                        <span class=\"fa fa-fw fa-desktop\"></span>\n" +
-    "                                                    </span>\n" +
-    "                                                    <span ng-show=\"$index == 2\">\n" +
-    "                                                        <span class=\"fa fa-fw fa-windows\"></span>\n" +
-    "                                                        <span class=\"fa fa-fw fa-laptop\"></span>\n" +
-    "                                                    </span>\n" +
-    "                                                    <span ng-show=\"$index == 3\">\n" +
-    "                                                        <span class=\"fa fa-fw fa-apple\"></span>\n" +
+    "                                                    <span ng-show=\"$index > 2\">\n" +
     "                                                        <span class=\"fa fa-fw fa-laptop\"></span>\n" +
     "                                                    </span>\n" +
     "                                                </div>\n" +
@@ -14363,7 +14356,7 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                                        </button>\n" +
     "                                        {{loc.name}}\n" +
     "                                    </div>\n" +
-    "                                    <div class=\"col-md-6\">\n" +
+    "                                    <div class=\"col-md-5\">\n" +
     "                                        <div class=\"col-md-6\" ng-show=\"checkDevices(loc.devices, 1)\">\n" +
     "                                            <span class=\"fa fa-fw fa-windows\"></span>\n" +
     "                                            <span class=\"fa fa-fw fa-desktop\"></span>\n" +
@@ -14381,6 +14374,9 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                                            <span class=\"fa fa-fw fa-laptop\"></span>\n" +
     "                                        </div>\n" +
     "                                    </div>\n" +
+    "                                    <div class=\"col-md-1\">\n" +
+    "\n" +
+    "                                    </div>\n" +
     "                                </li>\n" +
     "                                <li class=\"list-group-item col-md-12\">\n" +
     "                                    <div class=\"col-md-6\">\n" +
@@ -14393,20 +14389,10 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                                                ng-show=\"(($index == 0 || $index == 2) && version.os == 1) ||\n" +
     "                                                         (($index == 1 || $index == 3) && version.os == 2)\">\n" +
     "                                            <input type=\"checkbox\" ng-model=\"version.newLoc.devices[$index]\">\n" +
-    "                                                    <span ng-show=\"$index == 0\">\n" +
-    "                                                        <span class=\"fa fa-fw fa-windows\"></span>\n" +
+    "                                                    <span ng-show=\"$index <= 2\">\n" +
     "                                                        <span class=\"fa fa-fw fa-desktop\"></span>\n" +
     "                                                    </span>\n" +
-    "                                                    <span ng-show=\"$index == 1\">\n" +
-    "                                                        <span class=\"fa fa-fw fa-apple\"></span>\n" +
-    "                                                        <span class=\"fa fa-fw fa-desktop\"></span>\n" +
-    "                                                    </span>\n" +
-    "                                                    <span ng-show=\"$index == 2\">\n" +
-    "                                                        <span class=\"fa fa-fw fa-windows\"></span>\n" +
-    "                                                        <span class=\"fa fa-fw fa-laptop\"></span>\n" +
-    "                                                    </span>\n" +
-    "                                                    <span ng-show=\"$index == 3\">\n" +
-    "                                                        <span class=\"fa fa-fw fa-apple\"></span>\n" +
+    "                                                    <span ng-show=\"$index > 2\">\n" +
     "                                                        <span class=\"fa fa-fw fa-laptop\"></span>\n" +
     "                                                    </span>\n" +
     "                                        </div>\n" +
