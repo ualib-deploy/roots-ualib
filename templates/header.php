@@ -510,7 +510,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                     </div>
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="<?php echo site_url(); ?>/library-help/report-a-login-problem/">
+                                            <a class="service-card" href="<?php echo site_url(); ?>/forms/login-problem-report-form/">
                                                 <span class="fa fa-sign-in"></span>
                                                 <h4>Report a Login Problem</h4>
                                                 <p>Contact the libraries with problems accessing our online resources </p>
