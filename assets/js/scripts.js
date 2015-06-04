@@ -13672,9 +13672,9 @@ angular.module("manageNews/manageNews.tpl.html", []).run(["$templateCache", func
 angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageNews/manageNewsList.tpl.html",
     "<div>\n" +
-    "    <h3>Add News Record</h3>\n" +
     "    <form name=\"addNewsExh\" ng-submit=\"createNews()\">\n" +
     "        <div class=\"row sdOpen\">\n" +
+    "            <h3>Add News Record</h3>\n" +
     "            <div class=\"col-md-12\">\n" +
     "                <div class=\"col-md-3 form-group\">\n" +
     "                    <label for=\"up\">Upload Icon</label>\n" +
@@ -13720,7 +13720,7 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                    <textarea data-ui-tinymce id=\"description\" data-ng-model=\"newNews.description\" rows=\"5\"></textarea>\n" +
     "                </div>\n" +
     "            </div>\n" +
-    "            <div class=\"col-md-12\">\n" +
+    "            <div class=\"col-md-12 form-group\">\n" +
     "                <h4><small>Select contact person from the list or enter new contact information</small></h4>\n" +
     "                <div class=\"form-group\">\n" +
     "                    <div class=\"col-md-3\">\n" +
@@ -13746,7 +13746,7 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
-    "            <div class=\"col-md-12 text-center\">\n" +
+    "            <div class=\"col-md-12 text-center form-group\">\n" +
     "                <button type=\"submit\" class=\"btn btn-success\">Create New Record</button><br>\n" +
     "                {{newNews.formResponse}}\n" +
     "            </div>\n" +
@@ -13853,7 +13853,7 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                    </h4>\n" +
     "                    <div ng-show=\"news.show\">\n" +
     "                        <div class=\"row\">\n" +
-    "                            <div class=\"col-md-4 form-group\">\n" +
+    "                            <div class=\"col-md-3 form-group\">\n" +
     "                                <label for=\"{{news.nid}}_up\">Upload Icon</label>\n" +
     "                                <input type=\"file\" ngf-select=\"\" ng-model=\"news.picFile\" accept=\"image/png\"\n" +
     "                                       ngf-change=\"generateThumb(news.picFile[0], $files)\" id=\"{{news.nid}}_up\">\n" +
@@ -13861,13 +13861,17 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                                    <div class=\"ng-binding\" style=\"width:{{news.picFile[0].progress}}%\" ng-bind=\"news.picFile[0].progress + '%'\"></div>\n" +
     "                                </span>\n" +
     "                            </div>\n" +
-    "                            <div class=\"col-md-4 form-group\">\n" +
+    "                            <div class=\"col-md-3 form-group\">\n" +
+    "                                <label>Author</label>\n" +
+    "                                <div><strong>{{news.creator}}</strong></div>\n" +
+    "                            </div>\n" +
+    "                            <div class=\"col-md-3 form-group\">\n" +
     "                                <label for=\"{{news.nid}}_from\">Active From</label>\n" +
     "                                <input type=\"text\" class=\"form-control\" id=\"{{news.nid}}_from\" datepicker-popup=\"{{dpFormat}}\"\n" +
     "                                       ng-model=\"news.activeFrom\" is-open=\"news.dpFrom\" ng-required=\"true\" close-text=\"Close\"\n" +
     "                                       ng-focus=\"onNewsDPFocusFrom($event, $index)\"/>\n" +
     "                            </div>\n" +
-    "                            <div class=\"col-md-4 form-group\">\n" +
+    "                            <div class=\"col-md-3 form-group\">\n" +
     "                                <label for=\"{{news.nid}}_until\">Active Until</label>\n" +
     "                                <input type=\"text\" class=\"form-control\" id=\"{{news.nid}}_until\" datepicker-popup=\"{{dpFormat}}\"\n" +
     "                                       ng-model=\"news.activeUntil\" is-open=\"news.dpUntil\" ng-required=\"true\" close-text=\"Close\"\n" +
