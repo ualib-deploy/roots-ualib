@@ -11,6 +11,11 @@ function ualib_child_endSession() {
 }
 
 function ualib_scripts() {
+    if ( is_page('news-and-exhibitions') )
+        wp_enqueue_script(
+            'tinyMCE',
+            '//tinymce.cachefly.net/4.0/tinymce.min.js'
+        );
   if ( is_page('hours') )
     wp_enqueue_script(
       'GoogleMapAPI',
