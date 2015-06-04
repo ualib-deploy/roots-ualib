@@ -13752,7 +13752,7 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                </div>\n" +
     "                <div class=\"col-md-12 form-group\">\n" +
     "                    <label>Detailed Description</label>\n" +
-    "                    <tiny-mce-editor ng-model=\"newNews.description\" ></tiny-mce-editor>\n" +
+    "                    <tiny-mce-editor model=\"newNews.description\" ></tiny-mce-editor>\n" +
     "                </div>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-12\">\n" +
@@ -13896,7 +13896,7 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                        <div class=\"row\">\n" +
     "                            <div class=\"col-md-12 form-group\">\n" +
     "                                <label>Detailed Description</label>\n" +
-    "                                <tiny-mce-editor ng-model=\"news.description\" ></tiny-mce-editor>\n" +
+    "                                <tiny-mce-editor model=\"news.description\" ></tiny-mce-editor>\n" +
     "                            </div>\n" +
     "                        </div>\n" +
     "                        <h4><small>Select contact person from the list or enter new contact information</small></h4>\n" +
@@ -16199,9 +16199,11 @@ angular.module('manage.manageNews', ['ngFileUpload'])
         var uniqueId = 0;
         return {
             restrict: 'E',
-            require: 'ngModel',
-            scope: true,
-            template: '<textarea class="form-control" rows="6"></textarea>',
+            require: 'model',
+            scope: {
+                model: "=model"
+            },
+            template: '<textarea class="form-control" rows="6" ng-model="model"></textarea>',
             link: function (scope, element, attrs, ngModel) {
                 var id = 'myEditor_' + uniqueId++;
                 element.find('textarea').attr('id', id);
@@ -16271,7 +16273,6 @@ angular.module('manage.manageNews', ['ngFileUpload'])
                         .success(function(data, status, headers, config) {
                             if (data == 1){
                                 $scope.data.news[$scope.data.news.indexOf(news)].status = 1;
-                                alert("News item has been approved.");
                             } else {
                                 alert("Error: Can not approve news item! " + data);
                             }
