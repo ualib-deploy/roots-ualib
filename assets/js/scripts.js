@@ -16366,51 +16366,75 @@ angular.module('manage.manageNews', ['ngFileUpload'])
                 }
             };
             $scope.createNews = function(){
-                if (typeof $scope.newNews.picFile === 'undefined'){
-                    $scope.newNews.formResponse = "Please select icon file (.png)!";
-                    return false;
-                }
                 $scope.newNews.formResponse = $scope.validateNews($scope.newNews);
                 if ($scope.newNews.formResponse.length > 0)
                     return false;
                 $scope.newNews.tsFrom = $scope.newNews.activeFrom.valueOf() / 1000;
                 $scope.newNews.tsUntil = $scope.newNews.activeUntil.valueOf() / 1000;
-                $scope.newNews.picFile.upload = Upload.upload({
-                    url: appURL + 'processData.php?action=3',
-                    method: 'POST',
-                    fields: {
-                        news: $scope.newNews
-                    },
-                    file: $scope.newNews.picFile,
-                    fileFormDataName: 'addNewsExh'
-                });
-                $scope.newNews.picFile.upload.then(function(response) {
-                    $timeout(function() {
-                        if ((typeof response.data === 'object') && (response.data !== null)){
-                            var newNews = {};
-                            newNews.nid = response.data.id;
-                            newNews.title = $scope.newNews.title;
-                            newNews.description = $scope.newNews.description;
-                            newNews.show = false;
-                            newNews.class = "";
-                            newNews.img = response.data.img;
-                            newNews.type = $scope.newNews.selType.value;
-                            newNews.status = 0;
-                            $scope.data.news.push(newNews);
-                            $scope.newNews.formResponse = "News has been added.";
-                        } else {
-                            $scope.newNews.formResponse = "Error: Can not add news! " + response.data;
-                        }
-                        console.dir(response.data);
+
+                if (typeof $scope.newNews.picFile === 'undefined'){
+                    newsFactory.postData({action : 31}, $scope.newNews)
+                        .success(function(data, status, headers, config) {
+                            if ((typeof data === 'object') && (data !== null)){
+                                var newNews = {};
+                                newNews.nid = data.id;
+                                newNews.title = $scope.newNews.title;
+                                newNews.description = $scope.newNews.description;
+                                newNews.show = false;
+                                newNews.class = "";
+                                newNews.img = data.img;
+                                newNews.type = $scope.newNews.selType.value;
+                                newNews.status = 0;
+                                $scope.data.news.push(newNews);
+                                $scope.newNews.formResponse = "News has been added.";
+                            } else {
+                                $scope.newNews.formResponse = "Error: Can not add news 2! " + data;
+                            }
+                            console.dir(data);
+                        })
+                        .error(function(data, status, headers, config) {
+                            $scope.data.news[$scope.data.news.indexOf(news)].formResponse =
+                                "Error: Could not add news 2! " + data;
+                            console.log(data);
+                        });
+                } else {
+                    $scope.newNews.picFile.upload = Upload.upload({
+                        url: appURL + 'processData.php?action=3',
+                        method: 'POST',
+                        fields: {
+                            news: $scope.newNews
+                        },
+                        file: $scope.newNews.picFile,
+                        fileFormDataName: 'addNewsExh'
                     });
-                }, function(response) {
-                    if (response.status > 0)
-                        $scope.newNews.formResponse = response.status + ': ' + response.data;
-                });
-                $scope.newNews.picFile.upload.progress(function(evt) {
-                    // Math.min is to fix IE which reports 200% sometimes
-                    $scope.newNews.picFile.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
-                });
+                    $scope.newNews.picFile.upload.then(function(response) {
+                        $timeout(function() {
+                            if ((typeof response.data === 'object') && (response.data !== null)){
+                                var newNews = {};
+                                newNews.nid = response.data.id;
+                                newNews.title = $scope.newNews.title;
+                                newNews.description = $scope.newNews.description;
+                                newNews.show = false;
+                                newNews.class = "";
+                                newNews.img = response.data.img;
+                                newNews.type = $scope.newNews.selType.value;
+                                newNews.status = 0;
+                                $scope.data.news.push(newNews);
+                                $scope.newNews.formResponse = "News has been added.";
+                            } else {
+                                $scope.newNews.formResponse = "Error: Can not add news! " + response.data;
+                            }
+                            console.dir(response.data);
+                        });
+                    }, function(response) {
+                        if (response.status > 0)
+                            $scope.newNews.formResponse = response.status + ': ' + response.data;
+                    });
+                    $scope.newNews.picFile.upload.progress(function(evt) {
+                        // Math.min is to fix IE which reports 200% sometimes
+                        $scope.newNews.picFile.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+                    });
+                }
             };
         }])
 
