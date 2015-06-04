@@ -13752,7 +13752,7 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                </div>\n" +
     "                <div class=\"col-md-12 form-group\">\n" +
     "                    <label>Detailed Description</label>\n" +
-    "                    <tiny-mce-editor model=\"newNews.description\" ></tiny-mce-editor>\n" +
+    "                    <textarea data-ui-tinymce id=\"description\" data-ng-model=\"newNews.description\" rows=\"8\"></textarea>\n" +
     "                </div>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-12\">\n" +
@@ -13847,7 +13847,7 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                    </table>\n" +
     "                </td>\n" +
     "                <td>\n" +
-    "                    <form name=\"editNewsExh{{news.sid}}\" ng-submit=\"updateNews(news)\">\n" +
+    "                    <form name=\"editNewsExh{{news.nid}}\" ng-submit=\"updateNews(news)\">\n" +
     "                    <div class=\"row\">\n" +
     "                        <div class=\"col-md-10\">\n" +
     "                            <h4>\n" +
@@ -13873,22 +13873,22 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                    <div ng-show=\"news.show\">\n" +
     "                        <div class=\"row\">\n" +
     "                            <div class=\"col-md-4 form-group\">\n" +
-    "                                <label for=\"{{news.sid}}_up\">Upload Icon</label>\n" +
+    "                                <label for=\"{{news.nid}}_up\">Upload Icon</label>\n" +
     "                                <input type=\"file\" ngf-select=\"\" ng-model=\"news.picFile\" accept=\"image/png\"\n" +
-    "                                       ngf-change=\"generateThumb(news.picFile[0], $files)\" id=\"{{news.sid}}_up\">\n" +
+    "                                       ngf-change=\"generateThumb(news.picFile[0], $files)\" id=\"{{news.nid}}_up\">\n" +
     "                                <span class=\"progress\" ng-show=\"news.picFile[0].progress >= 0\">\n" +
     "                                    <div class=\"ng-binding\" style=\"width:{{news.picFile[0].progress}}%\" ng-bind=\"news.picFile[0].progress + '%'\"></div>\n" +
     "                                </span>\n" +
     "                            </div>\n" +
     "                            <div class=\"col-md-4 form-group\">\n" +
-    "                                <label for=\"{{news.sid}}_from\">Active From</label>\n" +
-    "                                <input type=\"text\" class=\"form-control\" id=\"{{news.sid}}_from\" datepicker-popup=\"{{dpFormat}}\"\n" +
+    "                                <label for=\"{{news.nid}}_from\">Active From</label>\n" +
+    "                                <input type=\"text\" class=\"form-control\" id=\"{{news.nid}}_from\" datepicker-popup=\"{{dpFormat}}\"\n" +
     "                                       ng-model=\"news.activeFrom\" is-open=\"news.dpFrom\" ng-required=\"true\" close-text=\"Close\"\n" +
     "                                       ng-focus=\"onNewsDPFocusFrom($event, $index)\"/>\n" +
     "                            </div>\n" +
     "                            <div class=\"col-md-4 form-group\">\n" +
-    "                                <label for=\"{{news.sid}}_until\">Active Until</label>\n" +
-    "                                <input type=\"text\" class=\"form-control\" id=\"{{news.sid}}_until\" datepicker-popup=\"{{dpFormat}}\"\n" +
+    "                                <label for=\"{{news.nid}}_until\">Active Until</label>\n" +
+    "                                <input type=\"text\" class=\"form-control\" id=\"{{news.nid}}_until\" datepicker-popup=\"{{dpFormat}}\"\n" +
     "                                       ng-model=\"news.activeUntil\" is-open=\"news.dpUntil\" ng-required=\"true\" close-text=\"Close\"\n" +
     "                                       ng-focus=\"onNewsDPFocusUntil($event, $index)\"/>\n" +
     "                            </div>\n" +
@@ -13896,31 +13896,31 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                        <div class=\"row\">\n" +
     "                            <div class=\"col-md-12 form-group\">\n" +
     "                                <label>Detailed Description</label>\n" +
-    "                                <tiny-mce-editor model=\"news.description\" ></tiny-mce-editor>\n" +
+    "                                <textarea data-ui-tinymce id=\"{{news.nid}}_descr\" data-ng-model=\"news.description\" rows=\"8\"></textarea>\n" +
     "                            </div>\n" +
     "                        </div>\n" +
     "                        <h4><small>Select contact person from the list or enter new contact information</small></h4>\n" +
     "                        <div class=\"row form-group\">\n" +
     "                            <div class=\"col-md-3\">\n" +
-    "                                <label for=\"{{news.sid}}_contact1\">Library Faculty and Staff</label>\n" +
-    "                                <select class=\"form-control\" id=\"{{news.sid}}_contact1\" ng-options=\"people.fullName for people in data.people\"\n" +
+    "                                <label for=\"{{news.nid}}_contact1\">Library Faculty and Staff</label>\n" +
+    "                                <select class=\"form-control\" id=\"{{news.nid}}_contact1\" ng-options=\"people.fullName for people in data.people\"\n" +
     "                                        ng-model=\"news.contactID\">\n" +
     "                                </select>\n" +
     "                            </div>\n" +
     "                            <div class=\"col-md-3\">\n" +
-    "                                <label for=\"{{news.sid}}_contact2\">Name</label>\n" +
+    "                                <label for=\"{{news.nid}}_contact2\">Name</label>\n" +
     "                                <input type=\"text\" class=\"form-control\" placeholder=\"Contact Name\" ng-model=\"news.contactName\"\n" +
-    "                                       id=\"{{news.sid}}_contact2\">\n" +
+    "                                       id=\"{{news.nid}}_contact2\">\n" +
     "                            </div>\n" +
     "                            <div class=\"col-md-3\">\n" +
-    "                                <label for=\"{{news.sid}}_contact3\">Email</label>\n" +
+    "                                <label for=\"{{news.nid}}_contact3\">Email</label>\n" +
     "                                <input type=\"text\" class=\"form-control\" placeholder=\"Contact Email\" ng-model=\"news.contactEmail\"\n" +
-    "                                       id=\"{{news.sid}}_contact3\">\n" +
+    "                                       id=\"{{news.nid}}_contact3\">\n" +
     "                            </div>\n" +
     "                            <div class=\"col-md-3\">\n" +
-    "                                <label for=\"{{news.sid}}_contact4\">Phone</label>\n" +
+    "                                <label for=\"{{news.nid}}_contact4\">Phone</label>\n" +
     "                                <input type=\"text\" class=\"form-control\" placeholder=\"Contact Phone\" ng-model=\"news.contactPhone\"\n" +
-    "                                       id=\"{{news.sid}}_contact4\">\n" +
+    "                                       id=\"{{news.nid}}_contact4\">\n" +
     "                            </div>\n" +
     "                        </div>\n" +
     "                        <div class=\"row text-center\">\n" +
@@ -16195,28 +16195,67 @@ angular.module('manage.manageNews', ['ngFileUpload'])
         };
     })
 
-    .directive('tinyMceEditor', function () {
-        var uniqueId = 0;
+    .value('uiTinymceConfig', {})
+    .directive('uiTinymce', ['uiTinymceConfig', function(uiTinymceConfig) {
+        uiTinymceConfig = uiTinymceConfig || {};
+        var generatedIds = 0;
         return {
-            restrict: 'E',
-            require: 'model',
-            scope: {
-                model: "=model"
-            },
-            template: '<textarea class="form-control" rows="6" ng-model="model"></textarea>',
-            link: function (scope, element, attrs, ngModel) {
-                var id = 'myEditor_' + uniqueId++;
-                element.find('textarea').attr('id', id);
-                tinymce.init({
-                    selector: '#' + id
+            require: 'ngModel',
+            link: function(scope, elm, attrs, ngModel) {
+                var expression, options, tinyInstance;
+                // generate an ID if not present
+                if (!attrs.id) {
+                    attrs.$set('id', 'uiTinymce' + generatedIds++);
+                }
+                options = {
+                    // Update model when calling setContent (such as from the source editor popup)
+                    setup: function(ed) {
+                        ed.on('init', function(args) {
+                            ngModel.$render();
+                        });
+                        // Update model on button click
+                        ed.on('ExecCommand', function(e) {
+                            ed.save();
+                            ngModel.$setViewValue(elm.val());
+                            if (!scope.$$phase) {
+                                scope.$apply();
+                            }
+                        });
+                        // Update model on keypress
+                        ed.on('KeyUp', function(e) {
+                            console.log(ed.isDirty());
+                            ed.save();
+                            ngModel.$setViewValue(elm.val());
+                            if (!scope.$$phase) {
+                                scope.$apply();
+                            }
+                        });
+                    },
+                    mode: 'exact',
+                    elements: attrs.id
+                };
+                if (attrs.uiTinymce) {
+                    expression = scope.$eval(attrs.uiTinymce);
+                } else {
+                    expression = {};
+                }
+                angular.extend(options, uiTinymceConfig, expression);
+                setTimeout(function() {
+                    tinymce.init(options);
                 });
 
-                setTimeout(function(){
-                    var editor = tinymce.get(id);
-                },0);
+
+                ngModel.$render = function() {
+                    if (!tinyInstance) {
+                        tinyInstance = tinymce.get(attrs.id);
+                    }
+                    if (tinyInstance) {
+                        tinyInstance.setContent(ngModel.$viewValue || '');
+                    }
+                };
             }
-        }
-    })
+        };
+    }])
 
     .controller('manageNewsListCtrl', ['$scope', '$timeout', 'Upload', 'newsFactory', 'NEWS_URL',
         function manageNewsListCtrl($scope, $timeout, Upload, newsFactory, appURL){
