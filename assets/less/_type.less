@@ -5,7 +5,16 @@
 // Import default Bootstrap typography. Overrides, custom variables, and docs below.
 @import "../vendor/bootstrap/less/type";
 
-
+// Helper Classes
+//
+// weight: 10
+//
+// Icon: fa-wrench
+//
+// MenuBlurb:
+// Helper classes let you add minor style tweaks to elements
+//
+// Styleguide style.helpers
 
 mark,
 .mark,
@@ -16,4 +25,98 @@ mark,
 mark,
 .mark {
   padding: .2em;
+}
+
+// Contextual Colors
+//
+// weight: 0
+//
+// Convey meaning through color with a handful of emphasis utility classes. These may also be applied to links and will darken on hover just like our default link styles.
+//
+// Markup:
+//  <p class="text-muted">Yesterday I did not know how to eat gagh.</p>
+//  <p class="text-primary">Commander William Riker of the Starship Enterprise.</p>
+//  <p class="text-success">We finished our first sensor sweep of the neutral zone.</p>
+//  <p class="text-info">The Enterprise computer system is controlled by three primary main processor cores, cross-linked with a redundant melacortz ramistat, fourteen kiloquad interface modules.</p>
+//  <p class="text-warning">The Federation's gone; the Borg is everywhere!</p>
+//  <p class="text-danger">Shields up! Rrrrred alert!</p>
+//
+// CodeTemplate:
+//  <p class="text-muted">...</p>
+//  <p class="text-primary">...</p>
+//  <p class="text-success">...</p>
+//  <p class="text-info">...</p>
+//  <p class="text-warning">...</p>
+//  <p class="text-danger">...</p>
+//
+// Styleguide style.helpers.colors
+
+.text-muted {
+  color: @text-muted;
+}
+.text-primary {
+  .text-emphasis-variant(@brand-primary);
+}
+.text-success {
+  .text-emphasis-variant(@state-success-text);
+}
+.text-info {
+  .text-emphasis-variant(@state-info-text);
+}
+.text-warning {
+  .text-emphasis-variant(@state-warning-text);
+}
+.text-danger {
+  .text-emphasis-variant(@state-danger-text);
+}
+
+// Contextual backgrounds
+// For now we'll leave these alongside the text classes until v4 when we can
+// safely shift things around (per SemVer rules).
+
+// Contextual Backgrounds
+//
+// weight: 1
+//
+// Similar to the contextual text color classes, easily set the background of an element to any contextual class. Anchor components will darken on hover, just like the text classes.
+//
+// <mark>Note:</mark> The `.bg-transparent` class uses `!important` and is meant to override the predefined background colors of other components.
+//
+// Markup:
+//  <p class="bg-transparent">Yesterday I did not know how to eat gagh.</p>
+//  <p class="bg-primary">Commander William Riker of the Starship Enterprise.</p>
+//  <p class="bg-success">We finished our first sensor sweep of the neutral zone.</p>
+//  <p class="bg-info">The Enterprise computer system is controlled by three primary main processor cores, cross-linked with a redundant melacortz ramistat, fourteen kiloquad interface modules.</p>
+//  <p class="bg-warning">The Federation's gone; the Borg is everywhere!</p>
+//  <p class="bg-danger">Shields up! Rrrrred alert!</p>
+//
+// CodeTemplate:
+//  <p class="bg-transparent">...</p>
+//  <p class="bg-primary">...</p>
+//  <p class="bg-success">...</p>
+//  <p class="bg-info">...</p>
+//  <p class="bg-warning">...</p>
+//  <p class="bg-danger">...</p>
+//
+// Styleguide style.helpers.backgrounds
+.bg-transparent {
+  background-color: transparent !important;
+}
+.bg-primary {
+  // Given the contrast here, this is the only class to have its color inverted
+  // automatically.
+  color: #fff;
+  .bg-variant(@brand-primary);
+}
+.bg-success {
+  .bg-variant(@state-success-bg);
+}
+.bg-info {
+  .bg-variant(@state-info-bg);
+}
+.bg-warning {
+  .bg-variant(@state-warning-bg);
+}
+.bg-danger {
+  .bg-variant(@state-danger-bg);
 }
