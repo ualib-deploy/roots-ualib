@@ -325,7 +325,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                     <li><a href="<?php echo site_url(); ?>/services/photocopying/">Print, Scan, Copy</a></li>
                                                     <li class="menu-computer-availability"><a href="<?php echo site_url(); ?>/services/computer-availability/computer-availability/">Computer Availability</a></li>
                                                     <li class="menu-laptop-computers"><a href="<?php echo site_url(); ?>/services/computer-availability/laptop-computers/">Equipment</a></li>
-                                                    <li class="menu-library-software-list"><a href="<?php echo site_url(); ?>/services/computer-availability/library-software-list/">Library Software List</a></li>
+                                                    <li class="menu-library-software-list"><a href="<?php echo site_url(); ?>/#software">Library Software List</a></li>
 
                                                 </ul>
                                             </div>
