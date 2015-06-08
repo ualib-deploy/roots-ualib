@@ -9046,16 +9046,17 @@ html,
 body {
   min-height: 100%;
 }
-.webapp {
-  height: 100%;
-  width: 100%;
+div[role="document"] {
+  min-height: 600px;
 }
-.webapp > .wrap main {
+.front-page > .wrap main,
+.bento > .wrap main {
   position: relative;
   margin-top: 111px;
 }
 @media (max-width: 991px) {
-  .webapp > .wrap main {
+  .front-page > .wrap main,
+  .bento > .wrap main {
     margin-top: 0px;
   }
 }
@@ -9076,6 +9077,64 @@ body {
   background-color: @body-bg;
 
 }*/
+div[ng-view].ng-enter {
+  -webkit-animation: Fade-Enter-Anime 0.2s;
+  -o-animation: Fade-Enter-Anime 0.2s;
+     animation: Fade-Enter-Anime 0.2s;
+}
+.Content-Fade-Leave {
+  -webkit-animation: Fade-Leave-Anime 0.2s;
+  -o-animation: Fade-Leave-Anime 0.2s;
+     animation: Fade-Leave-Anime 0.2s;
+}
+@-o-keyframes Fade-Enter-Anime {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes Fade-Enter-Anime {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@-o-keyframes Fade-Leave-Anime {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes Fade-Leave-Anime {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@-webkit-keyframes Fade-Enter-Anime {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@-webkit-keyframes Fade-Leave-Anime {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
 /**
  * Your styles here
  */
@@ -10055,19 +10114,25 @@ a[href^="https"]:not(.source-link):after {
   background-color: #f9f9f9;
 }
 /*# sourceMappingURL=/wp-content/themes/roots/assets/css/main.css.map */
-.databases-list-container .breadcrumb .btn-default {
-  padding: 2px 6px;
-  background-color: transparent;
-  border: none;
+.databases-details > span:not(:last-of-type):after {
+  content: '; ';
 }
-.databases-list-container .breadcrumb .btn-default:hover,
-.databases-list-container .breadcrumb .btn-default:active {
+/*# sourceMappingURL=dist/databases-ui.css.map */
+.breadcrumb.facetcrumb .btn-default {
+  padding: 2px 6px;
+  margin: 0 2px;
+}
+.breadcrumb.facetcrumb .btn-default:hover,
+.breadcrumb.facetcrumb .btn-default:active {
   background-color: #e6e6e6;
 }
-.databases-list-container .breadcrumb .btn-default > span {
+.breadcrumb.facetcrumb .btn-default > span {
   font-size: 17px;
   font-weight: 700;
   line-height: 1;
+}
+.breadcrumb.facetcrumb .reset-btn {
+  padding: 2px 6px;
 }
 .facets-form .facet-group {
   max-height: 300px;

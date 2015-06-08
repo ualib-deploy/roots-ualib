@@ -26,7 +26,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                             </a>
                         </li>
                     <?php endif; ?>
-                    <li class="dropdown yamm-fw" dropdown-sticky>
+                    <li class="dropdown yamm-fw">
                         <a href="#" class="dropdown-toggle icon-only" title="My Accounts" ng-click="mainNavbarCollapsed = false;">
                             <span class="fa fa-user"></span>
                         </a>
@@ -167,21 +167,13 @@ if (defined('GROUP_ANY_WEBAPP'))
                             </li>
                         </ul>
                     </li>
-                    <li class="<?php if (is_front_page()) print 'dropdown-static ';?>dropdown yamm-fw"  dropdown-sticky>
+                    <li class="dropdown yamm-fw" ng-class="{'dropdown-static': (appClass == 'front-page webapp' || appClass == 'bento webapp')}">
                         <a href="#" class="dropdown-toggle icon-only" ng-click="mainNavbarCollapsed = false;">
                             <span class="fa fa-search"></span>
                         </a>
                         <ul class="dropdown-menu">
                             <li>
                                 <div class="yamm-content" ng-controller="OneSearchCtrl">
-                                    <!--<form action="/sample-page/onesearch/">
-                                        <div class="input-group input-group-lg">
-                                            <input type="text" name="search" class="form-control onesearch-text" placeholder="Search all library resources">
-                                            <div class="input-group-btn">
-                                                <button type="submit" class="btn btn-onesearch btn-primary"><span class="fa fa-search"></span></button>
-                                            </div>
-                                        </div>
-                                    </form>-->
                                     <form ng-submit="search()">
 
                                         <suggest-one-search prompt="Search all library resources" model="searchText" search="search">
@@ -418,7 +410,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                 <div class="yamm-content">
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="<?php echo site_url(); ?>/sample-page/hours/">
+                                            <a class="service-card" href="<?php echo site_url(); ?>/#/hours">
                                                 <span class="fa fa-clock-o"></span>
                                                 <h4>Hours</h4>
                                                 <p>Library hours and locations</p>

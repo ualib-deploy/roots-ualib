@@ -4,9 +4,12 @@ html, body {
   min-height: 100%;
 }
 
-.webapp{
-  height: 100%;
-  width: 100%;
+div[role="document"] {
+  min-height: 600px;
+}
+
+.front-page, .bento{
+
   > .wrap {
     main {
       position:relative;
@@ -27,6 +30,7 @@ html, body {
   background-size: cover;
   background-color: transparent;
 
+
   .home-slice{
     padding-top: 15px;
     padding-bottom: 15px;
@@ -40,3 +44,44 @@ html, body {
   background-color: @body-bg;
 
 }*/
+div[ng-view].ng-enter {
+  -webkit-animation: Fade-Enter-Anime 0.2s;
+  -moz-animation: Fade-Enter-Anime 0.2s;
+  animation: Fade-Enter-Anime 0.2s;
+}
+.Content-Fade-Leave {
+  -webkit-animation: Fade-Leave-Anime 0.2s;
+  -moz-animation: Fade-Leave-Anime 0.2s;
+  animation: Fade-Leave-Anime 0.2s;
+}
+
+@keyframes Fade-Enter-Anime {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes Fade-Leave-Anime {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+
+@-webkit-keyframes Fade-Enter-Anime {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@-webkit-keyframes Fade-Leave-Anime {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@-moz-keyframes Fade-Enter-Anime {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@-moz-keyframes Fade-Leave-Anime {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
