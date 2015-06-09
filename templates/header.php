@@ -167,7 +167,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                             </li>
                         </ul>
                     </li>
-                    <li class="dropdown yamm-fw" ng-class="{'dropdown-static': (appClass == 'front-page webapp' || appClass == 'bento webapp')}">
+                    <li class="dropdown yamm-fw" ng-class="{'dropdown-static': (appClass == 'front-page webapp' || appClass == 'bento webapp')}" dropdown-sticky>
                         <a href="#" class="dropdown-toggle icon-only" ng-click="mainNavbarCollapsed = false;">
                             <span class="fa fa-search"></span>
                         </a>
