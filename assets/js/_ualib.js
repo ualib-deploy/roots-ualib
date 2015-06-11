@@ -1,5 +1,6 @@
 angular.module('ualib', [
     'ngRoute',
+    'ngAnimate',
     'ualib.templates',
     'ualib.ui',
     'hours',
@@ -8,7 +9,8 @@ angular.module('ualib', [
     'ualib.databases',
     'musicSearch',
     'ualib.staffdir',
-    'ualib.softwareList'
+    'ualib.softwareList',
+    'ualib.news'
 ])
 
     .config(['$routeProvider', function($routeProvider, $location) {

@@ -4664,11 +4664,11 @@ angular.module('ui.utils',  [
 ;/**!
  * AngularJS file upload/drop directive and service with progress and abort
  * @author  Danial  <danial.farid@gmail.com>
- * @version 5.0.1
+ * @version 5.0.4
  */
 var ngFileUpload = angular.module('ngFileUpload', []);
 
-ngFileUpload.version = '5.0.1';
+ngFileUpload.version = '5.0.4';
 ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, $timeout) {
   function patchXHR(fnName, newFn) {
     window.XMLHttpRequest.prototype[fnName] = newFn(window.XMLHttpRequest.prototype[fnName]);
@@ -4968,9 +4968,9 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
                 fileElem.attr('__ngf_gen__', true);
                 $compile(elem)(scope);
             } else {
-                fileElem.css('visibility', 'hidden').css('position', 'absolute')
-                    .css('width', '9').css('height', '1').css('z-index', '-100000')
-                    .attr('tabindex', '-1');
+                fileElem.css('visibility', 'hidden').css('position', 'absolute').css('overflow', 'hidden')
+                    .css('width', '0px').css('height', '0px').css('z-index', '-100000').css('border', 'none')
+                    .css('margin', '0px').css('padding', '0px').attr('tabindex', '-1');
                 if (elem.$$ngfRefElem) {
                     elem.$$ngfRefElem.remove();
                 }
@@ -5402,7 +5402,7 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
  * AngularJS file upload/drop directive and service with progress and abort
  * FileAPI Flash shim for old browsers not supporting FormData
  * @author  Danial  <danial.farid@gmail.com>
- * @version 5.0.1
+ * @version 5.0.4
  */
 
 (function () {
@@ -5419,7 +5419,12 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
     }
   }
 
-  if ((window.XMLHttpRequest && !window.FormData) || (window.FileAPI && FileAPI.forceLoad)) {
+  if (!window.FileAPI) {
+    window.FileAPI = {};
+  }
+
+  FileAPI.shouldLoad = (window.XMLHttpRequest && !window.FormData) || FileAPI.forceLoad;
+  if (FileAPI.shouldLoad) {
     var initializeUploadListener = function (xhr) {
       if (!xhr.__listeners) {
         if (!xhr.upload) xhr.upload = {};
@@ -5654,13 +5659,9 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
     };
   }
 
-  if ((window.XMLHttpRequest && !window.FormData) || (window.FileAPI && FileAPI.forceLoad)) {
+  if (FileAPI.shouldLoad) {
 
     //load FileAPI
-    if (!window.FileAPI) {
-      window.FileAPI = {};
-    }
-
     if (FileAPI.forceLoad) {
       FileAPI.html5 = false;
     }
@@ -6437,7 +6438,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
 }]);
 ;/**
  * @license
- * lodash 3.8.0 (Custom Build) <https://lodash.com/>
+ * lodash 3.9.3 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern -o ./lodash.js`
  * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
@@ -6450,7 +6451,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
   var undefined;
 
   /** Used as the semantic version number. */
-  var VERSION = '3.8.0';
+  var VERSION = '3.9.3';
 
   /** Used to compose bitmasks for wrapper metadata. */
   var BIND_FLAG = 1,
@@ -6555,6 +6556,9 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
   /** Used to detect host constructors (Safari > 5). */
   var reIsHostCtor = /^\[object .+?Constructor\]$/;
 
+  /** Used to detect unsigned integer values. */
+  var reIsUint = /^\d+$/;
+
   /** Used to match latin-1 supplementary letters (excluding mathematical operators). */
   var reLatin1 = /[\xc0-\xd6\xd8-\xde\xdf-\xf6\xf8-\xff]/g;
 
@@ -6589,9 +6593,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     'Array', 'ArrayBuffer', 'Date', 'Error', 'Float32Array', 'Float64Array',
     'Function', 'Int8Array', 'Int16Array', 'Int32Array', 'Math', 'Number',
     'Object', 'RegExp', 'Set', 'String', '_', 'clearTimeout', 'document',
-    'isFinite', 'parseInt', 'setTimeout', 'TypeError', 'Uint8Array',
-    'Uint8ClampedArray', 'Uint16Array', 'Uint32Array', 'WeakMap',
-    'window'
+    'isFinite', 'parseFloat', 'parseInt', 'setTimeout', 'TypeError', 'Uint8Array',
+    'Uint8ClampedArray', 'Uint16Array', 'Uint32Array', 'WeakMap', 'window'
   ];
 
   /** Used to make template sourceURLs easier to identify. */
@@ -6712,29 +6715,40 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
   /**
    * Used as a reference to the global object.
    *
-   * The `this` value is used if it is the global object to avoid Greasemonkey's
+   * The `this` value is used if it's the global object to avoid Greasemonkey's
    * restricted `window` object, otherwise the `window` object is used.
    */
   var root = freeGlobal || ((freeWindow !== (this && this.window)) && freeWindow) || freeSelf || this;
+
+  /*--------------------------------------------------------------------------*/
 
   /**
    * The base implementation of `compareAscending` which compares values and
    * sorts them in ascending order without guaranteeing a stable sort.
    *
    * @private
-   * @param {*} value The value to compare to `other`.
-   * @param {*} other The value to compare to `value`.
+   * @param {*} value The value to compare.
+   * @param {*} other The other value to compare.
    * @returns {number} Returns the sort order indicator for `value`.
    */
   function baseCompareAscending(value, other) {
     if (value !== other) {
-      var valIsReflexive = value === value,
+      var valIsNull = value === null,
+          valIsUndef = value === undefined,
+          valIsReflexive = value === value;
+
+      var othIsNull = other === null,
+          othIsUndef = other === undefined,
           othIsReflexive = other === other;
 
-      if (value > other || !valIsReflexive || (value === undefined && othIsReflexive)) {
+      if ((value > other && !othIsNull) || !valIsReflexive ||
+          (valIsNull && !othIsUndef && othIsReflexive) ||
+          (valIsUndef && othIsReflexive)) {
         return 1;
       }
-      if (value < other || !othIsReflexive || (other === undefined && valIsReflexive)) {
+      if ((value < other && !valIsNull) || !othIsReflexive ||
+          (othIsNull && !valIsUndef && valIsReflexive) ||
+          (othIsUndef && valIsReflexive)) {
         return -1;
       }
     }
@@ -6802,7 +6816,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
   }
 
   /**
-   * Converts `value` to a string if it is not one. An empty string is returned
+   * Converts `value` to a string if it's not one. An empty string is returned
    * for `null` or `undefined` values.
    *
    * @private
@@ -6814,17 +6828,6 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       return value;
     }
     return value == null ? '' : (value + '');
-  }
-
-  /**
-   * Used by `_.max` and `_.min` as the default callback for string values.
-   *
-   * @private
-   * @param {string} string The string to inspect.
-   * @returns {number} Returns the code unit of the first character of the string.
-   */
-  function charAtCallback(string) {
-    return string.charCodeAt(0);
   }
 
   /**
@@ -7087,6 +7090,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     return htmlUnescapes[chr];
   }
 
+  /*--------------------------------------------------------------------------*/
+
   /**
    * Create a new pristine `lodash` function using the given `context` object.
    *
@@ -7147,7 +7152,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
         stringProto = String.prototype;
 
     /** Used to detect DOM support. */
-    var document = (document = context.window) && document.document;
+    var document = (document = context.window) ? document.document : null;
 
     /** Used to resolve the decompiled source of functions. */
     var fnToString = Function.prototype.toString;
@@ -7169,26 +7174,24 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
 
     /** Used to detect if a method is native. */
     var reIsNative = RegExp('^' +
-      escapeRegExp(objToString)
-      .replace(/toString|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
+      escapeRegExp(fnToString.call(hasOwnProperty))
+      .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
     );
 
     /** Native method references. */
-    var ArrayBuffer = isNative(ArrayBuffer = context.ArrayBuffer) && ArrayBuffer,
-        bufferSlice = isNative(bufferSlice = ArrayBuffer && new ArrayBuffer(0).slice) && bufferSlice,
+    var ArrayBuffer = getNative(context, 'ArrayBuffer'),
+        bufferSlice = getNative(ArrayBuffer && new ArrayBuffer(0), 'slice'),
         ceil = Math.ceil,
         clearTimeout = context.clearTimeout,
         floor = Math.floor,
-        getOwnPropertySymbols = isNative(getOwnPropertySymbols = Object.getOwnPropertySymbols) && getOwnPropertySymbols,
-        getPrototypeOf = isNative(getPrototypeOf = Object.getPrototypeOf) && getPrototypeOf,
+        getPrototypeOf = getNative(Object, 'getPrototypeOf'),
+        parseFloat = context.parseFloat,
         push = arrayProto.push,
-        preventExtensions = isNative(preventExtensions = Object.preventExtensions) && preventExtensions,
-        propertyIsEnumerable = objectProto.propertyIsEnumerable,
-        Set = isNative(Set = context.Set) && Set,
+        Set = getNative(context, 'Set'),
         setTimeout = context.setTimeout,
         splice = arrayProto.splice,
-        Uint8Array = isNative(Uint8Array = context.Uint8Array) && Uint8Array,
-        WeakMap = isNative(WeakMap = context.WeakMap) && WeakMap;
+        Uint8Array = getNative(context, 'Uint8Array'),
+        WeakMap = getNative(context, 'WeakMap');
 
     /** Used to clone array buffers. */
     var Float64Array = (function() {
@@ -7196,44 +7199,21 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       // where the array buffer's `byteLength` is not a multiple of the typed
       // array's `BYTES_PER_ELEMENT`.
       try {
-        var func = isNative(func = context.Float64Array) && func,
+        var func = getNative(context, 'Float64Array'),
             result = new func(new ArrayBuffer(10), 0, 1) && func;
       } catch(e) {}
-      return result;
-    }());
-
-    /** Used as `baseAssign`. */
-    var nativeAssign = (function() {
-      // Avoid `Object.assign` in Firefox 34-37 which have an early implementation
-      // with a now defunct try/catch behavior. See https://bugzilla.mozilla.org/show_bug.cgi?id=1103344
-      // for more details.
-      //
-      // Use `Object.preventExtensions` on a plain object instead of simply using
-      // `Object('x')` because Chrome and IE fail to throw an error when attempting
-      // to assign values to readonly indexes of strings.
-      var func = preventExtensions && isNative(func = Object.assign) && func;
-      try {
-        if (func) {
-          var object = preventExtensions({ '1': 0 });
-          object[0] = 1;
-        }
-      } catch(e) {
-        // Only attempt in strict mode.
-        try { func(object, 'xo'); } catch(e) {}
-        return !object[1] && func;
-      }
-      return false;
+      return result || null;
     }());
 
     /* Native method references for those with the same name as other `lodash` methods. */
-    var nativeIsArray = isNative(nativeIsArray = Array.isArray) && nativeIsArray,
-        nativeCreate = isNative(nativeCreate = Object.create) && nativeCreate,
+    var nativeCreate = getNative(Object, 'create'),
+        nativeIsArray = getNative(Array, 'isArray'),
         nativeIsFinite = context.isFinite,
-        nativeKeys = isNative(nativeKeys = Object.keys) && nativeKeys,
+        nativeKeys = getNative(Object, 'keys'),
         nativeMax = Math.max,
         nativeMin = Math.min,
-        nativeNow = isNative(nativeNow = Date.now) && nativeNow,
-        nativeNumIsFinite = isNative(nativeNumIsFinite = Number.isFinite) && nativeNumIsFinite,
+        nativeNow = getNative(Date, 'now'),
+        nativeNumIsFinite = getNative(Number, 'isFinite'),
         nativeParseInt = context.parseInt,
         nativeRandom = Math.random;
 
@@ -7242,7 +7222,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
         POSITIVE_INFINITY = Number.POSITIVE_INFINITY;
 
     /** Used as references for the maximum length and index of an array. */
-    var MAX_ARRAY_LENGTH = Math.pow(2, 32) - 1,
+    var MAX_ARRAY_LENGTH = 4294967295,
         MAX_ARRAY_INDEX = MAX_ARRAY_LENGTH - 1,
         HALF_MAX_ARRAY_LENGTH = MAX_ARRAY_LENGTH >>> 1;
 
@@ -7253,13 +7233,15 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * Used as the [maximum length](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.max_safe_integer)
      * of an array-like value.
      */
-    var MAX_SAFE_INTEGER = Math.pow(2, 53) - 1;
+    var MAX_SAFE_INTEGER = 9007199254740991;
 
     /** Used to store function metadata. */
     var metaMap = WeakMap && new WeakMap;
 
     /** Used to lookup unminified function names. */
     var realNames = {};
+
+    /*------------------------------------------------------------------------*/
 
     /**
      * Creates a `lodash` object which wraps `value` to enable implicit chaining.
@@ -7300,30 +7282,31 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * `filter`, `flatten`, `flattenDeep`, `flow`, `flowRight`, `forEach`,
      * `forEachRight`, `forIn`, `forInRight`, `forOwn`, `forOwnRight`, `functions`,
      * `groupBy`, `indexBy`, `initial`, `intersection`, `invert`, `invoke`, `keys`,
-     * `keysIn`, `map`, `mapValues`, `matches`, `matchesProperty`, `memoize`,
-     * `merge`, `mixin`, `negate`, `omit`, `once`, `pairs`, `partial`, `partialRight`,
-     * `partition`, `pick`, `plant`, `pluck`, `property`, `propertyOf`, `pull`,
-     * `pullAt`, `push`, `range`, `rearg`, `reject`, `remove`, `rest`, `reverse`,
-     * `shuffle`, `slice`, `sort`, `sortBy`, `sortByAll`, `sortByOrder`, `splice`,
-     * `spread`, `take`, `takeRight`, `takeRightWhile`, `takeWhile`, `tap`,
-     * `throttle`, `thru`, `times`, `toArray`, `toPlainObject`, `transform`,
-     * `union`, `uniq`, `unshift`, `unzip`, `values`, `valuesIn`, `where`,
-     * `without`, `wrap`, `xor`, `zip`, and `zipObject`
+     * `keysIn`, `map`, `mapKeys`, `mapValues`, `matches`, `matchesProperty`,
+     * `memoize`, `merge`, `method`, `methodOf`, `mixin`, `negate`, `omit`, `once`,
+     * `pairs`, `partial`, `partialRight`, `partition`, `pick`, `plant`, `pluck`,
+     * `property`, `propertyOf`, `pull`, `pullAt`, `push`, `range`, `rearg`,
+     * `reject`, `remove`, `rest`, `restParam`, `reverse`, `set`, `shuffle`,
+     * `slice`, `sort`, `sortBy`, `sortByAll`, `sortByOrder`, `splice`, `spread`,
+     * `take`, `takeRight`, `takeRightWhile`, `takeWhile`, `tap`, `throttle`,
+     * `thru`, `times`, `toArray`, `toPlainObject`, `transform`, `union`, `uniq`,
+     * `unshift`, `unzip`, `unzipWith`, `values`, `valuesIn`, `where`, `without`,
+     * `wrap`, `xor`, `zip`, `zipObject`, `zipWith`
      *
      * The wrapper methods that are **not** chainable by default are:
      * `add`, `attempt`, `camelCase`, `capitalize`, `clone`, `cloneDeep`, `deburr`,
      * `endsWith`, `escape`, `escapeRegExp`, `every`, `find`, `findIndex`, `findKey`,
-     * `findLast`, `findLastIndex`, `findLastKey`, `findWhere`, `first`, `has`,
-     * `identity`, `includes`, `indexOf`, `inRange`, `isArguments`, `isArray`,
-     * `isBoolean`, `isDate`, `isElement`, `isEmpty`, `isEqual`, `isError`, `isFinite`
-     * `isFunction`, `isMatch`, `isNative`, `isNaN`, `isNull`, `isNumber`, `isObject`,
-     * `isPlainObject`, `isRegExp`, `isString`, `isUndefined`, `isTypedArray`,
-     * `join`, `kebabCase`, `last`, `lastIndexOf`, `max`, `min`, `noConflict`,
-     * `noop`, `now`, `pad`, `padLeft`, `padRight`, `parseInt`, `pop`, `random`,
-     * `reduce`, `reduceRight`, `repeat`, `result`, `runInContext`, `shift`, `size`,
-     * `snakeCase`, `some`, `sortedIndex`, `sortedLastIndex`, `startCase`, `startsWith`,
-     * `sum`, `template`, `trim`, `trimLeft`, `trimRight`, `trunc`, `unescape`,
-     * `uniqueId`, `value`, and `words`
+     * `findLast`, `findLastIndex`, `findLastKey`, `findWhere`, `first`, `get`,
+     * `gt`, `gte`, `has`, `identity`, `includes`, `indexOf`, `inRange`, `isArguments`,
+     * `isArray`, `isBoolean`, `isDate`, `isElement`, `isEmpty`, `isEqual`, `isError`,
+     * `isFinite` `isFunction`, `isMatch`, `isNative`, `isNaN`, `isNull`, `isNumber`,
+     * `isObject`, `isPlainObject`, `isRegExp`, `isString`, `isUndefined`,
+     * `isTypedArray`, `join`, `kebabCase`, `last`, `lastIndexOf`, `lt`, `lte`,
+     * `max`, `min`, `noConflict`, `noop`, `now`, `pad`, `padLeft`, `padRight`,
+     * `parseInt`, `pop`, `random`, `reduce`, `reduceRight`, `repeat`, `result`,
+     * `runInContext`, `shift`, `size`, `snakeCase`, `some`, `sortedIndex`,
+     * `sortedLastIndex`, `startCase`, `startsWith`, `sum`, `template`, `trim`,
+     * `trimLeft`, `trimRight`, `trunc`, `unescape`, `uniqueId`, `value`, and `words`
      *
      * The wrapper method `sample` will return a wrapped value when `n` is provided,
      * otherwise an unwrapped value is returned.
@@ -7400,30 +7383,11 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
 
     (function(x) {
       var Ctor = function() { this.x = x; },
-          args = arguments,
           object = { '0': x, 'length': x },
           props = [];
 
       Ctor.prototype = { 'valueOf': x, 'y': x };
       for (var key in new Ctor) { props.push(key); }
-
-      /**
-       * Detect if functions can be decompiled by `Function#toString`
-       * (all but Firefox OS certified apps, older Opera mobile browsers, and
-       * the PlayStation 3; forced `false` for Windows 8 apps).
-       *
-       * @memberOf _.support
-       * @type boolean
-       */
-      support.funcDecomp = /\bthis\b/.test(function() { return this; });
-
-      /**
-       * Detect if `Function#name` is supported (all but IE).
-       *
-       * @memberOf _.support
-       * @type boolean
-       */
-      support.funcNames = typeof Function.name == 'string';
 
       /**
        * Detect if the DOM is supported.
@@ -7435,24 +7399,6 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
         support.dom = document.createDocumentFragment().nodeType === 11;
       } catch(e) {
         support.dom = false;
-      }
-
-      /**
-       * Detect if `arguments` object indexes are non-enumerable.
-       *
-       * In Firefox < 4, IE < 9, PhantomJS, and Safari < 5.1 `arguments` object
-       * indexes are non-enumerable. Chrome < 25 and Node.js < 0.11.0 treat
-       * `arguments` object indexes as non-enumerable and fail `hasOwnProperty`
-       * checks for indexes that exceed the number of function parameters and
-       * whose associated argument values are `0`.
-       *
-       * @memberOf _.support
-       * @type boolean
-       */
-      try {
-        support.nonEnumArgs = !propertyIsEnumerable.call(args, 1);
-      } catch(e) {
-        support.nonEnumArgs = true;
       }
     }(1, 0));
 
@@ -7516,6 +7462,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
         '_': lodash
       }
     };
+
+    /*------------------------------------------------------------------------*/
 
     /**
      * Creates a lazy wrapper object which wraps `value` to enable lazy evaluation.
@@ -7645,6 +7593,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       return result;
     }
 
+    /*------------------------------------------------------------------------*/
+
     /**
      * Creates a cache object to store key/value pairs.
      *
@@ -7713,6 +7663,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       return this;
     }
 
+    /*------------------------------------------------------------------------*/
+
     /**
      *
      * Creates a cache object to store unique values.
@@ -7761,6 +7713,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
         data.hash[value] = true;
       }
     }
+
+    /*------------------------------------------------------------------------*/
 
     /**
      * Copies the values of `source` to `array`.
@@ -7845,6 +7799,35 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     }
 
     /**
+     * A specialized version of `baseExtremum` for arrays which invokes `iteratee`
+     * with one argument: (value).
+     *
+     * @private
+     * @param {Array} array The array to iterate over.
+     * @param {Function} iteratee The function invoked per iteration.
+     * @param {Function} comparator The function used to compare values.
+     * @param {*} exValue The initial extremum value.
+     * @returns {*} Returns the extremum value.
+     */
+    function arrayExtremum(array, iteratee, comparator, exValue) {
+      var index = -1,
+          length = array.length,
+          computed = exValue,
+          result = computed;
+
+      while (++index < length) {
+        var value = array[index],
+            current = +iteratee(value);
+
+        if (comparator(current, computed)) {
+          computed = current;
+          result = value;
+        }
+      }
+      return result;
+    }
+
+    /**
      * A specialized version of `_.filter` for arrays without support for callback
      * shorthands and `this` binding.
      *
@@ -7884,48 +7867,6 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
 
       while (++index < length) {
         result[index] = iteratee(array[index], index, array);
-      }
-      return result;
-    }
-
-    /**
-     * A specialized version of `_.max` for arrays without support for iteratees.
-     *
-     * @private
-     * @param {Array} array The array to iterate over.
-     * @returns {*} Returns the maximum value.
-     */
-    function arrayMax(array) {
-      var index = -1,
-          length = array.length,
-          result = NEGATIVE_INFINITY;
-
-      while (++index < length) {
-        var value = array[index];
-        if (value > result) {
-          result = value;
-        }
-      }
-      return result;
-    }
-
-    /**
-     * A specialized version of `_.min` for arrays without support for iteratees.
-     *
-     * @private
-     * @param {Array} array The array to iterate over.
-     * @returns {*} Returns the minimum value.
-     */
-    function arrayMin(array) {
-      var index = -1,
-          length = array.length,
-          result = POSITIVE_INFINITY;
-
-      while (++index < length) {
-        var value = array[index];
-        if (value < result) {
-          result = value;
-        }
       }
       return result;
     }
@@ -8060,10 +8001,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * @returns {Object} Returns `object`.
      */
     function assignWith(object, source, customizer) {
-      var props = keys(source);
-      push.apply(props, getSymbols(source));
-
       var index = -1,
+          props = keys(source),
           length = props.length;
 
       while (++index < length) {
@@ -8088,11 +8027,11 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * @param {Object} source The source object.
      * @returns {Object} Returns `object`.
      */
-    var baseAssign = nativeAssign || function(object, source) {
+    function baseAssign(object, source) {
       return source == null
         ? object
-        : baseCopy(source, getSymbols(source), baseCopy(source, keys(source), object));
-    };
+        : baseCopy(source, keys(source), object);
+    }
 
     /**
      * The base implementation of `_.at` without support for string collections
@@ -8107,7 +8046,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       var index = -1,
           isNil = collection == null,
           isArr = !isNil && isArrayLike(collection),
-          length = isArr && collection.length,
+          length = isArr ? collection.length : 0,
           propsLength = props.length,
           result = Array(propsLength);
 
@@ -8248,14 +8187,14 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * @returns {Object} Returns the new object.
      */
     var baseCreate = (function() {
-      function Object() {}
+      function object() {}
       return function(prototype) {
         if (isObject(prototype)) {
-          Object.prototype = prototype;
-          var result = new Object;
-          Object.prototype = null;
+          object.prototype = prototype;
+          var result = new object;
+          object.prototype = null;
         }
-        return result || context.Object();
+        return result || {};
       };
     }());
 
@@ -8360,6 +8299,32 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       baseEach(collection, function(value, index, collection) {
         result = !!predicate(value, index, collection);
         return result;
+      });
+      return result;
+    }
+
+    /**
+     * Gets the extremum value of `collection` invoking `iteratee` for each value
+     * in `collection` to generate the criterion by which the value is ranked.
+     * The `iteratee` is invoked with three arguments: (value, index|key, collection).
+     *
+     * @private
+     * @param {Array|Object|string} collection The collection to iterate over.
+     * @param {Function} iteratee The function invoked per iteration.
+     * @param {Function} comparator The function used to compare values.
+     * @param {*} exValue The initial extremum value.
+     * @returns {*} Returns the extremum value.
+     */
+    function baseExtremum(collection, iteratee, comparator, exValue) {
+      var computed = exValue,
+          result = computed;
+
+      baseEach(collection, function(value, index, collection) {
+        var current = +iteratee(value, index, collection);
+        if (comparator(current, computed) || (current === exValue && current === result)) {
+          computed = current;
+          result = value;
+        }
       });
       return result;
     }
@@ -8580,11 +8545,11 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       if (pathKey !== undefined && pathKey in toObject(object)) {
         path = [pathKey];
       }
-      var index = -1,
+      var index = 0,
           length = path.length;
 
-      while (object != null && ++index < length) {
-        object = object[path[index]];
+      while (object != null && index < length) {
+        object = object[path[index++]];
       }
       return (index && index == length) ? object : undefined;
     }
@@ -8603,17 +8568,10 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
      */
     function baseIsEqual(value, other, customizer, isLoose, stackA, stackB) {
-      // Exit early for identical values.
       if (value === other) {
         return true;
       }
-      var valType = typeof value,
-          othType = typeof other;
-
-      // Exit early for unlike primitive values.
-      if ((valType != 'function' && valType != 'object' && othType != 'function' && othType != 'object') ||
-          value == null || other == null) {
-        // Return `false` unless both values are `NaN`.
+      if (value == null || other == null || (!isObject(value) && !isObjectLike(other))) {
         return value !== value && other !== other;
       }
       return baseIsEqualDeep(value, other, baseIsEqual, customizer, isLoose, stackA, stackB);
@@ -8664,11 +8622,11 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
         return equalByTag(object, other, objTag);
       }
       if (!isLoose) {
-        var valWrapped = objIsObj && hasOwnProperty.call(object, '__wrapped__'),
-            othWrapped = othIsObj && hasOwnProperty.call(other, '__wrapped__');
+        var objIsWrapped = objIsObj && hasOwnProperty.call(object, '__wrapped__'),
+            othIsWrapped = othIsObj && hasOwnProperty.call(other, '__wrapped__');
 
-        if (valWrapped || othWrapped) {
-          return equalFunc(valWrapped ? object.value() : object, othWrapped ? other.value() : other, customizer, isLoose, stackA, stackB);
+        if (objIsWrapped || othIsWrapped) {
+          return equalFunc(objIsWrapped ? object.value() : object, othIsWrapped ? other.value() : other, customizer, isLoose, stackA, stackB);
         }
       }
       if (!isSameTag) {
@@ -8703,41 +8661,43 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      *
      * @private
      * @param {Object} object The object to inspect.
-     * @param {Array} props The source property names to match.
-     * @param {Array} values The source values to match.
-     * @param {Array} strictCompareFlags Strict comparison flags for source values.
+     * @param {Array} matchData The propery names, values, and compare flags to match.
      * @param {Function} [customizer] The function to customize comparing objects.
      * @returns {boolean} Returns `true` if `object` is a match, else `false`.
      */
-    function baseIsMatch(object, props, values, strictCompareFlags, customizer) {
-      var index = -1,
-          length = props.length,
+    function baseIsMatch(object, matchData, customizer) {
+      var index = matchData.length,
+          length = index,
           noCustomizer = !customizer;
 
-      while (++index < length) {
-        if ((noCustomizer && strictCompareFlags[index])
-              ? values[index] !== object[props[index]]
-              : !(props[index] in object)
+      if (object == null) {
+        return !length;
+      }
+      object = toObject(object);
+      while (index--) {
+        var data = matchData[index];
+        if ((noCustomizer && data[2])
+              ? data[1] !== object[data[0]]
+              : !(data[0] in object)
             ) {
           return false;
         }
       }
-      index = -1;
       while (++index < length) {
-        var key = props[index],
+        data = matchData[index];
+        var key = data[0],
             objValue = object[key],
-            srcValue = values[index];
+            srcValue = data[1];
 
-        if (noCustomizer && strictCompareFlags[index]) {
-          var result = objValue !== undefined || (key in object);
-        } else {
-          result = customizer ? customizer(objValue, srcValue, key) : undefined;
-          if (result === undefined) {
-            result = baseIsEqual(srcValue, objValue, customizer, true);
+        if (noCustomizer && data[2]) {
+          if (objValue === undefined && !(key in object)) {
+            return false;
           }
-        }
-        if (!result) {
-          return false;
+        } else {
+          var result = customizer ? customizer(objValue, srcValue, key) : undefined;
+          if (!(result === undefined ? baseIsEqual(srcValue, objValue, customizer, true) : result)) {
+            return false;
+          }
         }
       }
       return true;
@@ -8770,50 +8730,34 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * @returns {Function} Returns the new function.
      */
     function baseMatches(source) {
-      var props = keys(source),
-          length = props.length;
+      var matchData = getMatchData(source);
+      if (matchData.length == 1 && matchData[0][2]) {
+        var key = matchData[0][0],
+            value = matchData[0][1];
 
-      if (!length) {
-        return constant(true);
-      }
-      if (length == 1) {
-        var key = props[0],
-            value = source[key];
-
-        if (isStrictComparable(value)) {
-          return function(object) {
-            if (object == null) {
-              return false;
-            }
-            return object[key] === value && (value !== undefined || (key in toObject(object)));
-          };
-        }
-      }
-      var values = Array(length),
-          strictCompareFlags = Array(length);
-
-      while (length--) {
-        value = source[props[length]];
-        values[length] = value;
-        strictCompareFlags[length] = isStrictComparable(value);
+        return function(object) {
+          if (object == null) {
+            return false;
+          }
+          return object[key] === value && (value !== undefined || (key in toObject(object)));
+        };
       }
       return function(object) {
-        return object != null && baseIsMatch(toObject(object), props, values, strictCompareFlags);
+        return baseIsMatch(object, matchData);
       };
     }
 
     /**
-     * The base implementation of `_.matchesProperty` which does not which does
-     * not clone `value`.
+     * The base implementation of `_.matchesProperty` which does not clone `srcValue`.
      *
      * @private
      * @param {string} path The path of the property to get.
-     * @param {*} value The value to compare.
+     * @param {*} srcValue The value to compare.
      * @returns {Function} Returns the new function.
      */
-    function baseMatchesProperty(path, value) {
+    function baseMatchesProperty(path, srcValue) {
       var isArr = isArray(path),
-          isCommon = isKey(path) && isStrictComparable(value),
+          isCommon = isKey(path) && isStrictComparable(srcValue),
           pathKey = (path + '');
 
       path = toPath(path);
@@ -8831,9 +8775,9 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
           key = last(path);
           object = toObject(object);
         }
-        return object[key] === value
-          ? (value !== undefined || (key in object))
-          : baseIsEqual(value, object[key], null, true);
+        return object[key] === srcValue
+          ? (srcValue !== undefined || (key in object))
+          : baseIsEqual(srcValue, object[key], undefined, true);
       };
     }
 
@@ -8853,11 +8797,9 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       if (!isObject(object)) {
         return object;
       }
-      var isSrcArr = isArrayLike(source) && (isArray(source) || isTypedArray(source));
-      if (!isSrcArr) {
-        var props = keys(source);
-        push.apply(props, getSymbols(source));
-      }
+      var isSrcArr = isArrayLike(source) && (isArray(source) || isTypedArray(source)),
+          props = isSrcArr ? null : keys(source);
+
       arrayEach(props || source, function(srcValue, key) {
         if (props) {
           key = srcValue;
@@ -8876,7 +8818,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
           if (isCommon) {
             result = srcValue;
           }
-          if ((isSrcArr || result !== undefined) &&
+          if ((result !== undefined || (isSrcArr && !(key in object))) &&
               (isCommon || (result === result ? (result !== value) : (value === value)))) {
             object[key] = result;
           }
@@ -8983,7 +8925,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     function basePullAt(array, indexes) {
       var length = array ? indexes.length : 0;
       while (length--) {
-        var index = parseFloat(indexes[length]);
+        var index = indexes[length];
         if (index != previous && isIndex(index)) {
           var previous = index;
           splice.call(array, index, 1);
@@ -9296,7 +9238,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
           var mid = (low + high) >>> 1,
               computed = array[mid];
 
-          if (retHighest ? (computed <= value) : (computed < value)) {
+          if ((retHighest ? (computed <= value) : (computed < value)) && computed !== null) {
             low = mid + 1;
           } else {
             high = mid;
@@ -9326,17 +9268,23 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       var low = 0,
           high = array ? array.length : 0,
           valIsNaN = value !== value,
+          valIsNull = value === null,
           valIsUndef = value === undefined;
 
       while (low < high) {
         var mid = floor((low + high) / 2),
             computed = iteratee(array[mid]),
+            isDef = computed !== undefined,
             isReflexive = computed === computed;
 
         if (valIsNaN) {
           var setLow = isReflexive || retHighest;
+        } else if (valIsNull) {
+          setLow = isReflexive && isDef && (retHighest || computed != null);
         } else if (valIsUndef) {
-          setLow = isReflexive && (retHighest || computed !== undefined);
+          setLow = isReflexive && (retHighest || isDef);
+        } else if (computed == null) {
+          setLow = false;
         } else {
           setLow = retHighest ? (computed <= value) : (computed < value);
         }
@@ -9526,19 +9474,19 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       return restParam(function(object, sources) {
         var index = -1,
             length = object == null ? 0 : sources.length,
-            customizer = length > 2 && sources[length - 2],
-            guard = length > 2 && sources[2],
-            thisArg = length > 1 && sources[length - 1];
+            customizer = length > 2 ? sources[length - 2] : undefined,
+            guard = length > 2 ? sources[2] : undefined,
+            thisArg = length > 1 ? sources[length - 1] : undefined;
 
         if (typeof customizer == 'function') {
           customizer = bindCallback(customizer, thisArg, 5);
           length -= 2;
         } else {
-          customizer = typeof thisArg == 'function' ? thisArg : null;
+          customizer = typeof thisArg == 'function' ? thisArg : undefined;
           length -= (customizer ? 1 : 0);
         }
         if (guard && isIterateeCall(sources[0], sources[1], guard)) {
-          customizer = length < 3 ? null : customizer;
+          customizer = length < 3 ? undefined : customizer;
           length = 1;
         }
         while (++index < length) {
@@ -9663,8 +9611,20 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      */
     function createCtorWrapper(Ctor) {
       return function() {
+        // Use a `switch` statement to work with class constructors.
+        // See https://people.mozilla.org/~jorendorff/es6-draft.html#sec-ecmascript-function-objects-call-thisargument-argumentslist
+        // for more details.
+        var args = arguments;
+        switch (args.length) {
+          case 0: return new Ctor;
+          case 1: return new Ctor(args[0]);
+          case 2: return new Ctor(args[0], args[1]);
+          case 3: return new Ctor(args[0], args[1], args[2]);
+          case 4: return new Ctor(args[0], args[1], args[2], args[3]);
+          case 5: return new Ctor(args[0], args[1], args[2], args[3], args[4]);
+        }
         var thisBinding = baseCreate(Ctor.prototype),
-            result = Ctor.apply(thisBinding, arguments);
+            result = Ctor.apply(thisBinding, args);
 
         // Mimic the constructor's `return` behavior.
         // See https://es5.github.io/#x13.2.2 for more details.
@@ -9695,32 +9655,24 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * Creates a `_.max` or `_.min` function.
      *
      * @private
-     * @param {Function} arrayFunc The function to get the extremum value from an array.
-     * @param {boolean} [isMin] Specify returning the minimum, instead of the maximum,
-     *  extremum value.
+     * @param {Function} comparator The function used to compare values.
+     * @param {*} exValue The initial extremum value.
      * @returns {Function} Returns the new extremum function.
      */
-    function createExtremum(arrayFunc, isMin) {
+    function createExtremum(comparator, exValue) {
       return function(collection, iteratee, thisArg) {
         if (thisArg && isIterateeCall(collection, iteratee, thisArg)) {
           iteratee = null;
         }
-        var func = getCallback(),
-            noIteratee = iteratee == null;
-
-        if (!(func === baseCallback && noIteratee)) {
-          noIteratee = false;
-          iteratee = func(iteratee, thisArg, 3);
-        }
-        if (noIteratee) {
-          var isArr = isArray(collection);
-          if (!isArr && isString(collection)) {
-            iteratee = charAtCallback;
-          } else {
-            return arrayFunc(isArr ? collection : toIterable(collection));
+        iteratee = getCallback(iteratee, thisArg, 3);
+        if (iteratee.length == 1) {
+          collection = toIterable(collection);
+          var result = arrayExtremum(collection, iteratee, comparator, exValue);
+          if (!(collection.length && result === exValue)) {
+            return result;
           }
         }
-        return extremumBy(collection, iteratee, isMin);
+        return baseExtremum(collection, iteratee, comparator, exValue);
       };
     }
 
@@ -9783,11 +9735,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      */
     function createFlow(fromRight) {
       return function() {
-        var length = arguments.length;
-        if (!length) {
-          return function() { return arguments[0]; };
-        }
         var wrapper,
+            length = arguments.length,
             index = fromRight ? length : -1,
             leftIndex = 0,
             funcs = Array(length);
@@ -9797,15 +9746,17 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
           if (typeof func != 'function') {
             throw new TypeError(FUNC_ERROR_TEXT);
           }
-          var funcName = wrapper ? '' : getFuncName(func);
-          wrapper = funcName == 'wrapper' ? new LodashWrapper([]) : wrapper;
+          if (!wrapper && LodashWrapper.prototype.thru && getFuncName(func) == 'wrapper') {
+            wrapper = new LodashWrapper([]);
+          }
         }
         index = wrapper ? -1 : length;
         while (++index < length) {
           func = funcs[index];
-          funcName = getFuncName(func);
 
-          var data = funcName == 'wrapper' ? getData(func) : null;
+          var funcName = getFuncName(func),
+              data = funcName == 'wrapper' ? getData(func) : null;
+
           if (data && isLaziable(data[0]) && data[1] == (ARY_FLAG | CURRY_FLAG | PARTIAL_FLAG | REARG_FLAG) && !data[4].length && data[9] == 1) {
             wrapper = wrapper[getFuncName(data[0])].apply(wrapper, data[3]);
           } else {
@@ -9818,7 +9769,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
             return wrapper.plant(args[0]).value();
           }
           var index = 0,
-              result = funcs[index].apply(this, args);
+              result = length ? funcs[index].apply(this, args) : args[0];
 
           while (++index < length) {
             result = funcs[index].call(this, result);
@@ -9967,10 +9918,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
           isBindKey = bitmask & BIND_KEY_FLAG,
           isCurry = bitmask & CURRY_FLAG,
           isCurryBound = bitmask & CURRY_BOUND_FLAG,
-          isCurryRight = bitmask & CURRY_RIGHT_FLAG;
-
-      var Ctor = !isBindKey && createCtorWrapper(func),
-          key = func;
+          isCurryRight = bitmask & CURRY_RIGHT_FLAG,
+          Ctor = isBindKey ? null : createCtorWrapper(func);
 
       function wrapper() {
         // Avoid `arguments` object use disqualifying optimizations by
@@ -10017,17 +9966,18 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
             return result;
           }
         }
-        var thisBinding = isBind ? thisArg : this;
-        if (isBindKey) {
-          func = thisBinding[key];
-        }
+        var thisBinding = isBind ? thisArg : this,
+            fn = isBindKey ? thisBinding[func] : func;
+
         if (argPos) {
           args = reorder(args, argPos);
         }
         if (isAry && ary < args.length) {
           args.length = ary;
         }
-        var fn = (this && this !== root && this instanceof wrapper) ? (Ctor || createCtorWrapper(func)) : func;
+        if (this && this !== root && this instanceof wrapper) {
+          fn = Ctor || createCtorWrapper(func);
+        }
         return fn.apply(thisBinding, args);
       }
       return wrapper;
@@ -10101,10 +10051,10 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      */
     function createSortedIndex(retHighest) {
       return function(array, value, iteratee, thisArg) {
-        var func = getCallback(iteratee);
-        return (func === baseCallback && iteratee == null)
+        var callback = getCallback(iteratee);
+        return (iteratee == null && callback === baseCallback)
           ? binaryIndex(array, value, retHighest)
-          : binaryIndexBy(array, value, func(iteratee, thisArg, 1), retHighest);
+          : binaryIndexBy(array, value, callback(iteratee, thisArg, 1), retHighest);
       };
     }
 
@@ -10190,40 +10140,35 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     function equalArrays(array, other, equalFunc, customizer, isLoose, stackA, stackB) {
       var index = -1,
           arrLength = array.length,
-          othLength = other.length,
-          result = true;
+          othLength = other.length;
 
       if (arrLength != othLength && !(isLoose && othLength > arrLength)) {
         return false;
       }
-      // Deep compare the contents, ignoring non-numeric properties.
-      while (result && ++index < arrLength) {
+      // Ignore non-index properties.
+      while (++index < arrLength) {
         var arrValue = array[index],
-            othValue = other[index];
+            othValue = other[index],
+            result = customizer ? customizer(isLoose ? othValue : arrValue, isLoose ? arrValue : othValue, index) : undefined;
 
-        result = undefined;
-        if (customizer) {
-          result = isLoose
-            ? customizer(othValue, arrValue, index)
-            : customizer(arrValue, othValue, index);
-        }
-        if (result === undefined) {
-          // Recursively compare arrays (susceptible to call stack limits).
-          if (isLoose) {
-            var othIndex = othLength;
-            while (othIndex--) {
-              othValue = other[othIndex];
-              result = (arrValue && arrValue === othValue) || equalFunc(arrValue, othValue, customizer, isLoose, stackA, stackB);
-              if (result) {
-                break;
-              }
-            }
-          } else {
-            result = (arrValue && arrValue === othValue) || equalFunc(arrValue, othValue, customizer, isLoose, stackA, stackB);
+        if (result !== undefined) {
+          if (result) {
+            continue;
           }
+          return false;
+        }
+        // Recursively compare arrays (susceptible to call stack limits).
+        if (isLoose) {
+          if (!arraySome(other, function(othValue) {
+                return arrValue === othValue || equalFunc(arrValue, othValue, customizer, isLoose, stackA, stackB);
+              })) {
+            return false;
+          }
+        } else if (!(arrValue === othValue || equalFunc(arrValue, othValue, customizer, isLoose, stackA, stackB))) {
+          return false;
         }
       }
-      return !!result;
+      return true;
     }
 
     /**
@@ -10288,29 +10233,22 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       if (objLength != othLength && !isLoose) {
         return false;
       }
-      var skipCtor = isLoose,
-          index = -1;
-
-      while (++index < objLength) {
-        var key = objProps[index],
-            result = isLoose ? key in other : hasOwnProperty.call(other, key);
-
-        if (result) {
-          var objValue = object[key],
-              othValue = other[key];
-
-          result = undefined;
-          if (customizer) {
-            result = isLoose
-              ? customizer(othValue, objValue, key)
-              : customizer(objValue, othValue, key);
-          }
-          if (result === undefined) {
-            // Recursively compare objects (susceptible to call stack limits).
-            result = (objValue && objValue === othValue) || equalFunc(objValue, othValue, customizer, isLoose, stackA, stackB);
-          }
+      var index = objLength;
+      while (index--) {
+        var key = objProps[index];
+        if (!(isLoose ? key in other : hasOwnProperty.call(other, key))) {
+          return false;
         }
-        if (!result) {
+      }
+      var skipCtor = isLoose;
+      while (++index < objLength) {
+        key = objProps[index];
+        var objValue = object[key],
+            othValue = other[key],
+            result = customizer ? customizer(isLoose ? othValue : objValue, isLoose? objValue : othValue, key) : undefined;
+
+        // Recursively compare objects (susceptible to call stack limits).
+        if (!(result === undefined ? equalFunc(objValue, othValue, customizer, isLoose, stackA, stackB) : result)) {
           return false;
         }
         skipCtor || (skipCtor = key == 'constructor');
@@ -10328,34 +10266,6 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
         }
       }
       return true;
-    }
-
-    /**
-     * Gets the extremum value of `collection` invoking `iteratee` for each value
-     * in `collection` to generate the criterion by which the value is ranked.
-     * The `iteratee` is invoked with three arguments: (value, index, collection).
-     *
-     * @private
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {Function} iteratee The function invoked per iteration.
-     * @param {boolean} [isMin] Specify returning the minimum, instead of the
-     *  maximum, extremum value.
-     * @returns {*} Returns the extremum value.
-     */
-    function extremumBy(collection, iteratee, isMin) {
-      var exValue = isMin ? POSITIVE_INFINITY : NEGATIVE_INFINITY,
-          computed = exValue,
-          result = computed;
-
-      baseEach(collection, function(value, index, collection) {
-        var current = iteratee(value, index, collection);
-        if ((isMin ? (current < computed) : (current > computed)) ||
-            (current === exValue && current === result)) {
-          computed = current;
-          result = value;
-        }
-      });
-      return result;
     }
 
     /**
@@ -10391,29 +10301,20 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * @param {Function} func The function to query.
      * @returns {string} Returns the function name.
      */
-    var getFuncName = (function() {
-      if (!support.funcNames) {
-        return constant('');
-      }
-      if (constant.name == 'constant') {
-        return baseProperty('name');
-      }
-      return function(func) {
-        var result = func.name,
-            array = realNames[result],
-            length = array ? array.length : 0;
+    function getFuncName(func) {
+      var result = func.name,
+          array = realNames[result],
+          length = array ? array.length : 0;
 
-        while (length--) {
-          var data = array[length],
-              otherFunc = data.func;
-
-          if (otherFunc == null || otherFunc == func) {
-            return data.name;
-          }
+      while (length--) {
+        var data = array[length],
+            otherFunc = data.func;
+        if (otherFunc == null || otherFunc == func) {
+          return data.name;
         }
-        return result;
-      };
-    }());
+      }
+      return result;
+    }
 
     /**
      * Gets the appropriate "indexOf" function. If the `_.indexOf` method is
@@ -10443,15 +10344,34 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     var getLength = baseProperty('length');
 
     /**
-     * Creates an array of the own symbols of `object`.
+     * Gets the propery names, values, and compare flags of `object`.
      *
      * @private
      * @param {Object} object The object to query.
-     * @returns {Array} Returns the array of symbols.
+     * @returns {Array} Returns the match data of `object`.
      */
-    var getSymbols = !getOwnPropertySymbols ? constant([]) : function(object) {
-      return getOwnPropertySymbols(toObject(object));
-    };
+    function getMatchData(object) {
+      var result = pairs(object),
+          length = result.length;
+
+      while (length--) {
+        result[length][2] = isStrictComparable(result[length][1]);
+      }
+      return result;
+    }
+
+    /**
+     * Gets the native function at `key` of `object`.
+     *
+     * @private
+     * @param {Object} object The object to query.
+     * @param {string} key The key of the method to get.
+     * @returns {*} Returns the function if it's native, else `undefined`.
+     */
+    function getNative(object, key) {
+      var value = object == null ? undefined : object[key];
+      return isNative(value) ? value : undefined;
+    }
 
     /**
      * Gets the view, applying any `transforms` to the `start` and `end` positions.
@@ -10593,7 +10513,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
      */
     function isIndex(value, length) {
-      value = +value;
+      value = (typeof value == 'number' || reIsUint.test(value)) ? +value : -1;
       length = length == null ? MAX_SAFE_INTEGER : length;
       return value > -1 && value % 1 == 0 && value < length;
     }
@@ -10650,7 +10570,15 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      */
     function isLaziable(func) {
       var funcName = getFuncName(func);
-      return !!funcName && func === lodash[funcName] && funcName in LazyWrapper.prototype;
+      if (!(funcName in LazyWrapper.prototype)) {
+        return false;
+      }
+      var other = lodash[funcName];
+      if (func === other) {
+        return true;
+      }
+      var data = getData(other);
+      return !!data && func === data[0];
     }
 
     /**
@@ -10890,11 +10818,10 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     function shimKeys(object) {
       var props = keysIn(object),
           propsLength = props.length,
-          length = propsLength && object.length,
-          support = lodash.support;
+          length = propsLength && object.length;
 
-      var allowIndexes = length && isLength(length) &&
-        (isArray(object) || (support.nonEnumArgs && isArguments(object)));
+      var allowIndexes = !!length && isLength(length) &&
+        (isArray(object) || isArguments(object));
 
       var index = -1,
           result = [];
@@ -10909,7 +10836,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     }
 
     /**
-     * Converts `value` to an array-like object if it is not one.
+     * Converts `value` to an array-like object if it's not one.
      *
      * @private
      * @param {*} value The value to process.
@@ -10926,7 +10853,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     }
 
     /**
-     * Converts `value` to an object if it is not one.
+     * Converts `value` to an object if it's not one.
      *
      * @private
      * @param {*} value The value to process.
@@ -10937,7 +10864,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     }
 
     /**
-     * Converts `value` to property path array if it is not one.
+     * Converts `value` to property path array if it's not one.
      *
      * @private
      * @param {*} value The value to process.
@@ -10966,6 +10893,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
         ? wrapper.clone()
         : new LodashWrapper(wrapper.__wrapped__, wrapper.__chain__, arrayCopy(wrapper.__actions__));
     }
+
+    /*------------------------------------------------------------------------*/
 
     /**
      * Creates an array of elements split into groups the length of `size`.
@@ -11034,8 +10963,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     }
 
     /**
-     * Creates an array excluding all values of the provided arrays using
-     * [`SameValueZero`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-samevaluezero)
+     * Creates an array of unique `array` values not included in the other
+     * provided arrays using [`SameValueZero`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-samevaluezero)
      * for equality comparisons.
      *
      * @static
@@ -11508,8 +11437,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     }
 
     /**
-     * Creates an array of unique values in all provided arrays using
-     * [`SameValueZero`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-samevaluezero)
+     * Creates an array of unique values that are included in all of the provided
+     * arrays using [`SameValueZero`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-samevaluezero)
      * for equality comparisons.
      *
      * @static
@@ -11521,27 +11450,19 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * _.intersection([1, 2], [4, 2], [2, 1]);
      * // => [2]
      */
-    function intersection() {
-      var args = [],
-          argsIndex = -1,
-          argsLength = arguments.length,
-          caches = [],
+    var intersection = restParam(function(arrays) {
+      var othLength = arrays.length,
+          othIndex = othLength,
+          caches = Array(length),
           indexOf = getIndexOf(),
           isCommon = indexOf == baseIndexOf,
           result = [];
 
-      while (++argsIndex < argsLength) {
-        var value = arguments[argsIndex];
-        if (isArrayLike(value)) {
-          args.push(value);
-          caches.push((isCommon && value.length >= 120) ? createCache(argsIndex && value) : null);
-        }
+      while (othIndex--) {
+        var value = arrays[othIndex] = isArrayLike(value = arrays[othIndex]) ? value : [];
+        caches[othIndex] = (isCommon && value.length >= 120) ? createCache(othIndex && value) : null;
       }
-      argsLength = args.length;
-      if (argsLength < 2) {
-        return result;
-      }
-      var array = args[0],
+      var array = arrays[0],
           index = -1,
           length = array ? array.length : 0,
           seen = caches[0];
@@ -11550,10 +11471,10 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       while (++index < length) {
         value = array[index];
         if ((seen ? cacheIndexOf(seen, value) : indexOf(result, value, 0)) < 0) {
-          argsIndex = argsLength;
-          while (--argsIndex) {
-            var cache = caches[argsIndex];
-            if ((cache ? cacheIndexOf(cache, value) : indexOf(args[argsIndex], value, 0)) < 0) {
+          var othIndex = othLength;
+          while (--othIndex) {
+            var cache = caches[othIndex];
+            if ((cache ? cacheIndexOf(cache, value) : indexOf(arrays[othIndex], value, 0)) < 0) {
               continue outer;
             }
           }
@@ -11564,7 +11485,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
         }
       }
       return result;
-    }
+    });
 
     /**
      * Gets the last element of `array`.
@@ -12070,8 +11991,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     }
 
     /**
-     * Creates an array of unique values, in order, of the provided arrays using
-     * [`SameValueZero`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-samevaluezero)
+     * Creates an array of unique values, in order, from all of the provided arrays
+     * using [`SameValueZero`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-samevaluezero)
      * for equality comparisons.
      *
      * @static
@@ -12147,9 +12068,9 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
         iteratee = isIterateeCall(array, isSorted, thisArg) ? null : isSorted;
         isSorted = false;
       }
-      var func = getCallback();
-      if (!(func === baseCallback && iteratee == null)) {
-        iteratee = func(iteratee, thisArg, 3);
+      var callback = getCallback();
+      if (!(iteratee == null && callback === baseCallback)) {
+        iteratee = callback(iteratee, thisArg, 3);
       }
       return (isSorted && getIndexOf() == baseIndexOf)
         ? sortedUniq(array, iteratee)
@@ -12252,7 +12173,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     });
 
     /**
-     * Creates an array that is the [symmetric difference](https://en.wikipedia.org/wiki/Symmetric_difference)
+     * Creates an array of unique values that is the [symmetric difference](https://en.wikipedia.org/wiki/Symmetric_difference)
      * of the provided arrays.
      *
      * @static
@@ -12356,8 +12277,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      */
     var zipWith = restParam(function(arrays) {
       var length = arrays.length,
-          iteratee = arrays[length - 2],
-          thisArg = arrays[length - 1];
+          iteratee = length > 2 ? arrays[length - 2] : undefined,
+          thisArg = length > 1 ? arrays[length - 1] : undefined;
 
       if (length > 2 && typeof iteratee == 'function') {
         length -= 2;
@@ -12368,6 +12289,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       arrays.length = length;
       return unzipWith(arrays, iteratee, thisArg);
     });
+
+    /*------------------------------------------------------------------------*/
 
     /**
      * Creates a `lodash` object that wraps `value` with explicit method
@@ -12618,6 +12541,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     function wrapperValue() {
       return baseWrapperValue(this.__wrapped__, this.__actions__);
     }
+
+    /*------------------------------------------------------------------------*/
 
     /**
      * Creates an array of elements corresponding to the given keys, or indexes,
@@ -13110,7 +13035,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     });
 
     /**
-     * Invokes the method at `path` on each element in `collection`, returning
+     * Invokes the method at `path` of each element in `collection`, returning
      * an array of the results of each invoked method. Any additional arguments
      * are provided to each invoked method. If `methodName` is a function it is
      * invoked for, and `this` bound to, each element in `collection`.
@@ -13138,7 +13063,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
           result = isArrayLike(collection) ? Array(collection.length) : [];
 
       baseEach(collection, function(value) {
-        var func = isFunc ? path : (isProp && value != null && value[path]);
+        var func = isFunc ? path : ((isProp && value != null) ? value[path] : null);
         result[++index] = func ? func.apply(value, args) : invokePath(value, path, args);
       });
       return result;
@@ -13160,7 +13085,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * callback returns `true` for elements that have the properties of the given
      * object, else `false`.
      *
-     * Many lodash methods are guarded to work as interatees for methods like
+     * Many lodash methods are guarded to work as iteratees for methods like
      * `_.every`, `_.filter`, `_.map`, `_.mapValues`, `_.reject`, and `_.some`.
      *
      * The guarded methods are:
@@ -13304,7 +13229,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * value. The `iteratee` is bound to `thisArg` and invoked with four arguments:
      * (accumulator, value, index|key, collection).
      *
-     * Many lodash methods are guarded to work as interatees for methods like
+     * Many lodash methods are guarded to work as iteratees for methods like
      * `_.reduce`, `_.reduceRight`, and `_.transform`.
      *
      * The guarded methods are:
@@ -13426,8 +13351,20 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
         var length = collection.length;
         return length > 0 ? collection[baseRandom(0, length - 1)] : undefined;
       }
-      var result = shuffle(collection);
-      result.length = nativeMin(n < 0 ? 0 : (+n || 0), result.length);
+      var index = -1,
+          result = toArray(collection),
+          length = result.length,
+          lastIndex = length - 1;
+
+      n = nativeMin(n < 0 ? 0 : (+n || 0), length);
+      while (++index < n) {
+        var rand = baseRandom(index, lastIndex),
+            value = result[rand];
+
+        result[rand] = result[index];
+        result[index] = value;
+      }
+      result.length = n;
       return result;
     }
 
@@ -13446,20 +13383,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * // => [4, 1, 3, 2]
      */
     function shuffle(collection) {
-      collection = toIterable(collection);
-
-      var index = -1,
-          length = collection.length,
-          result = Array(length);
-
-      while (++index < length) {
-        var rand = baseRandom(0, index);
-        if (index != rand) {
-          result[index] = result[rand];
-        }
-        result[rand] = collection[index];
-      }
-      return result;
+      return sample(collection, POSITIVE_INFINITY);
     }
 
     /**
@@ -13740,6 +13664,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       return filter(collection, baseMatches(source));
     }
 
+    /*------------------------------------------------------------------------*/
+
     /**
      * Gets the number of milliseconds that have elapsed since the Unix epoch
      * (1 January 1970 00:00:00 UTC).
@@ -13757,6 +13683,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     var now = nativeNow || function() {
       return new Date().getTime();
     };
+
+    /*------------------------------------------------------------------------*/
 
     /**
      * The opposite of `_.before`; this method creates a function that invokes
@@ -14081,12 +14009,13 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     var curryRight = createCurry(CURRY_RIGHT_FLAG);
 
     /**
-     * Creates a function that delays invoking `func` until after `wait` milliseconds
-     * have elapsed since the last time it was invoked. The created function comes
-     * with a `cancel` method to cancel delayed invocations. Provide an options
-     * object to indicate that `func` should be invoked on the leading and/or
-     * trailing edge of the `wait` timeout. Subsequent calls to the debounced
-     * function return the result of the last `func` invocation.
+     * Creates a debounced function that delays invoking `func` until after `wait`
+     * milliseconds have elapsed since the last time the debounced function was
+     * invoked. The debounced function comes with a `cancel` method to cancel
+     * delayed invocations. Provide an options object to indicate that `func`
+     * should be invoked on the leading and/or trailing edge of the `wait` timeout.
+     * Subsequent calls to the debounced function return the result of the last
+     * `func` invocation.
      *
      * **Note:** If `leading` and `trailing` options are `true`, `func` is invoked
      * on the trailing edge of the timeout only if the the debounced function is
@@ -14400,14 +14329,14 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       }
       var memoized = function() {
         var args = arguments,
-            cache = memoized.cache,
-            key = resolver ? resolver.apply(this, args) : args[0];
+            key = resolver ? resolver.apply(this, args) : args[0],
+            cache = memoized.cache;
 
         if (cache.has(key)) {
           return cache.get(key);
         }
         var result = func.apply(this, args);
-        cache.set(key, result);
+        memoized.cache = cache.set(key, result);
         return result;
       };
       memoized.cache = new memoize.Cache;
@@ -14654,12 +14583,12 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     }
 
     /**
-     * Creates a function that only invokes `func` at most once per every `wait`
-     * milliseconds. The created function comes with a `cancel` method to cancel
-     * delayed invocations. Provide an options object to indicate that `func`
-     * should be invoked on the leading and/or trailing edge of the `wait` timeout.
-     * Subsequent calls to the throttled function return the result of the last
-     * `func` call.
+     * Creates a throttled function that only invokes `func` at most once per
+     * every `wait` milliseconds. The throttled function comes with a `cancel`
+     * method to cancel delayed invocations. Provide an options object to indicate
+     * that `func` should be invoked on the leading and/or trailing edge of the
+     * `wait` timeout. Subsequent calls to the throttled function return the
+     * result of the last `func` call.
      *
      * **Note:** If `leading` and `trailing` options are `true`, `func` is invoked
      * on the trailing edge of the timeout only if the the throttled function is
@@ -14737,6 +14666,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       return createWrapper(wrapper, PARTIAL_FLAG, null, [value], []);
     }
 
+    /*------------------------------------------------------------------------*/
+
     /**
      * Creates a clone of `value`. If `isDeep` is `true` nested objects are cloned,
      * otherwise they are assigned by reference. If `customizer` is provided it is
@@ -14797,8 +14728,9 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
         customizer = isDeep;
         isDeep = false;
       }
-      customizer = typeof customizer == 'function' && bindCallback(customizer, thisArg, 1);
-      return baseClone(value, isDeep, customizer);
+      return typeof customizer == 'function'
+        ? baseClone(value, isDeep, bindCallback(customizer, thisArg, 1))
+        : baseClone(value, isDeep);
     }
 
     /**
@@ -14847,8 +14779,57 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * // => 20
      */
     function cloneDeep(value, customizer, thisArg) {
-      customizer = typeof customizer == 'function' && bindCallback(customizer, thisArg, 1);
-      return baseClone(value, true, customizer);
+      return typeof customizer == 'function'
+        ? baseClone(value, true, bindCallback(customizer, thisArg, 1))
+        : baseClone(value, true);
+    }
+
+    /**
+     * Checks if `value` is greater than `other`.
+     *
+     * @static
+     * @memberOf _
+     * @category Lang
+     * @param {*} value The value to compare.
+     * @param {*} other The other value to compare.
+     * @returns {boolean} Returns `true` if `value` is greater than `other`, else `false`.
+     * @example
+     *
+     * _.gt(3, 1);
+     * // => true
+     *
+     * _.gt(3, 3);
+     * // => false
+     *
+     * _.gt(1, 3);
+     * // => false
+     */
+    function gt(value, other) {
+      return value > other;
+    }
+
+    /**
+     * Checks if `value` is greater than or equal to `other`.
+     *
+     * @static
+     * @memberOf _
+     * @category Lang
+     * @param {*} value The value to compare.
+     * @param {*} other The other value to compare.
+     * @returns {boolean} Returns `true` if `value` is greater than or equal to `other`, else `false`.
+     * @example
+     *
+     * _.gte(3, 1);
+     * // => true
+     *
+     * _.gte(3, 3);
+     * // => true
+     *
+     * _.gte(1, 3);
+     * // => false
+     */
+    function gte(value, other) {
+      return value >= other;
     }
 
     /**
@@ -15011,6 +14992,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      *
      * @static
      * @memberOf _
+     * @alias eq
      * @category Lang
      * @param {*} value The value to compare.
      * @param {*} other The other value to compare.
@@ -15040,12 +15022,9 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * // => true
      */
     function isEqual(value, other, customizer, thisArg) {
-      customizer = typeof customizer == 'function' && bindCallback(customizer, thisArg, 3);
-      if (!customizer && isStrictComparable(value) && isStrictComparable(other)) {
-        return value === other;
-      }
+      customizer = typeof customizer == 'function' ? bindCallback(customizer, thisArg, 3) : undefined;
       var result = customizer ? customizer(value, other) : undefined;
-      return result === undefined ? baseIsEqual(value, other, customizer) : !!result;
+      return  result === undefined ? baseIsEqual(value, other, customizer) : !!result;
     }
 
     /**
@@ -15147,7 +15126,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       // Avoid a V8 JIT bug in Chrome 19-20.
       // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
       var type = typeof value;
-      return type == 'function' || (!!value && type == 'object');
+      return !!value && (type == 'object' || type == 'function');
     }
 
     /**
@@ -15190,33 +15169,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * // => true
      */
     function isMatch(object, source, customizer, thisArg) {
-      var props = keys(source),
-          length = props.length;
-
-      if (!length) {
-        return true;
-      }
-      if (object == null) {
-        return false;
-      }
-      customizer = typeof customizer == 'function' && bindCallback(customizer, thisArg, 3);
-      object = toObject(object);
-      if (!customizer && length == 1) {
-        var key = props[0],
-            value = source[key];
-
-        if (isStrictComparable(value)) {
-          return value === object[key] && (value !== undefined || (key in object));
-        }
-      }
-      var values = Array(length),
-          strictCompareFlags = Array(length);
-
-      while (length--) {
-        value = values[length] = source[props[length]];
-        strictCompareFlags[length] = isStrictComparable(value);
-      }
-      return baseIsMatch(object, props, values, strictCompareFlags, customizer);
+      customizer = typeof customizer == 'function' ? bindCallback(customizer, thisArg, 3) : undefined;
+      return baseIsMatch(object, getMatchData(source), customizer);
     }
 
     /**
@@ -15356,8 +15310,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       if (!(value && objToString.call(value) == objectTag)) {
         return false;
       }
-      var valueOf = value.valueOf,
-          objProto = isNative(valueOf) && (objProto = getPrototypeOf(valueOf)) && getPrototypeOf(objProto);
+      var valueOf = getNative(value, 'valueOf'),
+          objProto = valueOf && (objProto = getPrototypeOf(valueOf)) && getPrototypeOf(objProto);
 
       return objProto
         ? (value == objProto || getPrototypeOf(value) == objProto)
@@ -15445,6 +15399,54 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     }
 
     /**
+     * Checks if `value` is less than `other`.
+     *
+     * @static
+     * @memberOf _
+     * @category Lang
+     * @param {*} value The value to compare.
+     * @param {*} other The other value to compare.
+     * @returns {boolean} Returns `true` if `value` is less than `other`, else `false`.
+     * @example
+     *
+     * _.lt(1, 3);
+     * // => true
+     *
+     * _.lt(3, 3);
+     * // => false
+     *
+     * _.lt(3, 1);
+     * // => false
+     */
+    function lt(value, other) {
+      return value < other;
+    }
+
+    /**
+     * Checks if `value` is less than or equal to `other`.
+     *
+     * @static
+     * @memberOf _
+     * @category Lang
+     * @param {*} value The value to compare.
+     * @param {*} other The other value to compare.
+     * @returns {boolean} Returns `true` if `value` is less than or equal to `other`, else `false`.
+     * @example
+     *
+     * _.lte(1, 3);
+     * // => true
+     *
+     * _.lte(3, 3);
+     * // => true
+     *
+     * _.lte(3, 1);
+     * // => false
+     */
+    function lte(value, other) {
+      return value <= other;
+    }
+
+    /**
      * Converts `value` to an array.
      *
      * @static
@@ -15496,6 +15498,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     function toPlainObject(value) {
       return baseCopy(value, keysIn(value));
     }
+
+    /*------------------------------------------------------------------------*/
 
     /**
      * Assigns own enumerable properties of source object(s) to the destination
@@ -15836,7 +15840,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     }
 
     /**
-     * Gets the property value of `path` on `object`. If the resolved value is
+     * Gets the property value at `path` of `object`. If the resolved value is
      * `undefined` the `defaultValue` is used in its place.
      *
      * @static
@@ -15894,10 +15898,14 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       if (!result && !isKey(path)) {
         path = toPath(path);
         object = path.length == 1 ? object : baseGet(object, baseSlice(path, 0, -1));
+        if (object == null) {
+          return false;
+        }
         path = last(path);
-        result = object != null && hasOwnProperty.call(object, path);
+        result = hasOwnProperty.call(object, path);
       }
-      return result;
+      return result || (isLength(object.length) && isIndex(path, object.length) &&
+        (isArray(object) || isArguments(object)));
     }
 
     /**
@@ -15978,7 +15986,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * // => ['0', '1']
      */
     var keys = !nativeKeys ? shimKeys : function(object) {
-      var Ctor = object != null && object.constructor;
+      var Ctor = object == null ? null : object.constructor;
       if ((typeof Ctor == 'function' && Ctor.prototype === object) ||
           (typeof object != 'function' && isArrayLike(object))) {
         return shimKeys(object);
@@ -16017,7 +16025,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       }
       var length = object.length;
       length = (length && isLength(length) &&
-        (isArray(object) || (support.nonEnumArgs && isArguments(object))) && length) || 0;
+        (isArray(object) || isArguments(object)) && length) || 0;
 
       var Ctor = object.constructor,
           index = -1,
@@ -16204,6 +16212,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * // => [['barney', 36], ['fred', 40]] (iteration order is not guaranteed)
      */
     function pairs(object) {
+      object = toObject(object);
+
       var index = -1,
           props = keys(object),
           length = props.length,
@@ -16324,13 +16334,13 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
 
       var index = -1,
           length = path.length,
-          endIndex = length - 1,
+          lastIndex = length - 1,
           nested = object;
 
       while (nested != null && ++index < length) {
         var key = path[index];
         if (isObject(nested)) {
-          if (index == endIndex) {
+          if (index == lastIndex) {
             nested[key] = value;
           } else if (nested[key] == null) {
             nested[key] = isIndex(path[index + 1]) ? [] : {};
@@ -16380,7 +16390,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
           if (isArr) {
             accumulator = isArray(object) ? new Ctor : [];
           } else {
-            accumulator = baseCreate(isFunction(Ctor) && Ctor.prototype);
+            accumulator = baseCreate(isFunction(Ctor) ? Ctor.prototype : null);
           }
         } else {
           accumulator = {};
@@ -16447,6 +16457,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     function valuesIn(object) {
       return baseValues(object, keysIn(object));
     }
+
+    /*------------------------------------------------------------------------*/
 
     /**
      * Checks if `n` is between `start` and up to but not including, `end`. If
@@ -16552,6 +16564,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       return baseRandom(min, max);
     }
 
+    /*------------------------------------------------------------------------*/
+
     /**
      * Converts `string` to [camel case](https://en.wikipedia.org/wiki/CamelCase).
      *
@@ -16655,7 +16669,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * use a third-party library like [_he_](https://mths.be/he).
      *
      * Though the ">" character is escaped for symmetry, characters like
-     * ">" and "/" don't require escaping in HTML and have no special meaning
+     * ">" and "/" don't need escaping in HTML and have no special meaning
      * unless they're part of a tag or unquoted attribute value.
      * See [Mathias Bynens's article](https://mathiasbynens.be/notes/ambiguous-ampersands)
      * (under "semi-related fun fact") for more details.
@@ -16732,7 +16746,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     });
 
     /**
-     * Pads `string` on the left and right sides if it is shorter than `length`.
+     * Pads `string` on the left and right sides if it's shorter than `length`.
      * Padding characters are truncated if they can't be evenly divided by `length`.
      *
      * @static
@@ -16770,7 +16784,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     }
 
     /**
-     * Pads `string` on the left side if it is shorter than `length`. Padding
+     * Pads `string` on the left side if it's shorter than `length`. Padding
      * characters are truncated if they exceed `length`.
      *
      * @static
@@ -16794,7 +16808,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     var padLeft = createPadDir();
 
     /**
-     * Pads `string` on the right side if it is shorter than `length`. Padding
+     * Pads `string` on the right side if it's shorter than `length`. Padding
      * characters are truncated if they exceed `length`.
      *
      * @static
@@ -17275,7 +17289,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     }
 
     /**
-     * Truncates `string` if it is longer than the given maximum string length.
+     * Truncates `string` if it's longer than the given maximum string length.
      * The last characters of the truncated string are replaced with the omission
      * string which defaults to "...".
      *
@@ -17417,6 +17431,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       return string.match(pattern || reWords) || [];
     }
 
+    /*------------------------------------------------------------------------*/
+
     /**
      * Attempts to invoke `func`, returning either the result or the caught error
      * object. Any additional arguments are provided to `func` when it is invoked.
@@ -17534,7 +17550,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     }
 
     /**
-     * Creates a function which performs a deep comparison between a given object
+     * Creates a function that performs a deep comparison between a given object
      * and `source`, returning `true` if the given object has equivalent property
      * values, else `false`.
      *
@@ -17563,7 +17579,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     }
 
     /**
-     * Creates a function which compares the property value of `path` on a given
+     * Creates a function that compares the property value of `path` on a given
      * object to `value`.
      *
      * **Note:** This method supports comparing arrays, booleans, `Date` objects,
@@ -17574,7 +17590,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * @memberOf _
      * @category Utility
      * @param {Array|string} path The path of the property to get.
-     * @param {*} value The value to compare.
+     * @param {*} srcValue The value to match.
      * @returns {Function} Returns the new function.
      * @example
      *
@@ -17586,17 +17602,19 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * _.find(users, _.matchesProperty('user', 'fred'));
      * // => { 'user': 'fred' }
      */
-    function matchesProperty(path, value) {
-      return baseMatchesProperty(path, baseClone(value, true));
+    function matchesProperty(path, srcValue) {
+      return baseMatchesProperty(path, baseClone(srcValue, true));
     }
 
     /**
-     * Creates a function which invokes the method at `path` on a given object.
+     * Creates a function that invokes the method at `path` on a given object.
+     * Any additional arguments are provided to the invoked method.
      *
      * @static
      * @memberOf _
      * @category Utility
      * @param {Array|string} path The path of the method to invoke.
+     * @param {...*} [args] The arguments to invoke the method with.
      * @returns {Function} Returns the new function.
      * @example
      *
@@ -17618,13 +17636,15 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     });
 
     /**
-     * The opposite of `_.method`; this method creates a function which invokes
-     * the method at a given path on `object`.
+     * The opposite of `_.method`; this method creates a function that invokes
+     * the method at a given path on `object`. Any additional arguments are
+     * provided to the invoked method.
      *
      * @static
      * @memberOf _
      * @category Utility
      * @param {Object} object The object to query.
+     * @param {...*} [args] The arguments to invoke the method with.
      * @returns {Function} Returns the new function.
      * @example
      *
@@ -17668,9 +17688,6 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      *   });
      * }
      *
-     * // use `_.runInContext` to avoid conflicts (esp. in Node.js)
-     * var _ = require('lodash').runInContext();
-     *
      * _.mixin({ 'vowels': vowels });
      * _.vowels('fred');
      * // => ['e']
@@ -17685,8 +17702,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     function mixin(object, source, options) {
       if (options == null) {
         var isObj = isObject(source),
-            props = isObj && keys(source),
-            methodNames = props && props.length && baseFunctions(source, props);
+            props = isObj ? keys(source) : null,
+            methodNames = (props && props.length) ? baseFunctions(source, props) : null;
 
         if (!(methodNames ? methodNames.length : isObj)) {
           methodNames = false;
@@ -17753,7 +17770,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     }
 
     /**
-     * A no-operation function which returns `undefined` regardless of the
+     * A no-operation function that returns `undefined` regardless of the
      * arguments it receives.
      *
      * @static
@@ -17771,7 +17788,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     }
 
     /**
-     * Creates a function which returns the property value at `path` on a
+     * Creates a function that returns the property value at `path` on a
      * given object.
      *
      * @static
@@ -17797,7 +17814,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     }
 
     /**
-     * The opposite of `_.property`; this method creates a function which returns
+     * The opposite of `_.property`; this method creates a function that returns
      * the property value at a given path on `object`.
      *
      * @static
@@ -17951,6 +17968,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       return baseToString(prefix) + id;
     }
 
+    /*------------------------------------------------------------------------*/
+
     /**
      * Adds two numbers.
      *
@@ -18016,7 +18035,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * _.max(users, 'age');
      * // => { 'user': 'fred', 'age': 40 }
      */
-    var max = createExtremum(arrayMax);
+    var max = createExtremum(gt, NEGATIVE_INFINITY);
 
     /**
      * Gets the minimum value of `collection`. If `collection` is empty or falsey
@@ -18065,7 +18084,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * _.min(users, 'age');
      * // => { 'user': 'barney', 'age': 36 }
      */
-    var min = createExtremum(arrayMin, true);
+    var min = createExtremum(lt, POSITIVE_INFINITY);
 
     /**
      * Gets the sum of the values in `collection`.
@@ -18103,17 +18122,19 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       if (thisArg && isIterateeCall(collection, iteratee, thisArg)) {
         iteratee = null;
       }
-      var func = getCallback(),
+      var callback = getCallback(),
           noIteratee = iteratee == null;
 
-      if (!(func === baseCallback && noIteratee)) {
+      if (!(noIteratee && callback === baseCallback)) {
         noIteratee = false;
-        iteratee = func(iteratee, thisArg, 3);
+        iteratee = callback(iteratee, thisArg, 3);
       }
       return noIteratee
         ? arraySum(isArray(collection) ? collection : toIterable(collection))
         : baseSum(collection, iteratee);
     }
+
+    /*------------------------------------------------------------------------*/
 
     // Ensure wrappers are instances of `baseLodash`.
     lodash.prototype = baseLodash.prototype;
@@ -18262,6 +18283,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     // Add functions to `lodash.prototype`.
     mixin(lodash, lodash);
 
+    /*------------------------------------------------------------------------*/
+
     // Add functions that return unwrapped values when chaining.
     lodash.add = add;
     lodash.attempt = attempt;
@@ -18283,6 +18306,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     lodash.findWhere = findWhere;
     lodash.first = first;
     lodash.get = get;
+    lodash.gt = gt;
+    lodash.gte = gte;
     lodash.has = has;
     lodash.identity = identity;
     lodash.includes = includes;
@@ -18312,6 +18337,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     lodash.kebabCase = kebabCase;
     lodash.last = last;
     lodash.lastIndexOf = lastIndexOf;
+    lodash.lt = lt;
+    lodash.lte = lte;
     lodash.max = max;
     lodash.min = min;
     lodash.noConflict = noConflict;
@@ -18348,6 +18375,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     lodash.all = every;
     lodash.any = some;
     lodash.contains = includes;
+    lodash.eq = isEqual;
     lodash.detect = find;
     lodash.foldl = reduce;
     lodash.foldr = reduceRight;
@@ -18365,6 +18393,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       return source;
     }()), false);
 
+    /*------------------------------------------------------------------------*/
+
     // Add functions capable of returning wrapped and unwrapped values when chaining.
     lodash.sample = sample;
 
@@ -18376,6 +18406,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
         return sample(value, n);
       });
     };
+
+    /*------------------------------------------------------------------------*/
 
     /**
      * The semantic version number.
@@ -18604,6 +18636,8 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     return lodash;
   }
 
+  /*--------------------------------------------------------------------------*/
+
   // Export lodash.
   var _ = runInContext();
 
@@ -18627,7 +18661,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     if (moduleExports) {
       (freeModule.exports = _)._ = _;
     }
-    // Export for Narwhal or Rhino -require.
+    // Export for Rhino with CommonJS support.
     else {
       freeExports._ = _;
     }
@@ -18637,7 +18671,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     root._ = _;
   }
 }.call(this));
-;/*! angular-google-maps 2.1.2 2015-06-04
+;/*! angular-google-maps 2.1.3 2015-06-10
  *  AngularJS directives for Google Maps
  *  git: https://github.com/angular-ui/angular-google-maps.git
  */
@@ -18769,7 +18803,7 @@ Nicholas McCready - https://twitter.com/nmccready
       transport: 'https',
       isGoogleMapsForWork: false,
       china: false,
-      v: '3.17',
+      v: '3',
       libraries: '',
       language: 'en',
       sensor: 'false'
@@ -21954,6 +21988,8 @@ Original idea from: http://stackoverflow.com/questions/22758950/google-map-drawi
               if (!_this.gObject) {
                 if (_this.isLabel(_this.opts)) {
                   _this.gObject = new MarkerWithLabel(_this.setLabelOptions(_this.opts));
+                } else if (_this.opts.content) {
+                  _this.gObject = new RichMarker(_this.opts);
                 } else {
                   _this.gObject = new google.maps.Marker(_this.opts);
                 }
@@ -30181,6 +30217,828 @@ MarkerWithLabel.prototype.setMap = function (theMap) {
   this.label.setMap(theMap);
 };
 
+// ==ClosureCompiler==
+// @compilation_level ADVANCED_OPTIMIZATIONS
+// @externs_url http://closure-compiler.googlecode.com/svn/trunk/contrib/externs/maps/google_maps_api_v3.js
+// @output_wrapper (function() {%output%})();
+// ==/ClosureCompiler==
+
+/**
+ * @license
+ * Copyright 2013 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * A RichMarker that allows any HTML/DOM to be added to a map and be draggable.
+ *
+ * @param {Object.<string, *>=} opt_options Optional properties to set.
+ * @extends {google.maps.OverlayView}
+ * @constructor
+ */
+function RichMarker(opt_options) {
+  var options = opt_options || {};
+
+  /**
+   * @type {boolean}
+   * @private
+   */
+  this.ready_ = false;
+
+  /**
+   * @type {boolean}
+   * @private
+   */
+  this.dragging_ = false;
+
+  if (opt_options['visible'] == undefined) {
+    opt_options['visible'] = true;
+  }
+
+  if (opt_options['shadow'] == undefined) {
+    opt_options['shadow'] = '7px -3px 5px rgba(88,88,88,0.7)';
+  }
+
+  if (opt_options['anchor'] == undefined) {
+    opt_options['anchor'] = RichMarkerPosition['BOTTOM'];
+  }
+
+  this.setValues(options);
+}
+RichMarker.prototype = new google.maps.OverlayView();
+window['RichMarker'] = RichMarker;
+
+
+/**
+ * Returns the current visibility state of the marker.
+ *
+ * @return {boolean} The visiblity of the marker.
+ */
+RichMarker.prototype.getVisible = function() {
+  return /** @type {boolean} */ (this.get('visible'));
+};
+RichMarker.prototype['getVisible'] = RichMarker.prototype.getVisible;
+
+
+/**
+ * Sets the visiblility state of the marker.
+ *
+ * @param {boolean} visible The visiblilty of the marker.
+ */
+RichMarker.prototype.setVisible = function(visible) {
+  this.set('visible', visible);
+};
+RichMarker.prototype['setVisible'] = RichMarker.prototype.setVisible;
+
+
+/**
+ *  The visible changed event.
+ */
+RichMarker.prototype.visible_changed = function() {
+  if (this.ready_) {
+    this.markerWrapper_.style['display'] = this.getVisible() ? '' : 'none';
+    this.draw();
+  }
+};
+RichMarker.prototype['visible_changed'] = RichMarker.prototype.visible_changed;
+
+
+/**
+ * Sets the marker to be flat.
+ *
+ * @param {boolean} flat If the marker is to be flat or not.
+ */
+RichMarker.prototype.setFlat = function(flat) {
+  this.set('flat', !!flat);
+};
+RichMarker.prototype['setFlat'] = RichMarker.prototype.setFlat;
+
+
+/**
+ * If the makrer is flat or not.
+ *
+ * @return {boolean} True the marker is flat.
+ */
+RichMarker.prototype.getFlat = function() {
+  return /** @type {boolean} */ (this.get('flat'));
+};
+RichMarker.prototype['getFlat'] = RichMarker.prototype.getFlat;
+
+
+/**
+ * Get the width of the marker.
+ *
+ * @return {Number} The width of the marker.
+ */
+RichMarker.prototype.getWidth = function() {
+  return /** @type {Number} */ (this.get('width'));
+};
+RichMarker.prototype['getWidth'] = RichMarker.prototype.getWidth;
+
+
+/**
+ * Get the height of the marker.
+ *
+ * @return {Number} The height of the marker.
+ */
+RichMarker.prototype.getHeight = function() {
+  return /** @type {Number} */ (this.get('height'));
+};
+RichMarker.prototype['getHeight'] = RichMarker.prototype.getHeight;
+
+
+/**
+ * Sets the marker's box shadow.
+ *
+ * @param {string} shadow The box shadow to set.
+ */
+RichMarker.prototype.setShadow = function(shadow) {
+  this.set('shadow', shadow);
+  this.flat_changed();
+};
+RichMarker.prototype['setShadow'] = RichMarker.prototype.setShadow;
+
+
+/**
+ * Gets the marker's box shadow.
+ *
+ * @return {string} The box shadow.
+ */
+RichMarker.prototype.getShadow = function() {
+  return /** @type {string} */ (this.get('shadow'));
+};
+RichMarker.prototype['getShadow'] = RichMarker.prototype.getShadow;
+
+
+/**
+ * Flat changed event.
+ */
+RichMarker.prototype.flat_changed = function() {
+  if (!this.ready_) {
+    return;
+  }
+
+  this.markerWrapper_.style['boxShadow'] =
+      this.markerWrapper_.style['webkitBoxShadow'] =
+      this.markerWrapper_.style['MozBoxShadow'] =
+      this.getFlat() ? '' : this.getShadow();
+};
+RichMarker.prototype['flat_changed'] = RichMarker.prototype.flat_changed;
+
+
+/**
+ * Sets the zIndex of the marker.
+ *
+ * @param {Number} index The index to set.
+ */
+RichMarker.prototype.setZIndex = function(index) {
+  this.set('zIndex', index);
+};
+RichMarker.prototype['setZIndex'] = RichMarker.prototype.setZIndex;
+
+
+/**
+ * Gets the zIndex of the marker.
+ *
+ * @return {Number} The zIndex of the marker.
+ */
+RichMarker.prototype.getZIndex = function() {
+  return /** @type {Number} */ (this.get('zIndex'));
+};
+RichMarker.prototype['getZIndex'] = RichMarker.prototype.getZIndex;
+
+
+/**
+ * zIndex changed event.
+ */
+RichMarker.prototype.zIndex_changed = function() {
+  if (this.getZIndex() && this.ready_) {
+    this.markerWrapper_.style.zIndex = this.getZIndex();
+  }
+};
+RichMarker.prototype['zIndex_changed'] = RichMarker.prototype.zIndex_changed;
+
+/**
+ * Whether the marker is draggable or not.
+ *
+ * @return {boolean} True if the marker is draggable.
+ */
+RichMarker.prototype.getDraggable = function() {
+  return /** @type {boolean} */ (this.get('draggable'));
+};
+RichMarker.prototype['getDraggable'] = RichMarker.prototype.getDraggable;
+
+
+/**
+ * Sets the marker to be draggable or not.
+ *
+ * @param {boolean} draggable If the marker is draggable or not.
+ */
+RichMarker.prototype.setDraggable = function(draggable) {
+  this.set('draggable', !!draggable);
+};
+RichMarker.prototype['setDraggable'] = RichMarker.prototype.setDraggable;
+
+
+/**
+ * Draggable property changed callback.
+ */
+RichMarker.prototype.draggable_changed = function() {
+  if (this.ready_) {
+    if (this.getDraggable()) {
+      this.addDragging_(this.markerWrapper_);
+    } else {
+      this.removeDragListeners_();
+    }
+  }
+};
+RichMarker.prototype['draggable_changed'] =
+    RichMarker.prototype.draggable_changed;
+
+
+/**
+ * Gets the postiton of the marker.
+ *
+ * @return {google.maps.LatLng} The position of the marker.
+ */
+RichMarker.prototype.getPosition = function() {
+  return /** @type {google.maps.LatLng} */ (this.get('position'));
+};
+RichMarker.prototype['getPosition'] = RichMarker.prototype.getPosition;
+
+
+/**
+ * Sets the position of the marker.
+ *
+ * @param {google.maps.LatLng} position The position to set.
+ */
+RichMarker.prototype.setPosition = function(position) {
+  this.set('position', position);
+};
+RichMarker.prototype['setPosition'] = RichMarker.prototype.setPosition;
+
+
+/**
+ * Position changed event.
+ */
+RichMarker.prototype.position_changed = function() {
+  this.draw();
+};
+RichMarker.prototype['position_changed'] =
+    RichMarker.prototype.position_changed;
+
+
+/**
+ * Gets the anchor.
+ *
+ * @return {google.maps.Size} The position of the anchor.
+ */
+RichMarker.prototype.getAnchor = function() {
+  return /** @type {google.maps.Size} */ (this.get('anchor'));
+};
+RichMarker.prototype['getAnchor'] = RichMarker.prototype.getAnchor;
+
+
+/**
+ * Sets the anchor.
+ *
+ * @param {RichMarkerPosition|google.maps.Size} anchor The anchor to set.
+ */
+RichMarker.prototype.setAnchor = function(anchor) {
+  this.set('anchor', anchor);
+};
+RichMarker.prototype['setAnchor'] = RichMarker.prototype.setAnchor;
+
+
+/**
+ * Anchor changed event.
+ */
+RichMarker.prototype.anchor_changed = function() {
+  this.draw();
+};
+RichMarker.prototype['anchor_changed'] = RichMarker.prototype.anchor_changed;
+
+
+/**
+ * Converts a HTML string to a document fragment.
+ *
+ * @param {string} htmlString The HTML string to convert.
+ * @return {Node} A HTML document fragment.
+ * @private
+ */
+RichMarker.prototype.htmlToDocumentFragment_ = function(htmlString) {
+  var tempDiv = document.createElement('DIV');
+  tempDiv.innerHTML = htmlString;
+  if (tempDiv.childNodes.length == 1) {
+    return /** @type {!Node} */ (tempDiv.removeChild(tempDiv.firstChild));
+  } else {
+    var fragment = document.createDocumentFragment();
+    while (tempDiv.firstChild) {
+      fragment.appendChild(tempDiv.firstChild);
+    }
+    return fragment;
+  }
+};
+
+
+/**
+ * Removes all children from the node.
+ *
+ * @param {Node} node The node to remove all children from.
+ * @private
+ */
+RichMarker.prototype.removeChildren_ = function(node) {
+  if (!node) {
+    return;
+  }
+
+  var child;
+  while (child = node.firstChild) {
+    node.removeChild(child);
+  }
+};
+
+
+/**
+ * Sets the content of the marker.
+ *
+ * @param {string|Node} content The content to set.
+ */
+RichMarker.prototype.setContent = function(content) {
+  this.set('content', content);
+};
+RichMarker.prototype['setContent'] = RichMarker.prototype.setContent;
+
+
+/**
+ * Get the content of the marker.
+ *
+ * @return {string|Node} The marker content.
+ */
+RichMarker.prototype.getContent = function() {
+  return /** @type {Node|string} */ (this.get('content'));
+};
+RichMarker.prototype['getContent'] = RichMarker.prototype.getContent;
+
+
+/**
+ * Sets the marker content and adds loading events to images
+ */
+RichMarker.prototype.content_changed = function() {
+  if (!this.markerContent_) {
+    // Marker content area doesnt exist.
+    return;
+  }
+
+  this.removeChildren_(this.markerContent_);
+  var content = this.getContent();
+  if (content) {
+    if (typeof content == 'string') {
+      content = content.replace(/^\s*([\S\s]*)\b\s*$/, '$1');
+      content = this.htmlToDocumentFragment_(content);
+    }
+    this.markerContent_.appendChild(content);
+
+    var that = this;
+    var images = this.markerContent_.getElementsByTagName('IMG');
+    for (var i = 0, image; image = images[i]; i++) {
+      // By default, a browser lets a image be dragged outside of the browser,
+      // so by calling preventDefault we stop this behaviour and allow the image
+      // to be dragged around the map and now out of the browser and onto the
+      // desktop.
+      google.maps.event.addDomListener(image, 'mousedown', function(e) {
+        if (that.getDraggable()) {
+          if (e.preventDefault) {
+            e.preventDefault();
+          }
+          e.returnValue = false;
+        }
+      });
+
+      // Because we don't know the size of an image till it loads, add a
+      // listener to the image load so the marker can resize and reposition
+      // itself to be the correct height.
+      google.maps.event.addDomListener(image, 'load', function() {
+        that.draw();
+      });
+    }
+
+    google.maps.event.trigger(this, 'domready');
+  }
+
+  if (this.ready_) {
+    this.draw();
+  }
+};
+RichMarker.prototype['content_changed'] = RichMarker.prototype.content_changed;
+
+/**
+ * Sets the cursor.
+ *
+ * @param {string} whichCursor What cursor to show.
+ * @private
+ */
+RichMarker.prototype.setCursor_ = function(whichCursor) {
+  if (!this.ready_) {
+    return;
+  }
+
+  var cursor = '';
+  if (navigator.userAgent.indexOf('Gecko/') !== -1) {
+    // Moz has some nice cursors :)
+    if (whichCursor == 'dragging') {
+      cursor = '-moz-grabbing';
+    }
+
+    if (whichCursor == 'dragready') {
+      cursor = '-moz-grab';
+    }
+
+    if (whichCursor == 'draggable') {
+      cursor = 'pointer';
+    }
+  } else {
+    if (whichCursor == 'dragging' || whichCursor == 'dragready') {
+      cursor = 'move';
+    }
+
+    if (whichCursor == 'draggable') {
+      cursor = 'pointer';
+    }
+  }
+
+  if (this.markerWrapper_.style.cursor != cursor) {
+    this.markerWrapper_.style.cursor = cursor;
+  }
+};
+
+/**
+ * Start dragging.
+ *
+ * @param {Event} e The event.
+ */
+RichMarker.prototype.startDrag = function(e) {
+  if (!this.getDraggable()) {
+    return;
+  }
+
+  if (!this.dragging_) {
+    this.dragging_ = true;
+    var map = this.getMap();
+    this.mapDraggable_ = map.get('draggable');
+    map.set('draggable', false);
+
+    // Store the current mouse position
+    this.mouseX_ = e.clientX;
+    this.mouseY_ = e.clientY;
+
+    this.setCursor_('dragready');
+
+    // Stop the text from being selectable while being dragged
+    this.markerWrapper_.style['MozUserSelect'] = 'none';
+    this.markerWrapper_.style['KhtmlUserSelect'] = 'none';
+    this.markerWrapper_.style['WebkitUserSelect'] = 'none';
+
+    this.markerWrapper_['unselectable'] = 'on';
+    this.markerWrapper_['onselectstart'] = function() {
+      return false;
+    };
+
+    this.addDraggingListeners_();
+
+    google.maps.event.trigger(this, 'dragstart');
+  }
+};
+
+
+/**
+ * Stop dragging.
+ */
+RichMarker.prototype.stopDrag = function() {
+  if (!this.getDraggable()) {
+    return;
+  }
+
+  if (this.dragging_) {
+    this.dragging_ = false;
+    this.getMap().set('draggable', this.mapDraggable_);
+    this.mouseX_ = this.mouseY_ = this.mapDraggable_ = null;
+
+    // Allow the text to be selectable again
+    this.markerWrapper_.style['MozUserSelect'] = '';
+    this.markerWrapper_.style['KhtmlUserSelect'] = '';
+    this.markerWrapper_.style['WebkitUserSelect'] = '';
+    this.markerWrapper_['unselectable'] = 'off';
+    this.markerWrapper_['onselectstart'] = function() {};
+
+    this.removeDraggingListeners_();
+
+    this.setCursor_('draggable');
+    google.maps.event.trigger(this, 'dragend');
+
+    this.draw();
+  }
+};
+
+
+/**
+ * Handles the drag event.
+ *
+ * @param {Event} e The event.
+ */
+RichMarker.prototype.drag = function(e) {
+  if (!this.getDraggable() || !this.dragging_) {
+    // This object isn't draggable or we have stopped dragging
+    this.stopDrag();
+    return;
+  }
+
+  var dx = this.mouseX_ - e.clientX;
+  var dy = this.mouseY_ - e.clientY;
+
+  this.mouseX_ = e.clientX;
+  this.mouseY_ = e.clientY;
+
+  var left = parseInt(this.markerWrapper_.style['left'], 10) - dx;
+  var top = parseInt(this.markerWrapper_.style['top'], 10) - dy;
+
+  this.markerWrapper_.style['left'] = left + 'px';
+  this.markerWrapper_.style['top'] = top + 'px';
+
+  var offset = this.getOffset_();
+
+  // Set the position property and adjust for the anchor offset
+  var point = new google.maps.Point(left - offset.width, top - offset.height);
+  var projection = this.getProjection();
+  this.setPosition(projection.fromDivPixelToLatLng(point));
+
+  this.setCursor_('dragging');
+  google.maps.event.trigger(this, 'drag');
+};
+
+
+/**
+ * Removes the drag listeners associated with the marker.
+ *
+ * @private
+ */
+RichMarker.prototype.removeDragListeners_ = function() {
+  if (this.draggableListener_) {
+    google.maps.event.removeListener(this.draggableListener_);
+    delete this.draggableListener_;
+  }
+  this.setCursor_('');
+};
+
+
+/**
+ * Add dragability events to the marker.
+ *
+ * @param {Node} node The node to apply dragging to.
+ * @private
+ */
+RichMarker.prototype.addDragging_ = function(node) {
+  if (!node) {
+    return;
+  }
+
+  var that = this;
+  this.draggableListener_ =
+    google.maps.event.addDomListener(node, 'mousedown', function(e) {
+      that.startDrag(e);
+    });
+
+  this.setCursor_('draggable');
+};
+
+
+/**
+ * Add dragging listeners.
+ *
+ * @private
+ */
+RichMarker.prototype.addDraggingListeners_ = function() {
+  var that = this;
+  if (this.markerWrapper_.setCapture) {
+    this.markerWrapper_.setCapture(true);
+    this.draggingListeners_ = [
+      google.maps.event.addDomListener(this.markerWrapper_, 'mousemove', function(e) {
+        that.drag(e);
+      }, true),
+      google.maps.event.addDomListener(this.markerWrapper_, 'mouseup', function() {
+        that.stopDrag();
+        that.markerWrapper_.releaseCapture();
+      }, true)
+    ];
+  } else {
+    this.draggingListeners_ = [
+      google.maps.event.addDomListener(window, 'mousemove', function(e) {
+        that.drag(e);
+      }, true),
+      google.maps.event.addDomListener(window, 'mouseup', function() {
+        that.stopDrag();
+      }, true)
+    ];
+  }
+};
+
+
+/**
+ * Remove dragging listeners.
+ *
+ * @private
+ */
+RichMarker.prototype.removeDraggingListeners_ = function() {
+  if (this.draggingListeners_) {
+    for (var i = 0, listener; listener = this.draggingListeners_[i]; i++) {
+      google.maps.event.removeListener(listener);
+    }
+    this.draggingListeners_.length = 0;
+  }
+};
+
+
+/**
+ * Get the anchor offset.
+ *
+ * @return {google.maps.Size} The size offset.
+ * @private
+ */
+RichMarker.prototype.getOffset_ = function() {
+  var anchor = this.getAnchor();
+  if (typeof anchor == 'object') {
+    return /** @type {google.maps.Size} */ (anchor);
+  }
+
+  var offset = new google.maps.Size(0, 0);
+  if (!this.markerContent_) {
+    return offset;
+  }
+
+  var width = this.markerContent_.offsetWidth;
+  var height = this.markerContent_.offsetHeight;
+
+  switch (anchor) {
+   case RichMarkerPosition['TOP_LEFT']:
+     break;
+   case RichMarkerPosition['TOP']:
+     offset.width = -width / 2;
+     break;
+   case RichMarkerPosition['TOP_RIGHT']:
+     offset.width = -width;
+     break;
+   case RichMarkerPosition['LEFT']:
+     offset.height = -height / 2;
+     break;
+   case RichMarkerPosition['MIDDLE']:
+     offset.width = -width / 2;
+     offset.height = -height / 2;
+     break;
+   case RichMarkerPosition['RIGHT']:
+     offset.width = -width;
+     offset.height = -height / 2;
+     break;
+   case RichMarkerPosition['BOTTOM_LEFT']:
+     offset.height = -height;
+     break;
+   case RichMarkerPosition['BOTTOM']:
+     offset.width = -width / 2;
+     offset.height = -height;
+     break;
+   case RichMarkerPosition['BOTTOM_RIGHT']:
+     offset.width = -width;
+     offset.height = -height;
+     break;
+  }
+
+  return offset;
+};
+
+
+/**
+ * Adding the marker to a map.
+ * Implementing the interface.
+ */
+RichMarker.prototype.onAdd = function() {
+  if (!this.markerWrapper_) {
+    this.markerWrapper_ = document.createElement('DIV');
+    this.markerWrapper_.style['position'] = 'absolute';
+  }
+
+  if (this.getZIndex()) {
+    this.markerWrapper_.style['zIndex'] = this.getZIndex();
+  }
+
+  this.markerWrapper_.style['display'] = this.getVisible() ? '' : 'none';
+
+  if (!this.markerContent_) {
+    this.markerContent_ = document.createElement('DIV');
+    this.markerWrapper_.appendChild(this.markerContent_);
+
+    var that = this;
+    google.maps.event.addDomListener(this.markerContent_, 'click', function(e) {
+      google.maps.event.trigger(that, 'click');
+    });
+    google.maps.event.addDomListener(this.markerContent_, 'mouseover', function(e) {
+      google.maps.event.trigger(that, 'mouseover');
+    });
+    google.maps.event.addDomListener(this.markerContent_, 'mouseout', function(e) {
+      google.maps.event.trigger(that, 'mouseout');
+    });
+  }
+
+  this.ready_ = true;
+  this.content_changed();
+  this.flat_changed();
+  this.draggable_changed();
+
+  var panes = this.getPanes();
+  if (panes) {
+    panes.overlayMouseTarget.appendChild(this.markerWrapper_);
+  }
+
+  google.maps.event.trigger(this, 'ready');
+};
+RichMarker.prototype['onAdd'] = RichMarker.prototype.onAdd;
+
+
+/**
+ * Impelementing the interface.
+ */
+RichMarker.prototype.draw = function() {
+  if (!this.ready_ || this.dragging_) {
+    return;
+  }
+
+  var projection = this.getProjection();
+
+  if (!projection) {
+    // The map projection is not ready yet so do nothing
+    return;
+  }
+
+  var latLng = /** @type {google.maps.LatLng} */ (this.get('position'));
+  var pos = projection.fromLatLngToDivPixel(latLng);
+
+  var offset = this.getOffset_();
+  this.markerWrapper_.style['top'] = (pos.y + offset.height) + 'px';
+  this.markerWrapper_.style['left'] = (pos.x + offset.width) + 'px';
+
+  var height = this.markerContent_.offsetHeight;
+  var width = this.markerContent_.offsetWidth;
+
+  if (width != this.get('width')) {
+    this.set('width', width);
+  }
+
+  if (height != this.get('height')) {
+    this.set('height', height);
+  }
+};
+RichMarker.prototype['draw'] = RichMarker.prototype.draw;
+
+
+/**
+ * Removing a marker from the map.
+ * Implementing the interface.
+ */
+RichMarker.prototype.onRemove = function() {
+  if (this.markerWrapper_ && this.markerWrapper_.parentNode) {
+    this.markerWrapper_.parentNode.removeChild(this.markerWrapper_);
+  }
+  this.removeDragListeners_();
+};
+RichMarker.prototype['onRemove'] = RichMarker.prototype.onRemove;
+
+
+/**
+ * RichMarker Anchor positions
+ * @enum {number}
+ */
+var RichMarkerPosition = {
+  'TOP_LEFT': 1,
+  'TOP': 2,
+  'TOP_RIGHT': 3,
+  'LEFT': 4,
+  'MIDDLE': 5,
+  'RIGHT': 6,
+  'BOTTOM_LEFT': 7,
+  'BOTTOM': 8,
+  'BOTTOM_RIGHT': 9
+};
+window['RichMarkerPosition'] = RichMarkerPosition;
+
       //END REPLACE
       window.InfoBox = InfoBox;
       window.Cluster = Cluster;
@@ -30188,6 +31046,7 @@ MarkerWithLabel.prototype.setMap = function (theMap) {
       window.MarkerClusterer = MarkerClusterer;
       window.MarkerLabel_ = MarkerLabel_;
       window.MarkerWithLabel = MarkerWithLabel;
+      window.RichMarker = RichMarker;
     })
   };
 });
@@ -45026,17 +45885,383 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
         }
 
 
+    }]);;angular.module('ualib.news.templates', ['news-item/event-card.tpl.html', 'news-item/news-card.tpl.html', 'news-item/news-item.tpl.html', 'news/news-list.tpl.html', 'today/news-today.tpl.html']);
+
+angular.module("news-item/event-card.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("news-item/event-card.tpl.html",
+    "<a ng-href=\"{{newsCard.link}}\" target=\"_new\" class=\"media news-card\">\n" +
+    "    <div class=\"media-left\">\n" +
+    "        <div class=\"cal-icon\">\n" +
+    "            <div class=\"cal-month\">{{newsCard.activeFrom | date:'MMM'}}</div>\n" +
+    "            <div class=\"cal-day\">{{newsCard.activeFrom | date:'d'}}</div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "    <div class=\"media-body\">\n" +
+    "        <h4 class=\"media-heading\" ng-bind-html=\"newsCard.title\"></h4>\n" +
+    "        <p ng-bind-html=\"newsCard.blurb\"></p>\n" +
+    "    </div>\n" +
+    "</a>");
+}]);
+
+angular.module("news-item/news-card.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("news-item/news-card.tpl.html",
+    "<a ng-href=\"#/news-exhibits/{{newsCard.link}}\" class=\"media news-card\">\n" +
+    "    <div class=\"media-body\">\n" +
+    "        <h4 class=\"media-heading\">\n" +
+    "            <span ng-bind-html=\"newsCard.title\"></span>\n" +
+    "        </h4>\n" +
+    "        <div class=\"details-context\" ng-if=\"(newsCard.activeFrom != newsCard.activeUntil && newsCard.type != 0)\">{{newsCard.activeFrom | date:mediumDate}} - {{newsCard.activeUntil | date:mediumDate}}</div>\n" +
+    "        <p ng-bind-html=\"newsCard.blurb\"></p>\n" +
+    "    </div>\n" +
+    "</a>");
+}]);
+
+angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("news-item/news-item.tpl.html",
+    "<div class=\"page-header\">\n" +
+    "    <h1>{{newsItem.title}}</h1>\n" +
+    "</div>\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-8\">\n" +
+    "        <div class=\"text-muted\">\n" +
+    "            <span>Created by {{newsItem.creator}} on {{newsItem.created}}</span>\n" +
+    "        </div>\n" +
+    "        <p ng-bind-html=\"newsItem.description\"></p>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-4\">\n" +
+    "        <div class=\"well\" ng-if=\"newsItem.contactName\">\n" +
+    "            <h4>For more information contact</h4>\n" +
+    "            <ul class=\"fa-ul\">\n" +
+    "                <li><span class=\"fa fa-user fa-li\"></span>{{newsItem.contactName}}</li>\n" +
+    "                <li><span class=\"fa fa-phone fa-li\"></span>{{newsItem.contactPhone}}</li>\n" +
+    "                <li><span class=\"fa fa-envelope fa-li\"></span>{{newsItem.contactEmail}}</li>\n" +
+    "            </ul>\n" +
+    "        </div>\n" +
+    "        <a href=\"#/news-exhibits\" class=\"btn btn-default\"><span class=\"fa fa-reply\"></span> See all news &amp; exhibits</a>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "");
+}]);
+
+angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("news/news-list.tpl.html",
+    "<div class=\"jumbotron bg-transparent\">\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-7\">\n" +
+    "            <h1>News &amp; Exhibits</h1>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-5\">\n" +
+    "            <div class=\"well\">\n" +
+    "                <p class=\"lead\">Looking for upcoming events in the University Libraries?</p>\n" +
+    "                <a href=\"http://events.ua.edu/category/22/\" class=\"btn btn-primary\" target=\"_new\">View event calendar <span class=\"fa fa-external-link\"></span></a>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "\n" +
+    "\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-9\">\n" +
+    "\n" +
+    "        <div class=\"media animate-repeat\" ng-repeat=\"item in news | orderBy:newsFilters.sort | filter:{type: newsFilters.type} | filter:newsFilters.search\">\n" +
+    "            <div class=\"media-left\">\n" +
+    "                <span class=\"fa fa-newspaper-o fa-2x text-muted\" ng-if=\"item.type == 0\"></span>\n" +
+    "                <span class=\"fa fa-leaf fa-2x text-muted\" ng-if=\"item.type == 1\"></span>\n" +
+    "            </div>\n" +
+    "            <div class=\"media-body\">\n" +
+    "                <h4 class=\"media-heading\">\n" +
+    "                    <a ng-href=\"#/news-exhibits/{{item.link}}\" ng-bind-html=\"item.title | highlight:newsFilters.search\"></a>\n" +
+    "                </h4>\n" +
+    "                <div class=\"details-context\" ng-if=\"item.type > 0\">{{item.activeFrom | date:mediumDate}} - {{item.activeUntil | date:mediumDate}}</div>\n" +
+    "                <p ng-bind-html=\"item.description | truncate:250:true | highlight:newsFilters.search\"></p>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "\n" +
+    "        <div class=\"text-center\">\n" +
+    "            <pagination total-items=\"filteredNews.length\" ng-model=\"soft.page\" max-size=\"10\" class=\"pagination-sm\" boundary-links=\"true\" items-per-page=\"soft.perPage\" ng-change=\"update()\" ng-if=\"filteredNews.length > soft.perPage\"></pagination>\n" +
+    "        </div>\n" +
+    "\n" +
+    "        <div class=\"alert alert-warning text-center\" role=\"alert\" ng-show=\"news.length < 1\">\n" +
+    "            <h2>\n" +
+    "                No <span ng-if=\"soft.cat\"><strong>{{soft.cat | lowercase}}</strong></span> software is available\n" +
+    "                <span ng-if=\"soft.os\">on <strong>{{soft.os == 1 ? 'Windows' : 'OS X'}}</strong> computers</span>\n" +
+    "                <span ng-if=\"soft.loc\">in <strong>{{soft.loc}}</strong></span>\n" +
+    "                <span ng-if=\"soft.search\">that matches the search \"<strong>{{soft.search}}</strong>\"</span>\n" +
+    "            </h2>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"col-md-3 software-list-container\">\n" +
+    "        <h3>Filters</h3>\n" +
+    "        <form class=\"facets-form\">\n" +
+    "            <div class=\"form-group\">\n" +
+    "                <input type=\"text\" class=\"form-control\" ng-model=\"newsFilters.search\" placeholder=\"Keyword search\">\n" +
+    "            </div>\n" +
+    "\n" +
+    "            <div class=\"form-group\">\n" +
+    "                <label for=\"byType\">Type</label>\n" +
+    "                <div id=\"byType\" class=\"btn-group btn-group-justified btn-group-sm\">\n" +
+    "                    <label class=\"btn btn-default\" ng-model=\"newsFilters.type\" btn-radio=\"''\">All</label>\n" +
+    "                    <label class=\"btn btn-default\" ng-model=\"newsFilters.type\" btn-radio=\"'0'\">News</label>\n" +
+    "                    <label class=\"btn btn-default\" ng-model=\"newsFilters.type\" btn-radio=\"'1'\">Exhibits</label>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </form>\n" +
+    "\n" +
+    "\n" +
+    "    </div>\n" +
+    "\n" +
+    "</div>");
+}]);
+
+angular.module("today/news-today.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("today/news-today.tpl.html",
+    "<div class=\"row\" ng-controller=\"NewsTodayCtrl\">\n" +
+    "\n" +
+    "    <a news-card=\"item\" ng-repeat=\"item in news\">\n" +
+    "    </a>\n" +
+    "\n" +
+    "    <masonry>\n" +
+    "        <div class=\"masonry-brick\">\n" +
+    "            <a news-card=\"item\" ng-repeat=\"item in news\">\n" +
+    "            </a>\n" +
+    "        </div>\n" +
+    "        <div class=\"masonry-brick\">\n" +
+    "            <a news-card=\"item\" ng-repeat=\"item in exhibitions\">\n" +
+    "            </a>\n" +
+    "        </div>\n" +
+    "        <div class=\"masonry-brick\">\n" +
+    "            <a news-card=\"item\" ng-repeat=\"item in events\">\n" +
+    "            </a>\n" +
+    "        </div>\n" +
+    "        <div class=\"masonry-brick\">\n" +
+    "            <div class=\"hours-list\"></div>\n" +
+    "        </div>\n" +
+    "    </masonry>\n" +
+    "\n" +
+    "</div>");
+}]);
+;angular.module('ualib.news', [
+    'ngRoute',
+    'ngResource',
+    'ngSanitize',
+    'ngAnimate',
+    'angular.filter',
+    'ui.bootstrap',
+    'ui.utils',
+    'ualib.ui',
+    'ualib.hours',
+    'ualib.news.templates'
+]);;angular.module('ualib.news')
+
+    .factory('newsFactory', ['$resource', '$sce', '$filter', function($resource, $sce, $filter){
+
+        function preprocessNews(news){
+            news = $filter('unique')(news, 'title');
+            return news.map(function(item){
+                var n = item;
+                // Convert timestamps into JS millisecond standard
+                n.activeFrom = (item.activeFrom * 1000);
+                n.activeUntil = (item.activeUntil * 1000);
+
+                // If link doesn't already exist, create one from the new item's title
+                if (!n.hasOwnProperty('link')){
+                    n.link = $filter('slugify')(n.title);
+                }
+
+                // If no 'blurb' exists, create one by truncating the description
+                if (!n.hasOwnProperty('blurb')){
+                    n.blurb = $filter('stripTags')(n.description);
+                    n.blurb = $filter('truncate')(n.blurb, 250, '...', true);
+                }
+                return n;
+            });
+        }
+
+        return $resource('https://wwwdev2.lib.ua.edu/newsApp/api/:news', {}, {
+            cache: false,
+            get: {
+                method: 'GET',
+                params: {news: 'all'},
+                transformResponse: function(data){
+                    var news = angular.fromJson(data);
+                    formatted = preprocessNews(news.news);
+                    news.news = formatted;
+                    return news;
+                }
+            },
+            today: {
+                method: 'GET',
+                params: {news: 'today'},
+                transformResponse: function(data){
+                    var news = angular.fromJson(data);
+                    //var formatted = $filter('unique')(news.news, 'title');
+                    for (var prop in news){
+                        if (angular.isArray(news[prop])){
+                            news[prop] = preprocessNews(news[prop]);
+
+                        }
+                    }
+                    return news;
+                }
+            }
+        });
+    }]);;angular.module('ualib.news')
+
+    .config(['$routeProvider', function($routeProvider){
+        $routeProvider
+            .when('/news-exhibits/:link', {
+                reloadOnSearch: false,
+                resolve: {
+                    newsItem: function(newsFactory){
+                        return newsFactory.get({news: 'all'}, function(data){
+                            return data;
+                        }, function(data, status, headers, config) {
+                            console.log('ERROR: news item');
+                            console.log({
+                                data: data,
+                                status: status,
+                                headers: headers,
+                                config: config
+                            });
+                        });
+                    }
+                },
+                templateUrl: 'news-item/news-item.tpl.html',
+                controller: 'newsItemCtrl'
+            });
+    }])
+
+    .controller('newsItemCtrl', ['$scope', 'newsItem', '$routeParams', function($scope, newsItem, $routeParams){
+       newsItem.$promise.then(function(data){
+           for (var i = 0, len = data.news.length; i < len; i++){
+               var item = data.news[i];
+               if (item.hasOwnProperty('link') && item.link === $routeParams.link){
+                   $scope.newsItem = item;
+               }
+           }
+       });
+    }])
+
+    .directive('newsCard', [function(){
+        return {
+            restrict: 'A',
+            replace: true,
+            scope: {
+                newsCard: '=?',
+                newsFilters: '=?',
+                newsType: '@'
+            },
+            templateUrl: function(tElem, tAttrs){
+                var type = angular.isDefined(tAttrs.newsType) ? tAttrs.newsType : 'news';
+                return 'news-item/' + type + '-card.tpl.html';
+            }
+        };
+    }]);;angular.module('ualib.news')
+
+    .config(['$routeProvider', function($routeProvider){
+        $routeProvider
+            .when('/news-exhibits/', {
+                reloadOnSearch: false,
+                resolve: {
+                    newsList: function(newsFactory){
+                        return newsFactory.get({news: 'all'}, function(data){
+                            return data;
+                        }, function(data, status, headers, config) {
+                            console.log('ERROR: news');
+                            console.log({
+                                data: data,
+                                status: status,
+                                headers: headers,
+                                config: config
+                            });
+                        });
+                    }
+                },
+                templateUrl: 'news/news-list.tpl.html',
+                controller: 'newsListCtrl'
+            });
+    }])
+
+    .controller('newsListCtrl', ['$scope', '$location', 'newsList', function($scope, $location, newsList){
+        var filterWatcher;
+        $scope.newsFilters = {
+            sort: 'activeFrom',
+            type: '',
+            search: ''
+        };
+
+        newsList.$promise.then(function(data){
+            console.log(data);
+            $scope.news = data.news;
+            paramsToScope();
+            filterWatcher = $scope.$watch('newsFilters', function(newVal, oldVal){
+                processFilters();
+            }, true);
+        });
+
+
+        $scope.$on('$destroy', function(){
+            filterWatcher();
+        });
+
+        function paramsToScope(){
+            var params = $location.search();
+            for (var param in params){
+                if ($scope.newsFilters.hasOwnProperty(param)){
+                    $scope.newsFilters[param] = params[param];
+                }
+            }
+        }
+
+        function processFilters(){
+            var f = $scope.newsFilters;
+            var params = $location.search();
+            for (var filter in f){
+                if (angular.isDefined(f[filter]) && f[filter] !== ''){
+                    $location.search(filter, f[filter]);
+                }
+                else if (params.hasOwnProperty(filter)){
+                    $location.search(filter, null);
+                }
+            }
+        }
+    }]);;angular.module('ualib.news')
+
+    .controller('NewsTodayCtrl', ['$scope', '$filter', 'newsFactory', function($scope, $filter, newsFactory){
+        newsFactory.today()
+            .$promise
+            .then(function(data){
+                $scope.news = data.news;
+                $scope.events = data.events;
+                $scope.exhibitions = data.exhibitions;
+                $scope.newsOverflow = (data.news.length + data.events.length + data.exhibitions.length) > 3;
+            });
     }]);;angular.module('ualib.templates', ['../assets/js/_ualib-home.tpl.html']);
 
 angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("../assets/js/_ualib-home.tpl.html",
-    "<div class=\"home-slice\">\n" +
-    "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-6 col-md-push-6\" style=\"background-color: rgba(255,255,255,.9);\">\n" +
+    "<div class=\"page-slice\">\n" +
+    "    <div class=\"row\" ng-controller=\"NewsTodayCtrl\">\n" +
+    "        <!--<div class=\"col-md-6 col-md-push-6\" style=\"background-color: rgba(255,255,255,.9);\">\n" +
     "            <div class=\"hours-list\"></div>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-6 col-md-pull-6\" style=\"background-color: rgba(255,255,255,.9);\">\n" +
     "            <div class=\"view-news-events-exhibitions\"></div>\n" +
+    "        </div>-->\n" +
+    "        <div class=\"col-md-6\">\n" +
+    "            <h2>News</h2>\n" +
+    "            <div class=\"animate-repeat\" news-card=\"item\" ng-repeat=\"item in news\">\n" +
+    "            </div>\n" +
+    "            <h2>Exhibits</h2>\n" +
+    "            <div class=\"animate-repeat\" news-card=\"item\" ng-repeat=\"item in exhibitions\">\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-6\">\n" +
+    "            <div class=\"hours-list\" style=\"padding: 15px; padding-top:0; background-color: rgba(255,255,255,.9);\"></div>\n" +
+    "            <h2>Events</h2>\n" +
+    "            <div class=\"animate-repeat\" news-card=\"item\" news-type=\"event\" ng-repeat=\"item in events\">\n" +
+    "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>");
@@ -45134,6 +46359,7 @@ $(document).ready(UTIL.loadEvents);
 })(jQuery); // Fully reference jQuery after this point.*/
 ;angular.module('ualib', [
     'ngRoute',
+    'ngAnimate',
     'ualib.templates',
     'ualib.ui',
     'hours',
@@ -45142,7 +46368,8 @@ $(document).ready(UTIL.loadEvents);
     'ualib.databases',
     'musicSearch',
     'ualib.staffdir',
-    'ualib.softwareList'
+    'ualib.softwareList',
+    'ualib.news'
 ])
 
     .config(['$routeProvider', function($routeProvider, $location) {

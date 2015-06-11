@@ -10107,6 +10107,72 @@ a[href^="https"]:not(.source-link):after {
 }
 /*# sourceMappingURL=dist/ualib.softwareList.css.map */
 /*# sourceMappingURL=/wp-content/themes/roots/assets/css/main.css.map */
+.front-page h2,
+.front-page .h2 {
+  background-color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 0;
+  padding: 10px;
+}
+.front-page .news-card {
+  color: #333;
+  display: block;
+  padding: 15px;
+  margin-top: 0;
+  border: 1px solid transparent;
+  background-color: rgba(255, 255, 255, 0.9);
+}
+.front-page .news-card:hover {
+  text-decoration: none;
+  background-color: #ffffff;
+  border-top-color: #eee;
+  border-bottom-color: #eee;
+}
+.front-page .news-card h4,
+.front-page .news-card .h4 {
+  color: #428bca;
+}
+/*# sourceMappingURL=dist/ualib.news.css.map */
+.cal-icon {
+  width: 36px;
+  height: 36px;
+  text-align: center;
+  line-height: normal;
+  background: #fff;
+  border-radius: 4px;
+  overflow: hidden;
+  /*.cal-month {
+    -moz-border-radius-bottomright: 5px;
+    -webkit-border-bottom-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    -moz-border-radius-bottomleft: 5px;
+    -webkit-border-bottom-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+  }*/
+}
+.cal-icon .cal-month {
+  font-size: 11px;
+  font-weight: bold;
+  color: #f6f6f6;
+  background: #993333;
+}
+.cal-icon .cal-day {
+  color: #333;
+  font-size: 17px;
+  font-weight: bold;
+  padding-top: 2px;
+  border: 1px solid #d0d0d0;
+  border-top: none;
+}
+.media {
+  margin-top: 30px;
+}
+/*# sourceMappingURL=dist/ualib.news.css.map */
+/*
+.col-md-6:nth-child(2n+1){
+  clear: left;
+}*/
+/*# sourceMappingURL=dist/ualib.news.css.map */
+/*# sourceMappingURL=/wp-content/themes/roots/assets/css/main.css.map */
 .sdOpen {
   background-color: #f9f9f9;
 }

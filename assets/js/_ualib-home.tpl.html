@@ -1,10 +1,24 @@
-<div class="home-slice">
-    <div class="row">
-        <div class="col-md-6 col-md-push-6" style="background-color: rgba(255,255,255,.9);">
+<div class="page-slice">
+    <div class="row" ng-controller="NewsTodayCtrl">
+        <!--<div class="col-md-6 col-md-push-6" style="background-color: rgba(255,255,255,.9);">
             <div class="hours-list"></div>
         </div>
         <div class="col-md-6 col-md-pull-6" style="background-color: rgba(255,255,255,.9);">
             <div class="view-news-events-exhibitions"></div>
+        </div>-->
+        <div class="col-md-6">
+            <h2>News</h2>
+            <div class="animate-repeat" news-card="item" ng-repeat="item in news">
+            </div>
+            <h2>Exhibits</h2>
+            <div class="animate-repeat" news-card="item" ng-repeat="item in exhibitions">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="hours-list" style="padding: 15px; padding-top:0; background-color: rgba(255,255,255,.9);"></div>
+            <h2>Events</h2>
+            <div class="animate-repeat" news-card="item" news-type="event" ng-repeat="item in events">
+            </div>
         </div>
     </div>
 </div>

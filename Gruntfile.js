@@ -28,6 +28,8 @@ module.exports = function(grunt) {
         '<%= bower.directory %>/ualib_staffdir/dist/staffdir.js',
         '<%= bower.directory %>/ualib-softwareList/dist/ualib.softwareList-templates.js',
         '<%= bower.directory %>/ualib-softwareList/dist/ualib.softwareList.js',
+        '<%= bower.directory %>/ualib-news/dist/ualib.news-templates.js',
+        '<%= bower.directory %>/ualib-news/dist/ualib.news.js',
         'assets/js/ualib-templates.js',
         'assets/js/plugins/*.js',
         'assets/js/_*.js'
@@ -40,6 +42,7 @@ module.exports = function(grunt) {
         '<%= bower.directory %>/ualib-hours/dist/*.css',
         '<%= bower.directory %>/ualib_staffdir/dist/staffdir.css',
         '<%= bower.directory %>/ualib-softwareList/dist/ualib.softwareList.css',
+        '<%= bower.directory %>/ualib-news/dist/ualib.news.css',
         '<%= bower.directory %>/manage/dist/manage.css',
         '<%= bower.directory %>/databases/dist/databases.css'
     ];
