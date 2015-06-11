@@ -122,19 +122,6 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                 <button type="submit" class="btn btn-default">Login to Refworks</button>
                                             </form>
                                         </tab>
-                                        <tab heading="Endnote">
-                                            <form>
-                                                <div class="form-group">
-                                                    <label for="exampleInputEmail1">Email</label>
-                                                    <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="exampleInputPassword1">Password</label>
-                                                    <input type="text" class="form-control" id="exampleInputPassword1" placeholder="Password">
-                                                </div>
-                                                <button type="submit" class="btn btn-default">Login to Endnote</button>
-                                            </form>
-                                        </tab>
                                         <tab heading="myBama">
                                             <form name="cplogin" action="https://mybama.ua.edu/cp/home/login" method="post">
                                                 <div class="form-group">
@@ -203,14 +190,14 @@ if (defined('GROUP_ANY_WEBAPP'))
                                             <a class="service-card" href="http://lib.ua.edu/scout/">
                                                 <span class="fa fa-binoculars"></span>
                                                 <h4>Scout</h4>
-                                                <p>Search for books, articles, and more</p>
+                                                <p>Use a discovery tool that searches for books, articles, and more   </p>
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="http://library.ua.edu/vwebv/searchBasic">
                                                 <span class="fa fa-search"></span>
                                                 <h4>Libraries' Catalog</h4>
-                                                <p>Search the classic catalog</p>
+                                                <p>Search the libraries' classic catalog</p>
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
@@ -241,7 +228,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                             <a class="service-card" href="<?php echo site_url(); ?>/research-help/e-resources/">
                                                 <span class="fa fa-bolt"></span>
                                                 <h4>Electronic Resources</h4>
-                                                <p>Explore the libraries' E-Book and E-Journal collections </p>
+                                                <p>Explore the libraries' e-book and e-journal collections </p>
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
@@ -265,7 +252,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                 <span class="fa fa-music"></span>
                                                 <h4>Music Library</h4>
                                                 <ul>
-                                                    <li class="menu-video-database-search"><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/campus-libraries/music-library/music-library-search/">Video Database Search</a></li>
+                                                    <li class="menu-video-database-search"><a href="<?php echo site_url(); ?>/libraries-and-collections/music-library/video-database-search/">Video Database Search</a></li>
                                                     <li class="menu-research-guides"><a href="https://guides.lib.ua.edu/visualperformingarts">Research Guides</a></li>
                                                     <li class="menu-home"><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/music-library/">Music Library Home</a></li>
                                                 </ul>
@@ -285,7 +272,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                         </div>
 
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="http://refworks.ua.edu">
+                                            <a class="service-card" href="<?php echo site_url(); ?>/research-help/refworks/">
                                                 <span class="fa fa-folder"></span>
                                                 <h4>RefWorks</h4>
                                                 <p>Save citations, organize your research, and create bibliographies</p>
@@ -324,13 +311,13 @@ if (defined('GROUP_ANY_WEBAPP'))
                                             <a class="service-card" href="<?php echo site_url(); ?>/services/circulation-services/">
                                                 <span class="fa fa-book"></span>
                                                 <h4>Borrow, Renew, and Course Reserves</h4>
-                                                <p>Checkout library resources and locate instructor provided materials for your courses</p>
+                                                <p>Checkout library materials and find instructor provided resources for your classs</p>
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-9">
                                             <div class="row">
                                                 <div class="col-sm-12 col-md-4">
-                                                    <a class="service-card" href="<?php echo site_url(); ?>/services/find-a-place-to-study/">
+                                                    <a class="service-card" href="<?php echo site_url(); ?>/services/interlibrary-borrowing/">
                                                         <span class="fa fa-exchange"></span>
                                                         <h4>Interlibrary Borrowing</h4>
                                                         <p>Borrow materials owned by other libraries</p>
@@ -347,7 +334,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                     <a class="service-card" href="<?php echo site_url(); ?>/services/digital-humanities-center/">
                                                         <span class="fa fa-tachometer"></span>
                                                         <h4>Digital Humanities Center</h4>
-                                                        <p>Explore and create innovative research and teaching projects</p>
+                                                        <p>Explore the digital humanities with innovative research and teaching projects </p>
                                                     </a>
                                                 </div>
                                             </div>
@@ -362,15 +349,15 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                 <div class="col-sm-12 col-md-4">
                                                     <a class="service-card" href="<?php echo site_url(); ?>/services/practice-presentation-rooms/">
                                                         <span class="fa fa-area-chart"></span>
-                                                        <h4>Practice Presentation Rooms</h4>
+                                                        <h4>Presentation Practice Rooms</h4>
                                                         <p>Facilities and equipment to help you prepare for presentations </p>
                                                     </a>
                                                 </div>
                                                 <div class="col-sm-12 col-md-4">
                                                     <a class="service-card" href="<?php echo site_url(); ?>/services/library-instruction/">
                                                         <span class="fa fa-calendar"></span>
-                                                        <h4>Classes, Workshops, Tours</h4>
-                                                        <p>Register for instruction sessions and tours of our libraries</p>
+                                                        <h4>Classes and Workshops</h4>
+                                                        <p>Register for instruction sessions and outreach opportunities</p>
                                                     </a>
                                                 </div>
                                             </div>
@@ -386,7 +373,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                     <a class="service-card" href="<?php echo site_url(); ?>/services/information-for-faculty/">
                                                         <span class="fa fa-graduation-cap"></span>
                                                         <h4>Information for Faculty</h4>
-                                                        <p>Purchases, teaching and research support</p>
+                                                        <p>Purchases, teaching, and research support</p>
                                                     </a>
                                                 </div>
                                                 <div class="col-sm-12 col-md-4">
@@ -420,7 +407,14 @@ if (defined('GROUP_ANY_WEBAPP'))
                                             <a class="service-card" href="<?php echo site_url(); ?>/#/staffdir">
                                                 <span class="fa fa-users"></span>
                                                 <h4>Directory</h4>
-                                                <p>UA Library Faculty and Staff</p>
+                                                <p>UA Libraries Faculty and Staff</p>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="<?php echo site_url(); ?>#/news-exhibits/">
+                                                <span class="fa fa-newspaper-o"></span>
+                                                <h4>News and Events</h4>
+                                                <p>The latest news and upcoming events at the libraries</p>
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
@@ -430,6 +424,8 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                 <p>Information about each of our branch libraries</p>
                                             </a>
                                         </div>
+                                    </div>
+                                    <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="<?php echo site_url(); ?>/about-ua-libraries/library-annex/">
                                                 <span class="fa fa-building"></span>
@@ -437,8 +433,6 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                 <p>Supplemental library collections located off campus</p>
                                             </a>
                                         </div>
-                                    </div>
-                                    <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="<?php echo site_url(); ?>/about-ua-libraries/libraries-policies/">
                                                 <span class="fa fa-sitemap"></span>
@@ -479,10 +473,10 @@ if (defined('GROUP_ANY_WEBAPP'))
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="<?php echo site_url(); ?>/research-help/subject-specialists/">
+                                            <a class="service-card" href="<?php echo site_url(); ?>/#/">
                                                 <span class="fa fa-comments"></span>
                                                 <h4>Subject Specialists</h4>
-                                                <p>Need research help? Reach out to your subject specialist</p>
+                                                <p>Need research help? Reach out to your subject librarian</p>
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
@@ -511,7 +505,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="<?php echo site_url(); ?>/library-help/kacecontact-form/">
                                                 <span class="fa fa-envelope"></span>
-                                                <h4>Run into Issues?</h4>
+                                                <h4>Run into Website Issues?</h4>
                                                 <p>Please contact Web Services for assistance </p>
                                             </a>
                                         </div>

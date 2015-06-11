@@ -6,13 +6,12 @@
         <div class="col-sm-3">
           <h4>Quick Links</h4>
           <ul class="footer-list">
-            <li><a href="<?php echo site_url(); ?>/about-ua-libraries/contact-us/">University Libraries’ Maps and Contact Information</a></li>
-            <li><a href="<?php echo site_url(); ?>/about-ua-libraries/libraries-policies/access-to-and-usage-of-electronic-resources/">Access to and Usage of Electronic Resources</a></li>
+            <li><a href="<?php echo site_url(); ?>/#/hours">Maps and Contact Information</a></li>
+            <li><a href="<?php echo site_url(); ?>/about-ua-libraries/libraries-policies/access-to-and-usage-of-electronic-resources/">Access and Use of Electronic Resources</a></li>
             <li><a href="<?php echo site_url(); ?>/services/disability-services/physical-access/">Physical Access</a></li>
             <li><a href="<?php echo site_url(); ?>/about-ua-libraries/libraries-policies/">Libraries' Policies</a></li>
-            <li><a href="<?php echo site_url(); ?>/about-ua-libraries/privacy-and-cookies/">Privacy and Cookies</a></li>
-            <li><a href="https://wwwdev2.lib.ua.edu/site-map">Site Map</a></li>
-            <li><a href="<?php echo site_url(); ?>/about-ua-libraries/copyright-statement/">Copyright Statement</a></li>
+            <li><a href="<?php echo site_url(); ?>/about-ua-libraries/mission-statement/">Mission Statement</a></li>
+            <li><a href="<?php echo site_url(); ?>/site-map">Site Map</a></li>
             <li><a href="<?php echo site_url(); ?>/about-ua-libraries/support-ua-libraries/">Support UA Libraries</a></li>
           </ul>
         </div>
@@ -38,7 +37,7 @@
                   <li role="presentation"><a role="menuitem" tabindex="-1" href="http://cis.ua.edu/undergraduates/resources/readingroom/">William E. Winter Reading Room</a></li>
               </ul>
               <button class="btn btn-default btn-xs"  type="button" ng-click="isCollapsed = !isCollapsed">
-                  {{!isCollapsed ? 'More' : 'Less'}} Libraries...
+                  {{!isCollapsed ? 'Other' : 'Less'}} Libraries...
               </button>
 
         </div>
@@ -95,6 +94,12 @@
   <div class="sub-footer">
     <div class="container">
       University Libraries • Box 870266 • Tuscaloosa, AL 35487-0266 • (205) 348-6047
+        <div> <a href="http://www.ua.edu/disclaimer.html">Disclaimer</a>
+            •
+            <a href="http://www.ua.edu/privacy.html">Privacy</a>
+            •
+            <a href=" http://www.ua.edu/copyright.html">Copyright</a>
+        </div>
     </div>
   </div>
 </footer>
