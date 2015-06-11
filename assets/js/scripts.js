@@ -46054,7 +46054,7 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
     'ualib.news.templates'
 ]);;angular.module('ualib.news')
 
-    .factory('newsFactory', ['$resource', '$sce', '$filter', function($resource, $sce, $filter){
+    .factory('ualibNewsFactory', ['$resource', '$sce', '$filter', function($resource, $sce, $filter){
 
         function preprocessNews(news){
             news = $filter('unique')(news, 'title');
@@ -46113,8 +46113,8 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
             .when('/news-exhibits/:link', {
                 reloadOnSearch: false,
                 resolve: {
-                    newsItem: function(newsFactory){
-                        return newsFactory.get({news: 'all'}, function(data){
+                    newsItem: function(ualibNewsFactory){
+                        return ualibNewsFactory.get({news: 'all'}, function(data){
                             return data;
                         }, function(data, status, headers, config) {
                             console.log('ERROR: news item');
@@ -46164,8 +46164,8 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
             .when('/news-exhibits/', {
                 reloadOnSearch: false,
                 resolve: {
-                    newsList: function(newsFactory){
-                        return newsFactory.get({news: 'all'}, function(data){
+                    newsList: function(ualibNewsFactory){
+                        return ualibNewsFactory.get({news: 'all'}, function(data){
                             return data;
                         }, function(data, status, headers, config) {
                             console.log('ERROR: news');
@@ -46192,18 +46192,20 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
         };
 
         newsList.$promise.then(function(data){
-            console.log(data);
             $scope.news = data.news;
             paramsToScope();
             filterWatcher = $scope.$watch('newsFilters', function(newVal, oldVal){
-                processFilters();
+                if (newVal !== oldVal){
+                    processFilters();
+                }
             }, true);
         });
-
 
         $scope.$on('$destroy', function(){
             filterWatcher();
         });
+
+
 
         function paramsToScope(){
             var params = $location.search();
@@ -46228,8 +46230,8 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
         }
     }]);;angular.module('ualib.news')
 
-    .controller('NewsTodayCtrl', ['$scope', '$filter', 'newsFactory', function($scope, $filter, newsFactory){
-        newsFactory.today()
+    .controller('NewsTodayCtrl', ['$scope', '$filter', 'ualibNewsFactory', function($scope, $filter, ualibNewsFactory){
+        ualibNewsFactory.today()
             .$promise
             .then(function(data){
                 $scope.news = data.news;
