@@ -9483,22 +9483,14 @@ footer > .sub-footer {
   margin-bottom: 0;
 }
 .resource-link-container {
-  border-bottom: 1px solid #eee;
+  text-align: right;
+  margin: 15px 0;
 }
 .recommend {
   min-height: 30px;
 }
 .recommend h2 {
-  margin: 0 30px 0 0;
   font-size: 1.2em;
-  float: left;
-}
-.recommend .bento-box-item {
-  display: inline-block;
-  margin-right: 15px;
-}
-.recommended > h2 {
-  font-size: 1.75em;
 }
 /*# sourceMappingURL=/wp-content/themes/roots/assets/css/main.css.map */
 .onesearch-container,
