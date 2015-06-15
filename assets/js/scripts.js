@@ -37730,7 +37730,7 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "    <div class=\"row\">\n" +
     "        <div class=\"col-md-12\">\n" +
     "            <div class=\"bento-box well\" bento-box=\"recommend\" hide-if-empty=\"true\" omit-from-menu=\"true\">\n" +
-    "                <h2>Other results</h2>\n" +
+    "                <h2>Recommended Links</h2>\n" +
     "\n" +
     "            </div>\n" +
     "        </div>\n" +
@@ -37762,7 +37762,7 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
     "        <div class=\"row\">\n" +
     "            <div class=\"col-sm-4\" ng-show=\"items.recommend.length\">\n" +
     "                <div class=\"suggest-col\">\n" +
-    "                    <h4>Web site pages</h4>\n" +
+    "                    <h4>Recommended</h4>\n" +
     "                    <div ng-repeat=\"recommendation in items.recommend | limitTo:10\">\n" +
     "                        <a href=\"{{recommendation.link}}\" ng-mousedown=\"go(recommendation.link)\">\n" +
     "                            {{recommendation.description}}\n" +
@@ -38245,6 +38245,7 @@ angular.module('oneSearch.bento', [])
                 //Watch the boxes "engines" Array
                 var boxWatcher = scope.$watchCollection(
                     function(){
+
                         return Bento.boxes[box]['engines'];
                     },
                     function(newVal, oldVal) {
@@ -38691,8 +38692,8 @@ angular.module('common.engines', [
     'engines.databases',
     'engines.scout',
     'engines.googleCS',
-    //'engines.faq',
-    //'engines.libguides',
+    'engines.faq',
+    'engines.libguides',
     'engines.ejournals',
     'engines.recommend'
 ])
@@ -38744,6 +38745,7 @@ angular.module('engines.googleCS', [])
             priority: 2,
             resultsPath: 'GoogleCS.items',
             totalsPath: 'GoogleCS.searchInformation.totalResults',
+            filterQuery: '-side:guides.lib.ua.edu -site:ask.lib.ua.edu',
             templateUrl: 'common/engines/google-cs/google-cs.tpl.html'
         })
     }])
