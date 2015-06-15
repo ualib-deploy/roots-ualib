@@ -1,6 +1,6 @@
 {
   "name": "roots-ualib",
-  "version": "1.21.3",
+  "version": "2.0.0",
   "homepage": "https://github.com/ualibweb/roots-ualib",
   "license": "ECL-2.0",
   "private": true,
@@ -31,7 +31,8 @@
     "musicSearch": "https://github.com/ualibweb/musicSearch_ui.git",
     "ualib_staffdir": "https://github.com/ualibweb/staffdir_ui.git",
     "ualib-softwareList": "https://github.com/ualibweb/softwareList_ui.git",
-    "ualib-news": "https://github.com/ualibweb/news_ui.git"
+    "ualib-news": "https://github.com/ualibweb/news_ui.git",
+    "angulartics": "~0.18.0"
   },
   "resolutions": {
     "angular": ">=1 <1.3.0",
