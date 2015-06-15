@@ -4664,11 +4664,11 @@ angular.module('ui.utils',  [
 ;/**!
  * AngularJS file upload/drop directive and service with progress and abort
  * @author  Danial  <danial.farid@gmail.com>
- * @version 5.0.6
+ * @version 5.0.4
  */
 var ngFileUpload = angular.module('ngFileUpload', []);
 
-ngFileUpload.version = '5.0.6';
+ngFileUpload.version = '5.0.4';
 ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, $timeout) {
   function patchXHR(fnName, newFn) {
     window.XMLHttpRequest.prototype[fnName] = newFn(window.XMLHttpRequest.prototype[fnName]);
@@ -4694,7 +4694,8 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
     config.method = config.method || 'POST';
     config.headers = config.headers || {};
 
-    var deferred = $q.defer();
+    var deferred =
+        $q.defer();
     var promise = deferred.promise;
 
     config.headers.__setXHR_ = function () {
@@ -4854,7 +4855,7 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
 
   this.http = function (config) {
     config.transformRequest = config.transformRequest || function (data) {
-        if ((window.ArrayBuffer && data instanceof window.ArrayBuffer) || data instanceof Blob) {
+        if (window.ArrayBuffer && data instanceof window.ArrayBuffer) {
           return data;
         }
         return $http.defaults.transformRequest[0](arguments);
@@ -4863,7 +4864,8 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
   };
 }
 
-]);
+])
+;
 
 (function () {
     ngFileUpload.directive('ngfSelect', ['$parse', '$timeout', '$compile',
@@ -5005,7 +5007,7 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
                 if (evt && resetOnClick && $parse(attr.ngfResetModelOnClick)(scope) !== false) resetModel(evt);
 
                 // fix for android native browser < 4.4
-                if (shouldClickLater(navigator.userAgent)) {
+                if (isAndroidBelow44(navigator.userAgent)) {
                     setTimeout(function () {
                         clickAndAssign(evt);
                     }, 0);
@@ -5026,15 +5028,13 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
         }
     }
 
-    function shouldClickLater(ua) {
-        // android below 4.4
+    function isAndroidBelow44(ua) {
         var m = ua.match(/Android[^\d]*(\d+)\.(\d+)/);
         if (m && m.length > 2) {
             return parseInt(m[1]) < 4 || (parseInt(m[1]) === 4 && parseInt(m[2]) < 4);
         }
 
-        // safari on windows
-        return /.*Windows.*Safari.*/.test(ua);
+        return false;
     }
 
     ngFileUpload.validate = function (scope, $parse, attr, file, evt) {
@@ -5402,7 +5402,7 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
  * AngularJS file upload/drop directive and service with progress and abort
  * FileAPI Flash shim for old browsers not supporting FormData
  * @author  Danial  <danial.farid@gmail.com>
- * @version 5.0.6
+ * @version 5.0.4
  */
 
 (function () {
@@ -18671,7 +18671,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     root._ = _;
   }
 }.call(this));
-;/*! angular-google-maps 2.1.4 2015-06-14
+;/*! angular-google-maps 2.1.3 2015-06-10
  *  AngularJS directives for Google Maps
  *  git: https://github.com/angular-ui/angular-google-maps.git
  */
@@ -21731,7 +21731,7 @@ Original idea from: http://stackoverflow.com/questions/22758950/google-map-drawi
           this.updateModel = bind(this.updateModel, this);
           this.handleModelChanges = bind(this.handleModelChanges, this);
           this.destroy = bind(this.destroy, this);
-          this.clonedModel = _.clone(this.model, true);
+          this.clonedModel = _.extend({}, this.model);
           this.deferred = uiGmapPromise.defer();
           _.each(this.keys, (function(_this) {
             return function(v, k) {
@@ -21810,7 +21810,7 @@ Original idea from: http://stackoverflow.com/questions/22758950/google-map-drawi
         };
 
         MarkerChildModel.prototype.updateModel = function(model) {
-          this.clonedModel = _.clone(model, true);
+          this.clonedModel = _.extend({}, model);
           return this.setMyScope('all', model, this.model);
         };
 
@@ -21990,8 +21990,6 @@ Original idea from: http://stackoverflow.com/questions/22758950/google-map-drawi
                   _this.gObject = new MarkerWithLabel(_this.setLabelOptions(_this.opts));
                 } else if (_this.opts.content) {
                   _this.gObject = new RichMarker(_this.opts);
-                  _this.gObject.getIcon = _this.gObject.getContent;
-                  _this.gObject.setIcon = _this.gObject.setContent;
                 } else {
                   _this.gObject = new google.maps.Marker(_this.opts);
                 }
@@ -22442,7 +22440,7 @@ Original idea from: http://stackoverflow.com/questions/22758950/google-map-drawi
         };
 
         WindowChildModel.prototype.updateModel = function(model) {
-          this.clonedModel = _.clone(model, true);
+          this.clonedModel = _.extend({}, model);
           return _.extend(this.model, this.clonedModel);
         };
 
@@ -37650,20 +37648,11 @@ angular.module('ualib.ui')
                 node.tagName.toLowerCase() === 'data-tab-heading'
                 );
         }
-    });;angular.module('oneSearch.templates', ['bento/bento.tpl.html', 'common/directives/suggest/suggest.tpl.html', 'common/engines/acumen/acumen.tpl.html', 'common/engines/catalog/catalog.tpl.html', 'common/engines/databases/databases.tpl.html', 'common/engines/ejournals/ejournals.tpl.html', 'common/engines/google-cs/google-cs.tpl.html', 'common/engines/recommend/recommend.tpl.html', 'common/engines/scout/scout.tpl.html']);
+    });;angular.module('oneSearch.templates', ['bento/bento.tpl.html', 'common/directives/suggest/suggest.tpl.html', 'common/engines/acumen/acumen.tpl.html', 'common/engines/catalog/catalog.tpl.html', 'common/engines/databases/databases.tpl.html', 'common/engines/ejournals/ejournals.tpl.html', 'common/engines/google-cs/google-cs.tpl.html', 'common/engines/recommend/recommend.tpl.html', 'common/engines/scout/scout.tpl.html', 'videos/videos.tpl.html']);
 
 angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("bento/bento.tpl.html",
     "<div class=\"bento-box-container\">\n" +
-    "    <div class=\"bento-box-menu-container\">\n" +
-    "        <div class=\"bento-box-menu\" ui-scrollfix=\"+0\">\n" +
-    "            <ul class=\"nav nav-justified\">\n" +
-    "                <li ng-repeat=\"item in boxMenu\">\n" +
-    "                    <a href=\"\" du-smooth-scroll=\"{{item.box}}\" ng-click=\"selectBox(item.box)\">{{item.title}}</a>\n" +
-    "                </li>\n" +
-    "            </ul>\n" +
-    "        </div>\n" +
-    "    </div>\n" +
     "    <div class=\"row\">\n" +
     "        <div class=\"col-md-4\">\n" +
     "            <div class=\"bento-box\" bento-box=\"articles\">\n" +
@@ -37691,14 +37680,18 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "        </div>\n" +
     "        <div class=\"col-md-6\">\n" +
     "            <div class=\"bento-box\" bento-box=\"acumen\">\n" +
-    "                <h2 id=\"acumen\">Acumen</h2>\n" +
+    "                <h2>Acumen</h2>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "    <div class=\"row\">\n" +
     "        <div class=\"col-md-4\">\n" +
     "            <div class=\"bento-box\" bento-box=\"databases\">\n" +
-    "                <h2>Databases </h2>\n" +
+    "                <h2>Databases\n" +
+    "                    <small>\n" +
+    "                        [<a href=\"{{domain}}sample-page/databases/#/databases/ts/d/{{s}}/fs/ft/\">more</a>]\n" +
+    "                    </small>\n" +
+    "                </h2>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-4\">\n" +
@@ -37715,21 +37708,13 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "    <div class=\"row\">\n" +
     "        <div class=\"col-md-6\">\n" +
     "            <div class=\"bento-box\" bento-box=\"googleCS\">\n" +
-    "                <h2 id=\"site-search\">Libraries' Website</h2>\n" +
+    "                <h2>Libraries' Website</h2>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "\n" +
     "        <div class=\"col-md-6\">\n" +
     "            <div class=\"bento-box\" bento-box=\"faq\">\n" +
     "                <h2>FAQ</h2>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "    </div>\n" +
-    "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-12\">\n" +
-    "            <div class=\"bento-box well\" bento-box=\"recommend\" hide-if-empty=\"true\" omit-from-menu=\"true\">\n" +
-    "                <h2>Recommended Links</h2>\n" +
-    "\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
@@ -37745,7 +37730,7 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
     "        <button type=\"submit\" class=\"btn btn-onesearch btn-primary\"><span class=\"fa fa-search\"></span></button>\n" +
     "    </div>\n" +
     "</div>\n" +
-    "<div class=\"suggest\" ng-show=\"showSuggestions && selected\">\n" +
+    "<div class=\"suggest\" ng-hide=\"model.length < 3 || selected\">\n" +
     "    <div class=\"row\" ng-hide=\"items.suggest.length == 0\">\n" +
     "        <ul class=\"nav nav-pills nav-stacked\">\n" +
     "            <li role=\"presentation\"\n" +
@@ -37760,7 +37745,7 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
     "        <div class=\"row\">\n" +
     "            <div class=\"col-sm-4\" ng-show=\"items.recommend.length\">\n" +
     "                <div class=\"suggest-col\">\n" +
-    "                    <h4>Recommended</h4>\n" +
+    "                    <h4>Web site pages</h4>\n" +
     "                    <div ng-repeat=\"recommendation in items.recommend | limitTo:10\">\n" +
     "                        <a href=\"{{recommendation.link}}\" ng-mousedown=\"go(recommendation.link)\">\n" +
     "                            {{recommendation.description}}\n" +
@@ -37784,7 +37769,7 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
     "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
-    "            <div class=\"col-sm-4\" ng-show=\"items.faq.length\">\n" +
+    "            <div class=\"col-sm-4\" ng-show=\"items.faq.searchInformation.totalResults > 0\">\n" +
     "                <div class=\"suggest-col\">\n" +
     "                    <h4>FAQ <a href=\"http://ask.lib.ua.edu/\" class=\"small\" ng-mousedown=\"go('http://ask.lib.ua.edu/')\">more</a></h4>\n" +
     "                    <div ng-repeat=\"faq in items.faq.items | limitTo:5\">\n" +
@@ -37870,17 +37855,17 @@ angular.module("common/engines/ejournals/ejournals.tpl.html", []).run(["$templat
     "        <div class=\"details-context\">\n" +
     "            <span ng-if=\"item.date\" ng-bind-html=\"item.date\"></span>\n" +
     "            <span ng-if=\"item.links[0]\">\n" +
-    "                <span title=\"{{item.links[0].name}}\">{{item.links[0].name | ltrim | truncate: 35: '...'}}</span>\n" +
+    "                Source: <span title=\"{{item.links[0].name}}\">{{item.links[0].name | ltrim | truncate: 35: '...'}}</span>\n" +
     "            </span>\n" +
     "        </div>\n" +
     "\n" +
     "        <div class=\"details-container\" ng-if=\"item.authors\">\n" +
-    "            <span class=\"text-muted\">Authors </span>\n" +
+    "            <span class=\"text-muted\">Author(s)</span>\n" +
     "            <span class=\"details\" ng-bind-html=\"item.authors\"></span>\n" +
     "        </div>\n" +
     "\n" +
     "        <div class=\"details-container\" ng-if=\"item.links[1]\">\n" +
-    "            <span class=\"text-muted\">Other Sources </span>\n" +
+    "            <span class=\"text-muted\">Other Sources: </span>\n" +
     "            <span class=\"details\" ng-repeat=\"link in item.links | after:1 | limitTo : (sourceLimit ? 10 : 2)\">\n" +
     "                <a ng-href=\"{{link.href}}\"\n" +
     "                   title=\"{{link.name}}\"\n" +
@@ -37888,7 +37873,7 @@ angular.module("common/engines/ejournals/ejournals.tpl.html", []).run(["$templat
     "                   ng-bind-html=\"link.name | ltrim | truncate: 35: '...': true\"></a>\n" +
     "            </span>\n" +
     "            <div ng-show=\"item.links[3]\">\n" +
-    "                <button type=\"button\" class=\"btn btn-default btn-xs\" ng-click=\"sourceLimit = !sourceLimit\">{{sourceLimit? 'less' : 'more'}} sources</button>\n" +
+    "                <button type=\"button\" class=\"btn btn-default btn-collapser\" ng-click=\"sourceLimit = !sourceLimit\">{{sourceLimit? 'more' : 'less'}}</button>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
@@ -37925,8 +37910,11 @@ angular.module("common/engines/google-cs/google-cs.tpl.html", []).run(["$templat
 
 angular.module("common/engines/recommend/recommend.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("common/engines/recommend/recommend.tpl.html",
-    "<a ng-href=\"{{item.link}}\" title=\"{{item.descr}}\">{{item.descr}}</a>\n" +
-    "");
+    "<div class=\"media\">\n" +
+    "    <div class=\"media-body\">\n" +
+    "        <h4 class=\"media-heading\"><a ng-href=\"{{item.link}}\" title=\"{{item.descr}}\">{{item.descr}}</a></h4>\n" +
+    "    </div>\n" +
+    "</div>");
 }]);
 
 angular.module("common/engines/scout/scout.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -37943,28 +37931,69 @@ angular.module("common/engines/scout/scout.tpl.html", []).run(["$templateCache",
     "            <span ng-if=\"item.mediaType\">{{item.mediaType}} </span>\n" +
     "            <span ng-if=\"item.FullText.Text.Availability\">Full Text Online</span>\n" +
     "        </div>\n" +
-    "        <div collapse=\"isCollapsed\" ng-show=\"(item.RecordInfo.BibRecord.BibRelationships.HasContributorRelationships || item.source || item.RecordInfo.BibRecord.BibEntity.Subjects)\">\n" +
+    "        <div collapse=\"isCollapsed\">\n" +
     "            <div class=\"details-container\" ng-if=\"item.RecordInfo.BibRecord.BibRelationships.HasContributorRelationships\">\n" +
-    "                <span class=\"text-muted\">Authors </span>\n" +
+    "                <span class=\"text-muted\">Author(s): </span>\n" +
     "            <span class=\"details\"\n" +
     "                  ng-repeat=\"author in item.RecordInfo.BibRecord.BibRelationships.HasContributorRelationships | unique: 'PersonEntity.Name.NameFull'\"\n" +
     "                  ng-bind-html=\"author.PersonEntity.Name.NameFull | lowercase | ucfirst\"></span>\n" +
     "            </div>\n" +
     "\n" +
     "            <div class=\"details-container\" ng-if=\"item.source\">\n" +
-    "                <span class=\"text-muted\">Sources </span>\n" +
+    "                <span class=\"text-muted\">Source(s): </span>\n" +
     "                <span class=\"details\" ng-bind-html=\"item.source\"></span>\n" +
     "            </div>\n" +
     "\n" +
     "            <div class=\"details-container\" ng-if=\"item.RecordInfo.BibRecord.BibEntity.Subjects\">\n" +
-    "                <span class=\"text-muted\">Subejcts </span>\n" +
+    "                <span class=\"text-muted\">Subejct(s): </span>\n" +
     "            <span class=\"details\"\n" +
     "                  ng-repeat=\"subject in item.RecordInfo.BibRecord.BibEntity.Subjects\"\n" +
     "                  ng-bind-html=\"subject.SubjectFull\"></span>\n" +
     "            </div>\n" +
     "        </div>\n" +
-    "        <div ng-show=\"item.RecordInfo.BibRecord.BibRelationships.HasContributorRelationships || item.source || item.RecordInfo.BibRecord.BibEntity.Subjects\">\n" +
+    "        <div>\n" +
     "            <button type=\"button\" class=\"btn btn-default btn-xs\" ng-click=\"isCollapsed = !isCollapsed\">{{!isCollapsed ? 'less' : 'more'}} detail</button>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>");
+}]);
+
+angular.module("videos/videos.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("videos/videos.tpl.html",
+    "<div class=\"video-container\">\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-sm-9 video-results\">\n" +
+    "            <div class=\"media\" ng-repeat=\"item in videos.results | filter:facets\">\n" +
+    "                <div class=\"media-body\">\n" +
+    "                    <h4 class=\"media-heading\">\n" +
+    "                        {{item.title}}\n" +
+    "                    </h4>\n" +
+    "                    <div class=\"details-context\">\n" +
+    "                        <span ng-if=\"item.series_title\">{{item.series_title}}</span>\n" +
+    "                        <span ng-if=\"item.call_number\">{{item.call_number}} </span>\n" +
+    "                        <span ng-if=\"item.genre\">{{item.genre}} </span>\n" +
+    "                        <span ng-if=\"item.language\">{{item.language}} </span>\n" +
+    "                    </div>\n" +
+    "                    <p>{{item.notes}}</p>\n" +
+    "                    <span class=\"text-muted\">{{item.keywords}}</span>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-sm-3 facets-container video-facets\">\n" +
+    "            <form>\n" +
+    "                <div class=\"form-group\" ng-repeat=\"(label, type) in videos.facets\">\n" +
+    "                    <h4>{{label}}</h4>\n" +
+    "                    <div class=\"facet-group-container\">\n" +
+    "                        <div class=\"facet-group\">\n" +
+    "                            <div class=\"checkbox\" ng-repeat=\"facet in type\">\n" +
+    "                                <label>\n" +
+    "                                    <input type=\"checkbox\"> {{facet.label}}\n" +
+    "                                </label>\n" +
+    "                            </div>\n" +
+    "                        </div>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "            </form>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>");
@@ -37984,22 +38013,18 @@ angular.module('oneSearch', [
     'ngSanitize',
     'ui.bootstrap',
     'angular.filter',
-    'duScroll',
-    'ualib.ui',
     'oneSearch.common',
     'oneSearch.templates',
-    'oneSearch.bento'
+    'oneSearch.bento',
+    'oneSearch.videos'
 ])
     // The URL to the main website
     .constant('UALIB_DOMAIN', '//wwwdev2.lib.ua.edu/')
 
     // Default search parameters
     .value('SearchParams', {
-        limit: 100
+        pp: 100
     })
-
-    .value('duScrollOffset', 100)
-    .value('duScrollGreedy', true);
 angular.module('oneSearch.bento', [])
 
     .config(['$routeProvider', function($routeProvider) {
@@ -38009,10 +38034,6 @@ angular.module('oneSearch.bento', [])
         $routeProvider
             .when('/bento/:s', {
                 templateUrl: 'bento/bento.tpl.html',
-                controller: 'BentoCtrl'
-            })
-            .when('/bento-test/:s', {
-                templateUrl: 'bento/bento-test.tpl.html',
                 controller: 'BentoCtrl'
             })
     }])
@@ -38121,7 +38142,6 @@ angular.module('oneSearch.bento', [])
             angular.forEach(self.boxes, function(box, type){
                 initResultLimit(type);
                 self.boxes[type].results = {};
-                self.boxes[type].resourceLinks = {};
 
             });
 
@@ -38134,7 +38154,6 @@ angular.module('oneSearch.bento', [])
                         // The results getter is defined by the JSON path defined by the
                         // "resultsPath" param in an engine's config
                         var res = engine.getResults(data);
-                        var link = engine.getResourceLink(data);
 
                         // Double check that the data is defined, in case the search API returned a '200' status with empty results.
                         if (isEmpty(res)){
@@ -38155,9 +38174,6 @@ angular.module('oneSearch.bento', [])
                                     //
                                     // Also, limit the number of results per group by 3
                                     self.boxes[type].results[name] = grouped[type];
-
-                                    // set resource "more" link
-                                    self.boxes[type].resourceLinks[name] = link;
                                 }
                                 // update loading progress, setting engine as loaded for current box
                                 loadProgress(type, name);
@@ -38212,6 +38228,17 @@ angular.module('oneSearch.bento', [])
         $scope.s = $routeParams.s;
     }])
 
+    .directive('bentoBoxMenu', ['Bento', '$animate', function(Bento, $animate){
+        return {
+            restrict: 'AC',
+            link: function(scope, elm){
+
+                scope.boxMenu = Bento.boxMenu;
+
+            }
+        }
+    }])
+
     .directive('bentoBox', ['$rootScope', '$controller', '$compile', '$animate', 'Bento', function($rootScope, $controller, $compile, $animate, Bento){
         return {
             restrict: 'A', //The directive always requires and attribute, so disallow class use to avoid conflict
@@ -38220,22 +38247,15 @@ angular.module('oneSearch.bento', [])
                 //Get the box name from the elements bentoBox attribute
                 var box = attrs.bentoBox;
                 elm.addClass(box);
-                elm.parent().attr('id', box + '-parent');
-
                 scope.bento= Bento;
-
                 //Preload the spinner element
                 var spinner = angular.element('<div id="loading-bar-spinner"><div class="spinner-icon"></div></div>');
 
                 //Preload the location of the boxe's title element (needs to be more dynamic in the future)
                 var titleElm = elm.find('h2');
-                titleElm.attr('id', box);
-
 
                 // Box menu/index scope variables
-                if (!attrs.omitFromMenu){
-                    Bento.boxMenu.push({box: box, title: titleElm.text(), loaded: false, noResults: false});
-                }
+                Bento.boxMenu.push({box: box, title: titleElm.text(), loaded: false});
 
                 //Enter the spinner animation, appending it to the title element
                 $animate.enter(spinner, titleElm, angular.element(titleElm[0].lastChild));
@@ -38243,7 +38263,6 @@ angular.module('oneSearch.bento', [])
                 //Watch the boxes "engines" Array
                 var boxWatcher = scope.$watchCollection(
                     function(){
-
                         return Bento.boxes[box]['engines'];
                     },
                     function(newVal, oldVal) {
@@ -38269,8 +38288,6 @@ angular.module('oneSearch.bento', [])
 
                             // Place engine results for the current box under an "items" object in the new local scope
                             engineScope.items = Bento.boxes[box]['results'][engine];
-                            engineScope.resourceLinks = Bento.boxes[box]['resourceLinks'][engine];
-                            engineScope.engineName = engine;
 
                             //console.log(Bento.boxes[box]['results']);
                             if (engineScope.items && engineScope.items.length > 0){
@@ -38299,7 +38316,7 @@ angular.module('oneSearch.bento', [])
 
                                     // Wrap the template in an element that specifies ng-repeat over the "items" object (i.e., the results),
                                     // gives the generic classes for items in a bento box.
-                                    var template = angular.element('<div class="animate-repeat bento-box-item" ng-repeat="item in items | limitTo: box.resultLimit">'+data+'</div><div class="resource-link-container"><a class="btn btn-default btn-xs" ng-href="{{link}}" ng-repeat="link in resourceLinks">More results from {{engineName | ucfirst}}  <span class="fa fa-fw fa-external-link"></span></a></div>');
+                                    var template = angular.element('<div class="animate-repeat bento-box-item" ng-repeat="item in items | limitTo: box.resultLimit">'+data+'</div>');
 
                                     // Compile wrapped template with the isolated scope's context
                                     var html = $compile(template)(engineScope);
@@ -38337,13 +38354,9 @@ angular.module('oneSearch.bento', [])
                     }
 
                     // Tell bentoMenu item it's loaded
-                    Bento.boxMenu = Bento.boxMenu.map(function(obj){
+                    Bento.boxMenu.map(function(obj){
                         if (obj.box === b){
                             obj.loaded = true;
-
-                            if (isEmpty(Bento.boxes[b]['results'])){
-                                obj.noResults = true;
-                            }
                         }
                         return obj
                     });
@@ -38356,26 +38369,6 @@ angular.module('oneSearch.bento', [])
                 }
             },
             controller: 'bentoBoxCtrl'
-        }
-    }])
-
-    .directive('bentoBoxMenu', ['Bento', '$timeout', function(Bento, $timeout){
-        return {
-            restrict: 'AC',
-            link: function(scope, elm){
-                scope.boxMenu = Bento.boxMenu;
-
-                scope.selectBox = function(box){
-                    var selected = angular.element(document.getElementById(box + '-parent'));
-                    selected.addClass('box-selected');
-
-                    $timeout(function(){
-                        selected.removeClass('box-selected');
-                    }, 500);
-                }
-
-
-            }
         }
     }])
 /**
@@ -38418,17 +38411,16 @@ angular.module('oneSearch.common')
                 $scope.numShow = 5;
 
                 // hides the list initially
-                $scope.selected = false;
+                $scope.selected = true;
 
                 $scope.onChange = function(){
                     var lastSpace = $scope.model.lastIndexOf(" ");
-                    $scope.selected = true;
+                    $scope.selected = false;
 
                     if ($scope.model.length - lastSpace <= 3 || $scope.model.indexOf($scope.originalValue) < 0){
                         $scope.items = {};
                         $scope.setCurrent(-1, false);
                         $scope.dataRequested = false;
-                        $scope.selected = false;
                     }
                     if ($scope.model.length - lastSpace > 3 && !$scope.dataRequested){
                         dataFactory.get('//wwwdev2.lib.ua.edu/oneSearch/api/suggest/' + $scope.model)
@@ -38448,11 +38440,10 @@ angular.module('oneSearch.common')
                                 .then(function(data) {
                                     $scope.items.subjects = data;
                                 });
-                            dataFactory.get('https://www.googleapis.com/customsearch/v1?key=AIzaSyCMGfdDaSfjqv5zYoS0mTJnOT3e9MURWkU&cx=003453353330912650815:lfyr_-azrxe&q=' +
+                            dataFactory.get('//www.googleapis.com/customsearch/v1?key=AIzaSyCMGfdDaSfjqv5zYoS0mTJnOT3e9MURWkU&cx=003453353330912650815:lfyr_-azrxe&q=' +
                             $scope.model + '&siteSearch=ask.lib.ua.edu')
                                 .then(function(data) {
-                                    // pluck out the items array for easier 'suggestWatcher' processing
-                                    $scope.items.faq = data.items;
+                                    $scope.items.faq = data;
                                 });
                         }, 200);
                     }
@@ -38480,11 +38471,11 @@ angular.module('oneSearch.common')
                 };
                 $scope.onFocus = function(){
                     if (angular.isDefined($scope.model) && $scope.model.length > 2){
-                        $scope.selected = true;
+                        $scope.selected = false;
                     }
                 };
                 $scope.onBlur = function($event){
-                    $scope.selected = false;
+                    $scope.selected = true;
                 };
                 $scope.compare = function(query){
                     return function(item){
@@ -38496,20 +38487,6 @@ angular.module('oneSearch.common')
                 };
             },
             link: function(scope, elem, attrs) {
-                scope.showSuggestions = false;
-                var suggestWatcher = scope.$watch('items', function(newVal, oldVal){
-                    var show = false;
-
-                    for (var item in newVal){
-                        if (item.length > 0){
-                            show = true;
-                            break;
-                        }
-                    }
-
-                    scope.showSuggestions = (scope.model.length > 3 && show);
-                }, true);
-
                 elem.bind("keydown", function (event) {
                     switch(event.keyCode){
                         //ArrowUp
@@ -38535,7 +38512,7 @@ angular.module('oneSearch.common')
 
                         //Enter
                         case 13:
-                            scope.selected = false;
+                            scope.selected = true;
                             break;
 
                         default:
@@ -38543,13 +38520,6 @@ angular.module('oneSearch.common')
                     }
                     scope.$apply();
                 });
-
-                // Unbind key event when scope is destroyed
-                scope.$on('$destroy', function(){
-                    elem.unbind("keydown");
-                    suggestWatcher();
-                });
-
                 scope.handleSelection = function(selectedItem) {
                     $timeout(function() {
                         scope.model = selectedItem;
@@ -38558,8 +38528,6 @@ angular.module('oneSearch.common')
                         scope.search();
                     }, 0);
                 };
-
-
             },
             templateUrl: 'common/directives/suggest/suggest.tpl.html'
         };
@@ -38799,8 +38767,7 @@ angular.module('engines.scout', [])
 
                     //Search for "source"
                     var bibRelationships = [];
-                    if (angular.isDefined(items[i].RecordInfo.BibRecord.BibRelationships.IsPartOfRelationships)){
-                        bibRelationships = items[i].RecordInfo.BibRecord.BibRelationships.IsPartOfRelationships;
+                    if (bibRelationships = items[i].RecordInfo.BibRecord.BibRelationships.IsPartOfRelationships){
                         for (var x = 0, len = bibRelationships.length; x < len; x++){
                             if (angular.isDefined(bibRelationships[x].BibEntity.Identifiers) && bibRelationships[x].BibEntity.Identifiers[0].Type === 'issn-print'){
                                 // define source title
@@ -38895,6 +38862,34 @@ function isEmpty(obj) {
     }
 
     return true;
+}
+/**
+ * Adopted from UI Router library
+ * https://github.com/angular-ui/ui-router/blob/master/src/common.js
+ */
+function merge(dst) {
+    forEach(arguments, function(obj) {
+        if (obj !== dst) {
+            forEach(obj, function(value, key) {
+                if (!dst.hasOwnProperty(key)) dst[key] = value;
+            });
+        }
+    });
+    return dst;
+}
+/**
+ * Adopted from UI Router library
+ * https://github.com/angular-ui/ui-router/blob/master/src/common.js
+ */
+// extracted from underscore.js
+// Return a copy of the object omitting the blacklisted properties.
+function omit(obj) {
+    var copy = {};
+    var keys = Array.prototype.concat.apply(Array.prototype, Array.prototype.slice.call(arguments, 1));
+    for (var key in obj) {
+        if (indexOf(keys, key) == -1) copy[key] = obj[key];
+    }
+    return copy;
 }
 // adopted from https://github.com/a8m/angular-filter/blob/master/src/_common.js
 function toArray(object) {
@@ -39040,7 +39035,7 @@ angular.module('common.mediaTypes', [])
 angular.module('common.oneSearch', [])
 
     .factory('Search', ['$resource', function($resource){
-        return $resource("//wwwdev2.lib.ua.edu/oneSearch/api/search/:s/engine/:engine/limit/:limit", {}, {cache: true});
+        return $resource("//wwwdev2.lib.ua.edu/oneSearch/api/search/:s/engine/:engine/limit/:pp", {}, {cache: true});
     }])
 
     .provider('oneSearch', ['mediaTypesProvider', function oneSearchProvider(mediaTypesProvider){
@@ -39065,7 +39060,6 @@ angular.module('common.oneSearch', [])
                         mediaTypesProvider.type(name, name);
                         e.mediaTypes = name;
                     }
-
                     e.name = name;
                     _engines[name] = e;
                 }
@@ -39076,7 +39070,7 @@ angular.module('common.oneSearch', [])
         };
 
         this.$get = ['$http', '$parse', '$filter', 'enginesTemplateFactory', 'SearchParams', 'Search', function($http, $parse, $filter, enginesTemplateFactory, SearchParams, Search){
-            this.resourceLinks = {};
+
 
             return {
                 engines: _engines, // Expose engines at Service level
@@ -39121,15 +39115,48 @@ angular.module('common.oneSearch', [])
                             engine.getTotal = $parse(engine.totalsPath);
                         }
 
-                        // Create resource link getter for "more" results link
-                        engine.getResourceLink = $parse("resourceLinks");
-
                         // Put engine's object in private _engines object
                         _engines[name] = engine;
                     });
 
                     // Return all engines with response promises, and getter functions
                     return _engines;
+                },
+                search: function(engName, params, search_url){
+                    if (!angular.isDefined(search_url))
+                        console.log("Error: URL is not defined!");
+                    var engine = _engines[engName];
+                    var p = {engine: engine.id};
+
+                    //Extend local parameters by global params.
+                    angular.extend(p, params);
+
+                    //if filterQuery present, add it to query
+                    // TODO: add proper REST support by accepting filter queries as objects and not just strings
+                    if (engine.filterQuery !== null){
+                        p.s += ' ' + engine.filterQuery;
+                    }
+
+                    /*console.log({
+                     engine: engine,
+                     params: p
+                     });*/
+
+                    // Store the $http response promise in the engine's object with key 'response
+                    engine.response = $http({method: 'GET', url: search_url, params: p});
+
+                    // Create results getter function from given results JSON path
+                    if (angular.isDefined(engine.resultsPath)){
+                        engine.getResults = $parse(engine.resultsPath);
+                    }
+
+                    // Create results getter function from given results JSON path
+                    if (angular.isDefined(engine.totalsPath)){
+                        engine.getTotal = $parse(engine.totalsPath);
+                    }
+
+                    // Put engine's object in private _engines object
+                    return engine;
                 },
                 getEngineTemplate: function(engine){
                     return enginesTemplateFactory.get(engine);
@@ -39142,7 +39169,7 @@ angular.module('common.oneSearch', [])
         }]
     }])
 
-    .controller('OneSearchCtrl', ['$scope', '$location', '$rootScope', '$resource', function($scope, $location, $rootScope, $resource){
+    .controller('OneSearchCtrl', ['$scope', '$location', '$rootScope', function($scope, $location, $rootScope){
         $scope.searchText;
         $scope.search = function(){
             if ($scope.searchText){
@@ -39157,18 +39184,7 @@ angular.module('common.oneSearch', [])
                     $location.path('/bento/'+$scope.searchText);
                 }
             }
-        };
-
-        $scope.getRecommend = function(val){
-            return $resource('//wwwdev2.lib.ua.edu/oneSearch/api/recommend/:search')
-                .query({search: val})
-                .$promise.then(function(rec) {
-                    console.log(rec);
-
-                    return rec;
-                });
         }
-
 
         $rootScope.$on('$routeChangeSuccess', function(event,currentRoute){
             var s = currentRoute.params.s;
@@ -39176,8 +39192,6 @@ angular.module('common.oneSearch', [])
                 $scope.searchText = s;
             }
         });
-
-
     }])
 
     // Borrowed from https://github.com/fmquaglia/ngOrderObjectBy
@@ -39212,7 +39226,64 @@ angular.module('common.oneSearch', [])
 
             return newObj;
         };
-    });;angular.module('hours.templates', ['calendar/calendar.tpl.html', 'hours-locations/hours-locations.tpl.html', 'lib-hours-today/lib-hours-today.tpl.html', 'list/list.tpl.html']);
+    });
+angular.module('oneSearch.videos', [])
+
+    .config(['$routeProvider', function($routeProvider) {
+        /**
+         * Register Videos videos display route with ngRoute's $routeProvider
+         */
+        $routeProvider
+            .when('/videos/:search', {
+                templateUrl: 'videos/videos.tpl.html',
+                resolve: {
+                    'Videos': ['$resource', '$location', '$routeParams', function($resource, $location, $routeParams){
+                        var url = 'https://wwwdev.lib.ua.edu/musicsearch/api';
+                        var params = {};
+
+                        return {
+                            results: function(){
+                                var path = url;
+                                angular.copy($routeParams, params);
+                                angular.extend(params, $location.search());
+
+                                angular.forEach(params, function(value, param){
+                                    path += '/' + param + '/' + value;
+                                })
+                                return $resource(path);
+                            },
+                            facets: function(){
+                                var path = url;
+                                return $resource(path + '/genres');
+                            }
+                        }
+                    }]
+                },
+                controller: ['$scope', 'Videos', function($scope, Videos){
+                    $scope.videos = {
+                        results: {},
+                        facets: {}
+                    };
+                    $scope.currentPage = 1;
+
+                    Videos.facets().get()
+                        .$promise.then(function(data){
+                            $scope.videos.facets = data;
+                        },function(){
+                            console.log('Error retrieving facets');
+                        });
+
+                    $scope.$on('$routeChangeSuccess', function(){
+                        Videos.results().get()
+                            .$promise.then(function(data){
+                                $scope.videos.total = data.totalResults;
+                                $scope.currentPage = 1;
+                                $scope.videos.results = data.results;
+                            });
+                    });
+                }]
+            })
+    }]);;angular.module('hours.templates', ['calendar/calendar.tpl.html', 'hours-locations/hours-locations.tpl.html', 'lib-hours-today/lib-hours-today.tpl.html', 'list/list.tpl.html']);
 
 angular.module("calendar/calendar.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("calendar/calendar.tpl.html",
@@ -39760,7 +39831,7 @@ angular.module('hours.list', [])
             templateUrl: 'list/list.tpl.html',
             controller: 'ListCtrl'
         }
-    }]);;angular.module('manage.templates', ['manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageNews/manageNews.tpl.html', 'manageNews/manageNewsAdmins.tpl.html', 'manageNews/manageNewsList.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html', 'submittedForms/submittedForms.tpl.html']);
+    }]);;angular.module('manage.templates', ['manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageNews/manageNews.tpl.html', 'manageNews/manageNewsList.tpl.html', 'manageNews/viewNewsEventsExhibitions.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html', 'submittedForms/submittedForms.tpl.html']);
 
 angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageDatabases/manageDatabases.tpl.html",
@@ -40469,122 +40540,86 @@ angular.module("manageNews/manageNews.tpl.html", []).run(["$templateCache", func
     "");
 }]);
 
-angular.module("manageNews/manageNewsAdmins.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("manageNews/manageNewsAdmins.tpl.html",
-    "<div class=\"row\" ng-if=\"isAdmin\">\n" +
-    "    <div class=\"panel panel-default col-md-12\">\n" +
-    "        <div class=\"panel-heading\">\n" +
-    "            <h3 class=\"panel-title\">People who can approve submitted News and Exhibits</h3>\n" +
-    "        </div>\n" +
-    "        <div class=\"panel-body\">\n" +
-    "            <ul class=\"list-group\">\n" +
-    "                <li class=\"list-group-item\" ng-repeat=\"admin in data.admins\">\n" +
-    "                    {{admin.name}}\n" +
-    "                </li>\n" +
-    "            </ul>\n" +
-    "        </div>\n" +
-    "    </div>\n" +
-    "</div>\n" +
-    "\n" +
-    "<div class=\"row\" ng-if=\"!isAdmin\">\n" +
-    "    <div class=\"panel panel-default col-md-12\">\n" +
-    "        <div class=\"panel-heading\">\n" +
-    "            <h3 class=\"panel-title\">People who can approve submitted News and Exhibits</h3>\n" +
-    "        </div>\n" +
-    "        <div class=\"panel-body\">\n" +
-    "            <ul class=\"list-group\">\n" +
-    "                <li class=\"list-group-item\" ng-repeat=\"admin in data.admins\">\n" +
-    "                    {{admin.name}}\n" +
-    "                </li>\n" +
-    "            </ul>\n" +
-    "        </div>\n" +
-    "    </div>\n" +
-    "</div>");
-}]);
-
 angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageNews/manageNewsList.tpl.html",
     "<div>\n" +
     "    <form name=\"addNewsExh\" ng-submit=\"createNews()\">\n" +
-    "        <div class=\"row\">\n" +
-    "            <div class=\"col-md-12 sdOpen\">\n" +
-    "                <h3>Add News Record</h3>\n" +
-    "                <div class=\"col-md-12\">\n" +
-    "                    <div class=\"col-md-3 form-group\">\n" +
-    "                        <label for=\"up\">Upload Icon</label>\n" +
-    "                        <input type=\"file\" ngf-select=\"\" ng-model=\"newNews.picFile\" accept=\"image/png\"\n" +
-    "                               ngf-change=\"generateThumb(newNews.picFile[0], $files)\" id=\"up\">\n" +
-    "                            <span class=\"progress\" ng-show=\"newNews.picFile[0].progress >= 0\">\n" +
-    "                                <div class=\"ng-binding\" style=\"width:{{newNews.picFile[0].progress}}%\" ng-bind=\"newNews.picFile[0].progress + '%'\"></div>\n" +
-    "                            </span>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-5 form-group\">\n" +
-    "                        <label for=\"title\">Title</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Enter Title\" ng-model=\"newNews.title\"\n" +
-    "                               id=\"title\" required>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-2 form-group\">\n" +
-    "                        <label for=\"from\">Active From</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" id=\"from\" datepicker-popup=\"{{dpFormat}}\"\n" +
-    "                               ng-model=\"newNews.activeFrom\" is-open=\"newNews.dpFrom\" ng-required=\"true\" close-text=\"Close\"\n" +
-    "                               ng-focus=\"onNewsDPFocusFrom($event)\"/>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-2 form-group\">\n" +
-    "                        <label for=\"until\">Active Until</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" id=\"until\" datepicker-popup=\"{{dpFormat}}\"\n" +
-    "                               ng-model=\"newNews.activeUntil\" is-open=\"newNews.dpUntil\" ng-required=\"true\" close-text=\"Close\"\n" +
-    "                               ng-focus=\"onNewsDPFocusUntil($event)\"/>\n" +
-    "                    </div>\n" +
+    "        <div class=\"row sdOpen\">\n" +
+    "            <h3>Add News Record</h3>\n" +
+    "            <div class=\"col-md-12\">\n" +
+    "                <div class=\"col-md-3 form-group\">\n" +
+    "                    <label for=\"up\">Upload Icon</label>\n" +
+    "                    <input type=\"file\" ngf-select=\"\" ng-model=\"newNews.picFile\" accept=\"image/png\"\n" +
+    "                           ngf-change=\"generateThumb(newNews.picFile[0], $files)\" id=\"up\">\n" +
+    "                        <span class=\"progress\" ng-show=\"newNews.picFile[0].progress >= 0\">\n" +
+    "                            <div class=\"ng-binding\" style=\"width:{{newNews.picFile[0].progress}}%\" ng-bind=\"newNews.picFile[0].progress + '%'\"></div>\n" +
+    "                        </span>\n" +
     "                </div>\n" +
-    "                <div class=\"col-md-12\">\n" +
-    "                    <div class=\"col-md-10 form-group\">\n" +
-    "                        <label for=\"blurb\">Short Description</label>\n" +
-    "                        <textarea class=\"form-control\" rows=\"1\" id=\"blurb\" ng-model=\"newNews.blurb\" maxlength=\"200\" required></textarea>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-2 form-group\">\n" +
-    "                        <label for=\"type\">Type</label>\n" +
-    "                        <select class=\"form-control\" id=\"type\" ng-options=\"type.name for type in types\"\n" +
-    "                                ng-model=\"newNews.selType\">\n" +
+    "                <div class=\"col-md-5 form-group\">\n" +
+    "                    <label for=\"title\">Title</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Enter Title\" ng-model=\"newNews.title\"\n" +
+    "                           id=\"title\">\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-2 form-group\">\n" +
+    "                    <label for=\"from\">Active From</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" id=\"from\" datepicker-popup=\"{{dpFormat}}\"\n" +
+    "                           ng-model=\"newNews.activeFrom\" is-open=\"newNews.dpFrom\" ng-required=\"true\" close-text=\"Close\"\n" +
+    "                           ng-focus=\"onNewsDPFocusFrom($event)\"/>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-2 form-group\">\n" +
+    "                    <label for=\"until\">Active Until</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" id=\"until\" datepicker-popup=\"{{dpFormat}}\"\n" +
+    "                           ng-model=\"newNews.activeUntil\" is-open=\"newNews.dpUntil\" ng-required=\"true\" close-text=\"Close\"\n" +
+    "                           ng-focus=\"onNewsDPFocusUntil($event)\"/>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-12\">\n" +
+    "                <div class=\"col-md-10 form-group\">\n" +
+    "                    <label for=\"blurb\">Short Description</label>\n" +
+    "                    <textarea class=\"form-control\" rows=\"1\" id=\"blurb\" ng-model=\"newNews.blurb\" ></textarea>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-2 form-group\">\n" +
+    "                    <label for=\"type\">Type</label>\n" +
+    "                    <select class=\"form-control\" id=\"type\" ng-options=\"type.name for type in types\"\n" +
+    "                            ng-model=\"newNews.selType\">\n" +
+    "                    </select>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-12\">\n" +
+    "                <div class=\"col-md-12 form-group\">\n" +
+    "                    <label>Detailed Description</label>\n" +
+    "                    <textarea data-ui-tinymce id=\"description\" data-ng-model=\"newNews.description\" rows=\"5\"></textarea>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-12 form-group\">\n" +
+    "                <h4><small>Select contact person from the list or enter new contact information</small></h4>\n" +
+    "                <div class=\"form-group\">\n" +
+    "                    <div class=\"col-md-3\">\n" +
+    "                        <label for=\"contact1\">Library Faculty and Staff</label>\n" +
+    "                        <select class=\"form-control\" id=\"contact1\" ng-options=\"people.fullName for people in data.people\"\n" +
+    "                                ng-model=\"newNews.contactID\">\n" +
     "                        </select>\n" +
     "                    </div>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-12\">\n" +
-    "                    <div class=\"col-md-12 form-group\">\n" +
-    "                        <label>Detailed Description</label>\n" +
-    "                        <textarea data-ui-tinymce id=\"description\" data-ng-model=\"newNews.description\" rows=\"5\"\n" +
-    "                                  maxlength=\"64000\" required></textarea>\n" +
+    "                    <div class=\"col-md-3\">\n" +
+    "                        <label for=\"contact2\">Name</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Contact Name\" ng-model=\"newNews.contactName\"\n" +
+    "                               id=\"contact2\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-3\">\n" +
+    "                        <label for=\"contact3\">Email</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Contact Email\" ng-model=\"newNews.contactEmail\"\n" +
+    "                               id=\"contact3\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-3\">\n" +
+    "                        <label for=\"contact4\">Phone</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Contact Phone\" ng-model=\"newNews.contactPhone\"\n" +
+    "                               id=\"contact4\">\n" +
     "                    </div>\n" +
     "                </div>\n" +
-    "                <div class=\"col-md-12 form-group\">\n" +
-    "                    <h4><small>Select contact person from the list or enter new contact information</small></h4>\n" +
-    "                    <div class=\"form-group\">\n" +
-    "                        <div class=\"col-md-3\">\n" +
-    "                            <label for=\"contact1\">Library Faculty and Staff</label>\n" +
-    "                            <select class=\"form-control\" id=\"contact1\" ng-options=\"people.fullName for people in data.people\"\n" +
-    "                                    ng-model=\"newNews.contactID\">\n" +
-    "                            </select>\n" +
-    "                        </div>\n" +
-    "                        <div class=\"col-md-3\">\n" +
-    "                            <label for=\"contact2\">Name</label>\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Contact Name\" ng-model=\"newNews.contactName\"\n" +
-    "                                   id=\"contact2\">\n" +
-    "                        </div>\n" +
-    "                        <div class=\"col-md-3\">\n" +
-    "                            <label for=\"contact3\">Email</label>\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Contact Email\" ng-model=\"newNews.contactEmail\"\n" +
-    "                                   id=\"contact3\">\n" +
-    "                        </div>\n" +
-    "                        <div class=\"col-md-3\">\n" +
-    "                            <label for=\"contact4\">Phone</label>\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Contact Phone\" ng-model=\"newNews.contactPhone\"\n" +
-    "                                   id=\"contact4\">\n" +
-    "                        </div>\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-12 text-center form-group\">\n" +
-    "                    <button type=\"submit\" class=\"btn btn-success\">Create New Record</button><br>\n" +
-    "                    {{newNews.formResponse}}\n" +
-    "                </div>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-12 text-center form-group\">\n" +
+    "                <button type=\"submit\" class=\"btn btn-success\">Create New Record</button><br>\n" +
+    "                {{newNews.formResponse}}\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </form>\n" +
@@ -40670,7 +40705,7 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                            <h4>\n" +
     "                                <span ng-hide=\"news.show\" ng-click=\"toggleNews(news)\"><a>{{news.title}}</a></span>\n" +
     "                                <span ng-show=\"news.show\">\n" +
-    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"Title\" ng-model=\"news.title\" required>\n" +
+    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"Title\" ng-model=\"news.title\">\n" +
     "                                </span>\n" +
     "                            </h4>\n" +
     "                        </div>\n" +
@@ -40679,13 +40714,12 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                                    ng-if=\"news.status == 0 && isAdmin\">\n" +
     "                                Approve\n" +
     "                            </button>\n" +
-    "                            <span ng-if=\"news.status == 0 && !isAdmin\">Approval Pending</span>\n" +
     "                        </div>\n" +
     "                    </div>\n" +
     "                    <h4 style=\"text-align: justify;\">\n" +
     "                        <span ng-hide=\"news.show\" ng-click=\"toggleNews(news)\"><small>{{news.blurb}}</small></span>\n" +
     "                        <span ng-show=\"news.show\">\n" +
-    "                            <textarea class=\"form-control\" rows=\"1\" ng-model=\"news.blurb\" maxlength=\"200\" required></textarea>\n" +
+    "                            <textarea class=\"form-control\" rows=\"1\" ng-model=\"news.blurb\" ></textarea>\n" +
     "                        </span>\n" +
     "                    </h4>\n" +
     "                    <div ng-show=\"news.show\">\n" +
@@ -40718,8 +40752,7 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                        <div class=\"row\">\n" +
     "                            <div class=\"col-md-12 form-group\">\n" +
     "                                <label>Detailed Description</label>\n" +
-    "                                <textarea data-ui-tinymce id=\"{{news.nid}}_descr\" data-ng-model=\"news.description\" rows=\"5\"\n" +
-    "                                         maxlength=\"64000\" required></textarea>\n" +
+    "                                <textarea data-ui-tinymce id=\"{{news.nid}}_descr\" data-ng-model=\"news.description\" rows=\"5\"></textarea>\n" +
     "                            </div>\n" +
     "                        </div>\n" +
     "                        <h4><small>Select contact person from the list or enter new contact information</small></h4>\n" +
@@ -40781,6 +40814,52 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "    <h4 ng-show=\"filteredNews.length == 0\">Nothing found</h4>\n" +
     "</div>\n" +
     "\n" +
+    "");
+}]);
+
+angular.module("manageNews/viewNewsEventsExhibitions.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("manageNews/viewNewsEventsExhibitions.tpl.html",
+    "<h2>News and Events</h2>\n" +
+    "<div class=\"event-card\" style=\"display: table-row\" ng-show=\"data.news.length > 0\">\n" +
+    "    <div style=\"text-align: right; font-size: 20px; color: #999; display: table-cell; vertical-align: top; padding-right: 15px;\">          News        </div>\n" +
+    "    <div style=\"display: table-cell; vertical-align: top;\">\n" +
+    "        <div class=\"media\" ng-repeat=\"news in data.news\">\n" +
+    "            <div class=\"media-left\">\n" +
+    "                <a href=\"#\">\n" +
+    "                    <img src=\"{{news.img}}\" style=\"height: 64px; width: 64px;\"/>\n" +
+    "                </a>\n" +
+    "            </div>\n" +
+    "            <div class=\"media-body\">\n" +
+    "                <h4 class=\"media-heading\">{{news.title}}</h4>\n" +
+    "                {{news.blurb}}\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div class=\"event-card\" style=\"display: table-row\" ng-show=\"data.events.length > 0\">\n" +
+    "    <div style=\"text-align: right; font-size: 20px; color: #999; display: table-cell; vertical-align: top; padding-right: 15px;\">          Events        </div>\n" +
+    "    <div style=\"display: table-cell; vertical-align: top;\">\n" +
+    "        <div class=\"media\" ng-repeat=\"event in data.events\">\n" +
+    "\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div class=\"event-card\" style=\"display: table-row\" ng-show=\"data.exhibitions.length > 0\">\n" +
+    "    <div style=\"text-align: right; font-size: 20px; color: #999; display: table-cell; vertical-align: top; padding-right: 15px;\">          Exhibits        </div>\n" +
+    "    <div style=\"display: table-cell; vertical-align: top;\">\n" +
+    "        <div class=\"media\" ng-repeat=\"exh in data.exhibitions\">\n" +
+    "            <div class=\"media-left\">\n" +
+    "                <a href=\"#\">\n" +
+    "                    <img src=\"{{exh.img}}\" style=\"height: 64px; width: 64px;\"/>\n" +
+    "                </a>\n" +
+    "            </div>\n" +
+    "            <div class=\"media-body\">\n" +
+    "                <h4 class=\"media-heading\">{{exh.title}}</h4>\n" +
+    "                {{exh.blurb}}\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
     "");
 }]);
 
@@ -42908,14 +42987,8 @@ angular.module('manage.manageNews', ['ngFileUpload'])
             $scope.validateNews = function(news){
                 if (news.title.length < 1)
                     return "Form error: Please fill out Title!";
-                if (news.blurb.length < 1)
-                    return "Form error: Please fill out Short Description!";
                 if (news.description.length < 1)
                     return "Form error: Please fill out Description!";
-                if (!(news.activeFrom.valueOf() > 1000))
-                    return "Form error: Please fill out Active From!";
-                if (!(news.activeUntil.valueOf() > 1000))
-                    return "Form error: Please fill out Active Until!";
 
                 return "";
             };
@@ -43259,19 +43332,48 @@ angular.module('manage.manageNews', ['ngFileUpload'])
         }
     })
 
-    .controller('manageAdminsListCtrl', ['$scope', 'newsFactory',
-        function manageAdminsListCtrl($scope, newsFactory){
+    .controller('viewNEECtrl', ['$scope', '$timeout', 'newsFactory',
+        function viewNEECtrl($scope, $timeout, newsFactory){
+            $scope.data = {};
+
+            newsFactory.getData("today")
+                .success(function(data) {
+                    console.dir(data);
+                    $scope.data = data;
+                })
+                .error(function(data, status, headers, config) {
+                    console.log(data);
+                });
+
+            //events will be pulled from XML feed
+            //http://events.ua.edu/category/22/feed
 
         }])
-
-    .directive('manageAdminsList', function() {
+    .directive('viewNewsEventsExhibitions', function() {
         return {
-            restrict: 'A',
-            controller: 'manageAdminsListCtrl',
+            restrict: 'AC',
+            scope: {},
+            controller: 'viewNEECtrl',
             link: function(scope, elm, attrs){
+                //Preload the spinner element
+                var spinner = angular.element('<div id="loading-bar-spinner"><div class="spinner-icon"></div></div>');
+                //Preload the location of the boxe's title element (needs to be more dynamic in the future)
+                var titleElm = elm.find('h2');
+                //Enter the spinner animation, appending it to the title element
+                $animate.enter(spinner, titleElm[0]);
 
+                var loadingWatcher = scope.$watch(
+                    'data.totalTime',
+                    function(newVal, oldVal){
+                        if (newVal != oldVal){
+                            $animate.leave(spinner);
+                            console.log("News data loaded");
+                        }
+                    },
+                    true
+                );
             },
-            templateUrl: 'manageNews/manageNewsAdmins.tpl.html'
+            templateUrl: 'manageNews/viewNewsEventsExhibitions.tpl.html'
         };
     })
 
@@ -45138,7 +45240,7 @@ angular.module("staff-card/staff-card-list.tpl.html", []).run(["$templateCache",
 
 angular.module("staff-card/staff-card.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staff-card/staff-card.tpl.html",
-    "<div class=\"staff-card-container panel panel-default\">\n" +
+    "<div class=\"staff-card-container panel panel-default\" style=\"position:relative;\">\n" +
     "    <div class=\"panel-body\">\n" +
     "        <div class=\"row\">\n" +
     "            <div class=\"name-plate col-sm-12 text-right\">\n" +
@@ -45148,52 +45250,65 @@ angular.module("staff-card/staff-card.tpl.html", []).run(["$templateCache", func
     "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"row\">\n" +
-    "            <div class=\"col-xs-6\">\n" +
-    "                <div class=\"staff-card-detail\">\n" +
-    "                    <h6>Contact</h6>\n" +
-    "                    <ul class=\"fa-ul\">\n" +
-    "                        <li ng-if=\"staffPerson.phone\"><span class=\"fa fa-phone fa-li\"></span>{{staffPerson.phone}}</li>\n" +
-    "                        <li ng-if=\"staffPerson.fax\"><span class=\"fa fa-fax fa-li\"></span>{{staffPerson.fax}}</li>\n" +
-    "                        <li ng-if=\"staffPerson.email\"><span class=\"fa fa-envelope fa-li\"></span>{{staffPerson.email}}</li>\n" +
-    "                    </ul>\n" +
-    "                </div>\n" +
+    "            <div class=\"col-sm-6\">\n" +
+    "                <ul class=\"fa-ul\">\n" +
+    "                    <li ng-if=\"staffPerson.phone\"><span class=\"fa fa-phone fa-li\"></span>{{staffPerson.phone}}</li>\n" +
+    "                    <li ng-if=\"staffPerson.fax\"><span class=\"fa fa-fax fa-li\"></span>{{staffPerson.fax}}</li>\n" +
+    "                    <li ng-if=\"staffPerson.email\"><span class=\"fa fa-envelope fa-li\"></span>{{staffPerson.email}}</li>\n" +
+    "                </ul>\n" +
     "            </div>\n" +
-    "            <div class=\"col-xs-6\">\n" +
-    "                <div class=\"staff-card-detail\" ng-if=\"staffPerson.subjects\">\n" +
-    "                    <h6>Subject Expertise</h6>\n" +
-    "                    <ul class=\"list-unstyled\">\n" +
+    "            <!--<div class=\"col-sm-6\">\n" +
+    "                <div class=\"staff-card-detail pull-right\" ng-if=\"staffPerson.subjects\">\n" +
+    "                    <div class=\"dropdown\">\n" +
+    "                        <button class=\"btn btn-primary dropdown-toggle\"  type=\"button\">\n" +
+    "                            Expert in\n" +
+    "                        </button>\n" +
+    "                        <ul class=\"dropdown-menu\" role=\"menu\" aria-labelledby=\"dropdownMenu1\">\n" +
+    "                            <li role=\"presentation\" ng-repeat=\"subject in staffPerson.subjects | orderBy:subject.subject\" ng-class=\"{'disabled': !subject.link}\">\n" +
+    "                                <a ng-href=\"{{subject.link}}\" title=\"{{subject.subject}}\">{{subject.subject}}</a>\n" +
+    "                            </li>\n" +
+    "                        </ul>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "            </div>-->\n" +
+    "        </div>\n" +
+    "        <div ng-if=\"staffPerson.subjects\">\n" +
+    "            <button class=\"btn btn-primary\" type=\"button\" style=\"position: absolute; bottom: 0; right: 0; border-top-right-radius: 0; border-bottom-left-radius: 0\" ng-click=\"isCollapsed = !isCollapsed\">Research Expert in</button>\n" +
+    "            <div collapse=\"!isCollapsed\">\n" +
+    "                <div class=\"bg-info\" style=\"width:100%; height:100%;\">\n" +
+    "                    <h4>Expert Librarian in...</h4>\n" +
+    "                    <ul>\n" +
     "                        <li role=\"presentation\" ng-repeat=\"subject in staffPerson.subjects | orderBy:subject.subject\" ng-class=\"{'disabled': !subject.link}\">\n" +
-    "                            <a ng-href=\"{{subject.link}}\" title=\"{{subject.subject}}\" ng-if=\"subject.link\">{{subject.subject}}</a>\n" +
-    "                            <span title=\"{{subject.subject}}\" ng-if=\"!subject.link\">{{subject.subject}}</span>\n" +
+    "                            <a ng-href=\"{{subject.link}}\" title=\"{{subject.subject}}\">{{subject.subject}}</a>\n" +
     "                        </li>\n" +
     "                    </ul>\n" +
     "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
+    "\n" +
     "    </div>\n" +
     "</div>");
 }]);
 
 angular.module("staff-directory/staff-directory-facets.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staff-directory/staff-directory-facets.tpl.html",
-    "<form class=\"facets-form form-horizontal text-center\">\n" +
+    "<form class=\"facets-form form-inline text-center\">\n" +
     "    <div class=\"form-group\">\n" +
-    "        <div class=\"col-sm-5\">\n" +
-    "            <input class=\"form-control\" id=\"directorySearch\" name=\"directorySearch\" type=\"text\" ng-model=\"staffdir.facet.search\" placeholder=\"Search...\" ng-keyup=\"changeFacet('search')\"/>\n" +
-    "        </div>\n" +
-    "\n" +
-    "        <div class=\"col-sm-5 hidden-xs\">\n" +
-    "            <select class=\"form-control\" ng-model=\"staffdir.facet.subject\" name=\"subject\" ng-options=\"subject for subject in facets.subjects\" ng-change=\"changeFacet('subject')\">\n" +
-    "                <option value=\"\">-- Select Subject Specialty --</option>\n" +
-    "            </select>\n" +
-    "        </div>\n" +
-    "\n" +
-    "        <div class=\"col-sm-2\">\n" +
-    "            <button class=\"btn btn-primary hidden-xs\" type=\"button\" ng-click=\"clearFacet('search', 'subject')\">\n" +
-    "                <span class=\"fa fa-refresh\"></span> Reset Filters\n" +
-    "            </button>\n" +
-    "        </div>\n" +
+    "        <input class=\"form-control\" id=\"directorySearch\" name=\"directorySearch\" type=\"text\" ng-model=\"staffdir.facet.search\" placeholder=\"Search...\" ng-keyup=\"clearFacet('subject')\"/>\n" +
     "    </div>\n" +
+    "\n" +
+    "    <div class=\"form-group hidden-xs\">\n" +
+    "        <strong class=\"text-center\">OR</strong>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"form-group hidden-xs\">\n" +
+    "        <select class=\"form-control\" ng-model=\"staffdir.facet.subject\" name=\"subject\" ng-options=\"subject.subject for subject in facets.subjects\" ng-change=\"clearFacet('search')\">\n" +
+    "            <option value=\"\">Choose Expertise</option>\n" +
+    "        </select>\n" +
+    "    </div>\n" +
+    "    <button class=\"btn btn-primary hidden-xs\" type=\"button\" ng-click=\"clearFacet('search', 'subject')\">\n" +
+    "        <span class=\"fa fa-refresh\"></span> Reset Filters\n" +
+    "    </button>\n" +
     "</form>");
 }]);
 
@@ -45219,15 +45334,14 @@ angular.module("staff-directory/staff-directory-listing.tpl.html", []).run(["$te
     "                   ng-class=\"{'sortable': !staffdir.sortReverse && staffdir.sortBy == 'department', 'sortable-reverse': staffdir.sortReverse && staffdir.sortBy == 'department'}\">Department/Unit</a>\n" +
     "            </th>\n" +
     "            <th>Contact</th>\n" +
-    "            <th class=\"hidden-xs hidden-sm\">Specialty</th>\n" +
+    "            <th class=\"hidden-xs hidden-sm\">Expertise</th>\n" +
     "        </tr>\n" +
     "        </thead>\n" +
     "        <tbody>\n" +
-    "        <tr ng-repeat=\"person in filteredList = (list | filter:staffdir.facet.search | filter:staffdir.facet.subject:true | orderBy:staffdir.sortBy:staffdir.sortReverse) track by  person.id\">\n" +
+    "        <tr ng-repeat=\"(column, person) in list | filter:staffdir.facet.search | filter:staffdir.facet.subject.subject:true | orderBy:staffdir.sortBy:staffdir.sortReverse track by  person.id \">\n" +
     "            <td class=\"text-nowrap\">\n" +
     "                <div ng-if=\"person.rank\" class=\"text-muted\"> {{person.rank}}</div>\n" +
     "                <span ng-bind-html=\"person.firstname | highlight:staffdir.facet.search\"></span> <strong ng-bind-html=\"person.lastname | highlight:staffdir.facet.search\"></strong>\n" +
-    "\n" +
     "            </td>\n" +
     "            <td class=\"hidden-xs\"><span ng-bind-html=\"person.title | highlight:staffdir.facet.search\"></span></td>\n" +
     "            <td class=\"hidden-xs\"><span ng-bind-html=\"person.department | highlight:staffdir.facet.search\"></span></td>\n" +
@@ -45238,7 +45352,7 @@ angular.module("staff-directory/staff-directory-listing.tpl.html", []).run(["$te
     "                    <li ng-if=\"person.email\"><span class=\"fa fa-envelope fa-li\"></span> <a ng-href=\"mailto:{{person.email}}\" title=\"Email {{person.firstname}} {{persone.lastname}}\">{{person.email}}</a></li>\n" +
     "                </ul>\n" +
     "            </td>\n" +
-    "            <td class=\"hidden-xs hidden-sm\">\n" +
+    "            <td class=\"hidden-xs\">\n" +
     "                <ul class=\"list-unstyled\" ng-if=\"person.subjects\">\n" +
     "                    <li ng-repeat=\"subject in person.subjects | orderBy:subject.subject\">\n" +
     "                        <a ng-href=\"{{subject.link}}\" title=\"{{subject.subject}}\" ng-if=\"subject.link\" ng-bind-html=\"subject.subject | highlight:staffdir.facet.search\"></a>\n" +
@@ -45249,28 +45363,14 @@ angular.module("staff-directory/staff-directory-listing.tpl.html", []).run(["$te
     "        </tr>\n" +
     "        </tbody>\n" +
     "    </table>\n" +
-    "    <div class=\"alert alert-warning text-center\" role=\"alert\" ng-show=\"filteredList.length === 0\">\n" +
-    "        <h2>\n" +
-    "            No results<span ng-if=\"staffdir.facet.subject\"><strong> for {{staffdir.facet.subject}}</strong> subject specialists</span>\n" +
-    "            <span ng-if=\"staffdir.facet.search\"> matching <strong>\"{{staffdir.facet.search}}\"</strong></span>\n" +
-    "        </h2>\n" +
-    "    </div>\n" +
     "</div>");
 }]);
 
 angular.module("staff-directory/staff-directory.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staff-directory/staff-directory.tpl.html",
-    "<div class=\"page-header\">\n" +
-    "    <h1>Staff Directory</h1>\n" +
-    "</div>\n" +
-    "\n" +
-    "<div class=\"page-slice\">\n" +
-    "    <div class=\"staff-directory-facets\" facets=\"staffdir.facets\"></div>\n" +
-    "</div>\n" +
-    "<div class=\"staff-directory-listing\" list=\"staffdir.list\" sort-by=\"lastname\"></div>\n" +
-    "\n" +
-    "\n" +
-    "");
+    "<h1 class=\"page-header\">Staff Directory</h1>\n" +
+    "<div class=\"staff-directory-facets\" facets=\"staffdir.facets\"></div>\n" +
+    "<div class=\"staff-directory-listing\" list=\"staffdir.list\" sort-by=\"lastname\"></div>");
 }]);
 ;angular.module('ualib.staffdir', [
     'ngRoute',
@@ -45288,7 +45388,7 @@ angular.module("staff-directory/staff-directory.tpl.html", []).run(["$templateCa
 angular.module('staffdir', ['ualib.staffdir']);
 ;angular.module('ualib.staffdir')
 
-    .service('StaffDirectoryService', ['$location', function($location){
+    .service('StaffDirectoryService', [function(){
         var self = this; //ensures proper contest in closure statements
         this.sortBy = ''; // Default sort column, can be overridden via 'sortBy' attribute for staffDirectory directive
         this.sortReverse = false; // Default sort direction
@@ -45316,8 +45416,6 @@ angular.module('staffdir', ['ualib.staffdir']);
             angular.copy(copy, self.facet);
             console.log(self.facet);
         };
-
-
 
         /**
          * Inspired by Angular UI Router library omit() function
@@ -45388,7 +45486,6 @@ angular.module('staffdir', ['ualib.staffdir']);
 
     .config(['$routeProvider', function($routeProvider){
         $routeProvider.when('/staffdir', {
-            reloadOnSearch: false,
             controller: 'StaffDirCtrl',
             templateUrl: 'staff-directory/staff-directory.tpl.html',
             resolve: {
@@ -45412,10 +45509,7 @@ angular.module('staffdir', ['ualib.staffdir']);
                         .$promise.then(function(data){
                             // Build new object of only subject that currently have a subject/research expert
                             var subj = [];
-                            var list = [];
                             angular.forEach(data.list, function(val){
-                                delete val.division;
-                                list.push(val);
                                 if (angular.isDefined(val.subjects) && val.subjects.length > 0){
                                     angular.forEach(val.subjects, function(subject){
                                         subj.push(subject);
@@ -45424,11 +45518,9 @@ angular.module('staffdir', ['ualib.staffdir']);
                             });
                             subj = $filter('unique')(subj, 'subject');
                             subj = $filter('orderBy')(subj, 'subject');
-                            staff.facets.subjects = subj.map(function(s){
-                                return s.subject;
-                            });
+                            staff.facets.subjects = subj;
                             // get list of people
-                            staff.list = list;
+                            staff.list = data.list;
 
                             return staff;
                         }, function(data, status){
@@ -45475,7 +45567,7 @@ angular.module('staffdir', ['ualib.staffdir']);
         };
     }])
 
-    .directive('staffDirectoryFacets', ['StaffDirectoryService', '$location', '$q', function(SDS, $location, $q){
+    .directive('staffDirectoryFacets', ['StaffDirectoryService', function(SDS){
         return {
             restrict: 'AC',
             scope: {
@@ -45485,12 +45577,6 @@ angular.module('staffdir', ['ualib.staffdir']);
             controller: function($scope){
                 $scope.staffdir = SDS;
 
-                // Sync any URI search params on initial load
-                var params = $location.search();
-                for (var param in params){
-                    SDS.facet[param] = params[param];
-                }
-
                 $scope.clearFacet = function(){
                     var copy = {};
                     var omitKeys = Array.prototype.concat.apply(Array.prototype, arguments);
@@ -45499,36 +45585,10 @@ angular.module('staffdir', ['ualib.staffdir']);
                         if (omitKeys.indexOf(key) === -1) {
                             copy[key] = SDS.facet[key];
                         }
-                        else{
-                            $location.search(key, null);
-                        }
                     });
                     SDS.facet = copy;
 
                 };
-
-                $scope.changeFacet = function(facet){
-                    var val = (SDS.facet.hasOwnProperty(facet) && SDS.facet[facet] !== '') ? SDS.facet[facet] : null;
-                    $location.search(facet, val);
-                };
-
-            },
-            link: function(scope){
-                /*var facetWatcher = scope.$watch('staffdir.facet', function(newVal, oldVal){
-                    for (var facet in newVal){
-                        if (newVal[facet] !== ''){
-                            var val = facet === 'subject' ? newVal[facet].subject : newVal[facet];
-                            $location.search(facet, val);
-                        }
-                        else {
-                            $location.search(facet, null);
-                        }
-                    }
-                }, true);
-
-                scope.$on('$destroy', function(){
-                    facetWatcher();
-                });*/
             }
         };
     }]);;angular.module('ualib.softwareList.templates', ['software-list/software-list.tpl.html']);
@@ -46208,6 +46268,34 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "    </div>\n" +
     "</div>");
 }]);
+;/*
+(function() {
+    tinymce.create('tinymce.plugins.typekit', {
+        setup : function(ed) {
+            ed.onInit.add(function(ed, evt) {
+
+                // Load a script from a specific URL using the global script loader
+                tinymce.ScriptLoader.load('somescript.js');
+
+                // Load a script using a unique instance of the script loader
+                var scriptLoader = new tinymce.dom.ScriptLoader();
+
+                scriptLoader.load('somescript.js');
+
+            });
+        },
+    getInfo: function() {
+    return {
+        longname:  'TypeKit',
+        author:    'Thomas Griffin',
+        authorurl: 'https://thomasgriffin.io',
+        infourl:   'https://twitter.com/jthomasgriffin',
+        version:   '1.0'
+    };
+}
+});
+tinymce.PluginManager.add('typekit', tinymce.plugins.typekit);
+})();*/
 ;/* ========================================================================
  * DOM-based Routing
  * Based on http://goo.gl/EUTi53 by Paul Irish
