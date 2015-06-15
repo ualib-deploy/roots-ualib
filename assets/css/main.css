@@ -9427,16 +9427,18 @@ footer > .sub-footer {
   -webkit-background-size: cover;
   background-size: cover;
   height: 350px;
+}
+.blue-banner {
   color: #fff;
 }
-.smc-banner .jumbotron {
+.blue-banner .jumbotron {
   width: 100%;
   height: 100%;
   border-radius: 0;
   background-color: rgba(24, 72, 102, 0.55);
 }
-.smc-banner .jumbotron h1,
-.smc-banner .jumbotron .h1 {
+.blue-banner .jumbotron h1,
+.blue-banner .jumbotron .h1 {
   text-transform: uppercase;
   text-shadow: 0 0 12px rgba(0, 0, 0, 0.9);
   text-align: center;
