@@ -9422,6 +9422,25 @@ footer > .sub-footer {
 .gMapDirections {
   margin-top: 10px;
 }
+.smc-banner {
+  background: url("../img/smc-head.jpg") no-repeat center center;
+  -webkit-background-size: cover;
+  background-size: cover;
+  height: 350px;
+  color: #fff;
+}
+.smc-banner .jumbotron {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  background-color: rgba(24, 72, 102, 0.55);
+}
+.smc-banner .jumbotron h1,
+.smc-banner .jumbotron .h1 {
+  text-transform: uppercase;
+  text-shadow: 0 0 12px rgba(0, 0, 0, 0.9);
+  text-align: center;
+}
 /*# sourceMappingURL=/wp-content/themes/roots/assets/css/main.css.map */
 .bento-box-container .scrollfix {
   top: 0;
