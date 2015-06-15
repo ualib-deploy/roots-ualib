@@ -33,123 +33,41 @@ if (defined('GROUP_ANY_WEBAPP'))
                         <ul class="dropdown-menu">
                             <li>
                                 <div class="yamm-content">
-                                    <h2>My Accounts</h2>
-                                    <tabset  vertical="true" tab-class="col-sm-3" content-class="col-sm-9">
-                                        <tab heading="My Library (Catalog)">
-                                            <form name="selectDatabases" accept-charset="UTF-8" method="POST"
-                                                  action="http://library.ua.edu/vwebv/login.do">
-                                                <div class="form-group col-sm-6">
-                                                    <label for="loginId">
-                                                        CWID
-                                                        <small><a href="https://bama.ua.edu/cgi-bin/cgiwrap/~acctweb/cwid.pl">What is my CWID?</a></small>
-                                                    </label>
-                                                    <input type="password" class="form-control" id="loginId" name="loginId" placeholder="Enter CWID">
-                                                </div>
-                                                <div class="form-group col-sm-6">
-                                                    <label for="lastName">Last Name</label>
-                                                    <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Enter Last Name">
-                                                </div>
-                                                <div class="form-group col-sm-12">
-                                                    <label for="lastName">Home Library</label>
-                                                    <select class="form-control" name="page.logIn.library" id="page.logIn.library">
-                                                        <option selected="" value="1@UADB20021202141309">University of Alabama Libraries</option>
-                                                        <option value="1@AUBDB20011120113530">Auburn University Libraries</option>
-                                                        <option value="1@AUMDB20011120113546">Auburn University Montgomery</option>
-                                                        <option value="1@JACKDB20020808100014">Houston Cole Library</option>
-                                                        <option value="1@UABDB20020817181349">Mervyn H. Sterne Library</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-sm-12">
-                                                    <select type="hidden" name="loginType" id="loginType" style="visibility:hidden">
-                                                        <option selected value="I">Campus-Wide ID (CWID)</option>
-                                                    </select><br>
-                                                    <button type="submit" class="btn btn-default" id="loginBtn">Login to Library Catalog</button>
-                                                </div>
-                                            </form>
-                                        </tab>
-                                        <tab heading="EasyProxy Login">
-                                            <form action="https://login.libdata.lib.ua.edu/login" method="post" name="login">
-                                                <div class="form-group col-sm-6">
-                                                    <label for="formfields1">
-                                                        User Login
-                                                    </label>
-                                                    <input type="hidden" name="url" value="^U">
-                                                    <input type="text" class="form-control" id="formfields1" name="user" placeholder="Enter Your Login">
-                                                </div>
-                                                <div class="form-group col-sm-6">
-                                                    <label for="formfields2">Password</label>
-                                                    <input type="password" class="form-control" id="formfields2" name="pass" placeholder="Enter Password">
-                                                </div>
-                                                <div class="form-group col-sm-12">
-                                                    <label for="auth">Login Type</label>
-                                                    <select name="auth" id="auth" class="form-control">
-                                                        <option value="UA" selected="selected">myBama ID</option>
-                                                        <option value="UAB">BlazerID</option>
-                                                        <option value="UAH">Charger ID</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-sm-12">
-                                                    <button type="submit" class="btn btn-default" id="loginBtn">Login to EasyProxy</button>
-                                                </div>
-                                            </form>
-                                        </tab>
-                                        <tab heading="Interlibrary Loan (ILLiad)">
-                                            <form method="post" name="Logon" action="https://ua.illiad.oclc.org/illiad/illiad.dll">
-                                                <input type="hidden" name="ILLiadForm" value="Logon">
-                                                <div class="form-group">
-                                                    <label for="usernameIlliad">MyBama User</label>
-                                                    <input type="text" class="form-control" id="usernameIlliad" name="Username" placeholder="Enter MyBama Username">
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="passwordIlliad">Password</label>
-                                                    <input type="password" class="form-control" id="passwordIlliad" name="Password" placeholder="Password">
-                                                </div>
-                                                <button type="submit" class="btn btn-default" name="SubmitButton">Login to ILLiad</button>
-                                            </form>
-                                        </tab>
-                                        <tab heading="Refworks">
-                                            <form method="post" action="https://www.refworks.com/refworks2/Default.aspx?r=authentication::validate">
-                                                <div class="form-group">
-                                                    <label for="LoginNameRefworks">
-                                                        <a href="http://www.refworks.com/refworks/">RefWorks</a> Login Name
-                                                    </label>
-                                                    <input type="text" class="form-control" name="LoginName" id="LoginNameRefworks" placeholder="Enter RefWorks Login">
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="PasswordRefworks">Password</label>
-                                                    <input type="password" class="form-control" name="Password" id="PasswordRefworks" placeholder="Password">
-                                                </div>
-                                                <button type="submit" class="btn btn-default">Login to Refworks</button>
-                                            </form>
-                                        </tab>
-                                        <tab heading="myBama">
-                                            <form name="cplogin" action="https://mybama.ua.edu/cp/home/login" method="post">
-                                                <div class="form-group">
-                                                    <label for="userMyBama">myBama User</label>
-                                                    <input type="text" class="form-control" id="userMyBama" name="user" placeholder="Enter myBama Id">
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="passwordMyBama">Password</label>
-                                                    <input type="password" class="form-control" id="passwordMyBama" name="pass" placeholder="Password">
-                                                </div>
-                                                <input type="hidden" name="uuid" value=""/>
-                                                <button type="submit" class="btn btn-default">Login to myBama</button>
-                                            </form>
-                                        </tab>
-                                        <tab heading="Blackboard Learn">
-                                            <form>
-                                                <div class="form-group">
-                                                    <label for="exampleInputEmail1">myBama Id</label>
-                                                    <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="exampleInputPassword1">Password</label>
-                                                    <input type="text" class="form-control" id="exampleInputPassword1" placeholder="Password">
-                                                </div>
-                                                <button type="submit" class="btn btn-default">Login to Blackboard Learn</button>
-                                            </form>
-                                        </tab>
-                                    </tabset>
+                                    <h2 style="background-color: transparent;">My Accounts</h2>
+                                    <div class="row">
+                                        <div class="col-xs-12 col-sm-6 col-md-4">
+                                            <a class="service-card" href="http://library.ua.edu/vwebv/login">
+                                                <h4>My Library (Catalog)</h4>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-4">
+                                            <a class="service-card" href="https://login.libdata.lib.ua.edu/login">
+                                                <h4>EasyProxy Login</h4>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-4">
+                                            <a class="service-card" href="https://ua.illiad.oclc.org/illiad/">
+                                                <h4>Interlibrary Loan (ILLiad)</h4>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-xs-12 col-sm-6 col-md-4">
+                                            <a class="service-card" href="https://www.refworks.com/refworks2/Default.aspx">
+                                                <h4>Refworks</h4>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-4">
+                                            <a class="service-card" href="https://mybama.ua.edu/">
+                                                <h4>myBama</h4>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-4">
+                                            <a class="service-card" href="https://ualearn.blackboard.com/webapps/login/">
+                                                <h4>Blackboard Learn</h4>
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
                             </li>
                         </ul>
