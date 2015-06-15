@@ -6,8 +6,6 @@ module.exports = function(grunt) {
     require('time-grunt')(grunt);
 
     var jsFileList = [
-        '<%= bower.directory %>/angulartics/src/angulartics.js',
-        '<%= bower.directory %>/angulartics/src/angulartics-ga.js',
         '<%= bower.directory %>/angular-filter/dist/angular-filter.js',
         '<%= bower.directory %>/angular-ui-utils/ui-utils.js',
         '<%= bower.directory %>/ng-file-upload/ng-file-upload-all.js',

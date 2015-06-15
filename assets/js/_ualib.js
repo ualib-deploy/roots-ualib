@@ -1,8 +1,6 @@
 angular.module('ualib', [
     'ngRoute',
     'ngAnimate',
-    'angulartics',
-    'angulartics.google.analytics',
     'ualib.templates',
     'ualib.ui',
     'hours',
@@ -15,9 +13,7 @@ angular.module('ualib', [
     'ualib.news'
 ])
 
-    .config(['$routeProvider', '$analyticsProvider', function($routeProvider, $analyticsProvider) {
-        $analyticsProvider.firstPageview(false); /* Records pages that don't use $state or $route */
-        $analyticsProvider.withAutoBase(true);  /* Records full path */
+    .config(['$routeProvider', function($routeProvider) {
         /**
          * Register Bento Box display route with ngRoute's $routeProvider
          */
