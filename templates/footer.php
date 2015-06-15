@@ -102,9 +102,8 @@
         </div>
     </div>
   </div>
-</footer>
-<?php
-    if (defined(WEBAPPS_PATH)){
+    <?php
         @include WEBAPPS_PATH . "siteSurvey/loadForm.php";
-    }
-?>
+    ?>
+</footer>
+
