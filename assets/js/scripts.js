@@ -37752,7 +37752,7 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
     "                ng-repeat=\"item in filteredItems = (items.suggest | filter:compare(originalValue)) | limitTo:numShow track by $index\"\n" +
     "                ng-mousedown=\"handleSelection(item.search)\" ng-class=\"item.class\"\n" +
     "                ng-mouseenter=\"setCurrent($index, false)\">\n" +
-    "                <a href=\"#\">{{item.search}}</a>\n" +
+    "                <a href=\"#/bento/{{item.search}}\">{{item.search}}</a>\n" +
     "            </li>\n" +
     "        </ul>\n" +
     "    </div>\n" +
