@@ -37756,7 +37756,7 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
     "            </li>\n" +
     "        </ul>\n" +
     "    </div>\n" +
-    "    <div class=\"suggest-row\" ng-show=\"items.recommend.length || items.subjects.length || items.faq.searchInformation.totalResults > 0\">\n" +
+    "    <div class=\"suggest-row\" ng-show=\"items.recommend.length || items.subjects.length || items.faq.length > 0\">\n" +
     "        <div class=\"row\">\n" +
     "            <div class=\"col-sm-4\" ng-show=\"items.recommend.length\">\n" +
     "                <div class=\"suggest-col\">\n" +
@@ -37787,7 +37787,7 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
     "            <div class=\"col-sm-4\" ng-show=\"items.faq.length\">\n" +
     "                <div class=\"suggest-col\">\n" +
     "                    <h4>FAQ <a href=\"http://ask.lib.ua.edu/\" class=\"small\" ng-mousedown=\"go('http://ask.lib.ua.edu/')\">more</a></h4>\n" +
-    "                    <div ng-repeat=\"faq in items.faq.items | limitTo:5\">\n" +
+    "                    <div ng-repeat=\"faq in items.faq | limitTo:5\">\n" +
     "                        <a href=\"{{faq.link}}\" ng-mousedown=\"go(faq.link)\">\n" +
     "                            {{faq.title}}\n" +
     "                        </a>\n" +
