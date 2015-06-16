@@ -42967,7 +42967,7 @@ angular.module('manage.manageNews', ['ngFileUpload'])
     })
 
     //from http://codepen.io/paulbhartzog/pen/Ekztl?editors=101
-    .value('uiTinymceConfig', {})
+    .value('uiTinymceConfig', {plugins: 'code textcolor link image spellchecker'})
     .directive('uiTinymce', ['uiTinymceConfig', function(uiTinymceConfig) {
         uiTinymceConfig = uiTinymceConfig || {};
         var generatedIds = 0;
