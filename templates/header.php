@@ -184,7 +184,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                 <ul>
                                                     <li class="menu-acumen"><a href="http://acumen.lib.ua.edu/home">Acumen Digital Archives</a></li>
                                                     <li class="menu-hoole"><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/hoole-library/">Hoole Special Collections</a></li>
-                                                    <li class=menu-williams"><a href="http://lib.ua.edu/williamscollection">Williams Collection</a></li>
+                                                    <li class="menu-williams"><a href="<?php echo site_url(); ?>/collections/williams/">Williams Collection</a></li>
                                                 </ul>
                                             </div>
                                         </div>
