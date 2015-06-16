@@ -43607,6 +43607,8 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                             newSW.versions = angular.copy(response.data.versions);
                             newSW.links = angular.copy(response.data.links);
                             newSW.categories = angular.copy(response.data.categories);
+                            newSW.status = 0;
+                            newSW.icon = response.data.icon;
                             newSW.show = false;
                             newSW.class = "";
                             for (var i = 0; i < newSW.versions.length; i++){
