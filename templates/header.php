@@ -139,7 +139,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                             <a class="service-card" href="http://guides.lib.ua.edu/">
                                                 <span class="fa fa-compass"></span>
                                                 <h4>Research Guides</h4>
-                                                <p>Explore subject and course specific resource in guides curated by UA librarians</p>
+                                                <p>Explore subject and course specific resources in guides curated by UA librarians</p>
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
@@ -171,7 +171,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                 <h4>Music Library</h4>
                                                 <ul>
                                                     <li class="menu-video-database-search"><a href="<?php echo site_url(); ?>/#videos">Video Database Search</a></li>
-                                                    <li class="menu-research-guides"><a href="https://guides.lib.ua.edu/visualperformingarts">Research Guides</a></li>
+                                                    <li class="menu-research-guides"><a href="http://guides.lib.ua.edu/visualperformingarts">Research Guides</a></li>
                                                     <li class="menu-home"><a href="https://wwwdev2.lib.ua.edu/libraries-and-collections/music-library/">Music Library Home</a></li>
                                                 </ul>
                                             </div>
@@ -220,7 +220,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                 <h4>Computers, Software, &amp; Equipment</h4>
                                                 <ul>
                                                     <li><a href="<?php echo site_url(); ?>/services/photocopying/">Print, Scan, Copy</a></li>
-                                                    <li class="menu-computer-availability"><a href="<?php echo site_url(); ?>/services/computer-availability/computer-availability/">Computer Availability</a></li>
+                                                    <li class="menu-computer-availability"><a href="http://www.lib.ua.edu/computers">Computer Availability</a></li>
                                                     <li class="menu-laptop-computers"><a href="<?php echo site_url(); ?>/services/computer-availability/laptop-computers/">Equipment</a></li>
                                                     <li class="menu-library-software-list"><a href="<?php echo site_url(); ?>/#software">Library Software List</a></li>
 
@@ -391,7 +391,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="<?php echo site_url(); ?>/#/">
+                                            <a class="service-card" href="<?php echo site_url(); ?>/#/staffdir">
                                                 <span class="fa fa-comments"></span>
                                                 <h4>Subject Specialists</h4>
                                                 <p>Need research help? Reach out to your subject librarian</p>
