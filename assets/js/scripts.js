@@ -4664,11 +4664,11 @@ angular.module('ui.utils',  [
 ;/**!
  * AngularJS file upload/drop directive and service with progress and abort
  * @author  Danial  <danial.farid@gmail.com>
- * @version 5.0.7
+ * @version 5.0.8
  */
 var ngFileUpload = angular.module('ngFileUpload', []);
 
-ngFileUpload.version = '5.0.7';
+ngFileUpload.version = '5.0.8';
 ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, $timeout) {
   function patchXHR(fnName, newFn) {
     window.XMLHttpRequest.prototype[fnName] = newFn(window.XMLHttpRequest.prototype[fnName]);
@@ -4953,8 +4953,6 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
         }
 
         function createFileInput(evt, resetOnClick) {
-            if (elem.attr('disabled') || disabled) return;
-
             if (!resetOnClick && (evt || isInputTypeFile())) return elem.$$ngfRefElem || elem;
 
             var fileElem = angular.element('<input type="file">');
@@ -4984,6 +4982,7 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
         }
 
         function clickHandler(evt) {
+            if (elem.attr('disabled') || disabled) return false;
             if (evt != null) {
                 evt.preventDefault();
                 evt.stopPropagation();
@@ -5399,7 +5398,7 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
  * AngularJS file upload/drop directive and service with progress and abort
  * FileAPI Flash shim for old browsers not supporting FormData
  * @author  Danial  <danial.farid@gmail.com>
- * @version 5.0.7
+ * @version 5.0.8
  */
 
 (function () {
@@ -39836,42 +39835,42 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                <div class=\"col-md-6 form-group\">\n" +
     "                    <label for=\"{{db.id}}_title\">Title</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.title}}\" ng-model=\"db.title\"\n" +
-    "                           id=\"{{db.id}}_title\">\n" +
+    "                           id=\"{{db.id}}_title\" maxlength=\"200\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Publisher\">Publisher</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.publisher}}\" ng-model=\"db.publisher\"\n" +
-    "                           id=\"{{db.id}}_Publisher\">\n" +
+    "                           id=\"{{db.id}}_Publisher\" maxlength=\"100\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Vendor\">Vendor</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.vendor}}\" ng-model=\"db.vendor\"\n" +
-    "                           id=\"{{db.id}}_Vendor\">\n" +
+    "                           id=\"{{db.id}}_Vendor\" maxlength=\"100\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Format\">Format</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.format}}\" ng-model=\"db.format\"\n" +
-    "                           id=\"{{db.id}}_Format\">\n" +
+    "                           id=\"{{db.id}}_Format\" maxlength=\"50\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-6 form-group\">\n" +
     "                    <label for=\"{{db.id}}_URL\">URL</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.url}}\" ng-model=\"db.url\"\n" +
-    "                           id=\"{{db.id}}_URL\">\n" +
+    "                           id=\"{{db.id}}_URL\" maxlength=\"2000\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Location\">Location</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.location}}\" ng-model=\"db.location\"\n" +
-    "                           id=\"{{db.id}}_Location\">\n" +
+    "                           id=\"{{db.id}}_Location\" maxlength=\"50\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_NotInEDS\">Not in EDS</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.notInEDS}}\" ng-model=\"db.notInEDS\"\n" +
-    "                           id=\"{{db.id}}_NotInEDS\">\n" +
+    "                           id=\"{{db.id}}_NotInEDS\" maxlength=\"1\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Full-text\">Fulltext</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.hasFullText}}\" ng-model=\"db.hasFullText\"\n" +
-    "                           id=\"{{db.id}}_Full-text\">\n" +
+    "                           id=\"{{db.id}}_Full-text\" maxlength=\"1\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Authenticate\">Authenticate</label>\n" +
@@ -39881,36 +39880,36 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                <div class=\"col-md-6 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Coverage\">Coverage</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.coverage}}\" ng-model=\"db.coverage\"\n" +
-    "                           id=\"{{db.id}}_Coverage\" >\n" +
+    "                           id=\"{{db.id}}_Coverage\" maxlength=\"256\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-3 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Notes\">Notes</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.notes}}\" ng-model=\"db.notes\"\n" +
-    "                           id=\"{{db.id}}_Notes\">\n" +
+    "                           id=\"{{db.id}}_Notes\" maxlength=\"100\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-3 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Status\">Status</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.status}}\" ng-model=\"db.status\"\n" +
-    "                           id=\"{{db.id}}_Status\">\n" +
+    "                           id=\"{{db.id}}_Status\" maxlength=\"100\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-12 form-group\">\n" +
     "                    <label for=\"{{db.id}}_descr\">Database Description</label>\n" +
-    "                    <textarea class=\"form-control\" rows=\"3\" id=\"{{db.id}}_descr\" ng-model=\"db.description\" ></textarea>\n" +
+    "                    <textarea class=\"form-control\" rows=\"3\" id=\"{{db.id}}_descr\" ng-model=\"db.description\" maxlength=\"4096\"></textarea>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{db.id}}_presented\">PresentedBy</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.presentedBy}}\" ng-model=\"db.presentedBy\"\n" +
-    "                           id=\"{{db.id}}_presented\">\n" +
+    "                           id=\"{{db.id}}_presented\" maxlength=\"50\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Audience1\">Audience1</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.audience1}}\" ng-model=\"db.audience1\"\n" +
-    "                           id=\"{{db.id}}_Audience1\">\n" +
+    "                           id=\"{{db.id}}_Audience1\" maxlength=\"30\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Audience2\">Audience2</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.audience2}}\" ng-model=\"db.audience2\"\n" +
-    "                           id=\"{{db.id}}_Audience2\">\n" +
+    "                           id=\"{{db.id}}_Audience2\" maxlength=\"30\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_updatedBy\">Updated by</label>\n" +
@@ -39919,7 +39918,7 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_dAuthor\">Description Author</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.descrAuthor}}\" ng-model=\"db.descrAuthor\"\n" +
-    "                           id=\"{{db.id}}_dAuthor\">\n" +
+    "                           id=\"{{db.id}}_dAuthor\" maxlength=\"50\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_date1\">Created/Modified</label>\n" +
@@ -39995,42 +39994,42 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "            <div class=\"col-md-6 form-group\">\n" +
     "                <label for=\"title\">Title</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Database Title\" ng-model=\"newDB.title\"\n" +
-    "                       id=\"title\" required>\n" +
+    "                       id=\"title\" maxlength=\"200\" required>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-2 form-group\">\n" +
     "                <label for=\"Publisher\">Publisher</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Publisher\" ng-model=\"newDB.publisher\"\n" +
-    "                       id=\"Publisher\">\n" +
+    "                       id=\"Publisher\" maxlength=\"100\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-2 form-group\">\n" +
     "                <label for=\"Vendor\">Vendor</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Vendor\" ng-model=\"newDB.vendor\"\n" +
-    "                       id=\"Vendor\">\n" +
+    "                       id=\"Vendor\" maxlength=\"100\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-2 form-group\">\n" +
     "                <label for=\"Format\">Format</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Format\" ng-model=\"newDB.format\"\n" +
-    "                       id=\"Format\">\n" +
+    "                       id=\"Format\" maxlength=\"50\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-6 form-group\">\n" +
     "                <label for=\"URL\">URL</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"http://www.example.com/\" ng-model=\"newDB.url\"\n" +
-    "                       id=\"URL\" required>\n" +
+    "                       id=\"URL\" maxlength=\"2000\" required>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-2 form-group\">\n" +
     "                <label for=\"Location\">Location</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Location\" ng-model=\"newDB.location\"\n" +
-    "                       id=\"Location\">\n" +
+    "                       id=\"Location\" maxlength=\"50\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-2 form-group\">\n" +
     "                <label for=\"NotInEDS\">Not in EDS</label>\n" +
     "                <input type=\"text\" class=\"form-control\" ng-model=\"newDB.notInEDS\"\n" +
-    "                       id=\"NotInEDS\">\n" +
+    "                       id=\"NotInEDS\" maxlength=\"1\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-1 form-group\">\n" +
     "                <label for=\"Full-text\">Fulltext</label>\n" +
     "                <input type=\"text\" class=\"form-control\" ng-model=\"newDB.hasFullText\"\n" +
-    "                       id=\"Full-text\">\n" +
+    "                       id=\"Full-text\" maxlength=\"1\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-1 form-group\">\n" +
     "                <label for=\"Authenticate\">Authenticate</label>\n" +
@@ -40040,41 +40039,41 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "            <div class=\"col-md-6 form-group\">\n" +
     "                <label for=\"Coverage\">Coverage</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Database Coverage\" ng-model=\"newDB.coverage\"\n" +
-    "                       id=\"Coverage\" required>\n" +
+    "                       id=\"Coverage\" maxlength=\"256\" required>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-3 form-group\">\n" +
     "                <label for=\"dAuthor\">Description Author</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Enter Author Name\" ng-model=\"newDB.descrAuthor\"\n" +
-    "                       id=\"dAuthor\">\n" +
+    "                       id=\"dAuthor\" maxlength=\"50\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-3 form-group\">\n" +
     "                <label for=\"Status\">Status</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Status\" ng-model=\"newDB.status\"\n" +
-    "                       id=\"Status\">\n" +
+    "                       id=\"Status\" maxlength=\"100\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-12 form-group\">\n" +
     "                <label for=\"descr\">Database Description</label>\n" +
-    "                <textarea class=\"form-control\" rows=\"3\" id=\"descr\" ng-model=\"newDB.description\" required></textarea>\n" +
+    "                <textarea class=\"form-control\" rows=\"3\" id=\"descr\" ng-model=\"newDB.description\" maxlength=\"4096\" required></textarea>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-2 form-group\">\n" +
     "                <label for=\"presented\">Presented by</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Presented By\" ng-model=\"newDB.presentedBy\"\n" +
-    "                       id=\"presented\">\n" +
+    "                       id=\"presented\" maxlength=\"50\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-2 form-group\">\n" +
     "                <label for=\"Audience1\">Audience One</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Audience One\" ng-model=\"newDB.audience1\"\n" +
-    "                       id=\"Audience1\">\n" +
+    "                       id=\"Audience1\" maxlength=\"30\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-2 form-group\">\n" +
     "                <label for=\"Audience2\">Audience Two</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Audience Two\" ng-model=\"newDB.audience2\"\n" +
-    "                       id=\"Audience2\">\n" +
+    "                       id=\"Audience2\" maxlength=\"30\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-4 form-group\">\n" +
     "                <label for=\"Notes\">Notes</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Notes\" ng-model=\"newDB.notes\"\n" +
-    "                       id=\"Notes\">\n" +
+    "                       id=\"Notes\" maxlength=\"100\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-1 form-group\">\n" +
     "                <label for=\"Disable\">Disabled</label>\n" +
@@ -40468,31 +40467,35 @@ angular.module("manageNews/manageNews.tpl.html", []).run(["$templateCache", func
 angular.module("manageNews/manageNewsAdmins.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageNews/manageNewsAdmins.tpl.html",
     "<div class=\"row\" ng-if=\"isAdmin\">\n" +
-    "    <div class=\"panel panel-default col-md-12\">\n" +
-    "        <div class=\"panel-heading\">\n" +
-    "            <h3 class=\"panel-title\">People who can approve submitted News and Exhibits</h3>\n" +
-    "        </div>\n" +
-    "        <div class=\"panel-body\">\n" +
-    "            <ul class=\"list-group\">\n" +
-    "                <li class=\"list-group-item\" ng-repeat=\"admin in data.admins\">\n" +
-    "                    {{admin.name}}\n" +
-    "                </li>\n" +
-    "            </ul>\n" +
+    "    <div class=\"col-md-12\">\n" +
+    "        <div class=\"panel panel-default\">\n" +
+    "            <div class=\"panel-heading\">\n" +
+    "                <h3 class=\"panel-title\">People who can approve submitted News and Exhibits</h3>\n" +
+    "            </div>\n" +
+    "            <div class=\"panel-body\">\n" +
+    "                <ul class=\"list-group\">\n" +
+    "                    <li class=\"list-group-item\" ng-repeat=\"admin in data.admins\">\n" +
+    "                        {{admin.name}}\n" +
+    "                    </li>\n" +
+    "                </ul>\n" +
+    "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
     "\n" +
     "<div class=\"row\" ng-if=\"!isAdmin\">\n" +
-    "    <div class=\"panel panel-default col-md-12\">\n" +
-    "        <div class=\"panel-heading\">\n" +
-    "            <h3 class=\"panel-title\">People who can approve submitted News and Exhibits</h3>\n" +
-    "        </div>\n" +
-    "        <div class=\"panel-body\">\n" +
-    "            <ul class=\"list-group\">\n" +
-    "                <li class=\"list-group-item\" ng-repeat=\"admin in data.admins\">\n" +
-    "                    {{admin.name}}\n" +
-    "                </li>\n" +
-    "            </ul>\n" +
+    "    <div class=\"col-md-12\">\n" +
+    "        <div class=\"panel panel-default\">\n" +
+    "            <div class=\"panel-heading\">\n" +
+    "                <h3 class=\"panel-title\">People who can approve submitted News and Exhibits</h3>\n" +
+    "            </div>\n" +
+    "            <div class=\"panel-body\">\n" +
+    "                <ul class=\"list-group\">\n" +
+    "                    <li class=\"list-group-item\" ng-repeat=\"admin in data.admins\">\n" +
+    "                        {{admin.name}}\n" +
+    "                    </li>\n" +
+    "                </ul>\n" +
+    "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>");
@@ -40503,83 +40506,85 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "<div>\n" +
     "    <form name=\"addNewsExh\" ng-submit=\"createNews()\">\n" +
     "        <div class=\"row\">\n" +
-    "            <div class=\"col-md-12 sdOpen\">\n" +
-    "                <h3>Add News Record</h3>\n" +
-    "                <div class=\"col-md-12\">\n" +
-    "                    <div class=\"col-md-3 form-group\">\n" +
-    "                        <label for=\"up\">Upload Icon</label>\n" +
-    "                        <input type=\"file\" ngf-select=\"\" ng-model=\"newNews.picFile\" accept=\"image/png\"\n" +
-    "                               ngf-change=\"generateThumb(newNews.picFile[0], $files)\" id=\"up\">\n" +
-    "                            <span class=\"progress\" ng-show=\"newNews.picFile[0].progress >= 0\">\n" +
-    "                                <div class=\"ng-binding\" style=\"width:{{newNews.picFile[0].progress}}%\" ng-bind=\"newNews.picFile[0].progress + '%'\"></div>\n" +
-    "                            </span>\n" +
+    "            <div class=\"col-md-12\">\n" +
+    "                <div class=\"col-md-12 sdOpen\">\n" +
+    "                    <h3>Add News Record</h3>\n" +
+    "                    <div class=\"col-md-12\">\n" +
+    "                        <div class=\"col-md-3 form-group\">\n" +
+    "                            <label for=\"up\">Upload Icon</label>\n" +
+    "                            <input type=\"file\" ngf-select=\"\" ng-model=\"newNews.picFile\" accept=\"image/png\"\n" +
+    "                                   ngf-change=\"generateThumb(newNews.picFile[0], $files)\" id=\"up\">\n" +
+    "                                <span class=\"progress\" ng-show=\"newNews.picFile[0].progress >= 0\">\n" +
+    "                                    <div class=\"ng-binding\" style=\"width:{{newNews.picFile[0].progress}}%\" ng-bind=\"newNews.picFile[0].progress + '%'\"></div>\n" +
+    "                                </span>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"col-md-5 form-group\">\n" +
+    "                            <label for=\"title\">Title</label>\n" +
+    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Enter Title\" ng-model=\"newNews.title\"\n" +
+    "                                   id=\"title\" maxlength=\"100\" required>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"col-md-2 form-group\">\n" +
+    "                            <label for=\"from\">Active From</label>\n" +
+    "                            <input type=\"text\" class=\"form-control\" id=\"from\" datepicker-popup=\"{{dpFormat}}\"\n" +
+    "                                   ng-model=\"newNews.activeFrom\" is-open=\"newNews.dpFrom\" ng-required=\"true\" close-text=\"Close\"\n" +
+    "                                   ng-focus=\"onNewsDPFocusFrom($event)\"/>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"col-md-2 form-group\">\n" +
+    "                            <label for=\"until\">Active Until</label>\n" +
+    "                            <input type=\"text\" class=\"form-control\" id=\"until\" datepicker-popup=\"{{dpFormat}}\"\n" +
+    "                                   ng-model=\"newNews.activeUntil\" is-open=\"newNews.dpUntil\" ng-required=\"true\" close-text=\"Close\"\n" +
+    "                                   ng-focus=\"onNewsDPFocusUntil($event)\"/>\n" +
+    "                        </div>\n" +
     "                    </div>\n" +
-    "                    <div class=\"col-md-5 form-group\">\n" +
-    "                        <label for=\"title\">Title</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Enter Title\" ng-model=\"newNews.title\"\n" +
-    "                               id=\"title\" maxlength=\"100\" required>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-2 form-group\">\n" +
-    "                        <label for=\"from\">Active From</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" id=\"from\" datepicker-popup=\"{{dpFormat}}\"\n" +
-    "                               ng-model=\"newNews.activeFrom\" is-open=\"newNews.dpFrom\" ng-required=\"true\" close-text=\"Close\"\n" +
-    "                               ng-focus=\"onNewsDPFocusFrom($event)\"/>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-2 form-group\">\n" +
-    "                        <label for=\"until\">Active Until</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" id=\"until\" datepicker-popup=\"{{dpFormat}}\"\n" +
-    "                               ng-model=\"newNews.activeUntil\" is-open=\"newNews.dpUntil\" ng-required=\"true\" close-text=\"Close\"\n" +
-    "                               ng-focus=\"onNewsDPFocusUntil($event)\"/>\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-12\">\n" +
-    "                    <div class=\"col-md-10 form-group\">\n" +
-    "                        <label for=\"blurb\">Short Description</label>\n" +
-    "                        <textarea class=\"form-control\" rows=\"1\" id=\"blurb\" ng-model=\"newNews.blurb\" maxlength=\"250\" required></textarea>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-2 form-group\">\n" +
-    "                        <label for=\"type\">Type</label>\n" +
-    "                        <select class=\"form-control\" id=\"type\" ng-options=\"type.name for type in types\"\n" +
-    "                                ng-model=\"newNews.selType\">\n" +
-    "                        </select>\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-12\">\n" +
-    "                    <div class=\"col-md-12 form-group\">\n" +
-    "                        <label>Detailed Description</label>\n" +
-    "                        <textarea data-ui-tinymce id=\"description\" data-ng-model=\"newNews.description\" rows=\"5\"\n" +
-    "                                  maxlength=\"64000\" required></textarea>\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-12 form-group\">\n" +
-    "                    <h4><small>Select contact person from the list or enter new contact information</small></h4>\n" +
-    "                    <div class=\"form-group\">\n" +
-    "                        <div class=\"col-md-3\">\n" +
-    "                            <label for=\"contact1\">Library Faculty and Staff</label>\n" +
-    "                            <select class=\"form-control\" id=\"contact1\" ng-options=\"people.fullName for people in data.people\"\n" +
-    "                                    ng-model=\"newNews.contactID\">\n" +
+    "                    <div class=\"col-md-12\">\n" +
+    "                        <div class=\"col-md-10 form-group\">\n" +
+    "                            <label for=\"blurb\">Short Description</label>\n" +
+    "                            <textarea class=\"form-control\" rows=\"1\" id=\"blurb\" ng-model=\"newNews.blurb\" maxlength=\"250\" required></textarea>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"col-md-2 form-group\">\n" +
+    "                            <label for=\"type\">Type</label>\n" +
+    "                            <select class=\"form-control\" id=\"type\" ng-options=\"type.name for type in types\"\n" +
+    "                                    ng-model=\"newNews.selType\">\n" +
     "                            </select>\n" +
     "                        </div>\n" +
-    "                        <div class=\"col-md-3\">\n" +
-    "                            <label for=\"contact2\">Name</label>\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Contact Name\" ng-model=\"newNews.contactName\"\n" +
-    "                                   id=\"contact2\" maxlength=\"60\">\n" +
-    "                        </div>\n" +
-    "                        <div class=\"col-md-3\">\n" +
-    "                            <label for=\"contact3\">Email</label>\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Contact Email\" ng-model=\"newNews.contactEmail\"\n" +
-    "                                   id=\"contact3\"  maxlength=\"1024\">\n" +
-    "                        </div>\n" +
-    "                        <div class=\"col-md-3\">\n" +
-    "                            <label for=\"contact4\">Phone</label>\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Contact Phone\" ng-model=\"newNews.contactPhone\"\n" +
-    "                                   id=\"contact4\" maxlength=\"20\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-12\">\n" +
+    "                        <div class=\"col-md-12 form-group\">\n" +
+    "                            <label>Detailed Description</label>\n" +
+    "                            <textarea data-ui-tinymce id=\"description\" data-ng-model=\"newNews.description\" rows=\"5\"\n" +
+    "                                      maxlength=\"64000\" required></textarea>\n" +
     "                        </div>\n" +
     "                    </div>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-12 text-center form-group\">\n" +
-    "                    <button type=\"submit\" class=\"btn btn-success\">Create New Record</button><br>\n" +
-    "                    {{newNews.formResponse}}\n" +
+    "                    <div class=\"col-md-12 form-group\">\n" +
+    "                        <h4><small>Select contact person from the list or enter new contact information</small></h4>\n" +
+    "                        <div class=\"form-group\">\n" +
+    "                            <div class=\"col-md-3\">\n" +
+    "                                <label for=\"contact1\">Library Faculty and Staff</label>\n" +
+    "                                <select class=\"form-control\" id=\"contact1\" ng-options=\"people.fullName for people in data.people\"\n" +
+    "                                        ng-model=\"newNews.contactID\">\n" +
+    "                                </select>\n" +
+    "                            </div>\n" +
+    "                            <div class=\"col-md-3\">\n" +
+    "                                <label for=\"contact2\">Name</label>\n" +
+    "                                <input type=\"text\" class=\"form-control\" placeholder=\"Contact Name\" ng-model=\"newNews.contactName\"\n" +
+    "                                       id=\"contact2\" maxlength=\"60\">\n" +
+    "                            </div>\n" +
+    "                            <div class=\"col-md-3\">\n" +
+    "                                <label for=\"contact3\">Email</label>\n" +
+    "                                <input type=\"text\" class=\"form-control\" placeholder=\"Contact Email\" ng-model=\"newNews.contactEmail\"\n" +
+    "                                       id=\"contact3\"  maxlength=\"1024\">\n" +
+    "                            </div>\n" +
+    "                            <div class=\"col-md-3\">\n" +
+    "                                <label for=\"contact4\">Phone</label>\n" +
+    "                                <input type=\"text\" class=\"form-control\" placeholder=\"Contact Phone\" ng-model=\"newNews.contactPhone\"\n" +
+    "                                       id=\"contact4\" maxlength=\"20\">\n" +
+    "                            </div>\n" +
+    "                        </div>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-12 text-center form-group\">\n" +
+    "                        <button type=\"submit\" class=\"btn btn-success\">Create New Record</button><br>\n" +
+    "                        {{newNews.formResponse}}\n" +
+    "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
@@ -40793,13 +40798,13 @@ angular.module("manageOneSearch/manageOneSearch.tpl.html", []).run(["$templateCa
     "                   id=\"K\" required>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"L\">Link</label>\n" +
+    "            <label for=\"L\">Link URL</label>\n" +
     "            <input type=\"text\" class=\"form-control\" placeholder=\"http://www.example.com/\" maxlength=\"1024\"\n" +
     "                   id=\"L\" ng-model=\"addRec.link\" required>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-3 form-group\">\n" +
     "            <label for=\"LT\">Link Title</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Link Title\" maxlength=\"100\" ng-model=\"addRec.title\"\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Link Title\" maxlength=\"100\" ng-model=\"addRec.description\"\n" +
     "                   id=\"LT\" required>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-3 form-group\">\n" +
@@ -40811,28 +40816,87 @@ angular.module("manageOneSearch/manageOneSearch.tpl.html", []).run(["$templateCa
     "<div ng-show=\"response.length > 0\">\n" +
     "    {{response}}\n" +
     "</div>\n" +
-    "<div class=\"row\">\n" +
-    "    <div class=\"col-md-4 form-group\">\n" +
-    "        <label for=\"filterK\">Filter by Keyword</label>\n" +
-    "        <input type=\"text\" class=\"form-control\" placeholder=\"Keyword\" id=\"filterK\" ng-model=\"filterKeyword\">\n" +
-    "    </div>\n" +
-    "    <div class=\"col-md-4 form-group\">\n" +
-    "        <label for=\"filterLT\">Filter by Link Title</label>\n" +
-    "        <input type=\"text\" class=\"form-control\" placeholder=\"Link Title\" id=\"filterLT\" ng-model=\"filterLinkTitle\">\n" +
-    "    </div>\n" +
-    "    <div class=\"col-md-4 form-group\">\n" +
-    "        <label for=\"filterL\">Filter by Link</label>\n" +
-    "        <input type=\"text\" class=\"form-control\" placeholder=\"Link\" id=\"filterL\" ng-model=\"filterLink\">\n" +
+    "\n" +
+    "<div class=\"row form-inline\">\n" +
+    "    <div class=\"form-group col-md-12\">\n" +
+    "        <label for=\"filterBy\">Filter <small>{{filteredList.length}}</small> results by</label>\n" +
+    "        <div id=\"filterBy\">\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Keyword contains\" ng-model=\"filterKeyword\">\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"filterLinkTitle\">\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"URL contains\" ng-model=\"filterLink\">\n" +
+    "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
     "\n" +
-    "<div class=\"row\">\n" +
-    "    <div class=\"col-md-6\"\n" +
-    "         ng-repeat=\"rec in recList.RecList | filter:{keyword:filterKeyword} | filter:{link:filterLink} | filter:{description:filterLinkTitle}\">\n" +
-    "        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteRec(rec, $index)\">Delete</button>\n" +
-    "        <span>{{rec.keyword}} = <a href=\"{{rec.link}}\">{{rec.description}}</a></span>\n" +
-    "    </div>\n" +
-    "</div>");
+    "<div class=\"table-responsive\">\n" +
+    "    <table class=\"table table-condensed table-hover\">\n" +
+    "        <thead>\n" +
+    "        <tr>\n" +
+    "            <th class=\"hidden-xs\" style=\"width:20%\">\n" +
+    "                <a\n" +
+    "                        ng-click=\"sortBy(0)\"\n" +
+    "                        ng-class=\"{'sortable': !sortModes[0].reverse && sortMode == 0, 'sortable-reverse': sortModes[0].reverse && sortMode == 0}\">\n" +
+    "                    Keyword\n" +
+    "                </a>\n" +
+    "            </th>\n" +
+    "            <th class=\"hidden-xs\">\n" +
+    "                <a\n" +
+    "                        ng-click=\"sortBy(1)\"\n" +
+    "                        ng-class=\"{'sortable': !sortModes[1].reverse && sortMode == 1, 'sortable-reverse': sortModes[1].reverse && sortMode == 1}\">\n" +
+    "                    Title\n" +
+    "                </a>\n" +
+    "            </th>\n" +
+    "            <th class=\"hidden-xs\">\n" +
+    "                <a\n" +
+    "                        ng-click=\"sortBy(2)\"\n" +
+    "                        ng-class=\"{'sortable': !sortModes[2].reverse && sortMode == 2, 'sortable-reverse': sortModes[2].reverse && sortMode == 2}\">\n" +
+    "                    URL\n" +
+    "                </a>\n" +
+    "            </th>\n" +
+    "            <th style=\"width:120px\">\n" +
+    "                Action\n" +
+    "            </th>\n" +
+    "        </tr>\n" +
+    "        </thead>\n" +
+    "        <tbody>\n" +
+    "        <tr ng-repeat=\"rec in (filteredList = recList.RecList | filter:{keyword:filterKeyword}\n" +
+    "                                                              | filter:{link:filterLink}\n" +
+    "                                                              | filter:{description:filterLinkTitle}\n" +
+    "                                                              | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\"\n" +
+    "                ng-click=\"expand(rec)\">\n" +
+    "            <td>\n" +
+    "                <span ng-show=\"expanded != rec.id\">{{rec.keyword}}</span>\n" +
+    "                <span ng-show=\"expanded == rec.id\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Keyword\" maxlength=\"200\" ng-model=\"rec.keyword\">\n" +
+    "                </span>\n" +
+    "            </td>\n" +
+    "            <td>\n" +
+    "                <span ng-show=\"expanded != rec.id\">{{rec.description}}</span>\n" +
+    "                <span ng-show=\"expanded == rec.id\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Title\" maxlength=\"100\" ng-model=\"rec.description\">\n" +
+    "                </span>\n" +
+    "            </td>\n" +
+    "            <td>\n" +
+    "                <span ng-show=\"expanded != rec.id\"><a href=\"{{rec.link}}\">{{rec.link}}</a></span>\n" +
+    "                <span ng-show=\"expanded == rec.id\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"URL\" maxlength=\"1024\" ng-model=\"rec.link\">\n" +
+    "                </span>\n" +
+    "            </td>\n" +
+    "            <td>\n" +
+    "                <span ng-show=\"expanded == rec.id\">\n" +
+    "                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"updateRec(rec)\">\n" +
+    "                        <span class=\"fa fa-fw fa-edit\"></span>\n" +
+    "                    </button>\n" +
+    "                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteRec(rec, $index)\">\n" +
+    "                        <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                    </button>\n" +
+    "                </span>\n" +
+    "            </td>\n" +
+    "        </tr>\n" +
+    "        </tbody>\n" +
+    "    </table>\n" +
+    "</div>\n" +
+    "");
 }]);
 
 angular.module("manageSoftware/manageSoftware.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -40859,23 +40923,22 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "<div>\n" +
     "    <div class=\"row form-inline\">\n" +
     "        <div class=\"form-group col-md-12\">\n" +
-    "            <label for=\"filterBy\">Filter <small>{{filteredSW.length}}</small> results by</label>\n" +
-    "            <div id=\"filterBy\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"titleFilter\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Description contains\" ng-model=\"descrFilter\">\n" +
+    "            <div class=\"col-md-6\">\n" +
+    "                <label for=\"filterBy\">Filter <small>{{filteredSW.length}}</small> results by</label>\n" +
+    "                <div id=\"filterBy\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"titleFilter\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Description contains\" ng-model=\"descrFilter\">\n" +
+    "                </div>\n" +
     "            </div>\n" +
-    "            <label for=\"sortBy\">Sort by</label>\n" +
-    "            <div id=\"sortBy\">\n" +
-    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"0\" ng-click=\"sortBy(0)\">\n" +
-    "                    Title\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[0].reverse\"></span>\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[0].reverse\"></span>\n" +
-    "                </button>\n" +
-    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"1\" ng-click=\"sortBy(1)\">\n" +
-    "                    Location\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[1].reverse\"></span>\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[1].reverse\"></span>\n" +
-    "                </button>\n" +
+    "            <div class=\"col-md-6\">\n" +
+    "                <label for=\"sortBy\">Sort by</label>\n" +
+    "                <div id=\"sortBy\">\n" +
+    "                    <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"0\" ng-click=\"sortBy(0)\">\n" +
+    "                        Title\n" +
+    "                        <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[0].reverse\"></span>\n" +
+    "                        <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[0].reverse\"></span>\n" +
+    "                    </button>\n" +
+    "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
@@ -40914,7 +40977,7 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                </tr>\n" +
     "            </table>\n" +
     "        </div>\n" +
-    "        <div ng-show=\"sw.show\">\n" +
+    "        <div ng-if=\"sw.show\">\n" +
     "            <form name=\"editSW{{sw.sid}}\" ng-submit=\"updateSW(sw)\">\n" +
     "                <div class=\"col-md-12\">\n" +
     "                    <div class=\"col-md-6 form-group\">\n" +
@@ -40928,17 +40991,19 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                    <div class=\"col-md-6 form-group\">\n" +
     "                        <label for=\"{{sw.sid}}_title\">Title</label>\n" +
     "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{sw.title}}\" ng-model=\"sw.title\"\n" +
-    "                               id=\"{{sw.sid}}_title\" required>\n" +
+    "                               id=\"{{sw.sid}}_title\" maxlength=\"50\" required>\n" +
     "                    </div>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-12\">\n" +
     "                    <div class=\"col-md-6 form-group\">\n" +
     "                        <label for=\"{{sw.sid}}_descr\">Description</label>\n" +
-    "                        <textarea class=\"form-control\" rows=\"3\" id=\"{{sw.sid}}_descr\" ng-model=\"sw.description\" required></textarea>\n" +
+    "                        <textarea class=\"form-control\" rows=\"3\" id=\"{{sw.sid}}_descr\" ng-model=\"sw.description\"\n" +
+    "                                  maxlength=\"4096\" required></textarea>\n" +
     "                    </div>\n" +
     "                    <div class=\"col-md-6 form-group\">\n" +
     "                        <label for=\"{{sw.sid}}_mod\">List of Installed Modules</label>\n" +
-    "                        <textarea class=\"form-control\" rows=\"3\" id=\"{{sw.sid}}_mod\" ng-model=\"sw.modules\" ></textarea>\n" +
+    "                        <textarea class=\"form-control\" rows=\"3\" id=\"{{sw.sid}}_mod\" ng-model=\"sw.modules\"\n" +
+    "                                  maxlength=\"4096\"></textarea>\n" +
     "                    </div>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-12\">\n" +
@@ -40953,13 +41018,16 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                            </li>\n" +
     "                            <li class=\"list-group-item col-md-12\">\n" +
     "                                <div class=\"col-md-4\">\n" +
-    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"Link Description\" ng-model=\"sw.newLink.description\">\n" +
+    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"Link Description\"\n" +
+    "                                           ng-model=\"sw.newLink.description\" maxlength=\"200\">\n" +
     "                                </div>\n" +
     "                                <div class=\"col-md-3\">\n" +
-    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"Link Title\" ng-model=\"sw.newLink.title\">\n" +
+    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"Link Title\"\n" +
+    "                                           ng-model=\"sw.newLink.title\" maxlength=\"100\">\n" +
     "                                </div>\n" +
     "                                <div class=\"col-md-4\">\n" +
-    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"http://www.example.com/\" ng-model=\"sw.newLink.url\">\n" +
+    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"http://www.example.com/\"\n" +
+    "                                           ng-model=\"sw.newLink.url\" maxlength=\"1024\">\n" +
     "                                </div>\n" +
     "                                <div class=\"col-md-1\">\n" +
     "                                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"addLink(sw)\"\n" +
@@ -40976,25 +41044,28 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                        <label for=\"{{sw.sid}}_ver\">Versions</label>\n" +
     "                        <ul class=\"list-group\" id=\"{{sw.sid}}_ver\">\n" +
     "                            <li class=\"list-group-item col-md-12\" ng-repeat=\"version in sw.versions\">\n" +
-    "                                <div class=\"col-md-4\">\n" +
+    "                                <div class=\"col-md-1\">\n" +
     "                                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteVersion(sw,version)\">\n" +
     "                                        <span class=\"fa fa-fw fa-close\"></span>\n" +
     "                                    </button>\n" +
-    "                                    {{version.version}}\n" +
     "                                    <span class=\"fa fa-fw fa-windows\" ng-show=\"version.os == 1\"></span>\n" +
     "                                    <span class=\"fa fa-fw fa-apple\" ng-show=\"version.os == 2\"></span>\n" +
+    "                                </div>\n" +
+    "                                <div class=\"col-md-3\">\n" +
+    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"Version\" ng-model=\"version.version\"\n" +
+    "                                           maxlength=\"50\">\n" +
     "                                </div>\n" +
     "                                <div class=\"col-md-8 form-group\">\n" +
     "                                    <label for=\"{{sw.sid}}_loc\">Locations</label>\n" +
     "                                    <ul class=\"list-group\" id=\"{{sw.sid}}_loc\">\n" +
     "                                        <li class=\"list-group-item col-md-12\" ng-repeat=\"loc in version.locations\">\n" +
-    "                                            <div class=\"col-md-6\">\n" +
+    "                                            <div class=\"col-md-8\">\n" +
     "                                                <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteLocation(sw,version,loc)\">\n" +
     "                                                    <span class=\"fa fa-fw fa-close\"></span>\n" +
     "                                                </button>\n" +
     "                                                {{loc.name}}\n" +
     "                                            </div>\n" +
-    "                                            <div class=\"col-md-5\">\n" +
+    "                                            <div class=\"col-md-3\">\n" +
     "                                                <div class=\"col-md-6\" ng-show=\"checkDevices(loc.devices, 1)\">\n" +
     "                                                    <span class=\"fa fa-fw fa-windows\"></span>\n" +
     "                                                    <span class=\"fa fa-fw fa-desktop\"></span>\n" +
@@ -41017,12 +41088,12 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                                            </div>\n" +
     "                                        </li>\n" +
     "                                        <li class=\"list-group-item col-md-12\">\n" +
-    "                                            <div class=\"col-md-6\">\n" +
+    "                                            <div class=\"col-md-8\">\n" +
     "                                                <select class=\"form-control\" ng-model=\"version.newLoc.selLoc\"\n" +
     "                                                        ng-options=\"loc.name for loc in SWList.locations\">\n" +
     "                                                </select>\n" +
     "                                            </div>\n" +
-    "                                            <div class=\"col-md-5\">\n" +
+    "                                            <div class=\"col-md-3\">\n" +
     "                                                <div class=\"col-md-6\" ng-repeat=\"device in version.newLoc.devices track by $index\"\n" +
     "                                                     ng-show=\"(($index == 0 || $index == 2) && version.os == 1) ||\n" +
     "                                                              (($index == 1 || $index == 3) && version.os == 2)\">\n" +
@@ -41046,7 +41117,8 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                            </li>\n" +
     "                            <li class=\"list-group-item col-md-6\">\n" +
     "                                <div class=\"col-md-6\">\n" +
-    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"Version\" ng-model=\"sw.newVer.version\">\n" +
+    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"Version\" ng-model=\"sw.newVer.version\"\n" +
+    "                                           maxlength=\"50\">\n" +
     "                                </div>\n" +
     "                                <div class=\"col-md-4\">\n" +
     "                                    <select class=\"form-control\" ng-model=\"sw.newVer.selOS\" ng-options=\"opSys.name for opSys in os\">\n" +
@@ -41125,17 +41197,17 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "            <div class=\"col-md-6 form-group\">\n" +
     "                <label for=\"title\">Title</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Software Title\" ng-model=\"newSW.title\"\n" +
-    "                       id=\"title\">\n" +
+    "                       id=\"title\" maxlength=\"50\">\n" +
     "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-12\">\n" +
     "            <div class=\"col-md-6 form-group\">\n" +
     "                <label for=\"descr\">Description</label>\n" +
-    "                <textarea class=\"form-control\" rows=\"3\" id=\"descr\" ng-model=\"newSW.description\" required></textarea>\n" +
+    "                <textarea class=\"form-control\" rows=\"3\" id=\"descr\" ng-model=\"newSW.description\" maxlength=\"4096\" required></textarea>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-6 form-group\">\n" +
     "                <label for=\"mod\">List of Installed Modules</label>\n" +
-    "                <textarea class=\"form-control\" rows=\"3\" id=\"mod\" ng-model=\"newSW.modules\" ></textarea>\n" +
+    "                <textarea class=\"form-control\" rows=\"3\" id=\"mod\" ng-model=\"newSW.modules\" maxlength=\"4096\"></textarea>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-12\">\n" +
@@ -41150,13 +41222,16 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                    </li>\n" +
     "                    <li class=\"list-group-item col-md-12\">\n" +
     "                        <div class=\"col-md-4\">\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Link Description\" ng-model=\"newSW.newLink.description\">\n" +
+    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Link Description\"\n" +
+    "                                   ng-model=\"newSW.newLink.description\" maxlength=\"200\">\n" +
     "                        </div>\n" +
     "                        <div class=\"col-md-3\">\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Link Title\" ng-model=\"newSW.newLink.title\">\n" +
+    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Link Title\"\n" +
+    "                                   ng-model=\"newSW.newLink.title\" maxlength=\"100\">\n" +
     "                        </div>\n" +
     "                        <div class=\"col-md-4\">\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"http://www.example.com/\" ng-model=\"newSW.newLink.url\">\n" +
+    "                            <input type=\"text\" class=\"form-control\" placeholder=\"http://www.example.com/\"\n" +
+    "                                   ng-model=\"newSW.newLink.url\" maxlength=\"1024\">\n" +
     "                        </div>\n" +
     "                        <div class=\"col-md-1\">\n" +
     "                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"addNewSWLink()\"\n" +
@@ -41185,13 +41260,13 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                            <label for=\"loc\">Locations</label>\n" +
     "                            <ul class=\"list-group\" id=\"loc\">\n" +
     "                                <li class=\"list-group-item col-md-12\" ng-repeat=\"loc in version.locations\">\n" +
-    "                                    <div class=\"col-md-6\">\n" +
+    "                                    <div class=\"col-md-8\">\n" +
     "                                        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"delNewSWLoc(version,loc)\">\n" +
     "                                            <span class=\"fa fa-fw fa-close\"></span>\n" +
     "                                        </button>\n" +
     "                                        {{loc.name}}\n" +
     "                                    </div>\n" +
-    "                                    <div class=\"col-md-5\">\n" +
+    "                                    <div class=\"col-md-3\">\n" +
     "                                        <div class=\"col-md-6\" ng-show=\"checkDevices(loc.devices, 1)\">\n" +
     "                                            <span class=\"fa fa-fw fa-windows\"></span>\n" +
     "                                            <span class=\"fa fa-fw fa-desktop\"></span>\n" +
@@ -41214,12 +41289,12 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                                    </div>\n" +
     "                                </li>\n" +
     "                                <li class=\"list-group-item col-md-12\">\n" +
-    "                                    <div class=\"col-md-6\">\n" +
+    "                                    <div class=\"col-md-8\">\n" +
     "                                        <select class=\"form-control\" ng-model=\"version.newLoc.selLoc\"\n" +
     "                                                ng-options=\"loc.name for loc in SWList.locations\">\n" +
     "                                        </select>\n" +
     "                                    </div>\n" +
-    "                                    <div class=\"col-md-5\">\n" +
+    "                                    <div class=\"col-md-3\">\n" +
     "                                        <div class=\"col-md-6\" ng-repeat=\"device in version.newLoc.devices track by $index\"\n" +
     "                                                ng-show=\"(($index == 0 || $index == 2) && version.os == 1) ||\n" +
     "                                                         (($index == 1 || $index == 3) && version.os == 2)\">\n" +
@@ -41243,7 +41318,8 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                    </li>\n" +
     "                    <li class=\"list-group-item col-md-6\">\n" +
     "                        <div class=\"col-md-6\">\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Version\" ng-model=\"newSW.newVer.version\">\n" +
+    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Version\" ng-model=\"newSW.newVer.version\"\n" +
+    "                                   maxlength=\"50\">\n" +
     "                        </div>\n" +
     "                        <div class=\"col-md-4\">\n" +
     "                            <select class=\"form-control\" ng-model=\"newSW.newVer.selOS\" ng-options=\"opSys.name for opSys in os\">\n" +
@@ -41300,30 +41376,32 @@ angular.module("manageSoftware/manageSoftwareLocCat.tpl.html", []).run(["$templa
     "<div class=\"row\">\n" +
     "    <div class=\"col-md-6\">\n" +
     "        <h3>Locations</h3>\n" +
+    "        <div class=\"row\">\n" +
+    "            <div class=\"col-md-2\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Parent ID\" ng-model=\"newLocation.parent\"\n" +
+    "                       maxlength=\"3\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-8\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"New Location Name\" ng-model=\"newLocation.name\"\n" +
+    "                       maxlength=\"50\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2\">\n" +
+    "                <button type=\"button\" class=\"btn btn-success\" ng-click=\"addLocation()\" ng-disabled=\"newLocation.name.length == 0\">\n" +
+    "                    <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "                </button>\n" +
+    "            </div>\n" +
+    "            {{locResponse}}\n" +
+    "        </div>\n" +
     "        <table class=\"table table-hover\">\n" +
     "            <thead>\n" +
     "            <tr>\n" +
-    "                <th>ID</th>\n" +
-    "                <th>Parent ID</th>\n" +
+    "                <th style=\"width:50px;\">ID</th>\n" +
+    "                <th style=\"width:75px;\">Parent</th>\n" +
     "                <th>Name</th>\n" +
-    "                <th>Action</th>\n" +
+    "                <th style=\"width:120px;\">Action</th>\n" +
     "            </tr>\n" +
     "            </thead>\n" +
     "            <tbody>\n" +
-    "            <tr>\n" +
-    "                <div class=\"col-md-2\">\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Parent ID\" ng-model=\"newLocation.parent\">\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-8\">\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"New Location Name\" ng-model=\"newLocation.name\">\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-2\">\n" +
-    "                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"addLocation()\" ng-disabled=\"newLocation.name.length == 0\">\n" +
-    "                        <span class=\"fa fa-fw fa-plus\"></span>\n" +
-    "                    </button>\n" +
-    "                </div>\n" +
-    "                {{locResponse}}\n" +
-    "            </tr>\n" +
     "            <tr ng-repeat=\"location in SWList.locations\" ng-click=\"selectLocation(location)\">\n" +
     "                <td>\n" +
     "                    {{location.lid}}\n" +
@@ -41333,7 +41411,8 @@ angular.module("manageSoftware/manageSoftwareLocCat.tpl.html", []).run(["$templa
     "                        {{location.parent}}\n" +
     "                    </span>\n" +
     "                    <span ng-show=\"selLocation == location.lid\">\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Parent ID\" ng-model=\"location.parent\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Parent ID\" ng-model=\"location.parent\"\n" +
+    "                               maxlength=\"3\">\n" +
     "                    </span>\n" +
     "                </td>\n" +
     "                <td>\n" +
@@ -41341,7 +41420,8 @@ angular.module("manageSoftware/manageSoftwareLocCat.tpl.html", []).run(["$templa
     "                        {{location.name}}\n" +
     "                    </span>\n" +
     "                    <span ng-show=\"selLocation == location.lid\">\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Location Name\" ng-model=\"location.name\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Location Name\" ng-model=\"location.name\"\n" +
+    "                               maxlength=\"50\">\n" +
     "                    </span>\n" +
     "                </td>\n" +
     "                <td>\n" +
@@ -41360,26 +41440,26 @@ angular.module("manageSoftware/manageSoftwareLocCat.tpl.html", []).run(["$templa
     "    </div>\n" +
     "    <div class=\"col-md-6\">\n" +
     "        <h3>Categories</h3>\n" +
+    "        <div class=\"row\">\n" +
+    "            <div class=\"col-md-10\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"New Category\" ng-model=\"newCategory\" maxlength=\"30\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2\">\n" +
+    "                <button type=\"button\" class=\"btn btn-success\" ng-click=\"addCategory()\" ng-disabled=\"newCategory.length == 0\">\n" +
+    "                    <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "                </button>\n" +
+    "            </div>\n" +
+    "            {{catResponse}}\n" +
+    "        </div>\n" +
     "        <table class=\"table table-hover\">\n" +
     "            <thead>\n" +
     "            <tr>\n" +
-    "                <th>ID</th>\n" +
+    "                <th style=\"width:50px;\">ID</th>\n" +
     "                <th>Name</th>\n" +
-    "                <th>Action</th>\n" +
+    "                <th style=\"width:120px;\">Action</th>\n" +
     "            </tr>\n" +
     "            </thead>\n" +
     "            <tbody>\n" +
-    "            <tr>\n" +
-    "                <div class=\"col-md-10\">\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"New Category\" ng-model=\"newCategory\">\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-2\">\n" +
-    "                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"addCategory()\" ng-disabled=\"newCategory.length == 0\">\n" +
-    "                        <span class=\"fa fa-fw fa-plus\"></span>\n" +
-    "                    </button>\n" +
-    "                </div>\n" +
-    "                {{catResponse}}\n" +
-    "            </tr>\n" +
     "            <tr ng-repeat=\"category in SWList.categories\" ng-click=\"selectCategory(category)\">\n" +
     "                <td>\n" +
     "                    {{category.cid}}\n" +
@@ -41389,7 +41469,8 @@ angular.module("manageSoftware/manageSoftwareLocCat.tpl.html", []).run(["$templa
     "                        {{category.name}}\n" +
     "                    </span>\n" +
     "                    <span ng-show=\"selCategory == category.cid\">\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Category Name\" ng-model=\"category.name\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Category Name\" ng-model=\"category.name\"\n" +
+    "                               maxlength=\"30\">\n" +
     "                    </span>\n" +
     "                </td>\n" +
     "                <td>\n" +
@@ -43306,11 +43387,18 @@ angular.module('manage.manageOneSearch', [])
             $scope.addRec = {};
             $scope.addRec.keyword = "";
             $scope.addRec.link = "";
-            $scope.addRec.title = "";
+            $scope.addRec.description = "";
             $scope.response = "";
             $scope.filterKeyword = '';
             $scope.filterLink = '';
             $scope.filterLinkTitle = '';
+            $scope.expanded = -1;
+
+            $scope.sortModes = [
+                {by:'keyword', reverse:false},
+                {by:'description', reverse:false},
+                {by:'link', reverse:false}
+            ];
 
             tokenFactory("CSRF-libOneSearch");
 
@@ -43323,10 +43411,20 @@ angular.module('manage.manageOneSearch', [])
                     console.log(data);
                 });
 
+            $scope.expand = function(rec){
+                $scope.expanded = rec.id;
+            };
+
+            $scope.sortBy = function(by){
+                if ($scope.sortMode === by)
+                    $scope.sortModes[by].reverse = !$scope.sortModes[by].reverse;
+                else
+                    $scope.sortMode = by;
+            };
+
             $scope.addRecommendation = function(){
-                if ( ($scope.addRec.keyword.length > 0) && ($scope.addRec.link.length > 0) && ($scope.addRec.title.length > 0) )
-                {
-                    osFactory.postData({addRec : 1}, $scope.addRec)
+                if ( ($scope.addRec.keyword.length > 0) && ($scope.addRec.link.length > 0) && ($scope.addRec.description.length > 0) ){
+                    osFactory.postData({action : 1}, $scope.addRec)
                         .success(function(data, status, headers, config) {
                             console.dir(data);
                             if ((typeof data === 'object') && (data !== null)){
@@ -43335,7 +43433,7 @@ angular.module('manage.manageOneSearch', [])
                                 newRec.linkid = data.lid;
                                 newRec.keyword = $scope.addRec.keyword;
                                 newRec.link = $scope.addRec.link;
-                                newRec.description = $scope.addRec.title;
+                                newRec.description = $scope.addRec.description;
                                 $scope.recList.RecList.push(newRec);
                                 $scope.response = data.text;
                             } else
@@ -43344,22 +43442,34 @@ angular.module('manage.manageOneSearch', [])
                         .error(function(data, status, headers, config) {
                             $scope.response = "Error: Could not add recommendation link! " + data;
                         });
-                }
+                } else
+                    alert("Please fill out all required fields!");
             };
             $scope.deleteRec = function(rec, index){
                 if (confirm("Are you sure you want to delete " + rec.description + " link?")){
-                    osFactory.postData({delRec : 1}, rec)
+                    osFactory.postData({action : 2}, rec)
                         .success(function(data, status, headers, config) {
                             $scope.response = data;
                             $scope.recList.RecList.splice(index, 1);
+                            $scope.expanded = -1;
                         })
                         .error(function(data, status, headers, config) {
                             $scope.response = "Error: Could not delete recommendation! " + data;
                         });
                 }
             };
+            $scope.updateRec = function(rec){
+                osFactory.postData({action : 3}, rec)
+                    .success(function(data, status, headers, config) {
+                        $scope.response = data;
+                        $scope.expanded = -1;
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.response = "Error: Could not update recommendation! " + data;
+                    });
+            };
         }])
-    .directive('recommendeLinksList', function() {
+    .directive('recommendedLinksList', function() {
         return {
             restrict: 'AC',
             scope: {},
@@ -43387,6 +43497,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                         data.software[i].class = "";
                         data.software[i].selCat = data.categories[0];
                         data.software[i].newVer = {};
+                        data.software[i].newVer.version = "";
                         data.software[i].newVer.selOS = $scope.os[0];
                         for (var j = 0; j < data.software[i].versions.length; j++){
                             data.software[i].versions[j].newLoc = {};
@@ -43396,6 +43507,9 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                                 data.software[i].versions[j].newLoc.devices[k] = false;
                         }
                         data.software[i].newLink = {};
+                        data.software[i].newLink.description = "";
+                        data.software[i].newLink.title = "";
+                        data.software[i].newLink.url = "";
                     }
                     $scope.newSW.selCat = data.categories[0];
                     $scope.SWList = data;
@@ -43449,8 +43563,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             $scope.descrFilter = '';
             $scope.sortMode = 0;
             $scope.sortModes = [
-                {by:'title', reverse:false},
-                {by:'location', reverse:false}
+                {by:'title', reverse:false}
             ];
             $scope.sortButton = $scope.sortMode;
             $scope.mOver = 0;
@@ -43461,8 +43574,12 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             $scope.newSW.categories = [];
             $scope.newSW.newVer = {};
             $scope.newSW.newVer.selOS = $scope.os[0];
+            $scope.newSW.newVer.version = "";
             $scope.newSW.newLink = {};
-            $scope.newSW.modules = '';
+            $scope.newSW.newLink.description = "";
+            $scope.newSW.newLink.title = "";
+            $scope.newSW.newLink.url = "";
+            $scope.newSW.modules = "";
 
             $scope.currentPage = 1;
             $scope.maxPageSize = 10;
@@ -43621,7 +43738,11 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                             newSW.selCat = response.data.categories[0];
                             newSW.newVer = {};
                             newSW.newVer.selOS = $scope.os[0];
+                            newSW.newVer.version = "";
                             newSW.newLink = {};
+                            newSW.newLink.description = "";
+                            newSW.newLink.title = "";
+                            newSW.newLink.url = "";
                             $scope.SWList.software.push(newSW);
                             $scope.newSW.formResponse = "Software has been added.";
                         } else {
