@@ -45,7 +45,7 @@
         <div class="col-sm-3" >
           <h4>Collections</h4>
           <ul class="footer-list">
-            <li><a href="http://lib.ua.edu/williamscollection/">A.S. Williams Collection</a></li>
+            <li><a href="https://wwwdev2.lib.ua.edu/collections/williams/">A.S. Williams Collection</a></li>
             <li><a href="https://wwwdev2.lib.ua.edu/collections/wade-hall-collection/">Wade Hall Collection</a></li>
             <li><a href="https://wwwdev2.lib.ua.edu/collections/the-david-walker-lupton-african-american-cookbook-collection/">Lupton Collection</a></li>
             <li><a href="https://wwwdev2.lib.ua.edu/collections/map-collections/">Map Collection</a></li>
