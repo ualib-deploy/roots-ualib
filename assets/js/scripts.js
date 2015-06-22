@@ -4663,33 +4663,459 @@ angular.module('ui.utils',  [
 ]);
 ;/**!
  * AngularJS file upload/drop directive and service with progress and abort
+ * FileAPI Flash shim for old browsers not supporting FormData
  * @author  Danial  <danial.farid@gmail.com>
- * @version 5.0.8
+ * @version 5.0.9
  */
-var ngFileUpload = angular.module('ngFileUpload', []);
 
-ngFileUpload.version = '5.0.8';
-ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, $timeout) {
+(function () {
+  /** @namespace FileAPI.noContentTimeout */
+
   function patchXHR(fnName, newFn) {
     window.XMLHttpRequest.prototype[fnName] = newFn(window.XMLHttpRequest.prototype[fnName]);
   }
 
-  if (window.XMLHttpRequest && !window.XMLHttpRequest.__isFileAPIShim) {
+  function redefineProp(xhr, prop, fn) {
+    try {
+      Object.defineProperty(xhr, prop, {get: fn});
+    } catch (e) {/*ignore*/
+    }
+  }
+
+  if (!window.FileAPI) {
+    window.FileAPI = {};
+  }
+
+  FileAPI.shouldLoad = (window.XMLHttpRequest && !window.FormData) || FileAPI.forceLoad;
+  if (FileAPI.shouldLoad) {
+    var initializeUploadListener = function (xhr) {
+      if (!xhr.__listeners) {
+        if (!xhr.upload) xhr.upload = {};
+        xhr.__listeners = [];
+        var origAddEventListener = xhr.upload.addEventListener;
+        xhr.upload.addEventListener = function (t, fn) {
+          xhr.__listeners[t] = fn;
+          if (origAddEventListener) origAddEventListener.apply(this, arguments);
+        };
+      }
+    };
+
+    patchXHR('open', function (orig) {
+      return function (m, url, b) {
+        initializeUploadListener(this);
+        this.__url = url;
+        try {
+          orig.apply(this, [m, url, b]);
+        } catch (e) {
+          if (e.message.indexOf('Access is denied') > -1) {
+            this.__origError = e;
+            orig.apply(this, [m, '_fix_for_ie_crossdomain__', b]);
+          }
+        }
+      };
+    });
+
+    patchXHR('getResponseHeader', function (orig) {
+      return function (h) {
+        return this.__fileApiXHR && this.__fileApiXHR.getResponseHeader ? this.__fileApiXHR.getResponseHeader(h) : (orig == null ? null : orig.apply(this, [h]));
+      };
+    });
+
+    patchXHR('getAllResponseHeaders', function (orig) {
+      return function () {
+        return this.__fileApiXHR && this.__fileApiXHR.getAllResponseHeaders ? this.__fileApiXHR.getAllResponseHeaders() : (orig == null ? null : orig.apply(this));
+      };
+    });
+
+    patchXHR('abort', function (orig) {
+      return function () {
+        return this.__fileApiXHR && this.__fileApiXHR.abort ? this.__fileApiXHR.abort() : (orig == null ? null : orig.apply(this));
+      };
+    });
+
     patchXHR('setRequestHeader', function (orig) {
       return function (header, value) {
         if (header === '__setXHR_') {
+          initializeUploadListener(this);
           var val = value(this);
           // fix for angular < 1.2.0
           if (val instanceof Function) {
             val(this);
           }
         } else {
+          this.__requestHeaders = this.__requestHeaders || {};
+          this.__requestHeaders[header] = value;
           orig.apply(this, arguments);
         }
       };
     });
+
+    patchXHR('send', function (orig) {
+      return function () {
+        var xhr = this;
+        if (arguments[0] && arguments[0].__isFileAPIShim) {
+          var formData = arguments[0];
+          var config = {
+            url: xhr.__url,
+            jsonp: false, //removes the callback form param
+            cache: true, //removes the ?fileapiXXX in the url
+            complete: function (err, fileApiXHR) {
+              xhr.__completed = true;
+              if (!err && xhr.__listeners.load)
+                xhr.__listeners.load({
+                  type: 'load',
+                  loaded: xhr.__loaded,
+                  total: xhr.__total,
+                  target: xhr,
+                  lengthComputable: true
+                });
+              if (!err && xhr.__listeners.loadend)
+                xhr.__listeners.loadend({
+                  type: 'loadend',
+                  loaded: xhr.__loaded,
+                  total: xhr.__total,
+                  target: xhr,
+                  lengthComputable: true
+                });
+              if (err === 'abort' && xhr.__listeners.abort)
+                xhr.__listeners.abort({
+                  type: 'abort',
+                  loaded: xhr.__loaded,
+                  total: xhr.__total,
+                  target: xhr,
+                  lengthComputable: true
+                });
+              if (fileApiXHR.status !== undefined) redefineProp(xhr, 'status', function () {
+                return (fileApiXHR.status === 0 && err && err !== 'abort') ? 500 : fileApiXHR.status;
+              });
+              if (fileApiXHR.statusText !== undefined) redefineProp(xhr, 'statusText', function () {
+                return fileApiXHR.statusText;
+              });
+              redefineProp(xhr, 'readyState', function () {
+                return 4;
+              });
+              if (fileApiXHR.response !== undefined) redefineProp(xhr, 'response', function () {
+                return fileApiXHR.response;
+              });
+              var resp = fileApiXHR.responseText || (err && fileApiXHR.status === 0 && err !== 'abort' ? err : undefined);
+              redefineProp(xhr, 'responseText', function () {
+                return resp;
+              });
+              redefineProp(xhr, 'response', function () {
+                return resp;
+              });
+              if (err) redefineProp(xhr, 'err', function () {
+                return err;
+              });
+              xhr.__fileApiXHR = fileApiXHR;
+              if (xhr.onreadystatechange) xhr.onreadystatechange();
+              if (xhr.onload) xhr.onload();
+            },
+            progress: function (e) {
+              e.target = xhr;
+              if (xhr.__listeners.progress) xhr.__listeners.progress(e);
+              xhr.__total = e.total;
+              xhr.__loaded = e.loaded;
+              if (e.total === e.loaded) {
+                // fix flash issue that doesn't call complete if there is no response text from the server
+                var _this = this;
+                setTimeout(function () {
+                  if (!xhr.__completed) {
+                    xhr.getAllResponseHeaders = function () {
+                    };
+                    _this.complete(null, {status: 204, statusText: 'No Content'});
+                  }
+                }, FileAPI.noContentTimeout || 10000);
+              }
+            },
+            headers: xhr.__requestHeaders
+          };
+          config.data = {};
+          config.files = {};
+          for (var i = 0; i < formData.data.length; i++) {
+            var item = formData.data[i];
+            if (item.val != null && item.val.name != null && item.val.size != null && item.val.type != null) {
+              config.files[item.key] = item.val;
+            } else {
+              config.data[item.key] = item.val;
+            }
+          }
+
+          setTimeout(function () {
+            if (!FileAPI.hasFlash) {
+              throw 'Adode Flash Player need to be installed. To check ahead use "FileAPI.hasFlash"';
+            }
+            xhr.__fileApiXHR = FileAPI.upload(config);
+          }, 1);
+        } else {
+          if (this.__origError) {
+            throw this.__origError;
+          }
+          orig.apply(xhr, arguments);
+        }
+      };
+    });
+    window.XMLHttpRequest.__isFileAPIShim = true;
+    window.FormData = FormData = function () {
+      return {
+        append: function (key, val, name) {
+          if (val.__isFileAPIBlobShim) {
+            val = val.data[0];
+          }
+          this.data.push({
+            key: key,
+            val: val,
+            name: name
+          });
+        },
+        data: [],
+        __isFileAPIShim: true
+      };
+    };
+
+    window.Blob = Blob = function (b) {
+      return {
+        data: b,
+        __isFileAPIBlobShim: true
+      };
+    };
   }
 
+})();
+
+(function () {
+  /** @namespace FileAPI.forceLoad */
+  /** @namespace window.FileAPI.jsUrl */
+  /** @namespace window.FileAPI.jsPath */
+
+  function isInputTypeFile(elem) {
+    return elem[0].tagName.toLowerCase() === 'input' && elem.attr('type') && elem.attr('type').toLowerCase() === 'file';
+  }
+
+  function hasFlash() {
+    try {
+      var fo = new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
+      if (fo) return true;
+    } catch (e) {
+      if (navigator.mimeTypes['application/x-shockwave-flash'] !== undefined) return true;
+    }
+    return false;
+  }
+
+  function getOffset(obj) {
+    var left = 0, top = 0;
+
+    if (window.jQuery) {
+      return jQuery(obj).offset();
+    }
+
+    if (obj.offsetParent) {
+      do {
+        left += (obj.offsetLeft - obj.scrollLeft);
+        top += (obj.offsetTop - obj.scrollTop);
+        obj = obj.offsetParent;
+      } while (obj);
+    }
+    return {
+      left: left,
+      top: top
+    };
+  }
+
+  if (FileAPI.shouldLoad) {
+
+    //load FileAPI
+    if (FileAPI.forceLoad) {
+      FileAPI.html5 = false;
+    }
+
+    if (!FileAPI.upload) {
+      var jsUrl, basePath, script = document.createElement('script'), allScripts = document.getElementsByTagName('script'), i, index, src;
+      if (window.FileAPI.jsUrl) {
+        jsUrl = window.FileAPI.jsUrl;
+      } else if (window.FileAPI.jsPath) {
+        basePath = window.FileAPI.jsPath;
+      } else {
+        for (i = 0; i < allScripts.length; i++) {
+          src = allScripts[i].src;
+          index = src.search(/\/ng\-file\-upload[\-a-zA-z0-9\.]*\.js/);
+          if (index > -1) {
+            basePath = src.substring(0, index + 1);
+            break;
+          }
+        }
+      }
+
+      if (FileAPI.staticPath == null) FileAPI.staticPath = basePath;
+      script.setAttribute('src', jsUrl || basePath + 'FileAPI.min.js');
+      document.getElementsByTagName('head')[0].appendChild(script);
+
+      FileAPI.hasFlash = hasFlash();
+    }
+
+    FileAPI.ngfFixIE = function (elem, createFileElemFn, bindAttr, changeFn) {
+      if (!hasFlash()) {
+        throw 'Adode Flash Player need to be installed. To check ahead use "FileAPI.hasFlash"';
+      }
+      var makeFlashInput = function () {
+        if (elem.attr('disabled')) {
+          elem.$$ngfRefElem.removeClass('js-fileapi-wrapper');
+        } else {
+          var fileElem = elem.$$ngfRefElem;
+          if (!fileElem) {
+            fileElem = elem.$$ngfRefElem = createFileElemFn();
+            fileElem.addClass('js-fileapi-wrapper');
+            if (!isInputTypeFile(elem)) {
+//						if (fileElem.parent().css('position') === '' || fileElem.parent().css('position') === 'static') {
+//							fileElem.parent().css('position', 'relative');
+//						}
+//						elem.parent()[0].insertBefore(fileElem[0], elem[0]);
+//						elem.css('overflow', 'hidden');
+            }
+            setTimeout(function () {
+              fileElem.bind('mouseenter', makeFlashInput);
+            }, 10);
+            fileElem.bind('change', function (evt) {
+              fileApiChangeFn.apply(this, [evt]);
+              changeFn.apply(this, [evt]);
+//						alert('change' +  evt);
+            });
+          } else {
+            bindAttr(elem.$$ngfRefElem);
+          }
+          if (!isInputTypeFile(elem)) {
+            fileElem.css('position', 'absolute')
+              .css('top', getOffset(elem[0]).top + 'px').css('left', getOffset(elem[0]).left + 'px')
+              .css('width', elem[0].offsetWidth + 'px').css('height', elem[0].offsetHeight + 'px')
+              .css('filter', 'alpha(opacity=0)').css('display', elem.css('display'))
+              .css('overflow', 'hidden').css('z-index', '900000')
+              .css('visibility', 'visible');
+          }
+        }
+      };
+
+      elem.bind('mouseenter', makeFlashInput);
+
+      var fileApiChangeFn = function (evt) {
+        var files = FileAPI.getFiles(evt);
+        //just a double check for #233
+        for (var i = 0; i < files.length; i++) {
+          if (files[i].size === undefined) files[i].size = 0;
+          if (files[i].name === undefined) files[i].name = 'file';
+          if (files[i].type === undefined) files[i].type = 'undefined';
+        }
+        if (!evt.target) {
+          evt.target = {};
+        }
+        evt.target.files = files;
+        // if evt.target.files is not writable use helper field
+        if (evt.target.files !== files) {
+          evt.__files_ = files;
+        }
+        (evt.__files_ || evt.target.files).item = function (i) {
+          return (evt.__files_ || evt.target.files)[i] || null;
+        };
+      };
+    };
+
+    FileAPI.disableFileInput = function (elem, disable) {
+      if (disable) {
+        elem.removeClass('js-fileapi-wrapper');
+      } else {
+        elem.addClass('js-fileapi-wrapper');
+      }
+    };
+  }
+})();
+
+if (!window.FileReader) {
+  window.FileReader = function () {
+    var _this = this, loadStarted = false;
+    this.listeners = {};
+    this.addEventListener = function (type, fn) {
+      _this.listeners[type] = _this.listeners[type] || [];
+      _this.listeners[type].push(fn);
+    };
+    this.removeEventListener = function (type, fn) {
+      if (_this.listeners[type]) _this.listeners[type].splice(_this.listeners[type].indexOf(fn), 1);
+    };
+    this.dispatchEvent = function (evt) {
+      var list = _this.listeners[evt.type];
+      if (list) {
+        for (var i = 0; i < list.length; i++) {
+          list[i].call(_this, evt);
+        }
+      }
+    };
+    this.onabort = this.onerror = this.onload = this.onloadstart = this.onloadend = this.onprogress = null;
+
+    var constructEvent = function (type, evt) {
+      var e = {type: type, target: _this, loaded: evt.loaded, total: evt.total, error: evt.error};
+      if (evt.result != null) e.target.result = evt.result;
+      return e;
+    };
+    var listener = function (evt) {
+      if (!loadStarted) {
+        loadStarted = true;
+        if (_this.onloadstart) _this.onloadstart(constructEvent('loadstart', evt));
+      }
+      var e;
+      if (evt.type === 'load') {
+        if (_this.onloadend) _this.onloadend(constructEvent('loadend', evt));
+        e = constructEvent('load', evt);
+        if (_this.onload) _this.onload(e);
+        _this.dispatchEvent(e);
+      } else if (evt.type === 'progress') {
+        e = constructEvent('progress', evt);
+        if (_this.onprogress) _this.onprogress(e);
+        _this.dispatchEvent(e);
+      } else {
+        e = constructEvent('error', evt);
+        if (_this.onerror) _this.onerror(e);
+        _this.dispatchEvent(e);
+      }
+    };
+    this.readAsArrayBuffer = function (file) {
+      FileAPI.readAsBinaryString(file, listener);
+    };
+    this.readAsBinaryString = function (file) {
+      FileAPI.readAsBinaryString(file, listener);
+    };
+    this.readAsDataURL = function (file) {
+      FileAPI.readAsDataURL(file, listener);
+    };
+    this.readAsText = function (file) {
+      FileAPI.readAsText(file, listener);
+    };
+  };
+}
+
+/**!
+ * AngularJS file upload/drop directive and service with progress and abort
+ * @author  Danial  <danial.farid@gmail.com>
+ * @version 5.0.9
+ */
+
+if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
+  window.XMLHttpRequest.prototype.setRequestHeader = (function (orig) {
+    return function (header, value) {
+      if (header === '__setXHR_') {
+        var val = value(this);
+        // fix for angular < 1.2.0
+        if (val instanceof Function) {
+          val(this);
+        }
+      } else {
+        orig.apply(this, arguments);
+      }
+    };
+  })(window.XMLHttpRequest.prototype.setRequestHeader);
+}
+
+var ngFileUpload = angular.module('ngFileUpload', []);
+
+ngFileUpload.version = '5.0.9';
+ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, $timeout) {
   function sendHttp(config) {
     config.method = config.method || 'POST';
     config.headers = config.headers || {};
@@ -5393,435 +5819,6 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
   }
 
 })();
-
-/**!
- * AngularJS file upload/drop directive and service with progress and abort
- * FileAPI Flash shim for old browsers not supporting FormData
- * @author  Danial  <danial.farid@gmail.com>
- * @version 5.0.8
- */
-
-(function () {
-  /** @namespace FileAPI.noContentTimeout */
-
-  function patchXHR(fnName, newFn) {
-    window.XMLHttpRequest.prototype[fnName] = newFn(window.XMLHttpRequest.prototype[fnName]);
-  }
-
-  function redefineProp(xhr, prop, fn) {
-    try {
-      Object.defineProperty(xhr, prop, {get: fn});
-    } catch (e) {/*ignore*/
-    }
-  }
-
-  if (!window.FileAPI) {
-    window.FileAPI = {};
-  }
-
-  FileAPI.shouldLoad = (window.XMLHttpRequest && !window.FormData) || FileAPI.forceLoad;
-  if (FileAPI.shouldLoad) {
-    var initializeUploadListener = function (xhr) {
-      if (!xhr.__listeners) {
-        if (!xhr.upload) xhr.upload = {};
-        xhr.__listeners = [];
-        var origAddEventListener = xhr.upload.addEventListener;
-        xhr.upload.addEventListener = function (t, fn) {
-          xhr.__listeners[t] = fn;
-          if (origAddEventListener) origAddEventListener.apply(this, arguments);
-        };
-      }
-    };
-
-    patchXHR('open', function (orig) {
-      return function (m, url, b) {
-        initializeUploadListener(this);
-        this.__url = url;
-        try {
-          orig.apply(this, [m, url, b]);
-        } catch (e) {
-          if (e.message.indexOf('Access is denied') > -1) {
-            this.__origError = e;
-            orig.apply(this, [m, '_fix_for_ie_crossdomain__', b]);
-          }
-        }
-      };
-    });
-
-    patchXHR('getResponseHeader', function (orig) {
-      return function (h) {
-        return this.__fileApiXHR && this.__fileApiXHR.getResponseHeader ? this.__fileApiXHR.getResponseHeader(h) : (orig == null ? null : orig.apply(this, [h]));
-      };
-    });
-
-    patchXHR('getAllResponseHeaders', function (orig) {
-      return function () {
-        return this.__fileApiXHR && this.__fileApiXHR.getAllResponseHeaders ? this.__fileApiXHR.getAllResponseHeaders() : (orig == null ? null : orig.apply(this));
-      };
-    });
-
-    patchXHR('abort', function (orig) {
-      return function () {
-        return this.__fileApiXHR && this.__fileApiXHR.abort ? this.__fileApiXHR.abort() : (orig == null ? null : orig.apply(this));
-      };
-    });
-
-    patchXHR('setRequestHeader', function (orig) {
-      return function (header, value) {
-        if (header === '__setXHR_') {
-          initializeUploadListener(this);
-          var val = value(this);
-          // fix for angular < 1.2.0
-          if (val instanceof Function) {
-            val(this);
-          }
-        } else {
-          this.__requestHeaders = this.__requestHeaders || {};
-          this.__requestHeaders[header] = value;
-          orig.apply(this, arguments);
-        }
-      };
-    });
-
-    patchXHR('send', function (orig) {
-      return function () {
-        var xhr = this;
-        if (arguments[0] && arguments[0].__isFileAPIShim) {
-          var formData = arguments[0];
-          var config = {
-            url: xhr.__url,
-            jsonp: false, //removes the callback form param
-            cache: true, //removes the ?fileapiXXX in the url
-            complete: function (err, fileApiXHR) {
-              xhr.__completed = true;
-              if (!err && xhr.__listeners.load)
-                xhr.__listeners.load({
-                  type: 'load',
-                  loaded: xhr.__loaded,
-                  total: xhr.__total,
-                  target: xhr,
-                  lengthComputable: true
-                });
-              if (!err && xhr.__listeners.loadend)
-                xhr.__listeners.loadend({
-                  type: 'loadend',
-                  loaded: xhr.__loaded,
-                  total: xhr.__total,
-                  target: xhr,
-                  lengthComputable: true
-                });
-              if (err === 'abort' && xhr.__listeners.abort)
-                xhr.__listeners.abort({
-                  type: 'abort',
-                  loaded: xhr.__loaded,
-                  total: xhr.__total,
-                  target: xhr,
-                  lengthComputable: true
-                });
-              if (fileApiXHR.status !== undefined) redefineProp(xhr, 'status', function () {
-                return (fileApiXHR.status === 0 && err && err !== 'abort') ? 500 : fileApiXHR.status;
-              });
-              if (fileApiXHR.statusText !== undefined) redefineProp(xhr, 'statusText', function () {
-                return fileApiXHR.statusText;
-              });
-              redefineProp(xhr, 'readyState', function () {
-                return 4;
-              });
-              if (fileApiXHR.response !== undefined) redefineProp(xhr, 'response', function () {
-                return fileApiXHR.response;
-              });
-              var resp = fileApiXHR.responseText || (err && fileApiXHR.status === 0 && err !== 'abort' ? err : undefined);
-              redefineProp(xhr, 'responseText', function () {
-                return resp;
-              });
-              redefineProp(xhr, 'response', function () {
-                return resp;
-              });
-              if (err) redefineProp(xhr, 'err', function () {
-                return err;
-              });
-              xhr.__fileApiXHR = fileApiXHR;
-              if (xhr.onreadystatechange) xhr.onreadystatechange();
-              if (xhr.onload) xhr.onload();
-            },
-            progress: function (e) {
-              e.target = xhr;
-              if (xhr.__listeners.progress) xhr.__listeners.progress(e);
-              xhr.__total = e.total;
-              xhr.__loaded = e.loaded;
-              if (e.total === e.loaded) {
-                // fix flash issue that doesn't call complete if there is no response text from the server
-                var _this = this;
-                setTimeout(function () {
-                  if (!xhr.__completed) {
-                    xhr.getAllResponseHeaders = function () {
-                    };
-                    _this.complete(null, {status: 204, statusText: 'No Content'});
-                  }
-                }, FileAPI.noContentTimeout || 10000);
-              }
-            },
-            headers: xhr.__requestHeaders
-          };
-          config.data = {};
-          config.files = {};
-          for (var i = 0; i < formData.data.length; i++) {
-            var item = formData.data[i];
-            if (item.val != null && item.val.name != null && item.val.size != null && item.val.type != null) {
-              config.files[item.key] = item.val;
-            } else {
-              config.data[item.key] = item.val;
-            }
-          }
-
-          setTimeout(function () {
-            if (!FileAPI.hasFlash) {
-              throw 'Adode Flash Player need to be installed. To check ahead use "FileAPI.hasFlash"';
-            }
-            xhr.__fileApiXHR = FileAPI.upload(config);
-          }, 1);
-        } else {
-          if (this.__origError) {
-            throw this.__origError;
-          }
-          orig.apply(xhr, arguments);
-        }
-      };
-    });
-    window.XMLHttpRequest.__isFileAPIShim = true;
-    window.FormData = FormData = function () {
-      return {
-        append: function (key, val, name) {
-          if (val.__isFileAPIBlobShim) {
-            val = val.data[0];
-          }
-          this.data.push({
-            key: key,
-            val: val,
-            name: name
-          });
-        },
-        data: [],
-        __isFileAPIShim: true
-      };
-    };
-
-    window.Blob = Blob = function (b) {
-      return {
-        data: b,
-        __isFileAPIBlobShim: true
-      };
-    };
-  }
-
-})();
-
-(function () {
-  /** @namespace FileAPI.forceLoad */
-  /** @namespace window.FileAPI.jsUrl */
-  /** @namespace window.FileAPI.jsPath */
-
-  function isInputTypeFile(elem) {
-    return elem[0].tagName.toLowerCase() === 'input' && elem.attr('type') && elem.attr('type').toLowerCase() === 'file';
-  }
-
-  function hasFlash() {
-    try {
-      var fo = new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
-      if (fo) return true;
-    } catch (e) {
-      if (navigator.mimeTypes['application/x-shockwave-flash'] !== undefined) return true;
-    }
-    return false;
-  }
-
-  function getOffset(obj) {
-    var left = 0, top = 0;
-
-    if (window.jQuery) {
-      return jQuery(obj).offset();
-    }
-
-    if (obj.offsetParent) {
-      do {
-        left += (obj.offsetLeft - obj.scrollLeft);
-        top += (obj.offsetTop - obj.scrollTop);
-        obj = obj.offsetParent;
-      } while (obj);
-    }
-    return {
-      left: left,
-      top: top
-    };
-  }
-
-  if (FileAPI.shouldLoad) {
-
-    //load FileAPI
-    if (FileAPI.forceLoad) {
-      FileAPI.html5 = false;
-    }
-
-    if (!FileAPI.upload) {
-      var jsUrl, basePath, script = document.createElement('script'), allScripts = document.getElementsByTagName('script'), i, index, src;
-      if (window.FileAPI.jsUrl) {
-        jsUrl = window.FileAPI.jsUrl;
-      } else if (window.FileAPI.jsPath) {
-        basePath = window.FileAPI.jsPath;
-      } else {
-        for (i = 0; i < allScripts.length; i++) {
-          src = allScripts[i].src;
-          index = src.search(/\/ng\-file\-upload[\-a-zA-z0-9\.]*\.js/);
-          if (index > -1) {
-            basePath = src.substring(0, index + 1);
-            break;
-          }
-        }
-      }
-
-      if (FileAPI.staticPath == null) FileAPI.staticPath = basePath;
-      script.setAttribute('src', jsUrl || basePath + 'FileAPI.min.js');
-      document.getElementsByTagName('head')[0].appendChild(script);
-
-      FileAPI.hasFlash = hasFlash();
-    }
-
-    FileAPI.ngfFixIE = function (elem, createFileElemFn, bindAttr, changeFn) {
-      if (!hasFlash()) {
-        throw 'Adode Flash Player need to be installed. To check ahead use "FileAPI.hasFlash"';
-      }
-      var makeFlashInput = function () {
-        if (elem.attr('disabled')) {
-          elem.$$ngfRefElem.removeClass('js-fileapi-wrapper');
-        } else {
-          var fileElem = elem.$$ngfRefElem;
-          if (!fileElem) {
-            fileElem = elem.$$ngfRefElem = createFileElemFn();
-            fileElem.addClass('js-fileapi-wrapper');
-            if (!isInputTypeFile(elem)) {
-//						if (fileElem.parent().css('position') === '' || fileElem.parent().css('position') === 'static') {
-//							fileElem.parent().css('position', 'relative');
-//						}
-//						elem.parent()[0].insertBefore(fileElem[0], elem[0]);
-//						elem.css('overflow', 'hidden');
-            }
-            setTimeout(function () {
-              fileElem.bind('mouseenter', makeFlashInput);
-            }, 10);
-            fileElem.bind('change', function (evt) {
-              fileApiChangeFn.apply(this, [evt]);
-              changeFn.apply(this, [evt]);
-//						alert('change' +  evt);
-            });
-          } else {
-            bindAttr(elem.$$ngfRefElem);
-          }
-          if (!isInputTypeFile(elem)) {
-            fileElem.css('position', 'absolute')
-              .css('top', getOffset(elem[0]).top + 'px').css('left', getOffset(elem[0]).left + 'px')
-              .css('width', elem[0].offsetWidth + 'px').css('height', elem[0].offsetHeight + 'px')
-              .css('filter', 'alpha(opacity=0)').css('display', elem.css('display'))
-              .css('overflow', 'hidden').css('z-index', '900000')
-              .css('visibility', 'visible');
-          }
-        }
-      };
-
-      elem.bind('mouseenter', makeFlashInput);
-
-      var fileApiChangeFn = function (evt) {
-        var files = FileAPI.getFiles(evt);
-        //just a double check for #233
-        for (var i = 0; i < files.length; i++) {
-          if (files[i].size === undefined) files[i].size = 0;
-          if (files[i].name === undefined) files[i].name = 'file';
-          if (files[i].type === undefined) files[i].type = 'undefined';
-        }
-        if (!evt.target) {
-          evt.target = {};
-        }
-        evt.target.files = files;
-        // if evt.target.files is not writable use helper field
-        if (evt.target.files !== files) {
-          evt.__files_ = files;
-        }
-        (evt.__files_ || evt.target.files).item = function (i) {
-          return (evt.__files_ || evt.target.files)[i] || null;
-        };
-      };
-    };
-
-    FileAPI.disableFileInput = function (elem, disable) {
-      if (disable) {
-        elem.removeClass('js-fileapi-wrapper');
-      } else {
-        elem.addClass('js-fileapi-wrapper');
-      }
-    };
-  }
-})();
-
-if (!window.FileReader) {
-  window.FileReader = function () {
-    var _this = this, loadStarted = false;
-    this.listeners = {};
-    this.addEventListener = function (type, fn) {
-      _this.listeners[type] = _this.listeners[type] || [];
-      _this.listeners[type].push(fn);
-    };
-    this.removeEventListener = function (type, fn) {
-      if (_this.listeners[type]) _this.listeners[type].splice(_this.listeners[type].indexOf(fn), 1);
-    };
-    this.dispatchEvent = function (evt) {
-      var list = _this.listeners[evt.type];
-      if (list) {
-        for (var i = 0; i < list.length; i++) {
-          list[i].call(_this, evt);
-        }
-      }
-    };
-    this.onabort = this.onerror = this.onload = this.onloadstart = this.onloadend = this.onprogress = null;
-
-    var constructEvent = function (type, evt) {
-      var e = {type: type, target: _this, loaded: evt.loaded, total: evt.total, error: evt.error};
-      if (evt.result != null) e.target.result = evt.result;
-      return e;
-    };
-    var listener = function (evt) {
-      if (!loadStarted) {
-        loadStarted = true;
-        if (_this.onloadstart) _this.onloadstart(constructEvent('loadstart', evt));
-      }
-      var e;
-      if (evt.type === 'load') {
-        if (_this.onloadend) _this.onloadend(constructEvent('loadend', evt));
-        e = constructEvent('load', evt);
-        if (_this.onload) _this.onload(e);
-        _this.dispatchEvent(e);
-      } else if (evt.type === 'progress') {
-        e = constructEvent('progress', evt);
-        if (_this.onprogress) _this.onprogress(e);
-        _this.dispatchEvent(e);
-      } else {
-        e = constructEvent('error', evt);
-        if (_this.onerror) _this.onerror(e);
-        _this.dispatchEvent(e);
-      }
-    };
-    this.readAsArrayBuffer = function (file) {
-      FileAPI.readAsBinaryString(file, listener);
-    };
-    this.readAsBinaryString = function (file) {
-      FileAPI.readAsBinaryString(file, listener);
-    };
-    this.readAsDataURL = function (file) {
-      FileAPI.readAsDataURL(file, listener);
-    };
-    this.readAsText = function (file) {
-      FileAPI.readAsText(file, listener);
-    };
-  };
-}
 ;/**
   * x is a value between 0 and 1, indicating where in the animation you are.
   */
@@ -18667,7 +18664,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     root._ = _;
   }
 }.call(this));
-;/*! angular-google-maps 2.1.4 2015-06-14
+;/*! angular-google-maps 2.1.5 2015-06-18
  *  AngularJS directives for Google Maps
  *  git: https://github.com/angular-ui/angular-google-maps.git
  */
@@ -39755,7 +39752,7 @@ angular.module('hours.list', [])
             templateUrl: 'list/list.tpl.html',
             controller: 'ListCtrl'
         }
-    }]);;angular.module('manage.templates', ['manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageNews/manageNews.tpl.html', 'manageNews/manageNewsAdmins.tpl.html', 'manageNews/manageNewsList.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html', 'submittedForms/submittedForms.tpl.html']);
+    }]);;angular.module('manage.templates', ['manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageNews/manageNews.tpl.html', 'manageNews/manageNewsAdmins.tpl.html', 'manageNews/manageNewsList.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html', 'staffDirectory/staffDirectoryDepartments.tpl.html', 'staffDirectory/staffDirectoryPeople.tpl.html', 'staffDirectory/staffDirectorySubjects.tpl.html', 'submittedForms/submittedForms.tpl.html']);
 
 angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageDatabases/manageDatabases.tpl.html",
@@ -40970,7 +40967,7 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                        </h4>\n" +
     "                    </td>\n" +
     "                    <td style=\"width: 79px;\">\n" +
-    "                        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"publishSW(sw)\" ng-if=\"sw.status == 0\">\n" +
+    "                        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"publishSW(sw)\" ng-show=\"sw.status == 0\">\n" +
     "                            Publish\n" +
     "                        </button>\n" +
     "                    </td>\n" +
@@ -41065,7 +41062,7 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                                                </button>\n" +
     "                                                {{loc.name}}\n" +
     "                                            </div>\n" +
-    "                                            <div class=\"col-md-3\">\n" +
+    "                                            <div class=\"col-md-4\">\n" +
     "                                                <div class=\"col-md-6\" ng-show=\"checkDevices(loc.devices, 1)\">\n" +
     "                                                    <span class=\"fa fa-fw fa-windows\"></span>\n" +
     "                                                    <span class=\"fa fa-fw fa-desktop\"></span>\n" +
@@ -41082,9 +41079,6 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                                                    <span class=\"fa fa-fw fa-apple\"></span>\n" +
     "                                                    <span class=\"fa fa-fw fa-laptop\"></span>\n" +
     "                                                </div>\n" +
-    "                                            </div>\n" +
-    "                                            <div class=\"col-md-1\">\n" +
-    "\n" +
     "                                            </div>\n" +
     "                                        </li>\n" +
     "                                        <li class=\"list-group-item col-md-12\">\n" +
@@ -41162,6 +41156,9 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                </div>\n" +
     "                <div class=\"col-md-12 text-center\">\n" +
     "                    <button type=\"submit\" class=\"btn btn-success\">Update information</button>\n" +
+    "                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"unpublishSW(sw)\" ng-hide=\"\">\n" +
+    "                        Unpublish\n" +
+    "                    </button>\n" +
     "                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteSW(sw)\">\n" +
     "                        Delete {{sw.title}} software\n" +
     "                    </button>\n" +
@@ -41266,7 +41263,7 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                                        </button>\n" +
     "                                        {{loc.name}}\n" +
     "                                    </div>\n" +
-    "                                    <div class=\"col-md-3\">\n" +
+    "                                    <div class=\"col-md-4\">\n" +
     "                                        <div class=\"col-md-6\" ng-show=\"checkDevices(loc.devices, 1)\">\n" +
     "                                            <span class=\"fa fa-fw fa-windows\"></span>\n" +
     "                                            <span class=\"fa fa-fw fa-desktop\"></span>\n" +
@@ -41283,9 +41280,6 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                                            <span class=\"fa fa-fw fa-apple\"></span>\n" +
     "                                            <span class=\"fa fa-fw fa-laptop\"></span>\n" +
     "                                        </div>\n" +
-    "                                    </div>\n" +
-    "                                    <div class=\"col-md-1\">\n" +
-    "\n" +
     "                                    </div>\n" +
     "                                </li>\n" +
     "                                <li class=\"list-group-item col-md-12\">\n" +
@@ -41637,207 +41631,470 @@ angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCach
   $templateCache.put("staffDirectory/staffDirectory.tpl.html",
     "<h2>Library Staff Directory</h2>\n" +
     "\n" +
-    "<div>\n" +
-    "    <div class=\"text-center row form-inline\">\n" +
-    "        <div class=\"col-md-5 form-group text-right\">\n" +
-    "            <label for=\"sortBy\">Sort By</label>\n" +
-    "            <div id=\"sortBy\">\n" +
-    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"'first'\"\n" +
-    "                        ng-click=\"sortMode='firstname'\">\n" +
-    "                    First Name\n" +
-    "                </button>\n" +
-    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"'last'\"\n" +
-    "                        ng-click=\"sortMode='lastname'\">\n" +
-    "                    Last Name\n" +
-    "                </button>\n" +
-    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"'title'\"\n" +
-    "                        ng-click=\"sortMode='title'\">\n" +
-    "                    Title\n" +
-    "                </button>\n" +
-    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"'dept'\"\n" +
-    "                        ng-click=\"sortMode='department'\">\n" +
-    "                    Department\n" +
-    "                </button>\n" +
+    "<tabset justified=\"true\">\n" +
+    "    <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
+    "        <div ng-if=\"tab.number == 0\">\n" +
+    "            <div manage-sd-people>\n" +
     "            </div>\n" +
     "        </div>\n" +
-    "        <div class=\"col-md-7 form-group text-left\">\n" +
-    "            <label for=\"filterBy\">Filter by</label>\n" +
-    "            <div id=\"filterBy\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Last Name\" ng-model=\"lastNameFilter\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"First Name\" ng-model=\"firstNameFilter\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Title\" ng-model=\"titleFilter\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Department\" ng-model=\"deptFilter\">\n" +
+    "        <div ng-if=\"tab.number == 1\" >\n" +
+    "            <div manage-sd-subjects>\n" +
     "            </div>\n" +
     "        </div>\n" +
-    "    </div>\n" +
+    "        <div ng-if=\"tab.number == 2\">\n" +
+    "            <div manage-sd-departments>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </tab>\n" +
+    "</tabset>\n" +
     "\n" +
-    "    <div class=\"text-center\">\n" +
-    "        <pagination total-items=\"filteredDB.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
-    "                    boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredDB.length > perPage\"></pagination>\n" +
-    "    </div>\n" +
-    "    <div class=\"row\" ng-repeat=\"person in filteredDB = (Directory.list\n" +
-    "                                                        | filter:{lastname:lastNameFilter}\n" +
-    "                                                        | filter:{firstname:firstNameFilter}\n" +
-    "                                                        | filter:{title:titleFilter}\n" +
-    "                                                        | filter:{department:deptFilter}\n" +
-    "                                                        | orderBy:sortMode)\n" +
-    "                                | startFrom:(currentPage-1)*perPage | limitTo:perPage\"\n" +
-    "         ng-class=\"{sdOpen: person.show, sdOver: person.id == mOver}\" ng-mouseover=\"setOver(person)\">\n" +
-    "        <div class=\"col-md-7\" ng-click=\"togglePerson(person)\">\n" +
-    "            <h4>\n" +
-    "                <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"person.show\"></span>\n" +
-    "                <span class=\"fa fa-fw fa-caret-down\" ng-show=\"person.show\"></span>\n" +
-    "                {{person.firstname}} {{person.lastname}} <small>{{person.title}}</small>\n" +
-    "            </h4>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-5\" ng-click=\"togglePerson(person)\">\n" +
-    "            <h4>{{person.department}}</h4>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-12\" ng-show=\"person.show\">\n" +
-    "            <div class=\"col-md-3\">\n" +
-    "                <img ng-src=\"{{person.image}}\" style=\"height:250px;\" alt=\"{{person.firstname}} {{person.lastname}}\"/>\n" +
+    "");
+}]);
+
+angular.module("staffDirectory/staffDirectoryDepartments.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("staffDirectory/staffDirectoryDepartments.tpl.html",
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-6\">\n" +
+    "        <h3>Departments</h3>\n" +
+    "        <div class=\"row\">\n" +
+    "            <div class=\"col-md-5\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Department Name\" ng-model=\"newDept.name\"\n" +
+    "                       maxlength=\"100\">\n" +
     "            </div>\n" +
-    "            <div class=\"col-md-9\" ng-show=\"person.show && hasAccess == 1\">\n" +
-    "                <div class=\"col-md-4 form-group\">\n" +
+    "            <div class=\"col-md-5\">\n" +
+    "                <select class=\"form-control\" ng-model=\"newDept.selLib\" ng-options=\"lib.name for lib in Directory.libraries\">\n" +
+    "                </select>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2\">\n" +
+    "                <button type=\"button\" class=\"btn btn-success\" ng-click=\"addDepartment()\" ng-disabled=\"newDept.name.length == 0\">\n" +
+    "                    <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "                </button>\n" +
+    "            </div>\n" +
+    "            {{depResponse}}\n" +
+    "        </div>\n" +
+    "        <table class=\"table table-hover\">\n" +
+    "            <thead>\n" +
+    "            <tr>\n" +
+    "                <th>Department</th>\n" +
+    "                <th>Location</th>\n" +
+    "                <th style=\"width:120px;\">Action</th>\n" +
+    "            </tr>\n" +
+    "            </thead>\n" +
+    "            <tbody>\n" +
+    "            <tr ng-repeat=\"dept in Directory.departments\" ng-click=\"expandDepartment(dept)\">\n" +
+    "                <td>\n" +
+    "                    <span ng-hide=\"dept.show\">{{dept.name}}</span>\n" +
+    "                    <span ng-show=\"dept.show\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Department Name\" ng-model=\"dept.name\"\n" +
+    "                               maxlength=\"100\">\n" +
+    "                    </span>\n" +
+    "                </td>\n" +
+    "                <td>\n" +
+    "                    <span ng-hide=\"dept.show\">{{dept.selLib.name}}</span>\n" +
+    "                    <span ng-show=\"dept.show\">\n" +
+    "                        <select class=\"form-control\" ng-model=\"dept.selLib\" ng-options=\"lib.name for lib in Directory.libraries\">\n" +
+    "                        </select>\n" +
+    "                    </span>\n" +
+    "                </td>\n" +
+    "                <td>\n" +
+    "                    <div ng-show=\"dept.show\">\n" +
+    "                        <button type=\"button\" class=\"btn btn-success\" ng-click=\"editDepartment(dept)\" ng-disabled=\"dept.name.length == 0\">\n" +
+    "                            <span class=\"fa fa-fw fa-edit\"></span>\n" +
+    "                        </button>\n" +
+    "                        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteDepartment(dept)\">\n" +
+    "                            <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                        </button>\n" +
+    "                    </div>\n" +
+    "                </td>\n" +
+    "            </tr>\n" +
+    "            </tbody>\n" +
+    "        </table>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-6\">\n" +
+    "        <h3>Libraries/Locations</h3>\n" +
+    "        <div class=\"row\">\n" +
+    "            <div class=\"col-md-10\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Location Name\" ng-model=\"newLoc.name\"\n" +
+    "                       maxlength=\"100\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2\">\n" +
+    "                <button type=\"button\" class=\"btn btn-success\" ng-click=\"addLibrary()\" ng-disabled=\"newLoc.name.length == 0\">\n" +
+    "                    <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "                </button>\n" +
+    "            </div>\n" +
+    "            {{libResponse}}\n" +
+    "        </div>\n" +
+    "        <table class=\"table table-hover\">\n" +
+    "            <thead>\n" +
+    "            <tr>\n" +
+    "                <th>Library/Location</th>\n" +
+    "                <th style=\"width:120px;\">Action</th>\n" +
+    "            </tr>\n" +
+    "            </thead>\n" +
+    "            <tbody>\n" +
+    "            <tr ng-repeat=\"lib in Directory.libraries\" ng-click=\"expandLibrary(lib)\">\n" +
+    "                <td>\n" +
+    "                    <span ng-hide=\"lib.show\">{{lib.name}}</span>\n" +
+    "                    <span ng-show=\"lib.show\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Library Name\" ng-model=\"lib.name\"\n" +
+    "                               maxlength=\"100\">\n" +
+    "                    </span>\n" +
+    "                </td>\n" +
+    "                <td>\n" +
+    "                    <div ng-show=\"lib.show\">\n" +
+    "                        <button type=\"button\" class=\"btn btn-success\" ng-click=\"editLibrary(lib)\" ng-disabled=\"lib.name.length == 0\">\n" +
+    "                            <span class=\"fa fa-fw fa-edit\"></span>\n" +
+    "                        </button>\n" +
+    "                        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteLibrary(lib)\">\n" +
+    "                            <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                        </button>\n" +
+    "                    </div>\n" +
+    "                </td>\n" +
+    "            </tr>\n" +
+    "            </tbody>\n" +
+    "        </table>\n" +
+    "\n" +
+    "        <h3>Divisions</h3>\n" +
+    "        <div class=\"row\">\n" +
+    "            <div class=\"col-md-10\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Division Name\" ng-model=\"newDiv.name\"\n" +
+    "                       maxlength=\"100\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2\">\n" +
+    "                <button type=\"button\" class=\"btn btn-success\" ng-click=\"addDivision()\" ng-disabled=\"newDiv.name.length == 0\">\n" +
+    "                    <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "                </button>\n" +
+    "            </div>\n" +
+    "            {{divResponse}}\n" +
+    "        </div>\n" +
+    "        <table class=\"table table-hover\">\n" +
+    "            <thead>\n" +
+    "            <tr>\n" +
+    "                <th>Division</th>\n" +
+    "                <th style=\"width:120px;\">Action</th>\n" +
+    "            </tr>\n" +
+    "            </thead>\n" +
+    "            <tbody>\n" +
+    "            <tr ng-repeat=\"division in Directory.divisions\" ng-click=\"expandDivision(division)\" ng-if=\"division.divid > 0\">\n" +
+    "                <td>\n" +
+    "                    <span ng-hide=\"division.show\">{{division.name}}</span>\n" +
+    "                    <span ng-show=\"division.show\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Division Name\" ng-model=\"division.name\"\n" +
+    "                               maxlength=\"100\">\n" +
+    "                    </span>\n" +
+    "                </td>\n" +
+    "                <td>\n" +
+    "                    <div ng-show=\"division.show\">\n" +
+    "                        <button type=\"button\" class=\"btn btn-success\" ng-click=\"editDivision(division)\"\n" +
+    "                                ng-disabled=\"division.name.length == 0\">\n" +
+    "                            <span class=\"fa fa-fw fa-edit\"></span>\n" +
+    "                        </button>\n" +
+    "                        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteDivision(division)\">\n" +
+    "                            <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                        </button>\n" +
+    "                    </div>\n" +
+    "                </td>\n" +
+    "            </tr>\n" +
+    "            </tbody>\n" +
+    "        </table>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "");
+}]);
+
+angular.module("staffDirectory/staffDirectoryPeople.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("staffDirectory/staffDirectoryPeople.tpl.html",
+    "<h3>Add New Person</h3>\n" +
+    "<form style=\"background-color:#f9f9f9;\" ng-submit=\"addPerson()\">\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-2 form-group\">\n" +
+    "            <label for=\"rank\">Rank</label>\n" +
+    "            <select class=\"form-control\" ng-model=\"newPerson.rank\" ng-options=\"rank for rank in ranks\" id=\"rank\">\n" +
+    "            </select>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-3 form-group\">\n" +
+    "            <label for=\"firstName\">First Name</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"First Name\" maxlength=\"25\"\n" +
+    "                   ng-model=\"newPerson.first\" id=\"firstName\" required>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-3 form-group\">\n" +
+    "            <label for=\"lastName\">Last Name</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Last Name\" maxlength=\"25\"\n" +
+    "                   ng-model=\"newPerson.last\" id=\"lastName\" required>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-4 form-group\">\n" +
+    "            <label for=\"title\">Title</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Title\" maxlength=\"150\"\n" +
+    "                   ng-model=\"newPerson.title\" id=\"title\" required>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-2 form-group\">\n" +
+    "            <label for=\"divis\">Division</label>\n" +
+    "            <select class=\"form-control\" ng-model=\"newPerson.selDiv\" ng-options=\"div.name for div in Directory.divisions\" id=\"divis\">\n" +
+    "            </select>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-3 form-group\">\n" +
+    "            <label for=\"dept\">Department</label>\n" +
+    "            <select class=\"form-control\" ng-model=\"newPerson.selDept\" ng-options=\"dept.name for dept in Directory.departments\" id=\"dept\">\n" +
+    "            </select>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-3 form-group\">\n" +
+    "            <label for=\"email\">Email</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Email\" maxlength=\"255\"\n" +
+    "                   ng-model=\"newPerson.email\" id=\"email\" required>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-2 form-group\">\n" +
+    "            <label for=\"phone\">Phone</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Phone\" maxlength=\"8\"\n" +
+    "                   ng-model=\"newPerson.phone\" id=\"phone\" required>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-2 form-group\">\n" +
+    "            <label for=\"fax\">Fax</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Fax\" maxlength=\"8\" ng-model=\"newPerson.fax\" id=\"fax\">\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-12 form-group text-center\">\n" +
+    "            <button type=\"submit\" class=\"btn btn-success\">\n" +
+    "                Create New Record\n" +
+    "            </button><br>\n" +
+    "            {{formResponse}}\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</form>\n" +
+    "\n" +
+    "<h3>People List</h3>\n" +
+    "<div class=\"row form-inline\">\n" +
+    "    <div class=\"form-group col-md-12\">\n" +
+    "        <label for=\"filterBy\">Filter <small>{{filteredList.length}}</small> results by</label>\n" +
+    "        <div id=\"filterBy\">\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Last name contains\" ng-model=\"lastNameFilter\">\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"First name contains\" ng-model=\"firstNameFilter\">\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"titleFilter\">\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Department contains\" ng-model=\"deptFilter\">\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div class=\"text-center\">\n" +
+    "    <pagination total-items=\"filteredList.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
+    "                boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredList.length > perPage\"></pagination>\n" +
+    "</div>\n" +
+    "<div class=\"table-responsive\">\n" +
+    "    <table class=\"table table-condensed table-hover\">\n" +
+    "        <thead>\n" +
+    "        <tr>\n" +
+    "            <th class=\"hidden-xs\" style=\"width:21%\">\n" +
+    "                <a ng-click=\"sortBy(0)\"\n" +
+    "                   ng-class=\"{'sortable': !sortModes[0].reverse && sortMode == 0, 'sortable-reverse': sortModes[0].reverse && sortMode == 0}\">\n" +
+    "                    Name\n" +
+    "                </a>\n" +
+    "            </th>\n" +
+    "            <th class=\"hidden-xs\" style=\"width:21%\">\n" +
+    "                <a ng-click=\"sortBy(1)\"\n" +
+    "                   ng-class=\"{'sortable': !sortModes[1].reverse && sortMode == 1, 'sortable-reverse': sortModes[1].reverse && sortMode == 1}\">\n" +
+    "                    Title\n" +
+    "                </a>\n" +
+    "            </th>\n" +
+    "            <th class=\"hidden-xs\" style=\"width:21%\">\n" +
+    "                <a ng-click=\"sortBy(2)\"\n" +
+    "                   ng-class=\"{'sortable': !sortModes[2].reverse && sortMode == 2, 'sortable-reverse': sortModes[2].reverse && sortMode == 2}\">\n" +
+    "                    Department/Division\n" +
+    "                </a>\n" +
+    "            </th>\n" +
+    "            <th class=\"hidden-xs\" style=\"width:16%\">\n" +
+    "                Contact Info\n" +
+    "            </th>\n" +
+    "            <th class=\"hidden-xs\" style=\"width:21%\">\n" +
+    "                Subjects\n" +
+    "            </th>\n" +
+    "        </tr>\n" +
+    "        </thead>\n" +
+    "        <tbody>\n" +
+    "        <tr ng-repeat=\"person in filteredList = (Directory.list\n" +
+    "                                                    | filter:{lastname:lastNameFilter}\n" +
+    "                                                    | filter:{firstname:firstNameFilter}\n" +
+    "                                                    | filter:{title:titleFilter}\n" +
+    "                                                    | filter:{department:deptFilter}\n" +
+    "                                                    | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\n" +
+    "                                                    | startFrom:(currentPage-1)*perPage\n" +
+    "                                                    | limitTo:perPage\">\n" +
+    "            <td ng-click=\"togglePerson(person)\">\n" +
+    "                <h4>\n" +
+    "                    <a>\n" +
+    "                        <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"person.show\"></span>\n" +
+    "                        <span class=\"fa fa-fw fa-caret-down\" ng-show=\"person.show\"></span>\n" +
+    "                        {{person.firstname}} {{person.lastname}}\n" +
+    "                    </a>\n" +
+    "                    <span ng-show=\"person.rank.length > 0\">\n" +
+    "                        <small>{{person.rank}}</small>\n" +
+    "                    </span>\n" +
+    "                </h4>\n" +
+    "            </td>\n" +
+    "            <td>\n" +
+    "                <h4 ng-hide=\"person.show\">\n" +
+    "                    <small>{{person.title}}</small>\n" +
+    "                </h4>\n" +
+    "                <div class=\"form-group\" ng-show=\"person.show\">\n" +
     "                    <label for=\"{{person.id}}_title\">Title</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{person.title}}\" maxlength=\"150\" ng-model=\"person.title\" required\n" +
     "                           id=\"{{person.id}}_title\">\n" +
     "                </div>\n" +
-    "                <div class=\"col-md-2 form-group\">\n" +
+    "                <div class=\"form-group\" ng-show=\"person.show\">\n" +
     "                    <label for=\"{{person.id}}_rank\">Rank</label>\n" +
     "                    <select class=\"form-control\" id=\"{{person.id}}_rank\" ng-model=\"person.rank\"\n" +
     "                            ng-options=\"rank for rank in ranks\">\n" +
     "                    </select>\n" +
     "                </div>\n" +
-    "                <div class=\"col-md-6 form-group\">\n" +
+    "                <div ng-show=\"person.show\">\n" +
+    "                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"updatePerson(person)\">\n" +
+    "                        Update information\n" +
+    "                    </button>\n" +
+    "                </div>\n" +
+    "            </td>\n" +
+    "            <td>\n" +
+    "                <h4 ng-hide=\"person.show\">\n" +
+    "                    <small>{{person.department}}</small>\n" +
+    "                </h4>\n" +
+    "                <h4 ng-hide=\"person.show\">\n" +
+    "                    <small>{{person.division}}</small>\n" +
+    "                </h4>\n" +
+    "                <div class=\"form-group\" ng-show=\"person.show\">\n" +
     "                    <label for=\"{{person.id}}_dept\">Department</label>\n" +
-    "                    <select class=\"form-control\" id=\"{{person.id}}_dept\" ng-model=\"person.department\"\n" +
-    "                            ng-options=\"dept for dept in departments\">\n" +
+    "                    <select class=\"form-control\" id=\"{{person.id}}_dept\" ng-model=\"person.selDept\"\n" +
+    "                            ng-options=\"dept.name for dept in Directory.departments\">\n" +
     "                    </select>\n" +
     "                </div>\n" +
-    "                <div class=\"col-md-3 form-group\">\n" +
-    "                    <label for=\"{{person.id}}_email\">Email</label>\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{person.email}}\" maxlength=\"1024\" ng-model=\"person.email\" required\n" +
-    "                           id=\"{{person.id}}_email\">\n" +
+    "                <div class=\"form-group\" ng-show=\"person.show\">\n" +
+    "                    <label for=\"{{person.id}}_divis\">Division</label>\n" +
+    "                    <select class=\"form-control\" id=\"{{person.id}}_divis\" ng-model=\"person.selDiv\"\n" +
+    "                            ng-options=\"div.name for div in Directory.divisions\">\n" +
+    "                    </select>\n" +
     "                </div>\n" +
-    "                <div class=\"col-md-3 form-group\">\n" +
-    "                    <label for=\"{{person.id}}_phone\">Phone</label>\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{person.phone}}\" maxlength=\"8\" ng-model=\"person.phone\" required\n" +
-    "                           id=\"{{person.id}}_phone\">\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-3 form-group\">\n" +
-    "                    <label for=\"{{person.id}}_fax\">Fax</label>\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{person.fax}}\" maxlength=\"8\" ng-model=\"person.fax\"\n" +
-    "                           id=\"{{person.id}}_fax\">\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-3 form-group\">\n" +
-    "                    <label for=\"{{person.id}}_div\">Division</label>\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{person.division}}\" maxlength=\"150\" ng-model=\"person.division\"\n" +
-    "                           id=\"{{person.id}}_div\">\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-6 text-center\">\n" +
-    "                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"updatePerson(person)\">Update information</button>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-6 text-center\">\n" +
+    "                <div ng-show=\"person.show\">\n" +
     "                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deletePerson(person)\">\n" +
     "                        Delete {{person.firstname}} {{person.lastname}} record\n" +
     "                    </button>\n" +
     "                </div>\n" +
-    "                <div class=\"col-md-12\">\n" +
-    "                    <h5>LibGuide Subjects</h5>\n" +
-    "                    <dd>\n" +
-    "                        <ul class=\"list-unstyled\">\n" +
-    "                            <li  ng-repeat=\"subject in person.subjects\">\n" +
-    "                                <button type=\"button\" class=\"btn btn-success\" ng-click=\"deleteSubject(person, subject.id, $index)\">\n" +
-    "                                    Delete\n" +
-    "                                </button>\n" +
-    "                                <a href=\"{{subject.link}}\">{{subject.subject}}</a>\n" +
-    "                            </li>\n" +
-    "                        </ul>\n" +
-    "                        <form class=\"form-inline\">\n" +
+    "            </td>\n" +
+    "            <td>\n" +
+    "                <div ng-hide=\"person.show\">\n" +
+    "                    <span class=\"fa fa-fw fa-envelope\"></span><small>{{person.email}}</small>\n" +
+    "                </div>\n" +
+    "                <div ng-hide=\"person.show\">\n" +
+    "                    <span class=\"fa fa-fw fa-phone\"></span><small>{{person.phone}}</small>\n" +
+    "                </div>\n" +
+    "                <div ng-hide=\"person.show\">\n" +
+    "                    <span class=\"fa fa-fw fa-fax\"></span><small>{{person.fax}}</small>\n" +
+    "                </div>\n" +
+    "                <div class=\"form-group\" ng-show=\"person.show\">\n" +
+    "                    <label for=\"{{person.id}}_email\">Email</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{person.email}}\" maxlength=\"1024\" ng-model=\"person.email\" required\n" +
+    "                           id=\"{{person.id}}_email\">\n" +
+    "                </div>\n" +
+    "                <div class=\"form-group\" ng-show=\"person.show\">\n" +
+    "                    <label for=\"{{person.id}}_phone\">Phone</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{person.phone}}\" maxlength=\"8\" ng-model=\"person.phone\" required\n" +
+    "                           id=\"{{person.id}}_phone\">\n" +
+    "                </div>\n" +
+    "                <div class=\"form-group\" ng-show=\"person.show\">\n" +
+    "                    <label for=\"{{person.id}}_fax\">Fax</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{person.fax}}\" maxlength=\"8\" ng-model=\"person.fax\"\n" +
+    "                           id=\"{{person.id}}_fax\">\n" +
+    "                </div>\n" +
+    "            </td>\n" +
+    "            <td>\n" +
+    "                <div ng-repeat=\"subject in person.subjects\" ng-hide=\"person.show\">\n" +
+    "                    <a href=\"{{subject.link}}\">{{subject.subject}}</a>\n" +
+    "                </div>\n" +
+    "                <div class=\"form-group\" ng-show=\"person.show\">\n" +
+    "                    <label for=\"{{person.id}}_subj\">Subjects</label>\n" +
+    "                    <div class=\"row\" id=\"{{person.id}}_subj\">\n" +
+    "                        <div class=\"col-md-12\" ng-repeat=\"subject in person.subjects\">\n" +
+    "                            <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteSubject(person, subject, $index)\">\n" +
+    "                                <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                            </button>\n" +
+    "                            <a href=\"{{subject.link}}\">{{subject.subject}}</a>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"col-md-9\">\n" +
     "                            <select class=\"form-control\" ng-model=\"person.selSubj\" ng-options=\"sub.subject for sub in Directory.subjects\">\n" +
     "                            </select>\n" +
-    "                            <button type=\"button\" class=\"btn btn-danger\" ng-click=\"addSubject(person)\">Assign Subject</button>\n" +
-    "                            <p>{{person.subjResponse}}</p>\n" +
-    "                        </form>\n" +
-    "                    </dd>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"col-md-3\">\n" +
+    "                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"addSubject(person)\">\n" +
+    "                                <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "                            </button>\n" +
+    "                        </div>\n" +
+    "                        <p>{{person.subjResponse}}</p>\n" +
+    "                    </div>\n" +
     "                </div>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-9\" ng-show=\"person.show && hasAccess == 0\">\n" +
-    "                <dt>Title</dt><dd>{{person.title}}</dd>\n" +
-    "                <dt ng-show=\"person.rank.length > 0\">Rank</dt>  <dd>{{person.rank}}</dd>\n" +
-    "                <dt>Departent</dt>  <dd>{{person.department}}</dd>\n" +
-    "                <dt ng-show=\"person.division.length > 0\">Division</dt>  <dd>{{person.division}}</dd>\n" +
-    "                <dt>Email</dt>  <dd>{{person.email}}</dd>\n" +
-    "                <dt>Phone</dt>  <dd>{{person.phone}}</dd>\n" +
-    "                <dt ng-show=\"person.fax.length > 0\">Fax</dt>  <dd>{{person.fax}}</dd>\n" +
-    "                <dt ng-show=\"person.subjects.length > 0\">LibGuide Subjects</dt>\n" +
-    "                <dd>\n" +
-    "                    <ul class=\"list-inline\">\n" +
-    "                        <li ng-repeat=\"subject in person.subjects\">\n" +
-    "                            <a href=\"{{subject.link}}\">{{subject.subject}}</a>\n" +
-    "                        </li>\n" +
-    "                    </ul>\n" +
-    "                </dd>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "    </div>\n" +
+    "            </td>\n" +
+    "        </tr>\n" +
+    "        </tbody>\n" +
+    "    </table>\n" +
     "</div>\n" +
+    "\n" +
     "<div class=\"text-center\">\n" +
-    "    <pagination total-items=\"filteredDB.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
-    "                boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredDB.length > perPage\"></pagination>\n" +
+    "    <pagination total-items=\"filteredList.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
+    "                boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredList.length > perPage\"></pagination>\n" +
     "</div>\n" +
-    "\n" +
-    "<div ng-show=\"hasAccess\" style=\"background-color:#f9f9f9;\">\n" +
+    "");
+}]);
+
+angular.module("staffDirectory/staffDirectorySubjects.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("staffDirectory/staffDirectorySubjects.tpl.html",
+    "<h3>Manage Subjects</h3>\n" +
+    "<div class=\"row\">\n" +
     "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"firstName\">Firts Name</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"First Name\" maxlength=\"25\"\n" +
-    "                   ng-model=\"formData.first\" id=\"firstName\" required>\n" +
+    "        <div class=\"col-md-5\">\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Subject Name\" ng-model=\"newSubj.subject\"\n" +
+    "                   maxlength=\"255\">\n" +
     "        </div>\n" +
-    "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"lastName\">Last Name</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Last Name\" maxlength=\"25\"\n" +
-    "                   ng-model=\"formData.last\" id=\"lastName\" required>\n" +
+    "        <div class=\"col-md-5\">\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"http://guides.lib.ua.edu/example\" ng-model=\"newSubj.link\"\n" +
+    "                   maxlength=\"1024\">\n" +
     "        </div>\n" +
-    "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"email\">Email</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Email\" maxlength=\"255\"\n" +
-    "                   ng-model=\"formData.email\" id=\"email\" required>\n" +
+    "        <div class=\"col-md-2\">\n" +
+    "            <button type=\"button\" class=\"btn btn-success\" ng-click=\"addSubject()\" ng-disabled=\"newSubj.subject.length == 0\">\n" +
+    "                <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "            </button>\n" +
     "        </div>\n" +
-    "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"title\">Title</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Title\" maxlength=\"150\"\n" +
-    "                   ng-model=\"formData.title\" id=\"title\" required>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-2 form-group\">\n" +
-    "            <label for=\"rank\">Rank</label>\n" +
-    "            <select class=\"form-control\" ng-model=\"formData.rank\" ng-options=\"rank for rank in ranks\" id=\"rank\">\n" +
-    "            </select>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-4 form-group\">\n" +
-    "            <label for=\"dept\">Department</label>\n" +
-    "            <select class=\"form-control\" ng-model=\"formData.dept\" ng-options=\"dept for dept in departments\" id=\"dept\">\n" +
-    "            </select>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-2 form-group\">\n" +
-    "            <label for=\"phone\">Phone</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Phone\" maxlength=\"8\"\n" +
-    "                   ng-model=\"formData.phone\" id=\"phone\" required>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-2 form-group\">\n" +
-    "            <label for=\"fax\">Fax</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Fax\" maxlength=\"8\" ng-model=\"formData.fax\" id=\"fax\">\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-2 form-group text-right\">\n" +
-    "            <label for=\"addButton\">&nbsp</label><br>\n" +
-    "            <button type=\"submit\" class=\"btn btn-success\" ng-click=\"addPerson()\" id=\"addButton\">Create New Record</button>\n" +
-    "        </div>\n" +
+    "        {{subResponse}}\n" +
     "    </div>\n" +
-    "    <p ng-model=\"formResponse\">{{formResponse}}</p>\n" +
+    "    <table class=\"table table-hover\">\n" +
+    "        <thead>\n" +
+    "        <tr>\n" +
+    "            <th style=\"width:41.6%;\">Subject</th>\n" +
+    "            <th style=\"width:41.6%;\">Subject Link</th>\n" +
+    "            <th style=\"width:120px;\">Action</th>\n" +
+    "        </tr>\n" +
+    "        </thead>\n" +
+    "        <tbody>\n" +
+    "        <tr ng-repeat=\"subject in Directory.subjects\" ng-click=\"expandSubject(subject)\">\n" +
+    "            <td>\n" +
+    "                <span ng-hide=\"subject.show\">{{subject.subject}}</span>\n" +
+    "                <span ng-show=\"subject.show\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Subject Name\" ng-model=\"subject.subject\"\n" +
+    "                           maxlength=\"255\">\n" +
+    "                </span>\n" +
+    "            </td>\n" +
+    "            <td>\n" +
+    "                <span ng-hide=\"subject.show\"><a href=\"{{subject.link}}\">{{subject.link}}</a></span>\n" +
+    "                <span ng-show=\"subject.show\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Subject Link\" ng-model=\"subject.link\"\n" +
+    "                           maxlength=\"1024\">\n" +
+    "                </span>\n" +
+    "            </td>\n" +
+    "            <td>\n" +
+    "                <div ng-show=\"subject.show\">\n" +
+    "                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"editSubject(subject)\" ng-disabled=\"subject.subject.length == 0\">\n" +
+    "                        <span class=\"fa fa-fw fa-edit\"></span>\n" +
+    "                    </button>\n" +
+    "                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteSubject(subject)\">\n" +
+    "                        <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                    </button>\n" +
+    "                </div>\n" +
+    "            </td>\n" +
+    "        </tr>\n" +
+    "        </tbody>\n" +
+    "    </table>\n" +
     "</div>\n" +
-    "\n" +
-    "\n" +
     "");
 }]);
 
@@ -43622,6 +43879,22 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                         console.log(data);
                     });
             };
+            $scope.unpublishSW = function(sw){
+                swFactory.postData({action : 11}, sw)
+                    .success(function(data, status, headers, config) {
+                        if (data == 1){
+                            $scope.SWList.software[$scope.SWList.software.indexOf(sw)].status = 0;
+                            $scope.formResponse = "Software has been unpublished.";
+                        } else {
+                            $scope.formResponse = "Error: Can not publish software! " + data;
+                        }
+                        console.log(data);
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.formResponse = "Error: Could not publish software! " + data;
+                        console.log(data);
+                    });
+            };
 
             $scope.deleteSW = function(sw){
                 if (confirm("Delete " + sw.title  + " permanently?") == true){
@@ -44300,50 +44573,27 @@ angular.module('manage.staffDirectory', [])
         "Asso. Prof.",
         "Asst. Prof."
     ])
-    .constant('STAFF_DIR_DEPTS', [
-        "Acquisitions",
-        "Annex Services",
-        "Area Computing Services",
-        "Business Library",
-        "Business Office",
-        "Cataloging & Metadata Services",
-        "Collection Management",
-        "Digital Humanities Center",
-        "Digital Services",
-        "Education Library",
-        "Electronic Resources",
-        "Gorgas Information Services",
-        "Gorgas Library, Circulation Department",
-        "Government Documents",
-        "Health Sciences Library",
-        "ILS & E-Resources Management",
-        "Interlibrary Loan",
-        "Library Administration",
-        "Office of Library Technology",
-        "Sanford Media Center",
-        "School of Social Work",
-        "Science and Engineering Library",
-        "Special Collections",
-        "Web Infrastructure & Application Development",
-        "Web Services"
-    ])
 
-    .controller('staffDirCtrl', ['$scope', '$window', 'tokenFactory', 'sdFactory', 'STAFF_DIR_RANKS', 'STAFF_DIR_DEPTS', 'STAFF_DIR_URL',
-        function staffDirCtrl($scope, $window, tokenFactory, sdFactory, ranks, departments, appUrl){
-            $scope.sortMode = 'lastname';
-            $scope.lastNameFilter = '';
-            $scope.firstNameFilter = '';
-            $scope.titleFilter = '';
-            $scope.deptFilter = '';
-            $scope.sortButton = 'last';
+    .controller('staffDirCtrl', ['$scope', 'tokenFactory', 'sdFactory', 'STAFF_DIR_URL',
+        function staffDirCtrl($scope, tokenFactory, sdFactory, appUrl){
             $scope.Directory = {};
-            $scope.hasAccess = $window.isAdmin;
-            $scope.ranks = ranks;
-            $scope.departments = departments;
-            $scope.mOver = 0;
-            $scope.currentPage = 1;
-            $scope.maxPageSize = 10;
-            $scope.perPage = 15;
+            $scope.newPerson = {};
+            $scope.newDept = {};
+
+            $scope.tabs = [
+                { name: 'Directory',
+                    number: 0,
+                    active: true
+                },
+                { name: 'Subjects',
+                    number: 1,
+                    active: false
+                },
+                { name: 'Departments/Locations',
+                    number: 2,
+                    active: false
+                }
+            ];
 
             tokenFactory("CSRF-libStaffDir");
 
@@ -44353,155 +44603,42 @@ angular.module('manage.staffDirectory', [])
                     $scope.Directory = data;
                     for (var i = 0; i < $scope.Directory.list.length; i++){
                         $scope.Directory.list[i].selSubj = $scope.Directory.subjects[0];
+                        for (var j = 0; j < $scope.Directory.departments.length; j++)
+                            if ($scope.Directory.departments[j].depid == $scope.Directory.list[i].dept){
+                                $scope.Directory.list[i].selDept = $scope.Directory.departments[j];
+                                break;
+                            }
+                        for (var j = 0; j < $scope.Directory.divisions.length; j++)
+                            if ($scope.Directory.divisions[j].divid == $scope.Directory.list[i].divis){
+                                $scope.Directory.list[i].selDiv = $scope.Directory.divisions[j];
+                                break;
+                            }
                         $scope.Directory.list[i].class = "";
+                        $scope.Directory.list[i].show = false;
                         $scope.Directory.list[i].image = appUrl + "staffImages/" + $scope.Directory.list[i].id + ".jpg";
                     }
+                    $scope.newPerson.selSubj = $scope.Directory.subjects[0];
+                    for (var i = 0; i < $scope.Directory.subjects.length; i++)
+                        $scope.Directory.subjects[i].show = false;
+                    $scope.newPerson.selDept = $scope.Directory.departments[0];
+                    for (var i = 0; i < $scope.Directory.departments.length; i++){
+                        $scope.Directory.departments[i].show = false;
+                        for (var j = 0; j < $scope.Directory.libraries.length; j++)
+                            if ($scope.Directory.libraries[j].lid == $scope.Directory.departments[i].library){
+                                $scope.Directory.departments[i].selLib = $scope.Directory.libraries[j];
+                            }
+                    }
+                    $scope.newPerson.selDiv = $scope.Directory.divisions[0];
+                    for (var i = 0; i < $scope.Directory.libraries.length; i++)
+                        $scope.Directory.libraries[i].show = false;
+                    for (var i = 0; i < $scope.Directory.divisions.length; i++)
+                        $scope.Directory.divisions[i].show = false;
+                    $scope.newDept.selLib = $scope.Directory.libraries[0];
                 })
                 .error(function(data, status, headers, config) {
                     console.log(data);
                 });
 
-            $scope.togglePerson = function(person){
-                $scope.Directory.list[$scope.Directory.list.indexOf(person)].show =
-                    !$scope.Directory.list[$scope.Directory.list.indexOf(person)].show;
-                $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjResponse = "";
-            };
-
-            $scope.setOver = function(person){
-                $scope.mOver = person.id;
-            };
-
-            $scope.resetNewPersonForm = function(){
-                $scope.formData.first = "";
-                $scope.formData.last = "";
-                $scope.formData.email = "";
-                $scope.formData.phone = "";
-                $scope.formData.fax = "";
-            };
-
-            $scope.deletePerson = function(person){
-                if (confirm("Delete " + person.lastname + ", " + person.firstname  + " record permanently?") == true){
-                    sdFactory.postData({delete : 1}, person)
-                        .success(function(data, status, headers, config) {
-                            $scope.formResponse = data;
-                            $scope.Directory.list.splice($scope.Directory.list.indexOf(person), 1);
-                        })
-                        .error(function(data, status, headers, config) {
-                            $scope.formResponse = "Error: Could not delete person data! " + data;
-                        });
-                }
-            };
-            $scope.updatePerson = function(person){
-                sdFactory.postData({update : person.id}, person)
-                    .success(function(data, status, headers, config) {
-                        $scope.formResponse = "Person has been updated!";
-                    })
-                    .error(function(data, status, headers, config) {
-                        $scope.formResponse = "Error: Person update failed! " + data;
-                    });
-            };
-            $scope.deleteSubject = function(person, subjectID, index){
-                if (confirm("Delete this subject from " + person.firstname + " " + person.lastname + "?") == true){
-                    sdFactory.postData({deleteSubject : subjectID}, {})
-                        .success(function(data, status, headers, config) {
-                            $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjects.splice(index, 1);
-                            $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjResponse = "Subject Deleted!";
-                            console.log(data);
-                        })
-                        .error(function(data, status, headers, config) {
-                            $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjResponse =
-                                "Error: Could not delete subject! " + data;
-                        });
-                }
-            };
-            $scope.addSubject = function(person){
-                sdFactory.postData({addSubject : 1}, person)
-                    .success(function(data, status, headers, config) {
-                        var newSubj = {};
-                        newSubj.id = person.selSubj.id;
-                        newSubj.subject = person.selSubj.subject;
-                        newSubj.link = person.selSubj.link;
-                        $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjects.push(newSubj);
-                        $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjResponse = "Subject Added!";
-                        console.log(data);
-                    })
-                    .error(function(data, status, headers, config) {
-                        $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjResponse =
-                            "Error: Could not add subject! " + data;
-                    });
-            };
-
-            $scope.formData = {};
-            $scope.formData.first = "";
-            $scope.formData.last = "";
-            $scope.formData.email = "";
-            $scope.formData.title = "";
-            $scope.formData.phone = "";
-            $scope.formData.fax = "";
-            $scope.formData.rank = ranks[0];
-            $scope.formData.dept = departments[0];
-            $scope.formResponse = '';
-
-            $scope.isValidEmailAddress = function(emailAddress) {
-                var pattern = new RegExp(/^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i);
-                return pattern.test(emailAddress);
-            };
-
-            $scope.addPerson = function() {
-                $scope.formResponse = '';
-                if ( $scope.formData.first.length > 0 )
-                {
-                    if ( $scope.formData.last.length > 0 )
-                    {
-                        if ( $scope.isValidEmailAddress( $scope.formData.email) )
-                        {
-                            if ( $scope.formData.title.length > 0 )
-                            {
-                                if ( $scope.formData.phone.length >= 7 )
-                                {
-                                    if ( $scope.formData.fax.length >= 7 )
-                                    {
-                                        sdFactory.postData({}, $scope.formData)
-                                            .success(function(data, status, headers, config) {
-                                                if ((typeof data === 'object') && (data !== null)){
-                                                    var createdUser = {};
-                                                    createdUser.id = data.id;
-                                                    createdUser.lastname = $scope.formData.last;
-                                                    createdUser.firstname = $scope.formData.first;
-                                                    createdUser.title = $scope.formData.title;
-                                                    createdUser.rank = $scope.formData.rank;
-                                                    createdUser.department = $scope.formData.dept;
-                                                    createdUser.division = "";
-                                                    createdUser.phone = $scope.formData.phone;
-                                                    createdUser.email = $scope.formData.email;
-                                                    createdUser.fax = $scope.formData.fax;
-                                                    createdUser.subjects = [];
-                                                    createdUser.show = false;
-                                                    createdUser.selSubj = $scope.Directory.subjects[0];
-                                                    createdUser.class = "";
-                                                    createdUser.image = appUrl + "staffImages/" + createdUser.id + ".jpg";
-                                                    $scope.Directory.list.push(createdUser);
-                                                    $scope.resetNewPersonForm();
-                                                    $scope.formResponse = "Person has been added!";
-                                                } else
-                                                    $scope.formResponse = "Error: Person could not be added! " + data;
-                                            })
-                                            .error(function(data, status, headers, config) {
-                                                $scope.formResponse = "Error: Person Creation failed! " + data;
-                                            });
-                                    } else
-                                        alert("Fax number is too short!");
-                                } else
-                                    alert("Phone number is too short!");
-                            } else
-                                alert("Title is too short!");
-                        } else
-                            alert("User email is invalid!");
-                    } else
-                        alert("Last Name is too short!");
-                } else
-                    alert("First Name is too short!");
-            };
         }])
     .directive('staffDirectoryList', function($animate) {
         return {
@@ -44529,12 +44666,438 @@ angular.module('manage.staffDirectory', [])
             templateUrl: 'staffDirectory/staffDirectory.tpl.html'
         };
     })
+    .controller('staffDirPeopleCtrl', ['$scope', 'sdFactory', 'STAFF_DIR_RANKS', 'STAFF_DIR_URL',
+        function staffDirPeopleCtrl($scope, sdFactory, ranks, appUrl){
+            $scope.lastNameFilter = '';
+            $scope.firstNameFilter = '';
+            $scope.titleFilter = '';
+            $scope.deptFilter = '';
+            $scope.ranks = ranks;
+
+            $scope.newPerson.first = "";
+            $scope.newPerson.last = "";
+            $scope.newPerson.email = "";
+            $scope.newPerson.title = "";
+            $scope.newPerson.phone = "";
+            $scope.newPerson.fax = "";
+            $scope.newPerson.rank = ranks[0];
+            $scope.formResponse = '';
+
+            $scope.currentPage = 1;
+            $scope.maxPageSize = 10;
+            $scope.perPage = 20;
+
+            $scope.sortModes = [
+                {by:'lastname', reverse:false},
+                {by:'title', reverse:false},
+                {by:'department', reverse:false}
+            ];
+            $scope.sortMode = $scope.sortModes[0];
+
+            $scope.togglePerson = function(person){
+                $scope.Directory.list[$scope.Directory.list.indexOf(person)].show =
+                    !$scope.Directory.list[$scope.Directory.list.indexOf(person)].show;
+                $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjResponse = "";
+            };
+
+            $scope.sortBy = function(by){
+                if ($scope.sortMode === by)
+                    $scope.sortModes[by].reverse = !$scope.sortModes[by].reverse;
+                else
+                    $scope.sortMode = by;
+            };
+
+            $scope.deletePerson = function(person){
+                if (confirm("Delete " + person.lastname + ", " + person.firstname  + " record permanently?") == true){
+                    sdFactory.postData({action : 1}, person)
+                        .success(function(data, status, headers, config) {
+                            $scope.formResponse = data;
+                            $scope.Directory.list.splice($scope.Directory.list.indexOf(person), 1);
+                        })
+                        .error(function(data, status, headers, config) {
+                            $scope.formResponse = "Error: Could not delete person data! " + data;
+                        });
+                }
+            };
+            $scope.updatePerson = function(person){
+                sdFactory.postData({action : 2}, person)
+                    .success(function(data, status, headers, config) {
+                        $scope.formResponse = "Person has been updated!";
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.formResponse = "Error: Person update failed! " + data;
+                    });
+            };
+            $scope.deleteSubject = function(person, subject, index){
+                if (confirm("Delete this subject from " + person.firstname + " " + person.lastname + "?") == true){
+                    sdFactory.postData({action : 4}, subject)
+                        .success(function(data, status, headers, config) {
+                            $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjects.splice(index, 1);
+                            $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjResponse = "Subject Deleted!";
+                            console.log(data);
+                        })
+                        .error(function(data, status, headers, config) {
+                            $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjResponse =
+                                "Error: Could not delete subject! " + data;
+                        });
+                }
+            };
+            $scope.addSubject = function(person){
+                sdFactory.postData({action : 5}, person)
+                    .success(function(data, status, headers, config) {
+                        var newSubj = {};
+                        newSubj.id = person.selSubj.id;
+                        newSubj.subject = person.selSubj.subject;
+                        newSubj.link = person.selSubj.link;
+                        $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjects.push(newSubj);
+                        $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjResponse = "Subject Added!";
+                        console.log(data);
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjResponse =
+                            "Error: Could not add subject! " + data;
+                    });
+            };
+
+            $scope.isValidEmailAddress = function(emailAddress) {
+                var pattern = new RegExp(/^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i);
+                return pattern.test(emailAddress);
+            };
+
+            $scope.addPerson = function() {
+                $scope.formResponse = '';
+                if ( $scope.newPerson.first.length > 0 )
+                {
+                    if ( $scope.newPerson.last.length > 0 )
+                    {
+                        if ( $scope.isValidEmailAddress( $scope.newPerson.email) )
+                        {
+                            if ( $scope.newPerson.title.length > 0 )
+                            {
+                                if ( $scope.newPerson.phone.length >= 7 )
+                                {
+                                    if ( $scope.newPerson.fax.length >= 7 ){
+                                        sdFactory.postData({action : 3}, $scope.newPerson)
+                                            .success(function(data, status, headers, config) {
+                                                if ((typeof data === 'object') && (data !== null)){
+                                                    var createdUser = {};
+                                                    createdUser.id = data.id;
+                                                    createdUser.lastname = $scope.newPerson.last;
+                                                    createdUser.firstname = $scope.newPerson.first;
+                                                    createdUser.title = $scope.newPerson.title;
+                                                    createdUser.rank = $scope.newPerson.rank;
+                                                    createdUser.department = $scope.newPerson.selDept.name;
+                                                    createdUser.division = $scope.newPerson.selDiv.name;
+                                                    createdUser.phone = $scope.newPerson.phone;
+                                                    createdUser.email = $scope.newPerson.email;
+                                                    createdUser.fax = $scope.newPerson.fax;
+                                                    createdUser.subjects = [];
+                                                    createdUser.show = false;
+                                                    createdUser.selSubj = $scope.Directory.subjects[0];
+                                                    for (var j = 0; j < $scope.Directory.departments.length; j++)
+                                                        if ($scope.Directory.departments[j].depid == $scope.newPerson.selDept.depid){
+                                                            createdUser.selDept = $scope.Directory.departments[j];
+                                                            break;
+                                                        }
+                                                    for (var j = 0; j < $scope.Directory.divisions.length; j++)
+                                                        if ($scope.Directory.divisions[j].divid == $scope.newPerson.selDiv.divid){
+                                                            createdUser.selDiv = $scope.Directory.divisions[j];
+                                                            break;
+                                                        }
+                                                    createdUser.class = "";
+                                                    createdUser.image = appUrl + "staffImages/" + createdUser.id + ".jpg";
+                                                    $scope.Directory.list.push(createdUser);
+                                                    $scope.resetNewPersonForm();
+                                                    $scope.formResponse = "Person has been added!";
+                                                } else
+                                                    $scope.formResponse = "Error: Person could not be added! " + data;
+                                            })
+                                            .error(function(data, status, headers, config) {
+                                                $scope.formResponse = "Error: Person Creation failed! " + data;
+                                            });
+                                    } else
+                                        alert("Fax number is too short!");
+                                } else
+                                    alert("Phone number is too short!");
+                            } else
+                                alert("Title is too short!");
+                        } else
+                            alert("User email is invalid!");
+                    } else
+                        alert("Last Name is too short!");
+                } else
+                    alert("First Name is too short!");
+            };
+        }])
+    .directive('manageSdPeople', function() {
+        return {
+            restrict: 'AC',
+            controller: 'staffDirPeopleCtrl',
+            link: function(scope, elm, attrs){
+            },
+            templateUrl: 'staffDirectory/staffDirectoryPeople.tpl.html'
+        };
+    })
     .filter('startFrom', function() {
         return function(input, start) {
             start = +start; //parse to int
             return input.slice(start);
         }
     })
+
+    .controller('staffDirSubjectsCtrl', ['$scope', 'sdFactory',
+        function staffDirSubjectsCtrl($scope, sdFactory){
+            $scope.newSubj = {};
+            $scope.newSubj.subject = "";
+            $scope.newSubj.link = "";
+            $scope.subResponse = '';
+
+            $scope.expandSubject = function(subject){
+                if (!$scope.Directory.subjects[$scope.Directory.subjects.indexOf(subject)].show)
+                    $scope.Directory.subjects[$scope.Directory.subjects.indexOf(subject)].show = true;
+            };
+
+            $scope.editSubject = function(subject){
+                sdFactory.postData({action : 6}, subject)
+                    .success(function(data, status, headers, config) {
+                        if (data == 1){
+                            $scope.Directory.subjects[$scope.Directory.subjects.indexOf(subject)].show = false;
+                        } else {
+                            $scope.subResponse = "Error: Can not save subject! " + data;
+                        }
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.subResponse = "Error: Could not save subject! " + data;
+                    });
+            };
+            $scope.deleteSubject = function(subject){
+                if (confirm("Delete "+ subject.subject + " subject?") == true){
+                    sdFactory.postData({action : 7}, subject)
+                        .success(function(data, status, headers, config) {
+                            if (data == 1){
+                                $scope.Directory.subjects.splice($scope.Directory.subjects.indexOf(subject), 1);
+                                $scope.subResponse = "Subject has been deleted!";
+                            } else {
+                                $scope.subResponse = "Error: Can not delete subject! " + data;
+                            }
+                        })
+                        .error(function(data, status, headers, config) {
+                            $scope.subResponse = "Error: Could not delete subject! " + data;
+                        });
+                }
+            };
+            $scope.addSubject = function(){
+                sdFactory.postData({action : 8}, $scope.newSubj)
+                    .success(function(data, status, headers, config) {
+                        if (typeof data == 'object' && data != null){
+                            var newSubject = {};
+                            newSubject.id = data.id;
+                            newSubject.subject = $scope.newSubj.subject;
+                            newSubject.show = false;
+                            $scope.Directory.subjects.push(newSubject);
+                            $scope.subResponse = "Subject has been added!";
+                        } else {
+                            $scope.subResponse = "Error: Can not add subject! " + data;
+                        }
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.subResponse = "Error: Could not add subject! " + data;
+                    });
+
+            };
+
+        }])
+    .directive('manageSdSubjects', function() {
+        return {
+            restrict: 'AC',
+            controller: 'staffDirSubjectsCtrl',
+            link: function(scope, elm, attrs){
+            },
+            templateUrl: 'staffDirectory/staffDirectorySubjects.tpl.html'
+        };
+    })
+
+    .controller('staffDirDepartmentsCtrl', ['$scope', 'sdFactory',
+        function staffDirDepartmentsCtrl($scope, sdFactory){
+            $scope.newDept.name = "";
+            $scope.newLoc = {};
+            $scope.newLoc.name = "";
+            $scope.newDiv = {};
+            $scope.newDiv.name = "";
+            $scope.depResponse = '';
+            $scope.libResponse = '';
+            $scope.divResponse = '';
+
+            $scope.expandDepartment = function(dept){
+                if (!$scope.Directory.departments[$scope.Directory.departments.indexOf(dept)].show)
+                    $scope.Directory.departments[$scope.Directory.departments.indexOf(dept)].show = true;
+            };
+            $scope.expandLibrary = function(lib){
+                if (!$scope.Directory.libraries[$scope.Directory.libraries.indexOf(lib)].show)
+                    $scope.Directory.libraries[$scope.Directory.libraries.indexOf(lib)].show = true;
+            };
+            $scope.expandDivision = function(division){
+                if (!$scope.Directory.divisions[$scope.Directory.divisions.indexOf(division)].show)
+                    $scope.Directory.divisions[$scope.Directory.divisions.indexOf(division)].show = true;
+            };
+
+            $scope.editDepartment = function(dept){
+                sdFactory.postData({action : 9}, dept)
+                    .success(function(data, status, headers, config) {
+                        if (data == 1){
+                            $scope.Directory.departments[$scope.Directory.departments.indexOf(dept)].show = false;
+                        } else {
+                            $scope.depResponse = "Error: Can not save department! " + data;
+                        }
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.depResponse = "Error: Could not save subject! " + data;
+                    });
+            };
+            $scope.deleteDepartment = function(dept){
+                if (confirm("Delete "+ dept.name + " department?") == true){
+                    sdFactory.postData({action : 10}, dept)
+                        .success(function(data, status, headers, config) {
+                            if (data == 1){
+                                $scope.Directory.departments.splice($scope.Directory.departments.indexOf(dept), 1);
+                                $scope.depResponse = "Department has been deleted!";
+                            } else {
+                                $scope.depResponse = "Error: Can not delete department! " + data;
+                            }
+                        })
+                        .error(function(data, status, headers, config) {
+                            $scope.depResponse = "Error: Could not delete department! " + data;
+                        });
+                }
+            };
+            $scope.addDepartment = function(){
+                sdFactory.postData({action : 11}, $scope.newDept)
+                    .success(function(data, status, headers, config) {
+                        if (typeof data == 'object' && data != null){
+                            var newDepartment = {};
+                            newDepartment.depid = data.id;
+                            newDepartment.name = $scope.newDept.name;
+                            newDepartment.library = $scope.newDept.selLib.lid;
+                            newDepartment.show = false;
+                            $scope.Directory.departments.push(newDepartment);
+                            $scope.depResponse = "Department has been added!";
+                        } else {
+                            $scope.depResponse = "Error: Can not add department! " + data;
+                        }
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.depResponse = "Error: Could not add department! " + data;
+                    });
+
+            };
+            $scope.editLibrary = function(lib){
+                sdFactory.postData({action : 12}, lib)
+                    .success(function(data, status, headers, config) {
+                        if (data == 1){
+                            $scope.Directory.libraries[$scope.Directory.libraries.indexOf(lib)].show = false;
+                        } else {
+                            $scope.libResponse = "Error: Can not update library! " + data;
+                        }
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.libResponse = "Error: Could not update library! " + data;
+                    });
+            };
+            $scope.deleteLibrary = function(lib){
+                if (confirm("Delete "+ lib.name + "?") == true){
+                    sdFactory.postData({action : 13}, lib)
+                        .success(function(data, status, headers, config) {
+                            if (data == 1){
+                                $scope.Directory.libraries.splice($scope.Directory.libraries.indexOf(lib), 1);
+                                $scope.libResponse = "Library has been deleted!";
+                            } else {
+                                $scope.libResponse = "Error: Can not delete library! " + data;
+                            }
+                        })
+                        .error(function(data, status, headers, config) {
+                            $scope.libResponse = "Error: Could not delete library! " + data;
+                        });
+                }
+            };
+            $scope.addLibrary = function(){
+                sdFactory.postData({action : 14}, $scope.newLoc)
+                    .success(function(data, status, headers, config) {
+                        if (typeof data == 'object' && data != null){
+                            var newLibrary = {};
+                            newLibrary.lid = data.id;
+                            newLibrary.name = $scope.newLoc.name;
+                            newLibrary.show = false;
+                            $scope.Directory.libraries.push(newLibrary);
+                            $scope.libResponse = "Library has been added!";
+                        } else {
+                            $scope.libResponse = "Error: Can not add library! " + data;
+                        }
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.libResponse = "Error: Could not add library! " + data;
+                    });
+
+            };
+            $scope.editDivision = function(division){
+                sdFactory.postData({action : 15}, division)
+                    .success(function(data, status, headers, config) {
+                        if (data == 1){
+                            $scope.Directory.divisions[$scope.Directory.divisions.indexOf(division)].show = false;
+                        } else {
+                            $scope.divResponse = "Error: Can not save division! " + data;
+                        }
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.divResponse = "Error: Could not save division! " + data;
+                    });
+            };
+            $scope.deleteDivision = function(division){
+                if (confirm("Delete "+ division.name + " division?") == true){
+                    sdFactory.postData({action : 16}, division)
+                        .success(function(data, status, headers, config) {
+                            if (data == 1){
+                                $scope.Directory.divisions.splice($scope.Directory.divisions.indexOf(division), 1);
+                                $scope.divResponse = "Division has been deleted!";
+                            } else {
+                                $scope.divResponse = "Error: Can not delete division! " + data;
+                            }
+                        })
+                        .error(function(data, status, headers, config) {
+                            $scope.divResponse = "Error: Could not delete division! " + data;
+                        });
+                }
+            };
+            $scope.addDivision = function(){
+                sdFactory.postData({action : 17}, $scope.newDiv)
+                    .success(function(data, status, headers, config) {
+                        if (typeof data == 'object' && data != null){
+                            var newDivision = {};
+                            newDivision.divid = data.id;
+                            newDivision.name = $scope.newDiv.name;
+                            newDivision.show = false;
+                            $scope.Directory.divisions.push(newDivision);
+                            $scope.divResponse = "Division has been added!";
+                        } else {
+                            $scope.divResponse = "Error: Can not add division! " + data;
+                        }
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.divResponse = "Error: Could not add division! " + data;
+                    });
+
+            };
+
+        }])
+    .directive('manageSdDepartments', function() {
+        return {
+            restrict: 'AC',
+            controller: 'staffDirDepartmentsCtrl',
+            link: function(scope, elm, attrs){
+            },
+            templateUrl: 'staffDirectory/staffDirectoryDepartments.tpl.html'
+        };
+    })
+
 angular.module('manage.submittedForms', [])
     .controller('manageSubFormsCtrl', ['$scope', '$timeout', 'tokenFactory', 'formFactory',
         function manageSubFormsCtrl($scope, $timeout, tokenFactory, formFactory){
