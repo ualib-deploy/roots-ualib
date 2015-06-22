@@ -4663,746 +4663,9 @@ angular.module('ui.utils',  [
 ]);
 ;/**!
  * AngularJS file upload/drop directive and service with progress and abort
- * @author  Danial  <danial.farid@gmail.com>
- * @version 5.0.6
- */
-var ngFileUpload = angular.module('ngFileUpload', []);
-
-ngFileUpload.version = '5.0.6';
-ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, $timeout) {
-  function patchXHR(fnName, newFn) {
-    window.XMLHttpRequest.prototype[fnName] = newFn(window.XMLHttpRequest.prototype[fnName]);
-  }
-
-  if (window.XMLHttpRequest && !window.XMLHttpRequest.__isFileAPIShim) {
-    patchXHR('setRequestHeader', function (orig) {
-      return function (header, value) {
-        if (header === '__setXHR_') {
-          var val = value(this);
-          // fix for angular < 1.2.0
-          if (val instanceof Function) {
-            val(this);
-          }
-        } else {
-          orig.apply(this, arguments);
-        }
-      };
-    });
-  }
-
-  function sendHttp(config) {
-    config.method = config.method || 'POST';
-    config.headers = config.headers || {};
-
-    var deferred = $q.defer();
-    var promise = deferred.promise;
-
-    config.headers.__setXHR_ = function () {
-      return function (xhr) {
-        if (!xhr) return;
-        config.__XHR = xhr;
-        if (config.xhrFn) config.xhrFn(xhr);
-        xhr.upload.addEventListener('progress', function (e) {
-          e.config = config;
-          if (deferred.notify) {
-            deferred.notify(e);
-          } else if (promise.progressFunc) {
-            $timeout(function () {
-              promise.progressFunc(e);
-            });
-          }
-        }, false);
-        //fix for firefox not firing upload progress end, also IE8-9
-        xhr.upload.addEventListener('load', function (e) {
-          if (e.lengthComputable) {
-            e.config = config;
-            if (deferred.notify) {
-              deferred.notify(e);
-            } else if (promise.progressFunc) {
-              $timeout(function () {
-                promise.progressFunc(e);
-              });
-            }
-          }
-        }, false);
-      };
-    };
-
-    $http(config).then(function (r) {
-      deferred.resolve(r);
-    }, function (e) {
-      deferred.reject(e);
-    }, function (n) {
-      deferred.notify(n);
-    });
-
-    promise.success = function (fn) {
-      promise.then(function (response) {
-        fn(response.data, response.status, response.headers, config);
-      });
-      return promise;
-    };
-
-    promise.error = function (fn) {
-      promise.then(null, function (response) {
-        fn(response.data, response.status, response.headers, config);
-      });
-      return promise;
-    };
-
-    promise.progress = function (fn) {
-      promise.progressFunc = fn;
-      promise.then(null, null, function (update) {
-        fn(update);
-      });
-      return promise;
-    };
-    promise.abort = function () {
-      if (config.__XHR) {
-        $timeout(function () {
-          config.__XHR.abort();
-        });
-      }
-      return promise;
-    };
-    promise.xhr = function (fn) {
-      config.xhrFn = (function (origXhrFn) {
-        return function () {
-          if (origXhrFn) origXhrFn.apply(promise, arguments);
-          fn.apply(promise, arguments);
-        };
-      })(config.xhrFn);
-      return promise;
-    };
-
-    return promise;
-  }
-
-  this.upload = function (config) {
-    function addFieldToFormData(formData, val, key) {
-      if (val !== undefined) {
-        if (angular.isDate(val)) {
-          val = val.toISOString();
-        }
-        if (angular.isString(val)) {
-          formData.append(key, val);
-        } else if (config.sendFieldsAs === 'form') {
-          if (angular.isObject(val)) {
-            for (var k in val) {
-              if (val.hasOwnProperty(k)) {
-                addFieldToFormData(formData, val[k], key + '[' + k + ']');
-              }
-            }
-          } else {
-            formData.append(key, val);
-          }
-        } else {
-          val = angular.isString(val) ? val : JSON.stringify(val);
-          if (config.sendFieldsAs === 'json-blob') {
-            formData.append(key, new Blob([val], {type: 'application/json'}));
-          } else {
-            formData.append(key, val);
-          }
-        }
-      }
-    }
-
-    config.headers = config.headers || {};
-    config.headers['Content-Type'] = undefined;
-    config.transformRequest = config.transformRequest ?
-      (angular.isArray(config.transformRequest) ?
-        config.transformRequest : [config.transformRequest]) : [];
-    config.transformRequest.push(function (data) {
-      var formData = new FormData();
-      var allFields = {};
-      var key;
-      for (key in config.fields) {
-        if (config.fields.hasOwnProperty(key)) {
-          allFields[key] = config.fields[key];
-        }
-      }
-      if (data) allFields.data = data;
-      for (key in allFields) {
-        if (allFields.hasOwnProperty(key)) {
-          var val = allFields[key];
-          if (config.formDataAppender) {
-            config.formDataAppender(formData, key, val);
-          } else {
-            addFieldToFormData(formData, val, key);
-          }
-        }
-      }
-
-      if (config.file != null) {
-        var fileFormName = config.fileFormDataName || 'file';
-
-        if (angular.isArray(config.file)) {
-          var isFileFormNameString = angular.isString(fileFormName);
-          for (var i = 0; i < config.file.length; i++) {
-            formData.append(isFileFormNameString ? fileFormName : fileFormName[i], config.file[i],
-              (config.fileName && config.fileName[i]) || config.file[i].name);
-          }
-        } else {
-          formData.append(fileFormName, config.file, config.fileName || config.file.name);
-        }
-      }
-      return formData;
-    });
-
-    return sendHttp(config);
-  };
-
-  this.http = function (config) {
-    config.transformRequest = config.transformRequest || function (data) {
-        if ((window.ArrayBuffer && data instanceof window.ArrayBuffer) || data instanceof Blob) {
-          return data;
-        }
-        return $http.defaults.transformRequest[0](arguments);
-      };
-    return sendHttp(config);
-  };
-}
-
-]);
-
-(function () {
-    ngFileUpload.directive('ngfSelect', ['$parse', '$timeout', '$compile',
-        function ($parse, $timeout, $compile) {
-            return {
-                restrict: 'AEC',
-                require: '?ngModel',
-                link: function (scope, elem, attr, ngModel) {
-                    linkFileSelect(scope, elem, attr, ngModel, $parse, $timeout, $compile);
-                }
-            };
-        }]);
-
-    function linkFileSelect(scope, elem, attr, ngModel, $parse, $timeout, $compile) {
-        /** @namespace attr.ngfSelect */
-        /** @namespace attr.ngfChange */
-        /** @namespace attr.ngModel */
-        /** @namespace attr.ngModelRejected */
-        /** @namespace attr.ngfMultiple */
-        /** @namespace attr.ngfCapture */
-        /** @namespace attr.ngfAccept */
-        /** @namespace attr.ngfMaxSize */
-        /** @namespace attr.ngfMinSize */
-        /** @namespace attr.ngfResetOnClick */
-        /** @namespace attr.ngfResetModelOnClick */
-        /** @namespace attr.ngfKeep */
-        /** @namespace attr.ngfKeepDistinct */
-
-        if (elem.attr('__ngf_gen__')) {
-            return;
-        }
-
-        scope.$on('$destroy', function () {
-            if (elem.$$ngfRefElem) elem.$$ngfRefElem.remove();
-        });
-
-        var disabled = false;
-        if (attr.ngfSelect.search(/\W+$files\W+/) === -1) {
-            scope.$watch(attr.ngfSelect, function (val) {
-                disabled = val === false;
-            });
-        }
-        function isInputTypeFile() {
-            return elem[0].tagName.toLowerCase() === 'input' && attr.type && attr.type.toLowerCase() === 'file';
-        }
-
-        var isUpdating = false;
-
-        function changeFn(evt) {
-            if (!isUpdating) {
-                isUpdating = true;
-                try {
-                    var fileList = evt.__files_ || (evt.target && evt.target.files);
-                    var files = [], rejFiles = [];
-
-                    for (var i = 0; i < fileList.length; i++) {
-                        var file = fileList.item(i);
-                        if (validate(scope, $parse, attr, file, evt)) {
-                            files.push(file);
-                        } else {
-                            rejFiles.push(file);
-                        }
-                    }
-                    updateModel($parse, $timeout, scope, ngModel, attr, attr.ngfChange || attr.ngfSelect, files, rejFiles, evt);
-                    if (files.length === 0) evt.target.value = files;
-//                if (evt.target && evt.target.getAttribute('__ngf_gen__')) {
-//                    angular.element(evt.target).remove();
-//                }
-                } finally {
-                    isUpdating = false;
-                }
-            }
-        }
-
-        function bindAttrToFileInput(fileElem) {
-            if (attr.ngfMultiple) fileElem.attr('multiple', $parse(attr.ngfMultiple)(scope));
-            if (attr.ngfCapture) fileElem.attr('capture', $parse(attr.ngfCapture)(scope));
-            if (attr.accept) fileElem.attr('accept', attr.accept);
-            for (var i = 0; i < elem[0].attributes.length; i++) {
-                var attribute = elem[0].attributes[i];
-                if ((isInputTypeFile() && attribute.name !== 'type') ||
-                    (attribute.name !== 'type' && attribute.name !== 'class' &&
-                    attribute.name !== 'id' && attribute.name !== 'style')) {
-                    fileElem.attr(attribute.name, attribute.value);
-                }
-            }
-        }
-
-        function createFileInput(evt, resetOnClick) {
-            if (elem.attr('disabled') || disabled) return;
-
-            if (!resetOnClick && (evt || isInputTypeFile())) return elem.$$ngfRefElem || elem;
-
-            var fileElem = angular.element('<input type="file">');
-            bindAttrToFileInput(fileElem);
-
-            if (isInputTypeFile()) {
-                elem.replaceWith(fileElem);
-                elem = fileElem;
-                fileElem.attr('__ngf_gen__', true);
-                $compile(elem)(scope);
-            } else {
-                fileElem.css('visibility', 'hidden').css('position', 'absolute').css('overflow', 'hidden')
-                    .css('width', '0px').css('height', '0px').css('z-index', '-100000').css('border', 'none')
-                    .css('margin', '0px').css('padding', '0px').attr('tabindex', '-1');
-                if (elem.$$ngfRefElem) {
-                    elem.$$ngfRefElem.remove();
-                }
-                elem.$$ngfRefElem = fileElem;
-                document.body.appendChild(fileElem[0]);
-            }
-
-            return fileElem;
-        }
-
-        function resetModel(evt) {
-            updateModel($parse, $timeout, scope, ngModel, attr, attr.ngfChange || attr.ngfSelect, [], [], evt, true);
-        }
-
-        function clickHandler(evt) {
-            if (evt != null) {
-                evt.preventDefault();
-                evt.stopPropagation();
-            }
-            var resetOnClick = $parse(attr.ngfResetOnClick)(scope) !== false;
-            var fileElem = createFileInput(evt, resetOnClick);
-
-            function clickAndAssign(evt) {
-                if (evt) {
-                    fileElem[0].click();
-                }
-                if (isInputTypeFile() || !evt) {
-                    elem.bind('click touchend', clickHandler);
-                }
-            }
-
-            if (fileElem) {
-                if (!evt || resetOnClick) fileElem.bind('change', changeFn);
-                if (evt && resetOnClick && $parse(attr.ngfResetModelOnClick)(scope) !== false) resetModel(evt);
-
-                // fix for android native browser < 4.4
-                if (shouldClickLater(navigator.userAgent)) {
-                    setTimeout(function () {
-                        clickAndAssign(evt);
-                    }, 0);
-                } else {
-                    clickAndAssign(evt);
-                }
-            }
-            return false;
-        }
-
-        if (window.FileAPI && window.FileAPI.ngfFixIE) {
-            window.FileAPI.ngfFixIE(elem, createFileInput, bindAttrToFileInput, changeFn);
-        } else {
-            clickHandler();
-            //if (!isInputTypeFile()) {
-            //  elem.bind('click touchend', clickHandler);
-            //}
-        }
-    }
-
-    function shouldClickLater(ua) {
-        // android below 4.4
-        var m = ua.match(/Android[^\d]*(\d+)\.(\d+)/);
-        if (m && m.length > 2) {
-            return parseInt(m[1]) < 4 || (parseInt(m[1]) === 4 && parseInt(m[2]) < 4);
-        }
-
-        // safari on windows
-        return /.*Windows.*Safari.*/.test(ua);
-    }
-
-    ngFileUpload.validate = function (scope, $parse, attr, file, evt) {
-        function globStringToRegex(str) {
-            if (str.length > 2 && str[0] === '/' && str[str.length - 1] === '/') {
-                return str.substring(1, str.length - 1);
-            }
-            var split = str.split(','), result = '';
-            if (split.length > 1) {
-                for (var i = 0; i < split.length; i++) {
-                    result += '(' + globStringToRegex(split[i]) + ')';
-                    if (i < split.length - 1) {
-                        result += '|';
-                    }
-                }
-            } else {
-                if (str.indexOf('.') === 0) {
-                    str = '*' + str;
-                }
-                result = '^' + str.replace(new RegExp('[.\\\\+*?\\[\\^\\]$(){}=!<>|:\\' + '-]', 'g'), '\\$&') + '$';
-                result = result.replace(/\\\*/g, '.*').replace(/\\\?/g, '.');
-            }
-            return result;
-        }
-
-        var accept = $parse(attr.ngfAccept)(scope, {$file: file, $event: evt});
-        var fileSizeMax = $parse(attr.ngfMaxSize)(scope, {$file: file, $event: evt}) || 9007199254740991;
-        var fileSizeMin = $parse(attr.ngfMinSize)(scope, {$file: file, $event: evt}) || -1;
-        if (accept != null && angular.isString(accept)) {
-            var regexp = new RegExp(globStringToRegex(accept), 'gi');
-            accept = (file.type != null && regexp.test(file.type.toLowerCase())) ||
-                (file.name != null && regexp.test(file.name.toLowerCase()));
-        }
-        return (accept == null || accept) && (file.size == null || (file.size < fileSizeMax && file.size > fileSizeMin));
-    };
-
-    ngFileUpload.updateModel = function ($parse, $timeout, scope, ngModel, attr, fileChange,
-                                         files, rejFiles, evt, noDelay) {
-        function update() {
-            if ($parse(attr.ngfKeep)(scope) === true) {
-                if (!files || !files.length) {
-                    return;
-                }
-                if ($parse(attr.ngfKeepDistinct)(scope) === true) {
-                    var prevFiles = (ngModel.$modelValue || []).slice(0), len = prevFiles.length;
-                    for (var i = 0; i < files.length; i++) {
-                        for (var j = 0; j < len; j++) {
-                            if (files[i].name === prevFiles[j].name) break;
-                        }
-                        if (j === len) {
-                            prevFiles.push(files[i]);
-                        }
-                    }
-                    if (len === prevFiles.length) {
-                        return;
-                    }
-                    files = [].concat(prevFiles);
-                } else {
-                    files = (ngModel.$modelValue || []).concat(files);
-                }
-            }
-            if (ngModel) {
-                $parse(attr.ngModel).assign(scope, files);
-                $timeout(function () {
-                    if (ngModel) {
-                        ngModel.$setViewValue(files != null && files.length === 0 ? null : files);
-                    }
-                });
-            }
-            if (attr.ngModelRejected) {
-                $parse(attr.ngModelRejected).assign(scope, rejFiles);
-            }
-            if (fileChange) {
-                $parse(fileChange)(scope, {
-                    $files: files,
-                    $rejectedFiles: rejFiles,
-                    $event: evt
-                });
-            }
-        }
-
-        if (noDelay) {
-            update();
-        } else {
-            $timeout(function () {
-                update();
-            });
-        }
-    };
-
-    var validate = ngFileUpload.validate;
-    var updateModel = ngFileUpload.updateModel;
-
-})();
-
-(function () {
-  var validate = ngFileUpload.validate;
-  var updateModel = ngFileUpload.updateModel;
-
-  ngFileUpload.directive('ngfDrop', ['$parse', '$timeout', '$location', function ($parse, $timeout, $location) {
-    return {
-      restrict: 'AEC',
-      require: '?ngModel',
-      link: function (scope, elem, attr, ngModel) {
-        linkDrop(scope, elem, attr, ngModel, $parse, $timeout, $location);
-      }
-    };
-  }]);
-
-  ngFileUpload.directive('ngfNoFileDrop', function () {
-    return function (scope, elem) {
-      if (dropAvailable()) elem.css('display', 'none');
-    };
-  });
-
-  ngFileUpload.directive('ngfDropAvailable', ['$parse', '$timeout', function ($parse, $timeout) {
-    return function (scope, elem, attr) {
-      if (dropAvailable()) {
-        var fn = $parse(attr.ngfDropAvailable);
-        $timeout(function () {
-          fn(scope);
-          if (fn.assign) {
-            fn.assign(scope, true);
-          }
-        });
-      }
-    };
-  }]);
-
-  function linkDrop(scope, elem, attr, ngModel, $parse, $timeout, $location) {
-    var available = dropAvailable();
-    if (attr.dropAvailable) {
-      $timeout(function () {
-        if (scope[attr.dropAvailable]) {
-          scope[attr.dropAvailable].value = available;
-        } else {
-          scope[attr.dropAvailable] = available;
-        }
-      });
-    }
-    if (!available) {
-      if ($parse(attr.ngfHideOnDropNotAvailable)(scope) === true) {
-        elem.css('display', 'none');
-      }
-      return;
-    }
-
-    var disabled = false;
-    if (attr.ngfDrop.search(/\W+$files\W+/) === -1) {
-      scope.$watch(attr.ngfDrop, function(val) {
-        disabled = val === false;
-      });
-    }
-
-    var leaveTimeout = null;
-    var stopPropagation = $parse(attr.ngfStopPropagation);
-    var dragOverDelay = 1;
-    var actualDragOverClass;
-
-    elem[0].addEventListener('dragover', function (evt) {
-      if (elem.attr('disabled') || disabled) return;
-      evt.preventDefault();
-      if (stopPropagation(scope)) evt.stopPropagation();
-      // handling dragover events from the Chrome download bar
-      if (navigator.userAgent.indexOf('Chrome') > -1) {
-        var b = evt.dataTransfer.effectAllowed;
-        evt.dataTransfer.dropEffect = ('move' === b || 'linkMove' === b) ? 'move' : 'copy';
-      }
-      $timeout.cancel(leaveTimeout);
-      if (!scope.actualDragOverClass) {
-        actualDragOverClass = calculateDragOverClass(scope, attr, evt);
-      }
-      elem.addClass(actualDragOverClass);
-    }, false);
-    elem[0].addEventListener('dragenter', function (evt) {
-      if (elem.attr('disabled') || disabled) return;
-      evt.preventDefault();
-      if (stopPropagation(scope)) evt.stopPropagation();
-    }, false);
-    elem[0].addEventListener('dragleave', function () {
-      if (elem.attr('disabled') || disabled) return;
-      leaveTimeout = $timeout(function () {
-        elem.removeClass(actualDragOverClass);
-        actualDragOverClass = null;
-      }, dragOverDelay || 1);
-    }, false);
-    elem[0].addEventListener('drop', function (evt) {
-      if (elem.attr('disabled') || disabled) return;
-      evt.preventDefault();
-      if (stopPropagation(scope)) evt.stopPropagation();
-      elem.removeClass(actualDragOverClass);
-      actualDragOverClass = null;
-      extractFiles(evt, function (files, rejFiles) {
-        updateModel($parse, $timeout, scope, ngModel, attr,
-          attr.ngfChange || attr.ngfDrop, files, rejFiles, evt);
-      }, $parse(attr.ngfAllowDir)(scope) !== false, attr.multiple || $parse(attr.ngfMultiple)(scope));
-    }, false);
-
-    function calculateDragOverClass(scope, attr, evt) {
-      var accepted = true;
-      var items = evt.dataTransfer.items;
-      if (items != null) {
-        for (var i = 0; i < items.length && accepted; i++) {
-          accepted = accepted &&
-            (items[i].kind === 'file' || items[i].kind === '') &&
-            validate(scope, $parse, attr, items[i], evt);
-        }
-      }
-      var clazz = $parse(attr.ngfDragOverClass)(scope, {$event: evt});
-      if (clazz) {
-        if (clazz.delay) dragOverDelay = clazz.delay;
-        if (clazz.accept) clazz = accepted ? clazz.accept : clazz.reject;
-      }
-      return clazz || attr.ngfDragOverClass || 'dragover';
-    }
-
-    function extractFiles(evt, callback, allowDir, multiple) {
-      var files = [], rejFiles = [], items = evt.dataTransfer.items, processing = 0;
-
-      function addFile(file) {
-        if (validate(scope, $parse, attr, file, evt)) {
-          files.push(file);
-        } else {
-          rejFiles.push(file);
-        }
-      }
-
-      function traverseFileTree(files, entry, path) {
-        if (entry != null) {
-          if (entry.isDirectory) {
-            var filePath = (path || '') + entry.name;
-            addFile({name: entry.name, type: 'directory', path: filePath});
-            var dirReader = entry.createReader();
-            var entries = [];
-            processing++;
-            var readEntries = function () {
-              dirReader.readEntries(function (results) {
-                try {
-                  if (!results.length) {
-                    for (var i = 0; i < entries.length; i++) {
-                      traverseFileTree(files, entries[i], (path ? path : '') + entry.name + '/');
-                    }
-                    processing--;
-                  } else {
-                    entries = entries.concat(Array.prototype.slice.call(results || [], 0));
-                    readEntries();
-                  }
-                } catch (e) {
-                  processing--;
-                  console.error(e);
-                }
-              }, function () {
-                processing--;
-              });
-            };
-            readEntries();
-          } else {
-            processing++;
-            entry.file(function (file) {
-              try {
-                processing--;
-                file.path = (path ? path : '') + file.name;
-                addFile(file);
-              } catch (e) {
-                processing--;
-                console.error(e);
-              }
-            }, function () {
-              processing--;
-            });
-          }
-        }
-      }
-
-      if (items && items.length > 0 && $location.protocol() !== 'file') {
-        for (var i = 0; i < items.length; i++) {
-          if (items[i].webkitGetAsEntry && items[i].webkitGetAsEntry() && items[i].webkitGetAsEntry().isDirectory) {
-            var entry = items[i].webkitGetAsEntry();
-            if (entry.isDirectory && !allowDir) {
-              continue;
-            }
-            if (entry != null) {
-              traverseFileTree(files, entry);
-            }
-          } else {
-            var f = items[i].getAsFile();
-            if (f != null) addFile(f);
-          }
-          if (!multiple && files.length > 0) break;
-        }
-      } else {
-        var fileList = evt.dataTransfer.files;
-        if (fileList != null) {
-          for (var j = 0; j < fileList.length; j++) {
-            addFile(fileList.item(j));
-            if (!multiple && files.length > 0) {
-              break;
-            }
-          }
-        }
-      }
-      var delays = 0;
-      (function waitForProcess(delay) {
-        $timeout(function () {
-          if (!processing) {
-            if (!multiple && files.length > 1) {
-              i = 0;
-              while (files[i].type === 'directory') i++;
-              files = [files[i]];
-            }
-            callback(files, rejFiles);
-          } else {
-            if (delays++ * 10 < 20 * 1000) {
-              waitForProcess(10);
-            }
-          }
-        }, delay || 0);
-      })();
-    }
-  }
-
-  ngFileUpload.directive('ngfSrc', ['$parse', '$timeout', function ($parse, $timeout) {
-    return {
-      restrict: 'AE',
-      link: function (scope, elem, attr) {
-        if (window.FileReader) {
-          scope.$watch(attr.ngfSrc, function (file) {
-            if (file &&
-              validate(scope, $parse, attr, file, null) &&
-              (!window.FileAPI || navigator.userAgent.indexOf('MSIE 8') === -1 || file.size < 20000) &&
-              (!window.FileAPI || navigator.userAgent.indexOf('MSIE 9') === -1 || file.size < 4000000)) {
-              $timeout(function () {
-                //prefer URL.createObjectURL for handling refrences to files of all sizes
-                //since it doesn´t build a large string in memory
-                var URL = window.URL || window.webkitURL;
-                if (URL && URL.createObjectURL) {
-                  elem.attr('src', URL.createObjectURL(file));
-                } else {
-                  var fileReader = new FileReader();
-                  fileReader.readAsDataURL(file);
-                  fileReader.onload = function (e) {
-                    $timeout(function () {
-                      elem.attr('src', e.target.result);
-                    });
-                  };
-                }
-              });
-            } else {
-              elem.attr('src', attr.ngfDefaultSrc || '');
-            }
-          });
-        }
-      }
-    };
-  }]);
-
-  function dropAvailable() {
-    var div = document.createElement('div');
-    return ('draggable' in div) && ('ondrop' in div);
-  }
-
-})();
-
-/**!
- * AngularJS file upload/drop directive and service with progress and abort
  * FileAPI Flash shim for old browsers not supporting FormData
  * @author  Danial  <danial.farid@gmail.com>
- * @version 5.0.6
+ * @version 5.0.9
  */
 
 (function () {
@@ -5826,6 +5089,736 @@ if (!window.FileReader) {
     };
   };
 }
+
+/**!
+ * AngularJS file upload/drop directive and service with progress and abort
+ * @author  Danial  <danial.farid@gmail.com>
+ * @version 5.0.9
+ */
+
+if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
+  window.XMLHttpRequest.prototype.setRequestHeader = (function (orig) {
+    return function (header, value) {
+      if (header === '__setXHR_') {
+        var val = value(this);
+        // fix for angular < 1.2.0
+        if (val instanceof Function) {
+          val(this);
+        }
+      } else {
+        orig.apply(this, arguments);
+      }
+    };
+  })(window.XMLHttpRequest.prototype.setRequestHeader);
+}
+
+var ngFileUpload = angular.module('ngFileUpload', []);
+
+ngFileUpload.version = '5.0.9';
+ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, $timeout) {
+  function sendHttp(config) {
+    config.method = config.method || 'POST';
+    config.headers = config.headers || {};
+
+    var deferred = $q.defer();
+    var promise = deferred.promise;
+
+    config.headers.__setXHR_ = function () {
+      return function (xhr) {
+        if (!xhr) return;
+        config.__XHR = xhr;
+        if (config.xhrFn) config.xhrFn(xhr);
+        xhr.upload.addEventListener('progress', function (e) {
+          e.config = config;
+          if (deferred.notify) {
+            deferred.notify(e);
+          } else if (promise.progressFunc) {
+            $timeout(function () {
+              promise.progressFunc(e);
+            });
+          }
+        }, false);
+        //fix for firefox not firing upload progress end, also IE8-9
+        xhr.upload.addEventListener('load', function (e) {
+          if (e.lengthComputable) {
+            e.config = config;
+            if (deferred.notify) {
+              deferred.notify(e);
+            } else if (promise.progressFunc) {
+              $timeout(function () {
+                promise.progressFunc(e);
+              });
+            }
+          }
+        }, false);
+      };
+    };
+
+    $http(config).then(function (r) {
+      deferred.resolve(r);
+    }, function (e) {
+      deferred.reject(e);
+    }, function (n) {
+      deferred.notify(n);
+    });
+
+    promise.success = function (fn) {
+      promise.then(function (response) {
+        fn(response.data, response.status, response.headers, config);
+      });
+      return promise;
+    };
+
+    promise.error = function (fn) {
+      promise.then(null, function (response) {
+        fn(response.data, response.status, response.headers, config);
+      });
+      return promise;
+    };
+
+    promise.progress = function (fn) {
+      promise.progressFunc = fn;
+      promise.then(null, null, function (update) {
+        fn(update);
+      });
+      return promise;
+    };
+    promise.abort = function () {
+      if (config.__XHR) {
+        $timeout(function () {
+          config.__XHR.abort();
+        });
+      }
+      return promise;
+    };
+    promise.xhr = function (fn) {
+      config.xhrFn = (function (origXhrFn) {
+        return function () {
+          if (origXhrFn) origXhrFn.apply(promise, arguments);
+          fn.apply(promise, arguments);
+        };
+      })(config.xhrFn);
+      return promise;
+    };
+
+    return promise;
+  }
+
+  this.upload = function (config) {
+    function addFieldToFormData(formData, val, key) {
+      if (val !== undefined) {
+        if (angular.isDate(val)) {
+          val = val.toISOString();
+        }
+        if (angular.isString(val)) {
+          formData.append(key, val);
+        } else if (config.sendFieldsAs === 'form') {
+          if (angular.isObject(val)) {
+            for (var k in val) {
+              if (val.hasOwnProperty(k)) {
+                addFieldToFormData(formData, val[k], key + '[' + k + ']');
+              }
+            }
+          } else {
+            formData.append(key, val);
+          }
+        } else {
+          val = angular.isString(val) ? val : JSON.stringify(val);
+          if (config.sendFieldsAs === 'json-blob') {
+            formData.append(key, new Blob([val], {type: 'application/json'}));
+          } else {
+            formData.append(key, val);
+          }
+        }
+      }
+    }
+
+    config.headers = config.headers || {};
+    config.headers['Content-Type'] = undefined;
+    config.transformRequest = config.transformRequest ?
+      (angular.isArray(config.transformRequest) ?
+        config.transformRequest : [config.transformRequest]) : [];
+    config.transformRequest.push(function (data) {
+      var formData = new FormData();
+      var allFields = {};
+      var key;
+      for (key in config.fields) {
+        if (config.fields.hasOwnProperty(key)) {
+          allFields[key] = config.fields[key];
+        }
+      }
+      if (data) allFields.data = data;
+      for (key in allFields) {
+        if (allFields.hasOwnProperty(key)) {
+          var val = allFields[key];
+          if (config.formDataAppender) {
+            config.formDataAppender(formData, key, val);
+          } else {
+            addFieldToFormData(formData, val, key);
+          }
+        }
+      }
+
+      if (config.file != null) {
+        var fileFormName = config.fileFormDataName || 'file';
+
+        if (angular.isArray(config.file)) {
+          var isFileFormNameString = angular.isString(fileFormName);
+          for (var i = 0; i < config.file.length; i++) {
+            formData.append(isFileFormNameString ? fileFormName : fileFormName[i], config.file[i],
+              (config.fileName && config.fileName[i]) || config.file[i].name);
+          }
+        } else {
+          formData.append(fileFormName, config.file, config.fileName || config.file.name);
+        }
+      }
+      return formData;
+    });
+
+    return sendHttp(config);
+  };
+
+  this.http = function (config) {
+    config.transformRequest = config.transformRequest || function (data) {
+        if ((window.ArrayBuffer && data instanceof window.ArrayBuffer) || data instanceof Blob) {
+          return data;
+        }
+        return $http.defaults.transformRequest[0](arguments);
+      };
+    return sendHttp(config);
+  };
+}
+
+]);
+
+(function () {
+    ngFileUpload.directive('ngfSelect', ['$parse', '$timeout', '$compile',
+        function ($parse, $timeout, $compile) {
+            return {
+                restrict: 'AEC',
+                require: '?ngModel',
+                link: function (scope, elem, attr, ngModel) {
+                    linkFileSelect(scope, elem, attr, ngModel, $parse, $timeout, $compile);
+                }
+            };
+        }]);
+
+    function linkFileSelect(scope, elem, attr, ngModel, $parse, $timeout, $compile) {
+        /** @namespace attr.ngfSelect */
+        /** @namespace attr.ngfChange */
+        /** @namespace attr.ngModel */
+        /** @namespace attr.ngModelRejected */
+        /** @namespace attr.ngfMultiple */
+        /** @namespace attr.ngfCapture */
+        /** @namespace attr.ngfAccept */
+        /** @namespace attr.ngfMaxSize */
+        /** @namespace attr.ngfMinSize */
+        /** @namespace attr.ngfResetOnClick */
+        /** @namespace attr.ngfResetModelOnClick */
+        /** @namespace attr.ngfKeep */
+        /** @namespace attr.ngfKeepDistinct */
+
+        if (elem.attr('__ngf_gen__')) {
+            return;
+        }
+
+        scope.$on('$destroy', function () {
+            if (elem.$$ngfRefElem) elem.$$ngfRefElem.remove();
+        });
+
+        var disabled = false;
+        if (attr.ngfSelect.search(/\W+$files\W+/) === -1) {
+            scope.$watch(attr.ngfSelect, function (val) {
+                disabled = val === false;
+            });
+        }
+        function isInputTypeFile() {
+            return elem[0].tagName.toLowerCase() === 'input' && attr.type && attr.type.toLowerCase() === 'file';
+        }
+
+        var isUpdating = false;
+
+        function changeFn(evt) {
+            if (!isUpdating) {
+                isUpdating = true;
+                try {
+                    var fileList = evt.__files_ || (evt.target && evt.target.files);
+                    var files = [], rejFiles = [];
+
+                    for (var i = 0; i < fileList.length; i++) {
+                        var file = fileList.item(i);
+                        if (validate(scope, $parse, attr, file, evt)) {
+                            files.push(file);
+                        } else {
+                            rejFiles.push(file);
+                        }
+                    }
+                    updateModel($parse, $timeout, scope, ngModel, attr, attr.ngfChange || attr.ngfSelect, files, rejFiles, evt);
+                    if (files.length === 0) evt.target.value = files;
+//                if (evt.target && evt.target.getAttribute('__ngf_gen__')) {
+//                    angular.element(evt.target).remove();
+//                }
+                } finally {
+                    isUpdating = false;
+                }
+            }
+        }
+
+        function bindAttrToFileInput(fileElem) {
+            if (attr.ngfMultiple) fileElem.attr('multiple', $parse(attr.ngfMultiple)(scope));
+            if (attr.ngfCapture) fileElem.attr('capture', $parse(attr.ngfCapture)(scope));
+            if (attr.accept) fileElem.attr('accept', attr.accept);
+            for (var i = 0; i < elem[0].attributes.length; i++) {
+                var attribute = elem[0].attributes[i];
+                if ((isInputTypeFile() && attribute.name !== 'type') ||
+                    (attribute.name !== 'type' && attribute.name !== 'class' &&
+                    attribute.name !== 'id' && attribute.name !== 'style')) {
+                    fileElem.attr(attribute.name, attribute.value);
+                }
+            }
+        }
+
+        function createFileInput(evt, resetOnClick) {
+            if (!resetOnClick && (evt || isInputTypeFile())) return elem.$$ngfRefElem || elem;
+
+            var fileElem = angular.element('<input type="file">');
+            bindAttrToFileInput(fileElem);
+
+            if (isInputTypeFile()) {
+                elem.replaceWith(fileElem);
+                elem = fileElem;
+                fileElem.attr('__ngf_gen__', true);
+                $compile(elem)(scope);
+            } else {
+                fileElem.css('visibility', 'hidden').css('position', 'absolute').css('overflow', 'hidden')
+                    .css('width', '0px').css('height', '0px').css('z-index', '-100000').css('border', 'none')
+                    .css('margin', '0px').css('padding', '0px').attr('tabindex', '-1');
+                if (elem.$$ngfRefElem) {
+                    elem.$$ngfRefElem.remove();
+                }
+                elem.$$ngfRefElem = fileElem;
+                document.body.appendChild(fileElem[0]);
+            }
+
+            return fileElem;
+        }
+
+        function resetModel(evt) {
+            updateModel($parse, $timeout, scope, ngModel, attr, attr.ngfChange || attr.ngfSelect, [], [], evt, true);
+        }
+
+        function clickHandler(evt) {
+            if (elem.attr('disabled') || disabled) return false;
+            if (evt != null) {
+                evt.preventDefault();
+                evt.stopPropagation();
+            }
+            var resetOnClick = $parse(attr.ngfResetOnClick)(scope) !== false;
+            var fileElem = createFileInput(evt, resetOnClick);
+
+            function clickAndAssign(evt) {
+                if (evt) {
+                    fileElem[0].click();
+                }
+                if (isInputTypeFile() || !evt) {
+                    elem.bind('click touchend', clickHandler);
+                }
+            }
+
+            if (fileElem) {
+                if (!evt || resetOnClick) fileElem.bind('change', changeFn);
+                if (evt && resetOnClick && $parse(attr.ngfResetModelOnClick)(scope) !== false) resetModel(evt);
+
+                // fix for android native browser < 4.4
+                if (shouldClickLater(navigator.userAgent)) {
+                    setTimeout(function () {
+                        clickAndAssign(evt);
+                    }, 0);
+                } else {
+                    clickAndAssign(evt);
+                }
+            }
+            return false;
+        }
+
+        if (window.FileAPI && window.FileAPI.ngfFixIE) {
+            window.FileAPI.ngfFixIE(elem, createFileInput, bindAttrToFileInput, changeFn);
+        } else {
+            clickHandler();
+            //if (!isInputTypeFile()) {
+            //  elem.bind('click touchend', clickHandler);
+            //}
+        }
+    }
+
+    function shouldClickLater(ua) {
+        // android below 4.4
+        var m = ua.match(/Android[^\d]*(\d+)\.(\d+)/);
+        if (m && m.length > 2) {
+            return parseInt(m[1]) < 4 || (parseInt(m[1]) === 4 && parseInt(m[2]) < 4);
+        }
+
+        // safari on windows
+        return /.*Windows.*Safari.*/.test(ua);
+    }
+
+    ngFileUpload.validate = function (scope, $parse, attr, file, evt) {
+        function globStringToRegex(str) {
+            if (str.length > 2 && str[0] === '/' && str[str.length - 1] === '/') {
+                return str.substring(1, str.length - 1);
+            }
+            var split = str.split(','), result = '';
+            if (split.length > 1) {
+                for (var i = 0; i < split.length; i++) {
+                    result += '(' + globStringToRegex(split[i]) + ')';
+                    if (i < split.length - 1) {
+                        result += '|';
+                    }
+                }
+            } else {
+                if (str.indexOf('.') === 0) {
+                    str = '*' + str;
+                }
+                result = '^' + str.replace(new RegExp('[.\\\\+*?\\[\\^\\]$(){}=!<>|:\\' + '-]', 'g'), '\\$&') + '$';
+                result = result.replace(/\\\*/g, '.*').replace(/\\\?/g, '.');
+            }
+            return result;
+        }
+
+        var accept = $parse(attr.ngfAccept)(scope, {$file: file, $event: evt});
+        var fileSizeMax = $parse(attr.ngfMaxSize)(scope, {$file: file, $event: evt}) || 9007199254740991;
+        var fileSizeMin = $parse(attr.ngfMinSize)(scope, {$file: file, $event: evt}) || -1;
+        if (accept != null && angular.isString(accept)) {
+            var regexp = new RegExp(globStringToRegex(accept), 'gi');
+            accept = (file.type != null && regexp.test(file.type.toLowerCase())) ||
+                (file.name != null && regexp.test(file.name.toLowerCase()));
+        }
+        return (accept == null || accept) && (file.size == null || (file.size < fileSizeMax && file.size > fileSizeMin));
+    };
+
+    ngFileUpload.updateModel = function ($parse, $timeout, scope, ngModel, attr, fileChange,
+                                         files, rejFiles, evt, noDelay) {
+        function update() {
+            if ($parse(attr.ngfKeep)(scope) === true) {
+                var prevFiles = (ngModel.$modelValue || []).slice(0);
+                if (!files || !files.length) {
+                    files = prevFiles;
+                } else if ($parse(attr.ngfKeepDistinct)(scope) === true) {
+                    var len = prevFiles.length;
+                    for (var i = 0; i < files.length; i++) {
+                        for (var j = 0; j < len; j++) {
+                            if (files[i].name === prevFiles[j].name) break;
+                        }
+                        if (j === len) {
+                            prevFiles.push(files[i]);
+                        }
+                    }
+                    files = prevFiles;
+                } else {
+                    files = prevFiles.concat(files);
+                }
+            }
+            if (ngModel) {
+                $parse(attr.ngModel).assign(scope, files);
+                $timeout(function () {
+                    if (ngModel) {
+                        ngModel.$setViewValue(files != null && files.length === 0 ? null : files);
+                    }
+                });
+            }
+            if (attr.ngModelRejected) {
+                $parse(attr.ngModelRejected).assign(scope, rejFiles);
+            }
+            if (fileChange) {
+                $parse(fileChange)(scope, {
+                    $files: files,
+                    $rejectedFiles: rejFiles,
+                    $event: evt
+                });
+            }
+        }
+
+        if (noDelay) {
+            update();
+        } else {
+            $timeout(function () {
+                update();
+            });
+        }
+    };
+
+    var validate = ngFileUpload.validate;
+    var updateModel = ngFileUpload.updateModel;
+
+})();
+
+(function () {
+  var validate = ngFileUpload.validate;
+  var updateModel = ngFileUpload.updateModel;
+
+  ngFileUpload.directive('ngfDrop', ['$parse', '$timeout', '$location', function ($parse, $timeout, $location) {
+    return {
+      restrict: 'AEC',
+      require: '?ngModel',
+      link: function (scope, elem, attr, ngModel) {
+        linkDrop(scope, elem, attr, ngModel, $parse, $timeout, $location);
+      }
+    };
+  }]);
+
+  ngFileUpload.directive('ngfNoFileDrop', function () {
+    return function (scope, elem) {
+      if (dropAvailable()) elem.css('display', 'none');
+    };
+  });
+
+  ngFileUpload.directive('ngfDropAvailable', ['$parse', '$timeout', function ($parse, $timeout) {
+    return function (scope, elem, attr) {
+      if (dropAvailable()) {
+        var fn = $parse(attr.ngfDropAvailable);
+        $timeout(function () {
+          fn(scope);
+          if (fn.assign) {
+            fn.assign(scope, true);
+          }
+        });
+      }
+    };
+  }]);
+
+  function linkDrop(scope, elem, attr, ngModel, $parse, $timeout, $location) {
+    var available = dropAvailable();
+    if (attr.dropAvailable) {
+      $timeout(function () {
+        if (scope[attr.dropAvailable]) {
+          scope[attr.dropAvailable].value = available;
+        } else {
+          scope[attr.dropAvailable] = available;
+        }
+      });
+    }
+    if (!available) {
+      if ($parse(attr.ngfHideOnDropNotAvailable)(scope) === true) {
+        elem.css('display', 'none');
+      }
+      return;
+    }
+
+    var disabled = false;
+    if (attr.ngfDrop.search(/\W+$files\W+/) === -1) {
+      scope.$watch(attr.ngfDrop, function(val) {
+        disabled = val === false;
+      });
+    }
+
+    var leaveTimeout = null;
+    var stopPropagation = $parse(attr.ngfStopPropagation);
+    var dragOverDelay = 1;
+    var actualDragOverClass;
+
+    elem[0].addEventListener('dragover', function (evt) {
+      if (elem.attr('disabled') || disabled) return;
+      evt.preventDefault();
+      if (stopPropagation(scope)) evt.stopPropagation();
+      // handling dragover events from the Chrome download bar
+      if (navigator.userAgent.indexOf('Chrome') > -1) {
+        var b = evt.dataTransfer.effectAllowed;
+        evt.dataTransfer.dropEffect = ('move' === b || 'linkMove' === b) ? 'move' : 'copy';
+      }
+      $timeout.cancel(leaveTimeout);
+      if (!scope.actualDragOverClass) {
+        actualDragOverClass = calculateDragOverClass(scope, attr, evt);
+      }
+      elem.addClass(actualDragOverClass);
+    }, false);
+    elem[0].addEventListener('dragenter', function (evt) {
+      if (elem.attr('disabled') || disabled) return;
+      evt.preventDefault();
+      if (stopPropagation(scope)) evt.stopPropagation();
+    }, false);
+    elem[0].addEventListener('dragleave', function () {
+      if (elem.attr('disabled') || disabled) return;
+      leaveTimeout = $timeout(function () {
+        elem.removeClass(actualDragOverClass);
+        actualDragOverClass = null;
+      }, dragOverDelay || 1);
+    }, false);
+    elem[0].addEventListener('drop', function (evt) {
+      if (elem.attr('disabled') || disabled) return;
+      evt.preventDefault();
+      if (stopPropagation(scope)) evt.stopPropagation();
+      elem.removeClass(actualDragOverClass);
+      actualDragOverClass = null;
+      extractFiles(evt, function (files, rejFiles) {
+        updateModel($parse, $timeout, scope, ngModel, attr,
+          attr.ngfChange || attr.ngfDrop, files, rejFiles, evt);
+      }, $parse(attr.ngfAllowDir)(scope) !== false, attr.multiple || $parse(attr.ngfMultiple)(scope));
+    }, false);
+
+    function calculateDragOverClass(scope, attr, evt) {
+      var accepted = true;
+      var items = evt.dataTransfer.items;
+      if (items != null) {
+        for (var i = 0; i < items.length && accepted; i++) {
+          accepted = accepted &&
+            (items[i].kind === 'file' || items[i].kind === '') &&
+            validate(scope, $parse, attr, items[i], evt);
+        }
+      }
+      var clazz = $parse(attr.ngfDragOverClass)(scope, {$event: evt});
+      if (clazz) {
+        if (clazz.delay) dragOverDelay = clazz.delay;
+        if (clazz.accept) clazz = accepted ? clazz.accept : clazz.reject;
+      }
+      return clazz || attr.ngfDragOverClass || 'dragover';
+    }
+
+    function extractFiles(evt, callback, allowDir, multiple) {
+      var files = [], rejFiles = [], items = evt.dataTransfer.items, processing = 0;
+
+      function addFile(file) {
+        if (validate(scope, $parse, attr, file, evt)) {
+          files.push(file);
+        } else {
+          rejFiles.push(file);
+        }
+      }
+
+      function traverseFileTree(files, entry, path) {
+        if (entry != null) {
+          if (entry.isDirectory) {
+            var filePath = (path || '') + entry.name;
+            addFile({name: entry.name, type: 'directory', path: filePath});
+            var dirReader = entry.createReader();
+            var entries = [];
+            processing++;
+            var readEntries = function () {
+              dirReader.readEntries(function (results) {
+                try {
+                  if (!results.length) {
+                    for (var i = 0; i < entries.length; i++) {
+                      traverseFileTree(files, entries[i], (path ? path : '') + entry.name + '/');
+                    }
+                    processing--;
+                  } else {
+                    entries = entries.concat(Array.prototype.slice.call(results || [], 0));
+                    readEntries();
+                  }
+                } catch (e) {
+                  processing--;
+                  console.error(e);
+                }
+              }, function () {
+                processing--;
+              });
+            };
+            readEntries();
+          } else {
+            processing++;
+            entry.file(function (file) {
+              try {
+                processing--;
+                file.path = (path ? path : '') + file.name;
+                addFile(file);
+              } catch (e) {
+                processing--;
+                console.error(e);
+              }
+            }, function () {
+              processing--;
+            });
+          }
+        }
+      }
+
+      if (items && items.length > 0 && $location.protocol() !== 'file') {
+        for (var i = 0; i < items.length; i++) {
+          if (items[i].webkitGetAsEntry && items[i].webkitGetAsEntry() && items[i].webkitGetAsEntry().isDirectory) {
+            var entry = items[i].webkitGetAsEntry();
+            if (entry.isDirectory && !allowDir) {
+              continue;
+            }
+            if (entry != null) {
+              traverseFileTree(files, entry);
+            }
+          } else {
+            var f = items[i].getAsFile();
+            if (f != null) addFile(f);
+          }
+          if (!multiple && files.length > 0) break;
+        }
+      } else {
+        var fileList = evt.dataTransfer.files;
+        if (fileList != null) {
+          for (var j = 0; j < fileList.length; j++) {
+            addFile(fileList.item(j));
+            if (!multiple && files.length > 0) {
+              break;
+            }
+          }
+        }
+      }
+      var delays = 0;
+      (function waitForProcess(delay) {
+        $timeout(function () {
+          if (!processing) {
+            if (!multiple && files.length > 1) {
+              i = 0;
+              while (files[i].type === 'directory') i++;
+              files = [files[i]];
+            }
+            callback(files, rejFiles);
+          } else {
+            if (delays++ * 10 < 20 * 1000) {
+              waitForProcess(10);
+            }
+          }
+        }, delay || 0);
+      })();
+    }
+  }
+
+  ngFileUpload.directive('ngfSrc', ['$parse', '$timeout', function ($parse, $timeout) {
+    return {
+      restrict: 'AE',
+      link: function (scope, elem, attr) {
+        if (window.FileReader) {
+          scope.$watch(attr.ngfSrc, function (file) {
+            if (file &&
+              validate(scope, $parse, attr, file, null) &&
+              (!window.FileAPI || navigator.userAgent.indexOf('MSIE 8') === -1 || file.size < 20000) &&
+              (!window.FileAPI || navigator.userAgent.indexOf('MSIE 9') === -1 || file.size < 4000000)) {
+              $timeout(function () {
+                //prefer URL.createObjectURL for handling refrences to files of all sizes
+                //since it doesn´t build a large string in memory
+                var URL = window.URL || window.webkitURL;
+                if (URL && URL.createObjectURL) {
+                  elem.attr('src', URL.createObjectURL(file));
+                } else {
+                  var fileReader = new FileReader();
+                  fileReader.readAsDataURL(file);
+                  fileReader.onload = function (e) {
+                    $timeout(function () {
+                      elem.attr('src', e.target.result);
+                    });
+                  };
+                }
+              });
+            } else {
+              elem.attr('src', attr.ngfDefaultSrc || '');
+            }
+          });
+        }
+      }
+    };
+  }]);
+
+  function dropAvailable() {
+    var div = document.createElement('div');
+    return ('draggable' in div) && ('ondrop' in div);
+  }
+
+})();
 ;/**
   * x is a value between 0 and 1, indicating where in the animation you are.
   */
@@ -18671,7 +18664,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     root._ = _;
   }
 }.call(this));
-;/*! angular-google-maps 2.1.4 2015-06-14
+;/*! angular-google-maps 2.1.5 2015-06-18
  *  AngularJS directives for Google Maps
  *  git: https://github.com/angular-ui/angular-google-maps.git
  */
@@ -39759,7 +39752,7 @@ angular.module('hours.list', [])
             templateUrl: 'list/list.tpl.html',
             controller: 'ListCtrl'
         }
-    }]);;angular.module('manage.templates', ['manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageNews/manageNews.tpl.html', 'manageNews/manageNewsAdmins.tpl.html', 'manageNews/manageNewsList.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html', 'submittedForms/submittedForms.tpl.html']);
+    }]);;angular.module('manage.templates', ['manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageNews/manageNews.tpl.html', 'manageNews/manageNewsAdmins.tpl.html', 'manageNews/manageNewsList.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html', 'staffDirectory/staffDirectoryDepartments.tpl.html', 'staffDirectory/staffDirectoryPeople.tpl.html', 'staffDirectory/staffDirectorySubjects.tpl.html', 'submittedForms/submittedForms.tpl.html']);
 
 angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageDatabases/manageDatabases.tpl.html",
@@ -39839,42 +39832,42 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                <div class=\"col-md-6 form-group\">\n" +
     "                    <label for=\"{{db.id}}_title\">Title</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.title}}\" ng-model=\"db.title\"\n" +
-    "                           id=\"{{db.id}}_title\">\n" +
+    "                           id=\"{{db.id}}_title\" maxlength=\"200\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Publisher\">Publisher</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.publisher}}\" ng-model=\"db.publisher\"\n" +
-    "                           id=\"{{db.id}}_Publisher\">\n" +
+    "                           id=\"{{db.id}}_Publisher\" maxlength=\"100\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Vendor\">Vendor</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.vendor}}\" ng-model=\"db.vendor\"\n" +
-    "                           id=\"{{db.id}}_Vendor\">\n" +
+    "                           id=\"{{db.id}}_Vendor\" maxlength=\"100\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Format\">Format</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.format}}\" ng-model=\"db.format\"\n" +
-    "                           id=\"{{db.id}}_Format\">\n" +
+    "                           id=\"{{db.id}}_Format\" maxlength=\"50\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-6 form-group\">\n" +
     "                    <label for=\"{{db.id}}_URL\">URL</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.url}}\" ng-model=\"db.url\"\n" +
-    "                           id=\"{{db.id}}_URL\">\n" +
+    "                           id=\"{{db.id}}_URL\" maxlength=\"2000\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Location\">Location</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.location}}\" ng-model=\"db.location\"\n" +
-    "                           id=\"{{db.id}}_Location\">\n" +
+    "                           id=\"{{db.id}}_Location\" maxlength=\"50\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_NotInEDS\">Not in EDS</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.notInEDS}}\" ng-model=\"db.notInEDS\"\n" +
-    "                           id=\"{{db.id}}_NotInEDS\">\n" +
+    "                           id=\"{{db.id}}_NotInEDS\" maxlength=\"1\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Full-text\">Fulltext</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.hasFullText}}\" ng-model=\"db.hasFullText\"\n" +
-    "                           id=\"{{db.id}}_Full-text\">\n" +
+    "                           id=\"{{db.id}}_Full-text\" maxlength=\"1\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Authenticate\">Authenticate</label>\n" +
@@ -39884,36 +39877,36 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                <div class=\"col-md-6 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Coverage\">Coverage</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.coverage}}\" ng-model=\"db.coverage\"\n" +
-    "                           id=\"{{db.id}}_Coverage\" >\n" +
+    "                           id=\"{{db.id}}_Coverage\" maxlength=\"256\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-3 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Notes\">Notes</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.notes}}\" ng-model=\"db.notes\"\n" +
-    "                           id=\"{{db.id}}_Notes\">\n" +
+    "                           id=\"{{db.id}}_Notes\" maxlength=\"100\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-3 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Status\">Status</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.status}}\" ng-model=\"db.status\"\n" +
-    "                           id=\"{{db.id}}_Status\">\n" +
+    "                           id=\"{{db.id}}_Status\" maxlength=\"100\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-12 form-group\">\n" +
     "                    <label for=\"{{db.id}}_descr\">Database Description</label>\n" +
-    "                    <textarea class=\"form-control\" rows=\"3\" id=\"{{db.id}}_descr\" ng-model=\"db.description\" ></textarea>\n" +
+    "                    <textarea class=\"form-control\" rows=\"3\" id=\"{{db.id}}_descr\" ng-model=\"db.description\" maxlength=\"4096\"></textarea>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{db.id}}_presented\">PresentedBy</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.presentedBy}}\" ng-model=\"db.presentedBy\"\n" +
-    "                           id=\"{{db.id}}_presented\">\n" +
+    "                           id=\"{{db.id}}_presented\" maxlength=\"50\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Audience1\">Audience1</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.audience1}}\" ng-model=\"db.audience1\"\n" +
-    "                           id=\"{{db.id}}_Audience1\">\n" +
+    "                           id=\"{{db.id}}_Audience1\" maxlength=\"30\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Audience2\">Audience2</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.audience2}}\" ng-model=\"db.audience2\"\n" +
-    "                           id=\"{{db.id}}_Audience2\">\n" +
+    "                           id=\"{{db.id}}_Audience2\" maxlength=\"30\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_updatedBy\">Updated by</label>\n" +
@@ -39922,7 +39915,7 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_dAuthor\">Description Author</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.descrAuthor}}\" ng-model=\"db.descrAuthor\"\n" +
-    "                           id=\"{{db.id}}_dAuthor\">\n" +
+    "                           id=\"{{db.id}}_dAuthor\" maxlength=\"50\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_date1\">Created/Modified</label>\n" +
@@ -39998,42 +39991,42 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "            <div class=\"col-md-6 form-group\">\n" +
     "                <label for=\"title\">Title</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Database Title\" ng-model=\"newDB.title\"\n" +
-    "                       id=\"title\" required>\n" +
+    "                       id=\"title\" maxlength=\"200\" required>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-2 form-group\">\n" +
     "                <label for=\"Publisher\">Publisher</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Publisher\" ng-model=\"newDB.publisher\"\n" +
-    "                       id=\"Publisher\">\n" +
+    "                       id=\"Publisher\" maxlength=\"100\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-2 form-group\">\n" +
     "                <label for=\"Vendor\">Vendor</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Vendor\" ng-model=\"newDB.vendor\"\n" +
-    "                       id=\"Vendor\">\n" +
+    "                       id=\"Vendor\" maxlength=\"100\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-2 form-group\">\n" +
     "                <label for=\"Format\">Format</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Format\" ng-model=\"newDB.format\"\n" +
-    "                       id=\"Format\">\n" +
+    "                       id=\"Format\" maxlength=\"50\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-6 form-group\">\n" +
     "                <label for=\"URL\">URL</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"http://www.example.com/\" ng-model=\"newDB.url\"\n" +
-    "                       id=\"URL\" required>\n" +
+    "                       id=\"URL\" maxlength=\"2000\" required>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-2 form-group\">\n" +
     "                <label for=\"Location\">Location</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Location\" ng-model=\"newDB.location\"\n" +
-    "                       id=\"Location\">\n" +
+    "                       id=\"Location\" maxlength=\"50\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-2 form-group\">\n" +
     "                <label for=\"NotInEDS\">Not in EDS</label>\n" +
     "                <input type=\"text\" class=\"form-control\" ng-model=\"newDB.notInEDS\"\n" +
-    "                       id=\"NotInEDS\">\n" +
+    "                       id=\"NotInEDS\" maxlength=\"1\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-1 form-group\">\n" +
     "                <label for=\"Full-text\">Fulltext</label>\n" +
     "                <input type=\"text\" class=\"form-control\" ng-model=\"newDB.hasFullText\"\n" +
-    "                       id=\"Full-text\">\n" +
+    "                       id=\"Full-text\" maxlength=\"1\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-1 form-group\">\n" +
     "                <label for=\"Authenticate\">Authenticate</label>\n" +
@@ -40043,41 +40036,41 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "            <div class=\"col-md-6 form-group\">\n" +
     "                <label for=\"Coverage\">Coverage</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Database Coverage\" ng-model=\"newDB.coverage\"\n" +
-    "                       id=\"Coverage\" required>\n" +
+    "                       id=\"Coverage\" maxlength=\"256\" required>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-3 form-group\">\n" +
     "                <label for=\"dAuthor\">Description Author</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Enter Author Name\" ng-model=\"newDB.descrAuthor\"\n" +
-    "                       id=\"dAuthor\">\n" +
+    "                       id=\"dAuthor\" maxlength=\"50\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-3 form-group\">\n" +
     "                <label for=\"Status\">Status</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Status\" ng-model=\"newDB.status\"\n" +
-    "                       id=\"Status\">\n" +
+    "                       id=\"Status\" maxlength=\"100\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-12 form-group\">\n" +
     "                <label for=\"descr\">Database Description</label>\n" +
-    "                <textarea class=\"form-control\" rows=\"3\" id=\"descr\" ng-model=\"newDB.description\" required></textarea>\n" +
+    "                <textarea class=\"form-control\" rows=\"3\" id=\"descr\" ng-model=\"newDB.description\" maxlength=\"4096\" required></textarea>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-2 form-group\">\n" +
     "                <label for=\"presented\">Presented by</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Presented By\" ng-model=\"newDB.presentedBy\"\n" +
-    "                       id=\"presented\">\n" +
+    "                       id=\"presented\" maxlength=\"50\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-2 form-group\">\n" +
     "                <label for=\"Audience1\">Audience One</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Audience One\" ng-model=\"newDB.audience1\"\n" +
-    "                       id=\"Audience1\">\n" +
+    "                       id=\"Audience1\" maxlength=\"30\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-2 form-group\">\n" +
     "                <label for=\"Audience2\">Audience Two</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Audience Two\" ng-model=\"newDB.audience2\"\n" +
-    "                       id=\"Audience2\">\n" +
+    "                       id=\"Audience2\" maxlength=\"30\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-4 form-group\">\n" +
     "                <label for=\"Notes\">Notes</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Notes\" ng-model=\"newDB.notes\"\n" +
-    "                       id=\"Notes\">\n" +
+    "                       id=\"Notes\" maxlength=\"100\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-1 form-group\">\n" +
     "                <label for=\"Disable\">Disabled</label>\n" +
@@ -40471,31 +40464,35 @@ angular.module("manageNews/manageNews.tpl.html", []).run(["$templateCache", func
 angular.module("manageNews/manageNewsAdmins.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageNews/manageNewsAdmins.tpl.html",
     "<div class=\"row\" ng-if=\"isAdmin\">\n" +
-    "    <div class=\"panel panel-default col-md-12\">\n" +
-    "        <div class=\"panel-heading\">\n" +
-    "            <h3 class=\"panel-title\">People who can approve submitted News and Exhibits</h3>\n" +
-    "        </div>\n" +
-    "        <div class=\"panel-body\">\n" +
-    "            <ul class=\"list-group\">\n" +
-    "                <li class=\"list-group-item\" ng-repeat=\"admin in data.admins\">\n" +
-    "                    {{admin.name}}\n" +
-    "                </li>\n" +
-    "            </ul>\n" +
+    "    <div class=\"col-md-12\">\n" +
+    "        <div class=\"panel panel-default\">\n" +
+    "            <div class=\"panel-heading\">\n" +
+    "                <h3 class=\"panel-title\">People who can approve submitted News and Exhibits</h3>\n" +
+    "            </div>\n" +
+    "            <div class=\"panel-body\">\n" +
+    "                <ul class=\"list-group\">\n" +
+    "                    <li class=\"list-group-item\" ng-repeat=\"admin in data.admins\">\n" +
+    "                        {{admin.name}}\n" +
+    "                    </li>\n" +
+    "                </ul>\n" +
+    "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
     "\n" +
     "<div class=\"row\" ng-if=\"!isAdmin\">\n" +
-    "    <div class=\"panel panel-default col-md-12\">\n" +
-    "        <div class=\"panel-heading\">\n" +
-    "            <h3 class=\"panel-title\">People who can approve submitted News and Exhibits</h3>\n" +
-    "        </div>\n" +
-    "        <div class=\"panel-body\">\n" +
-    "            <ul class=\"list-group\">\n" +
-    "                <li class=\"list-group-item\" ng-repeat=\"admin in data.admins\">\n" +
-    "                    {{admin.name}}\n" +
-    "                </li>\n" +
-    "            </ul>\n" +
+    "    <div class=\"col-md-12\">\n" +
+    "        <div class=\"panel panel-default\">\n" +
+    "            <div class=\"panel-heading\">\n" +
+    "                <h3 class=\"panel-title\">People who can approve submitted News and Exhibits</h3>\n" +
+    "            </div>\n" +
+    "            <div class=\"panel-body\">\n" +
+    "                <ul class=\"list-group\">\n" +
+    "                    <li class=\"list-group-item\" ng-repeat=\"admin in data.admins\">\n" +
+    "                        {{admin.name}}\n" +
+    "                    </li>\n" +
+    "                </ul>\n" +
+    "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>");
@@ -40506,83 +40503,85 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "<div>\n" +
     "    <form name=\"addNewsExh\" ng-submit=\"createNews()\">\n" +
     "        <div class=\"row\">\n" +
-    "            <div class=\"col-md-12 sdOpen\">\n" +
-    "                <h3>Add News Record</h3>\n" +
-    "                <div class=\"col-md-12\">\n" +
-    "                    <div class=\"col-md-3 form-group\">\n" +
-    "                        <label for=\"up\">Upload Icon</label>\n" +
-    "                        <input type=\"file\" ngf-select=\"\" ng-model=\"newNews.picFile\" accept=\"image/png\"\n" +
-    "                               ngf-change=\"generateThumb(newNews.picFile[0], $files)\" id=\"up\">\n" +
-    "                            <span class=\"progress\" ng-show=\"newNews.picFile[0].progress >= 0\">\n" +
-    "                                <div class=\"ng-binding\" style=\"width:{{newNews.picFile[0].progress}}%\" ng-bind=\"newNews.picFile[0].progress + '%'\"></div>\n" +
-    "                            </span>\n" +
+    "            <div class=\"col-md-12\">\n" +
+    "                <div class=\"col-md-12 sdOpen\">\n" +
+    "                    <h3>Add News Record</h3>\n" +
+    "                    <div class=\"col-md-12\">\n" +
+    "                        <div class=\"col-md-3 form-group\">\n" +
+    "                            <label for=\"up\">Upload Icon</label>\n" +
+    "                            <input type=\"file\" ngf-select=\"\" ng-model=\"newNews.picFile\" accept=\"image/png\"\n" +
+    "                                   ngf-change=\"generateThumb(newNews.picFile[0], $files)\" id=\"up\">\n" +
+    "                                <span class=\"progress\" ng-show=\"newNews.picFile[0].progress >= 0\">\n" +
+    "                                    <div class=\"ng-binding\" style=\"width:{{newNews.picFile[0].progress}}%\" ng-bind=\"newNews.picFile[0].progress + '%'\"></div>\n" +
+    "                                </span>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"col-md-5 form-group\">\n" +
+    "                            <label for=\"title\">Title</label>\n" +
+    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Enter Title\" ng-model=\"newNews.title\"\n" +
+    "                                   id=\"title\" maxlength=\"100\" required>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"col-md-2 form-group\">\n" +
+    "                            <label for=\"from\">Active From</label>\n" +
+    "                            <input type=\"text\" class=\"form-control\" id=\"from\" datepicker-popup=\"{{dpFormat}}\"\n" +
+    "                                   ng-model=\"newNews.activeFrom\" is-open=\"newNews.dpFrom\" ng-required=\"true\" close-text=\"Close\"\n" +
+    "                                   ng-focus=\"onNewsDPFocusFrom($event)\"/>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"col-md-2 form-group\">\n" +
+    "                            <label for=\"until\">Active Until</label>\n" +
+    "                            <input type=\"text\" class=\"form-control\" id=\"until\" datepicker-popup=\"{{dpFormat}}\"\n" +
+    "                                   ng-model=\"newNews.activeUntil\" is-open=\"newNews.dpUntil\" ng-required=\"true\" close-text=\"Close\"\n" +
+    "                                   ng-focus=\"onNewsDPFocusUntil($event)\"/>\n" +
+    "                        </div>\n" +
     "                    </div>\n" +
-    "                    <div class=\"col-md-5 form-group\">\n" +
-    "                        <label for=\"title\">Title</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Enter Title\" ng-model=\"newNews.title\"\n" +
-    "                               id=\"title\" maxlength=\"100\" required>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-2 form-group\">\n" +
-    "                        <label for=\"from\">Active From</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" id=\"from\" datepicker-popup=\"{{dpFormat}}\"\n" +
-    "                               ng-model=\"newNews.activeFrom\" is-open=\"newNews.dpFrom\" ng-required=\"true\" close-text=\"Close\"\n" +
-    "                               ng-focus=\"onNewsDPFocusFrom($event)\"/>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-2 form-group\">\n" +
-    "                        <label for=\"until\">Active Until</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" id=\"until\" datepicker-popup=\"{{dpFormat}}\"\n" +
-    "                               ng-model=\"newNews.activeUntil\" is-open=\"newNews.dpUntil\" ng-required=\"true\" close-text=\"Close\"\n" +
-    "                               ng-focus=\"onNewsDPFocusUntil($event)\"/>\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-12\">\n" +
-    "                    <div class=\"col-md-10 form-group\">\n" +
-    "                        <label for=\"blurb\">Short Description</label>\n" +
-    "                        <textarea class=\"form-control\" rows=\"1\" id=\"blurb\" ng-model=\"newNews.blurb\" maxlength=\"250\" required></textarea>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-2 form-group\">\n" +
-    "                        <label for=\"type\">Type</label>\n" +
-    "                        <select class=\"form-control\" id=\"type\" ng-options=\"type.name for type in types\"\n" +
-    "                                ng-model=\"newNews.selType\">\n" +
-    "                        </select>\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-12\">\n" +
-    "                    <div class=\"col-md-12 form-group\">\n" +
-    "                        <label>Detailed Description</label>\n" +
-    "                        <textarea data-ui-tinymce id=\"description\" data-ng-model=\"newNews.description\" rows=\"5\"\n" +
-    "                                  maxlength=\"64000\" required></textarea>\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-12 form-group\">\n" +
-    "                    <h4><small>Select contact person from the list or enter new contact information</small></h4>\n" +
-    "                    <div class=\"form-group\">\n" +
-    "                        <div class=\"col-md-3\">\n" +
-    "                            <label for=\"contact1\">Library Faculty and Staff</label>\n" +
-    "                            <select class=\"form-control\" id=\"contact1\" ng-options=\"people.fullName for people in data.people\"\n" +
-    "                                    ng-model=\"newNews.contactID\">\n" +
+    "                    <div class=\"col-md-12\">\n" +
+    "                        <div class=\"col-md-10 form-group\">\n" +
+    "                            <label for=\"blurb\">Short Description</label>\n" +
+    "                            <textarea class=\"form-control\" rows=\"1\" id=\"blurb\" ng-model=\"newNews.blurb\" maxlength=\"250\" required></textarea>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"col-md-2 form-group\">\n" +
+    "                            <label for=\"type\">Type</label>\n" +
+    "                            <select class=\"form-control\" id=\"type\" ng-options=\"type.name for type in types\"\n" +
+    "                                    ng-model=\"newNews.selType\">\n" +
     "                            </select>\n" +
     "                        </div>\n" +
-    "                        <div class=\"col-md-3\">\n" +
-    "                            <label for=\"contact2\">Name</label>\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Contact Name\" ng-model=\"newNews.contactName\"\n" +
-    "                                   id=\"contact2\" maxlength=\"60\">\n" +
-    "                        </div>\n" +
-    "                        <div class=\"col-md-3\">\n" +
-    "                            <label for=\"contact3\">Email</label>\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Contact Email\" ng-model=\"newNews.contactEmail\"\n" +
-    "                                   id=\"contact3\"  maxlength=\"1024\">\n" +
-    "                        </div>\n" +
-    "                        <div class=\"col-md-3\">\n" +
-    "                            <label for=\"contact4\">Phone</label>\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Contact Phone\" ng-model=\"newNews.contactPhone\"\n" +
-    "                                   id=\"contact4\" maxlength=\"20\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-12\">\n" +
+    "                        <div class=\"col-md-12 form-group\">\n" +
+    "                            <label>Detailed Description</label>\n" +
+    "                            <textarea data-ui-tinymce id=\"description\" data-ng-model=\"newNews.description\" rows=\"5\"\n" +
+    "                                      maxlength=\"64000\" required></textarea>\n" +
     "                        </div>\n" +
     "                    </div>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-12 text-center form-group\">\n" +
-    "                    <button type=\"submit\" class=\"btn btn-success\">Create New Record</button><br>\n" +
-    "                    {{newNews.formResponse}}\n" +
+    "                    <div class=\"col-md-12 form-group\">\n" +
+    "                        <h4><small>Select contact person from the list or enter new contact information</small></h4>\n" +
+    "                        <div class=\"form-group\">\n" +
+    "                            <div class=\"col-md-3\">\n" +
+    "                                <label for=\"contact1\">Library Faculty and Staff</label>\n" +
+    "                                <select class=\"form-control\" id=\"contact1\" ng-options=\"people.fullName for people in data.people\"\n" +
+    "                                        ng-model=\"newNews.contactID\">\n" +
+    "                                </select>\n" +
+    "                            </div>\n" +
+    "                            <div class=\"col-md-3\">\n" +
+    "                                <label for=\"contact2\">Name</label>\n" +
+    "                                <input type=\"text\" class=\"form-control\" placeholder=\"Contact Name\" ng-model=\"newNews.contactName\"\n" +
+    "                                       id=\"contact2\" maxlength=\"60\">\n" +
+    "                            </div>\n" +
+    "                            <div class=\"col-md-3\">\n" +
+    "                                <label for=\"contact3\">Email</label>\n" +
+    "                                <input type=\"text\" class=\"form-control\" placeholder=\"Contact Email\" ng-model=\"newNews.contactEmail\"\n" +
+    "                                       id=\"contact3\"  maxlength=\"1024\">\n" +
+    "                            </div>\n" +
+    "                            <div class=\"col-md-3\">\n" +
+    "                                <label for=\"contact4\">Phone</label>\n" +
+    "                                <input type=\"text\" class=\"form-control\" placeholder=\"Contact Phone\" ng-model=\"newNews.contactPhone\"\n" +
+    "                                       id=\"contact4\" maxlength=\"20\">\n" +
+    "                            </div>\n" +
+    "                        </div>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-12 text-center form-group\">\n" +
+    "                        <button type=\"submit\" class=\"btn btn-success\">Create New Record</button><br>\n" +
+    "                        {{newNews.formResponse}}\n" +
+    "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
@@ -40796,13 +40795,13 @@ angular.module("manageOneSearch/manageOneSearch.tpl.html", []).run(["$templateCa
     "                   id=\"K\" required>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"L\">Link</label>\n" +
+    "            <label for=\"L\">Link URL</label>\n" +
     "            <input type=\"text\" class=\"form-control\" placeholder=\"http://www.example.com/\" maxlength=\"1024\"\n" +
     "                   id=\"L\" ng-model=\"addRec.link\" required>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-3 form-group\">\n" +
     "            <label for=\"LT\">Link Title</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Link Title\" maxlength=\"100\" ng-model=\"addRec.title\"\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Link Title\" maxlength=\"100\" ng-model=\"addRec.description\"\n" +
     "                   id=\"LT\" required>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-3 form-group\">\n" +
@@ -40814,28 +40813,87 @@ angular.module("manageOneSearch/manageOneSearch.tpl.html", []).run(["$templateCa
     "<div ng-show=\"response.length > 0\">\n" +
     "    {{response}}\n" +
     "</div>\n" +
-    "<div class=\"row\">\n" +
-    "    <div class=\"col-md-4 form-group\">\n" +
-    "        <label for=\"filterK\">Filter by Keyword</label>\n" +
-    "        <input type=\"text\" class=\"form-control\" placeholder=\"Keyword\" id=\"filterK\" ng-model=\"filterKeyword\">\n" +
-    "    </div>\n" +
-    "    <div class=\"col-md-4 form-group\">\n" +
-    "        <label for=\"filterLT\">Filter by Link Title</label>\n" +
-    "        <input type=\"text\" class=\"form-control\" placeholder=\"Link Title\" id=\"filterLT\" ng-model=\"filterLinkTitle\">\n" +
-    "    </div>\n" +
-    "    <div class=\"col-md-4 form-group\">\n" +
-    "        <label for=\"filterL\">Filter by Link</label>\n" +
-    "        <input type=\"text\" class=\"form-control\" placeholder=\"Link\" id=\"filterL\" ng-model=\"filterLink\">\n" +
+    "\n" +
+    "<div class=\"row form-inline\">\n" +
+    "    <div class=\"form-group col-md-12\">\n" +
+    "        <label for=\"filterBy\">Filter <small>{{filteredList.length}}</small> results by</label>\n" +
+    "        <div id=\"filterBy\">\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Keyword contains\" ng-model=\"filterKeyword\">\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"filterLinkTitle\">\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"URL contains\" ng-model=\"filterLink\">\n" +
+    "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
     "\n" +
-    "<div class=\"row\">\n" +
-    "    <div class=\"col-md-6\"\n" +
-    "         ng-repeat=\"rec in recList.RecList | filter:{keyword:filterKeyword} | filter:{link:filterLink} | filter:{description:filterLinkTitle}\">\n" +
-    "        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteRec(rec, $index)\">Delete</button>\n" +
-    "        <span>{{rec.keyword}} = <a href=\"{{rec.link}}\">{{rec.description}}</a></span>\n" +
-    "    </div>\n" +
-    "</div>");
+    "<div class=\"table-responsive\">\n" +
+    "    <table class=\"table table-condensed table-hover\">\n" +
+    "        <thead>\n" +
+    "        <tr>\n" +
+    "            <th class=\"hidden-xs\" style=\"width:20%\">\n" +
+    "                <a\n" +
+    "                        ng-click=\"sortBy(0)\"\n" +
+    "                        ng-class=\"{'sortable': !sortModes[0].reverse && sortMode == 0, 'sortable-reverse': sortModes[0].reverse && sortMode == 0}\">\n" +
+    "                    Keyword\n" +
+    "                </a>\n" +
+    "            </th>\n" +
+    "            <th class=\"hidden-xs\">\n" +
+    "                <a\n" +
+    "                        ng-click=\"sortBy(1)\"\n" +
+    "                        ng-class=\"{'sortable': !sortModes[1].reverse && sortMode == 1, 'sortable-reverse': sortModes[1].reverse && sortMode == 1}\">\n" +
+    "                    Title\n" +
+    "                </a>\n" +
+    "            </th>\n" +
+    "            <th class=\"hidden-xs\">\n" +
+    "                <a\n" +
+    "                        ng-click=\"sortBy(2)\"\n" +
+    "                        ng-class=\"{'sortable': !sortModes[2].reverse && sortMode == 2, 'sortable-reverse': sortModes[2].reverse && sortMode == 2}\">\n" +
+    "                    URL\n" +
+    "                </a>\n" +
+    "            </th>\n" +
+    "            <th style=\"width:120px\">\n" +
+    "                Action\n" +
+    "            </th>\n" +
+    "        </tr>\n" +
+    "        </thead>\n" +
+    "        <tbody>\n" +
+    "        <tr ng-repeat=\"rec in (filteredList = recList.RecList | filter:{keyword:filterKeyword}\n" +
+    "                                                              | filter:{link:filterLink}\n" +
+    "                                                              | filter:{description:filterLinkTitle}\n" +
+    "                                                              | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\"\n" +
+    "                ng-click=\"expand(rec)\">\n" +
+    "            <td>\n" +
+    "                <span ng-show=\"expanded != rec.id\">{{rec.keyword}}</span>\n" +
+    "                <span ng-show=\"expanded == rec.id\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Keyword\" maxlength=\"200\" ng-model=\"rec.keyword\">\n" +
+    "                </span>\n" +
+    "            </td>\n" +
+    "            <td>\n" +
+    "                <span ng-show=\"expanded != rec.id\">{{rec.description}}</span>\n" +
+    "                <span ng-show=\"expanded == rec.id\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Title\" maxlength=\"100\" ng-model=\"rec.description\">\n" +
+    "                </span>\n" +
+    "            </td>\n" +
+    "            <td>\n" +
+    "                <span ng-show=\"expanded != rec.id\"><a href=\"{{rec.link}}\">{{rec.link}}</a></span>\n" +
+    "                <span ng-show=\"expanded == rec.id\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"URL\" maxlength=\"1024\" ng-model=\"rec.link\">\n" +
+    "                </span>\n" +
+    "            </td>\n" +
+    "            <td>\n" +
+    "                <span ng-show=\"expanded == rec.id\">\n" +
+    "                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"updateRec(rec)\">\n" +
+    "                        <span class=\"fa fa-fw fa-edit\"></span>\n" +
+    "                    </button>\n" +
+    "                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteRec(rec, $index)\">\n" +
+    "                        <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                    </button>\n" +
+    "                </span>\n" +
+    "            </td>\n" +
+    "        </tr>\n" +
+    "        </tbody>\n" +
+    "    </table>\n" +
+    "</div>\n" +
+    "");
 }]);
 
 angular.module("manageSoftware/manageSoftware.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -40862,23 +40920,22 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "<div>\n" +
     "    <div class=\"row form-inline\">\n" +
     "        <div class=\"form-group col-md-12\">\n" +
-    "            <label for=\"filterBy\">Filter <small>{{filteredSW.length}}</small> results by</label>\n" +
-    "            <div id=\"filterBy\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"titleFilter\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Description contains\" ng-model=\"descrFilter\">\n" +
+    "            <div class=\"col-md-6\">\n" +
+    "                <label for=\"filterBy\">Filter <small>{{filteredSW.length}}</small> results by</label>\n" +
+    "                <div id=\"filterBy\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"titleFilter\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Description contains\" ng-model=\"descrFilter\">\n" +
+    "                </div>\n" +
     "            </div>\n" +
-    "            <label for=\"sortBy\">Sort by</label>\n" +
-    "            <div id=\"sortBy\">\n" +
-    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"0\" ng-click=\"sortBy(0)\">\n" +
-    "                    Title\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[0].reverse\"></span>\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[0].reverse\"></span>\n" +
-    "                </button>\n" +
-    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"1\" ng-click=\"sortBy(1)\">\n" +
-    "                    Location\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[1].reverse\"></span>\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[1].reverse\"></span>\n" +
-    "                </button>\n" +
+    "            <div class=\"col-md-6\">\n" +
+    "                <label for=\"sortBy\">Sort by</label>\n" +
+    "                <div id=\"sortBy\">\n" +
+    "                    <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"0\" ng-click=\"sortBy(0)\">\n" +
+    "                        Title\n" +
+    "                        <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[0].reverse\"></span>\n" +
+    "                        <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[0].reverse\"></span>\n" +
+    "                    </button>\n" +
+    "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
@@ -40909,10 +40966,15 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                            {{sw.title}}\n" +
     "                        </h4>\n" +
     "                    </td>\n" +
+    "                    <td style=\"width: 79px;\">\n" +
+    "                        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"publishSW(sw)\" ng-show=\"sw.status == 0\">\n" +
+    "                            Publish\n" +
+    "                        </button>\n" +
+    "                    </td>\n" +
     "                </tr>\n" +
     "            </table>\n" +
     "        </div>\n" +
-    "        <div ng-show=\"sw.show\">\n" +
+    "        <div ng-if=\"sw.show\">\n" +
     "            <form name=\"editSW{{sw.sid}}\" ng-submit=\"updateSW(sw)\">\n" +
     "                <div class=\"col-md-12\">\n" +
     "                    <div class=\"col-md-6 form-group\">\n" +
@@ -40926,17 +40988,19 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                    <div class=\"col-md-6 form-group\">\n" +
     "                        <label for=\"{{sw.sid}}_title\">Title</label>\n" +
     "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{sw.title}}\" ng-model=\"sw.title\"\n" +
-    "                               id=\"{{sw.sid}}_title\" required>\n" +
+    "                               id=\"{{sw.sid}}_title\" maxlength=\"50\" required>\n" +
     "                    </div>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-12\">\n" +
     "                    <div class=\"col-md-6 form-group\">\n" +
     "                        <label for=\"{{sw.sid}}_descr\">Description</label>\n" +
-    "                        <textarea class=\"form-control\" rows=\"3\" id=\"{{sw.sid}}_descr\" ng-model=\"sw.description\" required></textarea>\n" +
+    "                        <textarea class=\"form-control\" rows=\"3\" id=\"{{sw.sid}}_descr\" ng-model=\"sw.description\"\n" +
+    "                                  maxlength=\"4096\" required></textarea>\n" +
     "                    </div>\n" +
     "                    <div class=\"col-md-6 form-group\">\n" +
     "                        <label for=\"{{sw.sid}}_mod\">List of Installed Modules</label>\n" +
-    "                        <textarea class=\"form-control\" rows=\"3\" id=\"{{sw.sid}}_mod\" ng-model=\"sw.modules\" ></textarea>\n" +
+    "                        <textarea class=\"form-control\" rows=\"3\" id=\"{{sw.sid}}_mod\" ng-model=\"sw.modules\"\n" +
+    "                                  maxlength=\"4096\"></textarea>\n" +
     "                    </div>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-12\">\n" +
@@ -40951,13 +41015,16 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                            </li>\n" +
     "                            <li class=\"list-group-item col-md-12\">\n" +
     "                                <div class=\"col-md-4\">\n" +
-    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"Link Description\" ng-model=\"sw.newLink.description\">\n" +
+    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"Link Description\"\n" +
+    "                                           ng-model=\"sw.newLink.description\" maxlength=\"200\">\n" +
     "                                </div>\n" +
     "                                <div class=\"col-md-3\">\n" +
-    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"Link Title\" ng-model=\"sw.newLink.title\">\n" +
+    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"Link Title\"\n" +
+    "                                           ng-model=\"sw.newLink.title\" maxlength=\"100\">\n" +
     "                                </div>\n" +
     "                                <div class=\"col-md-4\">\n" +
-    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"http://www.example.com/\" ng-model=\"sw.newLink.url\">\n" +
+    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"http://www.example.com/\"\n" +
+    "                                           ng-model=\"sw.newLink.url\" maxlength=\"1024\">\n" +
     "                                </div>\n" +
     "                                <div class=\"col-md-1\">\n" +
     "                                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"addLink(sw)\"\n" +
@@ -40974,25 +41041,28 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                        <label for=\"{{sw.sid}}_ver\">Versions</label>\n" +
     "                        <ul class=\"list-group\" id=\"{{sw.sid}}_ver\">\n" +
     "                            <li class=\"list-group-item col-md-12\" ng-repeat=\"version in sw.versions\">\n" +
-    "                                <div class=\"col-md-4\">\n" +
+    "                                <div class=\"col-md-1\">\n" +
     "                                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteVersion(sw,version)\">\n" +
     "                                        <span class=\"fa fa-fw fa-close\"></span>\n" +
     "                                    </button>\n" +
-    "                                    {{version.version}}\n" +
     "                                    <span class=\"fa fa-fw fa-windows\" ng-show=\"version.os == 1\"></span>\n" +
     "                                    <span class=\"fa fa-fw fa-apple\" ng-show=\"version.os == 2\"></span>\n" +
+    "                                </div>\n" +
+    "                                <div class=\"col-md-3\">\n" +
+    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"Version\" ng-model=\"version.version\"\n" +
+    "                                           maxlength=\"50\">\n" +
     "                                </div>\n" +
     "                                <div class=\"col-md-8 form-group\">\n" +
     "                                    <label for=\"{{sw.sid}}_loc\">Locations</label>\n" +
     "                                    <ul class=\"list-group\" id=\"{{sw.sid}}_loc\">\n" +
     "                                        <li class=\"list-group-item col-md-12\" ng-repeat=\"loc in version.locations\">\n" +
-    "                                            <div class=\"col-md-6\">\n" +
+    "                                            <div class=\"col-md-8\">\n" +
     "                                                <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteLocation(sw,version,loc)\">\n" +
     "                                                    <span class=\"fa fa-fw fa-close\"></span>\n" +
     "                                                </button>\n" +
     "                                                {{loc.name}}\n" +
     "                                            </div>\n" +
-    "                                            <div class=\"col-md-5\">\n" +
+    "                                            <div class=\"col-md-4\">\n" +
     "                                                <div class=\"col-md-6\" ng-show=\"checkDevices(loc.devices, 1)\">\n" +
     "                                                    <span class=\"fa fa-fw fa-windows\"></span>\n" +
     "                                                    <span class=\"fa fa-fw fa-desktop\"></span>\n" +
@@ -41010,17 +41080,14 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                                                    <span class=\"fa fa-fw fa-laptop\"></span>\n" +
     "                                                </div>\n" +
     "                                            </div>\n" +
-    "                                            <div class=\"col-md-1\">\n" +
-    "\n" +
-    "                                            </div>\n" +
     "                                        </li>\n" +
     "                                        <li class=\"list-group-item col-md-12\">\n" +
-    "                                            <div class=\"col-md-6\">\n" +
+    "                                            <div class=\"col-md-8\">\n" +
     "                                                <select class=\"form-control\" ng-model=\"version.newLoc.selLoc\"\n" +
     "                                                        ng-options=\"loc.name for loc in SWList.locations\">\n" +
     "                                                </select>\n" +
     "                                            </div>\n" +
-    "                                            <div class=\"col-md-5\">\n" +
+    "                                            <div class=\"col-md-3\">\n" +
     "                                                <div class=\"col-md-6\" ng-repeat=\"device in version.newLoc.devices track by $index\"\n" +
     "                                                     ng-show=\"(($index == 0 || $index == 2) && version.os == 1) ||\n" +
     "                                                              (($index == 1 || $index == 3) && version.os == 2)\">\n" +
@@ -41044,7 +41111,8 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                            </li>\n" +
     "                            <li class=\"list-group-item col-md-6\">\n" +
     "                                <div class=\"col-md-6\">\n" +
-    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"Version\" ng-model=\"sw.newVer.version\">\n" +
+    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"Version\" ng-model=\"sw.newVer.version\"\n" +
+    "                                           maxlength=\"50\">\n" +
     "                                </div>\n" +
     "                                <div class=\"col-md-4\">\n" +
     "                                    <select class=\"form-control\" ng-model=\"sw.newVer.selOS\" ng-options=\"opSys.name for opSys in os\">\n" +
@@ -41088,6 +41156,9 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                </div>\n" +
     "                <div class=\"col-md-12 text-center\">\n" +
     "                    <button type=\"submit\" class=\"btn btn-success\">Update information</button>\n" +
+    "                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"unpublishSW(sw)\" ng-hide=\"\">\n" +
+    "                        Unpublish\n" +
+    "                    </button>\n" +
     "                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteSW(sw)\">\n" +
     "                        Delete {{sw.title}} software\n" +
     "                    </button>\n" +
@@ -41123,17 +41194,17 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "            <div class=\"col-md-6 form-group\">\n" +
     "                <label for=\"title\">Title</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Software Title\" ng-model=\"newSW.title\"\n" +
-    "                       id=\"title\">\n" +
+    "                       id=\"title\" maxlength=\"50\">\n" +
     "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-12\">\n" +
     "            <div class=\"col-md-6 form-group\">\n" +
     "                <label for=\"descr\">Description</label>\n" +
-    "                <textarea class=\"form-control\" rows=\"3\" id=\"descr\" ng-model=\"newSW.description\" required></textarea>\n" +
+    "                <textarea class=\"form-control\" rows=\"3\" id=\"descr\" ng-model=\"newSW.description\" maxlength=\"4096\" required></textarea>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-6 form-group\">\n" +
     "                <label for=\"mod\">List of Installed Modules</label>\n" +
-    "                <textarea class=\"form-control\" rows=\"3\" id=\"mod\" ng-model=\"newSW.modules\" ></textarea>\n" +
+    "                <textarea class=\"form-control\" rows=\"3\" id=\"mod\" ng-model=\"newSW.modules\" maxlength=\"4096\"></textarea>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-12\">\n" +
@@ -41148,13 +41219,16 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                    </li>\n" +
     "                    <li class=\"list-group-item col-md-12\">\n" +
     "                        <div class=\"col-md-4\">\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Link Description\" ng-model=\"newSW.newLink.description\">\n" +
+    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Link Description\"\n" +
+    "                                   ng-model=\"newSW.newLink.description\" maxlength=\"200\">\n" +
     "                        </div>\n" +
     "                        <div class=\"col-md-3\">\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Link Title\" ng-model=\"newSW.newLink.title\">\n" +
+    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Link Title\"\n" +
+    "                                   ng-model=\"newSW.newLink.title\" maxlength=\"100\">\n" +
     "                        </div>\n" +
     "                        <div class=\"col-md-4\">\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"http://www.example.com/\" ng-model=\"newSW.newLink.url\">\n" +
+    "                            <input type=\"text\" class=\"form-control\" placeholder=\"http://www.example.com/\"\n" +
+    "                                   ng-model=\"newSW.newLink.url\" maxlength=\"1024\">\n" +
     "                        </div>\n" +
     "                        <div class=\"col-md-1\">\n" +
     "                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"addNewSWLink()\"\n" +
@@ -41183,13 +41257,13 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                            <label for=\"loc\">Locations</label>\n" +
     "                            <ul class=\"list-group\" id=\"loc\">\n" +
     "                                <li class=\"list-group-item col-md-12\" ng-repeat=\"loc in version.locations\">\n" +
-    "                                    <div class=\"col-md-6\">\n" +
+    "                                    <div class=\"col-md-8\">\n" +
     "                                        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"delNewSWLoc(version,loc)\">\n" +
     "                                            <span class=\"fa fa-fw fa-close\"></span>\n" +
     "                                        </button>\n" +
     "                                        {{loc.name}}\n" +
     "                                    </div>\n" +
-    "                                    <div class=\"col-md-5\">\n" +
+    "                                    <div class=\"col-md-4\">\n" +
     "                                        <div class=\"col-md-6\" ng-show=\"checkDevices(loc.devices, 1)\">\n" +
     "                                            <span class=\"fa fa-fw fa-windows\"></span>\n" +
     "                                            <span class=\"fa fa-fw fa-desktop\"></span>\n" +
@@ -41207,17 +41281,14 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                                            <span class=\"fa fa-fw fa-laptop\"></span>\n" +
     "                                        </div>\n" +
     "                                    </div>\n" +
-    "                                    <div class=\"col-md-1\">\n" +
-    "\n" +
-    "                                    </div>\n" +
     "                                </li>\n" +
     "                                <li class=\"list-group-item col-md-12\">\n" +
-    "                                    <div class=\"col-md-6\">\n" +
+    "                                    <div class=\"col-md-8\">\n" +
     "                                        <select class=\"form-control\" ng-model=\"version.newLoc.selLoc\"\n" +
     "                                                ng-options=\"loc.name for loc in SWList.locations\">\n" +
     "                                        </select>\n" +
     "                                    </div>\n" +
-    "                                    <div class=\"col-md-5\">\n" +
+    "                                    <div class=\"col-md-3\">\n" +
     "                                        <div class=\"col-md-6\" ng-repeat=\"device in version.newLoc.devices track by $index\"\n" +
     "                                                ng-show=\"(($index == 0 || $index == 2) && version.os == 1) ||\n" +
     "                                                         (($index == 1 || $index == 3) && version.os == 2)\">\n" +
@@ -41241,7 +41312,8 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                    </li>\n" +
     "                    <li class=\"list-group-item col-md-6\">\n" +
     "                        <div class=\"col-md-6\">\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Version\" ng-model=\"newSW.newVer.version\">\n" +
+    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Version\" ng-model=\"newSW.newVer.version\"\n" +
+    "                                   maxlength=\"50\">\n" +
     "                        </div>\n" +
     "                        <div class=\"col-md-4\">\n" +
     "                            <select class=\"form-control\" ng-model=\"newSW.newVer.selOS\" ng-options=\"opSys.name for opSys in os\">\n" +
@@ -41298,30 +41370,32 @@ angular.module("manageSoftware/manageSoftwareLocCat.tpl.html", []).run(["$templa
     "<div class=\"row\">\n" +
     "    <div class=\"col-md-6\">\n" +
     "        <h3>Locations</h3>\n" +
+    "        <div class=\"row\">\n" +
+    "            <div class=\"col-md-2\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Parent ID\" ng-model=\"newLocation.parent\"\n" +
+    "                       maxlength=\"3\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-8\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"New Location Name\" ng-model=\"newLocation.name\"\n" +
+    "                       maxlength=\"50\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2\">\n" +
+    "                <button type=\"button\" class=\"btn btn-success\" ng-click=\"addLocation()\" ng-disabled=\"newLocation.name.length == 0\">\n" +
+    "                    <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "                </button>\n" +
+    "            </div>\n" +
+    "            {{locResponse}}\n" +
+    "        </div>\n" +
     "        <table class=\"table table-hover\">\n" +
     "            <thead>\n" +
     "            <tr>\n" +
-    "                <th>ID</th>\n" +
-    "                <th>Parent ID</th>\n" +
+    "                <th style=\"width:50px;\">ID</th>\n" +
+    "                <th style=\"width:75px;\">Parent</th>\n" +
     "                <th>Name</th>\n" +
-    "                <th>Action</th>\n" +
+    "                <th style=\"width:120px;\">Action</th>\n" +
     "            </tr>\n" +
     "            </thead>\n" +
     "            <tbody>\n" +
-    "            <tr>\n" +
-    "                <div class=\"col-md-2\">\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Parent ID\" ng-model=\"newLocation.parent\">\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-8\">\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"New Location Name\" ng-model=\"newLocation.name\">\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-2\">\n" +
-    "                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"addLocation()\" ng-disabled=\"newLocation.name.length == 0\">\n" +
-    "                        <span class=\"fa fa-fw fa-plus\"></span>\n" +
-    "                    </button>\n" +
-    "                </div>\n" +
-    "                {{locResponse}}\n" +
-    "            </tr>\n" +
     "            <tr ng-repeat=\"location in SWList.locations\" ng-click=\"selectLocation(location)\">\n" +
     "                <td>\n" +
     "                    {{location.lid}}\n" +
@@ -41331,7 +41405,8 @@ angular.module("manageSoftware/manageSoftwareLocCat.tpl.html", []).run(["$templa
     "                        {{location.parent}}\n" +
     "                    </span>\n" +
     "                    <span ng-show=\"selLocation == location.lid\">\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Parent ID\" ng-model=\"location.parent\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Parent ID\" ng-model=\"location.parent\"\n" +
+    "                               maxlength=\"3\">\n" +
     "                    </span>\n" +
     "                </td>\n" +
     "                <td>\n" +
@@ -41339,7 +41414,8 @@ angular.module("manageSoftware/manageSoftwareLocCat.tpl.html", []).run(["$templa
     "                        {{location.name}}\n" +
     "                    </span>\n" +
     "                    <span ng-show=\"selLocation == location.lid\">\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Location Name\" ng-model=\"location.name\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Location Name\" ng-model=\"location.name\"\n" +
+    "                               maxlength=\"50\">\n" +
     "                    </span>\n" +
     "                </td>\n" +
     "                <td>\n" +
@@ -41358,26 +41434,26 @@ angular.module("manageSoftware/manageSoftwareLocCat.tpl.html", []).run(["$templa
     "    </div>\n" +
     "    <div class=\"col-md-6\">\n" +
     "        <h3>Categories</h3>\n" +
+    "        <div class=\"row\">\n" +
+    "            <div class=\"col-md-10\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"New Category\" ng-model=\"newCategory\" maxlength=\"30\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2\">\n" +
+    "                <button type=\"button\" class=\"btn btn-success\" ng-click=\"addCategory()\" ng-disabled=\"newCategory.length == 0\">\n" +
+    "                    <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "                </button>\n" +
+    "            </div>\n" +
+    "            {{catResponse}}\n" +
+    "        </div>\n" +
     "        <table class=\"table table-hover\">\n" +
     "            <thead>\n" +
     "            <tr>\n" +
-    "                <th>ID</th>\n" +
+    "                <th style=\"width:50px;\">ID</th>\n" +
     "                <th>Name</th>\n" +
-    "                <th>Action</th>\n" +
+    "                <th style=\"width:120px;\">Action</th>\n" +
     "            </tr>\n" +
     "            </thead>\n" +
     "            <tbody>\n" +
-    "            <tr>\n" +
-    "                <div class=\"col-md-10\">\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"New Category\" ng-model=\"newCategory\">\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-2\">\n" +
-    "                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"addCategory()\" ng-disabled=\"newCategory.length == 0\">\n" +
-    "                        <span class=\"fa fa-fw fa-plus\"></span>\n" +
-    "                    </button>\n" +
-    "                </div>\n" +
-    "                {{catResponse}}\n" +
-    "            </tr>\n" +
     "            <tr ng-repeat=\"category in SWList.categories\" ng-click=\"selectCategory(category)\">\n" +
     "                <td>\n" +
     "                    {{category.cid}}\n" +
@@ -41387,7 +41463,8 @@ angular.module("manageSoftware/manageSoftwareLocCat.tpl.html", []).run(["$templa
     "                        {{category.name}}\n" +
     "                    </span>\n" +
     "                    <span ng-show=\"selCategory == category.cid\">\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Category Name\" ng-model=\"category.name\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Category Name\" ng-model=\"category.name\"\n" +
+    "                               maxlength=\"30\">\n" +
     "                    </span>\n" +
     "                </td>\n" +
     "                <td>\n" +
@@ -41554,207 +41631,470 @@ angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCach
   $templateCache.put("staffDirectory/staffDirectory.tpl.html",
     "<h2>Library Staff Directory</h2>\n" +
     "\n" +
-    "<div>\n" +
-    "    <div class=\"text-center row form-inline\">\n" +
-    "        <div class=\"col-md-5 form-group text-right\">\n" +
-    "            <label for=\"sortBy\">Sort By</label>\n" +
-    "            <div id=\"sortBy\">\n" +
-    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"'first'\"\n" +
-    "                        ng-click=\"sortMode='firstname'\">\n" +
-    "                    First Name\n" +
-    "                </button>\n" +
-    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"'last'\"\n" +
-    "                        ng-click=\"sortMode='lastname'\">\n" +
-    "                    Last Name\n" +
-    "                </button>\n" +
-    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"'title'\"\n" +
-    "                        ng-click=\"sortMode='title'\">\n" +
-    "                    Title\n" +
-    "                </button>\n" +
-    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"'dept'\"\n" +
-    "                        ng-click=\"sortMode='department'\">\n" +
-    "                    Department\n" +
-    "                </button>\n" +
+    "<tabset justified=\"true\">\n" +
+    "    <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
+    "        <div ng-if=\"tab.number == 0\">\n" +
+    "            <div manage-sd-people>\n" +
     "            </div>\n" +
     "        </div>\n" +
-    "        <div class=\"col-md-7 form-group text-left\">\n" +
-    "            <label for=\"filterBy\">Filter by</label>\n" +
-    "            <div id=\"filterBy\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Last Name\" ng-model=\"lastNameFilter\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"First Name\" ng-model=\"firstNameFilter\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Title\" ng-model=\"titleFilter\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Department\" ng-model=\"deptFilter\">\n" +
+    "        <div ng-if=\"tab.number == 1\" >\n" +
+    "            <div manage-sd-subjects>\n" +
     "            </div>\n" +
     "        </div>\n" +
-    "    </div>\n" +
+    "        <div ng-if=\"tab.number == 2\">\n" +
+    "            <div manage-sd-departments>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </tab>\n" +
+    "</tabset>\n" +
     "\n" +
-    "    <div class=\"text-center\">\n" +
-    "        <pagination total-items=\"filteredDB.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
-    "                    boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredDB.length > perPage\"></pagination>\n" +
-    "    </div>\n" +
-    "    <div class=\"row\" ng-repeat=\"person in filteredDB = (Directory.list\n" +
-    "                                                        | filter:{lastname:lastNameFilter}\n" +
-    "                                                        | filter:{firstname:firstNameFilter}\n" +
-    "                                                        | filter:{title:titleFilter}\n" +
-    "                                                        | filter:{department:deptFilter}\n" +
-    "                                                        | orderBy:sortMode)\n" +
-    "                                | startFrom:(currentPage-1)*perPage | limitTo:perPage\"\n" +
-    "         ng-class=\"{sdOpen: person.show, sdOver: person.id == mOver}\" ng-mouseover=\"setOver(person)\">\n" +
-    "        <div class=\"col-md-7\" ng-click=\"togglePerson(person)\">\n" +
-    "            <h4>\n" +
-    "                <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"person.show\"></span>\n" +
-    "                <span class=\"fa fa-fw fa-caret-down\" ng-show=\"person.show\"></span>\n" +
-    "                {{person.firstname}} {{person.lastname}} <small>{{person.title}}</small>\n" +
-    "            </h4>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-5\" ng-click=\"togglePerson(person)\">\n" +
-    "            <h4>{{person.department}}</h4>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-12\" ng-show=\"person.show\">\n" +
-    "            <div class=\"col-md-3\">\n" +
-    "                <img ng-src=\"{{person.image}}\" style=\"height:250px;\" alt=\"{{person.firstname}} {{person.lastname}}\"/>\n" +
+    "");
+}]);
+
+angular.module("staffDirectory/staffDirectoryDepartments.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("staffDirectory/staffDirectoryDepartments.tpl.html",
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-6\">\n" +
+    "        <h3>Departments</h3>\n" +
+    "        <div class=\"row\">\n" +
+    "            <div class=\"col-md-5\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Department Name\" ng-model=\"newDept.name\"\n" +
+    "                       maxlength=\"100\">\n" +
     "            </div>\n" +
-    "            <div class=\"col-md-9\" ng-show=\"person.show && hasAccess == 1\">\n" +
-    "                <div class=\"col-md-4 form-group\">\n" +
+    "            <div class=\"col-md-5\">\n" +
+    "                <select class=\"form-control\" ng-model=\"newDept.selLib\" ng-options=\"lib.name for lib in Directory.libraries\">\n" +
+    "                </select>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2\">\n" +
+    "                <button type=\"button\" class=\"btn btn-success\" ng-click=\"addDepartment()\" ng-disabled=\"newDept.name.length == 0\">\n" +
+    "                    <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "                </button>\n" +
+    "            </div>\n" +
+    "            {{depResponse}}\n" +
+    "        </div>\n" +
+    "        <table class=\"table table-hover\">\n" +
+    "            <thead>\n" +
+    "            <tr>\n" +
+    "                <th>Department</th>\n" +
+    "                <th>Location</th>\n" +
+    "                <th style=\"width:120px;\">Action</th>\n" +
+    "            </tr>\n" +
+    "            </thead>\n" +
+    "            <tbody>\n" +
+    "            <tr ng-repeat=\"dept in Directory.departments\" ng-click=\"expandDepartment(dept)\">\n" +
+    "                <td>\n" +
+    "                    <span ng-hide=\"dept.show\">{{dept.name}}</span>\n" +
+    "                    <span ng-show=\"dept.show\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Department Name\" ng-model=\"dept.name\"\n" +
+    "                               maxlength=\"100\">\n" +
+    "                    </span>\n" +
+    "                </td>\n" +
+    "                <td>\n" +
+    "                    <span ng-hide=\"dept.show\">{{dept.selLib.name}}</span>\n" +
+    "                    <span ng-show=\"dept.show\">\n" +
+    "                        <select class=\"form-control\" ng-model=\"dept.selLib\" ng-options=\"lib.name for lib in Directory.libraries\">\n" +
+    "                        </select>\n" +
+    "                    </span>\n" +
+    "                </td>\n" +
+    "                <td>\n" +
+    "                    <div ng-show=\"dept.show\">\n" +
+    "                        <button type=\"button\" class=\"btn btn-success\" ng-click=\"editDepartment(dept)\" ng-disabled=\"dept.name.length == 0\">\n" +
+    "                            <span class=\"fa fa-fw fa-edit\"></span>\n" +
+    "                        </button>\n" +
+    "                        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteDepartment(dept)\">\n" +
+    "                            <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                        </button>\n" +
+    "                    </div>\n" +
+    "                </td>\n" +
+    "            </tr>\n" +
+    "            </tbody>\n" +
+    "        </table>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-6\">\n" +
+    "        <h3>Libraries/Locations</h3>\n" +
+    "        <div class=\"row\">\n" +
+    "            <div class=\"col-md-10\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Location Name\" ng-model=\"newLoc.name\"\n" +
+    "                       maxlength=\"100\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2\">\n" +
+    "                <button type=\"button\" class=\"btn btn-success\" ng-click=\"addLibrary()\" ng-disabled=\"newLoc.name.length == 0\">\n" +
+    "                    <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "                </button>\n" +
+    "            </div>\n" +
+    "            {{libResponse}}\n" +
+    "        </div>\n" +
+    "        <table class=\"table table-hover\">\n" +
+    "            <thead>\n" +
+    "            <tr>\n" +
+    "                <th>Library/Location</th>\n" +
+    "                <th style=\"width:120px;\">Action</th>\n" +
+    "            </tr>\n" +
+    "            </thead>\n" +
+    "            <tbody>\n" +
+    "            <tr ng-repeat=\"lib in Directory.libraries\" ng-click=\"expandLibrary(lib)\">\n" +
+    "                <td>\n" +
+    "                    <span ng-hide=\"lib.show\">{{lib.name}}</span>\n" +
+    "                    <span ng-show=\"lib.show\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Library Name\" ng-model=\"lib.name\"\n" +
+    "                               maxlength=\"100\">\n" +
+    "                    </span>\n" +
+    "                </td>\n" +
+    "                <td>\n" +
+    "                    <div ng-show=\"lib.show\">\n" +
+    "                        <button type=\"button\" class=\"btn btn-success\" ng-click=\"editLibrary(lib)\" ng-disabled=\"lib.name.length == 0\">\n" +
+    "                            <span class=\"fa fa-fw fa-edit\"></span>\n" +
+    "                        </button>\n" +
+    "                        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteLibrary(lib)\">\n" +
+    "                            <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                        </button>\n" +
+    "                    </div>\n" +
+    "                </td>\n" +
+    "            </tr>\n" +
+    "            </tbody>\n" +
+    "        </table>\n" +
+    "\n" +
+    "        <h3>Divisions</h3>\n" +
+    "        <div class=\"row\">\n" +
+    "            <div class=\"col-md-10\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Division Name\" ng-model=\"newDiv.name\"\n" +
+    "                       maxlength=\"100\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2\">\n" +
+    "                <button type=\"button\" class=\"btn btn-success\" ng-click=\"addDivision()\" ng-disabled=\"newDiv.name.length == 0\">\n" +
+    "                    <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "                </button>\n" +
+    "            </div>\n" +
+    "            {{divResponse}}\n" +
+    "        </div>\n" +
+    "        <table class=\"table table-hover\">\n" +
+    "            <thead>\n" +
+    "            <tr>\n" +
+    "                <th>Division</th>\n" +
+    "                <th style=\"width:120px;\">Action</th>\n" +
+    "            </tr>\n" +
+    "            </thead>\n" +
+    "            <tbody>\n" +
+    "            <tr ng-repeat=\"division in Directory.divisions\" ng-click=\"expandDivision(division)\" ng-if=\"division.divid > 0\">\n" +
+    "                <td>\n" +
+    "                    <span ng-hide=\"division.show\">{{division.name}}</span>\n" +
+    "                    <span ng-show=\"division.show\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Division Name\" ng-model=\"division.name\"\n" +
+    "                               maxlength=\"100\">\n" +
+    "                    </span>\n" +
+    "                </td>\n" +
+    "                <td>\n" +
+    "                    <div ng-show=\"division.show\">\n" +
+    "                        <button type=\"button\" class=\"btn btn-success\" ng-click=\"editDivision(division)\"\n" +
+    "                                ng-disabled=\"division.name.length == 0\">\n" +
+    "                            <span class=\"fa fa-fw fa-edit\"></span>\n" +
+    "                        </button>\n" +
+    "                        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteDivision(division)\">\n" +
+    "                            <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                        </button>\n" +
+    "                    </div>\n" +
+    "                </td>\n" +
+    "            </tr>\n" +
+    "            </tbody>\n" +
+    "        </table>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "");
+}]);
+
+angular.module("staffDirectory/staffDirectoryPeople.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("staffDirectory/staffDirectoryPeople.tpl.html",
+    "<h3>Add New Person</h3>\n" +
+    "<form style=\"background-color:#f9f9f9;\" ng-submit=\"addPerson()\">\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-2 form-group\">\n" +
+    "            <label for=\"rank\">Rank</label>\n" +
+    "            <select class=\"form-control\" ng-model=\"newPerson.rank\" ng-options=\"rank for rank in ranks\" id=\"rank\">\n" +
+    "            </select>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-3 form-group\">\n" +
+    "            <label for=\"firstName\">First Name</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"First Name\" maxlength=\"25\"\n" +
+    "                   ng-model=\"newPerson.first\" id=\"firstName\" required>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-3 form-group\">\n" +
+    "            <label for=\"lastName\">Last Name</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Last Name\" maxlength=\"25\"\n" +
+    "                   ng-model=\"newPerson.last\" id=\"lastName\" required>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-4 form-group\">\n" +
+    "            <label for=\"title\">Title</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Title\" maxlength=\"150\"\n" +
+    "                   ng-model=\"newPerson.title\" id=\"title\" required>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-2 form-group\">\n" +
+    "            <label for=\"divis\">Division</label>\n" +
+    "            <select class=\"form-control\" ng-model=\"newPerson.selDiv\" ng-options=\"div.name for div in Directory.divisions\" id=\"divis\">\n" +
+    "            </select>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-3 form-group\">\n" +
+    "            <label for=\"dept\">Department</label>\n" +
+    "            <select class=\"form-control\" ng-model=\"newPerson.selDept\" ng-options=\"dept.name for dept in Directory.departments\" id=\"dept\">\n" +
+    "            </select>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-3 form-group\">\n" +
+    "            <label for=\"email\">Email</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Email\" maxlength=\"255\"\n" +
+    "                   ng-model=\"newPerson.email\" id=\"email\" required>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-2 form-group\">\n" +
+    "            <label for=\"phone\">Phone</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Phone\" maxlength=\"8\"\n" +
+    "                   ng-model=\"newPerson.phone\" id=\"phone\" required>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-2 form-group\">\n" +
+    "            <label for=\"fax\">Fax</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Fax\" maxlength=\"8\" ng-model=\"newPerson.fax\" id=\"fax\">\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-12 form-group text-center\">\n" +
+    "            <button type=\"submit\" class=\"btn btn-success\">\n" +
+    "                Create New Record\n" +
+    "            </button><br>\n" +
+    "            {{formResponse}}\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</form>\n" +
+    "\n" +
+    "<h3>People List</h3>\n" +
+    "<div class=\"row form-inline\">\n" +
+    "    <div class=\"form-group col-md-12\">\n" +
+    "        <label for=\"filterBy\">Filter <small>{{filteredList.length}}</small> results by</label>\n" +
+    "        <div id=\"filterBy\">\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Last name contains\" ng-model=\"lastNameFilter\">\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"First name contains\" ng-model=\"firstNameFilter\">\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"titleFilter\">\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Department contains\" ng-model=\"deptFilter\">\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div class=\"text-center\">\n" +
+    "    <pagination total-items=\"filteredList.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
+    "                boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredList.length > perPage\"></pagination>\n" +
+    "</div>\n" +
+    "<div class=\"table-responsive\">\n" +
+    "    <table class=\"table table-condensed table-hover\">\n" +
+    "        <thead>\n" +
+    "        <tr>\n" +
+    "            <th class=\"hidden-xs\" style=\"width:21%\">\n" +
+    "                <a ng-click=\"sortBy(0)\"\n" +
+    "                   ng-class=\"{'sortable': !sortModes[0].reverse && sortMode == 0, 'sortable-reverse': sortModes[0].reverse && sortMode == 0}\">\n" +
+    "                    Name\n" +
+    "                </a>\n" +
+    "            </th>\n" +
+    "            <th class=\"hidden-xs\" style=\"width:21%\">\n" +
+    "                <a ng-click=\"sortBy(1)\"\n" +
+    "                   ng-class=\"{'sortable': !sortModes[1].reverse && sortMode == 1, 'sortable-reverse': sortModes[1].reverse && sortMode == 1}\">\n" +
+    "                    Title\n" +
+    "                </a>\n" +
+    "            </th>\n" +
+    "            <th class=\"hidden-xs\" style=\"width:21%\">\n" +
+    "                <a ng-click=\"sortBy(2)\"\n" +
+    "                   ng-class=\"{'sortable': !sortModes[2].reverse && sortMode == 2, 'sortable-reverse': sortModes[2].reverse && sortMode == 2}\">\n" +
+    "                    Department/Division\n" +
+    "                </a>\n" +
+    "            </th>\n" +
+    "            <th class=\"hidden-xs\" style=\"width:16%\">\n" +
+    "                Contact Info\n" +
+    "            </th>\n" +
+    "            <th class=\"hidden-xs\" style=\"width:21%\">\n" +
+    "                Subjects\n" +
+    "            </th>\n" +
+    "        </tr>\n" +
+    "        </thead>\n" +
+    "        <tbody>\n" +
+    "        <tr ng-repeat=\"person in filteredList = (Directory.list\n" +
+    "                                                    | filter:{lastname:lastNameFilter}\n" +
+    "                                                    | filter:{firstname:firstNameFilter}\n" +
+    "                                                    | filter:{title:titleFilter}\n" +
+    "                                                    | filter:{department:deptFilter}\n" +
+    "                                                    | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\n" +
+    "                                                    | startFrom:(currentPage-1)*perPage\n" +
+    "                                                    | limitTo:perPage\">\n" +
+    "            <td ng-click=\"togglePerson(person)\">\n" +
+    "                <h4>\n" +
+    "                    <a>\n" +
+    "                        <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"person.show\"></span>\n" +
+    "                        <span class=\"fa fa-fw fa-caret-down\" ng-show=\"person.show\"></span>\n" +
+    "                        {{person.firstname}} {{person.lastname}}\n" +
+    "                    </a>\n" +
+    "                    <span ng-show=\"person.rank.length > 0\">\n" +
+    "                        <small>{{person.rank}}</small>\n" +
+    "                    </span>\n" +
+    "                </h4>\n" +
+    "            </td>\n" +
+    "            <td>\n" +
+    "                <h4 ng-hide=\"person.show\">\n" +
+    "                    <small>{{person.title}}</small>\n" +
+    "                </h4>\n" +
+    "                <div class=\"form-group\" ng-show=\"person.show\">\n" +
     "                    <label for=\"{{person.id}}_title\">Title</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{person.title}}\" maxlength=\"150\" ng-model=\"person.title\" required\n" +
     "                           id=\"{{person.id}}_title\">\n" +
     "                </div>\n" +
-    "                <div class=\"col-md-2 form-group\">\n" +
+    "                <div class=\"form-group\" ng-show=\"person.show\">\n" +
     "                    <label for=\"{{person.id}}_rank\">Rank</label>\n" +
     "                    <select class=\"form-control\" id=\"{{person.id}}_rank\" ng-model=\"person.rank\"\n" +
     "                            ng-options=\"rank for rank in ranks\">\n" +
     "                    </select>\n" +
     "                </div>\n" +
-    "                <div class=\"col-md-6 form-group\">\n" +
+    "                <div ng-show=\"person.show\">\n" +
+    "                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"updatePerson(person)\">\n" +
+    "                        Update information\n" +
+    "                    </button>\n" +
+    "                </div>\n" +
+    "            </td>\n" +
+    "            <td>\n" +
+    "                <h4 ng-hide=\"person.show\">\n" +
+    "                    <small>{{person.department}}</small>\n" +
+    "                </h4>\n" +
+    "                <h4 ng-hide=\"person.show\">\n" +
+    "                    <small>{{person.division}}</small>\n" +
+    "                </h4>\n" +
+    "                <div class=\"form-group\" ng-show=\"person.show\">\n" +
     "                    <label for=\"{{person.id}}_dept\">Department</label>\n" +
-    "                    <select class=\"form-control\" id=\"{{person.id}}_dept\" ng-model=\"person.department\"\n" +
-    "                            ng-options=\"dept for dept in departments\">\n" +
+    "                    <select class=\"form-control\" id=\"{{person.id}}_dept\" ng-model=\"person.selDept\"\n" +
+    "                            ng-options=\"dept.name for dept in Directory.departments\">\n" +
     "                    </select>\n" +
     "                </div>\n" +
-    "                <div class=\"col-md-3 form-group\">\n" +
-    "                    <label for=\"{{person.id}}_email\">Email</label>\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{person.email}}\" maxlength=\"1024\" ng-model=\"person.email\" required\n" +
-    "                           id=\"{{person.id}}_email\">\n" +
+    "                <div class=\"form-group\" ng-show=\"person.show\">\n" +
+    "                    <label for=\"{{person.id}}_divis\">Division</label>\n" +
+    "                    <select class=\"form-control\" id=\"{{person.id}}_divis\" ng-model=\"person.selDiv\"\n" +
+    "                            ng-options=\"div.name for div in Directory.divisions\">\n" +
+    "                    </select>\n" +
     "                </div>\n" +
-    "                <div class=\"col-md-3 form-group\">\n" +
-    "                    <label for=\"{{person.id}}_phone\">Phone</label>\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{person.phone}}\" maxlength=\"8\" ng-model=\"person.phone\" required\n" +
-    "                           id=\"{{person.id}}_phone\">\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-3 form-group\">\n" +
-    "                    <label for=\"{{person.id}}_fax\">Fax</label>\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{person.fax}}\" maxlength=\"8\" ng-model=\"person.fax\"\n" +
-    "                           id=\"{{person.id}}_fax\">\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-3 form-group\">\n" +
-    "                    <label for=\"{{person.id}}_div\">Division</label>\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{person.division}}\" maxlength=\"150\" ng-model=\"person.division\"\n" +
-    "                           id=\"{{person.id}}_div\">\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-6 text-center\">\n" +
-    "                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"updatePerson(person)\">Update information</button>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-6 text-center\">\n" +
+    "                <div ng-show=\"person.show\">\n" +
     "                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deletePerson(person)\">\n" +
     "                        Delete {{person.firstname}} {{person.lastname}} record\n" +
     "                    </button>\n" +
     "                </div>\n" +
-    "                <div class=\"col-md-12\">\n" +
-    "                    <h5>LibGuide Subjects</h5>\n" +
-    "                    <dd>\n" +
-    "                        <ul class=\"list-unstyled\">\n" +
-    "                            <li  ng-repeat=\"subject in person.subjects\">\n" +
-    "                                <button type=\"button\" class=\"btn btn-success\" ng-click=\"deleteSubject(person, subject.id, $index)\">\n" +
-    "                                    Delete\n" +
-    "                                </button>\n" +
-    "                                <a href=\"{{subject.link}}\">{{subject.subject}}</a>\n" +
-    "                            </li>\n" +
-    "                        </ul>\n" +
-    "                        <form class=\"form-inline\">\n" +
+    "            </td>\n" +
+    "            <td>\n" +
+    "                <div ng-hide=\"person.show\">\n" +
+    "                    <span class=\"fa fa-fw fa-envelope\"></span><small>{{person.email}}</small>\n" +
+    "                </div>\n" +
+    "                <div ng-hide=\"person.show\">\n" +
+    "                    <span class=\"fa fa-fw fa-phone\"></span><small>{{person.phone}}</small>\n" +
+    "                </div>\n" +
+    "                <div ng-hide=\"person.show\">\n" +
+    "                    <span class=\"fa fa-fw fa-fax\"></span><small>{{person.fax}}</small>\n" +
+    "                </div>\n" +
+    "                <div class=\"form-group\" ng-show=\"person.show\">\n" +
+    "                    <label for=\"{{person.id}}_email\">Email</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{person.email}}\" maxlength=\"1024\" ng-model=\"person.email\" required\n" +
+    "                           id=\"{{person.id}}_email\">\n" +
+    "                </div>\n" +
+    "                <div class=\"form-group\" ng-show=\"person.show\">\n" +
+    "                    <label for=\"{{person.id}}_phone\">Phone</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{person.phone}}\" maxlength=\"8\" ng-model=\"person.phone\" required\n" +
+    "                           id=\"{{person.id}}_phone\">\n" +
+    "                </div>\n" +
+    "                <div class=\"form-group\" ng-show=\"person.show\">\n" +
+    "                    <label for=\"{{person.id}}_fax\">Fax</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{person.fax}}\" maxlength=\"8\" ng-model=\"person.fax\"\n" +
+    "                           id=\"{{person.id}}_fax\">\n" +
+    "                </div>\n" +
+    "            </td>\n" +
+    "            <td>\n" +
+    "                <div ng-repeat=\"subject in person.subjects\" ng-hide=\"person.show\">\n" +
+    "                    <a href=\"{{subject.link}}\">{{subject.subject}}</a>\n" +
+    "                </div>\n" +
+    "                <div class=\"form-group\" ng-show=\"person.show\">\n" +
+    "                    <label for=\"{{person.id}}_subj\">Subjects</label>\n" +
+    "                    <div class=\"row\" id=\"{{person.id}}_subj\">\n" +
+    "                        <div class=\"col-md-12\" ng-repeat=\"subject in person.subjects\">\n" +
+    "                            <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteSubject(person, subject, $index)\">\n" +
+    "                                <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                            </button>\n" +
+    "                            <a href=\"{{subject.link}}\">{{subject.subject}}</a>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"col-md-9\">\n" +
     "                            <select class=\"form-control\" ng-model=\"person.selSubj\" ng-options=\"sub.subject for sub in Directory.subjects\">\n" +
     "                            </select>\n" +
-    "                            <button type=\"button\" class=\"btn btn-danger\" ng-click=\"addSubject(person)\">Assign Subject</button>\n" +
-    "                            <p>{{person.subjResponse}}</p>\n" +
-    "                        </form>\n" +
-    "                    </dd>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"col-md-3\">\n" +
+    "                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"addSubject(person)\">\n" +
+    "                                <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "                            </button>\n" +
+    "                        </div>\n" +
+    "                        <p>{{person.subjResponse}}</p>\n" +
+    "                    </div>\n" +
     "                </div>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-9\" ng-show=\"person.show && hasAccess == 0\">\n" +
-    "                <dt>Title</dt><dd>{{person.title}}</dd>\n" +
-    "                <dt ng-show=\"person.rank.length > 0\">Rank</dt>  <dd>{{person.rank}}</dd>\n" +
-    "                <dt>Departent</dt>  <dd>{{person.department}}</dd>\n" +
-    "                <dt ng-show=\"person.division.length > 0\">Division</dt>  <dd>{{person.division}}</dd>\n" +
-    "                <dt>Email</dt>  <dd>{{person.email}}</dd>\n" +
-    "                <dt>Phone</dt>  <dd>{{person.phone}}</dd>\n" +
-    "                <dt ng-show=\"person.fax.length > 0\">Fax</dt>  <dd>{{person.fax}}</dd>\n" +
-    "                <dt ng-show=\"person.subjects.length > 0\">LibGuide Subjects</dt>\n" +
-    "                <dd>\n" +
-    "                    <ul class=\"list-inline\">\n" +
-    "                        <li ng-repeat=\"subject in person.subjects\">\n" +
-    "                            <a href=\"{{subject.link}}\">{{subject.subject}}</a>\n" +
-    "                        </li>\n" +
-    "                    </ul>\n" +
-    "                </dd>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "    </div>\n" +
+    "            </td>\n" +
+    "        </tr>\n" +
+    "        </tbody>\n" +
+    "    </table>\n" +
     "</div>\n" +
+    "\n" +
     "<div class=\"text-center\">\n" +
-    "    <pagination total-items=\"filteredDB.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
-    "                boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredDB.length > perPage\"></pagination>\n" +
+    "    <pagination total-items=\"filteredList.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
+    "                boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredList.length > perPage\"></pagination>\n" +
     "</div>\n" +
-    "\n" +
-    "<div ng-show=\"hasAccess\" style=\"background-color:#f9f9f9;\">\n" +
+    "");
+}]);
+
+angular.module("staffDirectory/staffDirectorySubjects.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("staffDirectory/staffDirectorySubjects.tpl.html",
+    "<h3>Manage Subjects</h3>\n" +
+    "<div class=\"row\">\n" +
     "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"firstName\">Firts Name</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"First Name\" maxlength=\"25\"\n" +
-    "                   ng-model=\"formData.first\" id=\"firstName\" required>\n" +
+    "        <div class=\"col-md-5\">\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Subject Name\" ng-model=\"newSubj.subject\"\n" +
+    "                   maxlength=\"255\">\n" +
     "        </div>\n" +
-    "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"lastName\">Last Name</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Last Name\" maxlength=\"25\"\n" +
-    "                   ng-model=\"formData.last\" id=\"lastName\" required>\n" +
+    "        <div class=\"col-md-5\">\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"http://guides.lib.ua.edu/example\" ng-model=\"newSubj.link\"\n" +
+    "                   maxlength=\"1024\">\n" +
     "        </div>\n" +
-    "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"email\">Email</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Email\" maxlength=\"255\"\n" +
-    "                   ng-model=\"formData.email\" id=\"email\" required>\n" +
+    "        <div class=\"col-md-2\">\n" +
+    "            <button type=\"button\" class=\"btn btn-success\" ng-click=\"addSubject()\" ng-disabled=\"newSubj.subject.length == 0\">\n" +
+    "                <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "            </button>\n" +
     "        </div>\n" +
-    "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"title\">Title</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Title\" maxlength=\"150\"\n" +
-    "                   ng-model=\"formData.title\" id=\"title\" required>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-2 form-group\">\n" +
-    "            <label for=\"rank\">Rank</label>\n" +
-    "            <select class=\"form-control\" ng-model=\"formData.rank\" ng-options=\"rank for rank in ranks\" id=\"rank\">\n" +
-    "            </select>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-4 form-group\">\n" +
-    "            <label for=\"dept\">Department</label>\n" +
-    "            <select class=\"form-control\" ng-model=\"formData.dept\" ng-options=\"dept for dept in departments\" id=\"dept\">\n" +
-    "            </select>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-2 form-group\">\n" +
-    "            <label for=\"phone\">Phone</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Phone\" maxlength=\"8\"\n" +
-    "                   ng-model=\"formData.phone\" id=\"phone\" required>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-2 form-group\">\n" +
-    "            <label for=\"fax\">Fax</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Fax\" maxlength=\"8\" ng-model=\"formData.fax\" id=\"fax\">\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-2 form-group text-right\">\n" +
-    "            <label for=\"addButton\">&nbsp</label><br>\n" +
-    "            <button type=\"submit\" class=\"btn btn-success\" ng-click=\"addPerson()\" id=\"addButton\">Create New Record</button>\n" +
-    "        </div>\n" +
+    "        {{subResponse}}\n" +
     "    </div>\n" +
-    "    <p ng-model=\"formResponse\">{{formResponse}}</p>\n" +
+    "    <table class=\"table table-hover\">\n" +
+    "        <thead>\n" +
+    "        <tr>\n" +
+    "            <th style=\"width:41.6%;\">Subject</th>\n" +
+    "            <th style=\"width:41.6%;\">Subject Link</th>\n" +
+    "            <th style=\"width:120px;\">Action</th>\n" +
+    "        </tr>\n" +
+    "        </thead>\n" +
+    "        <tbody>\n" +
+    "        <tr ng-repeat=\"subject in Directory.subjects\" ng-click=\"expandSubject(subject)\">\n" +
+    "            <td>\n" +
+    "                <span ng-hide=\"subject.show\">{{subject.subject}}</span>\n" +
+    "                <span ng-show=\"subject.show\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Subject Name\" ng-model=\"subject.subject\"\n" +
+    "                           maxlength=\"255\">\n" +
+    "                </span>\n" +
+    "            </td>\n" +
+    "            <td>\n" +
+    "                <span ng-hide=\"subject.show\"><a href=\"{{subject.link}}\">{{subject.link}}</a></span>\n" +
+    "                <span ng-show=\"subject.show\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Subject Link\" ng-model=\"subject.link\"\n" +
+    "                           maxlength=\"1024\">\n" +
+    "                </span>\n" +
+    "            </td>\n" +
+    "            <td>\n" +
+    "                <div ng-show=\"subject.show\">\n" +
+    "                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"editSubject(subject)\" ng-disabled=\"subject.subject.length == 0\">\n" +
+    "                        <span class=\"fa fa-fw fa-edit\"></span>\n" +
+    "                    </button>\n" +
+    "                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteSubject(subject)\">\n" +
+    "                        <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                    </button>\n" +
+    "                </div>\n" +
+    "            </td>\n" +
+    "        </tr>\n" +
+    "        </tbody>\n" +
+    "    </table>\n" +
     "</div>\n" +
-    "\n" +
-    "\n" +
     "");
 }]);
 
@@ -41948,7 +42288,7 @@ angular.module('common.manage', [])
     .factory('swFactory', ['$http', 'SOFTWARE_URL', function swFactory($http, url){
         return {
             getData: function(){
-                return $http({method: 'GET', url: url + "api/all", params: {}})
+                return $http({method: 'GET', url: url + "api/all/backend", params: {}})
             },
             postData: function(params, data){
                 params = angular.isDefined(params) ? params : {};
@@ -42965,7 +43305,7 @@ angular.module('manage.manageNews', ['ngFileUpload'])
     })
 
     //from http://codepen.io/paulbhartzog/pen/Ekztl?editors=101
-    .value('uiTinymceConfig', {})
+    .value('uiTinymceConfig', {plugins: 'code textcolor link image spellchecker'})
     .directive('uiTinymce', ['uiTinymceConfig', function(uiTinymceConfig) {
         uiTinymceConfig = uiTinymceConfig || {};
         var generatedIds = 0;
@@ -43304,11 +43644,18 @@ angular.module('manage.manageOneSearch', [])
             $scope.addRec = {};
             $scope.addRec.keyword = "";
             $scope.addRec.link = "";
-            $scope.addRec.title = "";
+            $scope.addRec.description = "";
             $scope.response = "";
             $scope.filterKeyword = '';
             $scope.filterLink = '';
             $scope.filterLinkTitle = '';
+            $scope.expanded = -1;
+
+            $scope.sortModes = [
+                {by:'keyword', reverse:false},
+                {by:'description', reverse:false},
+                {by:'link', reverse:false}
+            ];
 
             tokenFactory("CSRF-libOneSearch");
 
@@ -43321,10 +43668,20 @@ angular.module('manage.manageOneSearch', [])
                     console.log(data);
                 });
 
+            $scope.expand = function(rec){
+                $scope.expanded = rec.id;
+            };
+
+            $scope.sortBy = function(by){
+                if ($scope.sortMode === by)
+                    $scope.sortModes[by].reverse = !$scope.sortModes[by].reverse;
+                else
+                    $scope.sortMode = by;
+            };
+
             $scope.addRecommendation = function(){
-                if ( ($scope.addRec.keyword.length > 0) && ($scope.addRec.link.length > 0) && ($scope.addRec.title.length > 0) )
-                {
-                    osFactory.postData({addRec : 1}, $scope.addRec)
+                if ( ($scope.addRec.keyword.length > 0) && ($scope.addRec.link.length > 0) && ($scope.addRec.description.length > 0) ){
+                    osFactory.postData({action : 1}, $scope.addRec)
                         .success(function(data, status, headers, config) {
                             console.dir(data);
                             if ((typeof data === 'object') && (data !== null)){
@@ -43333,7 +43690,7 @@ angular.module('manage.manageOneSearch', [])
                                 newRec.linkid = data.lid;
                                 newRec.keyword = $scope.addRec.keyword;
                                 newRec.link = $scope.addRec.link;
-                                newRec.description = $scope.addRec.title;
+                                newRec.description = $scope.addRec.description;
                                 $scope.recList.RecList.push(newRec);
                                 $scope.response = data.text;
                             } else
@@ -43342,22 +43699,34 @@ angular.module('manage.manageOneSearch', [])
                         .error(function(data, status, headers, config) {
                             $scope.response = "Error: Could not add recommendation link! " + data;
                         });
-                }
+                } else
+                    alert("Please fill out all required fields!");
             };
             $scope.deleteRec = function(rec, index){
                 if (confirm("Are you sure you want to delete " + rec.description + " link?")){
-                    osFactory.postData({delRec : 1}, rec)
+                    osFactory.postData({action : 2}, rec)
                         .success(function(data, status, headers, config) {
                             $scope.response = data;
                             $scope.recList.RecList.splice(index, 1);
+                            $scope.expanded = -1;
                         })
                         .error(function(data, status, headers, config) {
                             $scope.response = "Error: Could not delete recommendation! " + data;
                         });
                 }
             };
+            $scope.updateRec = function(rec){
+                osFactory.postData({action : 3}, rec)
+                    .success(function(data, status, headers, config) {
+                        $scope.response = data;
+                        $scope.expanded = -1;
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.response = "Error: Could not update recommendation! " + data;
+                    });
+            };
         }])
-    .directive('recommendeLinksList', function() {
+    .directive('recommendedLinksList', function() {
         return {
             restrict: 'AC',
             scope: {},
@@ -43385,6 +43754,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                         data.software[i].class = "";
                         data.software[i].selCat = data.categories[0];
                         data.software[i].newVer = {};
+                        data.software[i].newVer.version = "";
                         data.software[i].newVer.selOS = $scope.os[0];
                         for (var j = 0; j < data.software[i].versions.length; j++){
                             data.software[i].versions[j].newLoc = {};
@@ -43394,6 +43764,9 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                                 data.software[i].versions[j].newLoc.devices[k] = false;
                         }
                         data.software[i].newLink = {};
+                        data.software[i].newLink.description = "";
+                        data.software[i].newLink.title = "";
+                        data.software[i].newLink.url = "";
                     }
                     $scope.newSW.selCat = data.categories[0];
                     $scope.SWList = data;
@@ -43447,8 +43820,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             $scope.descrFilter = '';
             $scope.sortMode = 0;
             $scope.sortModes = [
-                {by:'title', reverse:false},
-                {by:'location', reverse:false}
+                {by:'title', reverse:false}
             ];
             $scope.sortButton = $scope.sortMode;
             $scope.mOver = 0;
@@ -43459,8 +43831,12 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             $scope.newSW.categories = [];
             $scope.newSW.newVer = {};
             $scope.newSW.newVer.selOS = $scope.os[0];
+            $scope.newSW.newVer.version = "";
             $scope.newSW.newLink = {};
-            $scope.newSW.modules = '';
+            $scope.newSW.newLink.description = "";
+            $scope.newSW.newLink.title = "";
+            $scope.newSW.newLink.url = "";
+            $scope.newSW.modules = "";
 
             $scope.currentPage = 1;
             $scope.maxPageSize = 10;
@@ -43485,6 +43861,39 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                     $scope.sortModes[by].reverse = !$scope.sortModes[by].reverse;
                 else
                     $scope.sortMode = by;
+            };
+
+            $scope.publishSW = function(sw){
+                swFactory.postData({action : 10}, sw)
+                    .success(function(data, status, headers, config) {
+                        if (data == 1){
+                            $scope.SWList.software[$scope.SWList.software.indexOf(sw)].status = 1;
+                            $scope.formResponse = "Software has been published.";
+                        } else {
+                            $scope.formResponse = "Error: Can not publish software! " + data;
+                        }
+                        console.log(data);
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.formResponse = "Error: Could not publish software! " + data;
+                        console.log(data);
+                    });
+            };
+            $scope.unpublishSW = function(sw){
+                swFactory.postData({action : 11}, sw)
+                    .success(function(data, status, headers, config) {
+                        if (data == 1){
+                            $scope.SWList.software[$scope.SWList.software.indexOf(sw)].status = 0;
+                            $scope.formResponse = "Software has been unpublished.";
+                        } else {
+                            $scope.formResponse = "Error: Can not publish software! " + data;
+                        }
+                        console.log(data);
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.formResponse = "Error: Could not publish software! " + data;
+                        console.log(data);
+                    });
             };
 
             $scope.deleteSW = function(sw){
@@ -43588,6 +43997,8 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                             newSW.versions = angular.copy(response.data.versions);
                             newSW.links = angular.copy(response.data.links);
                             newSW.categories = angular.copy(response.data.categories);
+                            newSW.status = 0;
+                            newSW.icon = response.data.icon;
                             newSW.show = false;
                             newSW.class = "";
                             for (var i = 0; i < newSW.versions.length; i++){
@@ -43600,7 +44011,11 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                             newSW.selCat = response.data.categories[0];
                             newSW.newVer = {};
                             newSW.newVer.selOS = $scope.os[0];
+                            newSW.newVer.version = "";
                             newSW.newLink = {};
+                            newSW.newLink.description = "";
+                            newSW.newLink.title = "";
+                            newSW.newLink.url = "";
                             $scope.SWList.software.push(newSW);
                             $scope.newSW.formResponse = "Software has been added.";
                         } else {
@@ -44158,50 +44573,27 @@ angular.module('manage.staffDirectory', [])
         "Asso. Prof.",
         "Asst. Prof."
     ])
-    .constant('STAFF_DIR_DEPTS', [
-        "Acquisitions",
-        "Annex Services",
-        "Area Computing Services",
-        "Business Library",
-        "Business Office",
-        "Cataloging & Metadata Services",
-        "Collection Management",
-        "Digital Humanities Center",
-        "Digital Services",
-        "Education Library",
-        "Electronic Resources",
-        "Gorgas Information Services",
-        "Gorgas Library, Circulation Department",
-        "Government Documents",
-        "Health Sciences Library",
-        "ILS & E-Resources Management",
-        "Interlibrary Loan",
-        "Library Administration",
-        "Office of Library Technology",
-        "Sanford Media Center",
-        "School of Social Work",
-        "Science and Engineering Library",
-        "Special Collections",
-        "Web Infrastructure & Application Development",
-        "Web Services"
-    ])
 
-    .controller('staffDirCtrl', ['$scope', '$window', 'tokenFactory', 'sdFactory', 'STAFF_DIR_RANKS', 'STAFF_DIR_DEPTS', 'STAFF_DIR_URL',
-        function staffDirCtrl($scope, $window, tokenFactory, sdFactory, ranks, departments, appUrl){
-            $scope.sortMode = 'lastname';
-            $scope.lastNameFilter = '';
-            $scope.firstNameFilter = '';
-            $scope.titleFilter = '';
-            $scope.deptFilter = '';
-            $scope.sortButton = 'last';
+    .controller('staffDirCtrl', ['$scope', 'tokenFactory', 'sdFactory', 'STAFF_DIR_URL',
+        function staffDirCtrl($scope, tokenFactory, sdFactory, appUrl){
             $scope.Directory = {};
-            $scope.hasAccess = $window.isAdmin;
-            $scope.ranks = ranks;
-            $scope.departments = departments;
-            $scope.mOver = 0;
-            $scope.currentPage = 1;
-            $scope.maxPageSize = 10;
-            $scope.perPage = 15;
+            $scope.newPerson = {};
+            $scope.newDept = {};
+
+            $scope.tabs = [
+                { name: 'Directory',
+                    number: 0,
+                    active: true
+                },
+                { name: 'Subjects',
+                    number: 1,
+                    active: false
+                },
+                { name: 'Departments/Locations',
+                    number: 2,
+                    active: false
+                }
+            ];
 
             tokenFactory("CSRF-libStaffDir");
 
@@ -44211,155 +44603,42 @@ angular.module('manage.staffDirectory', [])
                     $scope.Directory = data;
                     for (var i = 0; i < $scope.Directory.list.length; i++){
                         $scope.Directory.list[i].selSubj = $scope.Directory.subjects[0];
+                        for (var j = 0; j < $scope.Directory.departments.length; j++)
+                            if ($scope.Directory.departments[j].depid == $scope.Directory.list[i].dept){
+                                $scope.Directory.list[i].selDept = $scope.Directory.departments[j];
+                                break;
+                            }
+                        for (var j = 0; j < $scope.Directory.divisions.length; j++)
+                            if ($scope.Directory.divisions[j].divid == $scope.Directory.list[i].divis){
+                                $scope.Directory.list[i].selDiv = $scope.Directory.divisions[j];
+                                break;
+                            }
                         $scope.Directory.list[i].class = "";
+                        $scope.Directory.list[i].show = false;
                         $scope.Directory.list[i].image = appUrl + "staffImages/" + $scope.Directory.list[i].id + ".jpg";
                     }
+                    $scope.newPerson.selSubj = $scope.Directory.subjects[0];
+                    for (var i = 0; i < $scope.Directory.subjects.length; i++)
+                        $scope.Directory.subjects[i].show = false;
+                    $scope.newPerson.selDept = $scope.Directory.departments[0];
+                    for (var i = 0; i < $scope.Directory.departments.length; i++){
+                        $scope.Directory.departments[i].show = false;
+                        for (var j = 0; j < $scope.Directory.libraries.length; j++)
+                            if ($scope.Directory.libraries[j].lid == $scope.Directory.departments[i].library){
+                                $scope.Directory.departments[i].selLib = $scope.Directory.libraries[j];
+                            }
+                    }
+                    $scope.newPerson.selDiv = $scope.Directory.divisions[0];
+                    for (var i = 0; i < $scope.Directory.libraries.length; i++)
+                        $scope.Directory.libraries[i].show = false;
+                    for (var i = 0; i < $scope.Directory.divisions.length; i++)
+                        $scope.Directory.divisions[i].show = false;
+                    $scope.newDept.selLib = $scope.Directory.libraries[0];
                 })
                 .error(function(data, status, headers, config) {
                     console.log(data);
                 });
 
-            $scope.togglePerson = function(person){
-                $scope.Directory.list[$scope.Directory.list.indexOf(person)].show =
-                    !$scope.Directory.list[$scope.Directory.list.indexOf(person)].show;
-                $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjResponse = "";
-            };
-
-            $scope.setOver = function(person){
-                $scope.mOver = person.id;
-            };
-
-            $scope.resetNewPersonForm = function(){
-                $scope.formData.first = "";
-                $scope.formData.last = "";
-                $scope.formData.email = "";
-                $scope.formData.phone = "";
-                $scope.formData.fax = "";
-            };
-
-            $scope.deletePerson = function(person){
-                if (confirm("Delete " + person.lastname + ", " + person.firstname  + " record permanently?") == true){
-                    sdFactory.postData({delete : 1}, person)
-                        .success(function(data, status, headers, config) {
-                            $scope.formResponse = data;
-                            $scope.Directory.list.splice($scope.Directory.list.indexOf(person), 1);
-                        })
-                        .error(function(data, status, headers, config) {
-                            $scope.formResponse = "Error: Could not delete person data! " + data;
-                        });
-                }
-            };
-            $scope.updatePerson = function(person){
-                sdFactory.postData({update : person.id}, person)
-                    .success(function(data, status, headers, config) {
-                        $scope.formResponse = "Person has been updated!";
-                    })
-                    .error(function(data, status, headers, config) {
-                        $scope.formResponse = "Error: Person update failed! " + data;
-                    });
-            };
-            $scope.deleteSubject = function(person, subjectID, index){
-                if (confirm("Delete this subject from " + person.firstname + " " + person.lastname + "?") == true){
-                    sdFactory.postData({deleteSubject : subjectID}, {})
-                        .success(function(data, status, headers, config) {
-                            $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjects.splice(index, 1);
-                            $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjResponse = "Subject Deleted!";
-                            console.log(data);
-                        })
-                        .error(function(data, status, headers, config) {
-                            $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjResponse =
-                                "Error: Could not delete subject! " + data;
-                        });
-                }
-            };
-            $scope.addSubject = function(person){
-                sdFactory.postData({addSubject : 1}, person)
-                    .success(function(data, status, headers, config) {
-                        var newSubj = {};
-                        newSubj.id = person.selSubj.id;
-                        newSubj.subject = person.selSubj.subject;
-                        newSubj.link = person.selSubj.link;
-                        $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjects.push(newSubj);
-                        $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjResponse = "Subject Added!";
-                        console.log(data);
-                    })
-                    .error(function(data, status, headers, config) {
-                        $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjResponse =
-                            "Error: Could not add subject! " + data;
-                    });
-            };
-
-            $scope.formData = {};
-            $scope.formData.first = "";
-            $scope.formData.last = "";
-            $scope.formData.email = "";
-            $scope.formData.title = "";
-            $scope.formData.phone = "";
-            $scope.formData.fax = "";
-            $scope.formData.rank = ranks[0];
-            $scope.formData.dept = departments[0];
-            $scope.formResponse = '';
-
-            $scope.isValidEmailAddress = function(emailAddress) {
-                var pattern = new RegExp(/^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i);
-                return pattern.test(emailAddress);
-            };
-
-            $scope.addPerson = function() {
-                $scope.formResponse = '';
-                if ( $scope.formData.first.length > 0 )
-                {
-                    if ( $scope.formData.last.length > 0 )
-                    {
-                        if ( $scope.isValidEmailAddress( $scope.formData.email) )
-                        {
-                            if ( $scope.formData.title.length > 0 )
-                            {
-                                if ( $scope.formData.phone.length >= 7 )
-                                {
-                                    if ( $scope.formData.fax.length >= 7 )
-                                    {
-                                        sdFactory.postData({}, $scope.formData)
-                                            .success(function(data, status, headers, config) {
-                                                if ((typeof data === 'object') && (data !== null)){
-                                                    var createdUser = {};
-                                                    createdUser.id = data.id;
-                                                    createdUser.lastname = $scope.formData.last;
-                                                    createdUser.firstname = $scope.formData.first;
-                                                    createdUser.title = $scope.formData.title;
-                                                    createdUser.rank = $scope.formData.rank;
-                                                    createdUser.department = $scope.formData.dept;
-                                                    createdUser.division = "";
-                                                    createdUser.phone = $scope.formData.phone;
-                                                    createdUser.email = $scope.formData.email;
-                                                    createdUser.fax = $scope.formData.fax;
-                                                    createdUser.subjects = [];
-                                                    createdUser.show = false;
-                                                    createdUser.selSubj = $scope.Directory.subjects[0];
-                                                    createdUser.class = "";
-                                                    createdUser.image = appUrl + "staffImages/" + createdUser.id + ".jpg";
-                                                    $scope.Directory.list.push(createdUser);
-                                                    $scope.resetNewPersonForm();
-                                                    $scope.formResponse = "Person has been added!";
-                                                } else
-                                                    $scope.formResponse = "Error: Person could not be added! " + data;
-                                            })
-                                            .error(function(data, status, headers, config) {
-                                                $scope.formResponse = "Error: Person Creation failed! " + data;
-                                            });
-                                    } else
-                                        alert("Fax number is too short!");
-                                } else
-                                    alert("Phone number is too short!");
-                            } else
-                                alert("Title is too short!");
-                        } else
-                            alert("User email is invalid!");
-                    } else
-                        alert("Last Name is too short!");
-                } else
-                    alert("First Name is too short!");
-            };
         }])
     .directive('staffDirectoryList', function($animate) {
         return {
@@ -44387,12 +44666,438 @@ angular.module('manage.staffDirectory', [])
             templateUrl: 'staffDirectory/staffDirectory.tpl.html'
         };
     })
+    .controller('staffDirPeopleCtrl', ['$scope', 'sdFactory', 'STAFF_DIR_RANKS', 'STAFF_DIR_URL',
+        function staffDirPeopleCtrl($scope, sdFactory, ranks, appUrl){
+            $scope.lastNameFilter = '';
+            $scope.firstNameFilter = '';
+            $scope.titleFilter = '';
+            $scope.deptFilter = '';
+            $scope.ranks = ranks;
+
+            $scope.newPerson.first = "";
+            $scope.newPerson.last = "";
+            $scope.newPerson.email = "";
+            $scope.newPerson.title = "";
+            $scope.newPerson.phone = "";
+            $scope.newPerson.fax = "";
+            $scope.newPerson.rank = ranks[0];
+            $scope.formResponse = '';
+
+            $scope.currentPage = 1;
+            $scope.maxPageSize = 10;
+            $scope.perPage = 20;
+
+            $scope.sortModes = [
+                {by:'lastname', reverse:false},
+                {by:'title', reverse:false},
+                {by:'department', reverse:false}
+            ];
+            $scope.sortMode = $scope.sortModes[0];
+
+            $scope.togglePerson = function(person){
+                $scope.Directory.list[$scope.Directory.list.indexOf(person)].show =
+                    !$scope.Directory.list[$scope.Directory.list.indexOf(person)].show;
+                $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjResponse = "";
+            };
+
+            $scope.sortBy = function(by){
+                if ($scope.sortMode === by)
+                    $scope.sortModes[by].reverse = !$scope.sortModes[by].reverse;
+                else
+                    $scope.sortMode = by;
+            };
+
+            $scope.deletePerson = function(person){
+                if (confirm("Delete " + person.lastname + ", " + person.firstname  + " record permanently?") == true){
+                    sdFactory.postData({action : 1}, person)
+                        .success(function(data, status, headers, config) {
+                            $scope.formResponse = data;
+                            $scope.Directory.list.splice($scope.Directory.list.indexOf(person), 1);
+                        })
+                        .error(function(data, status, headers, config) {
+                            $scope.formResponse = "Error: Could not delete person data! " + data;
+                        });
+                }
+            };
+            $scope.updatePerson = function(person){
+                sdFactory.postData({action : 2}, person)
+                    .success(function(data, status, headers, config) {
+                        $scope.formResponse = "Person has been updated!";
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.formResponse = "Error: Person update failed! " + data;
+                    });
+            };
+            $scope.deleteSubject = function(person, subject, index){
+                if (confirm("Delete this subject from " + person.firstname + " " + person.lastname + "?") == true){
+                    sdFactory.postData({action : 4}, subject)
+                        .success(function(data, status, headers, config) {
+                            $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjects.splice(index, 1);
+                            $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjResponse = "Subject Deleted!";
+                            console.log(data);
+                        })
+                        .error(function(data, status, headers, config) {
+                            $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjResponse =
+                                "Error: Could not delete subject! " + data;
+                        });
+                }
+            };
+            $scope.addSubject = function(person){
+                sdFactory.postData({action : 5}, person)
+                    .success(function(data, status, headers, config) {
+                        var newSubj = {};
+                        newSubj.id = person.selSubj.id;
+                        newSubj.subject = person.selSubj.subject;
+                        newSubj.link = person.selSubj.link;
+                        $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjects.push(newSubj);
+                        $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjResponse = "Subject Added!";
+                        console.log(data);
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjResponse =
+                            "Error: Could not add subject! " + data;
+                    });
+            };
+
+            $scope.isValidEmailAddress = function(emailAddress) {
+                var pattern = new RegExp(/^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i);
+                return pattern.test(emailAddress);
+            };
+
+            $scope.addPerson = function() {
+                $scope.formResponse = '';
+                if ( $scope.newPerson.first.length > 0 )
+                {
+                    if ( $scope.newPerson.last.length > 0 )
+                    {
+                        if ( $scope.isValidEmailAddress( $scope.newPerson.email) )
+                        {
+                            if ( $scope.newPerson.title.length > 0 )
+                            {
+                                if ( $scope.newPerson.phone.length >= 7 )
+                                {
+                                    if ( $scope.newPerson.fax.length >= 7 ){
+                                        sdFactory.postData({action : 3}, $scope.newPerson)
+                                            .success(function(data, status, headers, config) {
+                                                if ((typeof data === 'object') && (data !== null)){
+                                                    var createdUser = {};
+                                                    createdUser.id = data.id;
+                                                    createdUser.lastname = $scope.newPerson.last;
+                                                    createdUser.firstname = $scope.newPerson.first;
+                                                    createdUser.title = $scope.newPerson.title;
+                                                    createdUser.rank = $scope.newPerson.rank;
+                                                    createdUser.department = $scope.newPerson.selDept.name;
+                                                    createdUser.division = $scope.newPerson.selDiv.name;
+                                                    createdUser.phone = $scope.newPerson.phone;
+                                                    createdUser.email = $scope.newPerson.email;
+                                                    createdUser.fax = $scope.newPerson.fax;
+                                                    createdUser.subjects = [];
+                                                    createdUser.show = false;
+                                                    createdUser.selSubj = $scope.Directory.subjects[0];
+                                                    for (var j = 0; j < $scope.Directory.departments.length; j++)
+                                                        if ($scope.Directory.departments[j].depid == $scope.newPerson.selDept.depid){
+                                                            createdUser.selDept = $scope.Directory.departments[j];
+                                                            break;
+                                                        }
+                                                    for (var j = 0; j < $scope.Directory.divisions.length; j++)
+                                                        if ($scope.Directory.divisions[j].divid == $scope.newPerson.selDiv.divid){
+                                                            createdUser.selDiv = $scope.Directory.divisions[j];
+                                                            break;
+                                                        }
+                                                    createdUser.class = "";
+                                                    createdUser.image = appUrl + "staffImages/" + createdUser.id + ".jpg";
+                                                    $scope.Directory.list.push(createdUser);
+                                                    $scope.resetNewPersonForm();
+                                                    $scope.formResponse = "Person has been added!";
+                                                } else
+                                                    $scope.formResponse = "Error: Person could not be added! " + data;
+                                            })
+                                            .error(function(data, status, headers, config) {
+                                                $scope.formResponse = "Error: Person Creation failed! " + data;
+                                            });
+                                    } else
+                                        alert("Fax number is too short!");
+                                } else
+                                    alert("Phone number is too short!");
+                            } else
+                                alert("Title is too short!");
+                        } else
+                            alert("User email is invalid!");
+                    } else
+                        alert("Last Name is too short!");
+                } else
+                    alert("First Name is too short!");
+            };
+        }])
+    .directive('manageSdPeople', function() {
+        return {
+            restrict: 'AC',
+            controller: 'staffDirPeopleCtrl',
+            link: function(scope, elm, attrs){
+            },
+            templateUrl: 'staffDirectory/staffDirectoryPeople.tpl.html'
+        };
+    })
     .filter('startFrom', function() {
         return function(input, start) {
             start = +start; //parse to int
             return input.slice(start);
         }
     })
+
+    .controller('staffDirSubjectsCtrl', ['$scope', 'sdFactory',
+        function staffDirSubjectsCtrl($scope, sdFactory){
+            $scope.newSubj = {};
+            $scope.newSubj.subject = "";
+            $scope.newSubj.link = "";
+            $scope.subResponse = '';
+
+            $scope.expandSubject = function(subject){
+                if (!$scope.Directory.subjects[$scope.Directory.subjects.indexOf(subject)].show)
+                    $scope.Directory.subjects[$scope.Directory.subjects.indexOf(subject)].show = true;
+            };
+
+            $scope.editSubject = function(subject){
+                sdFactory.postData({action : 6}, subject)
+                    .success(function(data, status, headers, config) {
+                        if (data == 1){
+                            $scope.Directory.subjects[$scope.Directory.subjects.indexOf(subject)].show = false;
+                        } else {
+                            $scope.subResponse = "Error: Can not save subject! " + data;
+                        }
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.subResponse = "Error: Could not save subject! " + data;
+                    });
+            };
+            $scope.deleteSubject = function(subject){
+                if (confirm("Delete "+ subject.subject + " subject?") == true){
+                    sdFactory.postData({action : 7}, subject)
+                        .success(function(data, status, headers, config) {
+                            if (data == 1){
+                                $scope.Directory.subjects.splice($scope.Directory.subjects.indexOf(subject), 1);
+                                $scope.subResponse = "Subject has been deleted!";
+                            } else {
+                                $scope.subResponse = "Error: Can not delete subject! " + data;
+                            }
+                        })
+                        .error(function(data, status, headers, config) {
+                            $scope.subResponse = "Error: Could not delete subject! " + data;
+                        });
+                }
+            };
+            $scope.addSubject = function(){
+                sdFactory.postData({action : 8}, $scope.newSubj)
+                    .success(function(data, status, headers, config) {
+                        if (typeof data == 'object' && data != null){
+                            var newSubject = {};
+                            newSubject.id = data.id;
+                            newSubject.subject = $scope.newSubj.subject;
+                            newSubject.show = false;
+                            $scope.Directory.subjects.push(newSubject);
+                            $scope.subResponse = "Subject has been added!";
+                        } else {
+                            $scope.subResponse = "Error: Can not add subject! " + data;
+                        }
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.subResponse = "Error: Could not add subject! " + data;
+                    });
+
+            };
+
+        }])
+    .directive('manageSdSubjects', function() {
+        return {
+            restrict: 'AC',
+            controller: 'staffDirSubjectsCtrl',
+            link: function(scope, elm, attrs){
+            },
+            templateUrl: 'staffDirectory/staffDirectorySubjects.tpl.html'
+        };
+    })
+
+    .controller('staffDirDepartmentsCtrl', ['$scope', 'sdFactory',
+        function staffDirDepartmentsCtrl($scope, sdFactory){
+            $scope.newDept.name = "";
+            $scope.newLoc = {};
+            $scope.newLoc.name = "";
+            $scope.newDiv = {};
+            $scope.newDiv.name = "";
+            $scope.depResponse = '';
+            $scope.libResponse = '';
+            $scope.divResponse = '';
+
+            $scope.expandDepartment = function(dept){
+                if (!$scope.Directory.departments[$scope.Directory.departments.indexOf(dept)].show)
+                    $scope.Directory.departments[$scope.Directory.departments.indexOf(dept)].show = true;
+            };
+            $scope.expandLibrary = function(lib){
+                if (!$scope.Directory.libraries[$scope.Directory.libraries.indexOf(lib)].show)
+                    $scope.Directory.libraries[$scope.Directory.libraries.indexOf(lib)].show = true;
+            };
+            $scope.expandDivision = function(division){
+                if (!$scope.Directory.divisions[$scope.Directory.divisions.indexOf(division)].show)
+                    $scope.Directory.divisions[$scope.Directory.divisions.indexOf(division)].show = true;
+            };
+
+            $scope.editDepartment = function(dept){
+                sdFactory.postData({action : 9}, dept)
+                    .success(function(data, status, headers, config) {
+                        if (data == 1){
+                            $scope.Directory.departments[$scope.Directory.departments.indexOf(dept)].show = false;
+                        } else {
+                            $scope.depResponse = "Error: Can not save department! " + data;
+                        }
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.depResponse = "Error: Could not save subject! " + data;
+                    });
+            };
+            $scope.deleteDepartment = function(dept){
+                if (confirm("Delete "+ dept.name + " department?") == true){
+                    sdFactory.postData({action : 10}, dept)
+                        .success(function(data, status, headers, config) {
+                            if (data == 1){
+                                $scope.Directory.departments.splice($scope.Directory.departments.indexOf(dept), 1);
+                                $scope.depResponse = "Department has been deleted!";
+                            } else {
+                                $scope.depResponse = "Error: Can not delete department! " + data;
+                            }
+                        })
+                        .error(function(data, status, headers, config) {
+                            $scope.depResponse = "Error: Could not delete department! " + data;
+                        });
+                }
+            };
+            $scope.addDepartment = function(){
+                sdFactory.postData({action : 11}, $scope.newDept)
+                    .success(function(data, status, headers, config) {
+                        if (typeof data == 'object' && data != null){
+                            var newDepartment = {};
+                            newDepartment.depid = data.id;
+                            newDepartment.name = $scope.newDept.name;
+                            newDepartment.library = $scope.newDept.selLib.lid;
+                            newDepartment.show = false;
+                            $scope.Directory.departments.push(newDepartment);
+                            $scope.depResponse = "Department has been added!";
+                        } else {
+                            $scope.depResponse = "Error: Can not add department! " + data;
+                        }
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.depResponse = "Error: Could not add department! " + data;
+                    });
+
+            };
+            $scope.editLibrary = function(lib){
+                sdFactory.postData({action : 12}, lib)
+                    .success(function(data, status, headers, config) {
+                        if (data == 1){
+                            $scope.Directory.libraries[$scope.Directory.libraries.indexOf(lib)].show = false;
+                        } else {
+                            $scope.libResponse = "Error: Can not update library! " + data;
+                        }
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.libResponse = "Error: Could not update library! " + data;
+                    });
+            };
+            $scope.deleteLibrary = function(lib){
+                if (confirm("Delete "+ lib.name + "?") == true){
+                    sdFactory.postData({action : 13}, lib)
+                        .success(function(data, status, headers, config) {
+                            if (data == 1){
+                                $scope.Directory.libraries.splice($scope.Directory.libraries.indexOf(lib), 1);
+                                $scope.libResponse = "Library has been deleted!";
+                            } else {
+                                $scope.libResponse = "Error: Can not delete library! " + data;
+                            }
+                        })
+                        .error(function(data, status, headers, config) {
+                            $scope.libResponse = "Error: Could not delete library! " + data;
+                        });
+                }
+            };
+            $scope.addLibrary = function(){
+                sdFactory.postData({action : 14}, $scope.newLoc)
+                    .success(function(data, status, headers, config) {
+                        if (typeof data == 'object' && data != null){
+                            var newLibrary = {};
+                            newLibrary.lid = data.id;
+                            newLibrary.name = $scope.newLoc.name;
+                            newLibrary.show = false;
+                            $scope.Directory.libraries.push(newLibrary);
+                            $scope.libResponse = "Library has been added!";
+                        } else {
+                            $scope.libResponse = "Error: Can not add library! " + data;
+                        }
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.libResponse = "Error: Could not add library! " + data;
+                    });
+
+            };
+            $scope.editDivision = function(division){
+                sdFactory.postData({action : 15}, division)
+                    .success(function(data, status, headers, config) {
+                        if (data == 1){
+                            $scope.Directory.divisions[$scope.Directory.divisions.indexOf(division)].show = false;
+                        } else {
+                            $scope.divResponse = "Error: Can not save division! " + data;
+                        }
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.divResponse = "Error: Could not save division! " + data;
+                    });
+            };
+            $scope.deleteDivision = function(division){
+                if (confirm("Delete "+ division.name + " division?") == true){
+                    sdFactory.postData({action : 16}, division)
+                        .success(function(data, status, headers, config) {
+                            if (data == 1){
+                                $scope.Directory.divisions.splice($scope.Directory.divisions.indexOf(division), 1);
+                                $scope.divResponse = "Division has been deleted!";
+                            } else {
+                                $scope.divResponse = "Error: Can not delete division! " + data;
+                            }
+                        })
+                        .error(function(data, status, headers, config) {
+                            $scope.divResponse = "Error: Could not delete division! " + data;
+                        });
+                }
+            };
+            $scope.addDivision = function(){
+                sdFactory.postData({action : 17}, $scope.newDiv)
+                    .success(function(data, status, headers, config) {
+                        if (typeof data == 'object' && data != null){
+                            var newDivision = {};
+                            newDivision.divid = data.id;
+                            newDivision.name = $scope.newDiv.name;
+                            newDivision.show = false;
+                            $scope.Directory.divisions.push(newDivision);
+                            $scope.divResponse = "Division has been added!";
+                        } else {
+                            $scope.divResponse = "Error: Can not add division! " + data;
+                        }
+                    })
+                    .error(function(data, status, headers, config) {
+                        $scope.divResponse = "Error: Could not add division! " + data;
+                    });
+
+            };
+
+        }])
+    .directive('manageSdDepartments', function() {
+        return {
+            restrict: 'AC',
+            controller: 'staffDirDepartmentsCtrl',
+            link: function(scope, elm, attrs){
+            },
+            templateUrl: 'staffDirectory/staffDirectoryDepartments.tpl.html'
+        };
+    })
+
 angular.module('manage.submittedForms', [])
     .controller('manageSubFormsCtrl', ['$scope', '$timeout', 'tokenFactory', 'formFactory',
         function manageSubFormsCtrl($scope, $timeout, tokenFactory, formFactory){

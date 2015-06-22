@@ -31,7 +31,7 @@
 //
 // There are four `html tags` you can use to create buttons: `<button>`, `<a>`, and `<input>`.
 // <br><mark>TODO:</mark> Elaborate on `<button>` use exceptions and define about `type` attribute is required for `<button>` and `<input>` buttons.
-// > Use `<button>` over `<a>` and `<input>` where ever possible. There are rare instances where `<a>` or `<input>` should be used.
+// > Use `<button>` or `<a>` over `<input>` where ever possible. Use '<a>' if a button is used to link to another location. There will likely never be a reason to use `<input>`.
 //
 // Markup: button-tags.hbs
 //
@@ -81,18 +81,3 @@
 // </p>
 //
 // Styleguide style.buttons.modifiers.sizes
-
-// Button Sizes
-// --------------------------------------------------
-
-.btn-lg {
-  // line-height: ensure even-numbered height of button next to large input
-  .button-size(@padding-large-vertical; @padding-large-horizontal; @font-size-large; @line-height-large; @border-radius-large);
-}
-.btn-sm {
-  // line-height: ensure proper height of button next to small input
-  .button-size(@padding-small-vertical; @padding-small-horizontal; @font-size-small; @line-height-small; @border-radius-small);
-}
-.btn-xs {
-  .button-size(@padding-xs-vertical; @padding-xs-horizontal; @font-size-small; @line-height-small; @border-radius-small);
-}

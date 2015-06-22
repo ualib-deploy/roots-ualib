@@ -16,6 +16,12 @@
 
   <div class="wrap page-row page-row-expanded">
     <div role="document">
+      <?php
+        $fields = get_fields();
+        if (is_array($fields['jumbotron_header'])){
+            get_template_part('templates/jumbotron-header');
+        }
+      ?>
       <div class="content container">
         <main class="main" role="main">
           <?php
