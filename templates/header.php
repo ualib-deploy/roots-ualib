@@ -76,7 +76,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                         <a href="#" class="dropdown-toggle icon-only" ng-click="mainNavbarCollapsed = false;">
                             <span class="fa fa-search"></span>
                         </a>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu onsearch-box">
                             <li>
                                 <div class="yamm-content" ng-controller="OneSearchCtrl">
                                     <form ng-submit="search()">

@@ -9413,27 +9413,6 @@ footer > .sub-footer {
 .gMapDirections {
   margin-top: 10px;
 }
-.smc-banner {
-  background: url("../img/smc-head.jpg") no-repeat center center;
-  -webkit-background-size: cover;
-  background-size: cover;
-  height: 350px;
-}
-.blue-banner {
-  color: #fff;
-}
-.blue-banner .jumbotron {
-  width: 100%;
-  height: 100%;
-  border-radius: 0;
-  background-color: rgba(24, 72, 102, 0.55);
-}
-.blue-banner .jumbotron h1,
-.blue-banner .jumbotron .h1 {
-  text-transform: uppercase;
-  text-shadow: 0 0 12px rgba(0, 0, 0, 0.9);
-  text-align: center;
-}
 /*# sourceMappingURL=/wp-content/themes/roots/assets/css/main.css.map */
 .bento-box-container .scrollfix {
   top: 0;
@@ -9468,13 +9447,23 @@ footer > .sub-footer {
   border-top: 1px solid #eee;
 }
 .bento-box-menu-container {
-  min-height: 71px;
+  height: 73px;
 }
 .bento-box-menu {
-  background-color: #f6f6f6;
+  background-color: #fff;
+  border-color: transparent;
+  -webkit-transition: all 0.2s linear;
+  -o-transition: all 0.2s linear;
+  transition: all 0.2s linear;
+}
+.bento-box-menu.scrollfix {
+  border-color: #eee;
+  -webkit-box-shadow: 0px 3px 5px 0px rgba(50, 50, 50, 0.21);
+  box-shadow: 0px 3px 5px 0px rgba(50, 50, 50, 0.21);
 }
 .bento-box-menu .nav > li > a {
-  padding: 15px;
+  padding-top: 15px;
+  padding-bottom: 15px;
   white-space: nowrap;
 }
 .bento-box-menu .nav > li > a:hover {
@@ -9491,12 +9480,9 @@ footer > .sub-footer {
 .bento-box-item {
   margin-bottom: 15px;
 }
-.resource-link-container + .bento-box-item {
-  margin-bottom: 0;
-}
 .resource-link-container {
   text-align: right;
-  margin: 15px 0;
+  margin: 15px 15px 15px 0;
 }
 .recommend {
   min-height: 30px;
@@ -9594,9 +9580,9 @@ footer > .sub-footer {
   margin: 0 auto;
 }
 /*# sourceMappingURL=/wp-content/themes/roots/assets/css/main.css.map */
-a[href^="http"]:not(.source-link):after,
-a[href^="https"]:not(.source-link):after {
-  content: none;
+.bento .onsearch-box.dropdown-menu {
+  background-color: transparent;
+  border-color: transparent;
 }
 .facet-group-container {
   max-height: 300px;

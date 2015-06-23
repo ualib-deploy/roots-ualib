@@ -37648,14 +37648,14 @@ angular.module('ualib.ui')
 angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("bento/bento.tpl.html",
     "<div class=\"bento-box-container\">\n" +
-    "    <div class=\"bento-box-menu-container\">\n" +
-    "        <div class=\"bento-box-menu\" ui-scrollfix=\"+0\">\n" +
+    "    <div class=\"bento-box-menu-container hidden-xs\">\n" +
+    "        <nav class=\"bento-box-menu navbar navbar-default navbar-static-top\" ui-scrollfix=\"+0\">\n" +
     "            <ul class=\"nav nav-justified\">\n" +
     "                <li ng-repeat=\"item in boxMenu\">\n" +
     "                    <a href=\"\" du-smooth-scroll=\"{{item.box}}\" ng-click=\"selectBox(item.box)\">{{item.title}}</a>\n" +
     "                </li>\n" +
     "            </ul>\n" +
-    "        </div>\n" +
+    "        </nav>\n" +
     "    </div>\n" +
     "    <div class=\"row\">\n" +
     "        <div class=\"col-md-4\">\n" +
@@ -37991,8 +37991,8 @@ angular.module('oneSearch', [
         limit: 100
     })
 
-    .value('duScrollOffset', 100)
-    .value('duScrollGreedy', true);
+    .value('duScrollOffset', 81)
+
 angular.module('oneSearch.bento', [])
 
     .config(['$routeProvider', function($routeProvider) {
@@ -38150,7 +38150,7 @@ angular.module('oneSearch.bento', [])
                                     self.boxes[type].results[name] = grouped[type];
 
                                     // set resource "more" link
-                                    self.boxes[type].resourceLinks[name] = link;
+                                    self.boxes[type].resourceLinks[name] = link[engine.id];
                                 }
                                 // update loading progress, setting engine as loaded for current box
                                 loadProgress(type, name);
@@ -38262,10 +38262,9 @@ angular.module('oneSearch.bento', [])
 
                             // Place engine results for the current box under an "items" object in the new local scope
                             engineScope.items = Bento.boxes[box]['results'][engine];
-                            engineScope.resourceLinks = Bento.boxes[box]['resourceLinks'][engine];
-                            engineScope.engineName = engine;
 
-                            //console.log(Bento.boxes[box]['results']);
+
+
                             if (engineScope.items && engineScope.items.length > 0){
                                 // Set isCollapsed boolean to true
                                 // For engines that have collapsible results (see /common/engines/ejournals/ejournals.tpl.html for example)
@@ -38273,7 +38272,8 @@ angular.module('oneSearch.bento', [])
 
                                 ///engineScope.limit = Bento.boxes[box].resultLimit;
                                 engineScope.engine = engine;
-
+                                engineScope.resourceLink = Bento.boxes[box]['resourceLinks'][engine];
+                                engineScope.boxName = titleElm.text();
                                 // When the engine's promise is ready, then load the engine's controller/template data applying
                                 // the new isolated scope.
                                 Bento.engines[engine].tpl.then(function(data){
@@ -38286,13 +38286,13 @@ angular.module('oneSearch.bento', [])
                                         $scope.box = Bento.boxes[box];
                                     }];
 
-                                    var controller = $controller(EngCtrl, {$scope: engineScope, Bento: Bento});
+                                    var controller = $controller(EngCtrl, {$scope: engineScope});
                                     elm.data('$ngControllerController', controller);
                                     elm.children().data('$ngControllerController', controller);
 
                                     // Wrap the template in an element that specifies ng-repeat over the "items" object (i.e., the results),
                                     // gives the generic classes for items in a bento box.
-                                    var template = angular.element('<div class="animate-repeat bento-box-item" ng-repeat="item in items | limitTo: box.resultLimit">'+data+'</div><div class="resource-link-container"><a class="btn btn-default btn-xs" ng-href="{{link}}" ng-repeat="link in resourceLinks">More results from {{engineName | ucfirst}}  <span class="fa fa-fw fa-external-link"></span></a></div>');
+                                    var template = angular.element('<div class="animate-repeat bento-box-item" ng-repeat="item in items | limitTo: box.resultLimit">'+data+'</div><div class="resource-link-container"><a class="btn btn-link btn-sm" ng-href="{{resourceLink}}">More results from {{engine | ucfirst}}  <span class="fa fa-fw fa-external-link"></span></a></div>');
 
                                     // Compile wrapped template with the isolated scope's context
                                     var html = $compile(template)(engineScope);
@@ -38820,7 +38820,42 @@ angular.module('engines.scout', [])
                 }
                 $scope.items = items;
 
+                //Preprocess resource link to include facet. This is injected in the EDS header to limit results to media type (this is not native to EDS API)
+                var box = angular.copy($scope.boxName);
+                var link = angular.copy($scope.resourceLink);
+
+                // Tokenize box name to camelCase for EDS inject script
+                box = box.replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, function(match, index) {
+                    if (+match === 0) return ""; // or if (/\s+/.test(match)) for white spaces
+                    return index == 0 ? match.toLowerCase() : match.toUpperCase();
+                });
+
+                if (link.indexOf('facet=') > 0){
+                    link = link.replace(/&facet=(.+)&?/, box);
+                }
+                else {
+                    link += '&facet=' + box;
+                }
+
+                $scope.resourceLink = angular.copy(link);
             }
+        })
+    }])
+angular.module('engines.subjectSpecialist', [])
+
+    .config(['oneSearchProvider', function(oneSearchProvider){
+        oneSearchProvider.engine('subjectSpecialist', {
+            id: 16,
+            priority: 2,
+            mediaTypes: {
+                path: 'displayLink',
+                types: {
+                    subjectSpecialist: ['www.lib.ua.edu', 'lib.ua.edu', 'apps.lib.ua.edu', 'brunolib.cba.ua.edu'],
+                    faq: 'ask.lib.ua.edu',
+                    libguides: 'guides.lib.ua.edu'
+                }
+            },
+            templateUrl: 'common/engines/google-cs/google-cs.tpl.html'
         })
     }])
 angular.module('filters.nameFilter', [])
@@ -38887,6 +38922,34 @@ function isEmpty(obj) {
     }
 
     return true;
+}
+/**
+ * Adopted from UI Router library
+ * https://github.com/angular-ui/ui-router/blob/master/src/common.js
+ */
+function merge(dst) {
+    forEach(arguments, function(obj) {
+        if (obj !== dst) {
+            forEach(obj, function(value, key) {
+                if (!dst.hasOwnProperty(key)) dst[key] = value;
+            });
+        }
+    });
+    return dst;
+}
+/**
+ * Adopted from UI Router library
+ * https://github.com/angular-ui/ui-router/blob/master/src/common.js
+ */
+// extracted from underscore.js
+// Return a copy of the object omitting the blacklisted properties.
+function omit(obj) {
+    var copy = {};
+    var keys = Array.prototype.concat.apply(Array.prototype, Array.prototype.slice.call(arguments, 1));
+    for (var key in obj) {
+        if (indexOf(keys, key) == -1) copy[key] = obj[key];
+    }
+    return copy;
 }
 // adopted from https://github.com/a8m/angular-filter/blob/master/src/_common.js
 function toArray(object) {
@@ -46140,7 +46203,7 @@ angular.module("staff-directory/staff-directory-listing.tpl.html", []).run(["$te
     "        </tr>\n" +
     "        </thead>\n" +
     "        <tbody>\n" +
-    "        <tr ng-repeat=\"person in filteredList = (list | filter:staffdir.facet.search | filter:staffdir.facet.subject:true | orderBy:staffdir.sortBy:staffdir.sortReverse) track by  person.id\">\n" +
+    "        <tr ng-repeat=\"person in filteredList = (list | filter:staffdir.facet.search | filter:staffdir.facet.subject:true | orderBy:staffdir.sortBy:staffdir.sortReverse) track by $index\">\n" +
     "            <td class=\"text-nowrap\">\n" +
     "                <div ng-if=\"person.rank\" class=\"text-muted\"> {{person.rank}}</div>\n" +
     "                <span ng-bind-html=\"person.firstname | highlight:staffdir.facet.search\"></span> <strong ng-bind-html=\"person.lastname | highlight:staffdir.facet.search\"></strong>\n" +
@@ -47125,6 +47188,34 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "    </div>\n" +
     "</div>");
 }]);
+;/*
+(function() {
+    tinymce.create('tinymce.plugins.typekit', {
+        setup : function(ed) {
+            ed.onInit.add(function(ed, evt) {
+
+                // Load a script from a specific URL using the global script loader
+                tinymce.ScriptLoader.load('somescript.js');
+
+                // Load a script using a unique instance of the script loader
+                var scriptLoader = new tinymce.dom.ScriptLoader();
+
+                scriptLoader.load('somescript.js');
+
+            });
+        },
+    getInfo: function() {
+    return {
+        longname:  'TypeKit',
+        author:    'Thomas Griffin',
+        authorurl: 'https://thomasgriffin.io',
+        infourl:   'https://twitter.com/jthomasgriffin',
+        version:   '1.0'
+    };
+}
+});
+tinymce.PluginManager.add('typekit', tinymce.plugins.typekit);
+})();*/
 ;/* ========================================================================
  * DOM-based Routing
  * Based on http://goo.gl/EUTi53 by Paul Irish
