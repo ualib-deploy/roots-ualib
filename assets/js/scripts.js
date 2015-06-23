@@ -41084,7 +41084,7 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                                        <li class=\"list-group-item col-md-12\">\n" +
     "                                            <div class=\"col-md-8\">\n" +
     "                                                <select class=\"form-control\" ng-model=\"version.newLoc.selLoc\"\n" +
-    "                                                        ng-options=\"loc.name for loc in SWList.locations\">\n" +
+    "                                                        ng-options=\"loc.fullName for loc in SWList.locations | orderBy:'fullName'\">\n" +
     "                                                </select>\n" +
     "                                            </div>\n" +
     "                                            <div class=\"col-md-3\">\n" +
@@ -41285,7 +41285,7 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                                <li class=\"list-group-item col-md-12\">\n" +
     "                                    <div class=\"col-md-8\">\n" +
     "                                        <select class=\"form-control\" ng-model=\"version.newLoc.selLoc\"\n" +
-    "                                                ng-options=\"loc.name for loc in SWList.locations\">\n" +
+    "                                                ng-options=\"loc.fullName for loc in SWList.locations | orderBy:'fullName'\">\n" +
     "                                        </select>\n" +
     "                                    </div>\n" +
     "                                    <div class=\"col-md-3\">\n" +
@@ -41629,7 +41629,7 @@ angular.module("siteFeedback/siteFeedback.tpl.html", []).run(["$templateCache", 
 
 angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staffDirectory/staffDirectory.tpl.html",
-    "<h2>Library Staff Directory</h2>\n" +
+    "<h2>Library Staff Directory Management</h2>\n" +
     "\n" +
     "<tabset justified=\"true\">\n" +
     "    <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
@@ -41804,298 +41804,300 @@ angular.module("staffDirectory/staffDirectoryDepartments.tpl.html", []).run(["$t
 
 angular.module("staffDirectory/staffDirectoryPeople.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staffDirectory/staffDirectoryPeople.tpl.html",
-    "<h3>Add New Person</h3>\n" +
-    "<form style=\"background-color:#f9f9f9;\" ng-submit=\"addPerson()\">\n" +
-    "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-2 form-group\">\n" +
-    "            <label for=\"rank\">Rank</label>\n" +
-    "            <select class=\"form-control\" ng-model=\"newPerson.rank\" ng-options=\"rank for rank in ranks\" id=\"rank\">\n" +
-    "            </select>\n" +
+    "<div>\n" +
+    "    <h3>Add New Person</h3>\n" +
+    "    <form style=\"background-color:#f9f9f9;\" ng-submit=\"addPerson()\">\n" +
+    "        <div class=\"row\">\n" +
+    "            <div class=\"col-md-2 form-group\">\n" +
+    "                <label for=\"rank\">Rank</label>\n" +
+    "                <select class=\"form-control\" ng-model=\"newPerson.rank\" ng-options=\"rank for rank in ranks\" id=\"rank\">\n" +
+    "                </select>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-3 form-group\">\n" +
+    "                <label for=\"firstName\">First Name</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"First Name\" maxlength=\"25\"\n" +
+    "                       ng-model=\"newPerson.first\" id=\"firstName\" required>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-3 form-group\">\n" +
+    "                <label for=\"lastName\">Last Name</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Last Name\" maxlength=\"25\"\n" +
+    "                       ng-model=\"newPerson.last\" id=\"lastName\" required>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-4 form-group\">\n" +
+    "                <label for=\"title\">Title</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Title\" maxlength=\"150\"\n" +
+    "                       ng-model=\"newPerson.title\" id=\"title\" required>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2 form-group\">\n" +
+    "                <label for=\"divis\">Division</label>\n" +
+    "                <select class=\"form-control\" ng-model=\"newPerson.selDiv\" ng-options=\"div.name for div in Directory.divisions\" id=\"divis\">\n" +
+    "                </select>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-3 form-group\">\n" +
+    "                <label for=\"dept\">Department</label>\n" +
+    "                <select class=\"form-control\" ng-model=\"newPerson.selDept\" ng-options=\"dept.name for dept in Directory.departments\" id=\"dept\">\n" +
+    "                </select>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-3 form-group\">\n" +
+    "                <label for=\"email\">Email</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Email\" maxlength=\"255\"\n" +
+    "                       ng-model=\"newPerson.email\" id=\"email\" required>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2 form-group\">\n" +
+    "                <label for=\"phone\">Phone</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Phone\" maxlength=\"8\"\n" +
+    "                       ng-model=\"newPerson.phone\" id=\"phone\" required>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2 form-group\">\n" +
+    "                <label for=\"fax\">Fax</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Fax\" maxlength=\"8\" ng-model=\"newPerson.fax\" id=\"fax\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-12 form-group text-center\">\n" +
+    "                <button type=\"submit\" class=\"btn btn-success\">\n" +
+    "                    Create New Record\n" +
+    "                </button><br>\n" +
+    "                {{formResponse}}\n" +
+    "            </div>\n" +
     "        </div>\n" +
-    "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"firstName\">First Name</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"First Name\" maxlength=\"25\"\n" +
-    "                   ng-model=\"newPerson.first\" id=\"firstName\" required>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"lastName\">Last Name</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Last Name\" maxlength=\"25\"\n" +
-    "                   ng-model=\"newPerson.last\" id=\"lastName\" required>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-4 form-group\">\n" +
-    "            <label for=\"title\">Title</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Title\" maxlength=\"150\"\n" +
-    "                   ng-model=\"newPerson.title\" id=\"title\" required>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-2 form-group\">\n" +
-    "            <label for=\"divis\">Division</label>\n" +
-    "            <select class=\"form-control\" ng-model=\"newPerson.selDiv\" ng-options=\"div.name for div in Directory.divisions\" id=\"divis\">\n" +
-    "            </select>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"dept\">Department</label>\n" +
-    "            <select class=\"form-control\" ng-model=\"newPerson.selDept\" ng-options=\"dept.name for dept in Directory.departments\" id=\"dept\">\n" +
-    "            </select>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"email\">Email</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Email\" maxlength=\"255\"\n" +
-    "                   ng-model=\"newPerson.email\" id=\"email\" required>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-2 form-group\">\n" +
-    "            <label for=\"phone\">Phone</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Phone\" maxlength=\"8\"\n" +
-    "                   ng-model=\"newPerson.phone\" id=\"phone\" required>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-2 form-group\">\n" +
-    "            <label for=\"fax\">Fax</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Fax\" maxlength=\"8\" ng-model=\"newPerson.fax\" id=\"fax\">\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-12 form-group text-center\">\n" +
-    "            <button type=\"submit\" class=\"btn btn-success\">\n" +
-    "                Create New Record\n" +
-    "            </button><br>\n" +
-    "            {{formResponse}}\n" +
-    "        </div>\n" +
-    "    </div>\n" +
-    "</form>\n" +
+    "    </form>\n" +
     "\n" +
-    "<h3>People List</h3>\n" +
-    "<div class=\"row form-inline\">\n" +
-    "    <div class=\"form-group col-md-12\">\n" +
-    "        <label for=\"filterBy\">Filter <small>{{filteredList.length}}</small> results by</label>\n" +
-    "        <div id=\"filterBy\">\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Last name contains\" ng-model=\"lastNameFilter\">\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"First name contains\" ng-model=\"firstNameFilter\">\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"titleFilter\">\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Department contains\" ng-model=\"deptFilter\">\n" +
+    "    <h3>People List</h3>\n" +
+    "    <div class=\"row form-inline\">\n" +
+    "        <div class=\"form-group col-md-12\">\n" +
+    "            <label for=\"filterBy\">Filter <small>{{filteredList.length}}</small> results by</label>\n" +
+    "            <div id=\"filterBy\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Last name contains\" ng-model=\"lastNameFilter\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"First name contains\" ng-model=\"firstNameFilter\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"titleFilter\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Department contains\" ng-model=\"deptFilter\">\n" +
+    "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
-    "</div>\n" +
-    "<div class=\"text-center\">\n" +
-    "    <pagination total-items=\"filteredList.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
-    "                boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredList.length > perPage\"></pagination>\n" +
-    "</div>\n" +
-    "<div class=\"table-responsive\">\n" +
-    "    <table class=\"table table-condensed table-hover\">\n" +
-    "        <thead>\n" +
-    "        <tr>\n" +
-    "            <th class=\"hidden-xs\" style=\"width:21%\">\n" +
-    "                <a ng-click=\"sortBy(0)\"\n" +
-    "                   ng-class=\"{'sortable': !sortModes[0].reverse && sortMode == 0, 'sortable-reverse': sortModes[0].reverse && sortMode == 0}\">\n" +
-    "                    Name\n" +
-    "                </a>\n" +
-    "            </th>\n" +
-    "            <th class=\"hidden-xs\" style=\"width:21%\">\n" +
-    "                <a ng-click=\"sortBy(1)\"\n" +
-    "                   ng-class=\"{'sortable': !sortModes[1].reverse && sortMode == 1, 'sortable-reverse': sortModes[1].reverse && sortMode == 1}\">\n" +
-    "                    Title\n" +
-    "                </a>\n" +
-    "            </th>\n" +
-    "            <th class=\"hidden-xs\" style=\"width:21%\">\n" +
-    "                <a ng-click=\"sortBy(2)\"\n" +
-    "                   ng-class=\"{'sortable': !sortModes[2].reverse && sortMode == 2, 'sortable-reverse': sortModes[2].reverse && sortMode == 2}\">\n" +
-    "                    Department/Division\n" +
-    "                </a>\n" +
-    "            </th>\n" +
-    "            <th class=\"hidden-xs\" style=\"width:16%\">\n" +
-    "                Contact Info\n" +
-    "            </th>\n" +
-    "            <th class=\"hidden-xs\" style=\"width:21%\">\n" +
-    "                Subjects\n" +
-    "            </th>\n" +
-    "        </tr>\n" +
-    "        </thead>\n" +
-    "        <tbody>\n" +
-    "        <tr ng-repeat=\"person in filteredList = (Directory.list\n" +
-    "                                                    | filter:{lastname:lastNameFilter}\n" +
-    "                                                    | filter:{firstname:firstNameFilter}\n" +
-    "                                                    | filter:{title:titleFilter}\n" +
-    "                                                    | filter:{department:deptFilter}\n" +
-    "                                                    | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\n" +
-    "                                                    | startFrom:(currentPage-1)*perPage\n" +
-    "                                                    | limitTo:perPage\">\n" +
-    "            <td ng-click=\"togglePerson(person)\">\n" +
-    "                <h4>\n" +
-    "                    <a>\n" +
-    "                        <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"person.show\"></span>\n" +
-    "                        <span class=\"fa fa-fw fa-caret-down\" ng-show=\"person.show\"></span>\n" +
-    "                        {{person.firstname}} {{person.lastname}}\n" +
+    "    <div class=\"text-center\">\n" +
+    "        <pagination total-items=\"filteredList.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
+    "                    boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredList.length > perPage\"></pagination>\n" +
+    "    </div>\n" +
+    "    <div class=\"table-responsive\">\n" +
+    "        <table class=\"table table-condensed table-hover\">\n" +
+    "            <thead>\n" +
+    "            <tr>\n" +
+    "                <th class=\"hidden-xs\" style=\"width:21%\">\n" +
+    "                    <a ng-click=\"sortBy(0)\"\n" +
+    "                       ng-class=\"{'sortable': !sortModes[0].reverse && sortMode == 0, 'sortable-reverse': sortModes[0].reverse && sortMode == 0}\">\n" +
+    "                        Name\n" +
     "                    </a>\n" +
-    "                    <span ng-show=\"person.rank.length > 0\">\n" +
-    "                        <small>{{person.rank}}</small>\n" +
-    "                    </span>\n" +
-    "                </h4>\n" +
-    "            </td>\n" +
-    "            <td>\n" +
-    "                <h4 ng-hide=\"person.show\">\n" +
-    "                    <small>{{person.title}}</small>\n" +
-    "                </h4>\n" +
-    "                <div class=\"form-group\" ng-show=\"person.show\">\n" +
-    "                    <label for=\"{{person.id}}_title\">Title</label>\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{person.title}}\" maxlength=\"150\" ng-model=\"person.title\" required\n" +
-    "                           id=\"{{person.id}}_title\">\n" +
-    "                </div>\n" +
-    "                <div class=\"form-group\" ng-show=\"person.show\">\n" +
-    "                    <label for=\"{{person.id}}_rank\">Rank</label>\n" +
-    "                    <select class=\"form-control\" id=\"{{person.id}}_rank\" ng-model=\"person.rank\"\n" +
-    "                            ng-options=\"rank for rank in ranks\">\n" +
-    "                    </select>\n" +
-    "                </div>\n" +
-    "                <div ng-show=\"person.show\">\n" +
-    "                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"updatePerson(person)\">\n" +
-    "                        Update information\n" +
-    "                    </button>\n" +
-    "                </div>\n" +
-    "            </td>\n" +
-    "            <td>\n" +
-    "                <h4 ng-hide=\"person.show\">\n" +
-    "                    <small>{{person.department}}</small>\n" +
-    "                </h4>\n" +
-    "                <h4 ng-hide=\"person.show\">\n" +
-    "                    <small>{{person.division}}</small>\n" +
-    "                </h4>\n" +
-    "                <div class=\"form-group\" ng-show=\"person.show\">\n" +
-    "                    <label for=\"{{person.id}}_dept\">Department</label>\n" +
-    "                    <select class=\"form-control\" id=\"{{person.id}}_dept\" ng-model=\"person.selDept\"\n" +
-    "                            ng-options=\"dept.name for dept in Directory.departments\">\n" +
-    "                    </select>\n" +
-    "                </div>\n" +
-    "                <div class=\"form-group\" ng-show=\"person.show\">\n" +
-    "                    <label for=\"{{person.id}}_divis\">Division</label>\n" +
-    "                    <select class=\"form-control\" id=\"{{person.id}}_divis\" ng-model=\"person.selDiv\"\n" +
-    "                            ng-options=\"div.name for div in Directory.divisions\">\n" +
-    "                    </select>\n" +
-    "                </div>\n" +
-    "                <div ng-show=\"person.show\">\n" +
-    "                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deletePerson(person)\">\n" +
-    "                        Delete {{person.firstname}} {{person.lastname}} record\n" +
-    "                    </button>\n" +
-    "                </div>\n" +
-    "            </td>\n" +
-    "            <td>\n" +
-    "                <div ng-hide=\"person.show\">\n" +
-    "                    <span class=\"fa fa-fw fa-envelope\"></span><small>{{person.email}}</small>\n" +
-    "                </div>\n" +
-    "                <div ng-hide=\"person.show\">\n" +
-    "                    <span class=\"fa fa-fw fa-phone\"></span><small>{{person.phone}}</small>\n" +
-    "                </div>\n" +
-    "                <div ng-hide=\"person.show\">\n" +
-    "                    <span class=\"fa fa-fw fa-fax\"></span><small>{{person.fax}}</small>\n" +
-    "                </div>\n" +
-    "                <div class=\"form-group\" ng-show=\"person.show\">\n" +
-    "                    <label for=\"{{person.id}}_email\">Email</label>\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{person.email}}\" maxlength=\"1024\" ng-model=\"person.email\" required\n" +
-    "                           id=\"{{person.id}}_email\">\n" +
-    "                </div>\n" +
-    "                <div class=\"form-group\" ng-show=\"person.show\">\n" +
-    "                    <label for=\"{{person.id}}_phone\">Phone</label>\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{person.phone}}\" maxlength=\"8\" ng-model=\"person.phone\" required\n" +
-    "                           id=\"{{person.id}}_phone\">\n" +
-    "                </div>\n" +
-    "                <div class=\"form-group\" ng-show=\"person.show\">\n" +
-    "                    <label for=\"{{person.id}}_fax\">Fax</label>\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{person.fax}}\" maxlength=\"8\" ng-model=\"person.fax\"\n" +
-    "                           id=\"{{person.id}}_fax\">\n" +
-    "                </div>\n" +
-    "            </td>\n" +
-    "            <td>\n" +
-    "                <div ng-repeat=\"subject in person.subjects\" ng-hide=\"person.show\">\n" +
-    "                    <a href=\"{{subject.link}}\">{{subject.subject}}</a>\n" +
-    "                </div>\n" +
-    "                <div class=\"form-group\" ng-show=\"person.show\">\n" +
-    "                    <label for=\"{{person.id}}_subj\">Subjects</label>\n" +
-    "                    <div class=\"row\" id=\"{{person.id}}_subj\">\n" +
-    "                        <div class=\"col-md-12\" ng-repeat=\"subject in person.subjects\">\n" +
-    "                            <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteSubject(person, subject, $index)\">\n" +
-    "                                <span class=\"fa fa-fw fa-close\"></span>\n" +
-    "                            </button>\n" +
-    "                            <a href=\"{{subject.link}}\">{{subject.subject}}</a>\n" +
-    "                        </div>\n" +
-    "                        <div class=\"col-md-9\">\n" +
-    "                            <select class=\"form-control\" ng-model=\"person.selSubj\" ng-options=\"sub.subject for sub in Directory.subjects\">\n" +
-    "                            </select>\n" +
-    "                        </div>\n" +
-    "                        <div class=\"col-md-3\">\n" +
-    "                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"addSubject(person)\">\n" +
-    "                                <span class=\"fa fa-fw fa-plus\"></span>\n" +
-    "                            </button>\n" +
-    "                        </div>\n" +
-    "                        <p>{{person.subjResponse}}</p>\n" +
+    "                </th>\n" +
+    "                <th class=\"hidden-xs\" style=\"width:21%\">\n" +
+    "                    <a ng-click=\"sortBy(1)\"\n" +
+    "                       ng-class=\"{'sortable': !sortModes[1].reverse && sortMode == 1, 'sortable-reverse': sortModes[1].reverse && sortMode == 1}\">\n" +
+    "                        Title\n" +
+    "                    </a>\n" +
+    "                </th>\n" +
+    "                <th class=\"hidden-xs\" style=\"width:21%\">\n" +
+    "                    <a ng-click=\"sortBy(2)\"\n" +
+    "                       ng-class=\"{'sortable': !sortModes[2].reverse && sortMode == 2, 'sortable-reverse': sortModes[2].reverse && sortMode == 2}\">\n" +
+    "                        Department/Division\n" +
+    "                    </a>\n" +
+    "                </th>\n" +
+    "                <th class=\"hidden-xs\" style=\"width:16%\">\n" +
+    "                    Contact Info\n" +
+    "                </th>\n" +
+    "                <th class=\"hidden-xs\" style=\"width:21%\">\n" +
+    "                    Subjects\n" +
+    "                </th>\n" +
+    "            </tr>\n" +
+    "            </thead>\n" +
+    "            <tbody>\n" +
+    "            <tr ng-repeat=\"person in filteredList = (Directory.list\n" +
+    "                                                        | filter:{lastname:lastNameFilter}\n" +
+    "                                                        | filter:{firstname:firstNameFilter}\n" +
+    "                                                        | filter:{title:titleFilter}\n" +
+    "                                                        | filter:{department:deptFilter}\n" +
+    "                                                        | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\n" +
+    "                                                        | startFrom:(currentPage-1)*perPage\n" +
+    "                                                        | limitTo:perPage\">\n" +
+    "                <td ng-click=\"togglePerson(person)\">\n" +
+    "                    <h4>\n" +
+    "                        <a>\n" +
+    "                            <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"person.show\"></span>\n" +
+    "                            <span class=\"fa fa-fw fa-caret-down\" ng-show=\"person.show\"></span>\n" +
+    "                            {{person.firstname}} {{person.lastname}}\n" +
+    "                        </a>\n" +
+    "                        <span ng-show=\"person.rank.length > 0\">\n" +
+    "                            <small>{{person.rank}}</small>\n" +
+    "                        </span>\n" +
+    "                    </h4>\n" +
+    "                </td>\n" +
+    "                <td>\n" +
+    "                    <h4 ng-hide=\"person.show\">\n" +
+    "                        <small>{{person.title}}</small>\n" +
+    "                    </h4>\n" +
+    "                    <div class=\"form-group\" ng-show=\"person.show\">\n" +
+    "                        <label for=\"{{person.id}}_title\">Title</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{person.title}}\" maxlength=\"150\" ng-model=\"person.title\" required\n" +
+    "                               id=\"{{person.id}}_title\">\n" +
     "                    </div>\n" +
-    "                </div>\n" +
-    "            </td>\n" +
-    "        </tr>\n" +
-    "        </tbody>\n" +
-    "    </table>\n" +
-    "</div>\n" +
+    "                    <div class=\"form-group\" ng-show=\"person.show\">\n" +
+    "                        <label for=\"{{person.id}}_rank\">Rank</label>\n" +
+    "                        <select class=\"form-control\" id=\"{{person.id}}_rank\" ng-model=\"person.rank\"\n" +
+    "                                ng-options=\"rank for rank in ranks\">\n" +
+    "                        </select>\n" +
+    "                    </div>\n" +
+    "                    <div ng-show=\"person.show\">\n" +
+    "                        <button type=\"button\" class=\"btn btn-success\" ng-click=\"updatePerson(person)\">\n" +
+    "                            Update information\n" +
+    "                        </button>\n" +
+    "                    </div>\n" +
+    "                </td>\n" +
+    "                <td>\n" +
+    "                    <h4 ng-hide=\"person.show\">\n" +
+    "                        <small>{{person.department}}</small>\n" +
+    "                    </h4>\n" +
+    "                    <h4 ng-hide=\"person.show\">\n" +
+    "                        <small>{{person.division}}</small>\n" +
+    "                    </h4>\n" +
+    "                    <div class=\"form-group\" ng-show=\"person.show\">\n" +
+    "                        <label for=\"{{person.id}}_dept\">Department</label>\n" +
+    "                        <select class=\"form-control\" id=\"{{person.id}}_dept\" ng-model=\"person.selDept\"\n" +
+    "                                ng-options=\"dept.name for dept in Directory.departments\">\n" +
+    "                        </select>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"form-group\" ng-show=\"person.show\">\n" +
+    "                        <label for=\"{{person.id}}_divis\">Division</label>\n" +
+    "                        <select class=\"form-control\" id=\"{{person.id}}_divis\" ng-model=\"person.selDiv\"\n" +
+    "                                ng-options=\"div.name for div in Directory.divisions\">\n" +
+    "                        </select>\n" +
+    "                    </div>\n" +
+    "                    <div ng-show=\"person.show\">\n" +
+    "                        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deletePerson(person)\">\n" +
+    "                            Delete {{person.firstname}} {{person.lastname}} record\n" +
+    "                        </button>\n" +
+    "                    </div>\n" +
+    "                </td>\n" +
+    "                <td>\n" +
+    "                    <div ng-hide=\"person.show\">\n" +
+    "                        <span class=\"fa fa-fw fa-envelope\"></span><small>{{person.email}}</small>\n" +
+    "                    </div>\n" +
+    "                    <div ng-hide=\"person.show\">\n" +
+    "                        <span class=\"fa fa-fw fa-phone\"></span><small>{{person.phone}}</small>\n" +
+    "                    </div>\n" +
+    "                    <div ng-hide=\"person.show\">\n" +
+    "                        <span class=\"fa fa-fw fa-fax\"></span><small>{{person.fax}}</small>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"form-group\" ng-show=\"person.show\">\n" +
+    "                        <label for=\"{{person.id}}_email\">Email</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{person.email}}\" maxlength=\"1024\" ng-model=\"person.email\" required\n" +
+    "                               id=\"{{person.id}}_email\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"form-group\" ng-show=\"person.show\">\n" +
+    "                        <label for=\"{{person.id}}_phone\">Phone</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{person.phone}}\" maxlength=\"8\" ng-model=\"person.phone\" required\n" +
+    "                               id=\"{{person.id}}_phone\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"form-group\" ng-show=\"person.show\">\n" +
+    "                        <label for=\"{{person.id}}_fax\">Fax</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{person.fax}}\" maxlength=\"8\" ng-model=\"person.fax\"\n" +
+    "                               id=\"{{person.id}}_fax\">\n" +
+    "                    </div>\n" +
+    "                </td>\n" +
+    "                <td>\n" +
+    "                    <div ng-repeat=\"subject in person.subjects\" ng-hide=\"person.show\">\n" +
+    "                        <a href=\"{{subject.link}}\">{{subject.subject}}</a>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"form-group\" ng-show=\"person.show\">\n" +
+    "                        <label for=\"{{person.id}}_subj\">Subjects</label>\n" +
+    "                        <div class=\"row\" id=\"{{person.id}}_subj\">\n" +
+    "                            <div class=\"col-md-12\" ng-repeat=\"subject in person.subjects\">\n" +
+    "                                <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteSubject(person, subject, $index)\">\n" +
+    "                                    <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                                </button>\n" +
+    "                                <a href=\"{{subject.link}}\">{{subject.subject}}</a>\n" +
+    "                            </div>\n" +
+    "                            <div class=\"col-md-9\">\n" +
+    "                                <select class=\"form-control\" ng-model=\"person.selSubj\" ng-options=\"sub.subject for sub in Directory.subjects\">\n" +
+    "                                </select>\n" +
+    "                            </div>\n" +
+    "                            <div class=\"col-md-3\">\n" +
+    "                                <button type=\"button\" class=\"btn btn-success\" ng-click=\"addSubject(person)\">\n" +
+    "                                    <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "                                </button>\n" +
+    "                            </div>\n" +
+    "                            <p>{{person.subjResponse}}</p>\n" +
+    "                        </div>\n" +
+    "                    </div>\n" +
+    "                </td>\n" +
+    "            </tr>\n" +
+    "            </tbody>\n" +
+    "        </table>\n" +
+    "    </div>\n" +
     "\n" +
-    "<div class=\"text-center\">\n" +
-    "    <pagination total-items=\"filteredList.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
-    "                boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredList.length > perPage\"></pagination>\n" +
-    "</div>\n" +
-    "");
+    "    <div class=\"text-center\">\n" +
+    "        <pagination total-items=\"filteredList.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
+    "                    boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredList.length > perPage\"></pagination>\n" +
+    "    </div>\n" +
+    "</div>");
 }]);
 
 angular.module("staffDirectory/staffDirectorySubjects.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staffDirectory/staffDirectorySubjects.tpl.html",
-    "<h3>Manage Subjects</h3>\n" +
-    "<div class=\"row\">\n" +
+    "<div>\n" +
+    "    <h3>Manage Subjects</h3>\n" +
     "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-5\">\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"Subject Name\" ng-model=\"newSubj.subject\"\n" +
-    "                   maxlength=\"255\">\n" +
+    "        <div class=\"row\">\n" +
+    "            <div class=\"col-md-5\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Subject Name\" ng-model=\"newSubj.subject\"\n" +
+    "                       maxlength=\"255\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-5\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"http://guides.lib.ua.edu/example\" ng-model=\"newSubj.link\"\n" +
+    "                       maxlength=\"1024\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2\">\n" +
+    "                <button type=\"button\" class=\"btn btn-success\" ng-click=\"addSubject()\" ng-disabled=\"newSubj.subject.length == 0\">\n" +
+    "                    <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "                </button>\n" +
+    "            </div>\n" +
+    "            {{subResponse}}\n" +
     "        </div>\n" +
-    "        <div class=\"col-md-5\">\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"http://guides.lib.ua.edu/example\" ng-model=\"newSubj.link\"\n" +
-    "                   maxlength=\"1024\">\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-2\">\n" +
-    "            <button type=\"button\" class=\"btn btn-success\" ng-click=\"addSubject()\" ng-disabled=\"newSubj.subject.length == 0\">\n" +
-    "                <span class=\"fa fa-fw fa-plus\"></span>\n" +
-    "            </button>\n" +
-    "        </div>\n" +
-    "        {{subResponse}}\n" +
+    "        <table class=\"table table-hover\">\n" +
+    "            <thead>\n" +
+    "            <tr>\n" +
+    "                <th style=\"width:41.6%;\">Subject</th>\n" +
+    "                <th style=\"width:41.6%;\">Subject Link</th>\n" +
+    "                <th style=\"width:120px;\">Action</th>\n" +
+    "            </tr>\n" +
+    "            </thead>\n" +
+    "            <tbody>\n" +
+    "            <tr ng-repeat=\"subject in Directory.subjects\" ng-click=\"expandSubject(subject)\">\n" +
+    "                <td>\n" +
+    "                    <span ng-hide=\"subject.show\">{{subject.subject}}</span>\n" +
+    "                    <span ng-show=\"subject.show\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Subject Name\" ng-model=\"subject.subject\"\n" +
+    "                               maxlength=\"255\">\n" +
+    "                    </span>\n" +
+    "                </td>\n" +
+    "                <td>\n" +
+    "                    <span ng-hide=\"subject.show\"><a href=\"{{subject.link}}\">{{subject.link}}</a></span>\n" +
+    "                    <span ng-show=\"subject.show\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Subject Link\" ng-model=\"subject.link\"\n" +
+    "                               maxlength=\"1024\">\n" +
+    "                    </span>\n" +
+    "                </td>\n" +
+    "                <td>\n" +
+    "                    <div ng-show=\"subject.show\">\n" +
+    "                        <button type=\"button\" class=\"btn btn-success\" ng-click=\"editSubject(subject)\" ng-disabled=\"subject.subject.length == 0\">\n" +
+    "                            <span class=\"fa fa-fw fa-edit\"></span>\n" +
+    "                        </button>\n" +
+    "                        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteSubject(subject)\">\n" +
+    "                            <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                        </button>\n" +
+    "                    </div>\n" +
+    "                </td>\n" +
+    "            </tr>\n" +
+    "            </tbody>\n" +
+    "        </table>\n" +
     "    </div>\n" +
-    "    <table class=\"table table-hover\">\n" +
-    "        <thead>\n" +
-    "        <tr>\n" +
-    "            <th style=\"width:41.6%;\">Subject</th>\n" +
-    "            <th style=\"width:41.6%;\">Subject Link</th>\n" +
-    "            <th style=\"width:120px;\">Action</th>\n" +
-    "        </tr>\n" +
-    "        </thead>\n" +
-    "        <tbody>\n" +
-    "        <tr ng-repeat=\"subject in Directory.subjects\" ng-click=\"expandSubject(subject)\">\n" +
-    "            <td>\n" +
-    "                <span ng-hide=\"subject.show\">{{subject.subject}}</span>\n" +
-    "                <span ng-show=\"subject.show\">\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Subject Name\" ng-model=\"subject.subject\"\n" +
-    "                           maxlength=\"255\">\n" +
-    "                </span>\n" +
-    "            </td>\n" +
-    "            <td>\n" +
-    "                <span ng-hide=\"subject.show\"><a href=\"{{subject.link}}\">{{subject.link}}</a></span>\n" +
-    "                <span ng-show=\"subject.show\">\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Subject Link\" ng-model=\"subject.link\"\n" +
-    "                           maxlength=\"1024\">\n" +
-    "                </span>\n" +
-    "            </td>\n" +
-    "            <td>\n" +
-    "                <div ng-show=\"subject.show\">\n" +
-    "                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"editSubject(subject)\" ng-disabled=\"subject.subject.length == 0\">\n" +
-    "                        <span class=\"fa fa-fw fa-edit\"></span>\n" +
-    "                    </button>\n" +
-    "                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteSubject(subject)\">\n" +
-    "                        <span class=\"fa fa-fw fa-close\"></span>\n" +
-    "                    </button>\n" +
-    "                </div>\n" +
-    "            </td>\n" +
-    "        </tr>\n" +
-    "        </tbody>\n" +
-    "    </table>\n" +
-    "</div>\n" +
-    "");
+    "</div>");
 }]);
 
 angular.module("submittedForms/submittedForms.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -43769,6 +43771,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                         data.software[i].newLink.url = "";
                     }
                     $scope.newSW.selCat = data.categories[0];
+
                     $scope.SWList = data;
                 })
                 .error(function(data, status, headers, config) {
@@ -44307,8 +44310,14 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                             newLoc.lid = data.id;
                             newLoc.name = $scope.newLocation.name;
                             newLoc.parent = 0;
+                            newLoc.fullName = newLoc.name;
                             if ($scope.newLocation.parent > 0)
-                                newLoc.parent = $scope.newLocation.parent;
+                                for (var i = 0; i < $scope.SWList.locations.length; i++)
+                                    if ($scope.SWList.locations[i].lid === $scope.newLocation.parent){
+                                        newLoc.parent = $scope.newLocation.parent;
+                                        newLoc.fullName = $scope.SWList.locations[i].name + ": " + newLoc.name;
+                                        break;
+                                    }
                             $scope.SWList.locations.push(newLoc);
                             $scope.locResponse = "Location has been added!";
                         } else {
@@ -44594,6 +44603,18 @@ angular.module('manage.staffDirectory', [])
                     active: false
                 }
             ];
+            $scope.sortModes = [
+                {by:'lastname', reverse:false},
+                {by:'title', reverse:false},
+                {by:'department', reverse:false}
+            ];
+            $scope.sortMode = $scope.sortModes[0];
+            $scope.sortBy = function(by){
+                if ($scope.sortMode === by)
+                    $scope.sortModes[by].reverse = !$scope.sortModes[by].reverse;
+                else
+                    $scope.sortMode = by;
+            };
 
             tokenFactory("CSRF-libStaffDir");
 
@@ -44634,6 +44655,8 @@ angular.module('manage.staffDirectory', [])
                     for (var i = 0; i < $scope.Directory.divisions.length; i++)
                         $scope.Directory.divisions[i].show = false;
                     $scope.newDept.selLib = $scope.Directory.libraries[0];
+
+                    $scope.sortBy(0);
                 })
                 .error(function(data, status, headers, config) {
                     console.log(data);
@@ -44687,24 +44710,10 @@ angular.module('manage.staffDirectory', [])
             $scope.maxPageSize = 10;
             $scope.perPage = 20;
 
-            $scope.sortModes = [
-                {by:'lastname', reverse:false},
-                {by:'title', reverse:false},
-                {by:'department', reverse:false}
-            ];
-            $scope.sortMode = $scope.sortModes[0];
-
             $scope.togglePerson = function(person){
                 $scope.Directory.list[$scope.Directory.list.indexOf(person)].show =
                     !$scope.Directory.list[$scope.Directory.list.indexOf(person)].show;
                 $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjResponse = "";
-            };
-
-            $scope.sortBy = function(by){
-                if ($scope.sortMode === by)
-                    $scope.sortModes[by].reverse = !$scope.sortModes[by].reverse;
-                else
-                    $scope.sortMode = by;
             };
 
             $scope.deletePerson = function(person){
@@ -44775,49 +44784,44 @@ angular.module('manage.staffDirectory', [])
                             if ( $scope.newPerson.title.length > 0 )
                             {
                                 if ( $scope.newPerson.phone.length >= 7 )
-                                {
-                                    if ( $scope.newPerson.fax.length >= 7 ){
-                                        sdFactory.postData({action : 3}, $scope.newPerson)
-                                            .success(function(data, status, headers, config) {
-                                                if ((typeof data === 'object') && (data !== null)){
-                                                    var createdUser = {};
-                                                    createdUser.id = data.id;
-                                                    createdUser.lastname = $scope.newPerson.last;
-                                                    createdUser.firstname = $scope.newPerson.first;
-                                                    createdUser.title = $scope.newPerson.title;
-                                                    createdUser.rank = $scope.newPerson.rank;
-                                                    createdUser.department = $scope.newPerson.selDept.name;
-                                                    createdUser.division = $scope.newPerson.selDiv.name;
-                                                    createdUser.phone = $scope.newPerson.phone;
-                                                    createdUser.email = $scope.newPerson.email;
-                                                    createdUser.fax = $scope.newPerson.fax;
-                                                    createdUser.subjects = [];
-                                                    createdUser.show = false;
-                                                    createdUser.selSubj = $scope.Directory.subjects[0];
-                                                    for (var j = 0; j < $scope.Directory.departments.length; j++)
-                                                        if ($scope.Directory.departments[j].depid == $scope.newPerson.selDept.depid){
-                                                            createdUser.selDept = $scope.Directory.departments[j];
-                                                            break;
-                                                        }
-                                                    for (var j = 0; j < $scope.Directory.divisions.length; j++)
-                                                        if ($scope.Directory.divisions[j].divid == $scope.newPerson.selDiv.divid){
-                                                            createdUser.selDiv = $scope.Directory.divisions[j];
-                                                            break;
-                                                        }
-                                                    createdUser.class = "";
-                                                    createdUser.image = appUrl + "staffImages/" + createdUser.id + ".jpg";
-                                                    $scope.Directory.list.push(createdUser);
-                                                    $scope.resetNewPersonForm();
-                                                    $scope.formResponse = "Person has been added!";
-                                                } else
-                                                    $scope.formResponse = "Error: Person could not be added! " + data;
-                                            })
-                                            .error(function(data, status, headers, config) {
-                                                $scope.formResponse = "Error: Person Creation failed! " + data;
-                                            });
-                                    } else
-                                        alert("Fax number is too short!");
-                                } else
+                                    sdFactory.postData({action : 3}, $scope.newPerson)
+                                        .success(function(data, status, headers, config) {
+                                            if ((typeof data === 'object') && (data !== null)){
+                                                var createdUser = {};
+                                                createdUser.id = data.id;
+                                                createdUser.lastname = $scope.newPerson.last;
+                                                createdUser.firstname = $scope.newPerson.first;
+                                                createdUser.title = $scope.newPerson.title;
+                                                createdUser.rank = $scope.newPerson.rank;
+                                                createdUser.department = $scope.newPerson.selDept.name;
+                                                createdUser.division = $scope.newPerson.selDiv.name;
+                                                createdUser.phone = $scope.newPerson.phone;
+                                                createdUser.email = $scope.newPerson.email;
+                                                createdUser.fax = $scope.newPerson.fax;
+                                                createdUser.subjects = [];
+                                                createdUser.show = false;
+                                                createdUser.selSubj = $scope.Directory.subjects[0];
+                                                for (var j = 0; j < $scope.Directory.departments.length; j++)
+                                                    if ($scope.Directory.departments[j].depid == $scope.newPerson.selDept.depid){
+                                                        createdUser.selDept = $scope.Directory.departments[j];
+                                                        break;
+                                                    }
+                                                for (var j = 0; j < $scope.Directory.divisions.length; j++)
+                                                    if ($scope.Directory.divisions[j].divid == $scope.newPerson.selDiv.divid){
+                                                        createdUser.selDiv = $scope.Directory.divisions[j];
+                                                        break;
+                                                    }
+                                                createdUser.class = "";
+                                                createdUser.image = appUrl + "staffImages/" + createdUser.id + ".jpg";
+                                                $scope.Directory.list.push(createdUser);
+                                                $scope.formResponse = "Person has been added!";
+                                            } else
+                                                $scope.formResponse = "Error: Person could not be added! " + data;
+                                        })
+                                        .error(function(data, status, headers, config) {
+                                            $scope.formResponse = "Error: Person Creation failed! " + data;
+                                        });
+                                else
                                     alert("Phone number is too short!");
                             } else
                                 alert("Title is too short!");
@@ -47102,34 +47106,6 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "    </div>\n" +
     "</div>");
 }]);
-;/*
-(function() {
-    tinymce.create('tinymce.plugins.typekit', {
-        setup : function(ed) {
-            ed.onInit.add(function(ed, evt) {
-
-                // Load a script from a specific URL using the global script loader
-                tinymce.ScriptLoader.load('somescript.js');
-
-                // Load a script using a unique instance of the script loader
-                var scriptLoader = new tinymce.dom.ScriptLoader();
-
-                scriptLoader.load('somescript.js');
-
-            });
-        },
-    getInfo: function() {
-    return {
-        longname:  'TypeKit',
-        author:    'Thomas Griffin',
-        authorurl: 'https://thomasgriffin.io',
-        infourl:   'https://twitter.com/jthomasgriffin',
-        version:   '1.0'
-    };
-}
-});
-tinymce.PluginManager.add('typekit', tinymce.plugins.typekit);
-})();*/
 ;/* ========================================================================
  * DOM-based Routing
  * Based on http://goo.gl/EUTi53 by Paul Irish
