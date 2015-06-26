@@ -44681,15 +44681,14 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                 $scope.selComp = -1;
         };
 
-        $scope.createComp = function($event){
-            if ($event.button === 2){
+        $scope.createComp = function(event){
+            if (event.button === 2){
                 $scope.newComp.mid = $scope.selMap.mid;
-                $scope.newComp.mapX = $event.layerX;
-                $scope.newComp.mapY = $event.layerY;
+                $scope.newComp.mapX = event.layerX;
+                $scope.newComp.mapY = event.layerY;
 
                 $scope.showCreate = true;
-                $event.preventDefault();
-                $event.stopPropagation();
+                console.dir(event);
             }
         };
 
@@ -44723,7 +44722,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                 swFactory.postData({action : 13}, $scope.selMap.computers[$scope.selComp])
                     .success(function(data, status, headers, config) {
                         if (data == 1){
-                            $scope.selMap.computers[$scope.selComp].splice($scope.selComp, 1);
+                            $scope.SWList.maps[$scope.SWList.maps.indexOf($scope.selMap)].computers.splice($scope.selComp, 1);
                             $scope.selComp = -1;
                             $scope.compResponse = "Computer has been deleted!";
                         } else {
@@ -44738,7 +44737,9 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             }
         };
         $scope.updateComp = function(){
-            swFactory.postData({action : 14}, $scope.selMap.computers[$scope.selComp])
+            $scope.SWList.maps[$scope.SWList.maps.indexOf($scope.selMap)].computers[$scope.selComp].type = $scope.selCompOS.value;
+            $scope.SWList.maps[$scope.SWList.maps.indexOf($scope.selMap)].computers[$scope.selComp].lid = $scope.selCompLoc.lid;
+            swFactory.postData({action : 14}, $scope.SWList.maps[$scope.SWList.maps.indexOf($scope.selMap)].computers[$scope.selComp])
                 .success(function(data, status, headers, config) {
                     if (data == 1){
                         $scope.compResponse = "Computer name has been updated!";
