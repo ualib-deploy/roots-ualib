@@ -41009,7 +41009,7 @@ angular.module("manageSoftware/manageSoftwareComputerMaps.tpl.html", []).run(["$
     "        </div>\n" +
     "    </div>\n" +
     "    <div class=\"row\">\n" +
-    "        <div class=\"comps-map\"\n" +
+    "        <div class=\"comps-map\" id=\"computer-map\"\n" +
     "             style=\"background: transparent url('//wwwdev.lib.ua.edu/softwareList/floorMaps/{{selMap.floor_plan_file}}') no-repeat 0 0;\n" +
     "                    width:{{selMap.width}}px;\n" +
     "                    height:{{selMap.height}}px;\n" +
@@ -44648,7 +44648,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
         };
     })
 
-    .controller('manageSWCompMapsCtrl', ['$scope', 'swFactory', function manageSWCompMapsCtrl($scope, swFactory){
+    .controller('manageSWCompMapsCtrl', ['$scope', '$window', 'swFactory', function manageSWCompMapsCtrl($scope, $window, swFactory){
         $scope.selComp = -1;
         $scope.selCompX = 0;
         $scope.selCompY = 0;
@@ -44677,20 +44677,35 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                         $scope.selCompLoc = $scope.SWList.locations[i];
                         break;
                     }
+                $scope.compResponse = "";
             } else
                 $scope.selComp = -1;
         };
 
         $scope.createComp = function(event){
-            if (event.button === 2){
+            if (event.button === 2 && event.target.id === "computer-map"){
                 $scope.newComp.mid = $scope.selMap.mid;
-                $scope.newComp.mapX = event.layerX;
-                $scope.newComp.mapY = event.layerY;
+                var offset = getOffset(event.target);
+                $scope.newComp.mapX = event.pageX - offset.left;
+                $scope.newComp.mapY = event.pageY - offset.top;
 
                 $scope.showCreate = true;
+                $scope.compResponse = "";
                 console.dir(event);
             }
         };
+
+        function getOffset(elm){
+            var rect = elm.getBoundingClientRect();
+            //return {top: rect.top, left: rect.left};
+            var doc = elm.ownerDocument;
+            var docElem = doc.documentElement;
+
+            return {
+                top: rect.top + $window.pageYOffset - docElem.clientTop,
+                left: rect.left + $window.pageXOffset - docElem.clientLeft
+            };
+        }
 
         $scope.addComp = function(){
             swFactory.postData({action : 12}, $scope.newComp)
