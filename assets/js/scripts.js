@@ -44686,12 +44686,11 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             if (event.button === 2 && event.target.id === "computer-map"){
                 $scope.newComp.mid = $scope.selMap.mid;
                 var offset = getOffset(event.target);
-                $scope.newComp.mapX = event.pageX - offset.left;
-                $scope.newComp.mapY = event.pageY - offset.top;
+                $scope.newComp.mapX = Math.round(event.pageX - offset.left);
+                $scope.newComp.mapY = Math.round(event.pageY - offset.top);
 
                 $scope.showCreate = true;
                 $scope.compResponse = "";
-                console.dir(event);
             }
         };
 
@@ -44721,6 +44720,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                         newComputer.mapY = $scope.newComp.mapY;
                         newComputer.status = 0;
                         $scope.SWList.maps[$scope.SWList.maps.indexOf($scope.selMap)].computers.push(newComputer);
+                        $scope.showCreate = false;
                         $scope.compResponse = "Computer has been added!";
                     } else {
                         $scope.compResponse = "Error: Can not add Computer! " + data;
