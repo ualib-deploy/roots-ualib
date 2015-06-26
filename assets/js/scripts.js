@@ -40995,18 +40995,17 @@ angular.module("manageSoftware/manageSoftwareComputerMaps.tpl.html", []).run(["$
   $templateCache.put("manageSoftware/manageSoftwareComputerMaps.tpl.html",
     "<div>\n" +
     "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-2\">\n" +
-    "            <h3>\n" +
-    "                Computer maps:\n" +
-    "            </h3>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-4\">\n" +
-    "            <h3>\n" +
-    "                <select class=\"form-control\" ng-model=\"selMap\"\n" +
-    "                    ng-options=\"map.name for map in SWList.maps | orderBy:'name'\">\n" +
+    "        <form class=\"form-inline\">\n" +
+    "            <div class=\"col-md-6 form-group\">\n" +
+    "                <label for=\"plan\">Choose Floor Plan</label>\n" +
+    "                <select class=\"form-control\" ng-model=\"selMap\" ng-change=\"updateMap()\" id=\"plan\"\n" +
+    "                        ng-options=\"map.name for map in SWList.maps | orderBy:'name'\">\n" +
     "                </select>\n" +
-    "            </h3>\n" +
-    "        </div>\n" +
+    "            </div>\n" +
+    "        </form>\n" +
+    "    </div>\n" +
+    "    <div class=\"alert alert-success\" role=\"alert\">\n" +
+    "        <span class=\"fa fa-exclamation-triangle\"></span> Note: Right-click on the floor plan map in order to add a computer or left-click on existing one in order to edit it.\n" +
     "    </div>\n" +
     "    <div class=\"row\">\n" +
     "        <div class=\"comps-map\" id=\"computer-map\"\n" +
@@ -41028,7 +41027,7 @@ angular.module("manageSoftware/manageSoftwareComputerMaps.tpl.html", []).run(["$
     "                 style=\"left:{{selCompX}}px;top:{{selCompY}}px;width:450px;\"\n" +
     "                    >\n" +
     "                <div class=\"col-md-8\">\n" +
-    "                    <h4>Computer ID: {{selMap.computers[selComp].compid}} ({{selMap.computers[selComp].mapX}},{{selMap.computers[selComp].mapY}})</h4>\n" +
+    "                    <h4>Computer ID: {{selMap.computers[selComp].compid}}</h4>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-4 text-right\">\n" +
     "                    <button type=\"button\" class=\"btn btn-primary\" ng-click=\"selComp = -1\" style=\"left:450px;top:-15px;\">\n" +
@@ -41036,6 +41035,16 @@ angular.module("manageSoftware/manageSoftwareComputerMaps.tpl.html", []).run(["$
     "                    </button>\n" +
     "                </div>\n" +
     "                <form ng-submit=\"updateComp()\">\n" +
+    "                    <div class=\"col-md-6 form-group\">\n" +
+    "                        <label for=\"sel_X\">Coordinate X</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"X\" ng-model=\"selMap.computers[selComp].mapX\" id=\"sel_X\"\n" +
+    "                               maxlength=\"4\" required>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-6 form-group\">\n" +
+    "                        <label for=\"sel_Y\">Coordinate Y</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Y\" ng-model=\"selMap.computers[selComp].mapY\" id=\"sel_Y\"\n" +
+    "                               maxlength=\"4\" required>\n" +
+    "                    </div>\n" +
     "                    <div class=\"col-md-6 form-group\">\n" +
     "                        <label for=\"sel_name\">Computer Name</label>\n" +
     "                        <input type=\"text\" class=\"form-control\" placeholder=\"Enter Computer Name\" ng-model=\"selMap.computers[selComp].name\"\n" +
@@ -44680,6 +44689,10 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                 $scope.compResponse = "";
             } else
                 $scope.selComp = -1;
+        };
+        $scope.updateMap = function(){
+            $scope.selComp = -1;
+            $scope.showCreate = false;
         };
 
         $scope.createComp = function(event){
