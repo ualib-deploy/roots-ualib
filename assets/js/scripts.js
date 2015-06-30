@@ -40361,18 +40361,18 @@ angular.module("manageHours/manageEx.tpl.html", []).run(["$templateCache", funct
     "        <thead>\n" +
     "        <tr>\n" +
     "            <th>Exception Description</th>\n" +
-    "            <th class=\"text-center\">Date</th>\n" +
-    "            <th class=\"text-center\">Days</th>\n" +
-    "            <th class=\"text-center\">Hours</th>\n" +
-    "            <th class=\"text-center\">Action</th>\n" +
+    "            <th class=\"text-center\" style=\"width:140px;\">Date</th>\n" +
+    "            <th class=\"text-center\" style=\"width:80px;\">Days</th>\n" +
+    "            <th class=\"text-center\" style=\"width:320px;\">Hours</th>\n" +
+    "            <th class=\"text-center\" style=\"width:120px;\">Action</th>\n" +
     "        </tr>\n" +
     "        </thead>\n" +
     "        <tr ng-repeat=\"exception in excData track by exception.id\" ng-click=\"expandExc($event, exception)\">\n" +
-    "            <td style=\"width:30%\">\n" +
-    "                <div ng-hide=\"isExpExc(exception.id)\">{{exception.desc}}</div>\n" +
+    "            <td style=\"cursor: pointer;\">\n" +
+    "                <div ng-hide=\"isExpExc(exception.id)\"><a>{{exception.desc}}</a></div>\n" +
     "                <div ng-if=\"isExpExc(exception.id)\"><input type=\"text\" class=\"form-control\" ng-model=\"exception.desc\" ng-required /></div>\n" +
     "            </td>\n" +
-    "            <td class=\"text-center\">\n" +
+    "            <td class=\"text-center\" style=\"cursor: pointer;\">\n" +
     "                <div ng-hide=\"isExpExc(exception.id)\">{{exception.datems | date : 'MMM d, y'}}</div>\n" +
     "                <div ng-if=\"isExpExc(exception.id)\">\n" +
     "\n" +
@@ -40382,28 +40382,34 @@ angular.module("manageHours/manageEx.tpl.html", []).run(["$templateCache", funct
     "                           ng-focus=\"onExcFocus($event, $index)\" />\n" +
     "                </div>\n" +
     "            </td>\n" +
-    "            <td class=\"text-center\">\n" +
+    "            <td class=\"text-center\" style=\"cursor: pointer;\">\n" +
     "                <div ng-hide=\"isExpExc(exception.id)\">{{exception.days}}</div>\n" +
     "                <div ng-if=\"isExpExc(exception.id)\"><input type=\"text\" class=\"form-control\" ng-model=\"exception.days\" ng-required /></div>\n" +
     "            </td>\n" +
     "            <td class=\"text-center\">\n" +
     "                <div class=\"row\">\n" +
-    "                    <div class=\"col-md-6\">\n" +
+    "                    <div class=\"col-md-6 form-group\">\n" +
     "                        <select class=\"form-control\" ng-model=\"exception.from\">\n" +
     "                            <option ng-repeat=\"hours in hrsFrom\" ng-selected=\"{{exception.from == hours.value}}\" ng-value=\"{{hours.value}}\">{{hours.name}}</option>\n" +
     "                        </select>\n" +
     "                    </div>\n" +
-    "                    <div class=\"col-md-6\">\n" +
+    "                    <div class=\"col-md-6 form-group\">\n" +
     "                        <select class=\"form-control\" ng-model=\"exception.to\">\n" +
     "                            <option ng-repeat=\"hours in hrsTo\" ng-selected=\"{{exception.to == hours.value}}\" ng-value=\"{{hours.value}}\">{{hours.name}}</option>\n" +
     "                        </select>\n" +
     "                    </div>\n" +
     "                </div>\n" +
     "            </td>\n" +
-    "            <td class=\"text-right\">\n" +
-    "                <button type=\"button\" class=\"btn btn-success\" ng-click=\"updateExc(exception)\" ng-show=\"isExpExc(exception.id)\" ng-disabled=\"loading\">Save</button>\n" +
-    "                <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteExc(exception, $index)\" ng-show=\"isExpExc(exception.id)\" ng-disabled=\"loading\">Delete</button>\n" +
-    "                <div ng-show=\"isExpExc(exception.id)\"><br>{{result}}</div>\n" +
+    "            <td class=\"form-group text-center\">\n" +
+    "                <div ng-show=\"isExpExc(exception.id)\">\n" +
+    "                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"updateExc(exception)\" ng-disabled=\"loading\">\n" +
+    "                        <span class=\"fa fa-fw fa-edit\"></span>\n" +
+    "                    </button>\n" +
+    "                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteExc(exception, $index)\" ng-disabled=\"loading\">\n" +
+    "                        <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                    </button>\n" +
+    "                    <br>{{result}}\n" +
+    "                </div>\n" +
     "            </td>\n" +
     "        </tr>\n" +
     "        <tr class=\"sdOpen\">\n" +
@@ -40433,7 +40439,7 @@ angular.module("manageHours/manageEx.tpl.html", []).run(["$templateCache", funct
     "                    </div>\n" +
     "                </div>\n" +
     "            </td>\n" +
-    "            <td class=\"text-right\">\n" +
+    "            <td class=\"form-group text-right\">\n" +
     "                <label for=\"isGlobal\">Create For All Libraries</label>\n" +
     "                <input type=\"checkbox\" ng-model=\"newException.isGlobal\" id=\"isGlobal\">\n" +
     "                <br>\n" +
@@ -40447,15 +40453,24 @@ angular.module("manageHours/manageEx.tpl.html", []).run(["$templateCache", funct
 
 angular.module("manageHours/manageHours.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageHours/manageHours.tpl.html",
-    "<h2>Hours Management\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-3 form-group\">\n" +
+    "        <h2>\n" +
+    "            Hours Management\n" +
+    "        </h2>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-3 form-group\">\n" +
+    "        <h2>\n" +
+    "            <select class=\"form-control\" ng-model=\"selLib\" ng-options=\"lib.name for lib in allowedLibraries.libraries\">\n" +
+    "            </select>\n" +
+    "        </h2>\n" +
+    "    </div>\n" +
+    "</div>\n" +
     "\n" +
-    "    <select class=\"form-control\" ng-model=\"selLib\" ng-options=\"lib.name for lib in allowedLibraries.libraries\">\n" +
-    "    </select>\n" +
-    "\n" +
-    "</h2>\n" +
-    "<h2 class=\"text-center\">{{selLib.name}}</h2>\n" +
-    "\n" +
-    "<p><strong>*</strong> Set From and To hours to Midnight in order to indicate Open 24 hours.</p>\n" +
+    "<div class=\"alert alert-info\" role=\"alert\">\n" +
+    "    <span class=\"fa fa-exclamation-triangle\"></span> Note: set <strong>From</strong> and <strong>To</strong> hours to\n" +
+    "    <strong>Midnight</strong> in order to indicate <strong>Open 24 hours</strong>.\n" +
+    "</div>\n" +
     "\n" +
     "<tabset justified=\"true\">\n" +
     "    <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
@@ -40524,30 +40539,41 @@ angular.module("manageHours/manageSem.tpl.html", []).run(["$templateCache", func
     "        <thead>\n" +
     "        <tr>\n" +
     "            <th>Semester</th>\n" +
-    "            <th class=\"text-center\">Sun</th>\n" +
-    "            <th class=\"text-center\">Mon</th>\n" +
-    "            <th class=\"text-center\">Tue</th>\n" +
-    "            <th class=\"text-center\">Wed</th>\n" +
-    "            <th class=\"text-center\">Thu</th>\n" +
-    "            <th class=\"text-center\">Fri</th>\n" +
-    "            <th class=\"text-center\">Sat</th>\n" +
+    "            <th class=\"text-center\" style=\"width:10%\">Sun</th>\n" +
+    "            <th class=\"text-center\" style=\"width:10%\">Mon</th>\n" +
+    "            <th class=\"text-center\" style=\"width:10%\">Tue</th>\n" +
+    "            <th class=\"text-center\" style=\"width:10%\">Wed</th>\n" +
+    "            <th class=\"text-center\" style=\"width:10%\">Thu</th>\n" +
+    "            <th class=\"text-center\" style=\"width:10%\">Fri</th>\n" +
+    "            <th class=\"text-center\" style=\"width:10%\">Sat</th>\n" +
     "        </tr>\n" +
     "        </thead>\n" +
-    "        <tr ng-repeat=\"sem in semData\" ng-click=\"expandSem($event, sem)\">\n" +
-    "            <th scope=\"row\" ng-hide=\"isExpSem(sem.dsid)\">{{sem.name}}<br>\n" +
+    "        <tr ng-repeat=\"sem in semData\" ng-click=\"expandSem($event, sem)\" style=\"cursor: pointer;\">\n" +
+    "            <th ng-hide=\"isExpSem(sem.dsid)\">\n" +
+    "                <h4><a>{{sem.name}}</a></h4>\n" +
     "                {{sem.startdate | date : 'MMM d, y'}}<br>{{sem.enddate | date : 'MMM d, y'}}\n" +
     "            </th>\n" +
-    "            <th scope=\"row\" ng-if=\"isExpSem(sem.dsid)\">{{sem.name}}<br>\n" +
-    "                <div class=\"input-group\">\n" +
+    "            <th ng-if=\"isExpSem(sem.dsid)\">\n" +
+    "                <h4><a>{{sem.name}}</a></h4>\n" +
+    "                <div class=\"col-md-7 form-group\">\n" +
+    "                    <label for=\"{{sem.dsid}}_startDate\">Start Date</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" datepicker-popup=\"{{format}}\" size=\"3\"\n" +
     "                           ng-model=\"sem.startdate\" is-open=\"sem.dp\" ng-required=\"true\" close-text=\"Close\"\n" +
-    "                           ng-focus=\"onSemFocus($event, $index)\" />\n" +
-    "                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"saveChanges(sem)\" ng-disabled=\"loading\">Save</button>\n" +
-    "                    {{result}}\n" +
-    "                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteSem(sem, $index)\" ng-disabled=\"loading\">Delete {{sem.name}}</button>\n" +
+    "                           ng-focus=\"onSemFocus($event, $index)\" id=\"{{sem.dsid}}_startDate\" placeholder=\"MM/DD/YYYY\"/>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-5 form-group\">\n" +
+    "                    <div id=\"{{sem.dsid}}_action\">\n" +
+    "                        <button type=\"button\" class=\"btn btn-success\" ng-click=\"saveChanges(sem)\" ng-disabled=\"loading\">\n" +
+    "                            <span class=\"fa fa-fw fa-edit\"></span>\n" +
+    "                        </button>\n" +
+    "                        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteSem(sem, $index)\" ng-disabled=\"loading\">\n" +
+    "                            <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                        </button><br>\n" +
+    "                        {{result}}\n" +
+    "                    </div>\n" +
     "                </div>\n" +
     "            </th>\n" +
-    "            <td class=\"text-center\" style=\"width:11%\" ng-repeat=\"day in sem.dow\">\n" +
+    "            <td class=\"text-center\" ng-repeat=\"day in sem.dow\">\n" +
     "                <div ng-hide=\"isExpSem(sem.dsid)\">\n" +
     "                    {{day.hours}}\n" +
     "                </div>\n" +
@@ -40569,24 +40595,26 @@ angular.module("manageHours/manageSem.tpl.html", []).run(["$templateCache", func
     "            <thead>\n" +
     "            <tr>\n" +
     "                <th>Semester</th>\n" +
-    "                <th class=\"text-center\">Sun</th>\n" +
-    "                <th class=\"text-center\">Mon</th>\n" +
-    "                <th class=\"text-center\">Tue</th>\n" +
-    "                <th class=\"text-center\">Wed</th>\n" +
-    "                <th class=\"text-center\">Thu</th>\n" +
-    "                <th class=\"text-center\">Fri</th>\n" +
-    "                <th class=\"text-center\">Sat</th>\n" +
+    "                <th class=\"text-center\" style=\"width:10%;\">Sun</th>\n" +
+    "                <th class=\"text-center\" style=\"width:10%;\">Mon</th>\n" +
+    "                <th class=\"text-center\" style=\"width:10%;\">Tue</th>\n" +
+    "                <th class=\"text-center\" style=\"width:10%;\">Wed</th>\n" +
+    "                <th class=\"text-center\" style=\"width:10%;\">Thu</th>\n" +
+    "                <th class=\"text-center\" style=\"width:10%;\">Fri</th>\n" +
+    "                <th class=\"text-center\" style=\"width:10%;\">Sat</th>\n" +
     "            </tr>\n" +
     "            </thead>\n" +
     "            <tr>\n" +
-    "                <th scope=\"row\">\n" +
+    "                <th>\n" +
     "                    <div class=\"input-group\">\n" +
     "                        <input type=\"text\" class=\"form-control\" ng-minlength=\"4\" ng-maxlength=\"32\" ng-model=\"newSemester.name\" placeholder=\"Semester Name\" ng-required /><br>\n" +
     "                        <input type=\"text\" class=\"form-control\" datepicker-popup=\"{{format}}\" placeholder=\"Start Date (MM/DD/YYYY)\"\n" +
     "                               ng-model=\"newSemester.startdate\" is-open=\"newSemester.dp\" ng-required=\"true\" close-text=\"Close\"\n" +
     "                               ng-focus=\"onSemFocus($event)\" />\n" +
     "                    </div>\n" +
-    "                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"createSem()\" ng-disabled=\"loading\">Create New Semester</button>\n" +
+    "                    <div class=\"form-group\">\n" +
+    "                        <button type=\"button\" class=\"btn btn-success\" ng-click=\"createSem()\" ng-disabled=\"loading\">Create New Semester</button>\n" +
+    "                    </div>\n" +
     "                    {{result}}\n" +
     "                </th>\n" +
     "                <td class=\"text-center\" style=\"width:11%\" ng-repeat=\"day in newSemester.dow\">\n" +
@@ -40872,7 +40900,7 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                                                             | startFrom:(currentPage-1)*perPage\n" +
     "                                                             | limitTo:perPage\"\n" +
     "                >\n" +
-    "                <td ng-click=\"toggleNews(news)\" style=\"cursor: pointer;\">\n" +
+    "                <td ng-click=\"toggleNews(news)\" style=\"\">\n" +
     "                    <table>\n" +
     "                        <tr>\n" +
     "                            <td>\n" +
@@ -41844,7 +41872,7 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "            </div>\n" +
     "            <div class=\"col-md-2 form-group\">\n" +
     "                <label for=\"purDate\">Purchase Date</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"MM/DD/YYYY\" ng-model=\"newSW.purch_date\"\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"YYYY-MM-DD\" ng-model=\"newSW.purch_date\"\n" +
     "                       maxlength=\"10\" id=\"purDate\">\n" +
     "            </div>\n" +
     "        </div>\n" +
@@ -42023,10 +42051,10 @@ angular.module("manageUserGroups/manageUG.tpl.html", []).run(["$templateCache", 
     "            <table class=\"table table-hover table-condensed\">\n" +
     "                <thead>\n" +
     "                <tr>\n" +
-    "                    <th>User Login</th>\n" +
-    "                    <th class=\"text-center\">Name</th>\n" +
+    "                    <th style=\"width:15%;\">User Login</th>\n" +
+    "                    <th style=\"width:15%;\" class=\"text-center\">Name</th>\n" +
     "                    <th class=\"text-center\">Access Rights to Web Applications</th>\n" +
-    "                    <th class=\"text-center\">Action</th>\n" +
+    "                    <th class=\"text-center\" style=\"width:120px;\">Action</th>\n" +
     "                </tr>\n" +
     "                </thead>\n" +
     "                <tr ng-repeat=\"user in users\" ng-click=\"expandUser(user)\">\n" +
@@ -42036,36 +42064,34 @@ angular.module("manageUserGroups/manageUG.tpl.html", []).run(["$templateCache", 
     "                    <td class=\"text-center\">\n" +
     "                        {{user.name}}\n" +
     "                    </td>\n" +
-    "                    <td class=\"text-center\">\n" +
+    "                    <td>\n" +
     "                        <div ng-show=\"isExpUser(user.id) && $index > 0\">\n" +
     "                            <div class=\"row\" ng-repeat=\"app in apps\">\n" +
-    "                                <div class=\"col-xs-4 text-right\">\n" +
+    "                                <div class=\"col-md-2 text-right\">\n" +
     "                                    <input type=\"checkbox\" ng-model=\"user.access[$index]\">\n" +
     "                                </div>\n" +
-    "                                <div class=\"col-xs-8\">\n" +
+    "                                <div class=\"col-md-10\">\n" +
     "                                    <a href=\"{{app.link}}\">{{app.appName}}</a>\n" +
     "                                </div>\n" +
     "                            </div>\n" +
     "                        </div>\n" +
-    "                        <div ng-hide=\"isExpUser(user.id) && $index > 0\">\n" +
-    "                            <div class=\"row\" ng-repeat=\"app in apps\">\n" +
-    "                                <div class=\"col-xs-4 text-right\">\n" +
-    "\n" +
-    "                                </div>\n" +
-    "                                <div class=\"col-xs-8\">\n" +
-    "                                    <div ng-show=\"user.access[$index]\">\n" +
-    "                                        <a href=\"{{app.link}}\">{{app.appName}}</a>\n" +
-    "                                    </div>\n" +
-    "                                </div>\n" +
+    "                        <div ng-hide=\"isExpUser(user.id) && $index > 0\" class=\"row text-center\">\n" +
+    "                            <div class=\"col-md-3\" ng-repeat=\"app in apps\" ng-show=\"user.access[$index]\">\n" +
+    "                                <a href=\"{{app.link}}\">{{app.appName}}</a>\n" +
     "                            </div>\n" +
     "                        </div>\n" +
     "                    </td>\n" +
     "                    <td class=\"text-center\">\n" +
-    "                        <div ng-show=\"isExpUser(user.id)\">\n" +
+    "                        <div ng-show=\"isExpUser(user.id)\" class=\"form-group\">\n" +
     "                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"updateUser(user)\" ng-disabled=\"isLoading\"\n" +
-    "                                    ng-show=\"$index > 0\">Save</button>\n" +
+    "                                    ng-show=\"$index > 0\">\n" +
+    "                                <span class=\"fa fa-fw fa-edit\"></span>\n" +
+    "                            </button>\n" +
     "                            <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteUser(user, $index)\" ng-disabled=\"isLoading\"\n" +
-    "                                    ng-show=\"$index > 0\">Remove All</button><br>\n" +
+    "                                ng-show=\"$index > 0\">\n" +
+    "                                <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                            </button>\n" +
+    "                            <br>\n" +
     "                            {{result}}\n" +
     "                        </div>\n" +
     "                    </td>\n" +
@@ -42078,20 +42104,20 @@ angular.module("manageUserGroups/manageUG.tpl.html", []).run(["$templateCache", 
     "                    <td class=\"text-center\">\n" +
     "\n" +
     "                    </td>\n" +
-    "                    <td class=\"text-center\">\n" +
+    "                    <td>\n" +
     "                        <div class=\"row\" ng-repeat=\"app in apps\">\n" +
-    "                            <div class=\"col-xs-4 text-right\">\n" +
+    "                            <div class=\"col-md-2 text-right\">\n" +
     "                                <input type=\"checkbox\" ng-model=\"newUserAccess[$index]\">\n" +
     "                            </div>\n" +
-    "                            <div class=\"col-xs-8\">\n" +
+    "                            <div class=\"col-md-10\">\n" +
     "                                <a href=\"{{app.link}}\">{{app.appName}}</a>\n" +
     "                            </div>\n" +
     "                        </div>\n" +
     "                    </td>\n" +
     "                    <td class=\"text-center\">\n" +
-    "                        <div>\n" +
+    "                        <div class=\"form-group\">\n" +
     "                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"createUser(newUser)\" ng-disabled=\"isLoading\">\n" +
-    "                                Grant Access Rights\n" +
+    "                                <span class=\"fa fa-fw fa-plus\"></span> Grant Access\n" +
     "                            </button><br>\n" +
     "                            {{result2}}\n" +
     "                        </div>\n" +
