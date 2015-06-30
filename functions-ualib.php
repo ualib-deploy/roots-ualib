@@ -38,10 +38,10 @@ function myextensionTinyMCE($init) {
     return $init;
 }
 
+add_filter('tiny_mce_before_init', 'myextensionTinyMCE' );
+
 //disable tinyMCE visual editor for all users
 //add_filter('user_can_richedit' , create_function('' , 'return false;') , 50);
-
-add_action( 'transition_post_status', 'wwm_transition_post_status', 10, 3 );
 
 add_action('init', 'ualib_child_startSession', 1);
 add_action('wp_logout', 'ualib_child_endSession');
