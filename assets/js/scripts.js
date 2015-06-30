@@ -41590,7 +41590,7 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                <div class=\"col-md-12\">\n" +
     "                    <div class=\"col-md-6 form-group\">\n" +
     "                        <label for=\"{{sw.sid}}_prodKey\">Product Key</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Product Key\" ng-model=\"sw.key\"\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Product Key\" ng-model=\"sw.pkey\"\n" +
     "                               maxlength=\"100\" id=\"{{sw.sid}}_prodKey\">\n" +
     "                    </div>\n" +
     "                    <div class=\"col-md-6 form-group\">\n" +
@@ -41786,7 +41786,7 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                            {{category.name}}\n" +
     "                        </div>\n" +
     "                    </li>\n" +
-    "                    <li class=\"list-group-item col-md-6\">\n" +
+    "                    <li class=\"list-group-item col-md-12\">\n" +
     "                        <div class=\"col-md-10\">\n" +
     "                            <select class=\"form-control\" ng-model=\"newSW.selCat\" ng-options=\"cat.name for cat in SWList.categories\">\n" +
     "                            </select>\n" +
@@ -41868,7 +41868,7 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "        <div class=\"col-md-12\">\n" +
     "            <div class=\"col-md-6 form-group\">\n" +
     "                <label for=\"prodKey\">Product Key</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Product Key\" ng-model=\"newSW.key\"\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Product Key\" ng-model=\"newSW.pkey\"\n" +
     "                       maxlength=\"100\" id=\"prodKey\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-6 form-group\">\n" +
