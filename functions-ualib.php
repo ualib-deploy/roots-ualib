@@ -38,52 +38,6 @@ function myextensionTinyMCE($init) {
     return $init;
 }
 
-add_filter('tiny_mce_before_init', 'myextensionTinyMCE' );
-
-function wwm_transition_post_status( $new_status, $old_status, $post ) {
-    if ( 'trash' == $new_status ) {
-        $uid = get_current_user_id();
-
-        $subj = 'WP page deleted';
-
-        $emailMsg = '<h3>WP user ID: ' .$uid . '</h3><br>'.PHP_EOL;
-
-        if (isset($post)){
-            $emailMsg .= '<h4>Post Data:</h4>'.PHP_EOL;
-            foreach ($post as $param => $value)
-                $emailMsg .= $param . ' => ' . $value . '<br>'.PHP_EOL;
-            $emailMsg .= '<br>'.PHP_EOL;
-        }
-        if (isset($_SERVER)){
-            $emailMsg .= '<h4>SERVER:</h4>'.PHP_EOL;
-            foreach ($_SERVER as $param => $value)
-                $emailMsg .= $param . ' => ' . $value . '<br>'.PHP_EOL;
-            $emailMsg .= '<br>'.PHP_EOL;
-        }
-        if (isset($_SESSION)){
-            $emailMsg .= '<h4>SESSION:</h4>'.PHP_EOL;
-            foreach ($_SESSION as $param => $value)
-                $emailMsg .= $param . ' => ' . $value . '<br>'.PHP_EOL;
-            $emailMsg .= '<br>'.PHP_EOL;
-        }
-
-        $headers = apache_request_headers();
-        $emailMsg .= '<h4>Headers:</h4>'.PHP_EOL;
-        foreach ($headers as $param => $value)
-            $emailMsg .= $param . ' => ' . $value . '<br>'.PHP_EOL;
-        $emailMsg .= '<br>'.PHP_EOL;
-
-        $headers = 'MIME-Version: 1.0' . "\r\n";
-        $headers .= 'Content-type: text/html; charset=UTF-8' . "\r\n";
-        $headers .= 'From: bvkrylov@ua.edu'. "\r\n";
-        $headers .= 'Reply-To: bvkrylov@ua.edu' . "\r\n";
-
-        $emailMsg = wordwrap($emailMsg, 70);
-
-        mail('bvkrylov@ua.edu', $subj, $emailMsg, $headers);
-    }
-}
-
 //disable tinyMCE visual editor for all users
 //add_filter('user_can_richedit' , create_function('' , 'return false;') , 50);
 
