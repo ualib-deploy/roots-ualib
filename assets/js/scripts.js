@@ -41523,12 +41523,12 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                    </div>\n" +
     "                    <div class=\"col-md-3 form-group\">\n" +
     "                        <label for=\"{{sw.sid}}_effectDate\">Maintenance Effective Date</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"MM/DD/YYYY\" ng-model=\"sw.main_effect\"\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"YYYY-MM-DD\" ng-model=\"sw.main_effect\"\n" +
     "                               maxlength=\"10\" id=\"{{sw.sid}}_effectDate\">\n" +
     "                    </div>\n" +
     "                    <div class=\"col-md-3 form-group\">\n" +
     "                        <label for=\"{{sw.sid}}_expDate\">Maintenance Expiration Date</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"MM/DD/YYYY\" ng-model=\"sw.main_exp\"\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"YYYY-MM-DD\" ng-model=\"sw.main_exp\"\n" +
     "                               maxlength=\"10\" id=\"{{sw.sid}}_expDate\">\n" +
     "                    </div>\n" +
     "                </div>\n" +
@@ -41561,7 +41561,7 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                    </div>\n" +
     "                    <div class=\"col-md-2 form-group\">\n" +
     "                        <label for=\"{{sw.sid}}_purDate\">Purchase Date</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"MM/DD/YYYY\" ng-model=\"sw.purch_date\"\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"YYYY-MM-DD\" ng-model=\"sw.purch_date\"\n" +
     "                               maxlength=\"10\" id=\"{{sw.sid}}_purDate\">\n" +
     "                    </div>\n" +
     "                </div>\n" +
@@ -44387,6 +44387,19 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             $scope.newSW.newLink.title = "";
             $scope.newSW.newLink.url = "";
             $scope.newSW.modules = "";
+            $scope.newSW.trf = 0;
+            $scope.newSW.po = 0;
+            $scope.newSW.num_licenses = 0;
+            $scope.newSW.trf_notes = "";
+            $scope.newSW.purch_date = "2015-1-1";
+            $scope.newSW.vendor_name = "";
+            $scope.newSW.vendor_contact = "";
+            $scope.newSW.vendor_phone = "";
+            $scope.newSW.vendor_email = "";
+            $scope.newSW.main_effect = "2015-1-1";
+            $scope.newSW.main_exp = "2015-1-1";
+            $scope.newSW.pkey = "";
+            $scope.newSW.devices = "";
 
             $scope.currentPage = 1;
             $scope.maxPageSize = 10;
