@@ -40027,12 +40027,14 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                                                         | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\n" +
     "        | startFrom:(currentPage-1)*perPage | limitTo:perPage\"\n" +
     "         ng-class=\"{sdOpen: db.show, sdOver: db.id == mOver}\" ng-mouseover=\"setOver(db)\">\n" +
-    "        <div class=\"col-md-12\" ng-click=\"toggleDB(db)\">\n" +
+    "        <div class=\"col-md-12\" ng-click=\"toggleDB(db)\" style=\"cursor: pointer;\">\n" +
     "            <div class=\"col-md-10\">\n" +
     "                <h4>\n" +
-    "                    <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"db.show\"></span>\n" +
-    "                    <span class=\"fa fa-fw fa-caret-down\" ng-show=\"db.show\"></span>\n" +
-    "                    <a href=\"{{db.url}}\">{{db.title}}</a>\n" +
+    "                    <a>\n" +
+    "                        <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"db.show\"></span>\n" +
+    "                        <span class=\"fa fa-fw fa-caret-down\" ng-show=\"db.show\"></span>\n" +
+    "                    </a>\n" +
+    "                    <a href=\"{{db.url}}\" target=\"_blank\">{{db.title}}</a>\n" +
     "                    <small>{{db.publisher}} <span ng-show=\"db.vendor.length > 0\">: {{db.vendor}}</span></small>\n" +
     "                </h4>\n" +
     "            </div>\n" +
@@ -40870,7 +40872,7 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                                                             | startFrom:(currentPage-1)*perPage\n" +
     "                                                             | limitTo:perPage\"\n" +
     "                >\n" +
-    "                <td ng-click=\"toggleNews(news)\">\n" +
+    "                <td ng-click=\"toggleNews(news)\" style=\"cursor: pointer;\">\n" +
     "                    <table>\n" +
     "                        <tr>\n" +
     "                            <td>\n" +
@@ -41314,20 +41316,22 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                                                        | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\n" +
     "        | startFrom:(currentPage-1)*perPage | limitTo:perPage\"\n" +
     "         ng-class=\"{sdOpen: sw.show, sdOver: sw.sid == mOver}\" ng-mouseover=\"setOver(sw)\">\n" +
-    "        <div class=\"col-md-12\" ng-click=\"toggleSW(sw)\">\n" +
+    "        <div class=\"col-md-12\" ng-click=\"toggleSW(sw)\" style=\"cursor: pointer;\">\n" +
     "            <table class=\"table\">\n" +
     "                <tr>\n" +
     "                    <td style=\"width: 15px;\">\n" +
-    "                        <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"sw.show\"></span>\n" +
-    "                        <span class=\"fa fa-fw fa-caret-down\" ng-show=\"sw.show\"></span>\n" +
+    "                        <a>\n" +
+    "                            <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"sw.show\"></span>\n" +
+    "                            <span class=\"fa fa-fw fa-caret-down\" ng-show=\"sw.show\"></span>\n" +
+    "                        </a>\n" +
     "                    </td>\n" +
-    "                    <td style=\"width:64px\">\n" +
+    "                    <td style=\"width:64px;\">\n" +
     "                        <img ng-hide=\"sw.picFile[0] != null\" src=\"{{sw.icon}}\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
     "                        <img ng-show=\"sw.picFile[0] != null\" ngf-src=\"sw.picFile[0]\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
     "                    </td>\n" +
     "                    <td>\n" +
     "                        <h4>\n" +
-    "                            {{sw.title}}\n" +
+    "                            <a>{{sw.title}}</a>\n" +
     "                        </h4>\n" +
     "                    </td>\n" +
     "                    <td style=\"width: 79px;\">\n" +
@@ -41493,18 +41497,18 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                    </div>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-12\">\n" +
-    "                    <div class=\"col-md-12 form-group\">\n" +
+    "                    <div class=\"col-md-6 form-group\">\n" +
     "                        <label for=\"{{sw.sid}}_cat\">Categories</label>\n" +
     "                        <ul class=\"list-group\" id=\"{{sw.sid}}_cat\">\n" +
     "                            <li class=\"list-group-item col-md-12\">\n" +
-    "                                <div class=\"col-md-2\" ng-repeat=\"category in sw.categories\">\n" +
+    "                                <div class=\"col-md-4\" ng-repeat=\"category in sw.categories\">\n" +
     "                                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteCategory(sw,category)\">\n" +
     "                                        <span class=\"fa fa-fw fa-close\"></span>\n" +
     "                                    </button>\n" +
     "                                    {{category.name}}\n" +
     "                                </div>\n" +
     "                            </li>\n" +
-    "                            <li class=\"list-group-item col-md-6\">\n" +
+    "                            <li class=\"list-group-item col-md-12\">\n" +
     "                                <div class=\"col-md-10\">\n" +
     "                                    <select class=\"form-control\" ng-model=\"sw.selCat\" ng-options=\"cat.name for cat in SWList.categories\">\n" +
     "                                    </select>\n" +
@@ -41516,6 +41520,83 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                                </div>\n" +
     "                            </li>\n" +
     "                        </ul>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-3 form-group\">\n" +
+    "                        <label for=\"{{sw.sid}}_effectDate\">Maintenance Effective Date</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"MM/DD/YYYY\" ng-model=\"sw.main_effect\"\n" +
+    "                               maxlength=\"10\" id=\"{{sw.sid}}_effectDate\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-3 form-group\">\n" +
+    "                        <label for=\"{{sw.sid}}_expDate\">Maintenance Expiration Date</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"MM/DD/YYYY\" ng-model=\"sw.main_exp\"\n" +
+    "                               maxlength=\"10\" id=\"{{sw.sid}}_expDate\">\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-12\">\n" +
+    "                    <div class=\"col-md-2 form-group\">\n" +
+    "                        <label for=\"{{sw.sid}}_trf\">TRF</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"TRF number\" ng-model=\"sw.trf\"\n" +
+    "                               maxlength=\"100\" id=\"{{sw.sid}}_trf\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-2 form-group\">\n" +
+    "                        <label for=\"{{sw.sid}}_po\">PO</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"PO number\" ng-model=\"sw.po\"\n" +
+    "                               maxlength=\"100\" id=\"{{sw.sid}}_po\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-2 form-group\">\n" +
+    "                        <label for=\"{{sw.sid}}_numL\">Number of Licenses</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Number of Licenses\" ng-model=\"sw.num_licenses\"\n" +
+    "                               maxlength=\"100\" id=\"{{sw.sid}}_numL\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-2 form-group\">\n" +
+    "                        <label for=\"{{sw.sid}}_trfNotes\">TRF Notes</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"TRF notes\" ng-model=\"sw.trf_notes\"\n" +
+    "                               maxlength=\"100\" id=\"{{sw.sid}}_trfNotes\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-2 form-group\">\n" +
+    "                        <label for=\"{{sw.sid}}_lMode\">License Mode</label>\n" +
+    "                        <select class=\"form-control\" ng-model=\"sw.selMode\" ng-options=\"mode.name for mode in SWList.licenseModes\"\n" +
+    "                                id=\"{{sw.sid}}_lMode\">\n" +
+    "                        </select>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-2 form-group\">\n" +
+    "                        <label for=\"{{sw.sid}}_purDate\">Purchase Date</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"MM/DD/YYYY\" ng-model=\"sw.purch_date\"\n" +
+    "                               maxlength=\"10\" id=\"{{sw.sid}}_purDate\">\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-12\">\n" +
+    "                    <div class=\"col-md-3 form-group\">\n" +
+    "                        <label for=\"{{sw.sid}}_vendorName\">Vendor Company Name</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Company Name\" ng-model=\"sw.vendor_name\"\n" +
+    "                               maxlength=\"60\" id=\"{{sw.sid}}_vendorName\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-3 form-group\">\n" +
+    "                        <label for=\"{{sw.sid}}_vendorContact\">Vendor Contact Name</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Contact Name\" ng-model=\"sw.vendor_contact\"\n" +
+    "                               maxlength=\"60\" id=\"{{sw.sid}}_vendorContact\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-3 form-group\">\n" +
+    "                        <label for=\"{{sw.sid}}_vendorPhone\">Vendor Phone</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Contact Phone\" ng-model=\"sw.vendor_phone\"\n" +
+    "                               maxlength=\"20\" id=\"{{sw.sid}}_vendorPhone\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-3 form-group\">\n" +
+    "                        <label for=\"{{sw.sid}}_vendorEmail\">Vendor Email</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Contact Email\" ng-model=\"sw.vendor_email\"\n" +
+    "                               maxlength=\"255\" id=\"{{sw.sid}}_vendorEmail\">\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-12\">\n" +
+    "                    <div class=\"col-md-6 form-group\">\n" +
+    "                        <label for=\"{{sw.sid}}_prodKey\">Product Key</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Product Key\" ng-model=\"sw.key\"\n" +
+    "                               maxlength=\"100\" id=\"{{sw.sid}}_prodKey\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-6 form-group\">\n" +
+    "                        <label for=\"{{sw.sid}}_apDev\">Approved for Devices</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"List of Devices\" ng-model=\"sw.devices\"\n" +
+    "                               maxlength=\"100\" id=\"{{sw.sid}}_apDev\">\n" +
     "                    </div>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-12 text-center\">\n" +
@@ -41694,7 +41775,7 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-12\">\n" +
-    "            <div class=\"col-md-12 form-group\">\n" +
+    "            <div class=\"col-md-6 form-group\">\n" +
     "                <label for=\"cat\">Categories</label>\n" +
     "                <ul class=\"list-group\" id=\"cat\">\n" +
     "                    <li class=\"list-group-item col-md-12\">\n" +
@@ -41717,6 +41798,83 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                        </div>\n" +
     "                    </li>\n" +
     "                </ul>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-3 form-group\">\n" +
+    "                <label for=\"effectDate\">Maintenance Effective Date</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"MM/DD/YYYY\" ng-model=\"newSW.main_effect\"\n" +
+    "                       maxlength=\"10\" id=\"effectDate\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-3 form-group\">\n" +
+    "                <label for=\"expDate\">Maintenance Expiration Date</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"MM/DD/YYYY\" ng-model=\"newSW.main_exp\"\n" +
+    "                       maxlength=\"10\" id=\"expDate\">\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-12\">\n" +
+    "            <div class=\"col-md-2 form-group\">\n" +
+    "                <label for=\"trf\">TRF</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"TRF number\" ng-model=\"newSW.trf\"\n" +
+    "                       maxlength=\"100\" id=\"trf\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2 form-group\">\n" +
+    "                <label for=\"po\">PO</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"PO number\" ng-model=\"newSW.po\"\n" +
+    "                       maxlength=\"100\" id=\"po\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2 form-group\">\n" +
+    "                <label for=\"numL\">Number of Licenses</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Number of Licenses\" ng-model=\"newSW.num_licenses\"\n" +
+    "                       maxlength=\"100\" id=\"numL\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2 form-group\">\n" +
+    "                <label for=\"trfNotes\">TRF Notes</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"TRF notes\" ng-model=\"newSW.trf_notes\"\n" +
+    "                       maxlength=\"100\" id=\"trfNotes\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2 form-group\">\n" +
+    "                <label for=\"lMode\">License Mode</label>\n" +
+    "                <select class=\"form-control\" ng-model=\"newSW.selMode\" ng-options=\"mode.name for mode in SWList.licenseModes\"\n" +
+    "                        id=\"lMode\">\n" +
+    "                </select>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-2 form-group\">\n" +
+    "                <label for=\"purDate\">Purchase Date</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"MM/DD/YYYY\" ng-model=\"newSW.purch_date\"\n" +
+    "                       maxlength=\"10\" id=\"purDate\">\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-12\">\n" +
+    "            <div class=\"col-md-3 form-group\">\n" +
+    "                <label for=\"vendorName\">Vendor Company Name</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Company Name\" ng-model=\"newSW.vendor_name\"\n" +
+    "                       maxlength=\"60\" id=\"vendorName\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-3 form-group\">\n" +
+    "                <label for=\"vendorContact\">Vendor Contact Name</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Contact Name\" ng-model=\"newSW.vendor_contact\"\n" +
+    "                       maxlength=\"60\" id=\"vendorContact\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-3 form-group\">\n" +
+    "                <label for=\"vendorPhone\">Vendor Phone</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Contact Phone\" ng-model=\"newSW.vendor_phone\"\n" +
+    "                       maxlength=\"20\" id=\"vendorPhone\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-3 form-group\">\n" +
+    "                <label for=\"vendorEmail\">Vendor Email</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Contact Email\" ng-model=\"newSW.vendor_email\"\n" +
+    "                       maxlength=\"255\" id=\"vendorEmail\">\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-12\">\n" +
+    "            <div class=\"col-md-6 form-group\">\n" +
+    "                <label for=\"prodKey\">Product Key</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Product Key\" ng-model=\"newSW.key\"\n" +
+    "                       maxlength=\"100\" id=\"prodKey\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-6 form-group\">\n" +
+    "                <label for=\"apDev\">Approved for Devices</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"List of Devices\" ng-model=\"newSW.devices\"\n" +
+    "                       maxlength=\"100\" id=\"apDev\">\n" +
     "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-12 text-center\">\n" +
@@ -42282,7 +42440,7 @@ angular.module("staffDirectory/staffDirectoryPeople.tpl.html", []).run(["$templa
     "                                                        | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\n" +
     "                                                        | startFrom:(currentPage-1)*perPage\n" +
     "                                                        | limitTo:perPage\">\n" +
-    "                <td ng-click=\"togglePerson(person)\">\n" +
+    "                <td ng-click=\"togglePerson(person)\" style=\"cursor: pointer;\">\n" +
     "                    <h4>\n" +
     "                        <a>\n" +
     "                            <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"person.show\"></span>\n" +
@@ -42589,6 +42747,7 @@ angular.module('common.manage', [])
             };
             var header = {};
             header["X-" + tokenName] = this.GetCookie(tokenName);
+            $http.defaults.headers.get = header;
             $http.defaults.headers.post = header;
         }
     }])
@@ -44141,12 +44300,17 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                             for (var k = 0; k < data.devices.length; k++)
                                 data.software[i].versions[j].newLoc.devices[k] = false;
                         }
+                        for (var j = 0; j < data.licenseModes.length; j++)
+                            if (data.licenseModes[j].lmid === data.software[i].lmid){
+                                data.software[i].selMode = data.licenseModes[j];
+                            }
                         data.software[i].newLink = {};
                         data.software[i].newLink.description = "";
                         data.software[i].newLink.title = "";
                         data.software[i].newLink.url = "";
                     }
                     $scope.newSW.selCat = data.categories[0];
+                    $scope.newSW.selMode = data.licenseModes[0];
                     $scope.selMap = data.maps[3];
                     $scope.newComp.selLoc = data.locations[0];
 
