@@ -39388,7 +39388,12 @@ angular.module('common.oneSearch', [])
 angular.module("calendar/calendar.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("calendar/calendar.tpl.html",
     "<div class=\"calendar\">\n" +
-    "    <h3>Typical Week Schedule</h3>\n" +
+    "    <h3>\n" +
+    "        Typical Week Schedule\n" +
+    "        <small ng-show=\"defHours[1].ts > 0\">\n" +
+    "            until {{defHours[1].ts * 1000 | date:'MMM d, y'}}\n" +
+    "        </small>\n" +
+    "    </h3>\n" +
     "    <table class=\"table table-bordered table-condensed\">\n" +
     "        <thead>\n" +
     "        <tr>\n" +
@@ -39403,7 +39408,7 @@ angular.module("calendar/calendar.tpl.html", []).run(["$templateCache", function
     "        </thead>\n" +
     "        <tbody>\n" +
     "        <tr>\n" +
-    "            <td ng-repeat=\"day in defHours.hours\">\n" +
+    "            <td ng-repeat=\"day in defHours[0].hours\">\n" +
     "                <div class=\"hours\">\n" +
     "                    {{day.hoursFrom}}\n" +
     "                    <span ng-show=\"day.hoursFrom != day.hoursTo\">\n" +
@@ -39415,7 +39420,7 @@ angular.module("calendar/calendar.tpl.html", []).run(["$templateCache", function
     "        </tbody>\n" +
     "    </table>\n" +
     "\n" +
-    "    <h3>Calendar with Exceptions</h3>\n" +
+    "    <h3>Calendar <small>Exceptions</small></h3>\n" +
     "    <nav class=\"navbar navbar-default navbar-embedded\">\n" +
     "        <button type=\"button\" class=\"btn btn-primary navbar-btn navbar-left\" ng-class=\"{'disabled': params.month <= 0}\" ng-disabled=\"params.month <= 0\" ng-click=\"getPrevMonth()\">\n" +
     "            <span class=\"fa fa-angle-left\"></span>\n" +
@@ -39620,7 +39625,7 @@ angular.module('hours.calendar', [])
             lid = cal[0].library.lid;
             library = cal[0].library.name;
             thisMonth = cal[0].calendar[$scope.params.month];
-            defHours = cal[0].defaultHours[0];
+            defHours = cal[0].defaultHours;
 
             $scope.params.lid = lid;
             $scope.library = library;
