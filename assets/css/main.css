@@ -10208,112 +10208,39 @@ footer > .sub-footer {
 }*/
 /*# sourceMappingURL=dist/ualib.news.css.map */
 /*# sourceMappingURL=/wp-content/themes/roots/assets/css/main.css.map */
-.comps-map-key {
-  border: 1px solid #555;
-  border-bottom: 1px solid #222;
-  background-color: #666;
-  width: 100%;
-}
-.comps-map-key-item {
-  color: #f0f0f0;
-  font-family: Arial, san-serif;
-  font-size: 12px;
-  float: left;
-  padding: 10px;
-  width: 140px;
-}
-.comps-map-key-item .PC,
-.comps-map-key-item .PC2,
-.comps-map-key-item .MAC {
-  margin-right: 5px;
-  float: left;
-}
 .comps-map {
   margin: 0 auto;
   position: relative;
 }
-.comps-map-comp-border {
-  width: 13px;
-  height: 13px;
-  display: block;
-  margin: -2px 0 0 -2px;
+.comp-normal {
+  color: #428bca;
+  font-size: 17px;
+  margin-top: -4px;
 }
-.comps-map-comp {
-  width: 11px;
-  height: 11px;
-  position: absolute;
-  float: left;
-}
-.PC .comps-map-comp-border {
-  background: url(//wwwdev2.lib.ua.edu/softwareList/images/sq-comp-border.png) no-repeat 0 0;
-}
-.MAC {
-  border-radius: 14px;
-}
-.MAC .comps-map-comp-border {
-  width: 14px;
-  height: 14px;
-  background: url(//wwwdev2.lib.ua.edu/softwareList/images/circ-comp-border.png) no-repeat 0 0;
-}
-.PC2 .comps-map-comp-border {
-  background: url(//wwwdev2.lib.ua.edu/softwareList/images/sq-comp-border2.png) no-repeat 0 0;
-}
-.MAC2 {
-  border-radius: 14px;
-}
-.MAC2 .comps-map-comp-border {
-  width: 14px;
-  height: 14px;
-  background: url(//wwwdev2.lib.ua.edu/softwareList/images/circ-comp-border2.png) no-repeat 0 0;
-}
-.closed .comps-map-comp-border {
-  filter: alpha(opacity=55);
-  /* internet explorer */
-  -khtml-opacity: 0.55;
-  /* khtml, old safari */
-  -moz-opacity: 0.55;
-  /* mozilla, netscape */
-  opacity: 0.55;
-  /* fx, safari, opera */
-}
-.open {
-  background-color: #b395dd;
-}
-.higlighted {
-  background-color: #ffff00;
-  -webkit-box-shadow: 5px 5px 10px #888888;
-          box-shadow: 5px 5px 10px #888888;
+.comp-normal:hover {
   cursor: pointer;
+  color: #333333;
+  font-size: 19px;
+  margin-top: -4px;
 }
-.selected {
-  background-color: #0000ff;
+.comp-selected {
+  color: #993333;
+  font-size: 19px;
+  margin-top: -4px;
+}
+.comp-turned-off {
+  color: red;
 }
 .selected-form {
   position: absolute;
-  background-color: white;
+  background-color: #f9f9f9;
   -webkit-box-shadow: 5px 5px 10px #888888;
           box-shadow: 5px 5px 10px #888888;
+  border-radius: 4px;
+  width: 450px;
 }
-.help .OoO .closed {
-  background-color: #292929;
-}
-.clear-fix:after {
-  content: ".";
-  display: block;
-  clear: both;
-  visibility: hidden;
-  line-height: 0;
-  height: 0;
-}
-.clear-fix {
-  display: inline-block;
-}
-html[xmlns] .clear-fix {
-  display: block;
-}
-* html .clear-fix {
-  height: 1%;
-  overflow: visible;
+.row-clickable:hover {
+  background-color: #f9f9f9;
 }
 .sdOpen {
   background-color: #f9f9f9;

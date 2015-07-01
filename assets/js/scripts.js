@@ -40017,7 +40017,7 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "        <pagination total-items=\"filteredDB.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
     "                    boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredDB.length > perPage\"></pagination>\n" +
     "    </div>\n" +
-    "    <div class=\"row\"\n" +
+    "    <div class=\"row row-clickable\"\n" +
     "         ng-repeat=\"db in filteredDB = (DBList.databases | filter:{title:titleStartFilter}:startTitle\n" +
     "                                                         | filter:{title:titleFilter}\n" +
     "                                                         | filter:{description:descrFilter}\n" +
@@ -40026,7 +40026,7 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                                                         | filter:{disabled:disFilter.value}\n" +
     "                                                         | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\n" +
     "        | startFrom:(currentPage-1)*perPage | limitTo:perPage\"\n" +
-    "         ng-class=\"{sdOpen: db.show, sdOver: db.id == mOver}\" ng-mouseover=\"setOver(db)\">\n" +
+    "         ng-class=\"{sdOpen: db.show}\">\n" +
     "        <div class=\"col-md-12\" ng-click=\"toggleDB(db)\" style=\"cursor: pointer;\">\n" +
     "            <div class=\"col-md-10\">\n" +
     "                <h4>\n" +
@@ -40453,17 +40453,14 @@ angular.module("manageHours/manageEx.tpl.html", []).run(["$templateCache", funct
 
 angular.module("manageHours/manageHours.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageHours/manageHours.tpl.html",
+    "<h2>\n" +
+    "    Manage Hours <small>{{selLib.name}}</small>\n" +
+    "</h2>\n" +
+    "\n" +
     "<div class=\"row\">\n" +
-    "    <div class=\"col-md-3 form-group\">\n" +
-    "        <h2>\n" +
-    "            Hours Management\n" +
-    "        </h2>\n" +
-    "    </div>\n" +
-    "    <div class=\"col-md-3 form-group\">\n" +
-    "        <h2>\n" +
-    "            <select class=\"form-control\" ng-model=\"selLib\" ng-options=\"lib.name for lib in allowedLibraries.libraries\">\n" +
-    "            </select>\n" +
-    "        </h2>\n" +
+    "    <div class=\"col-md-4 form-group\">\n" +
+    "        <select class=\"form-control\" ng-model=\"selLib\" ng-options=\"lib.name for lib in allowedLibraries.libraries\">\n" +
+    "        </select>\n" +
     "    </div>\n" +
     "</div>\n" +
     "\n" +
@@ -41187,7 +41184,7 @@ angular.module("manageSoftware/manageSoftwareComputerMaps.tpl.html", []).run(["$
     "            </div>\n" +
     "        </form>\n" +
     "    </div>\n" +
-    "    <div class=\"alert alert-success\" role=\"alert\">\n" +
+    "    <div class=\"alert alert-info\" role=\"alert\">\n" +
     "        <span class=\"fa fa-exclamation-triangle\"></span> Note: Right-click on the floor plan map in order to add a computer or left-click on existing one in order to edit it.\n" +
     "    </div>\n" +
     "    <div class=\"row\">\n" +
@@ -41198,35 +41195,49 @@ angular.module("manageSoftware/manageSoftwareComputerMaps.tpl.html", []).run(["$
     "                    clear: both;\"\n" +
     "             ng-mousedown=\"createComp($event)\"\n" +
     "            >\n" +
-    "            <div class=\"comps-map-comp open\"\n" +
+    "            <span class=\"comp-normal\"\n" +
     "                 ng-repeat=\"comp in selMap.computers\"\n" +
-    "                 ng-class=\"{'MAC': comp.type == 2, 'PC': comp.type == 1, 'higlighted': comp.compid == high, 'selected': selComp == $index}\"\n" +
-    "                 style=\"left:{{comp.mapX}}px;top:{{comp.mapY}}px;\"\n" +
-    "                 ng-mouseenter=\"highlight(comp)\" ng-mouseleave=\"highlight(-1)\"\n" +
+    "                 style=\"left:{{comp.mapX}}px;top:{{comp.mapY}}px;position: absolute;\"\n" +
     "                 ng-click=\"expand($index)\"\n" +
+    "                 ng-class=\"{\n" +
+    "                 'fa fa-windows': comp.type == 1,\n" +
+    "                 'fa fa-apple': comp.type == 2,\n" +
+    "                 'comp-selected': selComp == $index,\n" +
+    "                 'comp-turned-off': comp.status !== 1\n" +
+    "                 }\"\n" +
     "                    >\n" +
-    "            </div>\n" +
-    "            <div class=\"selected-form row\" ng-show=\"selComp >= 0\"\n" +
-    "                 style=\"left:{{selCompX}}px;top:{{selCompY}}px;width:450px;\"\n" +
-    "                    >\n" +
-    "                <div class=\"col-md-8\">\n" +
-    "                    <h4>Computer ID: {{selMap.computers[selComp].compid}}</h4>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-4 text-right\">\n" +
-    "                    <button type=\"button\" class=\"btn btn-primary\" ng-click=\"selComp = -1\" style=\"left:450px;top:-15px;\">\n" +
-    "                        <span class=\"fa fa-fw fa-close\"></span>\n" +
-    "                    </button>\n" +
+    "            </span>\n" +
+    "            <div class=\"selected-form\" ng-show=\"selComp >= 0\" style=\"left:{{selCompX}}px;top:{{selCompY}}px;\">\n" +
+    "                <div class=\"row\">\n" +
+    "                    <div class=\"col-md-8\">\n" +
+    "                        <h4>&nbsp; Computer ID: {{selMap.computers[selComp].compid}}</h4>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-4 text-right\">\n" +
+    "                        <button type=\"button\" class=\"btn btn-primary\" ng-click=\"selComp = -1\" style=\"left:450px;top:-15px;\">\n" +
+    "                            <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                        </button>\n" +
+    "                    </div>\n" +
     "                </div>\n" +
     "                <form ng-submit=\"updateComp()\">\n" +
-    "                    <div class=\"col-md-6 form-group\">\n" +
-    "                        <label for=\"sel_X\">Coordinate X</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"X\" ng-model=\"selMap.computers[selComp].mapX\" id=\"sel_X\"\n" +
-    "                               maxlength=\"4\" required>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-6 form-group\">\n" +
-    "                        <label for=\"sel_Y\">Coordinate Y</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Y\" ng-model=\"selMap.computers[selComp].mapY\" id=\"sel_Y\"\n" +
-    "                               maxlength=\"4\" required>\n" +
+    "                    <div class=\"row\">\n" +
+    "                        <div class=\"col-md-12\">\n" +
+    "                            <div class=\"col-md-4 form-group\">\n" +
+    "                                <label for=\"sel_X\">Coordinate X</label>\n" +
+    "                                <input type=\"text\" class=\"form-control\" placeholder=\"X\" ng-model=\"selMap.computers[selComp].mapX\" id=\"sel_X\"\n" +
+    "                                       maxlength=\"4\" required>\n" +
+    "                            </div>\n" +
+    "                            <div class=\"col-md-4 form-group\">\n" +
+    "                                <label for=\"sel_Y\">Coordinate Y</label>\n" +
+    "                                <input type=\"text\" class=\"form-control\" placeholder=\"Y\" ng-model=\"selMap.computers[selComp].mapY\" id=\"sel_Y\"\n" +
+    "                                       maxlength=\"4\" required>\n" +
+    "                            </div>\n" +
+    "                            <div class=\"col-md-4 form-group\">\n" +
+    "                                <label for=\"sel_status\">Status</label>\n" +
+    "                                <select class=\"form-control\" ng-model=\"selCompStatus\" ng-options=\"status.name for status in compStatus\"\n" +
+    "                                        id=\"sel_status\">\n" +
+    "                                </select>\n" +
+    "                            </div>\n" +
+    "                        </div>\n" +
     "                    </div>\n" +
     "                    <div class=\"col-md-6 form-group\">\n" +
     "                        <label for=\"sel_name\">Computer Name</label>\n" +
@@ -41257,7 +41268,7 @@ angular.module("manageSoftware/manageSoftwareComputerMaps.tpl.html", []).run(["$
     "                </form>\n" +
     "            </div>\n" +
     "            <div class=\"selected-form row\" ng-show=\"showCreate\"\n" +
-    "                 style=\"left:{{newComp.mapX}}px;top:{{newComp.mapY}}px;width:450px;\"\n" +
+    "                 style=\"left:{{newComp.mapX}}px;top:{{newComp.mapY}}px;\"\n" +
     "                    >\n" +
     "                <div class=\"col-md-8\">\n" +
     "                    <h4>New Computer</h4>\n" +
@@ -41343,12 +41354,12 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "        <pagination total-items=\"filteredSW.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
     "                    boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredSW.length > perPage\"></pagination>\n" +
     "    </div>\n" +
-    "    <div class=\"row\"\n" +
+    "    <div class=\"row row-clickable\"\n" +
     "         ng-repeat=\"sw in filteredSW = (SWList.software | filter:{title:titleFilter}\n" +
     "                                                        | filter:{description:descrFilter}\n" +
     "                                                        | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\n" +
     "        | startFrom:(currentPage-1)*perPage | limitTo:perPage\"\n" +
-    "         ng-class=\"{sdOpen: sw.show, sdOver: sw.sid == mOver}\" ng-mouseover=\"setOver(sw)\">\n" +
+    "         ng-class=\"{sdOpen: sw.show}\">\n" +
     "        <div class=\"col-md-12\" ng-click=\"toggleSW(sw)\" style=\"cursor: pointer;\">\n" +
     "            <table class=\"table\">\n" +
     "                <tr>\n" +
@@ -42691,11 +42702,11 @@ angular.module("submittedForms/submittedForms.tpl.html", []).run(["$templateCach
     "        <pagination total-items=\"filteredForms.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
     "                    boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredNews.length > 0\"></pagination>\n" +
     "    </div>\n" +
-    "    <div class=\"row\"\n" +
+    "    <div class=\"row row-clickable\"\n" +
     "         ng-repeat=\"form in filteredForms = (data.forms | filter:{title:titleFilter}\n" +
     "                                                         | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\n" +
     "        | startFrom:(currentPage-1)*perPage | limitTo:perPage\"\n" +
-    "         ng-class=\"{sdOpen: form.show, sdOver: form.sid == mOver}\" ng-mouseover=\"setOver(form)\">\n" +
+    "         ng-class=\"{sdOpen: form.show}\">\n" +
     "        <div class=\"col-md-12\" ng-click=\"toggleForms(form)\">\n" +
     "            <div class=\"col-md-10\">\n" +
     "                <h4>\n" +
@@ -42903,7 +42914,6 @@ angular.module('manage.manageDatabases', [])
                 {by:'tmpDisabled', reverse:true}
                 ];
             $scope.sortButton = $scope.sortMode;
-            $scope.mOver = 0;
             $scope.newDB = {};
             $scope.newDB.updatedBy = $window.userName;
             $scope.newDB.subjects = [];
@@ -42946,9 +42956,6 @@ angular.module('manage.manageDatabases', [])
             $scope.toggleDB = function(db){
                 $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].show =
                     !$scope.DBList.databases[$scope.DBList.databases.indexOf(db)].show;
-            };
-            $scope.setOver = function(db){
-                $scope.mOver = db.id;
             };
             $scope.sortBy = function(by){
                 if ($scope.sortMode === by)
@@ -44331,17 +44338,17 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                             for (var k = 0; k < data.devices.length; k++)
                                 data.software[i].versions[j].newLoc.devices[k] = false;
                         }
-                        for (var j = 0; j < data.licenseModes.length; j++)
+/*                        for (var j = 0; j < data.licenseModes.length; j++)
                             if (data.licenseModes[j].lmid === data.software[i].lmid){
                                 data.software[i].selMode = data.licenseModes[j];
                             }
-                        data.software[i].newLink = {};
+  */                      data.software[i].newLink = {};
                         data.software[i].newLink.description = "";
                         data.software[i].newLink.title = "";
                         data.software[i].newLink.url = "";
                     }
                     $scope.newSW.selCat = data.categories[0];
-                    $scope.newSW.selMode = data.licenseModes[0];
+//                    $scope.newSW.selMode = data.licenseModes[0];
                     $scope.selMap = data.maps[3];
                     $scope.newComp.selLoc = data.locations[0];
 
@@ -44405,7 +44412,6 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                 {by:'status', reverse:false}
             ];
             $scope.sortButton = $scope.sortMode;
-            $scope.mOver = 0;
             $scope.appURL = appURL;
 
             $scope.newSW.versions = [];
@@ -44447,9 +44453,6 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             $scope.toggleSW = function(sw){
                 $scope.SWList.software[$scope.SWList.software.indexOf(sw)].show =
                     !$scope.SWList.software[$scope.SWList.software.indexOf(sw)].show;
-            };
-            $scope.setOver = function(sw){
-                $scope.mOver = sw.sid;
             };
             $scope.sortBy = function(by){
                 if ($scope.sortMode === by)
@@ -45029,6 +45032,11 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
         $scope.newComp.name = "";
         $scope.newComp.selType = $scope.os[0];
         $scope.showCreate = false;
+        $scope.compStatus = [
+            {name: 'Off', value: 0},
+            {name: 'On', value: 1}
+        ];
+        $scope.selCompStatus = $scope.compStatus[0];
 
         $scope.highlight = function(comp){
             $scope.high = comp.compid;
@@ -45043,6 +45051,10 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                     $scope.selCompOS = $scope.os[0];
                 else
                     $scope.selCompOS = $scope.os[1];
+                if (comp.status == 1)
+                    $scope.selCompStatus = $scope.compStatus[1];
+                else
+                    $scope.selCompStatus = $scope.compStatus[0];
                 for (var i = 0; i < $scope.SWList.locations.length; i++)
                     if ($scope.SWList.locations[i].lid == comp.lid){
                         $scope.selCompLoc = $scope.SWList.locations[i];
@@ -45093,7 +45105,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                         newComputer.mid = $scope.newComp.mid;
                         newComputer.mapX = $scope.newComp.mapX;
                         newComputer.mapY = $scope.newComp.mapY;
-                        newComputer.status = 0;
+                        newComputer.status = 1;
                         $scope.SWList.maps[$scope.SWList.maps.indexOf($scope.selMap)].computers.push(newComputer);
                         $scope.showCreate = false;
                         $scope.compResponse = "Computer has been added!";
@@ -45129,6 +45141,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
         $scope.updateComp = function(){
             $scope.SWList.maps[$scope.SWList.maps.indexOf($scope.selMap)].computers[$scope.selComp].type = $scope.selCompOS.value;
             $scope.SWList.maps[$scope.SWList.maps.indexOf($scope.selMap)].computers[$scope.selComp].lid = $scope.selCompLoc.lid;
+            $scope.SWList.maps[$scope.SWList.maps.indexOf($scope.selMap)].computers[$scope.selComp].status = $scope.selCompStatus.value;
             swFactory.postData({action : 14}, $scope.SWList.maps[$scope.SWList.maps.indexOf($scope.selMap)].computers[$scope.selComp])
                 .success(function(data, status, headers, config) {
                     if (data == 1){
@@ -45847,7 +45860,6 @@ angular.module('manage.submittedForms', [])
             ];
             $scope.sortMode = 0;
             $scope.sortButton = $scope.sortMode;
-            $scope.mOver = 0;
 
             tokenFactory("CSRF-libForms");
 
@@ -45864,9 +45876,6 @@ angular.module('manage.submittedForms', [])
                     console.log(data);
                 });
 
-            $scope.setOver = function(form){
-                $scope.mOver = form.fid;
-            };
             $scope.toggleForms = function(form){
                 $scope.data.forms[$scope.data.forms.indexOf(form)].show =
                     !$scope.data.forms[$scope.data.forms.indexOf(form)].show;
