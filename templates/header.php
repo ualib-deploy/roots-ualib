@@ -281,10 +281,10 @@ if (defined('GROUP_ANY_WEBAPP'))
                                             </div>
                                             <div class="row">
                                                 <div class="col-sm-12 col-md-4">
-                                                    <a class="service-card" href="<?php echo site_url(); ?>/services/disability-services/">
+                                                    <a class="service-card" href="<?php echo site_url(); ?>/services/Accessibility/">
                                                         <span class="fa fa-wheelchair"></span>
-                                                        <h4>Disability Services</h4>
-                                                        <p>Accommodations for library users with disabilities</p>
+                                                        <h4>Accessibility</h4>
+                                                        <p>Library services and access for users with disabilities</p>
                                                     </a>
                                                 </div>
                                                 <div class="col-sm-12 col-md-4">
