@@ -42570,9 +42570,9 @@ angular.module("staffDirectory/staffDirectoryPeople.tpl.html", []).run(["$templa
     "                    <div ng-repeat=\"subject in person.subjects\" ng-hide=\"person.show\">\n" +
     "                        <a href=\"{{subject.link}}\">{{subject.subject}}</a>\n" +
     "                    </div>\n" +
-    "                    <div class=\"form-group\" ng-show=\"person.show\">\n" +
+    "                    <div class=\"col-md-12 form-group\" ng-show=\"person.show\">\n" +
     "                        <label for=\"{{person.id}}_subj\">Subjects</label>\n" +
-    "                        <div class=\"row\" id=\"{{person.id}}_subj\">\n" +
+    "                        <div id=\"{{person.id}}_subj\">\n" +
     "                            <div class=\"col-md-12\" ng-repeat=\"subject in person.subjects\">\n" +
     "                                <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteSubject(person, subject, $index)\">\n" +
     "                                    <span class=\"fa fa-fw fa-close\"></span>\n" +
@@ -44338,17 +44338,17 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                             for (var k = 0; k < data.devices.length; k++)
                                 data.software[i].versions[j].newLoc.devices[k] = false;
                         }
-/*                        for (var j = 0; j < data.licenseModes.length; j++)
+                        for (var j = 0; j < data.licenseModes.length; j++)
                             if (data.licenseModes[j].lmid === data.software[i].lmid){
                                 data.software[i].selMode = data.licenseModes[j];
                             }
-  */                      data.software[i].newLink = {};
+                        data.software[i].newLink = {};
                         data.software[i].newLink.description = "";
                         data.software[i].newLink.title = "";
                         data.software[i].newLink.url = "";
                     }
                     $scope.newSW.selCat = data.categories[0];
-//                    $scope.newSW.selMode = data.licenseModes[0];
+                    $scope.newSW.selMode = data.licenseModes[0];
                     $scope.selMap = data.maps[3];
                     $scope.newComp.selLoc = data.locations[0];
 
