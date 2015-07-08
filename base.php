@@ -28,7 +28,7 @@
             <?php
                 if(isset($fields['multipage_menu'])){
                     set_query_var('multipage_menu', $fields['multipage_menu']);
-                    get_template_part('page', 'multipage-menu');
+                    get_template_part('templates/content', 'page-submenu');
                 }
             else{
                 include roots_template_path();
