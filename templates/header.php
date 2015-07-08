@@ -79,7 +79,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                         <ul class="dropdown-menu onsearch-box">
                             <li>
                                 <div class="yamm-content" ng-controller="OneSearchCtrl">
-                                    <form ng-submit="search()">
+                                    <form ng-submit="search()" class="onesearch-form">
 
                                         <suggest-one-search prompt="Search all library resources" model="searchText" search="search">
 

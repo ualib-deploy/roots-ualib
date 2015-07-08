@@ -19,20 +19,27 @@
       <?php
         $fields = get_fields();
         if (is_array($fields['jumbotron_header'])){
+
             get_template_part('templates/jumbotron-header');
         }
       ?>
       <div class="content container">
         <main class="main" role="main">
-          <?php
-              include roots_template_path();
-          ?>
+            <?php
+                if(isset($fields['multipage_menu'])){
+                    set_query_var('multipage_menu', $fields['multipage_menu']);
+                    get_template_part('page', 'multipage-menu');
+                }
+            else{
+                include roots_template_path();
+            }
+            ?>
         </main><!-- /.main -->
-        <?php if (roots_display_sidebar()) : ?>
-          <aside class="sidebar" role="complementary">
-            <?php include roots_sidebar_path(); ?>
-          </aside><!-- /.sidebar -->
-        <?php endif; ?>
+          <?php if (roots_display_sidebar()) : ?>
+              <aside class="sidebar" role="complementary">
+                  <?php include roots_sidebar_path(); ?>
+              </aside><!-- /.sidebar -->
+          <?php endif; ?>
       </div><!-- /.content -->
     </div><!-- /.wrap -->
   </div>
