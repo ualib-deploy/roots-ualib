@@ -26,7 +26,7 @@
       <div class="content container">
         <main class="main" role="main">
             <?php
-                if(isset($fields['multipage_menu'])){
+                if(isset($fields['multipage_menu']) && $fields['multipage_menu'] !== false){
                     set_query_var('multipage_menu', $fields['multipage_menu']);
                     get_template_part('templates/content-page-submenu');
                 }
