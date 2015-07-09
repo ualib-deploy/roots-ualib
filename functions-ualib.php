@@ -23,6 +23,27 @@ function ualib_scripts() {
     );
 }
 
+function add_manage_admin_bar_link() {
+    global $wp_admin_bar;
+    if ( !is_super_admin() || !is_admin_bar_showing() )
+        return;
+
+    @include_once WEBAPPS_PATH . "userGroupsAdmin/constants.php";
+    @include_once WEBAPPS_PATH . "userGroupsAdmin/functions.php";
+
+    if (!defined('GROUP_ANY_WEBAPP'))
+        return;
+
+    if (($wpUser = gDoesUserHaveAccessWP( GROUP_ANY_WEBAPP )) !== false){
+        $wp_admin_bar->add_menu( array(
+            'id' => 'manage_link',
+            'title' => __( 'WebApps'),
+            'href' => __(site_url()."/sample-page/user-groups-admin/")
+        ) );
+    }
+}
+add_action('admin_bar_menu', 'add_manage_admin_bar_link',25);
+
 //TinyMCE commands
 remove_filter('the_content', 'wpautop');
 remove_filter('the_excerpt', 'wpautop');
