@@ -229,7 +229,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                             <a class="service-card" href="<?php echo site_url(); ?>/services/circulation-services/">
                                                 <span class="fa fa-book"></span>
                                                 <h4>Borrow, Renew, and Course Reserves</h4>
-                                                <p>Checkout library materials and find instructor provided resources for your class</p>
+                                                <p>Check out library materials and find instructor provided resources for your class</p>
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-9">
