@@ -37764,8 +37764,8 @@ angular.module('ualib.ui')
 angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("bento/bento.tpl.html",
     "<div class=\"bento-box-container\">\n" +
-    "    <div class=\"bento-box-menu-container hidden-xs\">\n" +
-    "        <nav class=\"bento-box-menu navbar navbar-default navbar-static-top\" ui-scrollfix=\"+0\">\n" +
+    "    <div class=\"bento-box-menu-container hidden-sm\">\n" +
+    "        <nav class=\"bento-box-menu navbar navbar-default\" ui-scrollfix=\"+0\">\n" +
     "            <ul class=\"nav nav-justified\">\n" +
     "                <li ng-repeat=\"item in boxMenu\">\n" +
     "                    <a href=\"\" du-smooth-scroll=\"{{item.box}}\" ng-click=\"selectBox(item.box)\">{{item.title}}</a>\n" +
@@ -38231,6 +38231,7 @@ angular.module('oneSearch.bento', [])
                 initResultLimit(type);
                 self.boxes[type].results = {};
                 self.boxes[type].resourceLinks = {};
+                self.boxes[type].resourceLinkParams = {};
 
             });
 
@@ -38267,6 +38268,11 @@ angular.module('oneSearch.bento', [])
 
                                     // set resource "more" link
                                     self.boxes[type].resourceLinks[name] = link[engine.id];
+
+                                    // set resource link parameters by media type specified by the engine config
+                                    if (angular.isObject(engine.mediaTypes)){
+                                        self.boxes[type].resourceLinkParams[name] = engine.mediaTypes.types[type];
+                                    }
                                 }
                                 // update loading progress, setting engine as loaded for current box
                                 loadProgress(type, name);
@@ -38380,7 +38386,6 @@ angular.module('oneSearch.bento', [])
                             engineScope.items = Bento.boxes[box]['results'][engine];
 
 
-
                             if (engineScope.items && engineScope.items.length > 0){
                                 // Set isCollapsed boolean to true
                                 // For engines that have collapsible results (see /common/engines/ejournals/ejournals.tpl.html for example)
@@ -38389,7 +38394,9 @@ angular.module('oneSearch.bento', [])
                                 ///engineScope.limit = Bento.boxes[box].resultLimit;
                                 engineScope.engine = engine;
                                 engineScope.resourceLink = Bento.boxes[box]['resourceLinks'][engine];
+                                engineScope.resourceLinkParams = Bento.boxes[box]['resourceLinkParams'][engine];
                                 engineScope.boxName = titleElm.text();
+                                engineScope.mediaType = box;
                                 // When the engine's promise is ready, then load the engine's controller/template data applying
                                 // the new isolated scope.
                                 Bento.engines[engine].tpl.then(function(data){
@@ -38741,6 +38748,12 @@ angular.module('engines.catalog', [])
                     }
                 }
 
+                if (angular.isArray($scope.resourceLinkParams)){
+                    var typeParam = '&type=';
+                    var params = typeParam + $scope.resourceLinkParams.join(typeParam);
+                    $scope.resourceLink += params;
+                }
+
                 $scope.items = items;
             }
         })
@@ -38782,7 +38795,25 @@ angular.module('engines.ejournals', [])
                     journals: 'periodical'
                 }
             },
-            templateUrl: 'common/engines/ejournals/ejournals.tpl.html'
+            templateUrl: 'common/engines/ejournals/ejournals.tpl.html',
+            controller: function($scope){
+
+                var param;
+                switch ($scope.mediaType){
+                    case 'books':
+                        param = 'SS_searchTypeBook=yes';
+                        break;
+                    case 'journals':
+                        param = 'SS_searchTypeJournal=yes';
+                        break;
+                    case 'other':
+                        param = 'SS_searchTypeOther=yes'
+                }
+
+                if (param){
+                    $scope.resourceLink = $scope.resourceLink.replace('SS_searchTypeAll=yes&SS_searchTypeBook=yes&SS_searchTypeJournal=yes&SS_searchTypeOther=yes', param);
+                }
+            }
         })
     }])
 /**
@@ -38955,23 +38986,6 @@ angular.module('engines.scout', [])
 
                 $scope.resourceLink = angular.copy(link);
             }
-        })
-    }])
-angular.module('engines.subjectSpecialist', [])
-
-    .config(['oneSearchProvider', function(oneSearchProvider){
-        oneSearchProvider.engine('subjectSpecialist', {
-            id: 16,
-            priority: 2,
-            mediaTypes: {
-                path: 'displayLink',
-                types: {
-                    subjectSpecialist: ['www.lib.ua.edu', 'lib.ua.edu', 'apps.lib.ua.edu', 'brunolib.cba.ua.edu'],
-                    faq: 'ask.lib.ua.edu',
-                    libguides: 'guides.lib.ua.edu'
-                }
-            },
-            templateUrl: 'common/engines/google-cs/google-cs.tpl.html'
         })
     }])
 angular.module('filters.nameFilter', [])
@@ -41647,6 +41661,9 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                    <button type=\"submit\" class=\"btn btn-success\">Update information</button>\n" +
     "                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"unpublishSW(sw)\" ng-hide=\"sw.status == 0\">\n" +
     "                        Unpublish\n" +
+    "                    </button>\n" +
+    "                    <button type=\"button\" class=\"btn btn-primary\" ng-click=\"copySW(sw)\">\n" +
+    "                        Copy to New\n" +
     "                    </button>\n" +
     "                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteSW(sw)\">\n" +
     "                        Delete {{sw.title}} software\n" +
@@ -44630,6 +44647,19 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                             newSW.newLink.description = "";
                             newSW.newLink.title = "";
                             newSW.newLink.url = "";
+                            newSW.trf = $scope.newSW.trf;
+                            newSW.po = $scope.newSW.po;
+                            newSW.num_licenses = $scope.newSW.num_licenses;
+                            newSW.trf_notes = $scope.newSW.trf_notes;
+                            newSW.purch_date = $scope.newSW.purch_date;
+                            newSW.vendor_name = $scope.newSW.vendor_name;
+                            newSW.vendor_contact = $scope.newSW.vendor_contact;
+                            newSW.vendor_phone = $scope.newSW.vendor_phone;
+                            newSW.vendor_email = $scope.newSW.vendor_email;
+                            newSW.main_effect = $scope.newSW.main_effect;
+                            newSW.main_exp = $scope.newSW.main_exp;
+                            newSW.pkey = $scope.newSW.pkey;
+                            newSW.devices = $scope.newSW.devices;
                             $scope.SWList.software.push(newSW);
                             $scope.newSW.formResponse = "Software has been added.";
                         } else {
@@ -44645,6 +44675,9 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                     // Math.min is to fix IE which reports 200% sometimes
                     $scope.newSW.picFile.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
                 });
+            };
+            $scope.copySW = function(sw) {
+                $scope.newSW = angular.copy(sw);
             };
             $scope.validateSW = function(sw){
                 if (sw.title.length < 1)

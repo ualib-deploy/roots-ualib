@@ -9414,10 +9414,6 @@ footer > .sub-footer {
   margin-top: 10px;
 }
 /*# sourceMappingURL=/wp-content/themes/roots/assets/css/main.css.map */
-.bento-box-container .scrollfix {
-  top: 0;
-  z-index: 3000;
-}
 .bento-box-container > .row > div {
   border: 1px solid transparent;
   -webkit-transition: all 1s ease-in-out;
@@ -9452,14 +9448,15 @@ footer > .sub-footer {
 .bento-box-menu {
   background-color: #fff;
   border-color: transparent;
+  border-width: 0;
+  border-radius: 0;
   -webkit-transition: all 0.2s linear;
   -o-transition: all 0.2s linear;
   transition: all 0.2s linear;
 }
 .bento-box-menu.scrollfix {
-  border-color: #eee;
-  -webkit-box-shadow: 0px 3px 5px 0px rgba(50, 50, 50, 0.21);
-  box-shadow: 0px 3px 5px 0px rgba(50, 50, 50, 0.21);
+  -webkit-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
 }
 .bento-box-menu .nav > li > a {
   padding-top: 15px;
