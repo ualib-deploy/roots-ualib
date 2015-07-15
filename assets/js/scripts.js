@@ -46052,10 +46052,10 @@ angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", f
     "    <div class=\"col-md-9 col-md-pull-3 databases-list-container\">\n" +
     "        <p>\n" +
     "        <h4 class=\"text-right\">Showing {{pager.firstItem}} - {{pager.lastItem}} of {{pager.totalItems}} results</h4>\n" +
-    "        <div ng-if=\"activeFilters.startsWith || activeFilters.subjects || activeFilters.types\">\n" +
+    "        <div ng-if=\"!!activeFilters.startsWith || activeFilters.subjects || activeFilters.types\">\n" +
     "\n" +
     "        <ol class=\"breadcrumb facetcrumb\">\n" +
-    "            <li ng-if=\"activeFilters.startsWith\"><strong>Starts with:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"db.startsWith = ''\">\"{{db.startsWith}}\" <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "            <li ng-if=\"!!activeFilters.startsWith\"><strong>Starts with:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"db.startsWith = ''\">\"{{db.startsWith}}\" <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
     "            <li ng-if=\"activeFilters.subjects\"><strong>Subjects:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"db.subjects[subject] = false\" ng-repeat=\"(subject, key) in db.subjects\">{{subject}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
     "            <li ng-if=\"activeFilters.types\"><strong>Types:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"db.types[type] = false\" ng-repeat=\"(type, key) in db.types\">{{type}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
     "            <li class=\"pull-right\"><button type=\"button\" class=\"btn btn-primary btn-small reset-btn\" title=\"Reset filters\" ng-click=\"resetFilters()\"><i class=\"fa fa-refresh\"></i></button></li>\n" +
@@ -46065,7 +46065,7 @@ angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", f
     "\n" +
     "        </p>\n" +
     "\n" +
-    "        <div class=\"media\" ng-repeat=\"item in filteredDB | after:(pager.page-1)*pager.perPage | limitTo:20\">\n" +
+    "        <div class=\"media animate-repeat\" ng-repeat=\"item in filteredDB | after:(pager.page-1)*pager.perPage | limitTo:20\">\n" +
     "            <div class=\"media-body\">\n" +
     "\n" +
     "                <h4 class=\"media-heading\">\n" +
@@ -46093,6 +46093,14 @@ angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", f
     "                <div class=\"databases-details\" ng-if=\"item.types\">\n" +
     "                    <strong>Types of material: </strong>\n" +
     "                    <span ng-repeat=\"type in item.types\" ng-bind-html=\"type.type | highlight:db.search\"></span>\n" +
+    "                </div>\n" +
+    "                <div class=\"scout-coverage\">\n" +
+    "                    <strong>Scout coverage: </strong>\n" +
+    "                    <span class=\"fa text-info\" ng-class=\"{'fa-circle': item.notInEDS == 'Y', 'fa-adjust': item.notInEDS == 'P', 'fa-circle-o': !item.notInEDS}\">\n" +
+    "                    </span>\n" +
+    "                    <span ng-if=\"item.notInEDS == 'Y'\">Full</span>\n" +
+    "                    <span  ng-if=\"item.notInEDS == 'P'\">Partial</span>\n" +
+    "                    <span  ng-if=\"!item.notInEDS\">Not in Scout</span>\n" +
     "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
@@ -46199,6 +46207,7 @@ angular.module('ualib.databases')
     .controller('DatabasesListCtrl', ['$scope', 'databases', '$filter' ,'$location' ,'$document', function($scope, db, $filter, $location, $document){
         var databases = [];
 
+
         $scope.numAlpha = "abcdefghijklmnopqrstuvwxyz".toUpperCase().split("");
         $scope.numAlpha.unshift('0-9');
 
@@ -46225,6 +46234,7 @@ angular.module('ualib.databases')
 
             filtered = $filter('filter')(filtered, filterBySubject);
             filtered = $filter('filter')(filtered, filterByType);
+
 
             //if (newVal.search && newVal.search.length > 2){
                 filtered = $filter('filter')(filtered, newVal.search);
@@ -46810,19 +46820,85 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
     }]);
 
 
-;angular.module('ualib.staffdir.templates', ['staff-card/staff-card-list.tpl.html', 'staff-card/staff-card.tpl.html', 'staff-directory/staff-directory-facets.tpl.html', 'staff-directory/staff-directory-listing.tpl.html', 'staff-directory/staff-directory.tpl.html']);
+;angular.module('ualib.staffdir.templates', ['staff-card/staff-card-list.tpl.html', 'staff-card/staff-card-md.tpl.html', 'staff-card/staff-card-sm.tpl.html', 'staff-directory/staff-directory-facets.tpl.html', 'staff-directory/staff-directory-listing.tpl.html', 'staff-directory/staff-directory.tpl.html']);
 
 angular.module("staff-card/staff-card-list.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staff-card/staff-card-list.tpl.html",
-    "<div class=\"row\" ng-repeat=\"person in staffdir track by person.id\">\n" +
+    "<div class=\"animate-repeat\" ng-repeat=\"person in filteredList = (list | filter:staffdir.facet.search | filter:staffdir.facet.department | filter:staffdir.facet.subject:true | filter:staffdir.facet.library | filter:staffdir.specialtyType | orderBy:staffdir.sortBy:staffdir.sortReverse | alphaIndex:staffdir.sortBy) track by $index\">\n" +
+    "    <div class=\"page-slice\">\n" +
+    "        <div class=\"row\">\n" +
+    "            <div class=\"col-xs-12 col-sm-1\">\n" +
+    "                <div class=\"alpha-index-header\" ng-if=\"person.alphaIndex != filteredList[$index-1].alphaIndex\">\n" +
+    "                    <div ui-scrollfix=\"+0\">\n" +
+    "                        {{person.alphaIndex}}\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-xs-4 col-sm-3\">\n" +
+    "                <img class=\"staff-portrait thumbnail\" ng-src=\"{{person.image}}\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-xs-8\">\n" +
+    "                <div class=\"row\">\n" +
+    "                    <div class=\"col-xs-12 col-sm-7 name-plate\">\n" +
+    "                        <h3 class=\"name\">\n" +
+    "                            <small ng-if=\"person.rank\">{{person.rank}}</small>\n" +
+    "                            <span ng-class=\"{'sorting-by': staffdir.sortBy == 'firstname'}\" ng-bind-html=\"person.firstname | highlight:staffdir.facet.search\"></span> <span ng-class=\"{'sorting-by': staffdir.sortBy == 'lastname'}\" ng-bind-html=\"person.lastname | highlight:staffdir.facet.search\"></span>\n" +
+    "                        </h3>\n" +
+    "                        <h4 class=\"title\"><span ng-bind-html=\"person.title | highlight:staffdir.facet.search\"></span></h4>\n" +
+    "                        <h5 class=\"hidden-xs\"><span ng-bind-html=\"person.department | highlight:staffdir.facet.search\"></span></h5>\n" +
     "\n" +
-    "        <div class=\"staff-card\" staff-person=\"person\"></div>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-xs-12 col-sm-5\">\n" +
+    "                        <ul class=\"fa-ul\">\n" +
+    "                            <li ng-if=\"person.phone\"><span class=\"fa fa-phone fa-li\"></span>{{person.phone}}</li>\n" +
+    "                            <li class=\"hidden-xs\" ng-if=\"person.fax\"><span class=\"fa fa-fax fa-li\"></span>{{person.fax}}</li>\n" +
+    "                            <li ng-if=\"person.email\"><span class=\"fa fa-envelope fa-li\"></span>{{person.email}}</li>\n" +
+    "                        </ul>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-sm-12 subject-specialty hidden-xs\" ng-if=\"person.subjects\">\n" +
+    "                        <table class=\"table table-condensed\">\n" +
+    "                            <thead>\n" +
+    "                            <tr>\n" +
+    "                                <th>Subject specialty</th>\n" +
+    "                                <th class=\"text-center\">Selector</th>\n" +
+    "                                <th class=\"text-center\">Instruction</th>\n" +
+    "                            </tr>\n" +
+    "                            </thead>\n" +
+    "                            <tbody>\n" +
+    "                            <tr ng-repeat=\"subject in person.subjects | orderBy:subject.subject\">\n" +
+    "                                <td>\n" +
+    "                                    <a ng-href=\"{{subject.link}}\" title=\"{{subject.subject}}\" ng-if=\"subject.link\" ng-bind-html=\"subject.subject | highlight:staffdir.facet.search\"></a>\n" +
+    "                                    <span ng-if=\"!subject.link\" ng-bind-html=\"subject.subject | highlight:staffdir.facet.search\">{{subject.subject}}</span>\n" +
+    "                                </td>\n" +
+    "                                <td class=\"text-center\"><span class=\"fa fa-circle text-info\" ng-if=\"subject.type == 1 || subject.type == 3\"></span></td>\n" +
+    "                                <td class=\"text-center\"><span class=\"fa fa-circle text-info\" ng-if=\"subject.type > 1\"></span></td>\n" +
+    "                            </tr>\n" +
+    "                            </tbody>\n" +
+    "                        </table>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
     "\n" +
+    "<div class=\"alert alert-warning text-center\" role=\"alert\" ng-if=\"filteredList.length < 1\">\n" +
+    "    <h2>\n" +
+    "        No staff members found\n" +
+    "        <span ng-if=\"staffdir.facet.library\"> in {{staffdir.facet.library}}</span>\n" +
+    "        <span ng-if=\"staffdir.facet.selector\"> that are subject selectors</span>\n" +
+    "        <span ng-if=\"staffdir.facet.instructor\"><span ng-if=\"staffdir.facet.selector\"> or</span> <span ng-if=\"!staffdir.facet.selector\"> that are</span> instruction librarians</span>\n" +
+    "                <span ng-if=\"staffdir.facet.subject\">\n" +
+    "                    <span ng-if=\"staffdir.facet.selector || staffdir.facet.instructor\"> for</span>\n" +
+    "                    <span ng-if=\"!staffdir.facet.selector && !staffdir.facet.instructor\"> with a specialty in</span>\n" +
+    "                     {{staffdir.facet.subject}}\n" +
+    "                </span>\n" +
+    "    </h2>\n" +
     "</div>");
 }]);
 
-angular.module("staff-card/staff-card.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("staff-card/staff-card.tpl.html",
+angular.module("staff-card/staff-card-md.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("staff-card/staff-card-md.tpl.html",
     "<div class=\"staff-card-container panel panel-default\">\n" +
     "    <div class=\"panel-body\">\n" +
     "        <div class=\"row\">\n" +
@@ -46859,25 +46935,94 @@ angular.module("staff-card/staff-card.tpl.html", []).run(["$templateCache", func
     "</div>");
 }]);
 
+angular.module("staff-card/staff-card-sm.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("staff-card/staff-card-sm.tpl.html",
+    "<div class=\"staff-card staff-card-sm panel panel-default\">\n" +
+    "    <div class=\"panel-body\">\n" +
+    "        <span class=\"name h3\"><small ng-if=\"staffPerson.rank\">{{staffPerson.rank}} </small>{{staffPerson.firstname}} {{staffPerson.lastname}}</span>\n" +
+    "            <span class=\"pull-right\">\n" +
+    "                <a href=\"\" class=\"btn btn-primary btn-lg\"><span class=\"fa fa-envelope fa-fw\"></span></a>\n" +
+    "                <a href=\"\" class=\"btn btn-primary btn-lg\"><span class=\"fa fa-phone-square fa-fw\"></span></a>\n" +
+    "            </span>\n" +
+    "<!--\n" +
+    "        <div class=\"staff-card-detail\">\n" +
+    "            <ul class=\"fa-ul\">\n" +
+    "                <li ng-if=\"staffPerson.phone\"></li>\n" +
+    "                <li ng-if=\"staffPerson.email\"></li>\n" +
+    "            </ul>\n" +
+    "        </div>-->\n" +
+    "    </div>\n" +
+    "</div>");
+}]);
+
 angular.module("staff-directory/staff-directory-facets.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staff-directory/staff-directory-facets.tpl.html",
-    "<form class=\"facets-form form-horizontal text-center\">\n" +
+    "<form class=\"facets-form\">\n" +
     "    <div class=\"form-group\">\n" +
-    "        <div class=\"col-sm-5\">\n" +
-    "            <input class=\"form-control\" id=\"directorySearch\" name=\"directorySearch\" type=\"text\" ng-model=\"staffdir.facet.search\" placeholder=\"Search...\" ng-keyup=\"changeFacet('search')\"/>\n" +
+    "        <h4>Filters</h4>\n" +
+    "    </div>\n" +
+    "    <div class=\"form-group\">\n" +
+    "        <div class=\"facet-group\">\n" +
+    "            <input class=\"form-control\" id=\"directorySearch\" name=\"directorySearch\" type=\"text\" ng-model=\"staffdir.facet.search\" placeholder=\"Keyword Search...\" ng-keyup=\"staffdir.changeFacet('search')\"/>\n" +
     "        </div>\n" +
+    "    </div>\n" +
     "\n" +
-    "        <div class=\"col-sm-5 hidden-xs\">\n" +
-    "            <select class=\"form-control\" ng-model=\"staffdir.facet.subject\" name=\"subject\" ng-options=\"subject for subject in facets.subjects\" ng-change=\"changeFacet('subject')\">\n" +
-    "                <option value=\"\">-- Select Subject Specialty --</option>\n" +
+    "    <div class=\"form-group\">\n" +
+    "        <h5>Sort by</h5>\n" +
+    "        <div class=\"facet-group\">\n" +
+    "            <div class=\"btn-group btn-group-justified\">\n" +
+    "                <label class=\"btn btn-default\" ng-model=\"staffdir.sortBy\" btn-radio=\"'lastname'\" uncheckable>Last name</label>\n" +
+    "                <label class=\"btn btn-default\" ng-model=\"staffdir.sortBy\" btn-radio=\"'firstname'\" uncheckable>First name</label>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"form-group hidden-xs hidden-sm\">\n" +
+    "        <h5>Subject specialty</h5>\n" +
+    "\n" +
+    "        <div class=\"facet-group\">\n" +
+    "\n" +
+    "            <select class=\"form-control\" ng-model=\"staffdir.facet.subject\" name=\"subject\" ng-options=\"subject for subject in facets.subjects\" ng-change=\"staffdir.changeFacet('subject')\">\n" +
+    "                <option value=\"\">-- Select Subject --</option>\n" +
+    "            </select>\n" +
+    "            <label class=\"checkbox-inline\">\n" +
+    "                <input type=\"checkbox\" id=\"selector\" ng-true-value=\"1\" ng-model=\"staffdir.facet.selector\" ng-change=\"staffdir.changeFacet('selector')\"> Selector\n" +
+    "            </label>\n" +
+    "            <label class=\"checkbox-inline\">\n" +
+    "                <input type=\"checkbox\" id=\"instructor\" ng-true-value=\"2\" ng-model=\"staffdir.facet.instructor\" ng-change=\"staffdir.changeFacet('instructor')\"> Instructor\n" +
+    "            </label>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"form-group hidden-xs hidden-sm\">\n" +
+    "        <h5>Department</h5>\n" +
+    "        <div class=\"facet-group\">\n" +
+    "            <select class=\"form-control\" ng-model=\"staffdir.facet.department\" name=\"department\" ng-options=\"department for department in facets.departments\" ng-change=\"staffdir.changeFacet('department')\">\n" +
+    "                <option value=\"\">-- Select Department --</option>\n" +
     "            </select>\n" +
     "        </div>\n" +
+    "    </div>\n" +
     "\n" +
-    "        <div class=\"col-sm-2\">\n" +
-    "            <button class=\"btn btn-primary hidden-xs\" type=\"button\" ng-click=\"clearFacet('search', 'subject')\">\n" +
-    "                <span class=\"fa fa-refresh\"></span> Reset Filters\n" +
-    "            </button>\n" +
+    "    <div class=\"form-group hidden-xs hidden-sm\">\n" +
+    "        <h5>Library</h5>\n" +
+    "        <div class=\"facet-group\">\n" +
+    "            <div class=\"radio\">\n" +
+    "                <label>\n" +
+    "                    <input type=\"radio\" ng-model=\"staffdir.facet.library\" value=\"\" checked ng-change=\"staffdir.changeFacet('department')\"> All\n" +
+    "                </label>\n" +
+    "            </div>\n" +
+    "            <div class=\"radio\" ng-repeat=\"library in facets.libraries\">\n" +
+    "                <label>\n" +
+    "                    <input type=\"radio\" ng-model=\"staffdir.facet.library\" value=\"{{library}}\" ng-change=\"staffdir.changeFacet('department')\"> {{library}}\n" +
+    "                </label>\n" +
+    "            </div>\n" +
     "        </div>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"form-group\">\n" +
+    "        <button class=\"btn btn-primary btn-block hidden-xs\" type=\"button\" ng-click=\"staffdir.clearFacets()\">\n" +
+    "            <span class=\"fa fa-fw fa-refresh\"></span> Reset Filters\n" +
+    "        </button>\n" +
     "    </div>\n" +
     "</form>");
 }]);
@@ -46949,10 +47094,27 @@ angular.module("staff-directory/staff-directory.tpl.html", []).run(["$templateCa
     "    <h1>Staff Directory</h1>\n" +
     "</div>\n" +
     "\n" +
-    "<div class=\"page-slice\">\n" +
-    "    <div class=\"staff-directory-facets\" facets=\"staffdir.facets\"></div>\n" +
+    "\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-3 col-md-push-9\">\n" +
+    "        <div class=\"staff-directory-facets\" facets=\"staffdir.facets\"></div>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-9 col-md-pull-3\">\n" +
+    "        <div ng-show=\"facets.showFacetBar\">\n" +
+    "            <ol class=\"breadcrumb facetcrumb\">\n" +
+    "                <li ng-if=\"facets.facet.department\"><strong>Department:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"facets.clearFacets('department')\">{{facets.facet.department | truncate : 20 : '...'}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                <li ng-if=\"facets.facet.library\"><strong>Library:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"facets.clearFacets('library')\">{{facets.facet.library}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                <li ng-if=\"facets.facet.subject\"><strong>Subject:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"facets.clearFacets('subject')\">{{facets.facet.subject}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                <li ng-if=\"facets.facet.selector\"><button type=\"button\" class=\"btn btn-default\" ng-click=\"facets.clearFacets('selector')\">Selector <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                <li ng-if=\"facets.facet.instructor\"><button type=\"button\" class=\"btn btn-default\" ng-click=\"facets.clearFacets('instructor')\">Instructor <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "\n" +
+    "                <li class=\"pull-right\"><button type=\"button\" class=\"btn btn-primary btn-small reset-btn\" title=\"Reset filters\" ng-click=\"facets.clearFacets()\"><i class=\"fa fa-refresh\"></i></button></li>\n" +
+    "            </ol>\n" +
+    "        </div>\n" +
+    "        <div class=\"staff-directory-listing\" list=\"staffdir.list\" sort-by=\"lastname\"></div>\n" +
+    "    </div>\n" +
     "</div>\n" +
-    "<div class=\"staff-directory-listing\" list=\"staffdir.list\" sort-by=\"lastname\"></div>\n" +
+    "\n" +
     "\n" +
     "\n" +
     "");
@@ -46973,6 +47135,20 @@ angular.module("staff-directory/staff-directory.tpl.html", []).run(["$templateCa
 angular.module('staffdir', ['ualib.staffdir']);
 ;angular.module('ualib.staffdir')
 
+    // Capture any existing URL facet parameters.
+    .run(['StaffDirectoryService', '$location', function(SDS, $location){
+        var params = $location.search();
+        for (var param in params){
+            //TODO: This must be temporary. Any URI param will cause the facet bar to display on load!!
+            if (!SDS.showFacetBar) {
+                SDS.showFacetBar = true;
+            }
+            SDS.facet[param] = params[param];
+        }
+
+
+    }])
+
     .service('StaffDirectoryService', ['$location', function($location){
         var self = this; //ensures proper contest in closure statements
         this.sortBy = ''; // Default sort column, can be overridden via 'sortBy' attribute for staffDirectory directive
@@ -46980,47 +47156,55 @@ angular.module('staffdir', ['ualib.staffdir']);
         this.sortable = {}; // reference object for sortable columns
         this.facet = {}; // Object to hold filter values based on available facets (empty object means no filtering).
 
-        // reset all facets
-        this.resetFacets = function(){
-            self.facet = {};
-        };
-
+        //TODO: handle this variable through a central route/event instead of on a function-by-function basis
+        this.showFacetBar = false;
 
         // Accepts string or array arguments of facets to clear
         this.clearFacets = function(){
+            var args = arguments.length ? arguments : Object.keys(self.facet);
+            var omitKeys = Array.prototype.concat.apply(Array.prototype, args);
             var copy = {};
-            var omitKeys = Array.prototype.concat.apply(Array.prototype, arguments);
-            console.log(omitKeys);
 
             Object.keys(self.facet).map(function(key){
                 if (omitKeys.indexOf(key) === -1) {
                     copy[key] = self.facet[key];
                 }
-            });
-            console.log(copy);
-            angular.copy(copy, self.facet);
-            console.log(self.facet);
-        };
-
-
-
-        /**
-         * Inspired by Angular UI Router library omit() function
-         * https://github.com/angular-ui/ui-router/blob/master/src/common.js
-         */
-        // extracted from underscore.js
-        // Return a copy of the object omitting the blacklisted properties.
-        function omit(obj) {
-            var copy = {};
-            var omitKeys = Array.prototype.concat.apply(Array.prototype, Array.prototype.slice.call(arguments, 1));
-            console.log(omitKeys);
-            Object.keys(obj).map(function(key, index){
-                if (omitKeys.indexOf(key) === -1) {
-                    copy[key] = obj[key];
+                else{
+                    $location.search(key, null);
                 }
             });
-            return copy;
+            console.log(isEmptyObj(copy));
+            self.showFacetBar = !isEmptyObj(copy);
+            self.facet = angular.copy(copy);
+        };
+        
+        this.changeFacet = function(facet){
+            var val = (self.facet.hasOwnProperty(facet) && self.facet[facet] !== '' && self.facet[facet] !== false) ? self.facet[facet] : null;
+            $location.search(facet, val);
+            self.showFacetBar = !isEmptyObj(self.facet);
+        };
+
+        this.specialtyType = function(staff){
+            var type = (self.facet.selector | self.facet.instructor);
+            if (type){
+                return staff.subjects.filter(function(subj){
+                        var isType = (subj.type & type) === type;
+                        return self.facet.subject ? (self.facet.subject === subj.subject) && isType : isType;
+                    }).length > 0;
+            }
+            return true;
+        };
+
+        function isEmptyObj(obj){
+            var name;
+            for (name in obj){
+                if (obj[name]){
+                    return false;
+                }
+            }
+            return true;
         }
+
     }]);;angular.module('ualib.staffdir')
 
     .factory('StaffFactory', ['$resource', function($resource){
@@ -47028,8 +47212,14 @@ angular.module('staffdir', ['ualib.staffdir']);
             directory: function(){
                 return $resource('https://wwwdev2.lib.ua.edu/staffDir/api/people', {}, {cache: true});
             },
-            person: function(){
-                return $resource('https://wwwdev2.lib.ua.edu/staffDir/api/person', {}, {cache: true});
+            byEmail: function(){
+                return $resource('https://wwwdev2.lib.ua.edu/staffDir/api/people/search/email/:email', {}, {cache: true});
+            },
+            byName: function(){
+                return $resource('https://wwwdev2.lib.ua.edu/staffDir/api/people/search/firstname/:firstname/lastname/:lastname', {}, {cache: true});
+            },
+            byId: function(){
+                return $resource('https://wwwdev2.lib.ua.edu/staffDir/api/people/search/id/:id', {}, {cache: true});
             }
         };
     }]);;angular.module('ualib.staffdir')
@@ -47059,13 +47249,67 @@ angular.module('staffdir', ['ualib.staffdir']);
         };
     }])
 
-    .directive('staffCard', [function(){
+    .directive('staffCard', ['StaffFactory', function(StaffFactory){
         return {
-            restrict: 'AC',
+            restrict: 'EA',
             scope: {
-                staffPerson: '='
+                person: '@',
+                size: '@'
             },
-            templateUrl: 'staff-card/staff-card.tpl.html'
+            templateUrl: function(tElem, tAttrs){
+                var tpl = 'staff-card/';
+
+                switch (tAttrs.size){
+                    case 'xs':
+                        tpl += 'staff-card-xs.tpl.html';
+                        break;
+                    case 'sm':
+                        tpl += 'staff-card-sm.tpl.html';
+                        break;
+                    default:
+                        tpl += 'staff-card-md.tpl.html';
+                }
+
+                return tpl;
+            },
+            link: function(scope, elm){
+                console.log(scope.person);
+                if (angular.isDefined(scope.person)){
+                    scope.info = {};
+
+
+                    if (angular.isNumber(scope.person)){
+                        StaffFactory.byId().get({id: scope.person})
+                            .$promise.then(function(data){
+                                scope.staffPerson = data.list[0];
+                            }, function(){
+                                console.log('Staffdir Error -- Come on, put in proper error handling already');
+                            });
+                    }
+                    else {
+                        var p = scope.person.split(/\s/);
+
+                        if (p.length > 1){
+                            console.log({firstname: p[0], lastname: p[1]});
+                            StaffFactory.byName().get({firstname: p[0], lastname: p[1]})
+                                .$promise.then(function(data){
+                                    scope.staffPerson = data.list[0];
+                                }, function(){
+                                    console.log('Staffdir Error -- Come on, put in proper error handling already');
+                                });
+                        }
+                        else {
+                            StaffFactory.byEmail().get({email: p[0]})
+                                .$promise.then(function(data){
+                                    scope.staffPerson = data.list[0];
+                                }, function(){
+                                    console.log('Staffdir Error -- Come on, put in proper error handling already');
+                                });
+                        }
+                    }
+
+                }
+            }
         };
     }]);
 
@@ -47083,16 +47327,6 @@ angular.module('staffdir', ['ualib.staffdir']);
                         facets: {} //Object for available facets
                     };
 
-                    function extend(target) {
-                        var sources = [].slice.call(arguments, 1);
-                        sources.forEach(function (source) {
-                            for (var prop in source) {
-                                target[prop] = source[prop];
-                            }
-                        });
-                        return target;
-                    }
-
                     return StaffFactory.directory().get()
                         .$promise.then(function(data){
                             // Build new object of only subject that currently have a subject/research expert
@@ -47100,6 +47334,10 @@ angular.module('staffdir', ['ualib.staffdir']);
                             var list = [];
                             angular.forEach(data.list, function(val){
                                 delete val.division;
+                                if (angular.isUndefined(val.image)){
+                                    //TODO: temporary work around because CMS file handling is dumb. Fix and make sustainable!!!
+                                    val.image = '/wp-content/themes/roots-ualib/assets/img/user-profile.png';
+                                }
                                 list.push(val);
                                 if (angular.isDefined(val.subjects) && val.subjects.length > 0){
                                     angular.forEach(val.subjects, function(subject){
@@ -47112,6 +47350,16 @@ angular.module('staffdir', ['ualib.staffdir']);
                             staff.facets.subjects = subj.map(function(s){
                                 return s.subject;
                             });
+                            // get libraries
+                            staff.facets.libraries = data.libraries.map(function(lib){
+                                return lib.name;
+                            });
+
+                            // get libraries
+                            staff.facets.departments = data.departments.map(function(dept){
+                                return dept.name;
+                            });
+
                             // get list of people
                             staff.list = list;
 
@@ -47125,8 +47373,10 @@ angular.module('staffdir', ['ualib.staffdir']);
         });
     }])
 
-    .controller('StaffDirCtrl', ['$scope', 'StaffDir', function($scope, StaffDir){
+    .controller('StaffDirCtrl', ['$scope', 'StaffDir', 'StaffDirectoryService', function($scope, StaffDir, SDS){
+        $scope.filteredItems = [];
         $scope.staffdir = StaffDir;
+        $scope.facets = SDS;
     }])
 
     .directive('staffDirectoryListing', ['StaffDirectoryService', function(SDS){
@@ -47136,8 +47386,8 @@ angular.module('staffdir', ['ualib.staffdir']);
                 list: '=',
                 sortBy: '@'
             },
-            templateUrl: 'staff-directory/staff-directory-listing.tpl.html',
-            controller: function($scope, $element){
+            templateUrl: 'staff-card/staff-card-list.tpl.html',
+            controller: function($scope){
                 $scope.staffdir = SDS;
 
                 SDS.sortBy = angular.isDefined($scope.sortBy) ? $scope.sortBy : 'lastname';
@@ -47169,54 +47419,19 @@ angular.module('staffdir', ['ualib.staffdir']);
             templateUrl: 'staff-directory/staff-directory-facets.tpl.html',
             controller: function($scope){
                 $scope.staffdir = SDS;
-
-                // Sync any URI search params on initial load
-                var params = $location.search();
-                for (var param in params){
-                    SDS.facet[param] = params[param];
-                }
-
-                $scope.clearFacet = function(){
-                    var copy = {};
-                    var omitKeys = Array.prototype.concat.apply(Array.prototype, arguments);
-
-                    Object.keys(SDS.facet).map(function(key){
-                        if (omitKeys.indexOf(key) === -1) {
-                            copy[key] = SDS.facet[key];
-                        }
-                        else{
-                            $location.search(key, null);
-                        }
-                    });
-                    SDS.facet = copy;
-
-                };
-
-                $scope.changeFacet = function(facet){
-                    var val = (SDS.facet.hasOwnProperty(facet) && SDS.facet[facet] !== '') ? SDS.facet[facet] : null;
-                    $location.search(facet, val);
-                };
-
-            },
-            link: function(scope){
-                /*var facetWatcher = scope.$watch('staffdir.facet', function(newVal, oldVal){
-                    for (var facet in newVal){
-                        if (newVal[facet] !== ''){
-                            var val = facet === 'subject' ? newVal[facet].subject : newVal[facet];
-                            $location.search(facet, val);
-                        }
-                        else {
-                            $location.search(facet, null);
-                        }
-                    }
-                }, true);
-
-                scope.$on('$destroy', function(){
-                    facetWatcher();
-                });*/
             }
         };
-    }]);;angular.module('ualib.softwareList.templates', ['software-list/software-list.tpl.html']);
+    }])
+
+    .filter('alphaIndex', function(){
+        return function(items, indexProp){
+            var alphaIndexed = items.map(function(item){
+                item.alphaIndex = item[indexProp].charAt(0).toUpperCase();
+                return item;
+            });
+            return alphaIndexed;
+        };
+    });;angular.module('ualib.softwareList.templates', ['software-list/software-list.tpl.html']);
 
 angular.module("software-list/software-list.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("software-list/software-list.tpl.html",
@@ -47893,6 +48108,34 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "    </div>\n" +
     "</div>");
 }]);
+;/*
+(function() {
+    tinymce.create('tinymce.plugins.typekit', {
+        setup : function(ed) {
+            ed.onInit.add(function(ed, evt) {
+
+                // Load a script from a specific URL using the global script loader
+                tinymce.ScriptLoader.load('somescript.js');
+
+                // Load a script using a unique instance of the script loader
+                var scriptLoader = new tinymce.dom.ScriptLoader();
+
+                scriptLoader.load('somescript.js');
+
+            });
+        },
+    getInfo: function() {
+    return {
+        longname:  'TypeKit',
+        author:    'Thomas Griffin',
+        authorurl: 'https://thomasgriffin.io',
+        infourl:   'https://twitter.com/jthomasgriffin',
+        version:   '1.0'
+    };
+}
+});
+tinymce.PluginManager.add('typekit', tinymce.plugins.typekit);
+})();*/
 ;/* ========================================================================
  * DOM-based Routing
  * Based on http://goo.gl/EUTi53 by Paul Irish
