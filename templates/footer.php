@@ -13,7 +13,7 @@
             <li><a href="<?php echo site_url(); ?>/about-ua-libraries/mission-statement/">Mission Statement</a></li>
             <li><a href="<?php echo site_url(); ?>/site-map">Site Map</a></li>
             <li><a href="<?php echo site_url(); ?>/about-ua-libraries/support-ua-libraries/">Support UA Libraries</a></li>
-            <li><a href="<?php echo site_url(); ?>/services/library-information-for-current-students/about-the-libraries/employment/">Employment</a></li>
+            <li><a href="<?php echo site_url(); ?>/about-ua-libraries/employment-2/">Employment</a></li>
           </ul>
         </div>
 
@@ -46,13 +46,13 @@
         <div class="col-sm-3" >
           <h4>Collections</h4>
           <ul class="footer-list">
-            <li><a href="https://wwwdev2.lib.ua.edu/collections/williams/">A.S. Williams Collection</a></li>
-            <li><a href="https://wwwdev2.lib.ua.edu/collections/wade-hall-collection/">Wade Hall Collection</a></li>
-            <li><a href="https://wwwdev2.lib.ua.edu/collections/the-david-walker-lupton-african-american-cookbook-collection/">Lupton Collection</a></li>
-            <li><a href="https://wwwdev2.lib.ua.edu/collections/map-collections/">Map Collection</a></li>
-            <li><a href="https://wwwdev2.lib.ua.edu/collections/rare-book-collection/">Rare Book Collection</a></li>
-            <li><a href="https://wwwdev2.lib.ua.edu/collections/university-archives/">University Archives and Records Management</a></li>
-            <li><i><a href="https://wwwdev2.lib.ua.edu/collections/major-collections-summaries/">More Collections...</a></i></li>
+            <li><a href="<?php echo site_url(); ?>/collections/williams/">A.S. Williams Collection</a></li>
+            <li><a href="<?php echo site_url(); ?>/collections/wade-hall-collection/">Wade Hall Collection</a></li>
+            <li><a href="<?php echo site_url(); ?>/collections/the-david-walker-lupton-african-american-cookbook-collection/">Lupton Collection</a></li>
+            <li><a href="<?php echo site_url(); ?>/collections/map-collections/">Map Collection</a></li>
+            <li><a href="<?php echo site_url(); ?>/collections/rare-book-collection/">Rare Book Collection</a></li>
+            <li><a href="<?php echo site_url(); ?>/collections/university-archives/">University Archives and Records Management</a></li>
+            <li><i><a href="<?php echo site_url(); ?>/collections/major-collections-summaries/">More Collections...</a></i></li>
           </ul>
        </div>
 

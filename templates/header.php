@@ -336,7 +336,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="<?php echo site_url(); ?>/services/library-information-for-current-students/about-the-libraries/">
+                                            <a class="service-card" href="<?php echo site_url(); ?>about-ua-libraries/about-the-libraries/">
                                                 <span class="fa fa-university"></span>
                                                 <h4>About the Libraries</h4>
                                                 <p>Information about each of our branch libraries</p>
