@@ -48108,34 +48108,6 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "    </div>\n" +
     "</div>");
 }]);
-;/*
-(function() {
-    tinymce.create('tinymce.plugins.typekit', {
-        setup : function(ed) {
-            ed.onInit.add(function(ed, evt) {
-
-                // Load a script from a specific URL using the global script loader
-                tinymce.ScriptLoader.load('somescript.js');
-
-                // Load a script using a unique instance of the script loader
-                var scriptLoader = new tinymce.dom.ScriptLoader();
-
-                scriptLoader.load('somescript.js');
-
-            });
-        },
-    getInfo: function() {
-    return {
-        longname:  'TypeKit',
-        author:    'Thomas Griffin',
-        authorurl: 'https://thomasgriffin.io',
-        infourl:   'https://twitter.com/jthomasgriffin',
-        version:   '1.0'
-    };
-}
-});
-tinymce.PluginManager.add('typekit', tinymce.plugins.typekit);
-})();*/
 ;/* ========================================================================
  * DOM-based Routing
  * Based on http://goo.gl/EUTi53 by Paul Irish
@@ -48232,8 +48204,10 @@ $(document).ready(UTIL.loadEvents);
     .run(['$routeParams', '$location', '$rootScope', function($routeParams, $location, $rootScope){
         $rootScope.$on('$routeChangeSuccess', function(e, current, pre) {
             $rootScope.appClass = $location.path().split('/')[1];
-            if ($rootScope.appClass === 'home'){
+            if ($rootScope.appClass === 'home') {
                 $rootScope.appClass = 'front-page';
+                var bgNum = (Math.floor(Math.random() * 1000) % 12) + 1;
+                $rootScope.appStyle = {"background": "url('wp-content/themes/roots-ualib/assets/img/quad-sunset-lg_" + bgNum + ".jpg') no-repeat center center fixed"};
             }
             $rootScope.appClass += ' webapp';
         });

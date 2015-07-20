@@ -1,5 +1,5 @@
 <?php get_template_part('templates/head'); ?>
-<body <?php body_class(); ?> ng-class="appClass">
+<body <?php body_class(); ?> ng-class="appClass" ng-style="appStyle">
 
   <!--[if lt IE 8]>
     <div class="alert alert-warning">

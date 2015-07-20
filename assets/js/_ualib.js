@@ -31,8 +31,10 @@ angular.module('ualib', [
     .run(['$routeParams', '$location', '$rootScope', function($routeParams, $location, $rootScope){
         $rootScope.$on('$routeChangeSuccess', function(e, current, pre) {
             $rootScope.appClass = $location.path().split('/')[1];
-            if ($rootScope.appClass === 'home'){
+            if ($rootScope.appClass === 'home') {
                 $rootScope.appClass = 'front-page';
+                var bgNum = (Math.floor(Math.random() * 1000) % 12) + 1;
+                $rootScope.appStyle = {"background": "url('wp-content/themes/roots-ualib/assets/img/quad-sunset-lg_" + bgNum + ".jpg') no-repeat center center fixed"};
             }
             $rootScope.appClass += ' webapp';
         });
