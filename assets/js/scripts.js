@@ -44093,6 +44093,7 @@ angular.module('manage.manageNews', ['ngFileUpload'])
                             if ((typeof response.data === 'object') && (response.data !== null)){
                                 $scope.data.news[$scope.data.news.indexOf(news)].images = [];
                                 $scope.data.news[$scope.data.news.indexOf(news)].images = angular.copy(response.data.images);
+                                news.picFile = [];
                                 $scope.data.news[$scope.data.news.indexOf(news)].formResponse = "News has been updated, images have been uploaded.";
                             } else {
                                 $scope.data.news[$scope.data.news.indexOf(news)].formResponse = 
