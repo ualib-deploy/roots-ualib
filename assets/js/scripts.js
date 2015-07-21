@@ -43902,7 +43902,7 @@ angular.module('manage.manageNews', ['ngFileUpload'])
     })
 
     //from http://codepen.io/paulbhartzog/pen/Ekztl?editors=101
-    .value('uiTinymceConfig', {plugins: 'link spellchecker'})
+    .value('uiTinymceConfig', {plugins: 'link spellchecker', toolbar: 'undo redo | bold italic | link', menubar : false})
     .directive('uiTinymce', ['uiTinymceConfig', function(uiTinymceConfig) {
         uiTinymceConfig = uiTinymceConfig || {};
         var generatedIds = 0;
