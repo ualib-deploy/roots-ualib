@@ -40811,7 +40811,7 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                            <label for=\"uploaded\">Uploaded Images</label>\n" +
     "                            <div id=\"uploaded\">\n" +
     "                                <div class=\"col-md-3\" ng-repeat=\"img in newNews.picFile\">\n" +
-    "                                    <img ngf-src=\"img\" class=\"thumb\" width=\"150px\" height=\"100px\">\n" +
+    "                                    <img ngf-src=\"img\" width=\"150px\" height=\"100px\">\n" +
     "                                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"newNews.picFile.splice($index,1)\">\n" +
     "                                        <span class=\"fa fa-fw fa-close\"></span>\n" +
     "                                    </button>\n" +
@@ -40978,13 +40978,13 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                                <label for=\"{{news.nid}}_uploaded\">Uploaded Images</label>\n" +
     "                                <div id=\"{{news.nid}}_uploaded\">\n" +
     "                                    <div class=\"col-md-3\" ng-repeat=\"img in news.images\">\n" +
-    "                                        <img ngf-src=\"img.image\" class=\"thumb\" width=\"150px\" height=\"100px\">\n" +
+    "                                        <img src=\"{{img.image}}\" width=\"150px\" height=\"100px\">\n" +
     "                                        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"news.images.splice($index,1)\">\n" +
     "                                            <span class=\"fa fa-fw fa-close\"></span>\n" +
     "                                        </button>\n" +
     "                                    </div>\n" +
     "                                    <div class=\"col-md-3\" ng-repeat=\"img in news.picFile\">\n" +
-    "                                        <img ngf-src=\"img\" class=\"thumb\" width=\"150px\" height=\"100px\">\n" +
+    "                                        <img ngf-src=\"img\" width=\"150px\" height=\"100px\">\n" +
     "                                        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"news.picFile.splice($index,1)\">\n" +
     "                                            <span class=\"fa fa-fw fa-close\"></span>\n" +
     "                                        </button>\n" +
