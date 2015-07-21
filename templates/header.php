@@ -12,7 +12,7 @@ if (defined('GROUP_ANY_WEBAPP'))
     <nav class="navbar navbar-static-top navbar-mega-inverse" role="navigation">
         <div class="container-fluid">
             <div class="navbar-header">
-                <a class="navbar-brand" href="<?php echo get_settings('home'); ?>">
+                <a class="navbar-brand" href="<?php echo get_settings('home'); ?>/#/home">
                     <img src="<?php print get_template_directory_uri(); ?>/assets/img/ualib-logo-textonly-inverse.png" class="hidden-xs" rel="home" alt="University of Alabama Libraries"/>
                     <span class="visible-xs">UA Libraries</span>
                 </a>
