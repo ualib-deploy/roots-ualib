@@ -40948,7 +40948,7 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                            <div class=\"col-md-2 form-group\">\n" +
     "                                <label for=\"{{news.nid}}_sticky\">Sticky</label>\n" +
     "                                <div class=\"checkbox text-center\" id=\"{{news.nid}}_sticky\">\n" +
-    "                                    <input type=\"checkbox\" ng-model=\"newNews.sticky\" ng-true-value=\"1\" ng-false-value=\"0\">\n" +
+    "                                    <input type=\"checkbox\" ng-model=\"news.sticky\" ng-true-value=\"1\" ng-false-value=\"0\">\n" +
     "                                </div>\n" +
     "                            </div>\n" +
     "                            <div class=\"col-md-2 form-group\">\n" +
