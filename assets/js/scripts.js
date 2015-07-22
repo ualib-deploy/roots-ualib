@@ -42126,12 +42126,9 @@ angular.module("manageUserGroups/manageUG.tpl.html", []).run(["$templateCache", 
     "                    </td>\n" +
     "                </tr>\n" +
     "                <tr>\n" +
-    "                    <th scope=\"row\">\n" +
+    "                    <td colspan=\"2\">\n" +
     "                        <select class=\"form-control\" ng-model=\"newUser\" ng-options=\"user.fullName for user in wpUsers | orderBy:'name'\">\n" +
     "                        </select>\n" +
-    "                    </th>\n" +
-    "                    <td class=\"text-center\">\n" +
-    "\n" +
     "                    </td>\n" +
     "                    <td>\n" +
     "                        <div class=\"row\" ng-repeat=\"app in apps\">\n" +
