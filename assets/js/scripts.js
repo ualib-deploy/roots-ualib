@@ -42088,7 +42088,7 @@ angular.module("manageUserGroups/manageUG.tpl.html", []).run(["$templateCache", 
     "                    <th class=\"text-center\" style=\"width:120px;\">Action</th>\n" +
     "                </tr>\n" +
     "                </thead>\n" +
-    "                <tr ng-repeat=\"user in users | orderBy:name\" ng-click=\"expandUser(user)\">\n" +
+    "                <tr ng-repeat=\"user in users | orderBy:'name'\" ng-click=\"expandUser(user)\">\n" +
     "                    <th scope=\"row\">\n" +
     "                        {{user.wpLogin}}\n" +
     "                    </th>\n" +
