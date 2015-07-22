@@ -45248,9 +45248,9 @@ angular.module('manage.manageUserGroups', [])
                 active: false
             }];
 
-        $scope.sortMode = 0;
+        $scope.sortMode = 1;
         $scope.sortModes = [
-            {by:'login', reverse:false},
+            {by:'wpLogin', reverse:false},
             {by:'name', reverse:false}
         ];
 
