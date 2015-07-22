@@ -43631,6 +43631,12 @@ angular.module('manage.manageHoursUsers', [])
 
             hmFactory.getData("users")
                 .success(function(data){
+                    for (var i = 0; i < data.users.length; i++)
+                        for (var j = 0; j < $window.users.length; j++)
+                            if (data.users[i].name === $window.users[j].login) {
+                                data.users[i].fullName = $window.users[j].fullName;
+                                break;
+                            }
                     $scope.dataUL = data;
                     $scope.isLoading = false;
                     console.dir(data);
@@ -43704,6 +43710,7 @@ angular.module('manage.manageHoursUsers', [])
                         $scope.result2 = "Access granted!";
                         var createdUser = {};
                         createdUser.name = user.login;
+                        createdUser.fullName = user.fullName;
                         createdUser.uid = data.uid;
                         createdUser.role = user.admin;
                         createdUser.access = [];
