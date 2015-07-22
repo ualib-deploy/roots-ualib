@@ -42096,7 +42096,7 @@ angular.module("manageUserGroups/manageUG.tpl.html", []).run(["$templateCache", 
     "                        {{user.name}}\n" +
     "                    </td>\n" +
     "                    <td>\n" +
-    "                        <div ng-show=\"isExpUser(user.id) && $index > 0\">\n" +
+    "                        <div ng-show=\"isExpUser(user.id)\">\n" +
     "                            <div class=\"row\" ng-repeat=\"app in apps\">\n" +
     "                                <div class=\"col-md-2 text-right\">\n" +
     "                                    <input type=\"checkbox\" ng-model=\"user.access[$index]\">\n" +
@@ -42106,7 +42106,7 @@ angular.module("manageUserGroups/manageUG.tpl.html", []).run(["$templateCache", 
     "                                </div>\n" +
     "                            </div>\n" +
     "                        </div>\n" +
-    "                        <div ng-hide=\"isExpUser(user.id) && $index > 0\" class=\"row text-center\">\n" +
+    "                        <div ng-hide=\"isExpUser(user.id)\" class=\"row text-center\">\n" +
     "                            <div class=\"col-md-3\" ng-repeat=\"app in apps\" ng-show=\"user.access[$index]\">\n" +
     "                                <a href=\"{{app.link}}\">{{app.appName}}</a>\n" +
     "                            </div>\n" +
@@ -42114,12 +42114,10 @@ angular.module("manageUserGroups/manageUG.tpl.html", []).run(["$templateCache", 
     "                    </td>\n" +
     "                    <td class=\"text-center\">\n" +
     "                        <div ng-show=\"isExpUser(user.id)\" class=\"form-group\">\n" +
-    "                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"updateUser(user)\" ng-disabled=\"isLoading\"\n" +
-    "                                    ng-show=\"$index > 0\">\n" +
+    "                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"updateUser(user)\" ng-disabled=\"isLoading\">\n" +
     "                                <span class=\"fa fa-fw fa-edit\"></span>\n" +
     "                            </button>\n" +
-    "                            <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteUser(user, $index)\" ng-disabled=\"isLoading\"\n" +
-    "                                ng-show=\"$index > 0\">\n" +
+    "                            <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteUser(user, $index)\" ng-disabled=\"isLoading\">\n" +
     "                                <span class=\"fa fa-fw fa-close\"></span>\n" +
     "                            </button>\n" +
     "                            <br>\n" +
@@ -42147,7 +42145,7 @@ angular.module("manageUserGroups/manageUG.tpl.html", []).run(["$templateCache", 
     "                    </td>\n" +
     "                    <td class=\"text-center\">\n" +
     "                        <div class=\"form-group\">\n" +
-    "                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"createUser(newUser)\" ng-disabled=\"isLoading\">\n" +
+    "                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"createUser(newUser)\" ng-disabled=\"isLoading || newUser.login.length > 1\">\n" +
     "                                <span class=\"fa fa-fw fa-plus\"></span> Grant Access\n" +
     "                            </button><br>\n" +
     "                            {{result2}}\n" +
