@@ -42082,13 +42082,13 @@ angular.module("manageUserGroups/manageUG.tpl.html", []).run(["$templateCache", 
     "            <table class=\"table table-hover table-condensed\">\n" +
     "                <thead>\n" +
     "                <tr>\n" +
-    "                    <th style=\"width:15%;\">User Login</th>\n" +
-    "                    <th style=\"width:15%;\" class=\"text-center\">Name</th>\n" +
+    "                    <th style=\"width:15%;\"><a ng-click=\"sortBy(0)\">Login</a></th>\n" +
+    "                    <th style=\"width:15%;\" class=\"text-center\"><a ng-click=\"sortBy(1)\">Name</a></th>\n" +
     "                    <th class=\"text-center\">Access Rights to Web Applications</th>\n" +
     "                    <th class=\"text-center\" style=\"width:120px;\">Action</th>\n" +
     "                </tr>\n" +
     "                </thead>\n" +
-    "                <tr ng-repeat=\"user in users | orderBy:'name'\" ng-click=\"expandUser(user)\">\n" +
+    "                <tr ng-repeat=\"user in users | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse\" ng-click=\"expandUser(user)\">\n" +
     "                    <th scope=\"row\">\n" +
     "                        {{user.wpLogin}}\n" +
     "                    </th>\n" +
@@ -42145,7 +42145,7 @@ angular.module("manageUserGroups/manageUG.tpl.html", []).run(["$templateCache", 
     "                    </td>\n" +
     "                    <td class=\"text-center\">\n" +
     "                        <div class=\"form-group\">\n" +
-    "                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"createUser(newUser)\" ng-disabled=\"isLoading || newUser.login.length > 1\">\n" +
+    "                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"createUser(newUser)\" ng-disabled=\"isLoading || newUser.login.length <= 1\">\n" +
     "                                <span class=\"fa fa-fw fa-plus\"></span> Grant Access\n" +
     "                            </button><br>\n" +
     "                            {{result2}}\n" +
@@ -45248,6 +45248,12 @@ angular.module('manage.manageUserGroups', [])
                 active: false
             }];
 
+        $scope.sortMode = 0;
+        $scope.sortModes = [
+            {by:'login', reverse:false},
+            {by:'name', reverse:false}
+        ];
+
         tokenFactory("CSRF-libAdmin");
 
         $scope.expandUser = function(user){
@@ -45258,6 +45264,12 @@ angular.module('manage.manageUserGroups', [])
             if ($scope.expUser === uID)
                 return true;
             return false;
+        };
+        $scope.sortBy = function(by){
+            if ($scope.sortMode === by)
+                $scope.sortModes[by].reverse = !$scope.sortModes[by].reverse;
+            else
+                $scope.sortMode = by;
         };
 
         $scope.updateUser = function(user){
