@@ -40653,8 +40653,8 @@ angular.module("manageHours/manageUsers.tpl.html", []).run(["$templateCache", fu
     "        <th class=\"text-center\">Action</th>\n" +
     "    </tr>\n" +
     "    </thead>\n" +
-    "    <tr ng-repeat=\"user in dataUL.users\" ng-click=\"expandUser(user)\">\n" +
-    "        <th scope=\"row\">{{user.name}}\n" +
+    "    <tr ng-repeat=\"user in dataUL.users | orderBy:'name'\" ng-click=\"expandUser(user)\">\n" +
+    "        <th scope=\"row\">{{user.fullName}}\n" +
     "        </th>\n" +
     "        <td class=\"text-center\">\n" +
     "            <input type=\"checkbox\" ng-model=\"user.role\">\n" +
