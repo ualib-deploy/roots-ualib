@@ -41674,7 +41674,7 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                    </button>\n" +
     "                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteSW(sw)\">\n" +
     "                        Delete {{sw.title}} software\n" +
-    "                    </button>\n" +
+    "                    </button><br>\n" +
     "                    {{sw.formResponse}}\n" +
     "                </div>\n" +
     "            </form>\n" +
@@ -41946,7 +41946,7 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-12 form-group text-center\">\n" +
-    "            <button type=\"submit\" class=\"btn btn-success\">Create Software Record</button>\n" +
+    "            <button type=\"submit\" class=\"btn btn-success\">Create Software Record</button><br>\n" +
     "            {{newSW.formResponse}}\n" +
     "        </div>\n" +
     "    </div>\n" +
@@ -42086,8 +42086,8 @@ angular.module("manageUserGroups/manageUG.tpl.html", []).run(["$templateCache", 
     "            <table class=\"table table-hover table-condensed\">\n" +
     "                <thead>\n" +
     "                <tr>\n" +
-    "                    <th style=\"width:15%;\"><a ng-click=\"sortBy(0)\">Login</a></th>\n" +
-    "                    <th style=\"width:15%;\" class=\"text-center\"><a ng-click=\"sortBy(1)\">Name</a></th>\n" +
+    "                    <th style=\"width:15%;\"><a ng-click=\"sortBy(0)\" style=\"cursor: pointer;\">Login</a></th>\n" +
+    "                    <th style=\"width:15%;\" class=\"text-center\"><a ng-click=\"sortBy(1)\" style=\"cursor: pointer;\">Name</a></th>\n" +
     "                    <th class=\"text-center\">Access Rights to Web Applications</th>\n" +
     "                    <th class=\"text-center\" style=\"width:120px;\">Action</th>\n" +
     "                </tr>\n" +
