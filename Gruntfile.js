@@ -38,7 +38,7 @@ module.exports = function(grunt) {
     var lessFileList = [
         'assets/less/main.less',
         '<%= bower.directory %>/onesearch/src/**/*.less',
-        '<%= bower.directory %>/ualib-ui/src/**/*.less',
+        '<%= bower.directory %>/ualib-ui/dist/*.css',
         '<%= bower.directory %>/ualib-hours/dist/*.css',
         '<%= bower.directory %>/ualib_staffdir/dist/staffdir.css',
         '<%= bower.directory %>/ualib-softwareList/dist/ualib.softwareList.css',

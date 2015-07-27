@@ -57,20 +57,20 @@ function roots_scripts() {
    * Grab Google CDN's latest jQuery with a protocol relative URL; fallback to local if offline
    * It's kept in the header instead of footer to avoid conflicts with plugins.
    */
-  if (!is_admin()) {
+  /*if (!is_admin()) {
       if (current_theme_supports('jquery-cdn')){
           wp_deregister_script('jquery');
           wp_register_script('jquery', $assets['jquery'], array(), null, true);
           add_filter('script_loader_src', 'roots_jquery_local_fallback', 10, 2);
       }
-  }
+  }*/
 
   if (is_single() && comments_open() && get_option('thread_comments')) {
     wp_enqueue_script('comment-reply');
   }
 
   wp_enqueue_script('modernizr', get_template_directory_uri() . $assets['modernizr'], array(), null, true);
-  wp_enqueue_script('jquery');
+//  wp_enqueue_script('jquery');
 
     foreach($CDN as $name => $_cnd){
         wp_enqueue_script($name, $_cnd, array(), null, true);
@@ -97,7 +97,7 @@ function roots_jquery_local_fallback($src, $handle = null) {
 
   return $src;
 }
-add_action('wp_head', 'roots_jquery_local_fallback');
+//add_action('wp_head', 'roots_jquery_local_fallback');
 
 /**
  * Google Analytics snippet from HTML5 Boilerplate

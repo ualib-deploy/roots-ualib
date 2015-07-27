@@ -33351,8 +33351,8 @@ angular.module("page/templates/page.tpl.html", []).run(["$templateCache", functi
   $templateCache.put("page/templates/page.tpl.html",
     "<div class=\"row\" ng-cloak>\n" +
     "  <div class=\"col-md-9\" ng-transclude></div>\n" +
-    "  <div class=\"col-md-3 page-section-menu\">\n" +
-    "    <div ui-scrollfix>\n" +
+    "  <div class=\"col-md-3 page-section-menu hidden-xs\">\n" +
+    "    <div ui-scrollfix bound-by-parent>\n" +
     "      <ul class=\"nav nav-pills nav-stacked\">\n" +
     "        <li ng-repeat=\"section in menu\" du-scrollspy=\"{{section.link}}\">\n" +
     "          <a ng-href=\"#{{section.link}}\" du-smooth-scroll>\n" +
@@ -33407,7 +33407,7 @@ angular.module("tabs/templates/tabset.tpl.html", []).run(["$templateCache", func
  * angular-ui-bootstrap
  * http://angular-ui.github.io/bootstrap/
 
- * Version: 0.12.1 - 2015-05-27
+ * Version: 0.12.1 - 2015-07-27
  * License: MIT
  */
 angular.module("ui.bootstrap", ["ui.bootstrap.tpls", "ui.bootstrap.transition","ui.bootstrap.collapse","ui.bootstrap.accordion","ui.bootstrap.alert","ui.bootstrap.bindHtml","ui.bootstrap.buttons","ui.bootstrap.carousel","ui.bootstrap.dateparser","ui.bootstrap.position","ui.bootstrap.datepicker","ui.bootstrap.modal","ui.bootstrap.pagination","ui.bootstrap.tooltip","ui.bootstrap.popover","ui.bootstrap.progressbar","ui.bootstrap.rating","ui.bootstrap.timepicker","ui.bootstrap.typeahead"]);
@@ -37155,7 +37155,7 @@ angular.module('ualib.ui', [
     'duScroll',
     'ualib.ui.templates'
 ])
-
+    .value('duScrollBottomSpy', true)
     .value('duScrollOffset', 30);
 
 angular.module('ualib.ui')
@@ -37344,16 +37344,15 @@ angular.module('ualib.ui')
     return{
       restrict: 'C',
       transclude: true,
-        replace: true,
+      replace: true,
       templateUrl: 'page/templates/page.tpl.html',
       controller: function($scope, $element){
         var menu = $scope.menu = [];
         this.addSection = function(section){
           menu.push(section);
-          console.log(section);
-        }
+        };
 
-          $element.addClass('loaded');
+        $element.addClass('loaded');
       }
     }
   }])
@@ -37416,16 +37415,21 @@ angular.module('ualib.ui').directive('uiScrollfix', [
                 left: offsetLeft,
                 top: offsetTop
             };
-        };
+        }
         return {
             restrict: 'AC',
             require: '^?uiScrollfixTarget',
             link: function (scope, elm, attrs, uiScrollfixTarget) {
-                var absolute = true, 
+                var absolute = true,
                     shift = -30,
+                    elmWidth = elm[0].offsetWidth,
                     fixLimit,
+                    bottomLimit,
                     $target = uiScrollfixTarget && uiScrollfixTarget.$element || angular.element($window);
-                
+                var parent = angular.isDefined(attrs.boundByParent) ? elm.parent() : null;
+                console.log(angular.isDefined(attrs.boundByParent));
+                console.log(attrs);
+
                 if (!attrs.uiScrollfix) {
                     absolute = false;
                 } else if (typeof attrs.uiScrollfix === 'string') {
@@ -37445,6 +37449,15 @@ angular.module('ualib.ui').directive('uiScrollfix', [
                     // if pageYOffset is defined use it, otherwise use other crap for IE
                     var offset = uiScrollfixTarget ? $target[0].scrollTop : getWindowScrollTop();
 
+                    if (parent !== null){
+                        if (parent[0].offsetHeight + loopedOffset(parent[0]).top <= offset + elm[0].offsetHeight){
+                            elm.addClass('scrollfix-bottom-limit');
+                        }
+                        else if (elm.hasClass('scrollfix-bottom-limit')){
+                            elm.removeClass('scrollfix-bottom-limit');
+                        }
+                    }
+
                     if (!elm.hasClass('scrollfix') && offset > limit) {
                         var width = elm[0].offsetWidth;
                         elm.css('width', width + 'px');
@@ -37455,6 +37468,7 @@ angular.module('ualib.ui').directive('uiScrollfix', [
                         elm.css('width', 'auto');
                     }
                 }
+
                 $target.on('scroll', onScroll);
                 // Unbind scroll event handler when directive is removed
                 scope.$on('$destroy', function () {
@@ -38267,7 +38281,7 @@ angular.module('oneSearch.bento', [])
                                     self.boxes[type].results[name] = grouped[type];
 
                                     // set resource "more" link
-                                    self.boxes[type].resourceLinks[name] = link[engine.id];
+                                    self.boxes[type].resourceLinks[name] = decodeURIComponent(link[engine.id]);
 
                                     // set resource link parameters by media type specified by the engine config
                                     if (angular.isObject(engine.mediaTypes)){
@@ -38475,22 +38489,43 @@ angular.module('oneSearch.bento', [])
         }
     }])
 
-    .directive('bentoBoxMenu', ['Bento', '$timeout', function(Bento, $timeout){
+    .directive('bentoBoxMenu', ['Bento', '$document', '$rootScope', '$timeout', '$q', function(Bento, $document, $rootScope, $timeout, $q){
         return {
             restrict: 'AC',
             link: function(scope, elm){
+                var selected;
+                var timeout;
                 scope.boxMenu = Bento.boxMenu;
 
                 scope.selectBox = function(box){
-                    var selected = angular.element(document.getElementById(box + '-parent'));
-                    selected.addClass('box-selected');
+                    if (timeout){
+                        $timeout.cancel(timeout);
+                        $document.off('scroll', onScroll);
+                    }
 
-                    $timeout(function(){
-                        selected.removeClass('box-selected');
+                    deselect();
+                    select(box);
+
+                    timeout = $timeout(function(){
+                        $document.on('scroll', onScroll);
                     }, 500);
+                };
+
+                var select = function(box){
+                    selected = angular.element(document.getElementById(box + '-parent'));
+                    selected.addClass('box-selected');
+                };
+
+                var deselect = function(){
+                    if (selected){
+                        selected.removeClass('box-selected');
+                    }
+                };
+
+                var onScroll = function(){
+                    deselect();
+                    $document.off('scroll', onScroll);
                 }
-
-
             }
         }
     }])
@@ -48135,6 +48170,34 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "    </div>\n" +
     "</div>");
 }]);
+;/*
+(function() {
+    tinymce.create('tinymce.plugins.typekit', {
+        setup : function(ed) {
+            ed.onInit.add(function(ed, evt) {
+
+                // Load a script from a specific URL using the global script loader
+                tinymce.ScriptLoader.load('somescript.js');
+
+                // Load a script using a unique instance of the script loader
+                var scriptLoader = new tinymce.dom.ScriptLoader();
+
+                scriptLoader.load('somescript.js');
+
+            });
+        },
+    getInfo: function() {
+    return {
+        longname:  'TypeKit',
+        author:    'Thomas Griffin',
+        authorurl: 'https://thomasgriffin.io',
+        infourl:   'https://twitter.com/jthomasgriffin',
+        version:   '1.0'
+    };
+}
+});
+tinymce.PluginManager.add('typekit', tinymce.plugins.typekit);
+})();*/
 ;/* ========================================================================
  * DOM-based Routing
  * Based on http://goo.gl/EUTi53 by Paul Irish
@@ -48213,6 +48276,7 @@ $(document).ready(UTIL.loadEvents);
     'ualib.news'
 ])
 
+
     .config(['$routeProvider', function($routeProvider) {
         /**
          * Register Bento Box display route with ngRoute's $routeProvider
@@ -48225,10 +48289,11 @@ $(document).ready(UTIL.loadEvents);
                 redirectTo: '/home'
             });
 
-
     }])
 
-    .run(['$routeParams', '$location', '$rootScope', function($routeParams, $location, $rootScope){
+
+
+    .run(['$routeParams', '$location', '$rootScope', '$document', 'duScrollOffset', function($routeParams, $location, $rootScope, $document, duScrollOffset){
         $rootScope.$on('$routeChangeSuccess', function(e, current, pre) {
             $rootScope.appClass = $location.path().split('/')[1];
             if ($rootScope.appClass === 'home') {
@@ -48242,4 +48307,5 @@ $(document).ready(UTIL.loadEvents);
             }
             $rootScope.appClass += ' webapp';
         });
+
     }]);

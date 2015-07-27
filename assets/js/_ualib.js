@@ -13,6 +13,7 @@ angular.module('ualib', [
     'ualib.news'
 ])
 
+
     .config(['$routeProvider', function($routeProvider) {
         /**
          * Register Bento Box display route with ngRoute's $routeProvider
@@ -25,10 +26,11 @@ angular.module('ualib', [
                 redirectTo: '/home'
             });
 
-
     }])
 
-    .run(['$routeParams', '$location', '$rootScope', function($routeParams, $location, $rootScope){
+
+
+    .run(['$routeParams', '$location', '$rootScope', '$document', 'duScrollOffset', function($routeParams, $location, $rootScope, $document, duScrollOffset){
         $rootScope.$on('$routeChangeSuccess', function(e, current, pre) {
             $rootScope.appClass = $location.path().split('/')[1];
             if ($rootScope.appClass === 'home') {
@@ -42,4 +44,5 @@ angular.module('ualib', [
             }
             $rootScope.appClass += ' webapp';
         });
+
     }]);
