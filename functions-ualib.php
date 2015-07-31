@@ -65,7 +65,7 @@ add_filter('tiny_mce_before_init', 'myextensionTinyMCE' );
 //add_filter('user_can_richedit' , create_function('' , 'return false;') , 50);
 
 add_action('init', 'roots_ualib_startSession', 1);
-add_action('wp_login', 'roots_ualib_endSession');
+add_action('wp_login', 'roots_ualib_startSession');
 add_action('wp_logout', 'roots_ualib_endSession');
 
 add_action( 'wp_enqueue_scripts', 'roots_ualib_scripts' );
