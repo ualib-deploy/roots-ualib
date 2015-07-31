@@ -1,16 +1,16 @@
 <?php
 define( 'WEBAPPS_PATH', '/srv/web/www/webapps/' );
 
-function ualib_child_startSession() {
+function roots_ualib_startSession() {
   if(!session_id())
     session_start();
 }
 
-function ualib_child_endSession() {
+function roots_ualib_endSession() {
   session_destroy ();
 }
 
-function ualib_scripts() {
+function roots_ualib_scripts() {
     if ( is_page('news-and-exhibitions') )
         wp_enqueue_script(
             'tinyMCE',
@@ -64,9 +64,9 @@ add_filter('tiny_mce_before_init', 'myextensionTinyMCE' );
 //disable tinyMCE visual editor for all users
 //add_filter('user_can_richedit' , create_function('' , 'return false;') , 50);
 
-add_action('init', 'ualib_child_startSession', 1);
-add_action('wp_logout', 'ualib_child_endSession');
-add_action('wp_login', 'ualib_child_endSession');
+add_action('init', 'roots_ualib_startSession', 1);
+add_action('wp_login', 'roots_ualib_startSession');
+add_action('wp_logout', 'roots_ualib_endSession');
 
-add_action( 'wp_enqueue_scripts', 'ualib_scripts' );
+add_action( 'wp_enqueue_scripts', 'roots_ualib_scripts' );
 
