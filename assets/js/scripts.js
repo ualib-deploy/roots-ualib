@@ -44019,8 +44019,10 @@ angular.module('manage.manageNews', ['ngFileUpload'])
                     console.dir(data);
                     for (var i = 0; i < data.news.length; i++){
                         data.news[i].created = new Date(data.news[i].created * 1000);
-                        data.news[i].activeFrom = new Date(data.news[i].activeFrom * 1000);
-                        data.news[i].activeUntil = new Date(data.news[i].activeUntil * 1000);
+                        if (data.news[i].activeFrom !== null)
+                            data.news[i].activeFrom = new Date(data.news[i].activeFrom * 1000);
+                        if (data.news[i].activeUntil !== null)
+                            data.news[i].activeUntil = new Date(data.news[i].activeUntil * 1000);
                         for (var j = 0; j < data.people.length; j++)
                             if (data.news[i].contactID.uid === data.people[j].uid){
                                 data.news[i].contactID = data.people[j];
@@ -44330,8 +44332,14 @@ angular.module('manage.manageNews', ['ngFileUpload'])
                                 newNews.images = angular.copy(data.images);
                                 newNews.title = $scope.newNews.title;
                                 newNews.description = $scope.newNews.description;
-                                newNews.activeFrom = new Date($scope.newNews.activeFrom * 1000);
-                                newNews.activeUntil = new Date($scope.newNews.activeUntil * 1000);
+                                if ($scope.newNews.activeFrom > 0)
+                                    newNews.activeFrom = new Date($scope.newNews.activeFrom * 1000);
+                                else
+                                    newNews.activeFrom = null;
+                                if ($scope.newNews.activeUntil > 0)
+                                    newNews.activeUntil = new Date($scope.newNews.activeUntil * 1000);
+                                else
+                                    newNews.activeUntil = null;
                                 newNews.contactName = $scope.newNews.contactName;
                                 newNews.contactEmail = $scope.newNews.contactEmail;
                                 newNews.contactPhone = $scope.newNews.contactPhone;
@@ -44379,8 +44387,14 @@ angular.module('manage.manageNews', ['ngFileUpload'])
                                 newNews.images = angular.copy(response.data.images);
                                 newNews.title = $scope.newNews.title;
                                 newNews.description = $scope.newNews.description;
-                                newNews.activeFrom = new Date($scope.newNews.activeFrom * 1000);
-                                newNews.activeUntil = new Date($scope.newNews.activeUntil * 1000);
+                                if ($scope.newNews.activeFrom > 0)
+                                    newNews.activeFrom = new Date($scope.newNews.activeFrom * 1000);
+                                else
+                                    newNews.activeFrom = null;
+                                if ($scope.newNews.activeUntil > 0)
+                                    newNews.activeUntil = new Date($scope.newNews.activeUntil * 1000);
+                                else
+                                    newNews.activeUntil = null;
                                 newNews.contactName = $scope.newNews.contactName;
                                 newNews.contactEmail = $scope.newNews.contactEmail;
                                 newNews.contactPhone = $scope.newNews.contactPhone;
