@@ -40982,13 +40982,13 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                        <div class=\"col-md-2 form-group\">\n" +
     "                            <label for=\"from\">Active From</label>\n" +
     "                            <input type=\"text\" class=\"form-control\" id=\"from\" datepicker-popup=\"{{dpFormat}}\"\n" +
-    "                                   ng-model=\"newNews.activeFrom\" is-open=\"newNews.dpFrom\" ng-required=\"true\" close-text=\"Close\"\n" +
+    "                                   ng-model=\"newNews.activeFrom\" is-open=\"newNews.dpFrom\" close-text=\"Close\"\n" +
     "                                   ng-focus=\"onNewsDPFocusFrom($event)\"/>\n" +
     "                        </div>\n" +
     "                        <div class=\"col-md-2 form-group\">\n" +
     "                            <label for=\"until\">Active Until</label>\n" +
     "                            <input type=\"text\" class=\"form-control\" id=\"until\" datepicker-popup=\"{{dpFormat}}\"\n" +
-    "                                   ng-model=\"newNews.activeUntil\" is-open=\"newNews.dpUntil\" ng-required=\"true\" close-text=\"Close\"\n" +
+    "                                   ng-model=\"newNews.activeUntil\" is-open=\"newNews.dpUntil\" close-text=\"Close\"\n" +
     "                                   ng-focus=\"onNewsDPFocusUntil($event)\"/>\n" +
     "                        </div>\n" +
     "                    </div>\n" +
