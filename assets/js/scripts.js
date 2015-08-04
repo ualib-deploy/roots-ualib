@@ -4665,7 +4665,7 @@ angular.module('ui.utils',  [
  * AngularJS file upload/drop directive and service with progress and abort
  * FileAPI Flash shim for old browsers not supporting FormData
  * @author  Danial  <danial.farid@gmail.com>
- * @version 5.0.9
+ * @version 6.0.3
  */
 
 (function () {
@@ -5093,7 +5093,7 @@ if (!window.FileReader) {
 /**!
  * AngularJS file upload/drop directive and service with progress and abort
  * @author  Danial  <danial.farid@gmail.com>
- * @version 5.0.9
+ * @version 6.0.3
  */
 
 if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
@@ -5114,7 +5114,9 @@ if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
 
 var ngFileUpload = angular.module('ngFileUpload', []);
 
-ngFileUpload.version = '5.0.9';
+ngFileUpload.version = '6.0.3';
+ngFileUpload.defaults = {};
+
 ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, $timeout) {
   function sendHttp(config) {
     config.method = config.method || 'POST';
@@ -5287,274 +5289,373 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
       };
     return sendHttp(config);
   };
+
+  this.dataUrl = function (file, callback, disallowObjectUrl) {
+    if (window.FileReader && file &&
+      (!window.FileAPI || navigator.userAgent.indexOf('MSIE 8') === -1 || file.size < 20000) &&
+      (!window.FileAPI || navigator.userAgent.indexOf('MSIE 9') === -1 || file.size < 4000000)) {
+      $timeout(function () {
+        //prefer URL.createObjectURL for handling refrences to files of all sizes
+        //since it doesn´t build a large string in memory
+        var URL = window.URL || window.webkitURL;
+        if (URL && URL.createObjectURL && !disallowObjectUrl) {
+          callback(URL.createObjectURL(file));
+        } else {
+          var fileReader = new FileReader();
+          fileReader.readAsDataURL(file);
+          fileReader.onload = function (e) {
+            $timeout(function () {
+              callback(e.target.result);
+            });
+          };
+        }
+      });
+    } else {
+      callback(null);
+    }
+  };
+
+  this.setDefaults = function(defaults) {
+    ngFileUpload.defaults = defaults || {};
+  };
 }
 
 ]);
 
 (function () {
-    ngFileUpload.directive('ngfSelect', ['$parse', '$timeout', '$compile',
-        function ($parse, $timeout, $compile) {
-            return {
-                restrict: 'AEC',
-                require: '?ngModel',
-                link: function (scope, elem, attr, ngModel) {
-                    linkFileSelect(scope, elem, attr, ngModel, $parse, $timeout, $compile);
-                }
-            };
-        }]);
+  ngFileUpload.getAttrWithDefaults = function(attr, name) {
+    return attr[name] != null ? attr[name] :
+      (ngFileUpload.defaults[name] == null ?
+        ngFileUpload.defaults[name] : ngFileUpload.defaults[name].toString());
+  };
 
-    function linkFileSelect(scope, elem, attr, ngModel, $parse, $timeout, $compile) {
-        /** @namespace attr.ngfSelect */
-        /** @namespace attr.ngfChange */
-        /** @namespace attr.ngModel */
-        /** @namespace attr.ngModelRejected */
-        /** @namespace attr.ngfMultiple */
-        /** @namespace attr.ngfCapture */
-        /** @namespace attr.ngfAccept */
-        /** @namespace attr.ngfMaxSize */
-        /** @namespace attr.ngfMinSize */
-        /** @namespace attr.ngfResetOnClick */
-        /** @namespace attr.ngfResetModelOnClick */
-        /** @namespace attr.ngfKeep */
-        /** @namespace attr.ngfKeepDistinct */
+  var getAttr = ngFileUpload.getAttrWithDefaults;
 
-        if (elem.attr('__ngf_gen__')) {
-            return;
+  ngFileUpload.directive('ngfSelect', ['$parse', '$timeout', '$compile',
+    function ($parse, $timeout, $compile) {
+      return {
+        restrict: 'AEC',
+        require: '?ngModel',
+        link: function (scope, elem, attr, ngModel) {
+          linkFileSelect(scope, elem, attr, ngModel, $parse, $timeout, $compile);
         }
+      };
+    }]);
 
-        scope.$on('$destroy', function () {
-            if (elem.$$ngfRefElem) elem.$$ngfRefElem.remove();
-        });
+  function linkFileSelect(scope, elem, attr, ngModel, $parse, $timeout, $compile) {
+    /** @namespace attr.ngfSelect */
+    /** @namespace attr.ngfChange */
+    /** @namespace attr.ngModel */
+    /** @namespace attr.ngModelRejected */
+    /** @namespace attr.ngfModel */
+    /** @namespace attr.ngfMultiple */
+    /** @namespace attr.ngfCapture */
+    /** @namespace attr.ngfAccept */
+    /** @namespace attr.ngfMaxSize */
+    /** @namespace attr.ngfMinSize */
+    /** @namespace attr.ngfResetOnClick */
+    /** @namespace attr.ngfResetModelOnClick */
+    /** @namespace attr.ngfKeep */
+    /** @namespace attr.ngfKeepDistinct */
 
-        var disabled = false;
-        if (attr.ngfSelect.search(/\W+$files\W+/) === -1) {
-            scope.$watch(attr.ngfSelect, function (val) {
-                disabled = val === false;
-            });
-        }
-        function isInputTypeFile() {
-            return elem[0].tagName.toLowerCase() === 'input' && attr.type && attr.type.toLowerCase() === 'file';
-        }
+    if (elem.attr('__ngf_gen__')) {
+      return;
+    }
 
-        var isUpdating = false;
+    scope.$on('$destroy', function () {
+      if (elem.$$ngfRefElem) elem.$$ngfRefElem.remove();
+    });
 
-        function changeFn(evt) {
-            if (!isUpdating) {
-                isUpdating = true;
-                try {
-                    var fileList = evt.__files_ || (evt.target && evt.target.files);
-                    var files = [], rejFiles = [];
+    var disabled = false;
+    if (getAttr(attr, 'ngfSelect').search(/\W+$files\W+/) === -1) {
+      scope.$watch(getAttr(attr, 'ngfSelect'), function (val) {
+        disabled = val === false;
+      });
+    }
+    function isInputTypeFile() {
+      return elem[0].tagName.toLowerCase() === 'input' && attr.type && attr.type.toLowerCase() === 'file';
+    }
 
-                    for (var i = 0; i < fileList.length; i++) {
-                        var file = fileList.item(i);
-                        if (validate(scope, $parse, attr, file, evt)) {
-                            files.push(file);
-                        } else {
-                            rejFiles.push(file);
-                        }
-                    }
-                    updateModel($parse, $timeout, scope, ngModel, attr, attr.ngfChange || attr.ngfSelect, files, rejFiles, evt);
-                    if (files.length === 0) evt.target.value = files;
+    var isUpdating = false;
+
+    function changeFn(evt) {
+      if (!isUpdating) {
+        isUpdating = true;
+        try {
+          var fileList = evt.__files_ || (evt.target && evt.target.files);
+          var files = [], rejFiles = [];
+
+          for (var i = 0; i < fileList.length; i++) {
+            var file = fileList.item(i);
+            if (validate(scope, $parse, attr, file, evt)) {
+              files.push(file);
+            } else {
+              rejFiles.push(file);
+            }
+          }
+          updateModel($parse, $timeout, scope, ngModel, attr,
+            getAttr(attr, 'ngfChange') || getAttr(attr, 'ngfSelect'), files, rejFiles, evt);
+          if (files.length === 0) evt.target.value = files;
 //                if (evt.target && evt.target.getAttribute('__ngf_gen__')) {
 //                    angular.element(evt.target).remove();
 //                }
-                } finally {
-                    isUpdating = false;
-                }
-            }
+        } finally {
+          isUpdating = false;
         }
-
-        function bindAttrToFileInput(fileElem) {
-            if (attr.ngfMultiple) fileElem.attr('multiple', $parse(attr.ngfMultiple)(scope));
-            if (attr.ngfCapture) fileElem.attr('capture', $parse(attr.ngfCapture)(scope));
-            if (attr.accept) fileElem.attr('accept', attr.accept);
-            for (var i = 0; i < elem[0].attributes.length; i++) {
-                var attribute = elem[0].attributes[i];
-                if ((isInputTypeFile() && attribute.name !== 'type') ||
-                    (attribute.name !== 'type' && attribute.name !== 'class' &&
-                    attribute.name !== 'id' && attribute.name !== 'style')) {
-                    fileElem.attr(attribute.name, attribute.value);
-                }
-            }
-        }
-
-        function createFileInput(evt, resetOnClick) {
-            if (!resetOnClick && (evt || isInputTypeFile())) return elem.$$ngfRefElem || elem;
-
-            var fileElem = angular.element('<input type="file">');
-            bindAttrToFileInput(fileElem);
-
-            if (isInputTypeFile()) {
-                elem.replaceWith(fileElem);
-                elem = fileElem;
-                fileElem.attr('__ngf_gen__', true);
-                $compile(elem)(scope);
-            } else {
-                fileElem.css('visibility', 'hidden').css('position', 'absolute').css('overflow', 'hidden')
-                    .css('width', '0px').css('height', '0px').css('z-index', '-100000').css('border', 'none')
-                    .css('margin', '0px').css('padding', '0px').attr('tabindex', '-1');
-                if (elem.$$ngfRefElem) {
-                    elem.$$ngfRefElem.remove();
-                }
-                elem.$$ngfRefElem = fileElem;
-                document.body.appendChild(fileElem[0]);
-            }
-
-            return fileElem;
-        }
-
-        function resetModel(evt) {
-            updateModel($parse, $timeout, scope, ngModel, attr, attr.ngfChange || attr.ngfSelect, [], [], evt, true);
-        }
-
-        function clickHandler(evt) {
-            if (elem.attr('disabled') || disabled) return false;
-            if (evt != null) {
-                evt.preventDefault();
-                evt.stopPropagation();
-            }
-            var resetOnClick = $parse(attr.ngfResetOnClick)(scope) !== false;
-            var fileElem = createFileInput(evt, resetOnClick);
-
-            function clickAndAssign(evt) {
-                if (evt) {
-                    fileElem[0].click();
-                }
-                if (isInputTypeFile() || !evt) {
-                    elem.bind('click touchend', clickHandler);
-                }
-            }
-
-            if (fileElem) {
-                if (!evt || resetOnClick) fileElem.bind('change', changeFn);
-                if (evt && resetOnClick && $parse(attr.ngfResetModelOnClick)(scope) !== false) resetModel(evt);
-
-                // fix for android native browser < 4.4
-                if (shouldClickLater(navigator.userAgent)) {
-                    setTimeout(function () {
-                        clickAndAssign(evt);
-                    }, 0);
-                } else {
-                    clickAndAssign(evt);
-                }
-            }
-            return false;
-        }
-
-        if (window.FileAPI && window.FileAPI.ngfFixIE) {
-            window.FileAPI.ngfFixIE(elem, createFileInput, bindAttrToFileInput, changeFn);
-        } else {
-            clickHandler();
-            //if (!isInputTypeFile()) {
-            //  elem.bind('click touchend', clickHandler);
-            //}
-        }
+      }
     }
 
-    function shouldClickLater(ua) {
-        // android below 4.4
-        var m = ua.match(/Android[^\d]*(\d+)\.(\d+)/);
-        if (m && m.length > 2) {
-            return parseInt(m[1]) < 4 || (parseInt(m[1]) === 4 && parseInt(m[2]) < 4);
+    function bindAttrToFileInput(fileElem) {
+      if (getAttr(attr, 'ngfMultiple')) fileElem.attr('multiple', $parse(getAttr(attr, 'ngfMultiple'))(scope));
+      if (getAttr(attr, 'ngfCapture')) fileElem.attr('capture', $parse(getAttr(attr, 'ngfCapture'))(scope));
+      if (getAttr(attr, 'accept')) fileElem.attr('accept', getAttr(attr, 'accept'));
+      for (var i = 0; i < elem[0].attributes.length; i++) {
+        var attribute = elem[0].attributes[i];
+        if ((isInputTypeFile() && attribute.name !== 'type') ||
+          (attribute.name !== 'type' && attribute.name !== 'class' &&
+          attribute.name !== 'id' && attribute.name !== 'style')) {
+          if (attribute.value == null || attribute.value === '') {
+            if (attribute.name === 'required') attribute.value = 'required';
+            if (attribute.name === 'multiple') attribute.value = 'multiple';
+          }
+          fileElem.attr(attribute.name, attribute.value);
         }
-
-        // safari on windows
-        return /.*Windows.*Safari.*/.test(ua);
+      }
     }
 
-    ngFileUpload.validate = function (scope, $parse, attr, file, evt) {
-        function globStringToRegex(str) {
-            if (str.length > 2 && str[0] === '/' && str[str.length - 1] === '/') {
-                return str.substring(1, str.length - 1);
-            }
-            var split = str.split(','), result = '';
-            if (split.length > 1) {
-                for (var i = 0; i < split.length; i++) {
-                    result += '(' + globStringToRegex(split[i]) + ')';
-                    if (i < split.length - 1) {
-                        result += '|';
-                    }
-                }
-            } else {
-                if (str.indexOf('.') === 0) {
-                    str = '*' + str;
-                }
-                result = '^' + str.replace(new RegExp('[.\\\\+*?\\[\\^\\]$(){}=!<>|:\\' + '-]', 'g'), '\\$&') + '$';
-                result = result.replace(/\\\*/g, '.*').replace(/\\\?/g, '.');
-            }
-            return result;
-        }
+    function createFileInput(evt, resetOnClick) {
+      if (!resetOnClick && (evt || isInputTypeFile())) return elem.$$ngfRefElem || elem;
+      if (elem.$$ngfProgramClick) return elem;
 
-        var accept = $parse(attr.ngfAccept)(scope, {$file: file, $event: evt});
-        var fileSizeMax = $parse(attr.ngfMaxSize)(scope, {$file: file, $event: evt}) || 9007199254740991;
-        var fileSizeMin = $parse(attr.ngfMinSize)(scope, {$file: file, $event: evt}) || -1;
-        if (accept != null && angular.isString(accept)) {
-            var regexp = new RegExp(globStringToRegex(accept), 'gi');
-            accept = (file.type != null && regexp.test(file.type.toLowerCase())) ||
-                (file.name != null && regexp.test(file.name.toLowerCase()));
-        }
-        return (accept == null || accept) && (file.size == null || (file.size < fileSizeMax && file.size > fileSizeMin));
-    };
+      var fileElem = angular.element('<input type="file">');
+      bindAttrToFileInput(fileElem);
 
-    ngFileUpload.updateModel = function ($parse, $timeout, scope, ngModel, attr, fileChange,
-                                         files, rejFiles, evt, noDelay) {
-        function update() {
-            if ($parse(attr.ngfKeep)(scope) === true) {
-                var prevFiles = (ngModel.$modelValue || []).slice(0);
-                if (!files || !files.length) {
-                    files = prevFiles;
-                } else if ($parse(attr.ngfKeepDistinct)(scope) === true) {
-                    var len = prevFiles.length;
-                    for (var i = 0; i < files.length; i++) {
-                        for (var j = 0; j < len; j++) {
-                            if (files[i].name === prevFiles[j].name) break;
-                        }
-                        if (j === len) {
-                            prevFiles.push(files[i]);
-                        }
-                    }
-                    files = prevFiles;
-                } else {
-                    files = prevFiles.concat(files);
-                }
-            }
-            if (ngModel) {
-                $parse(attr.ngModel).assign(scope, files);
-                $timeout(function () {
-                    if (ngModel) {
-                        ngModel.$setViewValue(files != null && files.length === 0 ? null : files);
-                    }
-                });
-            }
-            if (attr.ngModelRejected) {
-                $parse(attr.ngModelRejected).assign(scope, rejFiles);
-            }
-            if (fileChange) {
-                $parse(fileChange)(scope, {
-                    $files: files,
-                    $rejectedFiles: rejFiles,
-                    $event: evt
-                });
-            }
+      if (isInputTypeFile()) {
+        elem.replaceWith(fileElem);
+        elem = fileElem;
+        fileElem.attr('__ngf_gen__', true);
+        $compile(elem)(scope);
+      } else {
+        fileElem.css('visibility', 'hidden').css('position', 'absolute').css('overflow', 'hidden')
+          .css('width', '0px').css('height', '0px').css('border', 'none')
+          .css('margin', '0px').css('padding', '0px').attr('tabindex', '-1');
+        if (elem.$$ngfRefElem) {
+          elem.$$ngfRefElem.remove();
         }
+        elem.$$ngfRefElem = fileElem;
+        document.body.appendChild(fileElem[0]);
+      }
 
-        if (noDelay) {
-            update();
+      return fileElem;
+    }
+
+    function resetModel(evt) {
+      updateModel($parse, $timeout, scope, ngModel, attr,
+        getAttr(attr, 'ngfChange') || getAttr(attr, 'ngfSelect'), [], [], evt, true);
+    }
+
+    var initialTouchStartY = 0;
+    function clickHandler(evt) {
+      if (elem.attr('disabled') || disabled) return false;
+
+      if (evt != null) {
+        var touches = evt.changedTouches || (evt.originalEvent && evt.originalEvent.changedTouches);
+        if (evt.type === 'touchstart') {
+          initialTouchStartY = touches ? touches[0].clientY : 0;
+          return true; // don't block event default
         } else {
-            $timeout(function () {
-                update();
-            });
-        }
-    };
+          evt.stopPropagation();
+          evt.preventDefault();
 
-    var validate = ngFileUpload.validate;
-    var updateModel = ngFileUpload.updateModel;
+          // prevent scroll from triggering event
+          if (evt.type === 'touchend') {
+            var currentLocation = touches ? touches[0].clientY : 0;
+            if (Math.abs(currentLocation - initialTouchStartY) > 20) return false;
+          }
+        }
+      }
+
+      var resetOnClick = $parse(getAttr(attr, 'ngfResetOnClick'))(scope) !== false;
+      var fileElem = createFileInput(evt, resetOnClick);
+
+      function clickAndAssign(evt) {
+        if (evt && !elem.$$ngfProgramClick) {
+          elem.$$ngfProgramClick = true;
+          fileElem[0].click();
+          $timeout(function() {
+            delete elem.$$ngfProgramClick;
+          }, 500);
+        }
+        if ((isInputTypeFile() || !evt) && resetOnClick) {
+          elem.bind('click touchstart touchend', clickHandler);
+        }
+      }
+
+      if (fileElem) {
+        if (!evt || resetOnClick) fileElem.bind('change', changeFn);
+        if (evt && resetOnClick && $parse(getAttr(attr, 'ngfResetModelOnClick'))(scope) !== false) {
+          resetModel(evt);
+        }
+
+        // fix for android native browser < 4.4
+        if (shouldClickLater(navigator.userAgent)) {
+          setTimeout(function () {
+            clickAndAssign(evt);
+          }, 0);
+        } else {
+          clickAndAssign(evt);
+        }
+      }
+
+      return false;
+    }
+
+    if (window.FileAPI && window.FileAPI.ngfFixIE) {
+      window.FileAPI.ngfFixIE(elem, createFileInput, bindAttrToFileInput, changeFn);
+    } else {
+      clickHandler();
+      //if (!isInputTypeFile()) {
+      //  elem.bind('click touchend', clickHandler);
+      //}
+    }
+  }
+
+  function shouldClickLater(ua) {
+    // android below 4.4
+    var m = ua.match(/Android[^\d]*(\d+)\.(\d+)/);
+    if (m && m.length > 2) {
+      var v = ngFileUpload.defaults.androidFixMinorVersion || 4;
+      return parseInt(m[1]) < 4 || (parseInt(m[1]) === v && parseInt(m[2]) < v);
+    }
+
+    // safari on windows
+    return ua.indexOf('Chrome') === -1 && /.*Windows.*Safari.*/.test(ua);
+  }
+
+  ngFileUpload.validate = function (scope, $parse, attr, file, evt) {
+    if (file == null) {
+      return false;
+    }
+    function globStringToRegex(str) {
+      if (str.length > 2 && str[0] === '/' && str[str.length - 1] === '/') {
+        return str.substring(1, str.length - 1);
+      }
+      var split = str.split(','), result = '';
+      if (split.length > 1) {
+        for (var i = 0; i < split.length; i++) {
+          result += '(' + globStringToRegex(split[i]) + ')';
+          if (i < split.length - 1) {
+            result += '|';
+          }
+        }
+      } else {
+        if (str.indexOf('.') === 0) {
+          str = '*' + str;
+        }
+        result = '^' + str.replace(new RegExp('[.\\\\+*?\\[\\^\\]$(){}=!<>|:\\' + '-]', 'g'), '\\$&') + '$';
+        result = result.replace(/\\\*/g, '.*').replace(/\\\?/g, '.');
+      }
+      return result;
+    }
+
+    var accept = $parse(getAttr(attr, 'ngfAccept'))(scope, {$file: file, $event: evt});
+    var fileSizeMax = $parse(getAttr(attr, 'ngfMaxSize'))(scope, {$file: file, $event: evt}) || 9007199254740991;
+    var fileSizeMin = $parse(getAttr(attr, 'ngfMinSize'))(scope, {$file: file, $event: evt}) || -1;
+    if (accept != null && angular.isString(accept)) {
+      var regexp = new RegExp(globStringToRegex(accept), 'gi');
+      accept = (file.type != null && regexp.test(file.type.toLowerCase())) ||
+        (file.name != null && regexp.test(file.name.toLowerCase()));
+      if (!accept) {
+        file.$error = 'accept';
+        return false;
+      }
+    } else {
+      if (accept === false) {
+        file.$error = 'accept';
+        return false;
+      }
+    }
+    if (file.size == null) return true;
+    if (file.size > fileSizeMax) {
+      file.$error = 'maxSize';
+      return false;
+    }
+    if (file.size < fileSizeMin) {
+      file.$error = 'minSize';
+      return false;
+    }
+    return true;
+  };
+
+  ngFileUpload.updateModel = function ($parse, $timeout, scope, ngModel, attr, fileChange,
+                                       files, rejFiles, evt, noDelay) {
+    function update() {
+      var keep = $parse(getAttr(attr, 'ngfKeep'))(scope);
+      if (keep === true) {
+        var prevFiles = (ngModel.$modelValue || []).slice(0);
+        if (!files || !files.length) {
+          files = prevFiles;
+        } else if ($parse(getAttr(attr, 'ngfKeepDistinct'))(scope) === true) {
+          var len = prevFiles.length;
+          for (var i = 0; i < files.length; i++) {
+            for (var j = 0; j < len; j++) {
+              if (files[i].name === prevFiles[j].name) break;
+            }
+            if (j === len) {
+              prevFiles.push(files[i]);
+            }
+          }
+          files = prevFiles;
+        } else {
+          files = prevFiles.concat(files);
+        }
+      }
+      var file = files && files.length ? files[0] : null;
+      if (ngModel) {
+        var singleModel = !$parse(getAttr(attr, 'ngfMultiple'))(scope) && ! getAttr(attr, 'multiple') && !keep;
+        $parse(getAttr(attr, 'ngModel')).assign(scope, singleModel ? file : files);
+        $timeout(function () {
+          if (ngModel) {
+            ngModel.$setViewValue(singleModel ? file : (files != null && files.length === 0 ? null : files));
+          }
+        });
+      }
+      var ngfModel = getAttr(attr, 'ngfModel');
+      if (ngfModel) {
+        $parse(ngfModel).assign(scope, files);
+      }
+
+      if (getAttr(attr, 'ngModelRejected')) {
+        $parse(getAttr(attr, 'ngModelRejected')).assign(scope, rejFiles);
+      }
+      if (fileChange) {
+        $parse(fileChange)(scope, {
+          $files: files,
+          $file: file,
+          $rejectedFiles: rejFiles,
+          $event: evt
+        });
+      }
+    }
+
+    if (noDelay) {
+      update();
+    } else {
+      $timeout(function () {
+        update();
+      });
+    }
+  };
+
+  var validate = ngFileUpload.validate;
+  var updateModel = ngFileUpload.updateModel;
 
 })();
 
 (function () {
   var validate = ngFileUpload.validate;
   var updateModel = ngFileUpload.updateModel;
+  var getAttr = ngFileUpload.getAttrWithDefaults;
 
   ngFileUpload.directive('ngfDrop', ['$parse', '$timeout', '$location', function ($parse, $timeout, $location) {
     return {
@@ -5575,7 +5676,7 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
   ngFileUpload.directive('ngfDropAvailable', ['$parse', '$timeout', function ($parse, $timeout) {
     return function (scope, elem, attr) {
       if (dropAvailable()) {
-        var fn = $parse(attr.ngfDropAvailable);
+        var fn = $parse(getAttr(attr, 'ngfDropAvailable'));
         $timeout(function () {
           fn(scope);
           if (fn.assign) {
@@ -5588,31 +5689,31 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
 
   function linkDrop(scope, elem, attr, ngModel, $parse, $timeout, $location) {
     var available = dropAvailable();
-    if (attr.dropAvailable) {
+    if (getAttr(attr, 'dropAvailable')) {
       $timeout(function () {
-        if (scope[attr.dropAvailable]) {
-          scope[attr.dropAvailable].value = available;
+        if (scope[getAttr(attr, 'dropAvailable')]) {
+          scope[getAttr(attr, 'dropAvailable')].value = available;
         } else {
-          scope[attr.dropAvailable] = available;
+          scope[getAttr(attr, 'dropAvailable')] = available;
         }
       });
     }
     if (!available) {
-      if ($parse(attr.ngfHideOnDropNotAvailable)(scope) === true) {
+      if ($parse(getAttr(attr, 'ngfHideOnDropNotAvailable'))(scope) === true) {
         elem.css('display', 'none');
       }
       return;
     }
 
     var disabled = false;
-    if (attr.ngfDrop.search(/\W+$files\W+/) === -1) {
-      scope.$watch(attr.ngfDrop, function(val) {
+    if (getAttr(attr, 'ngfDrop').search(/\W+$files\W+/) === -1) {
+      scope.$watch(getAttr(attr, 'ngfDrop'), function(val) {
         disabled = val === false;
       });
     }
 
     var leaveTimeout = null;
-    var stopPropagation = $parse(attr.ngfStopPropagation);
+    var stopPropagation = $parse(getAttr(attr, 'ngfStopPropagation'));
     var dragOverDelay = 1;
     var actualDragOverClass;
 
@@ -5651,8 +5752,18 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
       actualDragOverClass = null;
       extractFiles(evt, function (files, rejFiles) {
         updateModel($parse, $timeout, scope, ngModel, attr,
-          attr.ngfChange || attr.ngfDrop, files, rejFiles, evt);
-      }, $parse(attr.ngfAllowDir)(scope) !== false, attr.multiple || $parse(attr.ngfMultiple)(scope));
+          getAttr(attr, 'ngfChange') || getAttr(attr, 'ngfDrop'), files, rejFiles, evt);
+      }, $parse(getAttr(attr, 'ngfAllowDir'))(scope) !== false,
+        getAttr(attr, 'multiple') || $parse(getAttr(attr, 'ngfMultiple'))(scope));
+    }, false);
+    elem[0].addEventListener('paste', function (evt) {
+      if (elem.attr('disabled') || disabled) return;
+      evt.preventDefault();
+      if (stopPropagation(scope)) evt.stopPropagation();
+      extractFiles(evt, function (files, rejFiles) {
+        updateModel($parse, $timeout, scope, ngModel, attr,
+          getAttr(attr, 'ngfChange') || getAttr(attr, 'ngfDrop'), files, rejFiles, evt);
+      }, false, getAttr(attr, 'multiple') || $parse(getAttr(attr, 'ngfMultiple'))(scope));
     }, false);
 
     function calculateDragOverClass(scope, attr, evt) {
@@ -5665,16 +5776,16 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
             validate(scope, $parse, attr, items[i], evt);
         }
       }
-      var clazz = $parse(attr.ngfDragOverClass)(scope, {$event: evt});
+      var clazz = $parse(getAttr(attr, 'ngfDragOverClass'))(scope, {$event: evt});
       if (clazz) {
         if (clazz.delay) dragOverDelay = clazz.delay;
         if (clazz.accept) clazz = accepted ? clazz.accept : clazz.reject;
       }
-      return clazz || attr.ngfDragOverClass || 'dragover';
+      return clazz || getAttr(attr, 'ngfDragOverClass') || 'dragover';
     }
 
     function extractFiles(evt, callback, allowDir, multiple) {
-      var files = [], rejFiles = [], items = evt.dataTransfer.items, processing = 0;
+      var files = [], rejFiles = [], processing = 0;
 
       function addFile(file) {
         if (validate(scope, $parse, attr, file, evt)) {
@@ -5731,93 +5842,137 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
         }
       }
 
-      if (items && items.length > 0 && $location.protocol() !== 'file') {
-        for (var i = 0; i < items.length; i++) {
-          if (items[i].webkitGetAsEntry && items[i].webkitGetAsEntry() && items[i].webkitGetAsEntry().isDirectory) {
-            var entry = items[i].webkitGetAsEntry();
-            if (entry.isDirectory && !allowDir) {
-              continue;
+      if (evt.type === 'paste') {
+        var clipboard = evt.clipboardData || evt.originalEvent.clipboardData;
+        if (clipboard && clipboard.items) {
+          for (var k = 0; k < clipboard.items.length; k++) {
+            if (clipboard.items[k].type.indexOf('image') !== -1) {
+              addFile(clipboard.items[k].getAsFile());
             }
-            if (entry != null) {
-              traverseFileTree(files, entry);
-            }
-          } else {
-            var f = items[i].getAsFile();
-            if (f != null) addFile(f);
           }
-          if (!multiple && files.length > 0) break;
+          callback(files, rejFiles);
         }
       } else {
-        var fileList = evt.dataTransfer.files;
-        if (fileList != null) {
-          for (var j = 0; j < fileList.length; j++) {
-            addFile(fileList.item(j));
-            if (!multiple && files.length > 0) {
-              break;
+        var items = evt.dataTransfer.items;
+
+        if (items && items.length > 0 && $location.protocol() !== 'file') {
+          for (var i = 0; i < items.length; i++) {
+            if (items[i].webkitGetAsEntry && items[i].webkitGetAsEntry() && items[i].webkitGetAsEntry().isDirectory) {
+              var entry = items[i].webkitGetAsEntry();
+              if (entry.isDirectory && !allowDir) {
+                continue;
+              }
+              if (entry != null) {
+                traverseFileTree(files, entry);
+              }
+            } else {
+              var f = items[i].getAsFile();
+              if (f != null) addFile(f);
+            }
+            if (!multiple && files.length > 0) break;
+          }
+        } else {
+          var fileList = evt.dataTransfer.files;
+          if (fileList != null) {
+            for (var j = 0; j < fileList.length; j++) {
+              addFile(fileList.item(j));
+              if (!multiple && files.length > 0) {
+                break;
+              }
             }
           }
         }
+        var delays = 0;
+        (function waitForProcess(delay) {
+          $timeout(function () {
+            if (!processing) {
+              if (!multiple && files.length > 1) {
+                i = 0;
+                while (files[i].type === 'directory') i++;
+                files = [files[i]];
+              }
+              callback(files, rejFiles);
+            } else {
+              if (delays++ * 10 < 20 * 1000) {
+                waitForProcess(10);
+              }
+            }
+          }, delay || 0);
+        })();
       }
-      var delays = 0;
-      (function waitForProcess(delay) {
-        $timeout(function () {
-          if (!processing) {
-            if (!multiple && files.length > 1) {
-              i = 0;
-              while (files[i].type === 'directory') i++;
-              files = [files[i]];
-            }
-            callback(files, rejFiles);
-          } else {
-            if (delays++ * 10 < 20 * 1000) {
-              waitForProcess(10);
-            }
-          }
-        }, delay || 0);
-      })();
     }
   }
-
-  ngFileUpload.directive('ngfSrc', ['$parse', '$timeout', function ($parse, $timeout) {
-    return {
-      restrict: 'AE',
-      link: function (scope, elem, attr) {
-        if (window.FileReader) {
-          scope.$watch(attr.ngfSrc, function (file) {
-            if (file &&
-              validate(scope, $parse, attr, file, null) &&
-              (!window.FileAPI || navigator.userAgent.indexOf('MSIE 8') === -1 || file.size < 20000) &&
-              (!window.FileAPI || navigator.userAgent.indexOf('MSIE 9') === -1 || file.size < 4000000)) {
-              $timeout(function () {
-                //prefer URL.createObjectURL for handling refrences to files of all sizes
-                //since it doesn´t build a large string in memory
-                var URL = window.URL || window.webkitURL;
-                if (URL && URL.createObjectURL) {
-                  elem.attr('src', URL.createObjectURL(file));
-                } else {
-                  var fileReader = new FileReader();
-                  fileReader.readAsDataURL(file);
-                  fileReader.onload = function (e) {
-                    $timeout(function () {
-                      elem.attr('src', e.target.result);
-                    });
-                  };
-                }
-              });
-            } else {
-              elem.attr('src', attr.ngfDefaultSrc || '');
-            }
-          });
-        }
-      }
-    };
-  }]);
 
   function dropAvailable() {
     var div = document.createElement('div');
     return ('draggable' in div) && ('ondrop' in div);
   }
 
+})();
+
+(function () {
+
+  function fileToSrc(Upload, scope, $parse, attr, name, defaultName, callback) {
+      if (defaultName) {
+        callback($parse(defaultName)(scope));
+      }
+      scope.$watch(name, function (file) {
+        if (!angular.isString(file)) {
+          if (window.FileReader && ngFileUpload.validate(scope, $parse, attr, file, null)) {
+            Upload.dataUrl(file, function (url) {
+              if (callback) {
+                callback(url);
+              } else {
+                file.dataUrl = url || $parse(defaultName)(scope);
+              }
+            }, $parse(attr.ngfNoObjectUrl)(scope));
+          }
+        } else {
+          callback(file);
+        }
+      });
+  }
+
+  /** @namespace attr.ngfSrc */
+  /** @namespace attr.ngfDefaultSrc */
+  /** @namespace attr.ngfNoObjectUrl */
+  ngFileUpload.directive('ngfSrc', ['$parse', 'Upload', function ($parse, Upload) {
+    return {
+      restrict: 'AE',
+      link: function (scope, elem, attr) {
+        fileToSrc(Upload, scope, $parse, attr, attr.ngfSrc, attr.ngfDefaultSrc, function (url) {
+          elem.attr('src', url);
+        });
+      }
+    };
+  }]);
+
+  /** @namespace attr.ngfBackground */
+  /** @namespace attr.ngfDefaultBackground */
+  /** @namespace attr.ngfNoObjectUrl */
+  ngFileUpload.directive('ngfBackground', ['$parse', 'Upload', function ($parse, Upload) {
+    return {
+      restrict: 'AE',
+      link: function (scope, elem, attr) {
+        fileToSrc(Upload, scope, $parse, attr, attr.ngfBackground, attr.ngfDefaultBackground, function (url) {
+          elem.css('background-image', 'url(' + url + ')');
+        });
+      }
+    };
+  }]);
+
+  /** @namespace attr.ngfDataUrl */
+  /** @namespace attr.ngfDefaultDataUrl */
+  /** @namespace attr.ngfNoObjectUrl */
+  ngFileUpload.directive('ngfDataUrl', ['$parse', 'Upload', function ($parse, Upload) {
+    return {
+      restrict: 'AE',
+      link: function (scope, elem, attr) {
+
+        fileToSrc(Upload, scope, $parse, attr, attr.ngfDataUrl, attr.ngfDefaultDataUrl);
+      }
+    };
+  }]);
 })();
 ;/**
   * x is a value between 0 and 1, indicating where in the animation you are.
@@ -6431,7 +6586,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
 }]);
 ;/**
  * @license
- * lodash 3.10.0 (Custom Build) <https://lodash.com/>
+ * lodash 3.10.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern -o ./lodash.js`
  * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
@@ -6444,7 +6599,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
   var undefined;
 
   /** Used as the semantic version number. */
-  var VERSION = '3.10.0';
+  var VERSION = '3.10.1';
 
   /** Used to compose bitmasks for wrapper metadata. */
   var BIND_FLAG = 1,
@@ -7026,7 +7181,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
    * @private
    * @param {Array} array The array to inspect.
    * @param {Function} [iteratee] The function invoked per iteration.
-   * @returns {Array} Returns the new duplicate-value-free array.
+   * @returns {Array} Returns the new duplicate free array.
    */
   function sortedUniq(array, iteratee) {
     var seen,
@@ -7505,7 +7660,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
           takeCount = nativeMin(length, this.__takeCount__);
 
       if (!isArr || arrLength < LARGE_ARRAY_SIZE || (arrLength == length && takeCount == length)) {
-        return baseWrapperValue((isRight && isArr) ? array.reverse() : array, this.__actions__);
+        return baseWrapperValue(array, this.__actions__);
       }
       var result = [];
 
@@ -8222,7 +8377,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       }
       var index = -1,
           indexOf = getIndexOf(),
-          isCommon = indexOf == baseIndexOf,
+          isCommon = indexOf === baseIndexOf,
           cache = (isCommon && values.length >= LARGE_ARRAY_SIZE) ? createCache(values) : null,
           valuesLength = values.length;
 
@@ -9089,13 +9244,13 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * @private
      * @param {Array} array The array to inspect.
      * @param {Function} [iteratee] The function invoked per iteration.
-     * @returns {Array} Returns the new duplicate-value-free array.
+     * @returns {Array} Returns the new duplicate free array.
      */
     function baseUniq(array, iteratee) {
       var index = -1,
           indexOf = getIndexOf(),
           length = array.length,
-          isCommon = indexOf == baseIndexOf,
+          isCommon = indexOf === baseIndexOf,
           isLarge = isCommon && length >= LARGE_ARRAY_SIZE,
           seen = isLarge ? createCache() : null,
           result = [];
@@ -10304,7 +10459,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * @returns {string} Returns the function name.
      */
     function getFuncName(func) {
-      var result = func.name,
+      var result = (func.name + ''),
           array = realNames[result],
           length = array ? array.length : 0;
 
@@ -10571,11 +10726,12 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * @returns {boolean} Returns `true` if `func` has a lazy counterpart, else `false`.
      */
     function isLaziable(func) {
-      var funcName = getFuncName(func);
-      if (!(funcName in LazyWrapper.prototype)) {
+      var funcName = getFuncName(func),
+          other = lodash[funcName];
+
+      if (typeof other != 'function' || !(funcName in LazyWrapper.prototype)) {
         return false;
       }
-      var other = lodash[funcName];
       if (func === other) {
         return true;
       }
@@ -11310,7 +11466,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
 
     /**
      * Flattens a nested array. If `isDeep` is `true` the array is recursively
-     * flattened, otherwise it is only flattened a single level.
+     * flattened, otherwise it's only flattened a single level.
      *
      * @static
      * @memberOf _
@@ -11357,7 +11513,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     /**
      * Gets the index at which the first occurrence of `value` is found in `array`
      * using [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
-     * for equality comparisons. If `fromIndex` is negative, it is used as the offset
+     * for equality comparisons. If `fromIndex` is negative, it's used as the offset
      * from the end of `array`. If `array` is sorted providing `true` for `fromIndex`
      * performs a faster binary search.
      *
@@ -11436,7 +11592,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
           othIndex = othLength,
           caches = Array(length),
           indexOf = getIndexOf(),
-          isCommon = indexOf == baseIndexOf,
+          isCommon = indexOf === baseIndexOf,
           result = [];
 
       while (othIndex--) {
@@ -11721,7 +11877,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     /**
      * Uses a binary search to determine the lowest index at which `value` should
      * be inserted into `array` in order to maintain its sort order. If an iteratee
-     * function is provided it is invoked for `value` and each element of `array`
+     * function is provided it's invoked for `value` and each element of `array`
      * to compute their sort ranking. The iteratee is bound to `thisArg` and
      * invoked with one argument; (value).
      *
@@ -11995,7 +12151,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
      * for equality comparisons, in which only the first occurence of each element
      * is kept. Providing `true` for `isSorted` performs a faster search algorithm
-     * for sorted arrays. If an iteratee function is provided it is invoked for
+     * for sorted arrays. If an iteratee function is provided it's invoked for
      * each element in the array to generate the criterion by which uniqueness
      * is computed. The `iteratee` is bound to `thisArg` and invoked with three
      * arguments: (value, index, array).
@@ -12053,7 +12209,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       if (!(iteratee == null && callback === baseCallback)) {
         iteratee = callback(iteratee, thisArg, 3);
       }
-      return (isSorted && getIndexOf() == baseIndexOf)
+      return (isSorted && getIndexOf() === baseIndexOf)
         ? sortedUniq(array, iteratee)
         : baseUniq(array, iteratee);
     }
@@ -12508,7 +12664,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
       var value = this.__wrapped__;
 
       var interceptor = function(value) {
-        return (wrapped && wrapped.__dir__ < 0) ? value : value.reverse();
+        return value.reverse();
       };
       if (value instanceof LazyWrapper) {
         var wrapped = value;
@@ -12950,9 +13106,9 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     });
 
     /**
-     * Checks if `value` is in `collection` using
+     * Checks if `target` is in `collection` using
      * [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
-     * for equality comparisons. If `fromIndex` is negative, it is used as the offset
+     * for equality comparisons. If `fromIndex` is negative, it's used as the offset
      * from the end of `collection`.
      *
      * @static
@@ -13047,7 +13203,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     /**
      * Invokes the method at `path` of each element in `collection`, returning
      * an array of the results of each invoked method. Any additional arguments
-     * are provided to each invoked method. If `methodName` is a function it is
+     * are provided to each invoked method. If `methodName` is a function it's
      * invoked for, and `this` bound to, each element in `collection`.
      *
      * @static
@@ -13699,7 +13855,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
 
     /**
      * The opposite of `_.before`; this method creates a function that invokes
-     * `func` once it is called `n` or more times.
+     * `func` once it's called `n` or more times.
      *
      * @static
      * @memberOf _
@@ -13764,7 +13920,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
 
     /**
      * Creates a function that invokes `func`, with the `this` binding and arguments
-     * of the created function, while it is called less than `n` times. Subsequent
+     * of the created function, while it's called less than `n` times. Subsequent
      * calls to the created function return the result of the last `func` invocation.
      *
      * @static
@@ -14044,7 +14200,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * @param {boolean} [options.leading=false] Specify invoking on the leading
      *  edge of the timeout.
      * @param {number} [options.maxWait] The maximum time `func` is allowed to be
-     *  delayed before it is invoked.
+     *  delayed before it's invoked.
      * @param {boolean} [options.trailing=true] Specify invoking on the trailing
      *  edge of the timeout.
      * @returns {Function} Returns the new debounced function.
@@ -14192,7 +14348,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
 
     /**
      * Defers invoking the `func` until the current call stack has cleared. Any
-     * additional arguments are provided to `func` when it is invoked.
+     * additional arguments are provided to `func` when it's invoked.
      *
      * @static
      * @memberOf _
@@ -14213,7 +14369,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
 
     /**
      * Invokes `func` after `wait` milliseconds. Any additional arguments are
-     * provided to `func` when it is invoked.
+     * provided to `func` when it's invoked.
      *
      * @static
      * @memberOf _
@@ -14546,7 +14702,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * Creates a function that invokes `func` with the `this` binding of the
      * created function and arguments from `start` and beyond provided as an array.
      *
-     * **Note:** This method is based on the [rest parameter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/rest_parameters).
+     * **Note:** This method is based on the [rest parameter](https://developer.mozilla.org/Web/JavaScript/Reference/Functions/rest_parameters).
      *
      * @static
      * @memberOf _
@@ -14597,7 +14753,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * Creates a function that invokes `func` with the `this` binding of the created
      * function and an array of arguments much like [`Function#apply`](https://es5.github.io/#x15.3.4.3).
      *
-     * **Note:** This method is based on the [spread operator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_operator).
+     * **Note:** This method is based on the [spread operator](https://developer.mozilla.org/Web/JavaScript/Reference/Operators/Spread_operator).
      *
      * @static
      * @memberOf _
@@ -14718,10 +14874,10 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
 
     /**
      * Creates a clone of `value`. If `isDeep` is `true` nested objects are cloned,
-     * otherwise they are assigned by reference. If `customizer` is provided it is
+     * otherwise they are assigned by reference. If `customizer` is provided it's
      * invoked to produce the cloned values. If `customizer` returns `undefined`
      * cloning is handled by the method instead. The `customizer` is bound to
-     * `thisArg` and invoked with two argument; (value [, index|key, object]).
+     * `thisArg` and invoked with up to three argument; (value [, index|key, object]).
      *
      * **Note:** This method is loosely based on the
      * [structured clone algorithm](http://www.w3.org/TR/html5/infrastructure.html#internal-structured-cloning-algorithm).
@@ -14777,15 +14933,15 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
         isDeep = false;
       }
       return typeof customizer == 'function'
-        ? baseClone(value, isDeep, bindCallback(customizer, thisArg, 1))
+        ? baseClone(value, isDeep, bindCallback(customizer, thisArg, 3))
         : baseClone(value, isDeep);
     }
 
     /**
-     * Creates a deep clone of `value`. If `customizer` is provided it is invoked
+     * Creates a deep clone of `value`. If `customizer` is provided it's invoked
      * to produce the cloned values. If `customizer` returns `undefined` cloning
      * is handled by the method instead. The `customizer` is bound to `thisArg`
-     * and invoked with two argument; (value [, index|key, object]).
+     * and invoked with up to three argument; (value [, index|key, object]).
      *
      * **Note:** This method is loosely based on the
      * [structured clone algorithm](http://www.w3.org/TR/html5/infrastructure.html#internal-structured-cloning-algorithm).
@@ -14828,7 +14984,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      */
     function cloneDeep(value, customizer, thisArg) {
       return typeof customizer == 'function'
-        ? baseClone(value, true, bindCallback(customizer, thisArg, 1))
+        ? baseClone(value, true, bindCallback(customizer, thisArg, 3))
         : baseClone(value, true);
     }
 
@@ -14982,7 +15138,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     }
 
     /**
-     * Checks if `value` is empty. A value is considered empty unless it is an
+     * Checks if `value` is empty. A value is considered empty unless it's an
      * `arguments` object, array, string, or jQuery-like collection with a length
      * greater than `0` or an object with own enumerable properties.
      *
@@ -15021,10 +15177,10 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
 
     /**
      * Performs a deep comparison between two values to determine if they are
-     * equivalent. If `customizer` is provided it is invoked to compare values.
+     * equivalent. If `customizer` is provided it's invoked to compare values.
      * If `customizer` returns `undefined` comparisons are handled by the method
-     * instead. The `customizer` is bound to `thisArg` and invoked with three
-     * arguments: (value, other [, index|key]).
+     * instead. The `customizer` is bound to `thisArg` and invoked with up to
+     * three arguments: (value, other [, index|key]).
      *
      * **Note:** This method supports comparing arrays, booleans, `Date` objects,
      * numbers, `Object` objects, regexes, and strings. Objects are compared by
@@ -15140,7 +15296,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     function isFunction(value) {
       // The use of `Object#toString` avoids issues with the `typeof` operator
       // in older versions of Chrome and Safari which return 'function' for regexes
-      // and Safari 8 equivalents which return 'object' for typed array constructors.
+      // and Safari 8 which returns 'object' for typed array constructors.
       return isObject(value) && objToString.call(value) == funcTag;
     }
 
@@ -15174,7 +15330,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     /**
      * Performs a deep comparison between `object` and `source` to determine if
      * `object` contains equivalent property values. If `customizer` is provided
-     * it is invoked to compare values. If `customizer` returns `undefined`
+     * it's invoked to compare values. If `customizer` returns `undefined`
      * comparisons are handled by the method instead. The `customizer` is bound
      * to `thisArg` and invoked with three arguments: (value, other, index|key).
      *
@@ -15556,7 +15712,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * Recursively merges own enumerable properties of the source object(s), that
      * don't resolve to `undefined` into the destination object. Subsequent sources
      * overwrite property assignments of previous sources. If `customizer` is
-     * provided it is invoked to produce the merged values of the destination and
+     * provided it's invoked to produce the merged values of the destination and
      * source properties. If `customizer` returns `undefined` merging is handled
      * by the method instead. The `customizer` is bound to `thisArg` and invoked
      * with five arguments: (objectValue, sourceValue, key, object, source).
@@ -15605,7 +15761,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     /**
      * Assigns own enumerable properties of source object(s) to the destination
      * object. Subsequent sources overwrite property assignments of previous sources.
-     * If `customizer` is provided it is invoked to produce the assigned values.
+     * If `customizer` is provided it's invoked to produce the assigned values.
      * The `customizer` is bound to `thisArg` and invoked with five arguments:
      * (objectValue, sourceValue, key, object, source).
      *
@@ -15978,7 +16134,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      * // => 'default'
      */
     function get(object, path, defaultValue) {
-      var result = object == null ? undefined : baseGet(object, toPath(path), path + '');
+      var result = object == null ? undefined : baseGet(object, toPath(path), (path + ''));
       return result === undefined ? defaultValue : result;
     }
 
@@ -16293,7 +16449,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     /**
      * Creates an object composed of the picked `object` properties. Property
      * names may be specified as individual arguments or as arrays of property
-     * names. If `predicate` is provided it is invoked for each property of `object`
+     * names. If `predicate` is provided it's invoked for each property of `object`
      * picking the properties `predicate` returns truthy for. The predicate is
      * bound to `thisArg` and invoked with three arguments: (value, key, object).
      *
@@ -16327,7 +16483,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
 
     /**
      * This method is like `_.get` except that if the resolved value is a function
-     * it is invoked with the `this` binding of its parent object and its result
+     * it's invoked with the `this` binding of its parent object and its result
      * is returned.
      *
      * @static
@@ -16368,7 +16524,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
 
     /**
      * Sets the property value of `path` on `object`. If a portion of `path`
-     * does not exist it is created.
+     * does not exist it's created.
      *
      * @static
      * @memberOf _
@@ -16526,7 +16682,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
 
     /**
      * Checks if `n` is between `start` and up to but not including, `end`. If
-     * `end` is not specified it is set to `start` with `start` then set to `0`.
+     * `end` is not specified it's set to `start` with `start` then set to `0`.
      *
      * @static
      * @memberOf _
@@ -17490,7 +17646,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
 
     /**
      * Attempts to invoke `func`, returning either the result or the caught error
-     * object. Any additional arguments are provided to `func` when it is invoked.
+     * object. Any additional arguments are provided to `func` when it's invoked.
      *
      * @static
      * @memberOf _
@@ -17888,13 +18044,13 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
      */
     function propertyOf(object) {
       return function(path) {
-        return baseGet(object, toPath(path), path + '');
+        return baseGet(object, toPath(path), (path + ''));
       };
     }
 
     /**
      * Creates an array of numbers (positive and/or negative) progressing from
-     * `start` up to, but not including, `end`. If `end` is not specified it is
+     * `start` up to, but not including, `end`. If `end` is not specified it's
      * set to `start` with `start` then set to `0`. If `end` is less than `start`
      * a zero-length range is created unless a negative `step` is specified.
      *
@@ -18087,7 +18243,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
 
     /**
      * Gets the maximum value of `collection`. If `collection` is empty or falsey
-     * `-Infinity` is returned. If an iteratee function is provided it is invoked
+     * `-Infinity` is returned. If an iteratee function is provided it's invoked
      * for each value in `collection` to generate the criterion by which the value
      * is ranked. The `iteratee` is bound to `thisArg` and invoked with three
      * arguments: (value, index, collection).
@@ -18136,7 +18292,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
 
     /**
      * Gets the minimum value of `collection`. If `collection` is empty or falsey
-     * `Infinity` is returned. If an iteratee function is provided it is invoked
+     * `Infinity` is returned. If an iteratee function is provided it's invoked
      * for each value in `collection` to generate the criterion by which the value
      * is ranked. The `iteratee` is bound to `thisArg` and invoked with three
      * arguments: (value, index, collection).
@@ -18713,7 +18869,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
     baseForOwn(LazyWrapper.prototype, function(func, methodName) {
       var lodashFunc = lodash[methodName];
       if (lodashFunc) {
-        var key = lodashFunc.name,
+        var key = (lodashFunc.name + ''),
             names = realNames[key] || (realNames[key] = []);
 
         names.push({ 'name': methodName, 'func': lodashFunc });
@@ -33351,8 +33507,8 @@ angular.module("page/templates/page.tpl.html", []).run(["$templateCache", functi
   $templateCache.put("page/templates/page.tpl.html",
     "<div class=\"row\" ng-cloak>\n" +
     "  <div class=\"col-md-9\" ng-transclude></div>\n" +
-    "  <div class=\"col-md-3 page-section-menu\">\n" +
-    "    <div ui-scrollfix>\n" +
+    "  <div class=\"col-md-3 page-section-menu hidden-xs\">\n" +
+    "    <div ui-scrollfix bound-by-parent>\n" +
     "      <ul class=\"nav nav-pills nav-stacked\">\n" +
     "        <li ng-repeat=\"section in menu\" du-scrollspy=\"{{section.link}}\">\n" +
     "          <a ng-href=\"#{{section.link}}\" du-smooth-scroll>\n" +
@@ -33407,7 +33563,7 @@ angular.module("tabs/templates/tabset.tpl.html", []).run(["$templateCache", func
  * angular-ui-bootstrap
  * http://angular-ui.github.io/bootstrap/
 
- * Version: 0.12.1 - 2015-05-27
+ * Version: 0.12.1 - 2015-07-27
  * License: MIT
  */
 angular.module("ui.bootstrap", ["ui.bootstrap.tpls", "ui.bootstrap.transition","ui.bootstrap.collapse","ui.bootstrap.accordion","ui.bootstrap.alert","ui.bootstrap.bindHtml","ui.bootstrap.buttons","ui.bootstrap.carousel","ui.bootstrap.dateparser","ui.bootstrap.position","ui.bootstrap.datepicker","ui.bootstrap.modal","ui.bootstrap.pagination","ui.bootstrap.tooltip","ui.bootstrap.popover","ui.bootstrap.progressbar","ui.bootstrap.rating","ui.bootstrap.timepicker","ui.bootstrap.typeahead"]);
@@ -37155,7 +37311,7 @@ angular.module('ualib.ui', [
     'duScroll',
     'ualib.ui.templates'
 ])
-
+    .value('duScrollBottomSpy', true)
     .value('duScrollOffset', 30);
 
 angular.module('ualib.ui')
@@ -37344,16 +37500,15 @@ angular.module('ualib.ui')
     return{
       restrict: 'C',
       transclude: true,
-        replace: true,
+      replace: true,
       templateUrl: 'page/templates/page.tpl.html',
       controller: function($scope, $element){
         var menu = $scope.menu = [];
         this.addSection = function(section){
           menu.push(section);
-          console.log(section);
-        }
+        };
 
-          $element.addClass('loaded');
+        $element.addClass('loaded');
       }
     }
   }])
@@ -37416,16 +37571,21 @@ angular.module('ualib.ui').directive('uiScrollfix', [
                 left: offsetLeft,
                 top: offsetTop
             };
-        };
+        }
         return {
             restrict: 'AC',
             require: '^?uiScrollfixTarget',
             link: function (scope, elm, attrs, uiScrollfixTarget) {
-                var absolute = true, 
+                var absolute = true,
                     shift = -30,
+                    elmWidth = elm[0].offsetWidth,
                     fixLimit,
+                    bottomLimit,
                     $target = uiScrollfixTarget && uiScrollfixTarget.$element || angular.element($window);
-                
+                var parent = angular.isDefined(attrs.boundByParent) ? elm.parent() : null;
+                console.log(angular.isDefined(attrs.boundByParent));
+                console.log(attrs);
+
                 if (!attrs.uiScrollfix) {
                     absolute = false;
                 } else if (typeof attrs.uiScrollfix === 'string') {
@@ -37445,6 +37605,15 @@ angular.module('ualib.ui').directive('uiScrollfix', [
                     // if pageYOffset is defined use it, otherwise use other crap for IE
                     var offset = uiScrollfixTarget ? $target[0].scrollTop : getWindowScrollTop();
 
+                    if (parent !== null){
+                        if (parent[0].offsetHeight + loopedOffset(parent[0]).top <= offset + elm[0].offsetHeight){
+                            elm.addClass('scrollfix-bottom-limit');
+                        }
+                        else if (elm.hasClass('scrollfix-bottom-limit')){
+                            elm.removeClass('scrollfix-bottom-limit');
+                        }
+                    }
+
                     if (!elm.hasClass('scrollfix') && offset > limit) {
                         var width = elm[0].offsetWidth;
                         elm.css('width', width + 'px');
@@ -37455,6 +37624,7 @@ angular.module('ualib.ui').directive('uiScrollfix', [
                         elm.css('width', 'auto');
                     }
                 }
+
                 $target.on('scroll', onScroll);
                 // Unbind scroll event handler when directive is removed
                 scope.$on('$destroy', function () {
@@ -38267,7 +38437,7 @@ angular.module('oneSearch.bento', [])
                                     self.boxes[type].results[name] = grouped[type];
 
                                     // set resource "more" link
-                                    self.boxes[type].resourceLinks[name] = link[engine.id];
+                                    self.boxes[type].resourceLinks[name] = decodeURIComponent(link[engine.id]);
 
                                     // set resource link parameters by media type specified by the engine config
                                     if (angular.isObject(engine.mediaTypes)){
@@ -38475,22 +38645,43 @@ angular.module('oneSearch.bento', [])
         }
     }])
 
-    .directive('bentoBoxMenu', ['Bento', '$timeout', function(Bento, $timeout){
+    .directive('bentoBoxMenu', ['Bento', '$document', '$rootScope', '$timeout', '$q', function(Bento, $document, $rootScope, $timeout, $q){
         return {
             restrict: 'AC',
             link: function(scope, elm){
+                var selected;
+                var timeout;
                 scope.boxMenu = Bento.boxMenu;
 
                 scope.selectBox = function(box){
-                    var selected = angular.element(document.getElementById(box + '-parent'));
-                    selected.addClass('box-selected');
+                    if (timeout){
+                        $timeout.cancel(timeout);
+                        $document.off('scroll', onScroll);
+                    }
 
-                    $timeout(function(){
-                        selected.removeClass('box-selected');
+                    deselect();
+                    select(box);
+
+                    timeout = $timeout(function(){
+                        $document.on('scroll', onScroll);
                     }, 500);
+                };
+
+                var select = function(box){
+                    selected = angular.element(document.getElementById(box + '-parent'));
+                    selected.addClass('box-selected');
+                };
+
+                var deselect = function(){
+                    if (selected){
+                        selected.removeClass('box-selected');
+                    }
+                };
+
+                var onScroll = function(){
+                    deselect();
+                    $document.off('scroll', onScroll);
                 }
-
-
             }
         }
     }])

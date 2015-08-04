@@ -9416,15 +9416,17 @@ footer > .sub-footer {
 /*# sourceMappingURL=/wp-content/themes/roots/assets/css/main.css.map */
 .bento-box-container > .row > div {
   border: 1px solid transparent;
-  -webkit-transition: all 1s ease-in-out;
-  -o-transition: all 1s ease-in-out;
-  transition: all 1s ease-in-out;
+  -webkit-transition: all 250ms;
+  -o-transition: all 250ms;
+     transition: all 250ms;
 }
 .bento-box-container > .row > div.box-selected {
-  border: 1px solid #993333;
-  -webkit-transition: all 0s ease-in-out;
-  -o-transition: all 0s ease-in-out;
-  transition: all 0s ease-in-out;
+  -webkit-box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+          box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+  -webkit-transform: translateY(-5px);
+  -ms-transform: translateY(-5px);
+   -o-transform: translateY(-5px);
+      transform: translateY(-5px);
 }
 .bento-box-container h2 {
   font-size: 25px;
@@ -9455,6 +9457,8 @@ footer > .sub-footer {
   transition: all 0.2s linear;
 }
 .bento-box-menu.scrollfix {
+  top: 0;
+  z-index: 2000;
   -webkit-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
   box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
 }
@@ -9794,9 +9798,14 @@ footer > .sub-footer {
 /*# sourceMappingURL=/wp-content/themes/roots/assets/css/main.css.map */
 .page-with-menu {
   opacity: 0;
+  display: table;
   -o-transition: opacity 0.2s;
   -webkit-transition: opacity 0.2s;
   transition: opacity 0.2s;
+}
+.page-with-menu > div {
+  display: table-cell;
+  float: none;
 }
 .page-with-menu.loaded {
   opacity: 1;
@@ -9807,6 +9816,11 @@ footer > .sub-footer {
 .scrollfix {
   position: fixed;
   top: 30px;
+}
+.scrollfix-bottom-limit {
+  position: absolute;
+  bottom: 0;
+  top: auto;
 }
 .service-card,
 .service-list {
