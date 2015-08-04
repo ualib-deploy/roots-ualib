@@ -48061,7 +48061,11 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "\n" +
     "        <div class=\"media animate-repeat\" ng-repeat=\"item in news | orderBy:newsFilters.sort | filter:{type: newsFilters.type} | filter:newsFilters.search\">\n" +
     "            <div class=\"media-left\">\n" +
-    "                <img src=\"{{item.images[0].image}}\" width=\"150\">\n" +
+    "                <a ng-href=\"#/news-exhibits/{{item.link}}\" ng-if=\"item.images.length > 0\">\n" +
+    "                    <img src=\"{{item.images[0].image}}\" width=\"150\">\n" +
+    "                </a>\n" +
+    "                <span class=\"fa fa-newspaper-o fa-2x text-muted\" ng-if=\"item.type == 0 && item.images.length < 1\"></span>\n" +
+    "                <span class=\"fa fa-leaf fa-2x text-muted\" ng-if=\"item.type == 1 && item.images.length < 1\"></span>\n" +
     "            </div>\n" +
     "            <div class=\"media-body\">\n" +
     "                <h4 class=\"media-heading\">\n" +
@@ -48162,12 +48166,12 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
 
                 // Convert timestamps into JS millisecond standard
                 if (item.activeFrom !== null) {
-                    n.activeFrom = (item.activeFrom * 1000);
+                    n.activeFrom = new Date(item.activeFrom * 1000);
                 } else {
                     n.activeFrom = null;
                 }
                 if (item.activeUntil !== null) {
-                    n.activeUntil = (item.activeUntil * 1000);
+                    n.activeUntil = new Date(item.activeUntil * 1000);
                 } else {
                     n.activeUntil = null;
                 }
@@ -48176,7 +48180,7 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
                 if (n.activeFrom === null && n.activeUntil === null) {
                     n.type = 0;
                 }
-                n.created = (item.created * 1000);
+                n.created = new Date(item.created * 1000);
 
                 // If link doesn't already exist, create one from the new item's title
                 if (!n.hasOwnProperty('link')){
@@ -48188,6 +48192,7 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
                     n.blurb = $filter('stripTags')(n.description);
                     n.blurb = $filter('truncate')(n.blurb, 250, '...', true);
                 }
+                console.dir(n);
                 return n;
             });
         }
