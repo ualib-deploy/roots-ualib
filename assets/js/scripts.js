@@ -48021,10 +48021,7 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "    <div class=\"col-md-8\">\n" +
     "        <carousel interval=\"myInterval\" no-wrap=\"noWrapSlides\">\n" +
     "            <slide ng-repeat=\"slide in newsItem.slides\" active=\"slide.active\">\n" +
-    "                <img ng-src=\"{{slide.image}}\" style=\"margin:auto;\">\n" +
-    "                <div class=\"carousel-caption\">\n" +
-    "                    <h4>Slide {{$index}}</h4>\n" +
-    "                </div>\n" +
+    "                <img ng-src=\"{{slide.image}}\" style=\"margin:auto; width:800px; height: 300px;\">\n" +
     "            </slide>\n" +
     "        </carousel>\n" +
     "        <div class=\"text-muted\">\n" +
@@ -48069,16 +48066,14 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "\n" +
     "        <div class=\"media animate-repeat\" ng-repeat=\"item in news | orderBy:newsFilters.sort | filter:{type: newsFilters.type} | filter:newsFilters.search\">\n" +
     "            <div class=\"media-left\">\n" +
+    "                <span class=\"fa fa-newspaper-o fa-3x text-muted\" ng-if=\"item.type == 0\"></span>\n" +
+    "                <span class=\"fa fa-leaf fa-3x text-muted\" ng-if=\"item.type == 1\"></span>\n" +
     "                <a ng-href=\"#/news-exhibits/{{item.link}}\" ng-if=\"item.images.length > 0\">\n" +
-    "                    <img src=\"{{item.images[0]}}\" width=\"100\">\n" +
+    "                    <img src=\"{{item.images[0]}}\" width=\"120\" height=\"90\">\n" +
     "                </a>\n" +
-    "                <span class=\"fa fa-newspaper-o fa-4x text-muted\" ng-if=\"item.type == 0 && item.images.length < 1\"></span>\n" +
-    "                <span class=\"fa fa-leaf fa-4x text-muted\" ng-if=\"item.type == 1 && item.images.length < 1\"></span>\n" +
     "            </div>\n" +
     "            <div class=\"media-body\">\n" +
     "                <h4 class=\"media-heading\">\n" +
-    "                    <span class=\"fa fa-newspaper-o\" ng-if=\"item.type == 0 && item.images.length > 0\"></span>\n" +
-    "                    <span class=\"fa fa-leaf\" ng-if=\"item.type == 1 && item.images.length > 0\"></span>\n" +
     "                    <a ng-href=\"#/news-exhibits/{{item.link}}\" ng-bind-html=\"item.title | highlight:newsFilters.search\"></a>\n" +
     "                </h4>\n" +
     "                <div class=\"details-context\" ng-if=\"item.type > 0\">{{item.activeFrom | date:mediumDate}} - {{item.activeUntil | date:mediumDate}}</div>\n" +
