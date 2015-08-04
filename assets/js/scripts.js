@@ -48019,8 +48019,16 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "</div>\n" +
     "<div class=\"row\">\n" +
     "    <div class=\"col-md-8\">\n" +
+    "        <carousel interval=\"myInterval\" no-wrap=\"noWrapSlides\">\n" +
+    "            <slide ng-repeat=\"slide in newsItem.slides\" active=\"slide.active\">\n" +
+    "                <img ng-src=\"{{slide.image}}\" style=\"margin:auto;\">\n" +
+    "                <div class=\"carousel-caption\">\n" +
+    "                    <h4>Slide {{$index}}</h4>\n" +
+    "                </div>\n" +
+    "            </slide>\n" +
+    "        </carousel>\n" +
     "        <div class=\"text-muted\">\n" +
-    "            <span>Created by {{newsItem.creator}} on {{newsItem.created}}</span>\n" +
+    "            <span>Created by {{newsItem.creator}} on {{newsItem.created | date:mediumDate}}</span>\n" +
     "        </div>\n" +
     "        <p ng-bind-html=\"newsItem.description\"></p>\n" +
     "    </div>\n" +
@@ -48062,7 +48070,7 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "        <div class=\"media animate-repeat\" ng-repeat=\"item in news | orderBy:newsFilters.sort | filter:{type: newsFilters.type} | filter:newsFilters.search\">\n" +
     "            <div class=\"media-left\">\n" +
     "                <a ng-href=\"#/news-exhibits/{{item.link}}\" ng-if=\"item.images.length > 0\">\n" +
-    "                    <img src=\"{{item.images[0]}}\">\n" +
+    "                    <img src=\"{{item.images[0]}}\" width=\"100\">\n" +
     "                </a>\n" +
     "                <span class=\"fa fa-newspaper-o fa-4x text-muted\" ng-if=\"item.type == 0 && item.images.length < 1\"></span>\n" +
     "                <span class=\"fa fa-leaf fa-4x text-muted\" ng-if=\"item.type == 1 && item.images.length < 1\"></span>\n" +
@@ -48192,7 +48200,12 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
                     n.blurb = $filter('stripTags')(n.description);
                     n.blurb = $filter('truncate')(n.blurb, 250, '...', true);
                 }
-                console.dir(n);
+
+                n.slides = [];
+                for (var i = 0; i < item.images.length; i++) {
+                    n.slides.push({image: item.images[i], text: ""});
+                }
+
                 return n;
             });
         }
@@ -48252,6 +48265,9 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
     }])
 
     .controller('newsItemCtrl', ['$scope', 'newsItem', '$routeParams', function($scope, newsItem, $routeParams){
+        $scope.myInterval = 5000;
+        $scope.noWrapSlides = false;
+
        newsItem.$promise.then(function(data){
            for (var i = 0, len = data.news.length; i < len; i++){
                var item = data.news[i];
