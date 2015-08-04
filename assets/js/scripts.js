@@ -41149,13 +41149,13 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                            <div class=\"col-md-2 form-group\">\n" +
     "                                <label for=\"{{news.nid}}_from\">Active From</label>\n" +
     "                                <input type=\"text\" class=\"form-control\" id=\"{{news.nid}}_from\" datepicker-popup=\"{{dpFormat}}\"\n" +
-    "                                       ng-model=\"news.activeFrom\" is-open=\"news.dpFrom\" ng-required=\"true\" close-text=\"Close\"\n" +
+    "                                       ng-model=\"news.activeFrom\" is-open=\"news.dpFrom\" close-text=\"Close\"\n" +
     "                                       ng-focus=\"onNewsDPFocusFrom($event, $index)\"/>\n" +
     "                            </div>\n" +
     "                            <div class=\"col-md-2 form-group\">\n" +
     "                                <label for=\"{{news.nid}}_until\">Active Until</label>\n" +
     "                                <input type=\"text\" class=\"form-control\" id=\"{{news.nid}}_until\" datepicker-popup=\"{{dpFormat}}\"\n" +
-    "                                       ng-model=\"news.activeUntil\" is-open=\"news.dpUntil\" ng-required=\"true\" close-text=\"Close\"\n" +
+    "                                       ng-model=\"news.activeUntil\" is-open=\"news.dpUntil\" close-text=\"Close\"\n" +
     "                                       ng-focus=\"onNewsDPFocusUntil($event, $index)\"/>\n" +
     "                            </div>\n" +
     "                        </div>\n" +
@@ -44256,8 +44256,14 @@ angular.module('manage.manageNews', ['ngFileUpload'])
                 if ($scope.data.news[$scope.data.news.indexOf(news)].formResponse.length > 0)
                     return false;
                 $scope.uploading = true;
-                news.tsFrom = news.activeFrom.valueOf() / 1000;
-                news.tsUntil = news.activeUntil.valueOf() / 1000;
+                if (news.activeFrom !== null)
+                    news.tsFrom = news.activeFrom.valueOf() / 1000;
+                else
+                    news.tsFrom = null;
+                if (news.activeUntil !== null)
+                    news.tsUntil = news.activeUntil.valueOf() / 1000;
+                else
+                    news.tsUntil = null;
                 if (typeof news.picFile === 'undefined'){
                     newsFactory.postData({action : 21}, news)
                         .success(function(data, status, headers, config) {
@@ -44320,8 +44326,14 @@ angular.module('manage.manageNews', ['ngFileUpload'])
                 if ($scope.newNews.formResponse.length > 0)
                     return false;
                 $scope.uploading = true;
-                $scope.newNews.tsFrom = $scope.newNews.activeFrom.valueOf() / 1000;
-                $scope.newNews.tsUntil = $scope.newNews.activeUntil.valueOf() / 1000;
+                if ($scope.newNews.activeFrom !== null)
+                    $scope.newNews.tsFrom = $scope.newNews.activeFrom.valueOf() / 1000;
+                else
+                    $scope.newNews.tsFrom = null;
+                if ($scope.newNews.activeUntil !== null)
+                    $scope.newNews.tsUntil = $scope.newNews.activeUntil.valueOf() / 1000;
+                else
+                    $scope.newNews.tsUntil = null;
 
                 if (typeof $scope.newNews.picFile === 'undefined'){
                     newsFactory.postData({action : 31}, $scope.newNews)
