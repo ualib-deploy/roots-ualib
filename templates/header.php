@@ -40,11 +40,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                 <h4>My Library (Catalog)</h4>
                                             </a>
                                         </div>
-                                        <div class="col-xs-12 col-sm-6 col-md-4">
-                                            <a class="service-card" href="https://login.libdata.lib.ua.edu/login">
-                                                <h4>EasyProxy Login</h4>
-                                            </a>
-                                        </div>
+
                                         <div class="col-xs-12 col-sm-6 col-md-4">
                                             <a class="service-card" href="https://ua.illiad.oclc.org/illiad/">
                                                 <h4>Interlibrary Loan (ILLiad)</h4>
@@ -54,7 +50,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-4">
                                             <a class="service-card" href="https://www.refworks.com/refworks2/Default.aspx">
-                                                <h4>Refworks</h4>
+                                                <h4>RefWorks</h4>
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-4">
