@@ -46382,12 +46382,24 @@ angular.module('ualib.databases')
 /**
  * Transform the JSON response - this allows the transformed values to be cached via Angular's $resource service.
  */
-    .factory('databasesFactory', ['$resource', '$filter', 'DB_PROXY_PREPEND_URL', function($resource, $filter, DB_PROXY_PREPEND_URL){
+    .factory('databasesFactory', ['$resource', '$http', '$filter', 'DB_PROXY_PREPEND_URL', function($resource, $http, $filter, DB_PROXY_PREPEND_URL){
+
+        //TODO: centralize this function so it can be used with all apps
+        // Extend the default responseTransform array - Straight from Angular 1.2.8 API docs - https://docs.angularjs.org/api/ng/service/$http#overriding-the-default-transformations-per-request
+        function appendTransform(defaults, transform) {
+
+            // We can't guarantee that the default transformation is an array
+            defaults = angular.isArray(defaults) ? defaults : [defaults];
+            console.log(defaults.concat(transform));
+            // Append the new transformation to the defaults
+            return defaults.concat(transform);
+        }
+
         return $resource('https://wwwdev2.lib.ua.edu/databases/api/:db', {db: 'all'}, {
             cache: true,
             get: {
                 method: 'GET',
-                transformResponse: function(data){
+                transformResponse: appendTransform($http.defaults.transformResponse, function(data){
                     var db = angular.fromJson(data);
                     //Pre sort databases by title
                     var databases = $filter('orderBy')(db.databases, 'title');
@@ -46417,7 +46429,7 @@ angular.module('ualib.databases')
                     });
                     db.databases = databases;
                     return db;
-                }
+                })
             }
         });
     }]);
@@ -48049,11 +48061,12 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "\n" +
     "        <div class=\"media animate-repeat\" ng-repeat=\"item in news | orderBy:newsFilters.sort | filter:{type: newsFilters.type} | filter:newsFilters.search\">\n" +
     "            <div class=\"media-left\">\n" +
-    "                <span class=\"fa fa-newspaper-o fa-2x text-muted\" ng-if=\"item.type == 0\"></span>\n" +
-    "                <span class=\"fa fa-leaf fa-2x text-muted\" ng-if=\"item.type == 1\"></span>\n" +
+    "                <img src=\"{{item.images[0].image}}\" width=\"150\">\n" +
     "            </div>\n" +
     "            <div class=\"media-body\">\n" +
     "                <h4 class=\"media-heading\">\n" +
+    "                    <span class=\"fa fa-newspaper-o\" ng-if=\"item.type == 0\"></span>\n" +
+    "                    <span class=\"fa fa-leaf\" ng-if=\"item.type == 1\"></span>\n" +
     "                    <a ng-href=\"#/news-exhibits/{{item.link}}\" ng-bind-html=\"item.title | highlight:newsFilters.search\"></a>\n" +
     "                </h4>\n" +
     "                <div class=\"details-context\" ng-if=\"item.type > 0\">{{item.activeFrom | date:mediumDate}} - {{item.activeUntil | date:mediumDate}}</div>\n" +
@@ -48067,10 +48080,11 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "\n" +
     "        <div class=\"alert alert-warning text-center\" role=\"alert\" ng-show=\"news.length < 1\">\n" +
     "            <h2>\n" +
-    "                No <span ng-if=\"soft.cat\"><strong>{{soft.cat | lowercase}}</strong></span> software is available\n" +
-    "                <span ng-if=\"soft.os\">on <strong>{{soft.os == 1 ? 'Windows' : 'OS X'}}</strong> computers</span>\n" +
-    "                <span ng-if=\"soft.loc\">in <strong>{{soft.loc}}</strong></span>\n" +
-    "                <span ng-if=\"soft.search\">that matches the search \"<strong>{{soft.search}}</strong>\"</span>\n" +
+    "                No\n" +
+    "                <span ng-show=\"newsFilters.type == ''\">News or Exhibits</span>\n" +
+    "                <span ng-show=\"newsFilters.type == '0'\">News</span>\n" +
+    "                <span ng-show=\"newsFilters.type == '1'\">Exhibits</span>\n" +
+    "                match the search \"<strong>{{newsFilters.search}}</strong>\"</span>\n" +
     "            </h2>\n" +
     "        </div>\n" +
     "    </div>\n" +
@@ -48144,9 +48158,25 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
             news = $filter('unique')(news, 'title');
             return news.map(function(item){
                 var n = item;
+                n.type = 1;
+
                 // Convert timestamps into JS millisecond standard
-                n.activeFrom = (item.activeFrom * 1000);
-                n.activeUntil = (item.activeUntil * 1000);
+                if (item.activeFrom !== null) {
+                    n.activeFrom = (item.activeFrom * 1000);
+                } else {
+                    n.activeFrom = null;
+                }
+                if (item.activeUntil !== null) {
+                    n.activeUntil = (item.activeUntil * 1000);
+                } else {
+                    n.activeUntil = null;
+                }
+
+                //it is news if dates are not set, exhibit otherwise
+                if (n.activeFrom === null && n.activeUntil === null) {
+                    n.type = 0;
+                }
+                n.created = (item.created * 1000);
 
                 // If link doesn't already exist, create one from the new item's title
                 if (!n.hasOwnProperty('link')){
@@ -48166,7 +48196,7 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
             cache: false,
             get: {
                 method: 'GET',
-                params: {news: 'all'},
+                params: {news: 'archive'},
                 transformResponse: function(data){
                     var news = angular.fromJson(data);
                     formatted = preprocessNews(news.news);
@@ -48198,7 +48228,7 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
                 reloadOnSearch: false,
                 resolve: {
                     newsItem: function(ualibNewsFactory){
-                        return ualibNewsFactory.get({news: 'all'}, function(data){
+                        return ualibNewsFactory.get({news: 'archive'}, function(data){
                             return data;
                         }, function(data, status, headers, config) {
                             console.log('ERROR: news item');
@@ -48249,7 +48279,7 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
                 reloadOnSearch: false,
                 resolve: {
                     newsList: function(ualibNewsFactory){
-                        return ualibNewsFactory.get({news: 'all'}, function(data){
+                        return ualibNewsFactory.get({news: 'archive'}, function(data){
                             return data;
                         }, function(data, status, headers, config) {
                             console.log('ERROR: news');
@@ -48270,7 +48300,7 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
     .controller('newsListCtrl', ['$scope', '$location', 'newsList', function($scope, $location, newsList){
         var filterWatcher;
         $scope.newsFilters = {
-            sort: 'activeFrom',
+            sort: 'created',
             type: '',
             search: ''
         };
