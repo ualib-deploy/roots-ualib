@@ -48035,7 +48035,7 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "            <slide ng-repeat=\"slide in newsItem.slides\" active=\"slide.active\">\n" +
     "                <img ng-src=\"{{slide.image}}\" style=\"margin:auto; height: 300px;\">\n" +
     "                <div class=\"carousel-caption\">\n" +
-    "\n" +
+    "                    <h4>Slide {{$index}}</h4>\n" +
     "                </div>\n" +
     "            </slide>\n" +
     "        </carousel>\n" +
@@ -48081,8 +48081,8 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "\n" +
     "        <div class=\"media animate-repeat\" ng-repeat=\"item in news | orderBy:newsFilters.sort | filter:{type: newsFilters.type} | filter:newsFilters.search\">\n" +
     "            <div class=\"media-left\" style=\"width:150px;\">\n" +
-    "                <span class=\"fa fa-newspaper-o fa-4x text-muted\" ng-if=\"item.type == 0 && item.tb == 'undefined'\"></span>\n" +
-    "                <span class=\"fa fa-leaf fa-4x text-muted\" ng-if=\"item.type == 1 && item.tb == 'undefined'\"></span>\n" +
+    "                <span class=\"fa fa-newspaper-o fa-5x text-muted\" ng-if=\"item.type == 0\" ng-hide=\"item.tb.length > 0\"></span>\n" +
+    "                <span class=\"fa fa-leaf fa-5x text-muted\" ng-if=\"item.type == 1\" ng-hide=\"item.tb.length > 0\"></span>\n" +
     "                <a ng-href=\"#/news-exhibits/{{item.link}}\" ng-if=\"item.tb.length > 0\">\n" +
     "                    <img class=\"media-object\" src=\"{{item.tb}}\">\n" +
     "                </a>\n" +
