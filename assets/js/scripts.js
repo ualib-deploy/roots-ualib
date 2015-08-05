@@ -44275,7 +44275,7 @@ angular.module('manage.manageNews', ['ngFileUpload'])
                     news.tsUntil = news.activeUntil.valueOf() / 1000;
                 else
                     news.tsUntil = null;
-                if (typeof news.picFile === 'undefined'){
+                if (news.selectedFiles.length < 1){
                     newsFactory.postData({action : 21}, news)
                         .success(function(data, status, headers, config) {
                             if ((typeof data === 'object') && (data !== null)){
@@ -44296,22 +44296,23 @@ angular.module('manage.manageNews', ['ngFileUpload'])
                         });
                 } else {
                     var names = [];
-                    for (var i = 0; i < news.picFile.length; i++)
-                        names.push(news.picFile[i].name);
-                    news.picFile.upload = Upload.upload({
+                    for (var i = 0; i < news.selectedFiles.length; i++)
+                        names.push(news.selectedFiles[i].name);
+                    news.selectedFiles.upload = Upload.upload({
                         url: appURL + 'processData.php?action=2',
                         method: 'POST',
                         fields: {
                             news: news
                         },
-                        file: news.picFile,
+                        file: news.selectedFiles,
                         fileFormDataName: names
                     });
-                    news.picFile.upload.then(function(response) {
+                    news.selectedFiles.upload.then(function(response) {
                         $timeout(function() {
                             if ((typeof response.data === 'object') && (response.data !== null)){
                                 $scope.data.news[$scope.data.news.indexOf(news)].images = [];
                                 $scope.data.news[$scope.data.news.indexOf(news)].images = angular.copy(response.data.images);
+                                news.selectedFiles.length = 0;
                                 news.picFile.length = 0;
                                 $scope.data.news[$scope.data.news.indexOf(news)].formResponse = "News has been updated, images have been uploaded.";
                             } else {
@@ -44326,9 +44327,9 @@ angular.module('manage.manageNews', ['ngFileUpload'])
                             $scope.data.news[$scope.data.news.indexOf(news)].formResponse = response.status + ': ' + response.data;
                         $scope.uploading = false;
                     });
-                    news.picFile.upload.progress(function(evt) {
+                    news.selectedFiles.upload.progress(function(evt) {
                         // Math.min is to fix IE which reports 200% sometimes
-                        news.picFile.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+                        news.selectedFiles.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
                     });
                 }
             };
@@ -44346,7 +44347,7 @@ angular.module('manage.manageNews', ['ngFileUpload'])
                 else
                     $scope.newNews.tsUntil = null;
 
-                if (typeof $scope.newNews.picFile === 'undefined'){
+                if ($scope.newNews.selectedFiles.length < 1){
                     newsFactory.postData({action : 31}, $scope.newNews)
                         .success(function(data, status, headers, config) {
                             if ((typeof data === 'object') && (data !== null)){
@@ -44392,18 +44393,18 @@ angular.module('manage.manageNews', ['ngFileUpload'])
                         });
                 } else {
                     var names = [];
-                    for (var i = 0; i < $scope.newNews.picFile.length; i++)
-                        names.push($scope.newNews.picFile[i].name);
-                    $scope.newNews.picFile.upload = Upload.upload({
+                    for (var i = 0; i < $scope.newNews.selectedFiles.length; i++)
+                        names.push($scope.newNews.selectedFiles[i].name);
+                    $scope.newNews.selectedFiles.upload = Upload.upload({
                         url: appURL + 'processData.php?action=3',
                         method: 'POST',
                         fields: {
                             news: $scope.newNews
                         },
-                        file: $scope.newNews.picFile,
+                        file: $scope.newNews.selectedFiles,
                         fileFormDataName: names
                     });
-                    $scope.newNews.picFile.upload.then(function(response) {
+                    $scope.newNews.selectedFiles.upload.then(function(response) {
                         $timeout(function() {
                             if ((typeof response.data === 'object') && (response.data !== null)){
                                 var newNews = {};
@@ -44445,9 +44446,9 @@ angular.module('manage.manageNews', ['ngFileUpload'])
                             $scope.newNews.formResponse = response.status + ': ' + response.data;
                         $scope.uploading = false;
                     });
-                    $scope.newNews.picFile.upload.progress(function(evt) {
+                    $scope.newNews.selectedFiles.upload.progress(function(evt) {
                         // Math.min is to fix IE which reports 200% sometimes
-                        $scope.newNews.picFile.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+                        $scope.newNews.selectedFiles.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
                     });
                 }
             };
