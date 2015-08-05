@@ -387,7 +387,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                 <h4>How Do I...</h4>
                                                 <ul>
                                                     <li><a href="<?php echo site_url(); ?>/library-help/how-do-i/">Ask A Librarian: FAQs</a></li>
-                                                    <li><a href="<?php echo stie_url(); ?>/forms/reference-request/">Ask A Librarian: Reference Questions</a></li>
+                                                    <li><a href="<?php echo site_url(); ?>/forms/reference-request/">Ask A Librarian: Reference Questions</a></li>
                                                 </ul>
                                             </div>
                                         </div>
