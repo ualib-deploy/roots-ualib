@@ -48080,7 +48080,7 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "            </div>\n" +
     "            <div class=\"media-right\">\n" +
     "                <a ng-href=\"#/news-exhibits/{{item.link}}\" ng-if=\"item.images.length > 0\">\n" +
-    "                    <img src=\"{{item.images[0]}}\" width=\"120\" height=\"90\">\n" +
+    "                    <img class=\"media-object\" src=\"{{item.images[0]}}\" width=\"120\" height=\"90\">\n" +
     "                </a>\n" +
     "            </div>\n" +
     "        </div>\n" +
