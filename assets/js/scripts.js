@@ -48031,14 +48031,16 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "</div>\n" +
     "<div class=\"row\">\n" +
     "    <div class=\"col-md-8\">\n" +
-    "        <carousel interval=\"myInterval\" no-wrap=\"noWrapSlides\">\n" +
-    "            <slide ng-repeat=\"slide in newsItem.slides\" active=\"slide.active\">\n" +
-    "                <img ng-src=\"{{slide.image}}\" style=\"margin:auto; height: 300px;\">\n" +
-    "                <div class=\"carousel-caption\">\n" +
-    "                    <h4>Slide {{$index}}</h4>\n" +
-    "                </div>\n" +
-    "            </slide>\n" +
-    "        </carousel>\n" +
+    "        <div style=\"height: 305px\">\n" +
+    "            <carousel interval=\"myInterval\" no-wrap=\"noWrapSlides\">\n" +
+    "                <slide ng-repeat=\"slide in newsItem.slides\" active=\"slide.active\">\n" +
+    "                    <img ng-src=\"{{slide.image}}\" style=\"margin:auto;\">\n" +
+    "                    <div class=\"carousel-caption\">\n" +
+    "                        <h4>Slide {{$index}}</h4>\n" +
+    "                    </div>\n" +
+    "                </slide>\n" +
+    "            </carousel>\n" +
+    "        </div>\n" +
     "        <div class=\"text-muted\">\n" +
     "            <span>Created by {{newsItem.creator}} on {{newsItem.created | date:mediumDate}}</span>\n" +
     "        </div>\n" +
@@ -48081,10 +48083,12 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "\n" +
     "        <div class=\"media animate-repeat\" ng-repeat=\"item in news | orderBy:newsFilters.sort | filter:{type: newsFilters.type} | filter:newsFilters.search\">\n" +
     "            <div class=\"media-left\" style=\"width:150px;\">\n" +
-    "                <span class=\"fa fa-newspaper-o fa-5x text-muted\" ng-if=\"item.type == 0\" ng-hide=\"item.tb.length > 0\"></span>\n" +
-    "                <span class=\"fa fa-leaf fa-5x text-muted\" ng-if=\"item.type == 1\" ng-hide=\"item.tb.length > 0\"></span>\n" +
-    "                <a ng-href=\"#/news-exhibits/{{item.link}}\" ng-if=\"item.tb.length > 0\">\n" +
-    "                    <img class=\"media-object\" src=\"{{item.tb}}\">\n" +
+    "                <a ng-href=\"#/news-exhibits/{{item.link}}\">\n" +
+    "                    <img class=\"media-object\" src=\"{{item.tb}}\" ng-if=\"item.tb.length > 0\">\n" +
+    "                    <img class=\"media-object\" src=\"https://wwwdev2.lib.ua.edu/newsApp/images/tb_news.png\"\n" +
+    "                         ng-if=\"item.type == 0\" ng-hide=\"item.tb.length > 0\">\n" +
+    "                    <img class=\"media-object\" src=\"https://wwwdev2.lib.ua.edu/newsApp/images/tb_exhibit.png\"\n" +
+    "                         ng-if=\"item.type == 1\" ng-hide=\"item.tb.length > 0\">\n" +
     "                </a>\n" +
     "            </div>\n" +
     "            <div class=\"media-body\">\n" +
