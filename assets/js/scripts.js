@@ -48033,7 +48033,10 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "    <div class=\"col-md-8\">\n" +
     "        <carousel interval=\"myInterval\" no-wrap=\"noWrapSlides\">\n" +
     "            <slide ng-repeat=\"slide in newsItem.slides\" active=\"slide.active\">\n" +
-    "                <img ng-src=\"{{slide.image}}\" style=\"margin:auto; width:800px; height: 300px;\">\n" +
+    "                <img ng-src=\"{{slide.image}}\" style=\"margin:auto; height: 300px;\">\n" +
+    "                <div class=\"carousel-caption\">\n" +
+    "\n" +
+    "                </div>\n" +
     "            </slide>\n" +
     "        </carousel>\n" +
     "        <div class=\"text-muted\">\n" +
@@ -48078,8 +48081,8 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "\n" +
     "        <div class=\"media animate-repeat\" ng-repeat=\"item in news | orderBy:newsFilters.sort | filter:{type: newsFilters.type} | filter:newsFilters.search\">\n" +
     "            <div class=\"media-left\" style=\"width:150px;\">\n" +
-    "                <span class=\"fa fa-newspaper-o fa-4x text-muted\" ng-if=\"item.type == 0 && item.tb.length < 1\"></span>\n" +
-    "                <span class=\"fa fa-leaf fa-4x text-muted\" ng-if=\"item.type == 1 && item.tb.length < 1\"></span>\n" +
+    "                <span class=\"fa fa-newspaper-o fa-4x text-muted\" ng-if=\"item.type == 0 && item.tb == 'undefined'\"></span>\n" +
+    "                <span class=\"fa fa-leaf fa-4x text-muted\" ng-if=\"item.type == 1 && item.tb == 'undefined'\"></span>\n" +
     "                <a ng-href=\"#/news-exhibits/{{item.link}}\" ng-if=\"item.tb.length > 0\">\n" +
     "                    <img class=\"media-object\" src=\"{{item.tb}}\">\n" +
     "                </a>\n" +
@@ -48211,8 +48214,9 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
                 n.slides = [];
                 if (typeof item.images !== 'undefined') {
                     for (var i = 0; i < item.images.length; i++) {
-                        n.slides.push({image: item.images[i], text: ""});
+                        n.slides.push({image: item.images[i], text: "", active: false});
                     }
+                    n.slides[0].active = true;
                 }
 
                 return n;
