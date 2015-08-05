@@ -50244,17 +50244,19 @@ angular.module('staffdir', ['ualib.staffdir']);
 ;angular.module('ualib.staffdir')
 
     // Capture any existing URL facet parameters.
-    .run(['StaffDirectoryService', '$location', function(SDS, $location){
-        var params = $location.search();
-        for (var param in params){
-            //TODO: This must be temporary. Any URI param will cause the facet bar to display on load!!
-            if (!SDS.showFacetBar) {
-                SDS.showFacetBar = true;
+    .run(['StaffDirectoryService', '$location', '$rootScope', function(SDS, $location, $rootScope){
+        $rootScope.$on('$routeChangeStart', function(ev, next, last){
+            if (next.originalPath === '/staffdir'){
+                var params = $location.search();
+                for (var param in params){
+                    //TODO: This must be temporary. Any URI param will cause the facet bar to display on load!!
+                    if (!SDS.showFacetBar) {
+                        SDS.showFacetBar = true;
+                    }
+                    SDS.facet[param] = params[param];
+                }
             }
-            SDS.facet[param] = params[param];
-        }
-
-
+        });
     }])
 
     .service('StaffDirectoryService', ['$location', function($location){
@@ -50872,10 +50874,10 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "<div class=\"row\">\n" +
     "    <div class=\"col-md-8\">\n" +
     "        <div style=\"height: 305px\" ng-if=\"newsItem.images.length > 0\">\n" +
-    "            <ul rn-carousel class=\"image\" rn-carousel-controls rn-carousel-auto-slide>\n" +
-    "                <li ng-repeat=\"image in newsItem.images\">\n" +
-    "                    <div ng-style=\"{'background-image': 'url(' + image + ')'}\" class=\"bgimage\">\n" +
-    "\n" +
+    "            <ul rn-carousel rn-carousel-controls class=\"image\">\n" +
+    "                <li ng-repeat=\"img in newsItem.images\">\n" +
+    "                    <div class=\"layer\">\n" +
+    "                        <img ng-src=\"{{img}}\"/>\n" +
     "                    </div>\n" +
     "                </li>\n" +
     "            </ul>\n" +
@@ -51051,16 +51053,6 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
                 if (!n.hasOwnProperty('blurb')){
                     n.blurb = $filter('stripTags')(n.description);
                     n.blurb = $filter('truncate')(n.blurb, 250, '...', true);
-                }
-
-                n.slides = [];
-                if (typeof item.images !== 'undefined') {
-                    if (item.images.length > 0) {
-                        for (var i = 0; i < item.images.length; i++) {
-                            n.slides.push({image: item.images[i], text: "", active: false});
-                        }
-                        n.slides[0].active = true;
-                    }
                 }
 
                 return n;
