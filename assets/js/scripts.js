@@ -39679,18 +39679,14 @@ angular.module("calendar/calendar.tpl.html", []).run(["$templateCache", function
 angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("hours-locations/hours-locations.tpl.html",
     "<!--<script src='//maps.googleapis.com/maps/api/js?sensor=false&key=AIzaSyCdXuKwZiDx5W2uP8plV5d-o-jLQ5UQtIQ&mid=z4A8-271j5C8.kowwE312jycE'></script>-->\n" +
-    "\n" +
-    "<div class=\"jumbotron-header\">\n" +
-    "    <div class=\"jumbotron\">\n" +
-    "        <div class=\"container\">\n" +
-    "            <h1>Hours &amp; Locations</h1>\n" +
-    "            <h2>{{library}}</h2>\n" +
-    "        </div>\n" +
+    "<div class=\"jumbotron bg-transparent\">\n" +
+    "    <div class=\"container\">\n" +
+    "        <h1>Hours &amp; Locations</h1>\n" +
+    "        <h2>{{library}}</h2>\n" +
     "    </div>\n" +
     "</div>\n" +
-    "\n" +
     "<div class=\"container\">\n" +
-    "    <div class=\"row\">\n" +
+    "    <div class=\"row hours-locations-container\">\n" +
     "        <div class=\"col-md-9\">\n" +
     "            <div class=\"hours-calendar\"></div>\n" +
     "\n" +
