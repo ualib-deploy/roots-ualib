@@ -10,6 +10,7 @@ module.exports = function(grunt) {
         '<%= bower.directory %>/angular-ui-utils/ui-utils.js',
         '<%= bower.directory %>/ng-file-upload/ng-file-upload-all.js',
         '<%= bower.directory %>/angular-carousel/dist/angular-carousel.js',
+        '<%= bower.directory %>/angular-touch/angular-touch.js',
         '<%= bower.directory %>/angular-scroll/angular-scroll.js',
         '<%= bower.directory %>/lodash/lodash.js',
         '<%= bower.directory %>/angular-google-maps/dist/angular-google-maps.js',
