@@ -50874,7 +50874,9 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "        <div style=\"height: 305px\" ng-if=\"newsItem.images.length > 0\">\n" +
     "            <ul rn-carousel class=\"image\" rn-carousel-controls rn-carousel-auto-slide>\n" +
     "                <li ng-repeat=\"image in newsItem.images\">\n" +
-    "                    <div class=\"layer\">{{ image }}</div>\n" +
+    "                    <div ng-style=\"{'background-image': 'url(' + image + ')'}\" class=\"bgimage\">\n" +
+    "\n" +
+    "                    </div>\n" +
     "                </li>\n" +
     "            </ul>\n" +
     "        </div>\n" +
@@ -50987,10 +50989,6 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
     "    <masonry>\n" +
     "        <div class=\"masonry-brick\">\n" +
     "            <a news-card=\"item\" ng-repeat=\"item in news\">\n" +
-    "            </a>\n" +
-    "        </div>\n" +
-    "        <div class=\"masonry-brick\">\n" +
-    "            <a news-card=\"item\" ng-repeat=\"item in exhibitions\">\n" +
     "            </a>\n" +
     "        </div>\n" +
     "        <div class=\"masonry-brick\">\n" +
@@ -51230,8 +51228,7 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
             .then(function(data){
                 $scope.news = data.news;
                 $scope.events = data.events;
-                $scope.exhibitions = data.exhibitions;
-                $scope.newsOverflow = (data.news.length + data.events.length + data.exhibitions.length) > 3;
+                $scope.newsOverflow = (data.news.length + data.events.length) > 3;
             });
     }]);;angular.module('ualib.templates', ['../assets/js/_ualib-home.tpl.html']);
 
@@ -51270,34 +51267,6 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "</div>\n" +
     "");
 }]);
-;/*
-(function() {
-    tinymce.create('tinymce.plugins.typekit', {
-        setup : function(ed) {
-            ed.onInit.add(function(ed, evt) {
-
-                // Load a script from a specific URL using the global script loader
-                tinymce.ScriptLoader.load('somescript.js');
-
-                // Load a script using a unique instance of the script loader
-                var scriptLoader = new tinymce.dom.ScriptLoader();
-
-                scriptLoader.load('somescript.js');
-
-            });
-        },
-    getInfo: function() {
-    return {
-        longname:  'TypeKit',
-        author:    'Thomas Griffin',
-        authorurl: 'https://thomasgriffin.io',
-        infourl:   'https://twitter.com/jthomasgriffin',
-        version:   '1.0'
-    };
-}
-});
-tinymce.PluginManager.add('typekit', tinymce.plugins.typekit);
-})();*/
 ;/* ========================================================================
  * DOM-based Routing
  * Based on http://goo.gl/EUTi53 by Paul Irish
