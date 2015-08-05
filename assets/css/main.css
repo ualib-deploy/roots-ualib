@@ -9912,7 +9912,7 @@ a.service-card:focus {
      transition: opacity  .2s .1s;
 }
 /*# sourceMappingURL=/wp-content/themes/roots/assets/css/main.css.map */
-.calendar > table > thead > tr > td {
+.calendar table > thead > tr > td {
   color: #31708f;
   text-align: center;
   background-color: #d9edf7;
@@ -9920,58 +9920,57 @@ a.service-card:focus {
   padding-left: 0;
   padding-right: 0;
 }
-.calendar > table > tbody > tr > td {
+.calendar table > tbody > tr > td {
   width: 14.28571429%;
   height: 16.66666667%;
   margin: 0;
   position: relative;
   text-align: center;
-  /*> div {
-          position: relative;
-          width:100%;
-          height: 100%;
-        }
-*/
+  background-color: #f9f9f9;
 }
-.calendar > table > tbody > tr > td .date {
+.calendar table > tbody > tr > td:hover {
+  background-color: #fff;
+}
+.calendar table > tbody > tr > td .date {
   font-size: .85em;
   display: block;
   float: right;
   margin: 0;
 }
-.calendar > table > tbody > tr > td .hours {
+.calendar table > tbody > tr > td .hours {
   padding: 1em 0 1em 0.85em;
   text-align: left;
+  font-size: 0.9em;
 }
-.calendar > table > tbody > tr > td .exception-icon {
+.calendar table > tbody > tr > td .exception-icon {
   position: absolute;
   font-size: 1.2em;
   bottom: 2px;
   right: 2px;
 }
-.calendar > table > tbody > tr > .today {
+.calendar table > tbody > tr > .today {
   color: #31708f;
   background-color: #d9edf7;
 }
-.calendar > table > tbody > tr > .exception {
+.calendar table > tbody > tr > .exception {
   color: #8a6d3b;
   background-color: #fcf8e3;
 }
-.calendar > table > tbody > tr > .closed {
+.calendar table > tbody > tr > .closed {
   color: #a94442;
   background-color: #f2dede;
 }
-.calendar > table > tbody > tr > .not-current-month {
-  color: #a1a1a1;
-  background-color: #fafafa;
+.calendar table > tbody > tr > .not-current-month {
+  color: #949494;
+  background-color: #ededed;
 }
-.calendar > table > tbody > tr > .not-current-month.exception {
-  color: #c2b39a;
-  background-color: #fbf9ee;
+.calendar table > tbody > tr > .not-current-month.exception {
+  color: #bcad94;
+  background-color: #f5f3e8;
 }
-.calendar > table > tbody > tr > .not-current-month.closed {
-  color: #d19f9e;
-  background-color: #f6ecec;
+.calendar table > tbody > tr > .not-current-month.closed {
+  color: #cb9998;
+  background-color: #f0e6e6;
 }
 .navbar-embedded {
   margin-bottom: 0;
@@ -9994,7 +9993,7 @@ a.service-card:focus {
   margin: 5px;
 }
 .angular-google-map-container {
-  height: 200px;
+  height: 250px;
 }
 .hours-locations-menu > li > ul > li {
   padding-left: 15px;
@@ -10019,15 +10018,8 @@ a.service-card:focus {
 .library-hours-today .h3 {
   margin-top: 5px;
 }
-.hours-list {
-  position: relative;
-  max-width: 650px;
-}
 .hours-list .fa-info-circle:hover {
   cursor: help;
-}
-.hours-list-child {
-  color: #555;
 }
 .hours-list-child > td:first-of-type {
   padding-left: 30px !important;

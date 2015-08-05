@@ -39593,61 +39593,65 @@ angular.module('common.oneSearch', [])
 angular.module("calendar/calendar.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("calendar/calendar.tpl.html",
     "<div class=\"calendar\">\n" +
-    "    <h3>\n" +
-    "        Typical Week Schedule\n" +
-    "        <small ng-show=\"defHours[1].ts > 0\">\n" +
-    "            until {{defHours[1].ts * 1000 | date:'MMM d, y'}}\n" +
-    "        </small>\n" +
-    "    </h3>\n" +
-    "    <table class=\"table table-bordered table-condensed\">\n" +
-    "        <thead>\n" +
-    "        <tr>\n" +
-    "            <td>Sun</td>\n" +
-    "            <td>Mon</td>\n" +
-    "            <td>Tue</td>\n" +
-    "            <td>Wed</td>\n" +
-    "            <td>Thur</td>\n" +
-    "            <td>Fri</td>\n" +
-    "            <td>Sat</td>\n" +
-    "        </tr>\n" +
-    "        </thead>\n" +
-    "        <tbody>\n" +
-    "        <tr>\n" +
-    "            <td ng-repeat=\"day in defHours[0].hours\">\n" +
-    "                <div class=\"hours\">\n" +
-    "                    {{day.hoursFrom}}\n" +
+    "    <div class=\"form-group\">\n" +
+    "        <div class=\"btn-group\">\n" +
+    "            <label class=\"btn btn-default\" ng-model=\"calView\" btn-radio=\"\">Typical Week Schedule</label>\n" +
+    "            <label class=\"btn btn-default\" ng-model=\"calView\" btn-radio=\"1\">Calendar &amp; Exceptions</label>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "    <div ng-show=\"!calView\">\n" +
+    "        <div class=\"text-info\" ng-show=\"defHours[1].ts > 0\">\n" +
+    "            <span class=\"fa fw fa-info-circle\"></span> Until {{defHours[1].ts * 1000 | date:'MMM d, y'}}\n" +
+    "        </div>\n" +
+    "        <table class=\"table table-bordered table-condensed\">\n" +
+    "            <thead>\n" +
+    "            <tr>\n" +
+    "                <td>Sun</td>\n" +
+    "                <td>Mon</td>\n" +
+    "                <td>Tue</td>\n" +
+    "                <td>Wed</td>\n" +
+    "                <td>Thur</td>\n" +
+    "                <td>Fri</td>\n" +
+    "                <td>Sat</td>\n" +
+    "            </tr>\n" +
+    "            </thead>\n" +
+    "            <tbody>\n" +
+    "            <tr>\n" +
+    "                <td ng-repeat=\"day in defHours[0].hours\">\n" +
+    "                    <div class=\"hours\">\n" +
+    "                        {{day.hoursFrom}}\n" +
     "                    <span ng-show=\"day.hoursFrom != day.hoursTo\">\n" +
     "                        <br>{{day.hoursTo}}\n" +
     "                    </span>\n" +
-    "                </div>\n" +
-    "            </td>\n" +
-    "        </tr>\n" +
-    "        </tbody>\n" +
-    "    </table>\n" +
-    "\n" +
-    "    <h3>Calendar <small>Exceptions</small></h3>\n" +
-    "    <nav class=\"navbar navbar-default navbar-embedded\">\n" +
-    "        <button type=\"button\" class=\"btn btn-primary navbar-btn navbar-left\" ng-class=\"{'disabled': params.month <= 0}\" ng-disabled=\"params.month <= 0\" ng-click=\"getPrevMonth()\">\n" +
-    "            <span class=\"fa fa-angle-left\"></span>\n" +
-    "        </button>\n" +
-    "        <h2 class=\"navbar-text navbar-center\">{{cal.month}}</h2>\n" +
-    "        <button type=\"button\" class=\"btn btn-primary navbar-btn navbar-right\" ng-class=\"{'disabled': params.month >= 5}\" ng-disabled=\"params.month >= 5\" ng-click=\"getNextMonth()\"><span class=\"fa fa-angle-right\"></span></button>\n" +
-    "    </nav>\n" +
-    "    <table class=\"table table-bordered table-condensed\">\n" +
-    "        <thead>\n" +
-    "        <tr>\n" +
-    "            <td>Sun</td>\n" +
-    "            <td>Mon</td>\n" +
-    "            <td>Tue</td>\n" +
-    "            <td>Wed</td>\n" +
-    "            <td>Thur</td>\n" +
-    "            <td>Fri</td>\n" +
-    "            <td>Sat</td>\n" +
-    "        </tr>\n" +
-    "        </thead>\n" +
-    "        <tbody>\n" +
-    "        <tr ng-repeat=\"week in cal.weeks\">\n" +
-    "            <td ng-repeat=\"day in week\" ng-class=\"day.css\">\n" +
+    "                    </div>\n" +
+    "                </td>\n" +
+    "            </tr>\n" +
+    "            </tbody>\n" +
+    "        </table>\n" +
+    "    </div>\n" +
+    "    <div ng-show=\"calView\">\n" +
+    "        <nav class=\"navbar navbar-default navbar-embedded\">\n" +
+    "            <button type=\"button\" class=\"btn btn-primary navbar-btn navbar-left\" ng-class=\"{'disabled': params.month <= 0}\" ng-disabled=\"params.month <= 0\" ng-click=\"getPrevMonth()\">\n" +
+    "                <span class=\"fa fa-angle-left\"></span>\n" +
+    "            </button>\n" +
+    "            <h2 class=\"navbar-text navbar-center\">{{cal.month}}</h2>\n" +
+    "            <button type=\"button\" class=\"btn btn-primary navbar-btn navbar-right\" ng-class=\"{'disabled': params.month >= 5}\" ng-disabled=\"params.month >= 5\" ng-click=\"getNextMonth()\"><span class=\"fa fa-angle-right\"></span></button>\n" +
+    "        </nav>\n" +
+    "        <table class=\"table table-bordered table-condensed table-hover\">\n" +
+    "            <thead>\n" +
+    "            <tr>\n" +
+    "                <td>Sun</td>\n" +
+    "                <td>Mon</td>\n" +
+    "                <td>Tue</td>\n" +
+    "                <td>Wed</td>\n" +
+    "                <td>Thur</td>\n" +
+    "                <td>Fri</td>\n" +
+    "                <td>Sat</td>\n" +
+    "            </tr>\n" +
+    "            </thead>\n" +
+    "            <tbody>\n" +
+    "            <tr ng-repeat=\"week in cal.weeks\">\n" +
+    "                <td ng-repeat=\"day in week\" ng-class=\"day.css\">\n" +
     "\n" +
     "                    <div class=\"date\">\n" +
     "                        {{day.ts * 1000 | date:'d'}}\n" +
@@ -39660,62 +39664,99 @@ angular.module("calendar/calendar.tpl.html", []).run(["$templateCache", function
     "                    </div>\n" +
     "\n" +
     "\n" +
-    "                <div class=\"fa fa-exclamation-circle exception-icon\" ng-if=\"day.exc\" popover=\"{{day.exc}}\" popover-trigger=\"mouseenter\" popover-append-to-body=\"true\"></div>\n" +
-    "            </td>\n" +
-    "        </tr>\n" +
-    "        </tbody>\n" +
-    "    </table>\n" +
+    "                    <div class=\"fa fa-exclamation-circle exception-icon\" ng-if=\"day.exc\" popover=\"{{day.exc}}\" popover-trigger=\"mouseenter\" popover-append-to-body=\"true\"></div>\n" +
+    "                </td>\n" +
+    "            </tr>\n" +
+    "            </tbody>\n" +
+    "        </table>\n" +
+    "    </div>\n" +
+    "\n" +
+    "\n" +
+    "\n" +
     "</div>");
 }]);
 
 angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("hours-locations/hours-locations.tpl.html",
     "<!--<script src='//maps.googleapis.com/maps/api/js?sensor=false&key=AIzaSyCdXuKwZiDx5W2uP8plV5d-o-jLQ5UQtIQ&mid=z4A8-271j5C8.kowwE312jycE'></script>-->\n" +
-    "<h1>\n" +
-    "    <div class=\"page-header\">Hours &amp; Locations <small>{{library}}</small></div>\n" +
-    "</h1>\n" +
-    "<div class=\"row page-slice\">\n" +
-    "    <div class=\"col-md-9\">\n" +
-    "        <div class=\"hours-calendar\"></div>\n" +
     "\n" +
-    "        <div class=\"row page-slice\">\n" +
-    "            <div class=\"panel panel-default\">\n" +
-    "                <div class=\"panel-body\">\n" +
-    "                    <ui-gmap-google-map center='center' zoom='zoom' id=\"map-canvas\">\n" +
-    "                        <ui-gmap-markers models=\"loc\" coords=\"'self'\" icon=\"'icon'\">\n" +
-    "                        </ui-gmap-markers>\n" +
-    "                    </ui-gmap-google-map>\n" +
-    "                </div>\n" +
-    "\n" +
-    "                <div class=\"panel-footer\">\n" +
-    "                    <form ng-submit=\"getDirections()\">\n" +
-    "                        <div class=\"input-group\">\n" +
-    "                            <input type=\"text\" class=\"form-control\" ng-model=\"directionsFrom\" placeholder=\"Your address or location\" required>\n" +
-    "                    <span class=\"input-group-btn\">\n" +
-    "                        <button type=\"submit\" class=\"btn btn-primary\" target=\"_gmaps\">Get Directions <span class=\"fa fa-external-link\"></span></button>\n" +
-    "                    </span>\n" +
-    "                        </div>\n" +
-    "                    </form>\n" +
-    "                </div>\n" +
-    "            </div>\n" +
+    "<div class=\"jumbotron-header\">\n" +
+    "    <div class=\"jumbotron\">\n" +
+    "        <div class=\"container\">\n" +
+    "            <h1>Hours &amp; Locations</h1>\n" +
+    "            <h2>{{library}}</h2>\n" +
     "        </div>\n" +
     "    </div>\n" +
-    "    <div class=\"col-md-3\">\n" +
+    "</div>\n" +
     "\n" +
-    "        <div ui-scrollfix>\n" +
-    "            <ul class=\"nav nav-pills nav-stacked hours-locations-menu\">\n" +
-    "                <li><a href=\"#\" hours-href=\"{library: 'gorgas', month: 0}\">Gorgas</a>\n" +
-    "                    <ul class=\"nav nav-pills nav-stacked\">\n" +
-    "                        <li><a href=\"#\" hours-href=\"{library: 'music', month: 0}\">Music Library</a></li>\n" +
-    "                        <li><a href=\"#\" hours-href=\"{library: 'media', month: 0}\">Sanford Media Center</a></li>\n" +
-    "                        <li><a href=\"#\" hours-href=\"{library: 'williams', month: 0}\">Williams Americana Collection</a></li>\n" +
-    "                    </ul>\n" +
-    "                </li>\n" +
-    "                <li><a href=\"#\" hours-href=\"{library: 'rodgers', month: 0}\">Rodgers</a></li>\n" +
-    "                <li><a href=\"#\" hours-href=\"{library: 'mclure', month: 0}\">McLure</a></li>\n" +
-    "                <li><a href=\"#\" hours-href=\"{library: 'hoole', month: 0}\">Hoole</a></li>\n" +
-    "                <li><a href=\"#\" hours-href=\"{library: 'bruno', month: 0}\">Bruno</a></li>\n" +
-    "            </ul>\n" +
+    "<div class=\"container\">\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-9\">\n" +
+    "            <div class=\"hours-calendar\"></div>\n" +
+    "\n" +
+    "\n" +
+    "            <div class=\"row\">\n" +
+    "                <div class=\"col-md-7\">\n" +
+    "                    <div class=\"panel panel-default\">\n" +
+    "                        <div class=\"panel-body\">\n" +
+    "                            <ui-gmap-google-map center='center' zoom='zoom' id=\"map-canvas\" options=\"{disableDefaultUI: true}\" events=\"{bounds_changed: updateBounds}\">\n" +
+    "                                <ui-gmap-markers models=\"loc\" coords=\"'self'\" icon=\"'icon'\">\n" +
+    "                                </ui-gmap-markers>\n" +
+    "                            </ui-gmap-google-map>\n" +
+    "                        </div>\n" +
+    "\n" +
+    "                        <div class=\"panel-footer\">\n" +
+    "                            <form ng-submit=\"getDirections()\">\n" +
+    "                                <div class=\"input-group\">\n" +
+    "                                    <input type=\"text\" class=\"form-control\" ng-model=\"directionsFrom\" placeholder=\"Your address or location\" required>\n" +
+    "                        <span class=\"input-group-btn\">\n" +
+    "                            <button type=\"submit\" class=\"btn btn-default\" target=\"_gmaps\">Get Directions <span class=\"fa fa-external-link\"></span></button>\n" +
+    "                        </span>\n" +
+    "                                </div>\n" +
+    "                            </form>\n" +
+    "                        </div>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-5\">\n" +
+    "                    <div class=\"panel panel-default\">\n" +
+    "                        <div class=\"panel-heading\">Contact</div>\n" +
+    "                        <div class=\"panel-body\">\n" +
+    "                            <ul class=\"list-unstyled fa-ul\" ng-if=\"contact\">\n" +
+    "                                <li ng-if=\"contact.email\"><span class=\"fa fa-li fa-envelope\"></span> <a ng-href=\"mailto:{{contact.email}}\">{{contact.email}}</a></li>\n" +
+    "                                <li ng-if=\"contact.phone\">\n" +
+    "                                    <span class=\"fa fa-li fa-phone\"></span>\n" +
+    "                                    <ul class=\"list-unstyled\">\n" +
+    "                                        <li ng-repeat=\"phone in contact.phone\">\n" +
+    "                                            <strong ng-if=\"phone.dept\">{{phone.dept}}: </strong>\n" +
+    "                                            {{phone.number}}\n" +
+    "                                        </li>\n" +
+    "                                    </ul>\n" +
+    "                                </li>\n" +
+    "                            </ul>\n" +
+    "                            <a ng-href=\"{{moreLink}}\" class=\"btn btn-block btn-default\">More about {{library}}</a>\n" +
+    "                        </div>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-3\">\n" +
+    "\n" +
+    "            <div ui-scrollfix>\n" +
+    "                <ul class=\"nav nav-pills nav-stacked hours-locations-menu\">\n" +
+    "                    <li><a href=\"#\" hours-href=\"{library: 'gorgas', month: 0}\">Gorgas</a>\n" +
+    "                        <ul class=\"nav nav-pills nav-stacked\">\n" +
+    "                            <li><a href=\"#\" hours-href=\"{library: 'music', month: 0}\">Music Library</a></li>\n" +
+    "                            <li><a href=\"#\" hours-href=\"{library: 'media', month: 0}\">Sanford Media Center</a></li>\n" +
+    "                            <li><a href=\"#\" hours-href=\"{library: 'williams', month: 0}\">Williams Americana Collection</a></li>\n" +
+    "                        </ul>\n" +
+    "                    </li>\n" +
+    "                    <li><a href=\"#\" hours-href=\"{library: 'rodgers', month: 0}\">Rodgers</a></li>\n" +
+    "                    <li><a href=\"#\" hours-href=\"{library: 'mclure', month: 0}\">McLure</a></li>\n" +
+    "                    <li><a href=\"#\" hours-href=\"{library: 'hoole', month: 0}\">Hoole</a></li>\n" +
+    "                    <li><a href=\"#\" hours-href=\"{library: 'bruno', month: 0}\">Bruno</a></li>\n" +
+    "                </ul>\n" +
+    "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
@@ -39726,7 +39767,7 @@ angular.module("lib-hours-today/lib-hours-today.tpl.html", []).run(["$templateCa
   $templateCache.put("lib-hours-today/lib-hours-today.tpl.html",
     "<div class=\"library-hours-today\">\n" +
     "    <h2>\n" +
-    "        <span class=\"fa fa-clock-o\"></span> Hours\n" +
+    "        <span class=\"fa fa-clock-o\"></span> Today\n" +
     "        <span class=\"label\" ng-class=\"today.status.css\">{{today.status.text}}</span>\n" +
     "    </h2>\n" +
     "    <div class=\"h3\">{{today.hours}}</div>\n" +
@@ -39910,7 +39951,7 @@ angular.module('ualib.hours')
     }])
 
 
-    .controller('HoursLocationsCtrl', ['$scope', '$location', 'uiGmapGoogleMapApi', function($scope, $location, uiGmapGoogleMapApi){
+    .controller('HoursLocationsCtrl', ['$scope', '$location', 'uiGmapIsReady', 'uiGmapGoogleMapApi', function($scope, $location, uiGmapIsReady, uiGmapGoogleMapApi){
         $scope.center;
         $scope.mapOpts = {
             mapTypeControl: false
@@ -39921,62 +39962,132 @@ angular.module('ualib.hours')
                 name: "Gorgas Library",
                 latitude: 33.211803,
                 longitude: -87.546032,
-                icon: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png'
+                icon: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
+                contact: {
+                    phone: [{
+                            number: '(205) 348-6047',
+                            dept:   'Reference'
+                        },
+                        {
+                            number: '(205) 348-9748',
+                            dept: 'Circulation'
+                        }],
+                    email: 'gorgasinfo@ua.edu'
+                },
+                link: '/libraries-and-collections/gorgas-library/'
             },
             {
                 id: 2,
                 name: "Bruno Business Library",
                 latitude: 33.211107,
                 longitude: -87.549255,
-                icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
+                icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+                contact: {
+                    phone: [{
+                        number: '(205) 348-1090',
+                        dept:   'Reference'
+                    },
+                        {
+                            number: '(205) 348-1086',
+                            dept: 'Circulation'
+                        },
+                        {
+                            number: '(205) 348-1085',
+                            dept: 'Reserve Desk'
+                        }],
+
+                    email: 'brunolibrary@culverhouse.ua.edu'
+                },
+                link: '/libraries-and-collections/bruno/'
             },
             {
                 id: 3,
                 name: "Rodgers Library",
                 latitude: 33.2134785,
                 longitude: -87.5427543,
-                icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
+                icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+                contact: {
+                    phone: [{
+                        number: '(205) 348-2100',
+                        dept:   'Reference & Circulation'
+                    }],
+                    email: 'scenglib@bama.ua.edu'
+                },
+                link: '/libraries-and-collections/rodgers-science-and-engineering-library/'
             },
             {
                 id: 4,
                 name: "Hoole Special Collections",
                 latitude: 33.210927,
                 longitude: -87.543182,
-                icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
+                icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+                contact: {
+                    phone: [{
+                        number: '(205) 348-0500',
+                        dept: 'Front Desk'
+                    }],
+                    email: 'scenglib@bama.ua.edu',
+                    alert: [{
+                        type: 'info',
+                        msg: 'For reference questions'
+                    }]
+                },
+                link: '/libraries-and-collections/hoole-library/'
             },
             {
                 id: 5,
                 name: "McLure Education Library",
                 latitude: 33.2104774,
                 longitude: -87.5490442,
-                icon: 'http://maps.google.com/mapfiles/ms/icons/pink-dot.png'
+                icon: 'http://maps.google.com/mapfiles/ms/icons/pink-dot.png',
+                contact: {
+                    phone: [{
+                        number: '(205) 348-6055',
+                        dept:   'Reference & Circulation'
+                    }]
+                },
+                link: '/libraries-and-collections/mclure-education-library/'
             },
             {
                 id: 6,
                 name: "Music Library",
                 latitude: 33.211803,
                 longitude: -87.546032,
-                icon: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png'
+                icon: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
+                link: '/libraries-and-collections/music-library/'
             },
             {
                 id: 7,
                 name: "Sanford Media Center",
                 latitude: 33.211803,
                 longitude: -87.546032,
-                icon: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png'
+                icon: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
+                contact: {
+                    phone: [{
+                        number: '(205) 348-4651'
+                    }]
+                },
+                link: '/services/sanford-media-center/'
             },
             {
                 id: 8,
                 name: "Williams Collection",
                 latitude: 33.211803,
                 longitude: -87.546032,
-                icon: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png'
+                icon: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
+                contact: {
+                    phone: [{
+                        number: '(205) 358-1489'
+                    }]
+                },
+                link: '/collections/williams/'
             }
         ];
         var libChangeListener;
 
         uiGmapGoogleMapApi.then(function(maps) {
             updateMap();
+            console.log(maps);
             libChangeListener = $scope.$watch(function(){
                 return $scope.params.lid;
             }, function(newVal, oldVal){
@@ -39984,7 +40095,13 @@ angular.module('ualib.hours')
                     updateMap();
                 }
             }, true);
+
         });
+
+
+        $scope.updateBounds = function(maps, ev){
+            console.log(maps.getBounds());
+        };
 
         $scope.getDirections = function(){
             var link = "https://www.google.com/maps/dir/" + $scope.directionsFrom + "/" + $scope.center.latitude + "," + $scope.center.longitude;
@@ -40000,6 +40117,8 @@ angular.module('ualib.hours')
             var loc = $scope.loc[lid];
             $scope.center = {latitude: loc.latitude, longitude: loc.longitude};
             $scope.zoom = 18;
+            $scope.contact = loc.contact;
+            $scope.moreLink = loc.link;
         }
     }])
 
@@ -40030,10 +40149,10 @@ angular.module('ualib.hours')
                 hoursHref: '@'
             },
             link: function(scope, elm){
+                var library = $location.search().library || 'gorgas';
                 var href = scope.$eval(scope.hoursHref);
                 elm.bind('click', click);
-
-                if (href.library === $location.search().library){
+                if (library.toLowerCase().indexOf(href.library) !== -1){
                     elm.parent().addClass('active');
                 }
 
@@ -40053,7 +40172,7 @@ angular.module('ualib.hours')
 
             }
         }
-    }])
+    }]);
 
 angular.module('ualib.hours')
 
@@ -40076,8 +40195,8 @@ angular.module('ualib.hours')
                                 libraries = libraries.concat(data.libraries[lib]['children']);
                             }
                         }
-                        var lib = $filter('filter')(libraries, {name: $scope.library});
-                        $scope.today = setStatus(lib[0]);
+                        var library = $filter('filter')(libraries, {name: $scope.library});
+                        $scope.today = setStatus(library[0]);
                         $element.addClass('loaded');
 
                     },
@@ -48083,8 +48202,7 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "\n" +
     "        <div class=\"media animate-repeat\" ng-repeat=\"item in news | filter:{type: newsFilters.type}\n" +
     "                                                                  | filter:newsFilters.search\n" +
-    "                                                                  | orderBy:'sticky'\n" +
-    "                                                                  | orderBy:newsFilters.sort:false \">\n" +
+    "                                                                  | orderBy:['sticky', newsFilters.sort:true]\">\n" +
     "            <div class=\"media-left\" style=\"width:150px;\">\n" +
     "                <a ng-href=\"#/news-exhibits/{{item.link}}\">\n" +
     "                    <img class=\"media-object\" src=\"{{item.tb}}\" ng-if=\"item.tb.length > 0\">\n" +
