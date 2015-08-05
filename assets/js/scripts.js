@@ -40997,7 +40997,7 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                            <label for=\"browse\">Select Images</label>\n" +
     "                            <div id=\"browse\">\n" +
     "                                <button type=\"file\" ngf-select=\"\" ng-model=\"newNews.picFile\" accept=\"image/*\" ngf-multiple=\"true\"\n" +
-    "                                   ngf-change=\"generateThumb(newNews.picFile, 0, $files)\" class=\"btn btn-success\">\n" +
+    "                                   ngf-change=\"generateThumb(newNews.picFile, null)\" class=\"btn btn-success\">\n" +
     "                                    <span class=\"fa fa-fw fa-plus\"></span>Browse\n" +
     "                                </button>\n" +
     "                            </div>\n" +
@@ -41164,7 +41164,7 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                                <label for=\"{{news.nid}}_browse\">Select Images</label>\n" +
     "                                <div id=\"{{news.nid}}_browse\">\n" +
     "                                    <button type=\"file\" ngf-select=\"\" ng-model=\"news.picFile\" accept=\"image/*\" ngf-multiple=\"true\"\n" +
-    "                                            ngf-change=\"generateThumb(news.picFile, news.nid, $files)\" class=\"btn btn-success\">\n" +
+    "                                            ngf-change=\"generateThumb(news.picFile, news)\" class=\"btn btn-success\">\n" +
     "                                        <span class=\"fa fa-fw fa-plus\"></span>Browse\n" +
     "                                    </button>\n" +
     "                                </div>\n" +
@@ -44060,15 +44060,13 @@ angular.module('manage.manageNews', ['ngFileUpload'])
 
                 return "";
             };
-            $scope.generateThumb = function(files, index, fileArray) {
+            $scope.generateThumb = function(files, news) {
                 if (files != null) {
                     for (var i = 0; i < files.length; i++){
-                        if (index > 0) {
-                            $scope.data.news[index].selectedFiles.push(files[i]);
+                        if (news !== null) {
+                            $scope.data.news[$scope.data.news.indexOf(news)].selectedFiles.push(files[i]);
                         } else {
                             $scope.newNews.selectedFiles.push(files[i]);
-                            fileArray = angular.copy($scope.newNews.selectedFiles);
-                            console.dir(fileArray);
                         }
                         if ($scope.fileReaderSupported && files[i].type.indexOf('image') > -1) {
                             $timeout(function() {
