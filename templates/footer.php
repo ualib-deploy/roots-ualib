@@ -7,25 +7,25 @@
           <h4>Quick Links</h4>
           <ul class="footer-list">
             <li><a href="<?php echo site_url(); ?>/#/hours">Maps and Contact Information</a></li>
-            <li><a href="<?php echo site_url(); ?>/about-ua-libraries/libraries-policies/access-to-and-usage-of-electronic-resources/">Access and Use of Electronic Resources</a></li>
-            <li><a href="<?php echo site_url(); ?>/services/disability-services/physical-access/">Physical Access</a></li>
-            <li><a href="<?php echo site_url(); ?>/about-ua-libraries/libraries-policies/">Libraries' Policies</a></li>
-            <li><a href="<?php echo site_url(); ?>/about-ua-libraries/mission-statement/">Mission Statement</a></li>
+            <li><a href="<?php echo site_url(); ?>/about/libraries-policies/electronic-resource-user-policy//">Access and Use of Electronic Resources</a></li>
+            <li><a href="<?php echo site_url(); ?>/using-the-library/accessibility//">Physical Access</a></li>
+            <li><a href="<?php echo site_url(); ?>/about/libraries-policies/">Libraries' Policies</a></li>
+            <li><a href="<?php echo site_url(); ?>/about/mission-statement/">Mission Statement</a></li>
             <li><a href="<?php echo site_url(); ?>/site-map">Site Map</a></li>
-            <li><a href="<?php echo site_url(); ?>/about-ua-libraries/support-ua-libraries/">Support UA Libraries</a></li>
-            <li><a href="<?php echo site_url(); ?>/about-ua-libraries/employment-2/">Employment</a></li>
+            <li><a href="<?php echo site_url(); ?>/about/support-ua-libraries/">Support UA Libraries</a></li>
+            <li><a href="<?php echo site_url(); ?>/about/employment/">Employment</a></li>
           </ul>
         </div>
 
         <div class="col-sm-3">
           <h4>Libraries</h4>
           <ul class="footer-list">
-            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/gorgas-library/">Amelia Gayle Gorgas Library</a></li>
-            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/bruno/">Angelo Bruno Business Library</a></li>
-            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/mclure-education-library//">McLure Education Library</a></li>
-            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/rodgers-science-and-engineering-library/">Rodgers Library for Science &amp; Engineering</a></li>
-            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/hoole-library/">W.S. Hoole Special Collections Library</a></li>
-            <li><a href="<?php echo site_url(); ?>/libraries-and-collections/music-library/">Music Library</a></li>
+            <li><a href="<?php echo site_url(); ?>/libraries/gorgas/">Amelia Gayle Gorgas Library</a></li>
+            <li><a href="<?php echo site_url(); ?>/libraries/bruno/">Angelo Bruno Business Library</a></li>
+            <li><a href="<?php echo site_url(); ?>/libraries/mclure/">McLure Education Library</a></li>
+            <li><a href="<?php echo site_url(); ?>/libraries/rodgers/">Rodgers Library for Science &amp; Engineering</a></li>
+            <li><a href="<?php echo site_url(); ?>/libraries/hoole/">W.S. Hoole Special Collections Library</a></li>
+            <li><a href="<?php echo site_url(); ?>/libraries/music/">Music Library</a></li>
           </ul>
               <ul class="footer-list">
 
