@@ -48083,8 +48083,8 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "\n" +
     "        <div class=\"media animate-repeat\" ng-repeat=\"item in news | filter:{type: newsFilters.type}\n" +
     "                                                                  | filter:newsFilters.search\n" +
-    "                                                                  | orderBy:sticky\n" +
-    "                                                                  | orderBy:newsFilters.sort \">\n" +
+    "                                                                  | orderBy:'sticky'\n" +
+    "                                                                  | orderBy:newsFilters.sort:false \">\n" +
     "            <div class=\"media-left\" style=\"width:150px;\">\n" +
     "                <a ng-href=\"#/news-exhibits/{{item.link}}\">\n" +
     "                    <img class=\"media-object\" src=\"{{item.tb}}\" ng-if=\"item.tb.length > 0\">\n" +
