@@ -9,6 +9,7 @@ module.exports = function(grunt) {
         '<%= bower.directory %>/angular-filter/dist/angular-filter.js',
         '<%= bower.directory %>/angular-ui-utils/ui-utils.js',
         '<%= bower.directory %>/ng-file-upload/ng-file-upload-all.js',
+        '<%= bower.directory %>/angular-carousel/dist/angular-carousel.js',
         '<%= bower.directory %>/angular-scroll/angular-scroll.js',
         '<%= bower.directory %>/lodash/lodash.js',
         '<%= bower.directory %>/angular-google-maps/dist/angular-google-maps.js',
@@ -44,7 +45,8 @@ module.exports = function(grunt) {
         '<%= bower.directory %>/ualib-softwareList/dist/ualib.softwareList.css',
         '<%= bower.directory %>/ualib-news/dist/ualib.news.css',
         '<%= bower.directory %>/manage/dist/manage.css',
-        '<%= bower.directory %>/databases/dist/databases.css'
+        '<%= bower.directory %>/databases/dist/databases.css',
+        '<%= bower.directory %>/angular-carousel/dist/angular-carousel.css'
     ];
 
 
