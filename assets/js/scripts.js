@@ -41110,8 +41110,8 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                                </a>\n" +
     "                            </td>\n" +
     "                            <td style=\"width:64px\">\n" +
-    "                                <img ng-hide=\"news.picFile[0] != null\" src=\"{{news.images[0].image}}\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
-    "                                <img ng-show=\"news.picFile[0] != null\" ngf-src=\"news.picFile[0]\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
+    "                                <img ng-show=\"news.tb.length > 0\" src=\"{{news.tb}}\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
+    "                                <img ng-hide=\"news.tb.length > 0\" ngf-src=\"news.selectedFiles[0]\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
     "                            </td>\n" +
     "                        </tr>\n" +
     "                    </table>\n" +
@@ -48077,23 +48077,19 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "    <div class=\"col-md-9\">\n" +
     "\n" +
     "        <div class=\"media animate-repeat\" ng-repeat=\"item in news | orderBy:newsFilters.sort | filter:{type: newsFilters.type} | filter:newsFilters.search\">\n" +
-    "            <div class=\"media-left\">\n" +
-    "                <span class=\"fa fa-newspaper-o fa-3x text-muted\" ng-if=\"item.type == 0\"></span>\n" +
-    "                <span class=\"fa fa-leaf fa-3x text-muted\" ng-if=\"item.type == 1\"></span>\n" +
+    "            <div class=\"media-left\" style=\"width:150px;\">\n" +
+    "                <span class=\"fa fa-newspaper-o fa-4x text-muted\" ng-if=\"item.type == 0 && item.tb.length < 1\"></span>\n" +
+    "                <span class=\"fa fa-leaf fa-4x text-muted\" ng-if=\"item.type == 1 && item.tb.length < 1\"></span>\n" +
+    "                <a ng-href=\"#/news-exhibits/{{item.link}}\" ng-if=\"item.tb.length > 0\">\n" +
+    "                    <img class=\"media-object\" src=\"{{item.tb}}\">\n" +
+    "                </a>\n" +
     "            </div>\n" +
     "            <div class=\"media-body\">\n" +
     "                <h4 class=\"media-heading\">\n" +
     "                    <a ng-href=\"#/news-exhibits/{{item.link}}\" ng-bind-html=\"item.title | highlight:newsFilters.search\"></a>\n" +
+    "                    <small ng-if=\"item.type > 0\">{{item.activeFrom | date:mediumDate}} - {{item.activeUntil | date:mediumDate}}</small>\n" +
     "                </h4>\n" +
-    "                <div class=\"details-context\" ng-if=\"item.type > 0\">\n" +
-    "                    {{item.activeFrom | date:mediumDate}} - {{item.activeUntil | date:mediumDate}}\n" +
-    "                </div>\n" +
     "                <p class=\"text-justify\" ng-bind-html=\"item.description | truncate:250:true | highlight:newsFilters.search\"></p>\n" +
-    "            </div>\n" +
-    "            <div class=\"media-right\">\n" +
-    "                <a ng-href=\"#/news-exhibits/{{item.link}}\" ng-if=\"item.images.length > 0\">\n" +
-    "                    <img class=\"media-object\" src=\"{{item.images[0]}}\" width=\"120\" height=\"90\">\n" +
-    "                </a>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "\n" +
