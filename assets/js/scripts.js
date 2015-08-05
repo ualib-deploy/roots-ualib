@@ -48031,10 +48031,10 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "</div>\n" +
     "<div class=\"row\">\n" +
     "    <div class=\"col-md-8\">\n" +
-    "        <div style=\"height: 305px\">\n" +
+    "        <div style=\"height: 305px\" ng-if=\"newsItem.slides.length > 0\">\n" +
     "            <carousel interval=\"myInterval\" no-wrap=\"noWrapSlides\">\n" +
     "                <slide ng-repeat=\"slide in newsItem.slides\" active=\"slide.active\">\n" +
-    "                    <img ng-src=\"{{slide.image}}\" style=\"margin:auto;\">\n" +
+    "                    <img ng-src=\"{{slide.image}}\" style=\"margin:auto; height: 300px;\">\n" +
     "                    <div class=\"carousel-caption\">\n" +
     "                        <h4>Slide {{$index}}</h4>\n" +
     "                    </div>\n" +
