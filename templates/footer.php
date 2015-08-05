@@ -104,7 +104,8 @@
     </div>
   </div>
     <?php
-        @include WEBAPPS_PATH . "siteSurvey/loadForm.php";
+    //TODO: make a proper angular directive, so we can avoid unnecessary jQuery includes
+//        @include WEBAPPS_PATH . "siteSurvey/loadForm.php";
     ?>
 </footer>
 

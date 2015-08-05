@@ -13,7 +13,7 @@ div[role="document"] {
   > .wrap {
     main {
       position:relative;
-      margin-top: 111px;
+      margin-top: 126px;
 
       @media (max-width: @grid-float-breakpoint) {
         margin-top: 0px;
@@ -22,6 +22,7 @@ div[role="document"] {
   }
 }
 
+// Background images set through main ualib webapp in assets/js/_ualib.js
 .front-page {
   background: no-repeat center center fixed;
   -webkit-background-size: cover;
@@ -31,18 +32,16 @@ div[role="document"] {
   background-color: transparent;
 
   .home-slice{
-    padding-top: 15px;
-    padding-bottom: 15px;
+    padding: 0 15px 15px 15px;
   }
 }
 
-/*
-// TODO: put in proper method to only show background image on home page with web apps.
-.bento, .staffdir, .software, .databases {
-  background-image: none;
-  background-color: @body-bg;
+.front-page-card {
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 0 15px 15px 15px;
+}
 
-}*/
+
 div[ng-view].ng-enter {
   -webkit-animation: Fade-Enter-Anime 0.2s;
   -moz-animation: Fade-Enter-Anime 0.2s;

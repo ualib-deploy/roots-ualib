@@ -12,7 +12,7 @@
     get_template_part('templates/header');
   ?>
 
-  <?php //if (is_front_page()) get_template_part('templates/home-tmp'); ?>
+
 
   <div class="wrap page-row page-row-expanded">
     <div role="document">

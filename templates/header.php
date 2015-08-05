@@ -33,7 +33,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                         <ul class="dropdown-menu">
                             <li>
                                 <div class="yamm-content">
-                                    <h2 style="background-color: transparent;">My Accounts</h2>
+                                    <h2>My Accounts</h2>
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-4">
                                             <a class="service-card" href="http://library.ua.edu/vwebv/login">
