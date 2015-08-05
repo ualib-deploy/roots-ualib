@@ -392,7 +392,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                             </div>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="<?php echo site_url(); ?>/#/staffdir">
+                                            <a class="service-card" href="<?php echo site_url(); ?>/#/staffdir?selector=1&instructor=2">
                                                 <span class="fa fa-comment-o"></span>
                                                 <h4>Subject Specialists</h4>
                                                 <p>Need research help? Reach out to your subject librarian</p>
