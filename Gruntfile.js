@@ -38,6 +38,7 @@ module.exports = function(grunt) {
     ];
 
     var lessFileList = [
+        '<%= bower.directory %>/angular-carousel/dist/angular-carousel.css',
         'assets/less/main.less',
         '<%= bower.directory %>/onesearch/src/**/*.less',
         '<%= bower.directory %>/ualib-ui/dist/*.css',
@@ -46,8 +47,7 @@ module.exports = function(grunt) {
         '<%= bower.directory %>/ualib-softwareList/dist/ualib.softwareList.css',
         '<%= bower.directory %>/ualib-news/dist/ualib.news.css',
         '<%= bower.directory %>/manage/dist/manage.css',
-        '<%= bower.directory %>/databases/dist/databases.css',
-        '<%= bower.directory %>/angular-carousel/dist/angular-carousel.css'
+        '<%= bower.directory %>/databases/dist/databases.css'
     ];
 
 
