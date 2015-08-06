@@ -10415,17 +10415,12 @@ a.service-card:focus {
 }
 .rn-carousel-control {
   font-size: 8em;
-}
-.rn-carousel-control-next {
   color: #ffffff;
 }
-.rn-carousel-control-next:before {
+.rn-carousel-control.rn-carousel-control-next:before {
   content: "\f054";
 }
-.rn-carousel-control-prev {
-  color: #ffffff;
-}
-.rn-carousel-control-prev:before {
+.rn-carousel-control.rn-carousel-control-prev:before {
   content: "\f053";
 }
 /*# sourceMappingURL=dist/ualib.news.css.map */
