@@ -10298,6 +10298,45 @@ a.service-card:focus {
   color: #428bca;
 }
 /*# sourceMappingURL=dist/ualib.news.css.map */
+.news-carousel-small {
+  width: 500px;
+  height: 275px;
+  margin: auto;
+}
+.news-carousel-large {
+  width: 1024px;
+  height: 768px;
+  margin: 120px auto auto auto;
+}
+.news-carousel-image-small {
+  width: 100%;
+  height: 275px;
+  cursor: pointer;
+  background-position: center center;
+  background-repeat: no-repeat;
+  -webkit-background-size: contain;
+          background-size: contain;
+}
+.news-carousel-image-large {
+  width: 1024px;
+  height: 768px;
+  cursor: pointer;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+.news-carousel-container-large {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: rgba(51, 51, 51, 0.67);
+  z-index: 20;
+}
+.clickable-item {
+  cursor: pointer;
+}
+/*# sourceMappingURL=dist/ualib.news.css.map */
 .cal-icon {
   width: 36px;
   height: 36px;
@@ -10331,6 +10370,20 @@ a.service-card:focus {
 }
 .media {
   margin-top: 30px;
+}
+/*# sourceMappingURL=dist/ualib.news.css.map */
+.news-list-tb {
+  min-width: 180px;
+  background-position: center center;
+  background-repeat: no-repeat;
+  -webkit-background-size: contain;
+          background-size: contain;
+}
+.news-list-tb-news {
+  background-image: url('https://wwwdev2.lib.ua.edu/newsApp/images/tb_news.png');
+}
+.news-list-tb-exhibit {
+  background-image: url('https://wwwdev2.lib.ua.edu/newsApp/images/tb_exhibit.png');
 }
 /*# sourceMappingURL=dist/ualib.news.css.map */
 /*

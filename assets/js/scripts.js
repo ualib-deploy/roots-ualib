@@ -50981,14 +50981,10 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "        <div class=\"text-center\" ng-if=\"newsItem.images.length > 0\">\n" +
     "            <ul rn-carousel rn-carousel-auto-slide rn-carousel-buffered\n" +
     "                rn-carousel-index=\"curImage\"\n" +
-    "                class=\"image\" style=\"width:500px; height:275px;margin: auto;\">\n" +
+    "                class=\"image news-carousel-small\">\n" +
     "                <li ng-repeat=\"img in newsItem.images\">\n" +
     "                    <div class=\"layer text-center\">\n" +
-    "                        <div style=\"width:100%;height:275px;\n" +
-    "                            cursor: pointer;\n" +
-    "                            background-position: center center;\n" +
-    "                            background-repeat: no-repeat;\n" +
-    "                            background-size: contain;\"\n" +
+    "                        <div class=\"news-carousel-image-small\"\n" +
     "                             ng-style=\"{'background-image':'url('+img+')'}\" ng-click=\"enlargeImages(true, $index)\">\n" +
     "                        </div>\n" +
     "                    </div>\n" +
@@ -51015,29 +51011,20 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "    </div>\n" +
     "</div>\n" +
     "<div ng-show=\"showEnlarged\">\n" +
-    "    <div style=\"width: 100%;\n" +
-    "        height: 100%;\n" +
-    "        position: fixed;\n" +
-    "        top:0px;\n" +
-    "        left:0px;\n" +
-    "        background-color: rgba(202,202,202,0.7);\n" +
-    "        z-index:20;\">\n" +
+    "    <div class=\"news-carousel-container-large\">\n" +
     "            <ul rn-carousel rn-carousel-controls rn-carousel-controls-allow-loop rn-carousel-buffered\n" +
     "                rn-carousel-index=\"curEnlImage\" rn-carousel-transition=\"none\"\n" +
-    "                class=\"image\" style=\"width:1024px; height:768px;margin: 120px auto auto auto;\">\n" +
+    "                class=\"image news-carousel-large\">\n" +
     "                <li ng-repeat=\"img in newsItem.images\">\n" +
     "                    <div class=\"layer text-center\">\n" +
-    "                        <div style=\"width:1024px; height:768px;\n" +
-    "                                cursor: pointer;\n" +
-    "                                background-position: center center;\n" +
-    "                                background-repeat: no-repeat;\"\n" +
+    "                        <div class=\"news-carousel-image-large\"\n" +
     "                             ng-style=\"{'background-image':'url('+img+')'}\" ng-click=\"enlargeImages(false, $index)\">\n" +
     "                        </div>\n" +
     "                    </div>\n" +
     "                </li>\n" +
     "            </ul>\n" +
     "            <div class=\"rn-carousel-indicator text-center\" ng-if=\"newsItem.images.length > 0\">\n" +
-    "                <span ng-repeat=\"img in newsItem.images\" style=\"cursor:pointer;\"\n" +
+    "                <span ng-repeat=\"img in newsItem.images\" class=\"clickable-item\"\n" +
     "                      ng-click=\"setCurEnlImage($index)\">\n" +
     "                    <span class=\"fa fa-circle-o\" ng-class=\"{'fa-2x': $index == $parent.curEnlImage}\">\n" +
     "                    </span>\n" +
@@ -51071,25 +51058,12 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "        <div class=\"media animate-repeat\" ng-repeat=\"item in news | filter:{type: newsFilters.type}\n" +
     "                                                                  | filter:newsFilters.search\n" +
     "                                                                  | orderBy:['-sticky','-created']\">\n" +
-    "            <div class=\"media-left\" style=\"min-width:180px;\n" +
-    "                 background-position: center center;\n" +
-    "                 background-repeat: no-repeat;\n" +
-    "                 background-size: contain;\"\n" +
+    "            <div class=\"media-left news-list-tb\"\n" +
     "                 ng-style=\"{'background-image':'url('+item.tb+')'}\" ng-if=\"item.tb.length > 0\">\n" +
     "            </div>\n" +
-    "            <div class=\"media-left\" style=\"min-width:180px;\n" +
-    "                 background-position: center center;\n" +
-    "                 background-repeat: no-repeat;\n" +
-    "                 background-size: contain;\n" +
-    "                 background-image:url('https://wwwdev2.lib.ua.edu/newsApp/images/tb_news.png');\"\n" +
-    "                 ng-if=\"item.type == 0 && item.images.length == 0\">\n" +
+    "            <div class=\"media-left news-list-tb news-list-tb-news\" ng-if=\"item.type == 0 && item.images.length == 0\">\n" +
     "            </div>\n" +
-    "            <div class=\"media-left\" style=\"min-width:180px;\n" +
-    "                 background-position: center center;\n" +
-    "                 background-repeat: no-repeat;\n" +
-    "                 background-size: contain;\n" +
-    "                 background-image:url(https://wwwdev2.lib.ua.edu/newsApp/images/tb_exhibit.png)\"\n" +
-    "                 ng-if=\"item.type == 1 && item.images.length == 0\">\n" +
+    "            <div class=\"media-left news-list-tb news-list-tb-exhibit\" ng-if=\"item.type == 1 && item.images.length == 0\">\n" +
     "            </div>\n" +
     "            <div class=\"media-body\">\n" +
     "                <h4 class=\"media-heading\">\n" +
