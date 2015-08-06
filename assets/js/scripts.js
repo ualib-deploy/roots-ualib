@@ -50979,22 +50979,23 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "<div class=\"row\">\n" +
     "    <div class=\"col-md-8\">\n" +
     "        <div class=\"text-center\" ng-if=\"newsItem.images.length > 0\">\n" +
-    "            <ul rn-carousel rn-carousel-controls rn-carousel-controls-allow-loop rn-carousel-index=\"curImage\"\n" +
-    "                class=\"image\" style=\"width:500px; height:275px;\">\n" +
+    "            <ul rn-carousel rn-carousel-auto-slide rn-carousel-buffered\n" +
+    "                rn-carousel-index=\"curImage\"\n" +
+    "                class=\"image\" style=\"width:500px; height:275px;margin: auto;\">\n" +
     "                <li ng-repeat=\"img in newsItem.images\">\n" +
     "                    <div class=\"layer text-center\">\n" +
-    "                        <div style=\"width:500px;height:275px;\n" +
+    "                        <div style=\"width:100%;height:275px;\n" +
     "                            cursor: pointer;\n" +
     "                            background-position: center center;\n" +
     "                            background-repeat: no-repeat;\n" +
     "                            background-size: contain;\"\n" +
-    "                             ng-style=\"{'background-image':'url('+img+')'}\" ng-click=\"enlargeImages(true)\">\n" +
+    "                             ng-style=\"{'background-image':'url('+img+')'}\" ng-click=\"enlargeImages(true, $index)\">\n" +
     "                        </div>\n" +
     "                    </div>\n" +
     "                </li>\n" +
     "            </ul>\n" +
-    "            <div class=\"text-center\" rn-carousel-indicators ng-if=\"newsItem.images.length > 1\" slides=\"newsItem.images\"\n" +
-    "                 rn-carousel-index=\"curImage\" style=\"margin-top:-10px;\"></div>\n" +
+    "            <div rn-carousel-indicators ng-if=\"newsItem.images.length > 1\" slides=\"newsItem.images\" rn-carousel-index=\"curImage\">\n" +
+    "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"text-muted\">\n" +
     "            <span>Created by {{newsItem.creator}} on {{newsItem.created | date:mediumDate}}</span>\n" +
@@ -51019,25 +51020,28 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "        position: absolute;\n" +
     "        top:0px;\n" +
     "        left:0px;\n" +
-    "        background-color: rgba(222,222,222,0.5);\n" +
+    "        background-color: rgba(202,202,202,0.7);\n" +
     "        z-index:20;\">\n" +
-    "            <ul rn-carousel rn-carousel-controls rn-carousel-controls-allow-loop rn-carousel-index=\"curImage\"\n" +
-    "                class=\"image\" style=\"width:1024px; height:1024px;\">\n" +
+    "            <ul rn-carousel rn-carousel-controls rn-carousel-controls-allow-loop rn-carousel-buffered\n" +
+    "                rn-carousel-index=\"curEnlImage\" rn-carousel-transition=\"none\"\n" +
+    "                class=\"image\" style=\"width:1024px; height:768px;margin: auto;\">\n" +
     "                <li ng-repeat=\"img in newsItem.images\">\n" +
     "                    <div class=\"layer text-center\">\n" +
-    "                        <div style=\"width:1024px; height:1024px;;\n" +
+    "                        <div style=\"width:1024px; height:768px;\n" +
     "                                cursor: pointer;\n" +
     "                                background-position: center center;\n" +
-    "                                background-repeat: no-repeat;\n" +
-    "                                background-size: contain;\"\n" +
-    "                             ng-style=\"{'background-image':'url('+img+')'}\" ng-click=\"enlargeImages(false)\">\n" +
+    "                                background-repeat: no-repeat;\"\n" +
+    "                             ng-style=\"{'background-image':'url('+img+')'}\" ng-click=\"enlargeImages(false, $index)\">\n" +
     "                        </div>\n" +
     "                    </div>\n" +
     "                </li>\n" +
     "            </ul>\n" +
-    "            <div class=\"text-center\" rn-carousel-indicators ng-if=\"newsItem.images.length > 1\" slides=\"newsItem.images\"\n" +
-    "                 rn-carousel-index=\"curImage\" style=\"margin-top:-10px;\">\n" +
-    "\n" +
+    "            <div class=\"rn-carousel-indicator text-center\" ng-if=\"newsItem.images.length > 0\">\n" +
+    "                <span ng-repeat=\"img in newsItem.images\" style=\"cursor:pointer;\"\n" +
+    "                      ng-click=\"setCurEnlImage($index)\">\n" +
+    "                    <span class=\"fa fa-circle-o\" ng-class=\"{'fa-2x': $index == $parent.curEnlImage}\">\n" +
+    "                    </span>\n" +
+    "                </span>\n" +
     "            </div>\n" +
     "    </div>\n" +
     "</div>\n" +
@@ -51067,14 +51071,25 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "        <div class=\"media animate-repeat\" ng-repeat=\"item in news | filter:{type: newsFilters.type}\n" +
     "                                                                  | filter:newsFilters.search\n" +
     "                                                                  | orderBy:['-sticky','-created']\">\n" +
-    "            <div class=\"media-left text-center\" style=\"width:150px;\">\n" +
-    "                <a ng-href=\"#/news-exhibits/{{item.link}}\">\n" +
-    "                    <img class=\"media-object\" src=\"{{item.tb}}\" ng-if=\"item.tb.length > 0\">\n" +
-    "                    <img class=\"media-object\" src=\"https://wwwdev2.lib.ua.edu/newsApp/images/tb_news.png\"\n" +
-    "                         ng-if=\"item.type == 0\" ng-hide=\"item.tb.length > 0\">\n" +
-    "                    <img class=\"media-object\" src=\"https://wwwdev2.lib.ua.edu/newsApp/images/tb_exhibit.png\"\n" +
-    "                         ng-if=\"item.type == 1\" ng-hide=\"item.tb.length > 0\">\n" +
-    "                </a>\n" +
+    "            <div class=\"media-left\" style=\"min-width:180px;\n" +
+    "                 background-position: center center;\n" +
+    "                 background-repeat: no-repeat;\n" +
+    "                 background-size: contain;\"\n" +
+    "                 ng-style=\"{'background-image':'url('+item.tb+')'}\" ng-if=\"item.tb.length > 0\">\n" +
+    "            </div>\n" +
+    "            <div class=\"media-left\" style=\"min-width:180px;\n" +
+    "                 background-position: center center;\n" +
+    "                 background-repeat: no-repeat;\n" +
+    "                 background-size: contain;\n" +
+    "                 background-image:url('https://wwwdev2.lib.ua.edu/newsApp/images/tb_news.png');\"\n" +
+    "                 ng-if=\"item.type == 0 && item.images.length == 0\">\n" +
+    "            </div>\n" +
+    "            <div class=\"media-left\" style=\"min-width:180px;\n" +
+    "                 background-position: center center;\n" +
+    "                 background-repeat: no-repeat;\n" +
+    "                 background-size: contain;\n" +
+    "                 background-image:url(https://wwwdev2.lib.ua.edu/newsApp/images/tb_exhibit.png)\"\n" +
+    "                 ng-if=\"item.type == 1 && item.images.length == 0\">\n" +
     "            </div>\n" +
     "            <div class=\"media-body\">\n" +
     "                <h4 class=\"media-heading\">\n" +
@@ -51257,13 +51272,20 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
 
     .controller('newsItemCtrl', ['$scope', 'newsItem', '$routeParams', function($scope, newsItem, $routeParams){
         $scope.showEnlarged = false;
+        $scope.curImage = 0;
+        $scope.curEnlImage = 0;
 
-        $scope.enlargeImages = function(enlarge) {
+        $scope.enlargeImages = function(enlarge, index) {
             if (enlarge) {
                 $scope.showEnlarged = true;
+                $scope.curEnlImage = index;
             } else {
                 $scope.showEnlarged = false;
             }
+        };
+
+        $scope.setCurEnlImage = function(index) {
+            $scope.curEnlImage = index;
         };
 
        newsItem.$promise.then(function(data){
