@@ -51012,24 +51012,24 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "</div>\n" +
     "<div ng-show=\"showEnlarged\">\n" +
     "    <div class=\"news-carousel-container-large\">\n" +
-    "            <ul rn-carousel rn-carousel-controls rn-carousel-controls-allow-loop rn-carousel-buffered\n" +
-    "                rn-carousel-index=\"curEnlImage\" rn-carousel-transition=\"none\"\n" +
-    "                class=\"image news-carousel-large\">\n" +
-    "                <li ng-repeat=\"img in newsItem.images\">\n" +
-    "                    <div class=\"layer text-center\">\n" +
-    "                        <div class=\"news-carousel-image-large\"\n" +
-    "                             ng-style=\"{'background-image':'url('+img+')'}\" ng-click=\"enlargeImages(false, $index)\">\n" +
-    "                        </div>\n" +
+    "        <ul rn-carousel rn-carousel-controls rn-carousel-controls-allow-loop rn-carousel-buffered\n" +
+    "            rn-carousel-index=\"curEnlImage\" rn-carousel-transition=\"none\"\n" +
+    "            class=\"image news-carousel-large\">\n" +
+    "            <li ng-repeat=\"img in newsItem.images\">\n" +
+    "                <div class=\"layer text-center\">\n" +
+    "                    <div class=\"news-carousel-image-large\"\n" +
+    "                         ng-style=\"{'background-image':'url('+img+')'}\" ng-click=\"enlargeImages(false, $index)\">\n" +
     "                    </div>\n" +
-    "                </li>\n" +
-    "            </ul>\n" +
-    "            <div class=\"rn-carousel-indicator text-center\" ng-if=\"newsItem.images.length > 0\">\n" +
-    "                <span ng-repeat=\"img in newsItem.images\" class=\"clickable-item\"\n" +
-    "                      ng-click=\"setCurEnlImage($index)\">\n" +
-    "                    <span class=\"fa fa-circle-o\" ng-class=\"{'fa-2x': $index == $parent.curEnlImage}\">\n" +
-    "                    </span>\n" +
+    "                </div>\n" +
+    "            </li>\n" +
+    "        </ul>\n" +
+    "        <div class=\"rn-carousel-indicator text-center\" ng-if=\"newsItem.images.length > 0\">\n" +
+    "            <span ng-repeat=\"img in newsItem.images\" class=\"news-carousel-large-indicators clickable-item\"\n" +
+    "                  ng-click=\"setCurEnlImage($index)\">\n" +
+    "                <span class=\"fa fa-circle-o\" ng-class=\"{'fa-2x': $index == $parent.curEnlImage}\">\n" +
     "                </span>\n" +
-    "            </div>\n" +
+    "            </span>\n" +
+    "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
     "");
