@@ -49932,13 +49932,13 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
 
 angular.module("staff-card/staff-card-list.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staff-card/staff-card-list.tpl.html",
-    "<div class=\"animate-repeat\" ng-repeat=\"person in filteredList = (list | filter:staffdir.facet.search | filter:staffdir.facet.department | filter:staffdir.facet.subject:true | filter:staffdir.facet.library | filter:staffdir.specialtyType | orderBy:staffdir.sortBy:staffdir.sortReverse | alphaIndex:staffdir.sortBy) track by $index\">\n" +
+    "<div class=\"animate-repeat\" ng-repeat=\"person in filteredList track by $index\">\n" +
     "    <div class=\"page-slice\">\n" +
     "        <div class=\"row\">\n" +
     "            <div class=\"col-xs-12 col-sm-1\">\n" +
-    "                <div class=\"alpha-index-header\" ng-if=\"person.alphaIndex != filteredList[$index-1].alphaIndex\">\n" +
+    "                <div class=\"alpha-index-header\" ng-if=\"person.alphaIndex[staffdir.facet.sortBy] != filteredList[$index-1].alphaIndex[staffdir.facet.sortBy]\">\n" +
     "                    <div ui-scrollfix=\"+0\">\n" +
-    "                        {{person.alphaIndex}}\n" +
+    "                        {{person.alphaIndex[staffdir.facet.sortBy]}}\n" +
     "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
@@ -49950,7 +49950,7 @@ angular.module("staff-card/staff-card-list.tpl.html", []).run(["$templateCache",
     "                    <div class=\"col-xs-12 col-sm-7 name-plate\">\n" +
     "                        <h3 class=\"name\">\n" +
     "                            <small ng-if=\"person.rank\">{{person.rank}}</small>\n" +
-    "                            <span ng-class=\"{'sorting-by': staffdir.sortBy == 'firstname'}\" ng-bind-html=\"person.firstname | highlight:staffdir.facet.search\"></span> <span ng-class=\"{'sorting-by': staffdir.sortBy == 'lastname'}\" ng-bind-html=\"person.lastname | highlight:staffdir.facet.search\"></span>\n" +
+    "                            <span ng-class=\"{'sorting-by': staffdir.facet.sortBy == 'firstname'}\" ng-bind-html=\"person.firstname | highlight:staffdir.facet.search\"></span> <span ng-class=\"{'sorting-by': staffdir.facet.sortBy == 'lastname'}\" ng-bind-html=\"person.lastname | highlight:staffdir.facet.search\"></span>\n" +
     "                        </h3>\n" +
     "                        <h4 class=\"title\"><span ng-bind-html=\"person.title | highlight:staffdir.facet.search\"></span></h4>\n" +
     "                        <h5 class=\"hidden-xs\"><span ng-bind-html=\"person.department | highlight:staffdir.facet.search\"></span></h5>\n" +
@@ -50079,8 +50079,8 @@ angular.module("staff-directory/staff-directory-facets.tpl.html", []).run(["$tem
     "        <h5>Sort by</h5>\n" +
     "        <div class=\"facet-group\">\n" +
     "            <div class=\"btn-group btn-group-justified\">\n" +
-    "                <label class=\"btn btn-default\" ng-model=\"staffdir.sortBy\" btn-radio=\"'lastname'\" uncheckable>Last name</label>\n" +
-    "                <label class=\"btn btn-default\" ng-model=\"staffdir.sortBy\" btn-radio=\"'firstname'\" uncheckable>First name</label>\n" +
+    "                <label class=\"btn btn-default\" ng-model=\"staffdir.facet.sortBy\" btn-radio=\"'lastname'\" uncheckable ng-change=\"staffdir.changeFacet('sortBy')\">Last name</label>\n" +
+    "                <label class=\"btn btn-default\" ng-model=\"staffdir.facet.sortBy\" btn-radio=\"'firstname'\" uncheckable ng-change=\"staffdir.changeFacet('sortBy')\">First name</label>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
@@ -50116,7 +50116,7 @@ angular.module("staff-directory/staff-directory-facets.tpl.html", []).run(["$tem
     "        <div class=\"facet-group\">\n" +
     "            <div class=\"radio\">\n" +
     "                <label>\n" +
-    "                    <input type=\"radio\" ng-model=\"staffdir.facet.library\" value=\"\" checked ng-change=\"staffdir.changeFacet('department')\"> All\n" +
+    "                    <input type=\"radio\" ng-model=\"staffdir.facet.library\" value=\"\" ng-checked=\"!staffdir.facet.library\" ng-change=\"staffdir.changeFacet('department')\"> All\n" +
     "                </label>\n" +
     "            </div>\n" +
     "            <div class=\"radio\" ng-repeat=\"library in facets.libraries\">\n" +
@@ -50144,17 +50144,17 @@ angular.module("staff-directory/staff-directory-listing.tpl.html", []).run(["$te
     "            <th>\n" +
     "                <a href=\"#\"\n" +
     "                   ng-click=\"sortList($event, 'lastname')\"\n" +
-    "                   ng-class=\"{'sortable': !staffdir.sortReverse && staffdir.sortBy == 'lastname', 'sortable-reverse': staffdir.sortReverse && staffdir.sortBy == 'lastname'}\">Name</a>\n" +
+    "                   ng-class=\"{'sortable': !staffdir.sortReverse && staffdir.facet.sortBy == 'lastname', 'sortable-reverse': staffdir.sortReverse && staffdir.facet.sortBy == 'lastname'}\">Name</a>\n" +
     "            </th>\n" +
     "            <th class=\"hidden-xs\">\n" +
     "                <a href=\"#\" \n" +
     "                   ng-click=\"sortList($event, 'title')\" \n" +
-    "                   ng-class=\"{'sortable': !staffdir.sortReverse && staffdir.sortBy == 'title', 'sortable-reverse': staffdir.sortReverse && staffdir.sortBy == 'title'}\">Title</a>\n" +
+    "                   ng-class=\"{'sortable': !staffdir.sortReverse && staffdir.facet.sortBy == 'title', 'sortable-reverse': staffdir.sortReverse && staffdir.facet.sortBy == 'title'}\">Title</a>\n" +
     "            </th>\n" +
     "            <th class=\"hidden-xs\">\n" +
     "                <a href=\"#\" \n" +
     "                   ng-click=\"sortList($event, 'department')\" \n" +
-    "                   ng-class=\"{'sortable': !staffdir.sortReverse && staffdir.sortBy == 'department', 'sortable-reverse': staffdir.sortReverse && staffdir.sortBy == 'department'}\">Department/Unit</a>\n" +
+    "                   ng-class=\"{'sortable': !staffdir.sortReverse && staffdir.facet.sortBy == 'department', 'sortable-reverse': staffdir.sortReverse && staffdir.sortBy == 'department'}\">Department/Unit</a>\n" +
     "            </th>\n" +
     "            <th>Contact</th>\n" +
     "            <th class=\"hidden-xs hidden-sm\">Specialty</th>\n" +
@@ -50250,7 +50250,7 @@ angular.module('staffdir', ['ualib.staffdir']);
                 var params = $location.search();
                 for (var param in params){
                     //TODO: This must be temporary. Any URI param will cause the facet bar to display on load!!
-                    if (!SDS.showFacetBar) {
+                    if (!SDS.showFacetBar && !SDS.facetExceptions.hasOwnProperty(param)) {
                         SDS.showFacetBar = true;
                     }
                     SDS.facet[param] = params[param];
@@ -50259,12 +50259,13 @@ angular.module('staffdir', ['ualib.staffdir']);
         });
     }])
 
-    .service('StaffDirectoryService', ['$location', function($location){
+    .service('StaffDirectoryService', ['$location', '$rootScope', function($location, $rootScope){
         var self = this; //ensures proper contest in closure statements
         this.sortBy = ''; // Default sort column, can be overridden via 'sortBy' attribute for staffDirectory directive
         this.sortReverse = false; // Default sort direction
         this.sortable = {}; // reference object for sortable columns
         this.facet = {}; // Object to hold filter values based on available facets (empty object means no filtering).
+        this.facetExceptions = {sortBy: 'lastname', search: ''};
 
         //TODO: handle this variable through a central route/event instead of on a function-by-function basis
         this.showFacetBar = false;
@@ -50273,25 +50274,35 @@ angular.module('staffdir', ['ualib.staffdir']);
         this.clearFacets = function(){
             var args = arguments.length ? arguments : Object.keys(self.facet);
             var omitKeys = Array.prototype.concat.apply(Array.prototype, args);
-            var copy = {};
+            var test ={}, copy = {};
 
             Object.keys(self.facet).map(function(key){
-                if (omitKeys.indexOf(key) === -1) {
+                if (self.facetExceptions.hasOwnProperty(key)){
+                    copy[key] = self.facetExceptions[key];
+                    $location.search(key, null);
+                }
+                else if (omitKeys.indexOf(key) === -1) {
                     copy[key] = self.facet[key];
+                    test[key] = self.facet[key];
                 }
                 else{
                     $location.search(key, null);
                 }
+
             });
-            console.log(isEmptyObj(copy));
-            self.showFacetBar = !isEmptyObj(copy);
+
+            self.showFacetBar = !isEmptyObj(test);
             self.facet = angular.copy(copy);
+
+            $rootScope.$broadcast('facetsChange');
         };
         
         this.changeFacet = function(facet){
             var val = (self.facet.hasOwnProperty(facet) && self.facet[facet] !== '' && self.facet[facet] !== false) ? self.facet[facet] : null;
             $location.search(facet, val);
-            self.showFacetBar = !isEmptyObj(self.facet);
+            $location.replace();
+            self.showFacetBar = !isEmptyObj(self.facet) && !self.facetExceptions.hasOwnProperty(facet);
+            $rootScope.$broadcast('facetsChange');
         };
 
         this.specialtyType = function(staff){
@@ -50317,10 +50328,76 @@ angular.module('staffdir', ['ualib.staffdir']);
 
     }]);;angular.module('ualib.staffdir')
 
-    .factory('StaffFactory', ['$resource', function($resource){
+    .factory('StaffFactory', ['$resource', '$filter', '$http', function($resource, $filter, $http){
+        //TODO: centralize this function so it can be used with all apps
+        // Extend the default responseTransform array - Straight from Angular 1.2.8 API docs - https://docs.angularjs.org/api/ng/service/$http#overriding-the-default-transformations-per-request
+        function appendTransform(defaults, transform) {
+
+            // We can't guarantee that the default transformation is an array
+            defaults = angular.isArray(defaults) ? defaults : [defaults];
+
+            // Append the new transformation to the defaults
+            return defaults.concat(transform);
+        }
+
         return {
             directory: function(){
-                return $resource('https://wwwdev2.lib.ua.edu/staffDir/api/people', {}, {cache: true});
+                return $resource('https://wwwdev2.lib.ua.edu/staffDir/api/people', {}, {
+                    cache: true,
+                    get: {
+                        method: 'GET',
+                        transformResponse: appendTransform($http.defaults.transformResponse, function(d){
+                            var data = angular.fromJson(d);
+                            var staff = {
+                                list: [], // Array for directory listing
+                                facets: {} //Object for available facets
+                            };
+
+                            // Build new object of only subject that currently have a subject/research expert
+                            var subj = [];
+                            var list = [];
+                            angular.forEach(data.list, function(val){
+                                delete val.division;
+                                if (angular.isUndefined(val.image)){
+                                    //TODO: temporary work around because CMS file handling is dumb. Need to fix and make sustainable
+                                    val.image = '/wp-content/themes/roots-ualib/assets/img/user-profile.png';
+                                }
+
+                                //preset alpha index values base on first and last name
+                                val.alphaIndex = {};
+                                val.alphaIndex.lastname = val.lastname.charAt(0).toUpperCase();
+                                val.alphaIndex.firstname = val.firstname.charAt(0).toUpperCase();
+
+                                list.push(val);
+
+                                if (angular.isDefined(val.subjects) && val.subjects.length > 0){
+                                    angular.forEach(val.subjects, function(subject){
+                                        subj.push(subject);
+                                    });
+                                }
+                            });
+                            subj = $filter('unique')(subj, 'subject');
+                            subj = $filter('orderBy')(subj, 'subject');
+                            staff.facets.subjects = subj.map(function(s){
+                                return s.subject;
+                            });
+                            // get libraries
+                            staff.facets.libraries = data.libraries.map(function(lib){
+                                return lib.name;
+                            });
+
+                            // get libraries
+                            staff.facets.departments = data.departments.map(function(dept){
+                                return dept.name;
+                            });
+
+                            // get list of people
+                            staff.list = list;
+
+                            return staff;
+                        })
+                    }
+                });
             },
             byEmail: function(){
                 return $resource('https://wwwdev2.lib.ua.edu/staffDir/api/people/search/email/:email', {}, {cache: true});
@@ -50439,7 +50516,7 @@ angular.module('staffdir', ['ualib.staffdir']);
 
                     return StaffFactory.directory().get()
                         .$promise.then(function(data){
-                            // Build new object of only subject that currently have a subject/research expert
+                            /*// Build new object of only subject that currently have a subject/research expert
                             var subj = [];
                             var list = [];
                             angular.forEach(data.list, function(val){
@@ -50471,9 +50548,9 @@ angular.module('staffdir', ['ualib.staffdir']);
                             });
 
                             // get list of people
-                            staff.list = list;
+                            staff.list = list;*/
 
-                            return staff;
+                            return data;
                         }, function(data, status){
                             console.log('Error' + status + ': ' + data);
                             return staff;
@@ -50483,13 +50560,13 @@ angular.module('staffdir', ['ualib.staffdir']);
         });
     }])
 
-    .controller('StaffDirCtrl', ['$scope', 'StaffDir', 'StaffDirectoryService', function($scope, StaffDir, SDS){
-        $scope.filteredItems = [];
+    .controller('StaffDirCtrl', ['$scope', 'StaffDir', 'StaffDirectoryService', function($scope, StaffDir, SDS, $filter){
         $scope.staffdir = StaffDir;
         $scope.facets = SDS;
+
     }])
 
-    .directive('staffDirectoryListing', ['StaffDirectoryService', function(SDS){
+    .directive('staffDirectoryListing', ['StaffDirectoryService', '$filter', function(SDS, $filter){
         return {
             restrict: 'AC',
             scope: {
@@ -50498,24 +50575,52 @@ angular.module('staffdir', ['ualib.staffdir']);
             },
             templateUrl: 'staff-card/staff-card-list.tpl.html',
             controller: function($scope){
+                var prevSortBy; // used to detect if sort by has changed
+                $scope.filteredList = [];
                 $scope.staffdir = SDS;
 
-                SDS.sortBy = angular.isDefined($scope.sortBy) ? $scope.sortBy : 'lastname';
-                SDS.sortable = $scope.sortable;
+                $scope.staffdir.facet.sortBy = angular.isDefined($scope.sortBy) ? $scope.sortBy : 'lastname';
+                $scope.staffdir.sortable = $scope.sortable;
 
                 // Not good practice, but done for brevity's sake
                 // TODO: have sort functions event listeners defined in linking function and not via ng-click
                 $scope.sortList = function(ev, column){
                     ev. preventDefault();
 
-                    if (SDS.sortBy === column){
+                    if (SDS.facet.sortBy === column){
                         SDS.sortReverse = !SDS.sortReverse;
                     }
                     else {
-                        SDS.sortBy = column;
+                        SDS.facet.sortBy = column;
                         SDS.sortReverse = false;
                     }
                 };
+
+                // Update listing when SDS broadcasts "facetsChange" event
+                $scope.$on('facetsChange', function(ev){
+                    updateList();
+                });
+
+                // Function to update staff listing
+                function updateList(){
+                    var list = angular.copy($scope.list);
+
+                    list = $filter('filter')(list, $scope.staffdir.facet.search);
+                    list = $filter('filter')(list, $scope.staffdir.facet.department);
+                    list = $filter('filter')(list, $scope.staffdir.facet.subject, true);
+                    list = $filter('filter')(list, $scope.staffdir.facet.library);
+                    list = $filter('filter')(list, $scope.staffdir.facet.specialtyType);
+                    list = $filter('orderBy')(list, $scope.staffdir.facet.sortBy, $scope.staffdir.sortReverse);
+
+                    /*if (prevSortBy !== $scope.staffdir.facet.sortBy){
+                        list = $filter('alphaIndex')(list, $scope.staffdir.facet.sortBy);
+                        prevSortBy = angular.copy($scope.staffdir);
+                    }*/
+
+                    $scope.filteredList = angular.copy(list);
+                }
+
+                updateList();
             }
         };
     }])
@@ -50873,14 +50978,23 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "</div>\n" +
     "<div class=\"row\">\n" +
     "    <div class=\"col-md-8\">\n" +
-    "        <div style=\"height: 305px\" ng-if=\"newsItem.images.length > 0\">\n" +
-    "            <ul rn-carousel rn-carousel-controls class=\"image\">\n" +
+    "        <div class=\"text-center\" ng-if=\"newsItem.images.length > 0\">\n" +
+    "            <ul rn-carousel rn-carousel-controls rn-carousel-controls-allow-loop rn-carousel-index=\"curImage\"\n" +
+    "                class=\"image\" style=\"width:500px; height:275px;\">\n" +
     "                <li ng-repeat=\"img in newsItem.images\">\n" +
-    "                    <div class=\"layer\">\n" +
-    "                        <img ng-src=\"{{img}}\"/>\n" +
+    "                    <div class=\"layer text-center\">\n" +
+    "                        <div style=\"width:500px;height:275px;\n" +
+    "                            cursor: pointer;\n" +
+    "                            background-position: center center;\n" +
+    "                            background-repeat: no-repeat;\n" +
+    "                            background-size: contain;\"\n" +
+    "                             ng-style=\"{'background-image':'url('+img+')'}\" ng-click=\"enlargeImages(true)\">\n" +
+    "                        </div>\n" +
     "                    </div>\n" +
     "                </li>\n" +
     "            </ul>\n" +
+    "            <div class=\"text-center\" rn-carousel-indicators ng-if=\"newsItem.images.length > 1\" slides=\"newsItem.images\"\n" +
+    "                 rn-carousel-index=\"curImage\" style=\"margin-top:-10px;\"></div>\n" +
     "        </div>\n" +
     "        <div class=\"text-muted\">\n" +
     "            <span>Created by {{newsItem.creator}} on {{newsItem.created | date:mediumDate}}</span>\n" +
@@ -50897,6 +51011,34 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "            </ul>\n" +
     "        </div>\n" +
     "        <a href=\"#/news-exhibits\" class=\"btn btn-default\"><span class=\"fa fa-reply\"></span> See all news &amp; exhibits</a>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div ng-show=\"showEnlarged\">\n" +
+    "    <div style=\"width: 100%;\n" +
+    "        height: 100%;\n" +
+    "        position: absolute;\n" +
+    "        top:0px;\n" +
+    "        left:0px;\n" +
+    "        background-color: rgba(222,222,222,0.5);\n" +
+    "        z-index:20;\">\n" +
+    "            <ul rn-carousel rn-carousel-controls rn-carousel-controls-allow-loop rn-carousel-index=\"curImage\"\n" +
+    "                class=\"image\" style=\"width:1024px; height:1024px;\">\n" +
+    "                <li ng-repeat=\"img in newsItem.images\">\n" +
+    "                    <div class=\"layer text-center\">\n" +
+    "                        <div style=\"width:1024px; height:1024px;;\n" +
+    "                                cursor: pointer;\n" +
+    "                                background-position: center center;\n" +
+    "                                background-repeat: no-repeat;\n" +
+    "                                background-size: contain;\"\n" +
+    "                             ng-style=\"{'background-image':'url('+img+')'}\" ng-click=\"enlargeImages(false)\">\n" +
+    "                        </div>\n" +
+    "                    </div>\n" +
+    "                </li>\n" +
+    "            </ul>\n" +
+    "            <div class=\"text-center\" rn-carousel-indicators ng-if=\"newsItem.images.length > 1\" slides=\"newsItem.images\"\n" +
+    "                 rn-carousel-index=\"curImage\" style=\"margin-top:-10px;\">\n" +
+    "\n" +
+    "            </div>\n" +
     "    </div>\n" +
     "</div>\n" +
     "");
@@ -50925,7 +51067,7 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "        <div class=\"media animate-repeat\" ng-repeat=\"item in news | filter:{type: newsFilters.type}\n" +
     "                                                                  | filter:newsFilters.search\n" +
     "                                                                  | orderBy:['-sticky','-created']\">\n" +
-    "            <div class=\"media-left\" style=\"width:150px;\">\n" +
+    "            <div class=\"media-left text-center\" style=\"width:150px;\">\n" +
     "                <a ng-href=\"#/news-exhibits/{{item.link}}\">\n" +
     "                    <img class=\"media-object\" src=\"{{item.tb}}\" ng-if=\"item.tb.length > 0\">\n" +
     "                    <img class=\"media-object\" src=\"https://wwwdev2.lib.ua.edu/newsApp/images/tb_news.png\"\n" +
@@ -51114,8 +51256,15 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
     }])
 
     .controller('newsItemCtrl', ['$scope', 'newsItem', '$routeParams', function($scope, newsItem, $routeParams){
-        $scope.myInterval = 5000;
-        $scope.noWrapSlides = false;
+        $scope.showEnlarged = false;
+
+        $scope.enlargeImages = function(enlarge) {
+            if (enlarge) {
+                $scope.showEnlarged = true;
+            } else {
+                $scope.showEnlarged = false;
+            }
+        };
 
        newsItem.$promise.then(function(data){
            for (var i = 0, len = data.news.length; i < len; i++){
