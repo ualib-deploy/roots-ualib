@@ -51000,7 +51000,7 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "        <div class=\"text-muted\">\n" +
     "            <span>Created by {{newsItem.creator}} on {{newsItem.created | date:mediumDate}}</span>\n" +
     "        </div>\n" +
-    "        <p ng-bind-html=\"newsItem.description\"></p>\n" +
+    "        <p class=\"text-justify\" ng-bind-html=\"newsItem.description\"></p>\n" +
     "    </div>\n" +
     "    <div class=\"col-md-4\">\n" +
     "        <div class=\"well\" ng-if=\"newsItem.contactName\">\n" +
@@ -51017,14 +51017,14 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "<div ng-show=\"showEnlarged\">\n" +
     "    <div style=\"width: 100%;\n" +
     "        height: 100%;\n" +
-    "        position: absolute;\n" +
+    "        position: fixed;\n" +
     "        top:0px;\n" +
     "        left:0px;\n" +
     "        background-color: rgba(202,202,202,0.7);\n" +
     "        z-index:20;\">\n" +
     "            <ul rn-carousel rn-carousel-controls rn-carousel-controls-allow-loop rn-carousel-buffered\n" +
     "                rn-carousel-index=\"curEnlImage\" rn-carousel-transition=\"none\"\n" +
-    "                class=\"image\" style=\"width:1024px; height:768px;margin: auto;\">\n" +
+    "                class=\"image\" style=\"width:1024px; height:768px;margin: 120px auto auto auto;\">\n" +
     "                <li ng-repeat=\"img in newsItem.images\">\n" +
     "                    <div class=\"layer text-center\">\n" +
     "                        <div style=\"width:1024px; height:768px;\n" +
