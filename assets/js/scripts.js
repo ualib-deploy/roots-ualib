@@ -51026,7 +51026,7 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "        <div class=\"news-carousel-large-indicators text-center\" ng-if=\"newsItem.images.length > 0\">\n" +
     "            <span ng-repeat=\"img in newsItem.images\" class=\"clickable-item\"\n" +
     "                  ng-click=\"setCurEnlImage($index)\">\n" +
-    "                <span class=\"fa fa-circle-o\" ng-class=\"{'fa-2x': $index == $parent.curEnlImage}\">\n" +
+    "                <span class=\"fa fa-2x fa-circle-o\" ng-class=\"{'fa-3x': $index == $parent.curEnlImage}\">\n" +
     "                </span>\n" +
     "            </span>\n" +
     "        </div>\n" +

@@ -10339,6 +10339,21 @@ a.service-card:focus {
 .clickable-item {
   cursor: pointer;
 }
+.rn-carousel-control {
+  font-size: 8em;
+}
+.rn-carousel-control-next {
+  color: #ffffff;
+}
+.rn-carousel-control-next:before {
+  content: "\f054";
+}
+.rn-carousel-control-prev {
+  color: #ffffff;
+}
+.rn-carousel-control-prev:before {
+  content: "\f053";
+}
 /*# sourceMappingURL=dist/ualib.news.css.map */
 .cal-icon {
   width: 36px;
