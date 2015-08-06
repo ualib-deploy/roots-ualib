@@ -10413,8 +10413,19 @@ a.service-card:focus {
 .clickable-item {
   cursor: pointer;
 }
-.rn-carousel-control {
-  font-size: 8em;
+.rn-carousel-control.rn-carousel-control-next:before,
+.rn-carousel-control.rn-carousel-control-prev:before {
+  display: inline-block;
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-transform: translate(0, 0);
+      -ms-transform: translate(0, 0);
+       -o-transform: translate(0, 0);
+          transform: translate(0, 0);
+  font-size: 2em;
   color: #ffffff;
 }
 .rn-carousel-control.rn-carousel-control-next:before {
