@@ -40802,7 +40802,7 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
     "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
-    "            <div class=\"col-sm-4\" ng-show=\"items.subjects.length > 0\">\n" +
+    "            <div class=\"col-sm-4\" ng-show=\"items.subjects[0].subjects.length > 0\">\n" +
     "                <div class=\"suggest-col\">\n" +
     "                    <h4>LibGuides Subjects <a href=\"http://guides.lib.ua.edu/\" class=\"small\" ng-mousedown=\"go('http://guides.lib.ua.edu/')\">more</a></h4>\n" +
     "                    <div ng-repeat=\"person in items.subjects | limitTo:10\">\n" +
@@ -41604,6 +41604,7 @@ angular.module('oneSearch.common')
                         //Delete
                         case 46:
                             scope.onChange();
+                            scope.onFocus();
                             break;
 
                         default:
