@@ -40794,7 +40794,7 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
     "        <div class=\"row\">\n" +
     "            <div class=\"col-sm-4\" ng-show=\"items.recommend.length > 0\">\n" +
     "                <div class=\"suggest-col\">\n" +
-    "                    <h4>Recommended</h4>\n" +
+    "                    <h4>Recommended Links</h4>\n" +
     "                    <div ng-repeat=\"recommendation in items.recommend | limitTo:10\">\n" +
     "                        <a href=\"{{recommendation.link}}\" ng-mousedown=\"go(recommendation.link)\">\n" +
     "                            {{recommendation.description}}\n" +
