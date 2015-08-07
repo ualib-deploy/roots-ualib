@@ -40790,7 +40790,7 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
     "            </li>\n" +
     "        </ul>\n" +
     "    </div>\n" +
-    "    <div class=\"suggest-row\" ng-show=\"items.recommend.length > 0 || items.subjects.length > 0 || items.faq.length > 0\">\n" +
+    "    <div class=\"suggest-row\" ng-show=\"items.recommend.length > 0 || items.subjects[0].subjects.length > 0 || items.faq.length > 0\">\n" +
     "        <div class=\"row\">\n" +
     "            <div class=\"col-sm-4\" ng-show=\"items.recommend.length > 0\">\n" +
     "                <div class=\"suggest-col\">\n" +
@@ -41604,7 +41604,7 @@ angular.module('oneSearch.common')
                         //Delete
                         case 46:
                             scope.onChange();
-                            scope.onFocus();
+                            scope.selected = true;
                             break;
 
                         default:
