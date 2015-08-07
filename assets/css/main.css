@@ -10425,7 +10425,7 @@ a.service-card:focus {
       -ms-transform: translate(0, 0);
        -o-transform: translate(0, 0);
           transform: translate(0, 0);
-  font-size: 2em;
+  font-size: 3em;
   color: #ffffff;
 }
 .rn-carousel-control.rn-carousel-control-next:before {
