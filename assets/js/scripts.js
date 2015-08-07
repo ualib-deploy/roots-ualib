@@ -41624,15 +41624,14 @@ angular.module('oneSearch.common')
                     $timeout(function() {
                         scope.model = selectedItem;
                         scope.originalValue = "";
-                        $scope.items = {};
-                        $scope.setCurrent(-1, false);
-                        $scope.dataRequested = false;
-                        $scope.selected = false;
+                        scope.items = {};
+                        scope.setCurrent(-1, false);
+                        scope.dataRequested = false;
+                        scope.selected = false;
                         scope.$apply();
                         scope.search();
                     }, 0);
                 };
-
 
             },
             templateUrl: 'common/directives/suggest/suggest.tpl.html'
@@ -50269,6 +50268,7 @@ angular.module('staffdir', ['ualib.staffdir']);
                         SDS.showFacetBar = true;
                     }
                     SDS.facet[param] = params[param];
+                    console.log(SDS.facet);
                 }
             }
         });
@@ -50276,7 +50276,6 @@ angular.module('staffdir', ['ualib.staffdir']);
 
     .service('StaffDirectoryService', ['$location', '$rootScope', function($location, $rootScope){
         var self = this; //ensures proper contest in closure statements
-        this.sortBy = ''; // Default sort column, can be overridden via 'sortBy' attribute for staffDirectory directive
         this.sortReverse = false; // Default sort direction
         this.sortable = {}; // reference object for sortable columns
         this.facet = {}; // Object to hold filter values based on available facets (empty object means no filtering).
@@ -50316,7 +50315,7 @@ angular.module('staffdir', ['ualib.staffdir']);
             var val = (self.facet.hasOwnProperty(facet) && self.facet[facet] !== '' && self.facet[facet] !== false) ? self.facet[facet] : null;
             $location.search(facet, val);
             $location.replace();
-            self.showFacetBar = !isEmptyObj(self.facet) && val && !self.facetExceptions.hasOwnProperty(facet);
+            self.showFacetBar = !isEmptyObj(self.facet);
             $rootScope.$broadcast('facetsChange');
         };
 
@@ -50334,7 +50333,7 @@ angular.module('staffdir', ['ualib.staffdir']);
         function isEmptyObj(obj){
             var name;
             for (name in obj){
-                if (obj[name]){
+                if (obj[name] && !self.facetExceptions.hasOwnProperty(name)){
                     return false;
                 }
             }
@@ -50555,42 +50554,33 @@ angular.module('staffdir', ['ualib.staffdir']);
                 $scope.filteredList = [];
                 $scope.staffdir = SDS;
 
-                $scope.staffdir.facet.sortBy = angular.isDefined($scope.sortBy) ? $scope.sortBy : 'lastname';
-                $scope.staffdir.sortable = $scope.sortable;
-
-                // Not good practice, but done for brevity's sake
-                // TODO: have sort functions event listeners defined in linking function and not via ng-click
-                $scope.sortList = function(ev, column){
-                    ev. preventDefault();
-
-                    if (SDS.facet.sortBy === column){
-                        SDS.sortReverse = !SDS.sortReverse;
-                    }
-                    else {
-                        SDS.facet.sortBy = column;
-                        SDS.sortReverse = false;
-                    }
-                };
+                //If sortby hasn't been defined in URI, check it default defined with directive
+                if (angular.isUndefined(SDS.facet.sortBy)){
+                    $scope.staffdir.facet.sortBy = angular.isDefined($scope.sortBy) ? $scope.sortBy : 'lastname';
+                }
 
                 // Update listing when SDS broadcasts "facetsChange" event
-                $scope.$on('facetsChange', function(ev){
+                var facetsListener = $scope.$on('facetsChange', function(ev){
                     updateList();
                 });
 
                 // Function to update staff listing
                 function updateList(){
                     var list = angular.copy($scope.list);
-                    var facets = angular.copy($scope.staffdir.facet);
 
                     list = $filter('filter')(list, $scope.staffdir.facet.search);
                     list = $filter('filter')(list, $scope.staffdir.facet.department);
                     list = $filter('filter')(list, $scope.staffdir.facet.subject, true);
                     list = $filter('filter')(list, $scope.staffdir.facet.library);
-                    list = $filter('filter')(list, $scope.staffdir.facet.specialtyType);
+                    list = $filter('filter')(list, $scope.staffdir.specialtyType);
                     list = $filter('orderBy')(list, $scope.staffdir.facet.sortBy, $scope.staffdir.sortReverse);
 
                     $scope.filteredList = angular.copy(list);
                 }
+
+                $scope.$on('$destroy', function(){
+                    facetsListener();
+                });
 
                 updateList();
             }
