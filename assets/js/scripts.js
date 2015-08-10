@@ -51032,7 +51032,10 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "                    <a ng-href=\"#/news-exhibits/{{item.link}}\" ng-bind-html=\"item.title | highlight:newsFilters.search\"></a>\n" +
     "                    <small ng-if=\"item.type > 0\">{{item.activeFrom | date:mediumDate}} - {{item.activeUntil | date:mediumDate}}</small>\n" +
     "                </h4>\n" +
-    "                <p class=\"text-justify\" ng-bind-html=\"item.description | truncate:250:true | highlight:newsFilters.search\"></p>\n" +
+    "                <p class=\"text-justify\">\n" +
+    "                    <span ng-bind-html=\"item.description | truncate:250:'...' | highlight:newsFilters.search\">\n" +
+    "                    </span>\n" +
+    "                </p>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "\n" +
