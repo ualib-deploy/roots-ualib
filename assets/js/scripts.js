@@ -50956,7 +50956,7 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"text-muted\">\n" +
-    "            <span>Created by {{newsItem.creator}} on {{newsItem.created | date:mediumDate}}</span>\n" +
+    "            <span>Created on {{newsItem.created | date:mediumDate}}</span>\n" +
     "        </div>\n" +
     "        <p class=\"text-justify\" ng-bind-html=\"newsItem.description\"></p>\n" +
     "    </div>\n" +
