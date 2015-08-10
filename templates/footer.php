@@ -14,6 +14,7 @@
             <li><a href="<?php echo site_url(); ?>/site-map">Site Map</a></li>
             <li><a href="<?php echo site_url(); ?>/about/support-ua-libraries/">Support UA Libraries</a></li>
             <li><a href="<?php echo site_url(); ?>/about/employment/">Employment</a></li>
+            <li><a href="http://alabamacenterforthebook.lib.ua.edu/">Alabama Center for the Book</a></li>
           </ul>
         </div>
 
