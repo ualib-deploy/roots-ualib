@@ -6362,8 +6362,8 @@ fieldset[disabled] .navbar-mega .btn-link:focus {
   padding: 15px 5px;
 }
 .navbar-mega .navbar-header .navbar-brand > img {
+  max-height: 69px;
   margin-top: -9px;
-  max-width: 190px;
 }
 .navbar-mega .navbar-toggle {
   font-size: 16px;
@@ -6616,8 +6616,8 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
   padding: 15px 5px;
 }
 .navbar-mega-inverse .navbar-header .navbar-brand > img {
+  max-height: 69px;
   margin-top: -9px;
-  max-width: 190px;
 }
 .navbar-mega-inverse .navbar-toggle {
   font-size: 16px;
@@ -9126,7 +9126,7 @@ div[ng-view].ng-enter {
 .jumbotron-header > .jumbotron {
   min-height: 350px;
   color: #f9f9f9;
-  background-color: rgba(24, 72, 102, 0.7);
+  background-color: rgba(46, 36, 36, 0.75);
 }
 .jumbotron-header > .jumbotron .well {
   color: #333;
@@ -9827,76 +9827,6 @@ footer > .sub-footer {
   bottom: 0;
   top: auto;
 }
-.service-card,
-.service-list {
-  color: #333333;
-  position: relative;
-  display: block;
-  padding: 15px;
-}
-.service-card .fa,
-.service-list .fa {
-  display: block;
-  position: absolute;
-  top: 30px;
-  font-size: 30px;
-  color: #555555;
-}
-.service-card > h1,
-.service-list > h1,
-.service-card h2,
-.service-list h2,
-.service-card h3,
-.service-list h3,
-.service-card h4,
-.service-list h4,
-.service-card h5,
-.service-list h5,
-.service-card h6,
-.service-list h6 {
-  color: #993333;
-  margin-bottom: 0;
-  margin-left: 45px;
-}
-.service-card > p,
-.service-list > p {
-  margin-left: 45px;
-}
-a.service-card:hover,
-a.service-card:active,
-a.service-card:focus {
-  background-color: #f9f9f9;
-  text-decoration: none;
-  color: #333333;
-}
-.service-list > h1,
-.service-list h2,
-.service-list h3,
-.service-list h4,
-.service-list h5,
-.service-list h6 {
-  margin-top: 15px;
-}
-.service-list > ul {
-  list-style-type: none;
-  padding: 0;
-  margin-top: 5px;
-  margin-left: 45px;
-}
-.service-list > ul > li > a {
-  color: #333333;
-  position: relative;
-  display: block;
-  padding: 5px;
-  font-size: 16px;
-}
-.service-list > ul > li > a:hover,
-.service-list > ul > li > a:active,
-.service-list > ul > li > a:focus {
-  background-color: #f9f9f9;
-  text-decoration: none;
-  color: #333333;
-}
 .tabset-vertical > .tab-content {
   position: relative;
 }
@@ -10339,19 +10269,25 @@ a.service-card:focus {
 .clickable-item {
   cursor: pointer;
 }
-.rn-carousel-control {
-  font-size: 8em;
-}
-.rn-carousel-control-next {
+.rn-carousel-control.rn-carousel-control-next:before,
+.rn-carousel-control.rn-carousel-control-prev:before {
+  display: inline-block;
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-transform: translate(0, 0);
+      -ms-transform: translate(0, 0);
+       -o-transform: translate(0, 0);
+          transform: translate(0, 0);
+  font-size: 3em;
   color: #ffffff;
 }
-.rn-carousel-control-next:before {
+.rn-carousel-control.rn-carousel-control-next:before {
   content: "\f054";
 }
-.rn-carousel-control-prev {
-  color: #ffffff;
-}
-.rn-carousel-control-prev:before {
+.rn-carousel-control.rn-carousel-control-prev:before {
   content: "\f053";
 }
 /*# sourceMappingURL=dist/ualib.news.css.map */

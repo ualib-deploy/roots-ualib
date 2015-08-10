@@ -115,6 +115,18 @@ module.exports = function(grunt) {
                 }]
             }
         },
+        ngAnnotate: {
+            options: {
+                singleQuotes: true
+            },
+            dist: {
+                files: [
+                    {
+                        'assets/src/scripts.js': ['assets/src/scripts.js']
+                    }
+                ]
+            }
+        },
         uglify: {
             dist: {
                 files: {
@@ -243,10 +255,13 @@ module.exports = function(grunt) {
         'concat'
     ]);
     grunt.registerTask('build', [
+        'html2js',
         'jshint',
         'copy',
         'less:build',
         'autoprefixer:build',
+        'concat',
+        'ngAnnotate',
         'uglify',
         'modernizr',
         'version'

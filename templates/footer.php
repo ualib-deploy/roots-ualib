@@ -71,7 +71,7 @@
 
 
           <a href="http://www.ua.edu">
-              <img src="<?php print get_template_directory_uri(); ?>/assets/img/ua-capstone-logo.png" class="img-responsive" style="margin: 15px 0;"/>
+              <img src="<?php print get_template_directory_uri(); ?>/assets/img/ua-official-logo.png" class="img-responsive" style="margin: 15px 0 30px;"/>
           </a>
 
           <div class="row">

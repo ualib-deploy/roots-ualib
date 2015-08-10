@@ -13,7 +13,7 @@ if (defined('GROUP_ANY_WEBAPP'))
         <div class="container-fluid">
             <div class="navbar-header">
                 <a class="navbar-brand" href="<?php echo get_settings('home'); ?>/#/home">
-                    <img src="<?php print get_template_directory_uri(); ?>/assets/img/ualib-logo-textonly-inverse.png" class="hidden-xs" rel="home" alt="University of Alabama Libraries"/>
+                    <img src="<?php print get_template_directory_uri(); ?>/assets/img/new-ualib-logo-color.png" class="hidden-xs" rel="home" alt="University of Alabama Libraries"/>
                     <span class="visible-xs">UA Libraries</span>
                 </a>
             </div>

@@ -1,6 +1,6 @@
 /**
  * Bunch of useful filters for angularJS(with no external dependencies!)
- * @version v0.5.4 - 2015-02-20 * @link https://github.com/a8m/angular-filter
+ * @version v0.5.5 - 2015-08-07 * @link https://github.com/a8m/angular-filter
  * @author Ariel Mashraki <ariel@mashraki.co.il>
  * @license MIT License, http://www.opensource.org/licenses/MIT
  */
@@ -28,8 +28,9 @@ var isDefined = angular.isDefined,
  * @returns {Array}
  */
 function toArray(object) {
-  return isArray(object) ? object :
-    Object.keys(object).map(function(key) {
+  return isArray(object) 
+    ? object 
+    : Object.keys(object).map(function(key) {
       return object[key];
     });
 }
@@ -319,12 +320,11 @@ angular.module('a8m.after-where', [])
     .filter('afterWhere', function() {
       return function (collection, object) {
 
-        collection = (isObject(collection))
+        collection = isObject(collection)
           ? toArray(collection)
           : collection;
 
-        if(!isArray(collection) || isUndefined(object))
-          return collection;
+        if(!isArray(collection) || isUndefined(object)) return collection;
 
         var index = collection.map( function( elm ) {
           return objectContains(object, elm);
@@ -348,7 +348,7 @@ angular.module('a8m.after-where', [])
 angular.module('a8m.after', [])
     .filter('after', function() {
       return function (collection, count) {
-        collection = (isObject(collection))
+        collection = isObject(collection)
           ? toArray(collection)
           : collection;
 
@@ -371,12 +371,11 @@ angular.module('a8m.before-where', [])
   .filter('beforeWhere', function() {
     return function (collection, object) {
 
-      collection = (isObject(collection))
+      collection = isObject(collection)
         ? toArray(collection)
         : collection;
 
-      if(!isArray(collection) || isUndefined(object))
-        return collection;
+      if(!isArray(collection) || isUndefined(object)) return collection;
 
       var index = collection.map( function( elm ) {
         return objectContains(object, elm);
@@ -398,7 +397,7 @@ angular.module('a8m.before-where', [])
 angular.module('a8m.before', [])
     .filter('before', function() {
       return function (collection, count) {
-        collection = (isObject(collection))
+        collection = isObject(collection)
           ? toArray(collection)
           : collection;
 
@@ -410,6 +409,42 @@ angular.module('a8m.before', [])
 
 /**
  * @ngdoc filter
+ * @name chunkBy
+ * @kind function
+ *
+ * @description
+ * Collect data into fixed-length chunks or blocks
+ */
+
+angular.module('a8m.chunk-by', [])
+  .filter('chunkBy', [function () {
+    /**
+     * @description
+     * Get array with size `n` in `val` inside it.
+     * @param n
+     * @param val
+     * @returns {Array}
+     */
+    function fill(n, val) {
+      var ret = [];
+      while(n--) ret[n] = val;
+      return ret;
+    }
+
+    return function (array, n, fillVal) {
+      if (!isArray(array)) return array;
+      return array.map(function(el, i, self) {
+        i = i * n;
+        el = self.slice(i, i + n);
+        return !isUndefined(fillVal) && el.length < n
+          ? el.concat(fill(n - el.length, fillVal))
+          : el;
+      }).slice(0, Math.ceil(array.length / n));
+    }
+  }]);
+
+/**
+ * @ngdoc filter
  * @name concat
  * @kind function
  *
@@ -417,15 +452,13 @@ angular.module('a8m.before', [])
  * get (array/object, object/array) and return merged collection
  */
 angular.module('a8m.concat', [])
-  //TODO(Ariel):unique option ? or use unique filter to filter result
   .filter('concat', [function () {
     return function (collection, joined) {
 
-      if (isUndefined(joined)) {
-        return collection;
-      }
+      if (isUndefined(joined)) return collection;
+
       if (isArray(collection)) {
-        return (isObject(joined))
+        return isObject(joined)
           ? collection.concat(toArray(joined))
           : collection.concat(joined);
       }
@@ -455,10 +488,10 @@ angular.module('a8m.contains', [])
     some: ['$parse', containsFilter]
   });
 
-function containsFilter( $parse ) {
+function containsFilter($parse) {
     return function (collection, expression) {
 
-      collection = (isObject(collection)) ? toArray(collection) : collection;
+      collection = isObject(collection) ? toArray(collection) : collection;
 
       if(!isArray(collection) || isUndefined(expression)) {
         return false;
@@ -523,7 +556,7 @@ angular.module('a8m.defaults', [])
   .filter('defaults', ['$parse', function( $parse ) {
     return function(collection, defaults) {
 
-      collection = (isObject(collection)) ? toArray(collection) : collection;
+      collection = isObject(collection) ? toArray(collection) : collection;
 
       if(!isArray(collection) || !isObject(defaults)) {
         return collection;
@@ -559,7 +592,7 @@ angular.module('a8m.defaults', [])
 angular.module('a8m.every', [])
   .filter('every', ['$parse', function($parse) {
     return function (collection, expression) {
-      collection = (isObject(collection)) ? toArray(collection) : collection;
+      collection = isObject(collection) ? toArray(collection) : collection;
 
       if(!isArray(collection) || isUndefined(expression)) {
         return true;
@@ -584,13 +617,12 @@ angular.module('a8m.every', [])
 angular.module('a8m.filter-by', [])
   .filter('filterBy', ['$parse', function( $parse ) {
     return function(collection, properties, search) {
-
       var comparator;
 
       search = (isString(search) || isNumber(search)) ?
         String(search).toLowerCase() : undefined;
 
-      collection = (isObject(collection)) ? toArray(collection) : collection;
+      collection = isObject(collection) ? toArray(collection) : collection;
 
       if(!isArray(collection) || isUndefined(search)) {
         return collection;
@@ -635,12 +667,11 @@ angular.module('a8m.filter-by', [])
 angular.module('a8m.first', [])
   .filter('first', ['$parse', function( $parse ) {
     return function(collection) {
-
       var n
         , getter
         , args;
 
-      collection = (isObject(collection))
+      collection = isObject(collection)
         ? toArray(collection)
         : collection;
 
@@ -671,7 +702,7 @@ angular.module('a8m.flatten', [])
     return function(collection, shallow) {
 
       shallow = shallow || false;
-      collection = (isObject(collection))
+      collection = isObject(collection)
         ? toArray(collection)
         : collection;
 
@@ -720,7 +751,7 @@ angular.module('a8m.fuzzy-by', [])
       var sensitive = csensitive || false,
         prop, getter;
 
-      collection = (isObject(collection)) ? toArray(collection) : collection;
+      collection = isObject(collection) ? toArray(collection) : collection;
 
       if(!isArray(collection) || isUndefined(property)
         || isUndefined(search)) {
@@ -755,10 +786,8 @@ angular.module('a8m.fuzzy-by', [])
 angular.module('a8m.fuzzy', [])
   .filter('fuzzy', function () {
     return function (collection, search, csensitive) {
-
       var sensitive = csensitive || false;
-
-      collection = (isObject(collection)) ? toArray(collection) : collection;
+      collection = isObject(collection) ? toArray(collection) : collection;
 
       if(!isArray(collection) || isUndefined(search)) {
         return collection;
@@ -767,14 +796,11 @@ angular.module('a8m.fuzzy', [])
       search = (sensitive) ? search : search.toLowerCase();
 
       return collection.filter(function(elm) {
-
         if(isString(elm)) {
           elm = (sensitive) ? elm : elm.toLowerCase();
           return hasApproxPattern(elm, search) !== false
         }
-
         return (isObject(elm)) ? _hasApproximateKey(elm, search) : false;
-
       });
 
       /**
@@ -803,7 +829,6 @@ angular.module('a8m.fuzzy', [])
 
         }).length;
       }
-
     }
   });
 
@@ -818,7 +843,6 @@ angular.module('a8m.fuzzy', [])
  */
 
 angular.module('a8m.group-by', [ 'a8m.filter-watcher' ])
-
   .filter('groupBy', [ '$parse', 'filterWatcher', function ( $parse, filterWatcher ) {
     return function (collection, property) {
 
@@ -866,7 +890,7 @@ angular.module('a8m.group-by', [ 'a8m.filter-watcher' ])
 angular.module('a8m.is-empty', [])
   .filter('isEmpty', function () {
     return function(collection) {
-      return (isObject(collection))
+      return isObject(collection)
         ? !toArray(collection).length
         : !collection.length;
     }
@@ -886,9 +910,7 @@ angular.module('a8m.join', [])
       if (isUndefined(input) || !isArray(input)) {
         return input;
       }
-      if (isUndefined(delimiter)) {
-        delimiter = ' ';
-      }
+      if (isUndefined(delimiter)) delimiter = ' ';
 
       return input.join(delimiter);
     };
@@ -914,7 +936,7 @@ angular.module('a8m.last', [])
         //and we don't want side effects
         , reversed = copy(collection);
 
-      reversed = (isObject(reversed))
+      reversed = isObject(reversed)
         ? toArray(reversed)
         : reversed;
 
@@ -946,7 +968,7 @@ angular.module('a8m.map', [])
   .filter('map', ['$parse', function($parse) {
     return function (collection, expression) {
 
-      collection = (isObject(collection))
+      collection = isObject(collection)
         ? toArray(collection)
         : collection;
 
@@ -974,7 +996,7 @@ angular.module('a8m.omit', [])
   .filter('omit', ['$parse', function($parse) {
     return function (collection, expression) {
 
-      collection = (isObject(collection))
+      collection = isObject(collection)
         ? toArray(collection)
         : collection;
 
@@ -990,7 +1012,7 @@ angular.module('a8m.omit', [])
 
 /**
  * @ngdoc filter
- * @name omit
+ * @name pick
  * @kind function
  *
  * @description
@@ -1002,7 +1024,7 @@ angular.module('a8m.pick', [])
   .filter('pick', ['$parse', function($parse) {
     return function (collection, expression) {
 
-      collection = (isObject(collection))
+      collection = isObject(collection)
         ? toArray(collection)
         : collection;
 
@@ -1016,6 +1038,23 @@ angular.module('a8m.pick', [])
     }
   }]);
 
+/**
+ * @ngdoc filter
+ * @name range
+ * @kind function
+ *
+ * @description
+ * rangeFilter provides some support for a for loop using numbers
+ */
+angular.module('a8m.range', [])
+  .filter('range', function () {
+    return function (input, total) {
+      for (var i = 0; i < parseInt(total); i++) {
+        input.push(i);
+      }
+      return input;
+	  };
+  });
 /**
  * @ngdoc filter
  * @name removeWith
@@ -1057,9 +1096,7 @@ angular.module('a8m.remove', [])
 
   .filter('remove', function () {
     return function (collection) {
-
-      collection = (isObject(collection)) ? toArray(collection) : collection;
-
+      collection = isObject(collection) ? toArray(collection) : collection;
       var args = Array.prototype.slice.call(arguments, 1);
 
       if(!isArray(collection)) {
@@ -1071,7 +1108,6 @@ angular.module('a8m.remove', [])
           return equals(nest, member);
         })
       });
-
     }
   });
 
@@ -1086,7 +1122,7 @@ angular.module('a8m.remove', [])
 angular.module('a8m.reverse', [])
     .filter('reverse',[ function () {
       return function (input) {
-        input = (isObject(input)) ? toArray(input) : input;
+        input = isObject(input) ? toArray(input) : input;
 
         if(isString(input)) {
           return input.split('').reverse().join('');
@@ -1113,7 +1149,7 @@ angular.module('a8m.search-field', [])
 
       var get, field;
 
-      collection = (isObject(collection)) ? toArray(collection) : collection;
+      collection = isObject(collection) ? toArray(collection) : collection;
 
       var args = Array.prototype.slice.call(arguments, 1);
 
@@ -1180,7 +1216,7 @@ angular.module('a8m.unique', [])
 function uniqFilter($parse) {
     return function (collection, property) {
 
-      collection = (isObject(collection)) ? toArray(collection) : collection;
+      collection = isObject(collection) ? toArray(collection) : collection;
 
       if (!isArray(collection)) {
         return collection;
@@ -1230,11 +1266,8 @@ function uniqFilter($parse) {
 angular.module('a8m.where', [])
   .filter('where', function() {
     return function (collection, object) {
-
-      if(isUndefined(object)) {
-        return collection;
-      }
-      collection = (isObject(collection))
+      if(isUndefined(object)) return collection;
+      collection = isObject(collection)
         ? toArray(collection)
         : collection;
 
@@ -1260,8 +1293,8 @@ angular.module('a8m.xor', [])
 
       expression = expression || false;
 
-      col1 = (isObject(col1)) ? toArray(col1) : col1;
-      col2 = (isObject(col2)) ? toArray(col2) : col2;
+      col1 = isObject(col1) ? toArray(col1) : col1;
+      col2 = isObject(col2) ? toArray(col2) : col2;
 
       if(!isArray(col1) || !isArray(col2)) return col1;
 
@@ -1296,18 +1329,17 @@ angular.module('a8m.math.byteFmt', ['a8m.math'])
 
       if(isNumber(decimal) && isFinite(decimal) && decimal%1===0 && decimal >= 0 &&
         isNumber(bytes) && isFinite(bytes)) {
-
         if(bytes < 1024) { // within 1 KB so B
-            return convertToDecimal(bytes, decimal, $math) + ' B';
+          return convertToDecimal(bytes, decimal, $math) + ' B';
         } else if(bytes < 1048576) { // within 1 MB so KB
-            return convertToDecimal((bytes / 1024), decimal, $math) + ' KB';
+          return convertToDecimal((bytes / 1024), decimal, $math) + ' KB';
         } else if(bytes < 1073741824){ // within 1 GB so MB
-            return convertToDecimal((bytes / 1048576), decimal, $math) + ' MB';
+          return convertToDecimal((bytes / 1048576), decimal, $math) + ' MB';
         } else { // GB or more
-            return convertToDecimal((bytes / 1073741824), decimal, $math) + ' GB';
+          return convertToDecimal((bytes / 1073741824), decimal, $math) + ' GB';
         }
 
-	    }
+      }
       return "NaN";
     }
   }]);
@@ -1322,17 +1354,17 @@ angular.module('a8m.math.byteFmt', ['a8m.math'])
 angular.module('a8m.math.degrees', ['a8m.math'])
   .filter('degrees', ['$math', function ($math) {
     return function (radians, decimal) {
-	  // if decimal is not an integer greater than -1, we cannot do. quit with error "NaN"
-		// if degrees is not a real number, we cannot do also. quit with error "NaN"
-		if(isNumber(decimal) && isFinite(decimal) && decimal%1===0 && decimal >= 0 &&
-          isNumber(radians) && isFinite(radians)) {
-		    var degrees = (radians * 180) / $math.PI;
-		    return $math.round(degrees * $math.pow(10,decimal)) / ($math.pow(10,decimal));
-	    } else {
-          return "NaN";
-		}
-	}
-}]);
+      // if decimal is not an integer greater than -1, we cannot do. quit with error "NaN"
+      // if degrees is not a real number, we cannot do also. quit with error "NaN"
+      if(isNumber(decimal) && isFinite(decimal) && decimal%1===0 && decimal >= 0 &&
+        isNumber(radians) && isFinite(radians)) {
+        var degrees = (radians * 180) / $math.PI;
+        return $math.round(degrees * $math.pow(10,decimal)) / ($math.pow(10,decimal));
+      } else {
+        return "NaN";
+      }
+    }
+  }]);
 
  
  
@@ -1351,18 +1383,17 @@ angular.module('a8m.math.kbFmt', ['a8m.math'])
 
       if(isNumber(decimal) && isFinite(decimal) && decimal%1===0 && decimal >= 0 &&
         isNumber(bytes) && isFinite(bytes)) {
-
         if(bytes < 1024) { // within 1 MB so KB
-            return convertToDecimal(bytes, decimal, $math) + ' KB';
+          return convertToDecimal(bytes, decimal, $math) + ' KB';
         } else if(bytes < 1048576) { // within 1 GB so MB
-            return convertToDecimal((bytes / 1024), decimal, $math) + ' MB';
+          return convertToDecimal((bytes / 1024), decimal, $math) + ' MB';
         } else {
-            return convertToDecimal((bytes / 1048576), decimal, $math) + ' GB';
+          return convertToDecimal((bytes / 1048576), decimal, $math) + ' GB';
         }
-		  }
-			return "NaN";
+      }
+      return "NaN";
     }
-}]);
+  }]);
 /**
  * @ngdoc module
  * @name math
@@ -1454,7 +1485,7 @@ angular.module('a8m.math.percent', ['a8m.math'])
   .filter('percent', ['$math', '$window', function ($math, $window) {
     return function (input, divided, round) {
 
-      var divider = (isString(input)) ? $window.Number(input) : input;
+      var divider = isString(input) ? $window.Number(input) : input;
       divided = divided || 100;
       round = round || false;
 
@@ -1477,16 +1508,16 @@ angular.module('a8m.math.percent', ['a8m.math'])
 angular.module('a8m.math.radians', ['a8m.math'])
   .filter('radians', ['$math', function ($math) {
     return function (degrees, decimal) {
-	  // if decimal is not an integer greater than -1, we cannot do. quit with error "NaN"
-	  // if degrees is not a real number, we cannot do also. quit with error "NaN"
-        if(isNumber(decimal) && isFinite(decimal) && decimal%1===0 && decimal >= 0 &&
-          isNumber(degrees) && isFinite(degrees)) {
-          var radians = (degrees * 3.14159265359) / 180;
-          return $math.round(radians * $math.pow(10,decimal)) / ($math.pow(10,decimal));
-		}
-		return "NaN";
-	}
-}]);
+      // if decimal is not an integer greater than -1, we cannot do. quit with error "NaN"
+      // if degrees is not a real number, we cannot do also. quit with error "NaN"
+      if(isNumber(decimal) && isFinite(decimal) && decimal%1===0 && decimal >= 0 &&
+        isNumber(degrees) && isFinite(degrees)) {
+        var radians = (degrees * 3.14159265359) / 180;
+        return $math.round(radians * $math.pow(10,decimal)) / ($math.pow(10,decimal));
+      }
+      return "NaN";
+    }
+  }]);
 
  
  
@@ -1526,21 +1557,20 @@ angular.module('a8m.math.shortFmt', ['a8m.math'])
     return function (number, decimal) {
       if(isNumber(decimal) && isFinite(decimal) && decimal%1===0 && decimal >= 0 &&
         isNumber(number) && isFinite(number)){
-                    
-          if(number < 1e3) {
-              return number;
-          } else if(number < 1e6) {
-              return convertToDecimal((number / 1e3), decimal, $math) + ' K';
-          } else if(number < 1e9){
-              return convertToDecimal((number / 1e6), decimal, $math) + ' M';
-          } else {
-            return convertToDecimal((number / 1e9), decimal, $math) + ' B';
-          }
+        if(number < 1e3) {
+          return number;
+        } else if(number < 1e6) {
+          return convertToDecimal((number / 1e3), decimal, $math) + ' K';
+        } else if(number < 1e9){
+          return convertToDecimal((number / 1e6), decimal, $math) + ' M';
+        } else {
+          return convertToDecimal((number / 1e9), decimal, $math) + ' B';
+        }
 
-	  }
-    return "NaN";
-	}
-}]);
+      }
+      return "NaN";
+    }
+  }]);
 /**
  * @ngdoc filter
  * @name sum
@@ -2090,7 +2120,7 @@ angular.module('a8m.filter-watcher', [])
       /**
        * @description
        * for angular version that greater than v.1.3.0
-       * if clear cache when the digest cycle end.
+       * it clear cache when the digest cycle is end.
        */
       function cleanStateless() {
         $$timeout(function() {
@@ -2204,6 +2234,7 @@ angular.module('angular.filter', [
   'a8m.remove-with',
   'a8m.group-by',
   'a8m.count-by',
+  'a8m.chunk-by',
   'a8m.search-field',
   'a8m.fuzzy-by',
   'a8m.fuzzy',
@@ -2217,7 +2248,8 @@ angular.module('angular.filter', [
   'a8m.last',
   'a8m.flatten',
   'a8m.join',
-
+  'a8m.range',
+  
   'a8m.math',
   'a8m.math.max',
   'a8m.math.min',
@@ -4665,7 +4697,7 @@ angular.module('ui.utils',  [
  * AngularJS file upload/drop directive and service with progress and abort
  * FileAPI Flash shim for old browsers not supporting FormData
  * @author  Danial  <danial.farid@gmail.com>
- * @version 6.0.3
+ * @version 6.0.4
  */
 
 (function () {
@@ -5093,7 +5125,7 @@ if (!window.FileReader) {
 /**!
  * AngularJS file upload/drop directive and service with progress and abort
  * @author  Danial  <danial.farid@gmail.com>
- * @version 6.0.3
+ * @version 6.0.4
  */
 
 if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
@@ -5114,7 +5146,7 @@ if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
 
 var ngFileUpload = angular.module('ngFileUpload', []);
 
-ngFileUpload.version = '6.0.3';
+ngFileUpload.version = '6.0.4';
 ngFileUpload.defaults = {};
 
 ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, $timeout) {
@@ -5758,8 +5790,6 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
     }, false);
     elem[0].addEventListener('paste', function (evt) {
       if (elem.attr('disabled') || disabled) return;
-      evt.preventDefault();
-      if (stopPropagation(scope)) evt.stopPropagation();
       extractFiles(evt, function (files, rejFiles) {
         updateModel($parse, $timeout, scope, ngModel, attr,
           getAttr(attr, 'ngfChange') || getAttr(attr, 'ngfDrop'), files, rejFiles, evt);
@@ -36220,7 +36250,7 @@ angular.module('uiGmapgoogle-maps.extensions')
     })
   };
 }]);
-}( window,angular));;angular.module('ualib.ui.templates', ['page/templates/page-section.tpl.html', 'page/templates/page.tpl.html', 'stepcard/templates/step-card.tpl.html', 'stepcard/templates/step.tpl.html', 'tabs/templates/tab.tpl.html', 'tabs/templates/tabset.tpl.html']);
+}( window,angular));;angular.module('ualib.ui.templates', ['page/templates/page-section.tpl.html', 'page/templates/page.tpl.html', 'tabs/templates/tab.tpl.html', 'tabs/templates/tabset.tpl.html']);
 
 angular.module("page/templates/page-section.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("page/templates/page-section.tpl.html",
@@ -36244,21 +36274,6 @@ angular.module("page/templates/page.tpl.html", []).run(["$templateCache", functi
     "      </ul>\n" +
     "    </div>\n" +
     "  </div>\n" +
-    "</div>");
-}]);
-
-angular.module("stepcard/templates/step-card.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("stepcard/templates/step-card.tpl.html",
-    "<div class=\"row step-card\">\n" +
-    "  <h3 ng-if=\"heading\">{{heading}}</h3>\n" +
-    "  <div ng-transclude></div>\n" +
-    "</div>");
-}]);
-
-angular.module("stepcard/templates/step.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("stepcard/templates/step.tpl.html",
-    "<div class=\"step-card-step\" ng-class=\"stepcard.colSize\">\n" +
-    "  <div class=\"step-num pull-left\">{{}}</div>\n" +
     "</div>");
 }]);
 
@@ -36288,7 +36303,7 @@ angular.module("tabs/templates/tabset.tpl.html", []).run(["$templateCache", func
  * angular-ui-bootstrap
  * http://angular-ui.github.io/bootstrap/
 
- * Version: 0.12.1 - 2015-07-27
+ * Version: 0.12.1 - 2015-08-10
  * License: MIT
  */
 angular.module("ui.bootstrap", ["ui.bootstrap.tpls", "ui.bootstrap.transition","ui.bootstrap.collapse","ui.bootstrap.accordion","ui.bootstrap.alert","ui.bootstrap.bindHtml","ui.bootstrap.buttons","ui.bootstrap.carousel","ui.bootstrap.dateparser","ui.bootstrap.position","ui.bootstrap.datepicker","ui.bootstrap.modal","ui.bootstrap.pagination","ui.bootstrap.tooltip","ui.bootstrap.popover","ui.bootstrap.progressbar","ui.bootstrap.rating","ui.bootstrap.timepicker","ui.bootstrap.typeahead"]);
@@ -40718,8 +40733,16 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "    </div>\n" +
     "    <div class=\"row\">\n" +
     "        <div class=\"col-md-6\">\n" +
-    "            <div class=\"bento-box\" bento-box=\"googleCS\">\n" +
+    "            <div class=\"bento-box\">\n" +
     "                <h2 id=\"site-search\">Libraries' Website</h2>\n" +
+    "                <div class=\"alert alert-warning\">\n" +
+    "                    <h4><span class=\"fa fa-fw fa-info-circle\"></span> Temporarily disabled</h4>\n" +
+    "                    <p>\n" +
+    "                        We have completely restructured our website for the better. But Google still needs time to catch up!\n" +
+    "                        Searching of the University Libraries' website will be available shortly.\n" +
+    "                    </p>\n" +
+    "                </div>\n" +
+    "\n" +
     "            </div>\n" +
     "        </div>\n" +
     "\n" +
@@ -40749,8 +40772,8 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
     "        <button type=\"submit\" class=\"btn btn-onesearch btn-primary\"><span class=\"fa fa-search\"></span></button>\n" +
     "    </div>\n" +
     "</div>\n" +
-    "<div class=\"suggest\" ng-show=\"showSuggestions && selected\">\n" +
-    "    <div class=\"row\" ng-hide=\"items.suggest.length == 0\">\n" +
+    "<div class=\"suggest\" ng-show=\"showSuggestions && selected && (items.suggest.length > 0 || items.recommend.length > 0 || items.subjects[0].subjects.length > 0 || items.faq.length > 0)\">\n" +
+    "    <div class=\"row\" ng-show=\"items.suggest.length > 0\">\n" +
     "        <ul class=\"nav nav-pills nav-stacked\">\n" +
     "            <li role=\"presentation\"\n" +
     "                ng-repeat=\"item in filteredItems = (items.suggest | filter:compare(originalValue)) | limitTo:numShow track by $index\"\n" +
@@ -40760,11 +40783,11 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
     "            </li>\n" +
     "        </ul>\n" +
     "    </div>\n" +
-    "    <div class=\"suggest-row\" ng-show=\"items.recommend.length || items.subjects.length || items.faq.length > 0\">\n" +
+    "    <div class=\"suggest-row\" ng-show=\"items.recommend.length > 0 || items.subjects[0].subjects.length > 0 || items.faq.length > 0\">\n" +
     "        <div class=\"row\">\n" +
-    "            <div class=\"col-sm-4\" ng-show=\"items.recommend.length\">\n" +
+    "            <div class=\"col-sm-4\" ng-show=\"items.recommend.length > 0\">\n" +
     "                <div class=\"suggest-col\">\n" +
-    "                    <h4>Recommended</h4>\n" +
+    "                    <h4>Recommended Links</h4>\n" +
     "                    <div ng-repeat=\"recommendation in items.recommend | limitTo:10\">\n" +
     "                        <a href=\"{{recommendation.link}}\" ng-mousedown=\"go(recommendation.link)\">\n" +
     "                            {{recommendation.description}}\n" +
@@ -40772,7 +40795,7 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
     "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
-    "            <div class=\"col-sm-4\" ng-show=\"items.subjects.length\">\n" +
+    "            <div class=\"col-sm-4\" ng-show=\"items.subjects[0].subjects.length > 0\">\n" +
     "                <div class=\"suggest-col\">\n" +
     "                    <h4>LibGuides Subjects <a href=\"http://guides.lib.ua.edu/\" class=\"small\" ng-mousedown=\"go('http://guides.lib.ua.edu/')\">more</a></h4>\n" +
     "                    <div ng-repeat=\"person in items.subjects | limitTo:10\">\n" +
@@ -40788,7 +40811,7 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
     "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
-    "            <div class=\"col-sm-4\" ng-show=\"items.faq.length\">\n" +
+    "            <div class=\"col-sm-4\" ng-show=\"items.faq.length > 0\">\n" +
     "                <div class=\"suggest-col\">\n" +
     "                    <h4>FAQ <a href=\"http://ask.lib.ua.edu/\" class=\"small\" ng-mousedown=\"go('http://ask.lib.ua.edu/')\">more</a></h4>\n" +
     "                    <div ng-repeat=\"faq in items.faq | limitTo:5\">\n" +
@@ -41216,11 +41239,7 @@ angular.module('oneSearch.bento', [])
  *  </div>
  */
 
-    .controller('bentoBoxCtrl', ['$scope', '$routeParams', 'UALIB_DOMAIN', function($scope, $routeParams, domain){
-        // Updates total results links
-        $scope.domain = domain;
-        $scope.s = $routeParams.s;
-    }])
+
 
     .directive('bentoBox', ['$rootScope', '$controller', '$compile', '$animate', 'Bento', function($rootScope, $controller, $compile, $animate, Bento){
         return {
@@ -41288,7 +41307,7 @@ angular.module('oneSearch.bento', [])
 
                                 ///engineScope.limit = Bento.boxes[box].resultLimit;
                                 engineScope.engine = engine;
-                                engineScope.resourceLink = Bento.boxes[box]['resourceLinks'][engine];
+                                engineScope.resourceLink = Bento.boxes[box]['resourceLinks'][engine] === "undefined" ? false : Bento.boxes[box]['resourceLinks'][engine];
                                 engineScope.resourceLinkParams = Bento.boxes[box]['resourceLinkParams'][engine];
                                 engineScope.boxName = titleElm.text();
                                 engineScope.mediaType = box;
@@ -41310,7 +41329,7 @@ angular.module('oneSearch.bento', [])
 
                                     // Wrap the template in an element that specifies ng-repeat over the "items" object (i.e., the results),
                                     // gives the generic classes for items in a bento box.
-                                    var template = angular.element('<div class="animate-repeat bento-box-item" ng-repeat="item in items | limitTo: box.resultLimit">'+data+'</div><div class="resource-link-container"><a class="btn btn-link btn-sm" ng-href="{{resourceLink}}">More results from {{engine | ucfirst}}  <span class="fa fa-fw fa-external-link"></span></a></div>');
+                                    var template = angular.element('<div class="animate-repeat bento-box-item" ng-repeat="item in items | limitTo: box.resultLimit">'+data+'</div><div class="resource-link-container"><a class="btn btn-link btn-sm" ng-href="{{resourceLink}}" ng-if="resourceLink">More results from {{engine | ucfirst}}  <span class="fa fa-fw fa-external-link"></span></a></div>');
 
                                     // Compile wrapped template with the isolated scope's context
                                     var html = $compile(template)(engineScope);
@@ -41365,8 +41384,7 @@ angular.module('oneSearch.bento', [])
                     // Destroy this box's watcher (no need to waste the cycles)
                     boxWatcher();
                 }
-            },
-            controller: 'bentoBoxCtrl'
+            }
         }
     }])
 
@@ -41423,7 +41441,7 @@ angular.module('oneSearch.common', [
     'filters.nameFilter'
 ])
 angular.module('oneSearch.common')
-    .factory('dataFactory', function($http) {
+    .factory('dataFactory', ['$http', function($http) {
         return {
             get: function(url) {
                 return $http.get(url).then(function(resp) {
@@ -41431,8 +41449,8 @@ angular.module('oneSearch.common')
                 });
             }
         };
-    })
-    .directive('suggestOneSearch', function($timeout) {
+    }])
+    .directive('suggestOneSearch', ['$timeout', function($timeout) {
         return {
             restrict: 'AEC',
             scope: {
@@ -41440,7 +41458,7 @@ angular.module('oneSearch.common')
                 model: '=',
                 search: '='
             },
-            controller: function($scope, $window, $timeout, dataFactory){
+            controller: ['$scope', '$window', '$timeout', 'dataFactory', function($scope, $window, $timeout, dataFactory){
                 $scope.items = {};
                 $scope.filteredItems = [];
                 $scope.model = "";
@@ -41455,7 +41473,9 @@ angular.module('oneSearch.common')
                 $scope.onChange = function(){
                     $scope.selected = true;
 
-                    if ($scope.model.length < 3 || $scope.model.indexOf($scope.originalValue) < 0){
+                    if ($scope.model.length < 3 ||
+                        ($scope.model.indexOf($scope.originalValue) < 0 && $scope.model.length >= $scope.originalValue.length) ||
+                        ($scope.originalValue.indexOf($scope.model) < 0 && $scope.model.length <= $scope.originalValue.length)){
                         $scope.items = {};
                         $scope.setCurrent(-1, false);
                         $scope.dataRequested = false;
@@ -41525,7 +41545,7 @@ angular.module('oneSearch.common')
                         return false;
                     };
                 };
-            },
+            }],
             link: function(scope, elem, attrs) {
                 scope.showSuggestions = false;
                 var suggestWatcher = scope.$watch('items', function(newVal, oldVal){
@@ -41569,6 +41589,13 @@ angular.module('oneSearch.common')
                             scope.selected = false;
                             break;
 
+                        //Backspace
+                        case 8:
+                        //Delete
+                        case 46:
+                            scope.selected = true;
+                            break;
+
                         default:
                             break;
                     }
@@ -41584,17 +41611,20 @@ angular.module('oneSearch.common')
                 scope.handleSelection = function(selectedItem) {
                     $timeout(function() {
                         scope.model = selectedItem;
-                        scope.selected = true;
+                        scope.originalValue = "";
+                        scope.items = {};
+                        scope.setCurrent(-1, false);
+                        scope.dataRequested = false;
+                        scope.selected = false;
                         scope.$apply();
                         scope.search();
                     }, 0);
                 };
 
-
             },
             templateUrl: 'common/directives/suggest/suggest.tpl.html'
         };
-    })
+    }]);
 
 angular.module('engines.acumen', [])
 
@@ -41605,19 +41635,21 @@ angular.module('engines.acumen', [])
             resultsPath: 'Acumen.data',
             totalsPath: 'Acumen.metadata.numFound',
             templateUrl: 'common/engines/acumen/acumen.tpl.html',
-            controller: function($scope, $filter){
-                var items = $scope.items;
-
-                for (var i = 0, len = items.length; i < len; i++) {
-                    if (items[i].type) {
-                        //console.log(items[i].type);
-                        if (items[i].type[0] == 'text' && items[i].details && items[i].details.genre) items[i].type = items[i].details.genre.sort().shift();
-                        else items[i].type = items[i].type.sort().shift();
-                    }
-                }
-            }
+            controller: 'AcumenCtrl'
         })
     }])
+
+    .controller('AcumenCtrl', ['$scope', '$filter', function($scope, $filter){
+        var items = $scope.items;
+
+        for (var i = 0, len = items.length; i < len; i++) {
+            if (items[i].type) {
+                //console.log(items[i].type);
+                if (items[i].type[0] == 'text' && items[i].details && items[i].details.genre) items[i].type = items[i].details.genre.sort().shift();
+                else items[i].type = items[i].type.sort().shift();
+            }
+        }
+    }]);
 angular.module('engines.catalog', [])
 
     .config(['oneSearchProvider', function(oneSearchProvider){
@@ -41635,43 +41667,7 @@ angular.module('engines.catalog', [])
                 }
             },
             templateUrl: 'common/engines/catalog/catalog.tpl.html',
-            controller: function($scope, $filter){
-                var types = {
-                    bc: "Archive/Manuscript",
-                    cm: "Music Score",
-                    em: "Map",
-                    im: "Nonmusical Recording",
-                    jm: "Musical Recording",
-                    mm: "Computer File/Software",
-                    om: "Kit",
-                    pc: "Mixed Material/Collection",
-                    pm: "Mixed Material",
-                    rm: "Visual Material"
-                };
-                var items = $scope.items;
-
-                for (var i = 0; i < items.length; i++){
-                    var t = items[i]['bibFormat'];
-                    items[i].mediaType = types[t];
-
-                    //Check for authors field. If not there, check the title for author names.
-                    if (!items[i].author){
-                        var split = $filter('catalogSplitTitleAuthor')(items[i].title);
-                        if (angular.isArray(split)){
-                            items[i].title = split[0];
-                            items[i].author = split[2];
-                        }
-                    }
-                }
-
-                if (angular.isArray($scope.resourceLinkParams)){
-                    var typeParam = '&type=';
-                    var params = typeParam + $scope.resourceLinkParams.join(typeParam);
-                    $scope.resourceLink += params;
-                }
-
-                $scope.items = items;
-            }
+            controller: 'CatalogCtrl'
         })
     }])
 
@@ -41683,6 +41679,44 @@ angular.module('engines.catalog', [])
             }
             return title;
         }
+    }])
+
+    .controller('CatalogCtrl', ['$scope', '$filter', function($scope, $filter){
+        var types = {
+            bc: "Archive/Manuscript",
+            cm: "Music Score",
+            em: "Map",
+            im: "Nonmusical Recording",
+            jm: "Musical Recording",
+            mm: "Computer File/Software",
+            om: "Kit",
+            pc: "Mixed Material/Collection",
+            pm: "Mixed Material",
+            rm: "Visual Material"
+        };
+        var items = $scope.items;
+
+        for (var i = 0; i < items.length; i++){
+            var t = items[i]['bibFormat'];
+            items[i].mediaType = types[t];
+
+            //Check for authors field. If not there, check the title for author names.
+            if (!items[i].author){
+                var split = $filter('catalogSplitTitleAuthor')(items[i].title);
+                if (angular.isArray(split)){
+                    items[i].title = split[0];
+                    items[i].author = split[2];
+                }
+            }
+        }
+
+        if (angular.isArray($scope.resourceLinkParams)){
+            var typeParam = '&type=';
+            var params = typeParam + $scope.resourceLinkParams.join(typeParam);
+            $scope.resourceLink += params;
+        }
+
+        $scope.items = items;
     }]);
 
 angular.module('engines.databases', [])
@@ -41712,26 +41746,28 @@ angular.module('engines.ejournals', [])
                 }
             },
             templateUrl: 'common/engines/ejournals/ejournals.tpl.html',
-            controller: function($scope){
-
-                var param;
-                switch ($scope.mediaType){
-                    case 'books':
-                        param = 'SS_searchTypeBook=yes';
-                        break;
-                    case 'journals':
-                        param = 'SS_searchTypeJournal=yes';
-                        break;
-                    case 'other':
-                        param = 'SS_searchTypeOther=yes'
-                }
-
-                if (param){
-                    $scope.resourceLink = $scope.resourceLink.replace('SS_searchTypeAll=yes&SS_searchTypeBook=yes&SS_searchTypeJournal=yes&SS_searchTypeOther=yes', param);
-                }
-            }
+            controller: 'EjouralsCtrl'
         })
     }])
+
+    .controller('EjouralsCtrl', ['$scope', function($scope){
+
+        var param;
+        switch ($scope.mediaType){
+            case 'books':
+                param = 'SS_searchTypeBook=yes';
+                break;
+            case 'journals':
+                param = 'SS_searchTypeJournal=yes';
+                break;
+            case 'other':
+                param = 'SS_searchTypeOther=yes'
+        }
+
+        if (param){
+            $scope.resourceLink = $scope.resourceLink.replace('SS_searchTypeAll=yes&SS_searchTypeBook=yes&SS_searchTypeJournal=yes&SS_searchTypeOther=yes', param);
+        }
+    }]);
 /**
  * @module common.engines
  *
@@ -41744,7 +41780,7 @@ angular.module('common.engines', [
     'engines.catalog',
     'engines.databases',
     'engines.scout',
-    'engines.googleCS',
+    //'engines.googleCS',
     'engines.faq',
     'engines.libguides',
     'engines.ejournals',
@@ -41842,68 +41878,70 @@ angular.module('engines.scout', [])
                 }
             },
             templateUrl: 'common/engines/scout/scout.tpl.html',
-            controller: function($scope){
-                var items = $scope.items;
-                for (var i = 0; i < items.length; i++){
-                    if (items[i].Header.PubTypeId == 'audio'){
-                        items[i].mediaType = 'Audio';
-                    }
-                    if (items[i].Header.PubTypeId == 'videoRecording'){
-                        items[i].mediaType = 'Video Recording';
-                    }
-
-                    //Search for "source"
-                    var bibRelationships = [];
-                    if (angular.isDefined(items[i].RecordInfo.BibRecord.BibRelationships.IsPartOfRelationships)){
-                        bibRelationships = items[i].RecordInfo.BibRecord.BibRelationships.IsPartOfRelationships;
-                        for (var x = 0, len = bibRelationships.length; x < len; x++){
-                            if (angular.isDefined(bibRelationships[x].BibEntity.Identifiers) && bibRelationships[x].BibEntity.Identifiers[0].Type === 'issn-print'){
-                                // define source title
-                                items[i].source = bibRelationships[x].BibEntity.Titles[0].TitleFull;
-
-                                // Append source volume, issue, etc.
-                                if (angular.isDefined(bibRelationships[x].BibEntity.Numbering)){
-                                    for (var y = 0, l = bibRelationships[x].BibEntity.Numbering.length; y < l; y++){
-                                        items[i].source += ' ' + bibRelationships[x].BibEntity.Numbering[y].Type.substring(0,3) + '.' + bibRelationships[x].BibEntity.Numbering[y].Value;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-
-                    if (angular.isDefined(items[i].Items)){
-                        for (var x = 0; x < items[i].Items.length; x++){
-                            if (items[i].Items[x].Group == 'Src'){
-                                //console.log(items[i].Items[x].Group);
-                                items[i].source = items[i].Items[x].Data;
-                            }
-                        }
-                    }
-                }
-                $scope.items = items;
-
-                //Preprocess resource link to include facet. This is injected in the EDS header to limit results to media type (this is not native to EDS API)
-                var box = angular.copy($scope.boxName);
-                var link = angular.copy($scope.resourceLink);
-
-                // Tokenize box name to camelCase for EDS inject script
-                box = box.replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, function(match, index) {
-                    if (+match === 0) return ""; // or if (/\s+/.test(match)) for white spaces
-                    return index == 0 ? match.toLowerCase() : match.toUpperCase();
-                });
-
-                if (link.indexOf('facet=') > 0){
-                    link = link.replace(/&facet=(.+)&?/, box);
-                }
-                else {
-                    link += '&facet=' + box;
-                }
-
-                $scope.resourceLink = angular.copy(link);
-            }
+            controller: 'ScoutCtrl'
         })
     }])
+
+    .controller('ScoutCtrl', ['$scope', function($scope){
+        var items = $scope.items;
+        for (var i = 0; i < items.length; i++){
+            if (items[i].Header.PubTypeId == 'audio'){
+                items[i].mediaType = 'Audio';
+            }
+            if (items[i].Header.PubTypeId == 'videoRecording'){
+                items[i].mediaType = 'Video Recording';
+            }
+
+            //Search for "source"
+            var bibRelationships = [];
+            if (angular.isDefined(items[i].RecordInfo.BibRecord.BibRelationships.IsPartOfRelationships)){
+                bibRelationships = items[i].RecordInfo.BibRecord.BibRelationships.IsPartOfRelationships;
+                for (var x = 0, len = bibRelationships.length; x < len; x++){
+                    if (angular.isDefined(bibRelationships[x].BibEntity.Identifiers) && bibRelationships[x].BibEntity.Identifiers[0].Type === 'issn-print'){
+                        // define source title
+                        items[i].source = bibRelationships[x].BibEntity.Titles[0].TitleFull;
+
+                        // Append source volume, issue, etc.
+                        if (angular.isDefined(bibRelationships[x].BibEntity.Numbering)){
+                            for (var y = 0, l = bibRelationships[x].BibEntity.Numbering.length; y < l; y++){
+                                items[i].source += ' ' + bibRelationships[x].BibEntity.Numbering[y].Type.substring(0,3) + '.' + bibRelationships[x].BibEntity.Numbering[y].Value;
+                            }
+                        }
+                    }
+                }
+            }
+
+
+            if (angular.isDefined(items[i].Items)){
+                for (var x = 0; x < items[i].Items.length; x++){
+                    if (items[i].Items[x].Group == 'Src'){
+                        //console.log(items[i].Items[x].Group);
+                        items[i].source = items[i].Items[x].Data;
+                    }
+                }
+            }
+        }
+        $scope.items = items;
+
+        //Preprocess resource link to include facet. This is injected in the EDS header to limit results to media type (this is not native to EDS API)
+        var box = angular.copy($scope.boxName);
+        var link = angular.copy($scope.resourceLink);
+
+        // Tokenize box name to camelCase for EDS inject script
+        box = box.replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, function(match, index) {
+            if (+match === 0) return ""; // or if (/\s+/.test(match)) for white spaces
+            return index == 0 ? match.toLowerCase() : match.toUpperCase();
+        });
+
+        if (link.indexOf('facet=') > 0){
+            link = link.replace(/&facet=(.+)&?/, box);
+        }
+        else {
+            link += '&facet=' + box;
+        }
+
+        $scope.resourceLink = angular.copy(link);
+    }]);
 angular.module('filters.nameFilter', [])
 
     .filter('nameFilter', ['$filter', function($filter){
@@ -43990,13 +44028,13 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                                <label for=\"{{news.nid}}_from\">Active From</label>\n" +
     "                                <input type=\"text\" class=\"form-control\" id=\"{{news.nid}}_from\" datepicker-popup=\"{{dpFormat}}\"\n" +
     "                                       ng-model=\"news.activeFrom\" is-open=\"news.dpFrom\" close-text=\"Close\"\n" +
-    "                                       ng-focus=\"onNewsDPFocusFrom($event, $index)\"/>\n" +
+    "                                       ng-focus=\"onNewsDPFocusFrom($event, news)\"/>\n" +
     "                            </div>\n" +
     "                            <div class=\"col-md-2 form-group\">\n" +
     "                                <label for=\"{{news.nid}}_until\">Active Until</label>\n" +
     "                                <input type=\"text\" class=\"form-control\" id=\"{{news.nid}}_until\" datepicker-popup=\"{{dpFormat}}\"\n" +
     "                                       ng-model=\"news.activeUntil\" is-open=\"news.dpUntil\" close-text=\"Close\"\n" +
-    "                                       ng-focus=\"onNewsDPFocusUntil($event, $index)\"/>\n" +
+    "                                       ng-focus=\"onNewsDPFocusUntil($event, news)\"/>\n" +
     "                            </div>\n" +
     "                        </div>\n" +
     "                        <div class=\"row\">\n" +
@@ -46246,7 +46284,7 @@ angular.module('manage.manageDatabases', [])
             };
         }])
 
-    .directive('databasesManageList', function($animate) {
+    .directive('databasesManageList', ['$animate', function($animate) {
         return {
             restrict: 'A',
             scope: {},
@@ -46272,15 +46310,15 @@ angular.module('manage.manageDatabases', [])
             },
             templateUrl: 'manageDatabases/manageDatabases.tpl.html'
         };
-    })
-    .filter('startFrom', function() {
+    }])
+    .filter('startFrom', [ function() {
         return function(input, start) {
             start = +start; //parse to int
             if (typeof input == 'undefined')
                 return input;
             return input.slice(start);
         }
-    })
+    }])
 
 angular.module('manage.manageHours', [])
     .constant('HOURS_FROM', [
@@ -46371,7 +46409,7 @@ angular.module('manage.manageHours', [])
                 }];
     }])
 
-    .directive('manageHours', function($animate) {
+    .directive('manageHours',['$animate', function($animate) {
         return {
             restrict: 'A',
             scope: {},
@@ -46397,7 +46435,7 @@ angular.module('manage.manageHours', [])
             },
             templateUrl: 'manageHours/manageHours.tpl.html'
         };
-    })
+    }])
 
     .controller('semListCtrl', ['$scope', 'hmFactory', function semListCtrl($scope, hmFactory) {
         $scope.expSem = -1;
@@ -46507,14 +46545,14 @@ angular.module('manage.manageHours', [])
         };
     }])
 
-    .directive('semesterList', function() {
+    .directive('semesterList', [ function() {
         return {
             require: '^manageHours',
             restrict: 'A',
             controller: 'semListCtrl',
             templateUrl: 'manageHours/manageSem.tpl.html'
         };
-    })
+    }])
 
     .controller('exListCtrl', ['$scope', 'hmFactory', function exListCtrl($scope, hmFactory) {
         $scope.newException = {};
@@ -46636,7 +46674,7 @@ angular.module('manage.manageHours', [])
                 });
         };
     }])
-    .directive('exceptionList', function($timeout) {
+    .directive('exceptionList',[ function() {
         return {
             require: '^manageHours',
             restrict: 'A',
@@ -46646,7 +46684,7 @@ angular.module('manage.manageHours', [])
             },
             templateUrl: 'manageHours/manageEx.tpl.html'
         };
-    })
+    }])
 
 angular.module('manage.manageHoursUsers', [])
     .controller('manageHrsUsersCtrl', ['$scope', '$window', '$animate', 'tokenFactory', 'hmFactory',
@@ -46782,13 +46820,13 @@ angular.module('manage.manageHoursUsers', [])
         };
 
     }])
-    .directive('hoursUserList', function() {
+    .directive('hoursUserList', [function() {
         return {
             restrict: 'AC',
             controller: 'hrsUserListCtrl',
             templateUrl: 'manageHours/manageUsers.tpl.html'
         };
-    })
+    }])
 
     .controller('hrsLocationsCtrl', ['$scope', 'hmFactory', function hrsUserListCtrl($scope, hmFactory) {
         $scope.newLocation = "";
@@ -46828,13 +46866,13 @@ angular.module('manage.manageHoursUsers', [])
                 });
         };
     }])
-    .directive('hoursLocationList', function() {
+    .directive('hoursLocationList', [function() {
         return {
             restrict: 'AC',
             controller: 'hrsLocationsCtrl',
             templateUrl: 'manageHours/manageLoc.tpl.html'
         };
-    })
+    }])
 
 angular.module('manage.manageNews', ['ngFileUpload'])
     .controller('manageNewsCtrl', ['$scope', '$window', '$timeout', 'tokenFactory', 'newsFactory',
@@ -46924,7 +46962,7 @@ angular.module('manage.manageNews', ['ngFileUpload'])
             };
         }])
 
-    .directive('newsExhibitionsMain', function($animate) {
+    .directive('newsExhibitionsMain', ['$animate', function($animate) {
         return {
             restrict: 'A',
             scope: {},
@@ -46950,10 +46988,10 @@ angular.module('manage.manageNews', ['ngFileUpload'])
             },
             templateUrl: 'manageNews/manageNews.tpl.html'
         };
-    })
+    }])
 
     //from http://codepen.io/paulbhartzog/pen/Ekztl?editors=101
-    .value('uiTinymceConfig', {plugins: 'link spellchecker', toolbar: 'undo redo | bold italic | link', menubar : false})
+    .value('uiTinymceConfig', {plugins: 'link spellchecker code', toolbar: 'undo redo | bold italic | link | code', menubar : false})
     .directive('uiTinymce', ['uiTinymceConfig', function(uiTinymceConfig) {
         uiTinymceConfig = uiTinymceConfig || {};
         var generatedIds = 0;
@@ -47036,21 +47074,29 @@ angular.module('manage.manageNews', ['ngFileUpload'])
             $scope.maxPageSize = 10;
             $scope.perPage = 20;
 
-            $scope.onNewsDPFocusFrom = function($event, index){
+            $scope.onNewsDPFocusFrom = function($event, news){
                 $event.preventDefault();
                 $event.stopPropagation();
-                if (typeof index != 'undefined' && index >= 0)
-                    $scope.data.news[index].dpFrom = true;
-                else
+                if (typeof news != 'undefined') {
+                    if ($scope.data.news[$scope.data.news.indexOf(news)].activeFrom == null) {
+                        $scope.data.news[$scope.data.news.indexOf(news)].activeFrom = new Date();
+                    }
+                    $scope.data.news[$scope.data.news.indexOf(news)].dpFrom = true;
+                } else {
                     $scope.newNews.dpFrom = true;
+                }
             };
-            $scope.onNewsDPFocusUntil = function($event, index){
+            $scope.onNewsDPFocusUntil = function($event, news){
                 $event.preventDefault();
                 $event.stopPropagation();
-                if (typeof index != 'undefined' && index >= 0)
-                    $scope.data.news[index].dpUntil = true;
-                else
+                if (typeof news != 'undefined') {
+                    if ($scope.data.news[$scope.data.news.indexOf(news)].activeUntil == null) {
+                        $scope.data.news[$scope.data.news.indexOf(news)].activeUntil = new Date();
+                    }
+                    $scope.data.news[$scope.data.news.indexOf(news)].dpUntil = true;
+                } else {
                     $scope.newNews.dpUntil = true;
+                }
             };
 
             $scope.toggleNews = function(news){
@@ -47292,7 +47338,7 @@ angular.module('manage.manageNews', ['ngFileUpload'])
             };
         }])
 
-    .directive('manageNewsList', function() {
+    .directive('manageNewsList', [ function() {
         return {
             restrict: 'A',
             controller: 'manageNewsListCtrl',
@@ -47301,22 +47347,22 @@ angular.module('manage.manageNews', ['ngFileUpload'])
             },
             templateUrl: 'manageNews/manageNewsList.tpl.html'
         };
-    })
-    .filter('startFrom', function() {
+    }])
+    .filter('startFrom', [ function() {
         return function(input, start) {
             start = +start; //parse to int
             if (typeof input == 'undefined')
                 return input;
             return input.slice(start);
         }
-    })
+    }])
 
     .controller('manageAdminsListCtrl', ['$scope', 'newsFactory',
         function manageAdminsListCtrl($scope, newsFactory){
 
         }])
 
-    .directive('manageAdminsList', function() {
+    .directive('manageAdminsList', [ function() {
         return {
             restrict: 'A',
             controller: 'manageAdminsListCtrl',
@@ -47325,7 +47371,7 @@ angular.module('manage.manageNews', ['ngFileUpload'])
             },
             templateUrl: 'manageNews/manageNewsAdmins.tpl.html'
         };
-    })
+    }])
 
 angular.module('manage.manageOneSearch', [])
     .controller('manageOneSearchCtrl', ['$scope', 'tokenFactory', 'osFactory',
@@ -47416,14 +47462,14 @@ angular.module('manage.manageOneSearch', [])
                     });
             };
         }])
-    .directive('recommendedLinksList', function() {
+    .directive('recommendedLinksList', [ function() {
         return {
             restrict: 'AC',
             scope: {},
             controller: 'manageOneSearchCtrl',
             templateUrl: 'manageOneSearch/manageOneSearch.tpl.html'
         };
-    })
+    }])
 angular.module('manage.manageSoftware', ['ngFileUpload'])
     .controller('manageSWCtrl', ['$scope', 'tokenFactory', 'swFactory',
         function manageSWCtrl($scope, tokenFactory, swFactory){
@@ -47491,7 +47537,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             ];
         }])
 
-    .directive('manageSoftwareMain', function($animate) {
+    .directive('manageSoftwareMain', ['$animate', function($animate) {
         return {
             restrict: 'A',
             scope: {},
@@ -47517,7 +47563,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             },
             templateUrl: 'manageSoftware/manageSoftware.tpl.html'
         };
-    })
+    }])
 
     .controller('manageSWListCtrl', ['$scope', '$timeout', 'Upload', 'swFactory', 'SOFTWARE_URL',
         function manageSWListCtrl($scope, $timeout, Upload, swFactory, appURL){
@@ -47994,7 +48040,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
 
     }])
 
-    .directive('softwareManageList', function() {
+    .directive('softwareManageList',[  function() {
         return {
             restrict: 'A',
             controller: 'manageSWListCtrl',
@@ -48003,15 +48049,15 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             },
             templateUrl: 'manageSoftware/manageSoftwareList.tpl.html'
         };
-    })
-    .filter('startFrom', function() {
+    }])
+    .filter('startFrom', [ function() {
         return function(input, start) {
             start = +start; //parse to int
             if (typeof input == 'undefined')
                 return input;
             return input.slice(start);
         }
-    })
+    }])
     .controller('manageSWLocCatCtrl', ['$scope', '$timeout', 'swFactory',
         function manageSWLocCatCtrl($scope, $timeout, swFactory){
             $scope.selLocation = -1;
@@ -48144,7 +48190,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                     });
             };
         }])
-    .directive('softwareManageLocCat', function() {
+    .directive('softwareManageLocCat', [ function() {
         return {
             restrict: 'A',
             controller: 'manageSWLocCatCtrl',
@@ -48153,7 +48199,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             },
             templateUrl: 'manageSoftware/manageSoftwareLocCat.tpl.html'
         };
-    })
+    }])
 
     .controller('manageSWCompMapsCtrl', ['$scope', '$window', 'swFactory', function manageSWCompMapsCtrl($scope, $window, swFactory){
         $scope.selComp = -1;
@@ -48292,7 +48338,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
 
 
     }])
-    .directive('softwareManageComputerMaps', function() {
+    .directive('softwareManageComputerMaps', [ function() {
         return {
             restrict: 'A',
             controller: 'manageSWCompMapsCtrl',
@@ -48301,7 +48347,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             },
             templateUrl: 'manageSoftware/manageSoftwareComputerMaps.tpl.html'
         };
-    })
+    }])
 
 angular.module('manage.manageUserGroups', [])
     .controller('userGroupsCtrl', ['$scope', '$window', 'tokenFactory', 'ugFactory',
@@ -48417,27 +48463,27 @@ angular.module('manage.manageUserGroups', [])
         };
 
     }])
-    .directive('userGroupsList', function() {
+    .directive('userGroupsList', [ function() {
         return {
             restrict: 'A',
             scope: {},
             controller: 'userGroupsCtrl',
             templateUrl: 'manageUserGroups/manageUG.tpl.html'
         };
-    })
+    }])
     .controller('myWebAppsCtrl', ['$scope', '$window',
         function myWebAppsCtrl($scope, $window){
             $scope.apps = $window.apps;
             $scope.userName = $window.userName;
         }])
-    .directive('viewMyWebApps', function() {
+    .directive('viewMyWebApps', [ function() {
         return {
             restrict: 'A',
             scope: {},
             controller: 'myWebAppsCtrl',
             templateUrl: 'manageUserGroups/viewMyWebApps.tpl.html'
         };
-    })
+    }])
 angular.module('manage.siteFeedback', [])
     .controller('siteFeedbackCtrl', ['$scope', 'tokenFactory', 'sfFactory',
         function siteFeedbackCtrl($scope, tokenFactory, sfFactory){
@@ -48454,14 +48500,14 @@ angular.module('manage.siteFeedback', [])
                     console.log(data);
                 });
         }])
-    .directive('siteFeedbackList', function() {
+    .directive('siteFeedbackList', [ function() {
         return {
             restrict: 'AC',
             scope: {},
             controller: 'siteFeedbackCtrl',
             templateUrl: 'siteFeedback/siteFeedback.tpl.html'
         };
-    })
+    }])
 
 angular.module('manage.staffDirectory', [])
     .constant('STAFF_DIR_RANKS', [
@@ -48557,7 +48603,7 @@ angular.module('manage.staffDirectory', [])
                 });
 
         }])
-    .directive('staffDirectoryList', function($animate) {
+    .directive('staffDirectoryList', ['$animate', function($animate) {
         return {
             restrict: 'AC',
             scope: {},
@@ -48582,7 +48628,7 @@ angular.module('manage.staffDirectory', [])
             },
             templateUrl: 'staffDirectory/staffDirectory.tpl.html'
         };
-    })
+    }])
     .controller('staffDirPeopleCtrl', ['$scope', 'sdFactory', 'STAFF_DIR_RANKS', 'STAFF_DIR_URL',
         function staffDirPeopleCtrl($scope, sdFactory, ranks, appUrl){
             $scope.lastNameFilter = '';
@@ -48718,7 +48764,7 @@ angular.module('manage.staffDirectory', [])
                     alert("First Name is too short!");
             };
         }])
-    .directive('manageSdPeople', function() {
+    .directive('manageSdPeople', [ function() {
         return {
             restrict: 'AC',
             controller: 'staffDirPeopleCtrl',
@@ -48726,13 +48772,13 @@ angular.module('manage.staffDirectory', [])
             },
             templateUrl: 'staffDirectory/staffDirectoryPeople.tpl.html'
         };
-    })
-    .filter('startFrom', function() {
+    }])
+    .filter('startFrom', [ function() {
         return function(input, start) {
             start = +start; //parse to int
             return input.slice(start);
         }
-    })
+    }])
 
     .controller('staffDirSubjectsCtrl', ['$scope', 'sdFactory',
         function staffDirSubjectsCtrl($scope, sdFactory){
@@ -48797,7 +48843,7 @@ angular.module('manage.staffDirectory', [])
             };
 
         }])
-    .directive('manageSdSubjects', function() {
+    .directive('manageSdSubjects', [ function() {
         return {
             restrict: 'AC',
             controller: 'staffDirSubjectsCtrl',
@@ -48805,7 +48851,7 @@ angular.module('manage.staffDirectory', [])
             },
             templateUrl: 'staffDirectory/staffDirectorySubjects.tpl.html'
         };
-    })
+    }])
 
     .controller('staffDirDepartmentsCtrl', ['$scope', 'sdFactory',
         function staffDirDepartmentsCtrl($scope, sdFactory){
@@ -48978,7 +49024,7 @@ angular.module('manage.staffDirectory', [])
             };
 
         }])
-    .directive('manageSdDepartments', function() {
+    .directive('manageSdDepartments', [ function() {
         return {
             restrict: 'AC',
             controller: 'staffDirDepartmentsCtrl',
@@ -48986,7 +49032,7 @@ angular.module('manage.staffDirectory', [])
             },
             templateUrl: 'staffDirectory/staffDirectoryDepartments.tpl.html'
         };
-    })
+    }])
 
 angular.module('manage.submittedForms', [])
     .controller('manageSubFormsCtrl', ['$scope', '$timeout', 'tokenFactory', 'formFactory',
@@ -49026,7 +49072,7 @@ angular.module('manage.submittedForms', [])
             };
         }])
 
-    .directive('submittedFormsList', function($animate) {
+    .directive('submittedFormsList', ['$animate', function($animate) {
         return {
             restrict: 'AC',
             scope: {},
@@ -49052,15 +49098,15 @@ angular.module('manage.submittedForms', [])
             },
             templateUrl: 'submittedForms/submittedForms.tpl.html'
         };
-    })
-    .filter('startFrom', function() {
+    }])
+    .filter('startFrom', [ function() {
         return function(input, start) {
             start = +start; //parse to int
             if (typeof input == 'undefined')
                 return input;
             return input.slice(start);
         }
-    })
+    }])
 
     .controller('customFormCtrl', ['$scope', 'formFactory',
     function customFormCtrl($scope, formFactory){
@@ -49932,7 +49978,7 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
 
 angular.module("staff-card/staff-card-list.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staff-card/staff-card-list.tpl.html",
-    "<div class=\"animate-repeat\" ng-repeat=\"person in filteredList track by $index\">\n" +
+    "<div ng-repeat=\"person in filteredList track by $index\">\n" +
     "    <div class=\"page-slice\">\n" +
     "        <div class=\"row\">\n" +
     "            <div class=\"col-xs-12 col-sm-1\">\n" +
@@ -50116,12 +50162,12 @@ angular.module("staff-directory/staff-directory-facets.tpl.html", []).run(["$tem
     "        <div class=\"facet-group\">\n" +
     "            <div class=\"radio\">\n" +
     "                <label>\n" +
-    "                    <input type=\"radio\" ng-model=\"staffdir.facet.library\" value=\"\" ng-checked=\"!staffdir.facet.library\" ng-change=\"staffdir.changeFacet('department')\"> All\n" +
+    "                    <input type=\"radio\" ng-model=\"staffdir.facet.library\" value=\"\" ng-checked=\"!staffdir.facet.library\" ng-change=\"staffdir.changeFacet('library')\"> All\n" +
     "                </label>\n" +
     "            </div>\n" +
     "            <div class=\"radio\" ng-repeat=\"library in facets.libraries\">\n" +
     "                <label>\n" +
-    "                    <input type=\"radio\" ng-model=\"staffdir.facet.library\" value=\"{{library}}\" ng-change=\"staffdir.changeFacet('department')\"> {{library}}\n" +
+    "                    <input type=\"radio\" ng-model=\"staffdir.facet.library\" value=\"{{library}}\" ng-change=\"staffdir.changeFacet('library')\"> {{library}}\n" +
     "                </label>\n" +
     "            </div>\n" +
     "        </div>\n" +
@@ -50254,6 +50300,7 @@ angular.module('staffdir', ['ualib.staffdir']);
                         SDS.showFacetBar = true;
                     }
                     SDS.facet[param] = params[param];
+                    console.log(SDS.facet);
                 }
             }
         });
@@ -50261,7 +50308,6 @@ angular.module('staffdir', ['ualib.staffdir']);
 
     .service('StaffDirectoryService', ['$location', '$rootScope', function($location, $rootScope){
         var self = this; //ensures proper contest in closure statements
-        this.sortBy = ''; // Default sort column, can be overridden via 'sortBy' attribute for staffDirectory directive
         this.sortReverse = false; // Default sort direction
         this.sortable = {}; // reference object for sortable columns
         this.facet = {}; // Object to hold filter values based on available facets (empty object means no filtering).
@@ -50301,7 +50347,7 @@ angular.module('staffdir', ['ualib.staffdir']);
             var val = (self.facet.hasOwnProperty(facet) && self.facet[facet] !== '' && self.facet[facet] !== false) ? self.facet[facet] : null;
             $location.search(facet, val);
             $location.replace();
-            self.showFacetBar = !isEmptyObj(self.facet) && !self.facetExceptions.hasOwnProperty(facet);
+            self.showFacetBar = !isEmptyObj(self.facet);
             $rootScope.$broadcast('facetsChange');
         };
 
@@ -50319,7 +50365,7 @@ angular.module('staffdir', ['ualib.staffdir']);
         function isEmptyObj(obj){
             var name;
             for (name in obj){
-                if (obj[name]){
+                if (obj[name] && !self.facetExceptions.hasOwnProperty(name)){
                     return false;
                 }
             }
@@ -50509,47 +50555,9 @@ angular.module('staffdir', ['ualib.staffdir']);
             templateUrl: 'staff-directory/staff-directory.tpl.html',
             resolve: {
                 StaffDir: ['StaffFactory', '$filter', function(StaffFactory, $filter){
-                    var staff = {
-                        list: [], // Array for directory listing
-                        facets: {} //Object for available facets
-                    };
 
                     return StaffFactory.directory().get()
                         .$promise.then(function(data){
-                            /*// Build new object of only subject that currently have a subject/research expert
-                            var subj = [];
-                            var list = [];
-                            angular.forEach(data.list, function(val){
-                                delete val.division;
-                                if (angular.isUndefined(val.image)){
-                                    //TODO: temporary work around because CMS file handling is dumb. Fix and make sustainable!!!
-                                    val.image = '/wp-content/themes/roots-ualib/assets/img/user-profile.png';
-                                }
-                                list.push(val);
-                                if (angular.isDefined(val.subjects) && val.subjects.length > 0){
-                                    angular.forEach(val.subjects, function(subject){
-                                        subj.push(subject);
-                                    });
-                                }
-                            });
-                            subj = $filter('unique')(subj, 'subject');
-                            subj = $filter('orderBy')(subj, 'subject');
-                            staff.facets.subjects = subj.map(function(s){
-                                return s.subject;
-                            });
-                            // get libraries
-                            staff.facets.libraries = data.libraries.map(function(lib){
-                                return lib.name;
-                            });
-
-                            // get libraries
-                            staff.facets.departments = data.departments.map(function(dept){
-                                return dept.name;
-                            });
-
-                            // get list of people
-                            staff.list = list;*/
-
                             return data;
                         }, function(data, status){
                             console.log('Error' + status + ': ' + data);
@@ -50575,29 +50583,16 @@ angular.module('staffdir', ['ualib.staffdir']);
             },
             templateUrl: 'staff-card/staff-card-list.tpl.html',
             controller: function($scope){
-                var prevSortBy; // used to detect if sort by has changed
                 $scope.filteredList = [];
                 $scope.staffdir = SDS;
 
-                $scope.staffdir.facet.sortBy = angular.isDefined($scope.sortBy) ? $scope.sortBy : 'lastname';
-                $scope.staffdir.sortable = $scope.sortable;
-
-                // Not good practice, but done for brevity's sake
-                // TODO: have sort functions event listeners defined in linking function and not via ng-click
-                $scope.sortList = function(ev, column){
-                    ev. preventDefault();
-
-                    if (SDS.facet.sortBy === column){
-                        SDS.sortReverse = !SDS.sortReverse;
-                    }
-                    else {
-                        SDS.facet.sortBy = column;
-                        SDS.sortReverse = false;
-                    }
-                };
+                //If sortby hasn't been defined in URI, check it default defined with directive
+                if (angular.isUndefined(SDS.facet.sortBy)){
+                    $scope.staffdir.facet.sortBy = angular.isDefined($scope.sortBy) ? $scope.sortBy : 'lastname';
+                }
 
                 // Update listing when SDS broadcasts "facetsChange" event
-                $scope.$on('facetsChange', function(ev){
+                var facetsListener = $scope.$on('facetsChange', function(ev){
                     updateList();
                 });
 
@@ -50609,16 +50604,15 @@ angular.module('staffdir', ['ualib.staffdir']);
                     list = $filter('filter')(list, $scope.staffdir.facet.department);
                     list = $filter('filter')(list, $scope.staffdir.facet.subject, true);
                     list = $filter('filter')(list, $scope.staffdir.facet.library);
-                    list = $filter('filter')(list, $scope.staffdir.facet.specialtyType);
+                    list = $filter('filter')(list, $scope.staffdir.specialtyType);
                     list = $filter('orderBy')(list, $scope.staffdir.facet.sortBy, $scope.staffdir.sortReverse);
-
-                    /*if (prevSortBy !== $scope.staffdir.facet.sortBy){
-                        list = $filter('alphaIndex')(list, $scope.staffdir.facet.sortBy);
-                        prevSortBy = angular.copy($scope.staffdir);
-                    }*/
 
                     $scope.filteredList = angular.copy(list);
                 }
+
+                $scope.$on('$destroy', function(){
+                    facetsListener();
+                });
 
                 updateList();
             }
@@ -50994,7 +50988,7 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"text-muted\">\n" +
-    "            <span>Created by {{newsItem.creator}} on {{newsItem.created | date:mediumDate}}</span>\n" +
+    "            <span>Created on {{newsItem.created | date:mediumDate}}</span>\n" +
     "        </div>\n" +
     "        <p class=\"text-justify\" ng-bind-html=\"newsItem.description\"></p>\n" +
     "    </div>\n" +
@@ -51070,7 +51064,10 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "                    <a ng-href=\"#/news-exhibits/{{item.link}}\" ng-bind-html=\"item.title | highlight:newsFilters.search\"></a>\n" +
     "                    <small ng-if=\"item.type > 0\">{{item.activeFrom | date:mediumDate}} - {{item.activeUntil | date:mediumDate}}</small>\n" +
     "                </h4>\n" +
-    "                <p class=\"text-justify\" ng-bind-html=\"item.description | truncate:250:true | highlight:newsFilters.search\"></p>\n" +
+    "                <p class=\"text-justify\">\n" +
+    "                    <span ng-bind-html=\"item.description | truncate:250:'...' | highlight:newsFilters.search\">\n" +
+    "                    </span>\n" +
+    "                </p>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "\n" +
@@ -51404,6 +51401,34 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "</div>\n" +
     "");
 }]);
+;/*
+(function() {
+    tinymce.create('tinymce.plugins.typekit', {
+        setup : function(ed) {
+            ed.onInit.add(function(ed, evt) {
+
+                // Load a script from a specific URL using the global script loader
+                tinymce.ScriptLoader.load('somescript.js');
+
+                // Load a script using a unique instance of the script loader
+                var scriptLoader = new tinymce.dom.ScriptLoader();
+
+                scriptLoader.load('somescript.js');
+
+            });
+        },
+    getInfo: function() {
+    return {
+        longname:  'TypeKit',
+        author:    'Thomas Griffin',
+        authorurl: 'https://thomasgriffin.io',
+        infourl:   'https://twitter.com/jthomasgriffin',
+        version:   '1.0'
+    };
+}
+});
+tinymce.PluginManager.add('typekit', tinymce.plugins.typekit);
+})();*/
 ;/* ========================================================================
  * DOM-based Routing
  * Based on http://goo.gl/EUTi53 by Paul Irish

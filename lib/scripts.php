@@ -41,6 +41,7 @@ function roots_scripts() {
     $get_assets = file_get_contents(get_template_directory() . '/assets/manifest.json');
     $assets     = json_decode($get_assets, true);
     $assets     = array(
+      'CDN'       => '//fonts.googleapis.com/css?family=Roboto:400,700|Open+Sans:400,700',
       'css'       => '/assets/css/main.min.css?' . $assets['assets/css/main.min.css']['hash'],
       'js'        => '/assets/js/scripts.min.js?' . $assets['assets/js/scripts.min.js']['hash'],
       'modernizr' => '/assets/js/vendor/modernizr.min.js',
@@ -48,11 +49,11 @@ function roots_scripts() {
     );
   }
 
-  wp_enqueue_style('roots_css', get_template_directory_uri() . $assets['css'], false, null);
-  wp_enqueue_style('roots_cdn', $assets['CDN'], false, null);
+    wp_enqueue_style('roots_css', get_template_directory_uri() . $assets['css'], false, null);
+    wp_enqueue_style('roots_cdn', $assets['CDN'], false, null);
 
 
-  /**
+    /**
    * jQuery is loaded using the same method from HTML5 Boilerplate:
    * Grab Google CDN's latest jQuery with a protocol relative URL; fallback to local if offline
    * It's kept in the header instead of footer to avoid conflicts with plugins.
