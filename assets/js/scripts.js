@@ -45898,7 +45898,7 @@ angular.module('common.manage', [])
             header["X-" + tokenName] = this.GetCookie(tokenName);
             $http.defaults.headers.get = header;
             $http.defaults.headers.post = header;
-        }
+        };
     }])
 
     .factory('hmFactory', ['$http', 'HOURS_MANAGE_URL', function hmFactory($http, url){
@@ -45910,7 +45910,7 @@ angular.module('common.manage', [])
                 params = angular.isDefined(params) ? params : {};
                 return $http({method: 'POST', url: url + "manageHours.php", params: params, data: data})
             }
-        }
+        };
     }])
     .factory('ugFactory', ['$http', 'USER_GROUPS_URL', function ugFactory($http, url){
         return {
@@ -45918,7 +45918,7 @@ angular.module('common.manage', [])
                 params = angular.isDefined(params) ? params : {};
                 return $http({method: 'POST', url: url, params: params, data: data})
             }
-        }
+        };
     }])
     .factory('sfFactory', ['$http', 'SITE_FEEDBACK_URL', function sfFactory($http, url){
         return {
@@ -45926,7 +45926,7 @@ angular.module('common.manage', [])
                 params = angular.isDefined(params) ? params : {};
                 return $http({method: 'GET', url: url, params: params})
             }
-        }
+        };
     }])
     .factory('osFactory', ['$http', 'ONE_SEARCH_URL', function osFactory($http, url){
         return {
@@ -45937,7 +45937,7 @@ angular.module('common.manage', [])
                 params = angular.isDefined(params) ? params : {};
                 return $http({method: 'POST', url: url + "processData.php", params: params, data: data})
             }
-        }
+        };
     }])
     .factory('sdFactory', ['$http', 'STAFF_DIR_URL', function sdFactory($http, url){
         return {
@@ -45948,7 +45948,7 @@ angular.module('common.manage', [])
                 params = angular.isDefined(params) ? params : {};
                 return $http({method: 'POST', url: url + "processData.php", params: params, data: data})
             }
-        }
+        };
     }])
     .factory('mdbFactory', ['$http', 'DATABASES_URL', function mdbFactory($http, url){
         return {
@@ -45959,7 +45959,7 @@ angular.module('common.manage', [])
                 params = angular.isDefined(params) ? params : {};
                 return $http({method: 'POST', url: url + "processData.php", params: params, data: data})
             }
-        }
+        };
     }])
     .factory('swFactory', ['$http', 'SOFTWARE_URL', function swFactory($http, url){
         return {
@@ -45970,7 +45970,7 @@ angular.module('common.manage', [])
                 params = angular.isDefined(params) ? params : {};
                 return $http({method: 'POST', url: url + "processData.php", params: params, data: data})
             }
-        }
+        };
     }])
     .factory('newsFactory', ['$http', 'NEWS_URL', function newsFactory($http, url){
         return {
@@ -45981,7 +45981,7 @@ angular.module('common.manage', [])
                 params = angular.isDefined(params) ? params : {};
                 return $http({method: 'POST', url: url + "processData.php", params: params, data: data})
             }
-        }
+        };
     }])
     .factory('formFactory', ['$http', 'FORMS_URL', function formFactory($http, url){
         return {
@@ -45995,7 +45995,7 @@ angular.module('common.manage', [])
             submitForm: function(data){
                 return $http({method: 'POST', url: url + "api/process", params: {}, data: data})
             }
-        }
+        };
     }])
 
 angular.module('manage.manageDatabases', [])
@@ -49974,7 +49974,7 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
     }]);
 
 
-;angular.module('ualib.staffdir.templates', ['staff-card/staff-card-list.tpl.html', 'staff-card/staff-card-md.tpl.html', 'staff-card/staff-card-sm.tpl.html', 'staff-directory/staff-directory-facets.tpl.html', 'staff-directory/staff-directory-listing.tpl.html', 'staff-directory/staff-directory.tpl.html']);
+;angular.module('ualib.staffdir.templates', ['staff-card/staff-card-list.tpl.html', 'staff-card/staff-card-md.tpl.html', 'staff-directory/staff-directory-facets.tpl.html', 'staff-directory/staff-directory-listing.tpl.html', 'staff-directory/staff-directory.tpl.html']);
 
 angular.module("staff-card/staff-card-list.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staff-card/staff-card-list.tpl.html",
@@ -50085,26 +50085,6 @@ angular.module("staff-card/staff-card-md.tpl.html", []).run(["$templateCache", f
     "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
-    "    </div>\n" +
-    "</div>");
-}]);
-
-angular.module("staff-card/staff-card-sm.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("staff-card/staff-card-sm.tpl.html",
-    "<div class=\"staff-card staff-card-sm panel panel-default\">\n" +
-    "    <div class=\"panel-body\">\n" +
-    "        <span class=\"name h3\"><small ng-if=\"staffPerson.rank\">{{staffPerson.rank}} </small>{{staffPerson.firstname}} {{staffPerson.lastname}}</span>\n" +
-    "            <span class=\"pull-right\">\n" +
-    "                <a href=\"\" class=\"btn btn-primary btn-lg\"><span class=\"fa fa-envelope fa-fw\"></span></a>\n" +
-    "                <a href=\"\" class=\"btn btn-primary btn-lg\"><span class=\"fa fa-phone-square fa-fw\"></span></a>\n" +
-    "            </span>\n" +
-    "<!--\n" +
-    "        <div class=\"staff-card-detail\">\n" +
-    "            <ul class=\"fa-ul\">\n" +
-    "                <li ng-if=\"staffPerson.phone\"></li>\n" +
-    "                <li ng-if=\"staffPerson.email\"></li>\n" +
-    "            </ul>\n" +
-    "        </div>-->\n" +
     "    </div>\n" +
     "</div>");
 }]);
@@ -50356,6 +50336,9 @@ angular.module('staffdir', ['ualib.staffdir']);
             if (type){
                 return staff.subjects.filter(function(subj){
                         var isType = (subj.type & type) === type;
+                        if (type === 3){
+                            return self.facet.subject ? (self.facet.subject === subj.subject) && subj.type > 0 : subj.type > 0;
+                        }
                         return self.facet.subject ? (self.facet.subject === subj.subject) && isType : isType;
                     }).length > 0;
             }
@@ -50554,7 +50537,7 @@ angular.module('staffdir', ['ualib.staffdir']);
             controller: 'StaffDirCtrl',
             templateUrl: 'staff-directory/staff-directory.tpl.html',
             resolve: {
-                StaffDir: ['StaffFactory', '$filter', function(StaffFactory, $filter){
+                StaffDir: ['StaffFactory', function(StaffFactory){
 
                     return StaffFactory.directory().get()
                         .$promise.then(function(data){
@@ -50568,7 +50551,7 @@ angular.module('staffdir', ['ualib.staffdir']);
         });
     }])
 
-    .controller('StaffDirCtrl', ['$scope', 'StaffDir', 'StaffDirectoryService', function($scope, StaffDir, SDS, $filter){
+    .controller('StaffDirCtrl', ['$scope', 'StaffDir', 'StaffDirectoryService', function($scope, StaffDir, SDS){
         $scope.staffdir = StaffDir;
         $scope.facets = SDS;
 
@@ -50582,7 +50565,7 @@ angular.module('staffdir', ['ualib.staffdir']);
                 sortBy: '@'
             },
             templateUrl: 'staff-card/staff-card-list.tpl.html',
-            controller: function($scope){
+            controller: ['$scope', function($scope){
                 $scope.filteredList = [];
                 $scope.staffdir = SDS;
 
@@ -50615,20 +50598,20 @@ angular.module('staffdir', ['ualib.staffdir']);
                 });
 
                 updateList();
-            }
+            }]
         };
     }])
 
-    .directive('staffDirectoryFacets', ['StaffDirectoryService', '$location', '$q', function(SDS, $location, $q){
+    .directive('staffDirectoryFacets', ['StaffDirectoryService', function(SDS){
         return {
             restrict: 'AC',
             scope: {
                 facets: '='
             },
             templateUrl: 'staff-directory/staff-directory-facets.tpl.html',
-            controller: function($scope){
+            controller: ['$scope', function($scope){
                 $scope.staffdir = SDS;
-            }
+            }]
         };
     }])
 
@@ -51401,34 +51384,6 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "</div>\n" +
     "");
 }]);
-;/*
-(function() {
-    tinymce.create('tinymce.plugins.typekit', {
-        setup : function(ed) {
-            ed.onInit.add(function(ed, evt) {
-
-                // Load a script from a specific URL using the global script loader
-                tinymce.ScriptLoader.load('somescript.js');
-
-                // Load a script using a unique instance of the script loader
-                var scriptLoader = new tinymce.dom.ScriptLoader();
-
-                scriptLoader.load('somescript.js');
-
-            });
-        },
-    getInfo: function() {
-    return {
-        longname:  'TypeKit',
-        author:    'Thomas Griffin',
-        authorurl: 'https://thomasgriffin.io',
-        infourl:   'https://twitter.com/jthomasgriffin',
-        version:   '1.0'
-    };
-}
-});
-tinymce.PluginManager.add('typekit', tinymce.plugins.typekit);
-})();*/
 ;/* ========================================================================
  * DOM-based Routing
  * Based on http://goo.gl/EUTi53 by Paul Irish
