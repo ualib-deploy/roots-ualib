@@ -1,0 +1,43 @@
+.multipage-menu{
+  ul {
+    .nav;
+    .nav-stacked;
+
+    > li {
+      > a {
+        font-size: 1.2em;
+        border-left: 2px solid transparent;
+
+        &:hover,
+        &:focus {
+           border-left: 2px solid @brand-primary;
+           background-color: darken(@gray-lighter, 5%);
+         }
+
+        &.active {
+          > a {
+            border-left: 2px solid @brand-primary;
+            background-color: darken(@gray-lighter, 5%);
+          }
+        }
+      }
+      > ul {
+        > li {
+          margin-left: 17px;
+          > a {
+            &:hover,
+            &:focus {
+              border-left: 2px solid @gray-light;
+            }
+
+            &.active {
+              > a {
+                border-left: 2px solid @gray-light;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

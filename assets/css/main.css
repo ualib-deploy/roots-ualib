@@ -8644,6 +8644,8 @@ button.close {
 .panel-body:after,
 .modal-footer:before,
 .modal-footer:after,
+.multipage-menu ul:before,
+.multipage-menu ul:after,
 .form-horizontal .comment-form p:before,
 .form-horizontal .comment-form p:after {
   content: " ";
@@ -8664,6 +8666,7 @@ button.close {
 .pager:after,
 .panel-body:after,
 .modal-footer:after,
+.multipage-menu ul:after,
 .form-horizontal .comment-form p:after {
   clear: both;
 }
@@ -8990,6 +8993,83 @@ a.service-card:focus {
 .event-card > div {
   padding: 15px;
   padding-top: 0;
+}
+.multipage-menu ul {
+  margin-bottom: 0;
+  padding-left: 0;
+  list-style: none;
+}
+.multipage-menu ul > li {
+  position: relative;
+  display: block;
+}
+.multipage-menu ul > li > a {
+  position: relative;
+  display: block;
+  padding: 10px 15px;
+}
+.multipage-menu ul > li > a:hover,
+.multipage-menu ul > li > a:focus {
+  text-decoration: none;
+  background-color: #f9f9f9;
+}
+.multipage-menu ul > li.disabled > a {
+  color: #999999;
+}
+.multipage-menu ul > li.disabled > a:hover,
+.multipage-menu ul > li.disabled > a:focus {
+  color: #999999;
+  text-decoration: none;
+  background-color: transparent;
+  cursor: not-allowed;
+}
+.multipage-menu ul .open > a,
+.multipage-menu ul .open > a:hover,
+.multipage-menu ul .open > a:focus {
+  background-color: #f9f9f9;
+  border-color: #428bca;
+}
+.multipage-menu ul .nav-divider {
+  height: 1px;
+  margin: 9.5px 0;
+  overflow: hidden;
+  background-color: #e5e5e5;
+}
+.multipage-menu ul > li > a > img {
+  max-width: none;
+}
+.multipage-menu ul > li > a {
+  color: #993333;
+}
+.multipage-menu ul > li {
+  float: none;
+}
+.multipage-menu ul > li + li {
+  margin-top: 2px;
+  margin-left: 0;
+}
+.multipage-menu ul > li > a {
+  font-size: 1.2em;
+  border-left: 2px solid transparent;
+}
+.multipage-menu ul > li > a:hover,
+.multipage-menu ul > li > a:focus {
+  border-left: 2px solid #993333;
+  background-color: #ececec;
+}
+.multipage-menu ul > li > a.active > a {
+  border-left: 2px solid #993333;
+  background-color: #ececec;
+}
+.multipage-menu ul > li > ul > li {
+  margin-left: 17px;
+}
+.multipage-menu ul > li > ul > li > a:hover,
+.multipage-menu ul > li > ul > li > a:focus {
+  border-left: 2px solid #999999;
+}
+.multipage-menu ul > li > ul > li > a.active > a {
+  border-left: 2px solid #999999;
 }
 .comment-list ol {
   list-style: none;

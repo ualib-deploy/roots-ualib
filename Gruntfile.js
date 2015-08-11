@@ -128,6 +128,9 @@ module.exports = function(grunt) {
             }
         },
         uglify: {
+            options: {
+                mangle: false
+            },
             dist: {
                 files: {
                     'assets/js/scripts.min.js': [jsFileList]

@@ -41096,14 +41096,18 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
     "<div class=\"container\">\n" +
     "    <div class=\"row hours-locations-container\">\n" +
     "        <div class=\"col-md-9\">\n" +
-    "            <div class=\"hours-calendar\"></div>\n" +
+    "            <div class=\"row\">\n" +
+    "                <div class=\"col-md-12\">\n" +
+    "                    <div class=\"hours-calendar\"></div>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
     "\n" +
     "\n" +
     "            <div class=\"row\">\n" +
     "                <div class=\"col-md-7\">\n" +
     "                    <div class=\"panel panel-default\">\n" +
     "                        <div class=\"panel-body\">\n" +
-    "                            <ui-gmap-google-map center='center' zoom='zoom' id=\"map-canvas\" options=\"{disableDefaultUI: true}\" events=\"{bounds_changed: updateBounds}\">\n" +
+    "                            <ui-gmap-google-map center='center' zoom='zoom' id=\"map-canvas\" options=\"{disableDefaultUI: true}\">\n" +
     "                                <ui-gmap-markers models=\"loc\" coords=\"'self'\" icon=\"'icon'\">\n" +
     "                                </ui-gmap-markers>\n" +
     "                            </ui-gmap-google-map>\n" +
@@ -41144,7 +41148,7 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
     "            </div>\n" +
     "\n" +
     "        </div>\n" +
-    "        <div class=\"col-md-3\">\n" +
+    "        <div class=\"col-md-3 hidden-xs\">\n" +
     "\n" +
     "            <div ui-scrollfix bound-by-parent>\n" +
     "                <ul class=\"nav nav-pills nav-stacked hours-locations-menu\">\n" +
@@ -41161,6 +41165,7 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
     "                    <li><a href=\"#\" hours-href=\"{library: 'bruno', month: 0}\">Bruno</a></li>\n" +
     "                </ul>\n" +
     "            </div>\n" +
+    "\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
@@ -41225,7 +41230,7 @@ angular.module('hours', ['ualib.hours']);
 
 angular.module('hours.calendar', [])
 
-    .controller('CalendarCtrl', ['$scope', '$location', '$filter', 'hoursFactory', function CalendarCtrl($scope, $location, $filter, hoursFactory){
+    .controller('CalendarCtrl', ['$scope', '$location', '$filter', 'hoursFactory', '$rootScope', function CalendarCtrl($scope, $location, $filter, hoursFactory, $rootScope){
         var calData;
         $scope.cal;
         $scope.month;
@@ -41281,6 +41286,7 @@ angular.module('hours.calendar', [])
             $scope.library = library;
             $scope.cal = getCalStyles(thisMonth);
             $scope.defHours = defHours;
+            $rootScope.$broadcast('hoursLoaded');
         }
 
 
@@ -41491,21 +41497,12 @@ angular.module('ualib.hours')
 
         uiGmapGoogleMapApi.then(function(maps) {
             updateMap();
-            console.log(maps);
-            libChangeListener = $scope.$watch(function(){
-                return $scope.params.lid;
-            }, function(newVal, oldVal){
-                if (newVal != oldVal){
-                    updateMap();
-                }
-            }, true);
+            //console.log(maps);
+            libChangeListener = $scope.$on('hoursLoaded', function(){
+                updateMap();
+            });
 
         });
-
-
-        $scope.updateBounds = function(maps, ev){
-            console.log(maps.getBounds());
-        };
 
         $scope.getDirections = function(){
             var link = "https://www.google.com/maps/dir/" + $scope.directionsFrom + "/" + $scope.center.latitude + "," + $scope.center.longitude;

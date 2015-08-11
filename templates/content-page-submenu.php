@@ -7,7 +7,7 @@
                 <div ng-class="{'one-search-results': appClass == 'bento'}" ng-view></div>
             <?php endif; ?>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 multipage-menu">
             <?php print $multipage_menu; ?>
         </div>
     </div>
