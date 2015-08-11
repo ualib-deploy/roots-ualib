@@ -8,7 +8,7 @@ assets/vendor/modernizr/*
 #assets/css/*main*.css
 # assets/js/*scripts*.js
 #assets/js/vendor/modernizr.min.js
-assets/manifest.json
+#assets/manifest.json
 
 # Ignore the styleguide folder used for testing
 styleguide/
