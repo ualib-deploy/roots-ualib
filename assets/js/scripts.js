@@ -42192,8 +42192,12 @@ angular.module("manageHours/manageHours.tpl.html", []).run(["$templateCache", fu
     "    </div>\n" +
     "</div>\n" +
     "\n" +
+    "<div class=\"alert alert-warning\" role=\"alert\">\n" +
+    "    <span class=\"fa fa-exclamation-triangle\"></span> Warning: Please use exceptions in order to create periods with the non\n" +
+    "    standard hours (for example, Finals week).\n" +
+    "</div>\n" +
     "<div class=\"alert alert-info\" role=\"alert\">\n" +
-    "    <span class=\"fa fa-exclamation-triangle\"></span> Note: set <strong>From</strong> and <strong>To</strong> hours to\n" +
+    "    <span class=\"fa fa-info-circle\"></span> Note: set <strong>From</strong> and <strong>To</strong> hours to\n" +
     "    <strong>Midnight</strong> in order to indicate <strong>Open 24 hours</strong>.\n" +
     "</div>\n" +
     "\n" +
@@ -49774,7 +49778,7 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
     'angular-carousel'
 ]);;angular.module('ualib.news')
 
-    .factory('ualibNewsFactory', ['$resource', '$sce', '$filter', function($resource, $sce, $filter){
+    .factory('ualibNewsFactory', ['$resource', '$sce', '$filter', '$http', function($resource, $sce, $filter, $http){
 
         function preprocessNews(news){
             news = $filter('unique')(news, 'title');
@@ -49815,22 +49819,33 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
             });
         }
 
+        //TODO: centralize this function so it can be used with all apps
+        // Extend the default responseTransform array - Straight from Angular 1.2.8 API docs - https://docs.angularjs.org/api/ng/service/$http#overriding-the-default-transformations-per-request
+        function appendTransform(defaults, transform) {
+
+            // We can't guarantee that the default transformation is an array1
+            defaults = angular.isArray(defaults) ? defaults : [defaults];
+            //console.log(defaults.concat(transform));
+            // Append the new transformation to the defaults
+            return defaults.concat(transform);
+        }
+
         return $resource('https://wwwdev2.lib.ua.edu/newsApp/api/:news', {}, {
             cache: false,
             get: {
                 method: 'GET',
                 params: {news: 'archive'},
-                transformResponse: function(data){
+                transformResponse: appendTransform($http.defaults.transformResponse, function(data){
                     var news = angular.fromJson(data);
                     formatted = preprocessNews(news.news);
                     news.news = formatted;
                     return news;
-                }
+                })
             },
             today: {
                 method: 'GET',
                 params: {news: 'today'},
-                transformResponse: function(data){
+                transformResponse: appendTransform($http.defaults.transformResponse, function(data){
                     var news = angular.fromJson(data);
                     //var formatted = $filter('unique')(news.news, 'title');
                     for (var prop in news){
@@ -49840,7 +49855,7 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
                         }
                     }
                     return news;
-                }
+                })
             }
         });
     }]);;angular.module('ualib.news')
@@ -49850,7 +49865,7 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
             .when('/news-exhibits/:link', {
                 reloadOnSearch: false,
                 resolve: {
-                    newsItem: function(ualibNewsFactory){
+                    newsItem: ['ualibNewsFactory', function(ualibNewsFactory){
                         return ualibNewsFactory.get({news: 'archive'}, function(data){
                             return data;
                         }, function(data, status, headers, config) {
@@ -49862,7 +49877,7 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
                                 config: config
                             });
                         });
-                    }
+                    }]
                 },
                 templateUrl: 'news-item/news-item.tpl.html',
                 controller: 'newsItemCtrl'
@@ -49906,10 +49921,7 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
                 newsFilters: '=?',
                 newsType: '@'
             },
-            templateUrl: function(tElem, tAttrs){
-                var type = angular.isDefined(tAttrs.newsType) ? tAttrs.newsType : 'news';
-                return 'news-item/' + type + '-card.tpl.html';
-            }
+            templateUrl: 'news-item/news-card.tpl.html'
         };
     }]);;angular.module('ualib.news')
 
@@ -49918,7 +49930,7 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
             .when('/news-exhibits/', {
                 reloadOnSearch: false,
                 resolve: {
-                    newsList: function(ualibNewsFactory){
+                    newsList: ['ualibNewsFactory', function(ualibNewsFactory){
                         return ualibNewsFactory.get({news: 'archive'}, function(data){
                             return data;
                         }, function(data, status, headers, config) {
@@ -49930,7 +49942,7 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
                                 config: config
                             });
                         });
-                    }
+                    }]
                 },
                 templateUrl: 'news/news-list.tpl.html',
                 controller: 'newsListCtrl'
@@ -50029,34 +50041,6 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "</div>\n" +
     "");
 }]);
-;/*
-(function() {
-    tinymce.create('tinymce.plugins.typekit', {
-        setup : function(ed) {
-            ed.onInit.add(function(ed, evt) {
-
-                // Load a script from a specific URL using the global script loader
-                tinymce.ScriptLoader.load('somescript.js');
-
-                // Load a script using a unique instance of the script loader
-                var scriptLoader = new tinymce.dom.ScriptLoader();
-
-                scriptLoader.load('somescript.js');
-
-            });
-        },
-    getInfo: function() {
-    return {
-        longname:  'TypeKit',
-        author:    'Thomas Griffin',
-        authorurl: 'https://thomasgriffin.io',
-        infourl:   'https://twitter.com/jthomasgriffin',
-        version:   '1.0'
-    };
-}
-});
-tinymce.PluginManager.add('typekit', tinymce.plugins.typekit);
-})();*/
 ;/* ========================================================================
  * DOM-based Routing
  * Based on http://goo.gl/EUTi53 by Paul Irish

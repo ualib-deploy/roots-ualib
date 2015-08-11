@@ -10287,8 +10287,6 @@ footer > .sub-footer {
 /*# sourceMappingURL=/wp-content/themes/roots/assets/css/main.css.map */
 .front-page h2,
 .front-page .h2 {
-  background-color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 0;
   padding: 10px;
 }
 .front-page .news-card {
@@ -10297,13 +10295,12 @@ footer > .sub-footer {
   padding: 15px;
   margin-top: 0;
   border: 1px solid transparent;
-  background-color: rgba(255, 255, 255, 0.9);
 }
 .front-page .news-card:hover {
   text-decoration: none;
   background-color: #ffffff;
-  border-top-color: #eee;
-  border-bottom-color: #eee;
+  border-top-color: #ddd;
+  border-bottom-color: #ddd;
 }
 .front-page .news-card h4,
 .front-page .news-card .h4 {
