@@ -9202,8 +9202,12 @@ div[ng-view].ng-enter {
   color: #f9f9f9;
   background-color: rgba(46, 36, 36, 0.8);
 }
+.jumbotron-header > .jumbotron a {
+  color: #f9f9f9;
+}
 .jumbotron-header > .jumbotron .well {
-  color: #333;
+  background-color: rgba(25, 20, 20, 0.75);
+  border-color: #0D0A0A;
 }
 /**
  * Your styles here
