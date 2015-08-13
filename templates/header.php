@@ -79,7 +79,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                 <div class="yamm-content" ng-controller="OneSearchCtrl">
                                     <form ng-submit="search()" class="onesearch-form">
 
-                                        <suggest-one-search prompt="Search all library resources" model="searchText" search="search">
+                                        <suggest-one-search prompt="Search journals, articles, books, website, people & more" model="searchText" search="search">
 
                                     </form>
                                 </div>
@@ -143,8 +143,8 @@ if (defined('GROUP_ANY_WEBAPP'))
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="<?php echo site_url(); ?>/research-help/e-resources/">
                                                 <span class="fa fa-bolt"></span>
-                                                <h4>Electronic Resources</h4>
-                                                <p>Explore the libraries' e-book and e-journal collections </p>
+                                                <h4>E-Books & E-Journals</h4>
+                                                <p>Explore the libraries' electronic resource collections and more </p>
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">

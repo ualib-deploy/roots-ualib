@@ -8102,7 +8102,7 @@ angular.module('angular-carousel.shifty', [])
 
 })();
 ;/**
- * @license AngularJS v1.4.3
+ * @license AngularJS v1.4.4
  * (c) 2010-2015 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -8761,7 +8761,9 @@ angular.module('duScroll', [
   //Which events on the container (such as body) should cancel scroll animations
   .value('duScrollCancelOnEvents', 'scroll mousedown mousewheel touchmove keydown')
   //Whether or not to activate the last scrollspy, when page/container bottom is reached
-  .value('duScrollBottomSpy', false);
+  .value('duScrollBottomSpy', false)
+  //Active class name
+  .value('duScrollActiveClass', 'active');
 
 
 angular.module('duScroll.scrollHelpers', ['duScroll.requestAnimation'])
@@ -8979,7 +8981,7 @@ angular.module('duScroll.requestAnimation', ['duScroll.polyfill'])
 
 
 angular.module('duScroll.spyAPI', ['duScroll.scrollContainerAPI'])
-.factory('spyAPI', ["$rootScope", "$timeout", "$window", "$document", "scrollContainerAPI", "duScrollGreedy", "duScrollSpyWait", "duScrollBottomSpy", function($rootScope, $timeout, $window, $document, scrollContainerAPI, duScrollGreedy, duScrollSpyWait, duScrollBottomSpy) {
+.factory('spyAPI', ["$rootScope", "$timeout", "$window", "$document", "scrollContainerAPI", "duScrollGreedy", "duScrollSpyWait", "duScrollBottomSpy", "duScrollActiveClass", function($rootScope, $timeout, $window, $document, scrollContainerAPI, duScrollGreedy, duScrollSpyWait, duScrollBottomSpy, duScrollActiveClass) {
   'use strict';
 
   var createScrollHandler = function(context) {
@@ -9025,11 +9027,11 @@ angular.module('duScroll.spyAPI', ['duScroll.scrollContainerAPI'])
       }
       if(currentlyActive === toBeActive || (duScrollGreedy && !toBeActive)) return;
       if(currentlyActive) {
-        currentlyActive.$element.removeClass('active');
+        currentlyActive.$element.removeClass(duScrollActiveClass);
         $rootScope.$broadcast('duScrollspy:becameInactive', currentlyActive.$element);
       }
       if(toBeActive) {
-        toBeActive.$element.addClass('active');
+        toBeActive.$element.addClass(duScrollActiveClass);
         $rootScope.$broadcast('duScrollspy:becameActive', toBeActive.$element);
       }
       context.currentlyActive = toBeActive;
@@ -40127,7 +40129,8 @@ angular.module('oneSearch.common')
                         $scope.selected = false;
                     }
                     if ($scope.model.length > 2 && !$scope.dataRequested){
-                        dataFactory.get('//wwwdev2.lib.ua.edu/oneSearch/api/suggest/' + $scope.model)
+                        var fixedString = $scope.model.replace(/\//g, " ");
+                        dataFactory.get('//wwwdev2.lib.ua.edu/oneSearch/api/suggest/' + encodeURI(fixedString))
                             .then(function(data) {
                                 $scope.items.suggest = data;
                                 $scope.setCurrent(-1, false);
@@ -40136,16 +40139,17 @@ angular.module('oneSearch.common')
                     }
                     if ($scope.model.length > 2){
                         $timeout(function() {
-                            dataFactory.get('//wwwdev2.lib.ua.edu/oneSearch/api/recommend/' + $scope.model)
+                            var fixedString = $scope.model.replace(/\//g, " ");
+                            dataFactory.get('//wwwdev2.lib.ua.edu/oneSearch/api/recommend/' + encodeURI(fixedString))
                                 .then(function(data) {
                                     $scope.items.recommend = data;
                                 });
-                            dataFactory.get('//wwwdev2.lib.ua.edu/staffDir/api/subject/' + $scope.model + '/match/startwith')
+                            dataFactory.get('//wwwdev2.lib.ua.edu/staffDir/api/subject/' + encodeURI(fixedString) + '/match/startwith')
                                 .then(function(data) {
                                     $scope.items.subjects = data;
                                 });
                             dataFactory.get('https://www.googleapis.com/customsearch/v1?key=AIzaSyCMGfdDaSfjqv5zYoS0mTJnOT3e9MURWkU&cx=003453353330912650815:lfyr_-azrxe&q=' +
-                            $scope.model + '&siteSearch=ask.lib.ua.edu')
+                                encodeURI(fixedString) + '&siteSearch=ask.lib.ua.edu')
                                 .then(function(data) {
                                     // pluck out the items array for easier 'suggestWatcher' processing
                                     $scope.items.faq = data.items;
@@ -40652,34 +40656,6 @@ function isEmpty(obj) {
 
     return true;
 }
-/**
- * Adopted from UI Router library
- * https://github.com/angular-ui/ui-router/blob/master/src/common.js
- */
-function merge(dst) {
-    forEach(arguments, function(obj) {
-        if (obj !== dst) {
-            forEach(obj, function(value, key) {
-                if (!dst.hasOwnProperty(key)) dst[key] = value;
-            });
-        }
-    });
-    return dst;
-}
-/**
- * Adopted from UI Router library
- * https://github.com/angular-ui/ui-router/blob/master/src/common.js
- */
-// extracted from underscore.js
-// Return a copy of the object omitting the blacklisted properties.
-function omit(obj) {
-    var copy = {};
-    var keys = Array.prototype.concat.apply(Array.prototype, Array.prototype.slice.call(arguments, 1));
-    for (var key in obj) {
-        if (indexOf(keys, key) == -1) copy[key] = obj[key];
-    }
-    return copy;
-}
 // adopted from https://github.com/a8m/angular-filter/blob/master/src/_common.js
 function toArray(object) {
     return Array.isArray(object) ? object :
@@ -41088,14 +41064,29 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
   $templateCache.put("hours-locations/hours-locations.tpl.html",
     "<!--<script src='//maps.googleapis.com/maps/api/js?sensor=false&key=AIzaSyCdXuKwZiDx5W2uP8plV5d-o-jLQ5UQtIQ&mid=z4A8-271j5C8.kowwE312jycE'></script>-->\n" +
     "<div class=\"jumbotron bg-transparent\">\n" +
-    "    <div class=\"container\">\n" +
-    "        <h1>Hours &amp; Locations</h1>\n" +
-    "        <h2>{{library}}</h2>\n" +
-    "    </div>\n" +
+    "    <h1>Hours &amp; Locations</h1>\n" +
+    "    <h2>{{library}}</h2>\n" +
     "</div>\n" +
     "<div class=\"container\">\n" +
-    "    <div class=\"row hours-locations-container\">\n" +
-    "        <div class=\"col-md-9\">\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-3 col-md-push-9\">\n" +
+    "            <div>\n" +
+    "                <ul class=\"nav nav-pills nav-stacked hours-locations-menu\">\n" +
+    "                    <li><a href=\"#\" hours-href=\"{library: 'gorgas', month: 0}\">Gorgas</a>\n" +
+    "                        <ul class=\"nav nav-pills nav-stacked\">\n" +
+    "                            <li><a href=\"#\" hours-href=\"{library: 'music', month: 0}\">Music Library</a></li>\n" +
+    "                            <li><a href=\"#\" hours-href=\"{library: 'media', month: 0}\">Sanford Media Center</a></li>\n" +
+    "                            <li><a href=\"#\" hours-href=\"{library: 'williams', month: 0}\">Williams Americana Collection</a></li>\n" +
+    "                        </ul>\n" +
+    "                    </li>\n" +
+    "                    <li><a href=\"#\" hours-href=\"{library: 'rodgers', month: 0}\">Rodgers</a></li>\n" +
+    "                    <li><a href=\"#\" hours-href=\"{library: 'mclure', month: 0}\">McLure</a></li>\n" +
+    "                    <li><a href=\"#\" hours-href=\"{library: 'hoole', month: 0}\">Hoole</a></li>\n" +
+    "                    <li><a href=\"#\" hours-href=\"{library: 'bruno', month: 0}\">Bruno</a></li>\n" +
+    "                </ul>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-9 col-md-pull-3\">\n" +
     "            <div class=\"row\">\n" +
     "                <div class=\"col-md-12\">\n" +
     "                    <div class=\"hours-calendar\"></div>\n" +
@@ -41145,25 +41136,6 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
     "                        </div>\n" +
     "                    </div>\n" +
     "                </div>\n" +
-    "            </div>\n" +
-    "\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-3 hidden-xs\">\n" +
-    "\n" +
-    "            <div ui-scrollfix bound-by-parent>\n" +
-    "                <ul class=\"nav nav-pills nav-stacked hours-locations-menu\">\n" +
-    "                    <li><a href=\"#\" hours-href=\"{library: 'gorgas', month: 0}\">Gorgas</a>\n" +
-    "                        <ul class=\"nav nav-pills nav-stacked\">\n" +
-    "                            <li><a href=\"#\" hours-href=\"{library: 'music', month: 0}\">Music Library</a></li>\n" +
-    "                            <li><a href=\"#\" hours-href=\"{library: 'media', month: 0}\">Sanford Media Center</a></li>\n" +
-    "                            <li><a href=\"#\" hours-href=\"{library: 'williams', month: 0}\">Williams Americana Collection</a></li>\n" +
-    "                        </ul>\n" +
-    "                    </li>\n" +
-    "                    <li><a href=\"#\" hours-href=\"{library: 'rodgers', month: 0}\">Rodgers</a></li>\n" +
-    "                    <li><a href=\"#\" hours-href=\"{library: 'mclure', month: 0}\">McLure</a></li>\n" +
-    "                    <li><a href=\"#\" hours-href=\"{library: 'hoole', month: 0}\">Hoole</a></li>\n" +
-    "                    <li><a href=\"#\" hours-href=\"{library: 'bruno', month: 0}\">Bruno</a></li>\n" +
-    "                </ul>\n" +
     "            </div>\n" +
     "\n" +
     "        </div>\n" +
@@ -41496,7 +41468,7 @@ angular.module('ualib.hours')
         var libChangeListener;
 
         uiGmapGoogleMapApi.then(function(maps) {
-            updateMap();
+
             //console.log(maps);
             libChangeListener = $scope.$on('hoursLoaded', function(){
                 updateMap();
@@ -41693,7 +41665,7 @@ angular.module('hours.list', [])
             templateUrl: 'list/list.tpl.html',
             controller: 'ListCtrl'
         }
-    }]);;angular.module('manage.templates', ['manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageNews/manageNews.tpl.html', 'manageNews/manageNewsAdmins.tpl.html', 'manageNews/manageNewsList.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareComputerMaps.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html', 'staffDirectory/staffDirectoryDepartments.tpl.html', 'staffDirectory/staffDirectoryPeople.tpl.html', 'staffDirectory/staffDirectorySubjects.tpl.html', 'submittedForms/submittedForms.tpl.html']);
+    }]);;angular.module('manage.templates', ['manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageNews/manageNews.tpl.html', 'manageNews/manageNewsAdmins.tpl.html', 'manageNews/manageNewsList.tpl.html', 'manageOneSearch/mainOneSearch.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageOneSearch/oneSearchStat.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareComputerMaps.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html', 'staffDirectory/staffDirectoryDepartments.tpl.html', 'staffDirectory/staffDirectoryPeople.tpl.html', 'staffDirectory/staffDirectorySubjects.tpl.html', 'submittedForms/submittedForms.tpl.html']);
 
 angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageDatabases/manageDatabases.tpl.html",
@@ -42771,9 +42743,27 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "");
 }]);
 
+angular.module("manageOneSearch/mainOneSearch.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("manageOneSearch/mainOneSearch.tpl.html",
+    "<h2>Manage OneSearch</h2>\n" +
+    "\n" +
+    "<tabset justified=\"true\">\n" +
+    "    <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
+    "        <div ng-if=\"tab.number == 0\">\n" +
+    "            <div recommended-links-list>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "        <div ng-if=\"tab.number == 1\" >\n" +
+    "            <div search-statistics-list>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </tab>\n" +
+    "</tabset>");
+}]);
+
 angular.module("manageOneSearch/manageOneSearch.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageOneSearch/manageOneSearch.tpl.html",
-    "<h3>OneSearch Recommended Links Management</h3>\n" +
+    "<h3>OneSearch Recommended Links</h3>\n" +
     "\n" +
     "<form ng-submit=\"addRecommendation()\">\n" +
     "    <div class=\"row sdOpen\">\n" +
@@ -42876,6 +42866,44 @@ angular.module("manageOneSearch/manageOneSearch.tpl.html", []).run(["$templateCa
     "                        <span class=\"fa fa-fw fa-close\"></span>\n" +
     "                    </button>\n" +
     "                </span>\n" +
+    "            </td>\n" +
+    "        </tr>\n" +
+    "        </tbody>\n" +
+    "    </table>\n" +
+    "</div>\n" +
+    "");
+}]);
+
+angular.module("manageOneSearch/oneSearchStat.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("manageOneSearch/oneSearchStat.tpl.html",
+    "<h3>OneSearch Statistics</h3>\n" +
+    "\n" +
+    "\n" +
+    "<div class=\"table-responsive\">\n" +
+    "    <table class=\"table table-condensed table-hover\">\n" +
+    "        <thead>\n" +
+    "        <tr>\n" +
+    "            <th style=\"width:80px;\">\n" +
+    "                Number\n" +
+    "            </th>\n" +
+    "            <th>\n" +
+    "                Keyword\n" +
+    "            </th>\n" +
+    "            <th style=\"width:150px;\">\n" +
+    "                Count\n" +
+    "            </th>\n" +
+    "        </tr>\n" +
+    "        </thead>\n" +
+    "        <tbody>\n" +
+    "        <tr ng-repeat=\"stat in statList\">\n" +
+    "            <td>\n" +
+    "                {{$index}}\n" +
+    "            </td>\n" +
+    "            <td>\n" +
+    "                {{stat.keyword}}\n" +
+    "            </td>\n" +
+    "            <td>\n" +
+    "                {{stat.count}}\n" +
     "            </td>\n" +
     "        </tr>\n" +
     "        </tbody>\n" +
@@ -44576,8 +44604,8 @@ angular.module('common.manage', [])
     }])
     .factory('osFactory', ['$http', 'ONE_SEARCH_URL', function osFactory($http, url){
         return {
-            getData: function(){
-                return $http({method: 'GET', url: url + "api/reclist", params: {}})
+            getData: function(pPoint){
+                return $http({method: 'GET', url: url + "api/" + pPoint, params: {}})
             },
             postData: function(params, data){
                 params = angular.isDefined(params) ? params : {};
@@ -46020,6 +46048,32 @@ angular.module('manage.manageNews', ['ngFileUpload'])
     }])
 
 angular.module('manage.manageOneSearch', [])
+
+    .controller('mainOneSearchCtrl', ['$scope',
+        function mainOneSearchCtrl($scope){
+            $scope.tabs = [
+                { name: 'Recommended Links',
+                    number: 0,
+                    active: true
+                },
+                { name: 'Search Statistics',
+                    number: 1,
+                    active: false
+                }
+            ];
+        }])
+
+    .directive('manageOneSearchMain', ['$animate', function($animate) {
+        return {
+            restrict: 'A',
+            scope: {},
+            controller: 'mainOneSearchCtrl',
+            link: function(scope, elm, attrs){
+            },
+            templateUrl: 'manageOneSearch/mainOneSearch.tpl.html'
+        };
+    }])
+
     .controller('manageOneSearchCtrl', ['$scope', 'tokenFactory', 'osFactory',
         function manageOneSearchCtrl($scope, tokenFactory, osFactory){
             $scope.recList = [];
@@ -46041,9 +46095,8 @@ angular.module('manage.manageOneSearch', [])
 
             tokenFactory("CSRF-libOneSearch");
 
-            osFactory.getData()
+            osFactory.getData('reclist')
                 .success(function(data) {
-                    console.dir(data);
                     $scope.recList = data;
                 })
                 .error(function(data, status, headers, config) {
@@ -46116,6 +46169,28 @@ angular.module('manage.manageOneSearch', [])
             templateUrl: 'manageOneSearch/manageOneSearch.tpl.html'
         };
     }])
+
+    .controller('oneSearchStatCtrl', ['$scope', 'osFactory',
+        function oneSearchStatCtrl($scope, osFactory){
+            $scope.statList = [];
+
+            osFactory.getData('statistics')
+                .success(function(data) {
+                    $scope.statList = data;
+                })
+                .error(function(data, status, headers, config) {
+                    console.log(data);
+                });
+
+        }])
+    .directive('searchStatisticsList', [ function() {
+        return {
+            restrict: 'AC',
+            scope: {},
+            controller: 'oneSearchStatCtrl',
+            templateUrl: 'manageOneSearch/oneSearchStat.tpl.html'
+        };
+    }]);
 angular.module('manage.manageSoftware', ['ngFileUpload'])
     .controller('manageSWCtrl', ['$scope', 'tokenFactory', 'swFactory',
         function manageSWCtrl($scope, tokenFactory, swFactory){
@@ -49588,7 +49663,12 @@ angular.module("news-item/news-card.tpl.html", []).run(["$templateCache", functi
     "        <h4 class=\"media-heading\">\n" +
     "            <span ng-bind-html=\"newsCard.title\"></span>\n" +
     "        </h4>\n" +
-    "        <div class=\"details-context\" ng-if=\"(newsCard.activeFrom != newsCard.activeUntil && newsCard.type != 0)\">{{newsCard.activeFrom | date:mediumDate}} - {{newsCard.activeUntil | date:mediumDate}}</div>\n" +
+    "        <div class=\"details-context\" ng-if=\"(newsCard.activeFrom != newsCard.activeUntil && newsCard.type != 0)\">\n" +
+    "            {{newsCard.activeFrom | date:mediumDate}} - {{newsCard.activeUntil | date:mediumDate}}\n" +
+    "        </div>\n" +
+    "        <div class=\"details-context\" ng-if=\"(newsCard.type == 0)\">\n" +
+    "            {{newsCard.created | date:mediumDate}}\n" +
+    "        </div>\n" +
     "        <p ng-bind-html=\"newsCard.blurb\"></p>\n" +
     "    </div>\n" +
     "</a>");
@@ -49692,6 +49772,7 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "                <h4 class=\"media-heading\">\n" +
     "                    <a ng-href=\"#/news-exhibits/{{item.link}}\" ng-bind-html=\"item.title | highlight:newsFilters.search\"></a>\n" +
     "                    <small ng-if=\"item.type > 0\">{{item.activeFrom | date:mediumDate}} - {{item.activeUntil | date:mediumDate}}</small>\n" +
+    "                    <small ng-if=\"item.type < 1\">{{item.created | date:mediumDate}}</small>\n" +
     "                </h4>\n" +
     "                <p class=\"text-justify\">\n" +
     "                    <span ng-bind-html=\"item.description | truncate:250:'...' | highlight:newsFilters.search\">\n" +
@@ -50038,6 +50119,34 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "</div>\n" +
     "");
 }]);
+;/*
+(function() {
+    tinymce.create('tinymce.plugins.typekit', {
+        setup : function(ed) {
+            ed.onInit.add(function(ed, evt) {
+
+                // Load a script from a specific URL using the global script loader
+                tinymce.ScriptLoader.load('somescript.js');
+
+                // Load a script using a unique instance of the script loader
+                var scriptLoader = new tinymce.dom.ScriptLoader();
+
+                scriptLoader.load('somescript.js');
+
+            });
+        },
+    getInfo: function() {
+    return {
+        longname:  'TypeKit',
+        author:    'Thomas Griffin',
+        authorurl: 'https://thomasgriffin.io',
+        infourl:   'https://twitter.com/jthomasgriffin',
+        version:   '1.0'
+    };
+}
+});
+tinymce.PluginManager.add('typekit', tinymce.plugins.typekit);
+})();*/
 ;/* ========================================================================
  * DOM-based Routing
  * Based on http://goo.gl/EUTi53 by Paul Irish

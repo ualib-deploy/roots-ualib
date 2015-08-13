@@ -186,6 +186,16 @@ module.exports = function(grunt) {
                 }
             }
         },
+        replace: {
+            devToLive: {
+                src: ['assets/js/scripts.min.js'],
+                dest: 'assets/js/',
+                replacements: [{
+                    from: /(wwwdev2?)/g,
+                    to: 'www'
+                }]
+            }
+        },
         bump: {
             options: {
                 files: ['package.json', 'bower.json'],
@@ -267,7 +277,8 @@ module.exports = function(grunt) {
         'ngAnnotate',
         'uglify',
         'modernizr',
-        'version'
+        'version',
+        'replace:devToLive'
     ]);
     grunt.registerTask('lessVarsToSass', ['lessToSass:lessVars']);
 };

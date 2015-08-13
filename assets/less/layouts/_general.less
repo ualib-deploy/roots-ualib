@@ -19,8 +19,10 @@ body {
 // Main content area
 .main {
   padding-bottom: 60px;
-  .make-sm-column(@main-sm-columns);
-  .sidebar-primary & {
-    .make-sm-column(@main-sm-columns - @sidebar-sm-columns);
-  }
+  /*@media (min-width: @screen-md-min){
+    .make-sm-column(@main-sm-columns);
+    .sidebar-primary & {
+      .make-sm-column(@main-sm-columns - @sidebar-sm-columns);
+    }
+  }*/
 }
