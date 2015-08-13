@@ -1,65 +1,31 @@
-<div class="home-slice">
-    <div class="row">
-        <div class="col-sm-6" style="padding: 15px; background-color: rgba(255,255,255,.9); display: table;">
-            <div class="event-card" style="display: table-row">
-                <div style="text-align: right; font-size: 20px; color: #999; display: table-cell; vertical-align: top; padding-right: 15px;">          News        </div>
-                <div style="display: table-cell; vertical-align: top;">
-                    <div class="media">
-                        <div class="media-left">
-                            <a href="#">
-                                <div class="media-object" style="background-color: #999; height: 64px; width: 64px;"/>
-                            </a>
-                        </div>
-                        <div class="media-body">
-                            <h4 class="media-heading">Visiting Poet To Give Reading on UA Campus</h4>
-                            The Coal Royalty Fund of the English Department at the University of Alabama presents Cathy Park Hong.
-                        </div>
-                    </div>
-                </div>
+<div ng-controller="NewsTodayCtrl">
+    <div class="home-slice">
+        <div class="row">
+            <div class="col-md-6 col-md-push-6">
+                <div class="front-page-card hours-list"></div>
             </div>
-            <div class="event-card" style="display: table-row">
-                <div style="text-align: right; font-size: 20px; color: #999; display: table-cell; vertical-align: top; padding-right: 15px;">          Events        </div>
-                <div style="display: table-cell; vertical-align: top;">
-                    <div class="media">
-                        <div class="media-left">
-                            <a href="#">
-                                <div class="media-object" style="background-color: #999; height: 64px; width: 64px;"/>
-                            </a>
-                        </div>
-                        <div class="media-body">
-                            <h4 class="media-heading">UA Eco-Health Workshop</h4>
-                            Sponsored by: Office for Research and Economic Development/ Office for Sponsored Programs
-                        </div>
-                    </div>
-                    <div class="media">
-                        <div class="media-left">
-                            <a href="#">
-                                <div class="media-object" style="background-color: #999; height: 64px; width: 64px;"/>
-                            </a>
-                        </div>
-                        <div class="media-body">
-                            <h4 class="media-heading">Visiting Poet To Give Reading on UA Campus</h4>
-                            Sponsored by: Office for Sponsored Programs/Office for Research and Economic Development
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="event-card" style="display: table-row">
-                <div style="text-align: right; font-size: 20px; color: #999; display: table-cell; vertical-align: top; padding-right: 15px;">          Exhibits        </div>
-                <div style="display: table-cell; vertical-align: top;">
-                    <div class="media">
-                        <div class="media-left">
-                            <a href="#">
-                                <div class="media-object" style="background-color: #999; height: 64px; width: 64px;"/>
-                            </a>
-                        </div>
-                        <div class="media-body">              Lorem ipsum dolor sit amet, consectetur adipiscing elit.              Donec vitae.            </div>
+            <div class="col-md-6 col-md-pull-6">
+                <div class="front-page-card">
+                    <h2>News</h2>
+                    <div class="animate-repeat" news-card="item" ng-repeat="item in news">
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-sm-6">
-            <div style="padding: 15px; background-color: rgba(255,255,255,.9);" class="hours-list"></div>
+    </div>
+    <div class="home-slice" ng-if="events">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="front-page-card">
+                    <h2>Events</h2>
+                    <div class="row">
+                        <div class="animate-repeat" ng-repeat="item in events" ng-class="{'col-md-6': events.length == 2,'col-md-4': events.length == 3, 'col-md-3': events.length == 4}">
+                            <div news-card="item" news-type="event">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

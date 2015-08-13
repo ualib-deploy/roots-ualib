@@ -16,6 +16,11 @@
 //    <p>Short description of the service or resource</p>
 //  </div>
 //
+// Icon: fa-ticket
+//
+// MenuBlurb:
+// Highlight and link to services or resources
+//
 // Styleguide components.service_cards
 
 .service-card, .service-list {
@@ -53,7 +58,7 @@ a.service-card {
   &:hover,
   &:active,
   &:focus {
-    background-color: @gray-lighter;
+    background-color: darken(@gray-lighter, 5%);
     text-decoration: none;
     color: @gray-dark;
   }
@@ -97,7 +102,7 @@ a.service-card {
       &:hover,
       &:active,
       &:focus {
-        background-color: @gray-lighter;
+        background-color: darken(@gray-lighter, 5%);
         text-decoration: none;
         color: @gray-dark;
       }

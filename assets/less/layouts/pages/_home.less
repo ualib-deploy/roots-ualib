@@ -4,39 +4,82 @@ html, body {
   min-height: 100%;
 }
 
-.home, .bento{
-  height: 100%;
-  width: 100%;
+div[role="document"] {
+  min-height: 600px;
+}
+
+.front-page, .bento{
+
   > .wrap {
-    position:relative;
-    margin-top: 111px;
+    main {
+      position:relative;
+      margin-top: 126px;
+
+      @media (max-width: @grid-float-breakpoint) {
+        margin-top: 0px;
+      }
+    }
   }
 }
 
-.home {
-  background: url('../img/quad-sunset-lg.jpg') no-repeat center center fixed;
+// Background images set through main ualib webapp in assets/js/_ualib.js
+.front-page {
+  background: no-repeat center center fixed;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
   background-color: transparent;
 
-  > .home-slice{
-
-    /*padding-top: @home-card-gutter;
-    padding-bottom: @home-card-gutter;
-
-    > .row {
-      > div {
-        padding: @home-card-gutter;
-        background-color: rgba(255,255,255,.5);
-      }
-    }*/
+  .home-slice{
+    padding: 0 15px 15px 15px;
   }
 }
 
-.bento {
-  background-image: none;
-  background-color: @body-bg;
+.front-page-card {
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 0 15px 15px 15px;
+}
 
+
+div[ng-view].ng-enter {
+  -webkit-animation: Fade-Enter-Anime 0.2s;
+  -moz-animation: Fade-Enter-Anime 0.2s;
+  animation: Fade-Enter-Anime 0.2s;
+}
+.Content-Fade-Leave {
+  -webkit-animation: Fade-Leave-Anime 0.2s;
+  -moz-animation: Fade-Leave-Anime 0.2s;
+  animation: Fade-Leave-Anime 0.2s;
+}
+
+@keyframes Fade-Enter-Anime {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes Fade-Leave-Anime {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+
+@-webkit-keyframes Fade-Enter-Anime {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@-webkit-keyframes Fade-Leave-Anime {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@-moz-keyframes Fade-Enter-Anime {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@-moz-keyframes Fade-Leave-Anime {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }

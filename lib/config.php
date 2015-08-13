@@ -14,7 +14,7 @@ add_theme_support('jquery-cdn');            // Enable to load jQuery from the Go
 define('GOOGLE_ANALYTICS_ID', ''); // UA-XXXXX-Y (Note: Universal Analytics only, not Classic Analytics)
 
 if (!defined('WP_ENV')) {
-  define('WP_ENV', 'production');  // scripts.php checks for values 'production' or 'development'
+  define('WP_ENV', 'development');  // scripts.php checks for values 'production' or 'development'
 }
 
 /**
@@ -50,7 +50,8 @@ function roots_display_sidebar() {
        */
       array(
         'is_404',
-        'is_front_page'
+        'is_front_page',
+        'is_page'
       ),
       /**
        * Page template checks (via is_page_template())

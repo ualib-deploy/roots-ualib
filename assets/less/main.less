@@ -16,6 +16,7 @@
 
 @import "components/service-cards";
 @import "components/event-card";
+@import "components/_multipage-menu";
 
 // Roots
 @import "_global";                   // Base styling & custom mixins
@@ -31,19 +32,24 @@
 @import "layouts/_pages";            // Page styling
 @import "layouts/pages/_home";       // Home page styling
 @import "layouts/_posts";            // Post styling
+@import "layouts/_jumbotron-header";            // Post styling
 
 /**
  * Your styles here
+
  */
+main > p {
+  text-align: justify;
+}
 
 // oneSearch Styles
 // --------------
 
-.onesearch-container{
+/*.onesearch-container{
   padding-top: 30px;
   padding-bottom: 30px;
   background-color: rgba(248,248,248,.25);
-}
+}*/
 .onesearch-text {
   height: 60px !important;
   font-size: 20px !important;
@@ -105,14 +111,7 @@ footer {
     }
   }
 
-  & .social-icons > li > a{
-    padding: 15px;
-    color: @gray;
 
-    &:hover{
-      color: @link-color;
-    }
-  }
 
   > .sub-footer {
     background-color: #ddd;
@@ -125,10 +124,6 @@ footer {
 // Page Slices (sections)
 // -----------
 
-.home-slice{
-  padding-top: 30px;
-  padding-bottom: 30px;
-}
 .home-slice-main {
   width: 100%;
   background-color: transparent;
@@ -144,7 +139,7 @@ footer {
 .slice, .head-slice{
   padding-top: 15px;
   padding-bottom: 30px;
-  margin-bottom: 30px;
+  margin-bottom: 15px;
 }
 
 .slice{

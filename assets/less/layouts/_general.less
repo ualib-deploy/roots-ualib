@@ -1,8 +1,24 @@
+html,
+body { height: 100%; }
+
+body {
+  display: table;
+  width: 100%;
+}
+
+.page-row {
+  display: table-row;
+  height: 1px;
+}
+
+.page-row-expanded { height: 100%; }
+
 // Content wrapper
 .wrap { }
 
 // Main content area
 .main {
+  padding-bottom: 60px;
   .make-sm-column(@main-sm-columns);
   .sidebar-primary & {
     .make-sm-column(@main-sm-columns - @sidebar-sm-columns);

@@ -1,12 +1,20 @@
 angular.module('ualib', [
     'ngRoute',
+    'ngAnimate',
     'ualib.templates',
     'ualib.ui',
     'hours',
-    'oneSearch'
+    'oneSearch',
+    'manage',
+    'ualib.databases',
+    'musicSearch',
+    'ualib.staffdir',
+    'ualib.softwareList',
+    'ualib.news'
 ])
 
-    .config(['$routeProvider', function($routeProvider, $location) {
+
+    .config(['$routeProvider', function($routeProvider) {
         /**
          * Register Bento Box display route with ngRoute's $routeProvider
          */
@@ -17,13 +25,22 @@ angular.module('ualib', [
             .otherwise({
                 redirectTo: '/home'
             });
+
     }])
 
-    .run(['$routeParams', '$location', '$rootScope', function($routeParams, $location, $rootScope){
+
+
+    .run(['$routeParams', '$location', '$rootScope', '$document', 'duScrollOffset', function($routeParams, $location, $rootScope, $document, duScrollOffset){
         $rootScope.$on('$routeChangeSuccess', function(e, current, pre) {
+            $rootScope.appStyle = {};
             $rootScope.appClass = $location.path().split('/')[1];
-            console.log('Current route name: ' + $location.path().split('/'));
-            // Get all URL parameter
-            console.log($routeParams);
+            if ($rootScope.appClass === 'home') {
+                $rootScope.appClass = 'front-page';
+                var bgNum = (Math.floor(Math.random() * 1000) % 16) + 1;
+                $rootScope.appStyle = {"background-image": "url('wp-content/themes/roots-ualib/assets/img/quad-sunset-lg_" + bgNum + ".jpg')"};
+                console.log('Background 1.');
+            }
+            $rootScope.appClass += ' webapp';
         });
+
     }]);

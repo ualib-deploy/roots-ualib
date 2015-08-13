@@ -13,7 +13,7 @@ if( !defined( 'ABSPATH' ) ) {
 <div id="content">
 
     <?php
-        include WEBAPPS_PATH . "staffDirectory/index_wp.php";
+    include WEBAPPS_PATH . "software/manage_wp.php";
     ?>
 
 </div><!-- end of #content -->

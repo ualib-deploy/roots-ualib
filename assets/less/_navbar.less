@@ -138,9 +138,6 @@
 //
 // Styleguide components.megamenu
 
-header, .header{
-  height: 80px;
-}
 
 .navbar-mega {
   .navbar-default;
@@ -175,15 +172,62 @@ header, .header{
   padding-left: 15px;
   padding-right: 15px;
 
-  .navbar-brand {
-    padding: 5px;
+  // Override collapse animation styles from bootstrap/less/component-animations.less
+  .collapsing {
+    position: static;
+  }
+
+  .navbar-header {
+    float: left;
+    .navbar-brand {
+      padding: 15px 5px;
+      > img {
+        max-height: 69px;
+        margin-top: -9px;
+//        max-width: 190px;
+      }
+    }
+  }
+
+  .navbar-toggle{
+    .mega-navbar-item();
+    border: 0;
+    border-radius: 0;
+    margin-right: 0;
+    line-height: @line-height-computed;
+
+    @media (max-width: @grid-float-breakpoint) {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+  }
+
+  .navbar-collapse {
+    @media (max-width: @grid-float-breakpoint-max) {
+      clear: both;
+    }
   }
 
   .navbar-right {
     margin-right: 0;
+    &:not(.navbar-main){
+      float: right;
+      > li {
+        float: left;
+        &.open {
+          > .dropdown-menu{
+            position:absolute;
+            float: left;
+            top: auto;
+          }
+        }
+      }
+    }
   }
 
   .navbar-nav {
+    margin-top: 0;
+    margin-bottom: 0;
     > li {
       &.dropdown > a{
         &:not(.icon-only){
@@ -191,19 +235,16 @@ header, .header{
         }
       }
 
-      > a {
-        font-size: 16px;
-        padding: 30px;
+      > a, > button {
+        .mega-navbar-item();
 
         &.icon-only {
           font-size:20px;
-          padding-top: 29px;
           padding-bottom: 29px;
         }
 
         &:hover,
-        &:focus,
-        &.active{
+        &:focus{
           &.dropdown-toggle::before,
           &.dropdown-toggle::after{
             background-color: @hover-color;
@@ -232,19 +273,37 @@ header, .header{
         }
       }
 
-      &.open > a {
-        &:not(.icon-only){
-          &::before, &::after{
-            width: 14px;
-          }
-        }
-        &.icon-only {
-          &::before, &::after{
-            background-color: @hover-color;
-          }
+      > button {
+        color: @color;
+
+        &:hover,
+        &:focus {
+          color: @hover-color;
+          background-color: @color;
         }
       }
 
+      &.open {
+
+        > a, > button {
+          &.dropdown-toggle::before,
+          &.dropdown-toggle::after{
+            background-color: @hover-color;
+          }
+        }
+        > a {
+          &:not(.icon-only){
+            &::before, &::after{
+              width: 14px;
+            }
+          }
+        }
+
+        > button {
+          color: @hover-color;
+          background-color: @color;
+        }
+      }
     }
 
     .dropdown-menu{
@@ -260,11 +319,17 @@ header, .header{
           border-bottom: 1px solid darken(@dropdown-bg, 10%);
         }
 
-        a {
+        /*a {
           &:hover,
           &:focus {
             background-color: darken(@gray-lighter, 5%);
             text-decoration: none;
+          }
+        }*/
+
+        @media (min-width: @screen-sm-min) and (max-width: @screen-sm-max) {
+          .col-sm-6:nth-child(2n+1) {
+            clear: both;
           }
         }
       }
@@ -272,15 +337,60 @@ header, .header{
   }
 }
 
+.mega-navbar-item(){
+  font-size: 16px;
+  padding: 30px;
+
+  &.icon-only {
+    font-size:20px;
+    padding-bottom: 29px;
+  }
+
+}
 
 .dropdown-static {
-  > .dropdown-menu {
-    height: auto;
-    opacity: 1;
-    z-index: (@zindex-dropdown - 1);
-    display: block;
-    visibility: visible;
-    -webkit-box-shadow: none;
-    box-shadow: none;
+  @media (min-width: @grid-float-breakpoint-max) {
+    > .dropdown-toggle{
+      display: none;
+    }
+    > .dropdown-menu {
+      height: auto;
+      opacity: 1;
+      z-index: (@zindex-dropdown - 1);
+      display: block;
+      visibility: visible;
+      -webkit-box-shadow: none;
+      box-shadow: none;
+    }
   }
 }
+
+.navbar-mega-backdrop {
+  position: fixed;
+  z-index: 2;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.7);
+  visibility: hidden;
+  opacity: 0;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transition: opacity 0.3s 0s, visibility 0s 0.3s, -webkit-transform 0.3s 0s;
+  -moz-transition: opacity 0.3s 0s, visibility 0s 0.3s, -moz-transform 0.3s 0s;
+  transition: opacity 0.3s 0s, visibility 0s 0.3s, transform 0.3s 0s;
+
+  &.navbar-open {
+    @media (min-width: @screen-xs-min) and (max-width: @screen-sm-max) {
+      opacity: 1;
+      visibility: visible;
+      -webkit-transition: opacity 0.3s 0s, visibility 0s 0s, -webkit-transform 0.3s 0s;
+      -moz-transition: opacity 0.3s 0s, visibility 0s 0s, -moz-transform 0.3s 0s;
+      transition: opacity 0.3s 0s, visibility 0s 0s, transform 0.3s 0s;
+    }
+  }
+}
+
+

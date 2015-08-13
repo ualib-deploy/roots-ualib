@@ -8,6 +8,14 @@
 
 // Buttons
 //
+// weight: 2
+//
+// Usage rules and recommendations:
+// * All buttons must use have the `.btn` class declared, regardless of what type of button is it.
+// * Always use the [primary button](#3dot1dot1), unless otherwise stated in the styleguide.
+// * Use `<button type="button">` over `<a href="#">` and `<input type="button">`, whenever possible.
+// * Always declare a `type` attribute with your `button`.
+//
 // <mark>TODO:</mark> Write out description and link to other mentions of button use in docs
 //
 // Icon: fa-hand-o-up
@@ -19,9 +27,11 @@
 
 // Button Tags
 //
+// weight: 0
+//
 // There are four `html tags` you can use to create buttons: `<button>`, `<a>`, and `<input>`.
 // <br><mark>TODO:</mark> Elaborate on `<button>` use exceptions and define about `type` attribute is required for `<button>` and `<input>` buttons.
-// > Use `<button>` over `<a>` and `<input>` where ever possible. There are rare instances where `<a>` or `<input>` should be used.
+// > Use `<button>` or `<a>` over `<input>` where ever possible. Use '<a>' if a button is used to link to another location. There will likely never be a reason to use `<input>`.
 //
 // Markup: button-tags.hbs
 //
@@ -29,8 +39,45 @@
 
 // Button Types
 //
-// <mark>TODO:</mark> Elaborate or link to button type uses.
+// weight: 1
+//
+// More often than not, you will only use the primary and default buttons. However, there are more options available for success, info, warning, and danger prompts, modals,
+// or UI/navigation that need to communicate those states to the user.
 //
 // Markup: button-types.hbs
 //
 // Styleguide style.buttons.types
+
+// Button modifiers
+//
+// weight: 3
+//
+// There are several classes that will modify a buttons appearance.
+//
+// Styleguide style.buttons.modifiers
+
+// Button Sizes
+//
+// weight: 0
+//
+// Utilize the `.btn-lg`, `.btn-sm`, or `.btn-xs` classes for different size buttons
+//
+// Markup:
+// <p>
+// <button type="button" class="btn btn-primary btn-lg">Large button</button>
+// <button type="button" class="btn btn-default btn-lg">Large button</button>
+// </p>
+// <p>
+// <button type="button" class="btn btn-primary">Default button</button>
+// <button type="button" class="btn btn-default">Default button</button>
+// </p>
+// <p>
+// <button type="button" class="btn btn-primary btn-sm">Small button</button>
+// <button type="button" class="btn btn-default btn-sm">Small button</button>
+// </p>
+// <p>
+// <button type="button" class="btn btn-primary btn-xs">Extra small button</button>
+// <button type="button" class="btn btn-default btn-xs">Extra small button</button>
+// </p>
+//
+// Styleguide style.buttons.modifiers.sizes
