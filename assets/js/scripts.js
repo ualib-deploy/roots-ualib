@@ -42897,7 +42897,7 @@ angular.module("manageOneSearch/oneSearchStat.tpl.html", []).run(["$templateCach
     "        </tr>\n" +
     "        </thead>\n" +
     "        <tbody>\n" +
-    "        <tr ng-repeat=\"stat in statList)\">\n" +
+    "        <tr ng-repeat=\"stat in statList\">\n" +
     "            <td>\n" +
     "                {{$index}}\n" +
     "            </td>\n" +
@@ -46079,7 +46079,7 @@ angular.module('manage.manageOneSearch', [])
                 $animate.enter(spinner, titleElm[0]);
 
                 var loadingWatcher = scope.$watch(
-                    'recList.RecList',
+                    'recList.length',
                     function(newVal, oldVal){
                         if (newVal != oldVal){
                             $animate.leave(spinner);
