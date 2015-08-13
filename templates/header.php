@@ -79,7 +79,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                 <div class="yamm-content" ng-controller="OneSearchCtrl">
                                     <form ng-submit="search()" class="onesearch-form">
 
-                                        <suggest-one-search prompt="Search all library resources" model="searchText" search="search">
+                                        <suggest-one-search prompt="Search journals, articles, books, website, people & more" model="searchText" search="search">
 
                                     </form>
                                 </div>
