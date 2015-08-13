@@ -8102,7 +8102,7 @@ angular.module('angular-carousel.shifty', [])
 
 })();
 ;/**
- * @license AngularJS v1.4.3
+ * @license AngularJS v1.4.4
  * (c) 2010-2015 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -46079,7 +46079,7 @@ angular.module('manage.manageOneSearch', [])
                 $animate.enter(spinner, titleElm[0]);
 
                 var loadingWatcher = scope.$watch(
-                    'recList.length',
+                    'recList.RecList.length',
                     function(newVal, oldVal){
                         if (newVal != oldVal){
                             $animate.leave(spinner);
