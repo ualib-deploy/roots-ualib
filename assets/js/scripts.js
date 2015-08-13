@@ -46071,23 +46071,6 @@ angular.module('manage.manageOneSearch', [])
             scope: {},
             controller: 'mainOneSearchCtrl',
             link: function(scope, elm, attrs){
-                //Preload the spinner element
-                var spinner = angular.element('<div id="loading-bar-spinner"><div class="spinner-icon"></div></div>');
-                //Preload the location of the boxe's title element (needs to be more dynamic in the future)
-                var titleElm = elm.find('h2');
-                //Enter the spinner animation, appending it to the title element
-                $animate.enter(spinner, titleElm[0]);
-
-                var loadingWatcher = scope.$watch(
-                    'recList.RecList.length',
-                    function(newVal, oldVal){
-                        if (newVal != oldVal){
-                            $animate.leave(spinner);
-                            console.log("Rec list loaded");
-                        }
-                    },
-                    true
-                );
             },
             templateUrl: 'manageOneSearch/mainOneSearch.tpl.html'
         };
@@ -46116,7 +46099,6 @@ angular.module('manage.manageOneSearch', [])
 
             osFactory.getData('reclist')
                 .success(function(data) {
-                    console.dir(data);
                     $scope.recList = data;
                 })
                 .error(function(data, status, headers, config) {
@@ -46196,7 +46178,6 @@ angular.module('manage.manageOneSearch', [])
 
             osFactory.getData('statistics')
                 .success(function(data) {
-                    console.dir(data);
                     $scope.statList = data;
                 })
                 .error(function(data, status, headers, config) {
