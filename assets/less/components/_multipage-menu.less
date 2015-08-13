@@ -4,6 +4,12 @@
     .nav-stacked;
 
     > li {
+      &.active {
+        > a {
+          border-left: 2px solid @brand-primary;
+          background-color: darken(@gray-lighter, 5%);
+        }
+      }
       > a {
         font-size: 1.2em;
         border-left: 2px solid transparent;
@@ -14,26 +20,21 @@
            background-color: darken(@gray-lighter, 5%);
          }
 
-        &.active {
-          > a {
-            border-left: 2px solid @brand-primary;
-            background-color: darken(@gray-lighter, 5%);
-          }
-        }
       }
       > ul {
         > li {
           margin-left: 17px;
+
+          &.active {
+            > a {
+              border-left: 2px solid @gray-light;
+            }
+          }
+
           > a {
             &:hover,
             &:focus {
               border-left: 2px solid @gray-light;
-            }
-
-            &.active {
-              > a {
-                border-left: 2px solid @gray-light;
-              }
             }
           }
         }

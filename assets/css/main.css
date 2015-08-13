@@ -9048,6 +9048,10 @@ a.service-card:focus {
   margin-top: 2px;
   margin-left: 0;
 }
+.multipage-menu ul > li.active > a {
+  border-left: 2px solid #993333;
+  background-color: #ececec;
+}
 .multipage-menu ul > li > a {
   font-size: 1.2em;
   border-left: 2px solid transparent;
@@ -9057,18 +9061,14 @@ a.service-card:focus {
   border-left: 2px solid #993333;
   background-color: #ececec;
 }
-.multipage-menu ul > li > a.active > a {
-  border-left: 2px solid #993333;
-  background-color: #ececec;
-}
 .multipage-menu ul > li > ul > li {
   margin-left: 17px;
 }
-.multipage-menu ul > li > ul > li > a:hover,
-.multipage-menu ul > li > ul > li > a:focus {
+.multipage-menu ul > li > ul > li.active > a {
   border-left: 2px solid #999999;
 }
-.multipage-menu ul > li > ul > li > a.active > a {
+.multipage-menu ul > li > ul > li > a:hover,
+.multipage-menu ul > li > ul > li > a:focus {
   border-left: 2px solid #999999;
 }
 .comment-list ol {
@@ -9117,28 +9117,12 @@ body {
 }
 .main {
   padding-bottom: 60px;
-  position: relative;
-  min-height: 1px;
-  padding-left: 15px;
-  padding-right: 15px;
-}
-@media (min-width: 768px) {
-  .main {
-    float: left;
-    width: 100%;
-  }
-}
-.sidebar-primary .main {
-  position: relative;
-  min-height: 1px;
-  padding-left: 15px;
-  padding-right: 15px;
-}
-@media (min-width: 768px) {
-  .sidebar-primary .main {
-    float: left;
-    width: 66.66666667%;
-  }
+  /*@media (min-width: @screen-md-min){
+    .make-sm-column(@main-sm-columns);
+    .sidebar-primary & {
+      .make-sm-column(@main-sm-columns - @sidebar-sm-columns);
+    }
+  }*/
 }
 .sidebar {
   position: relative;
@@ -9206,12 +9190,20 @@ div[role="document"] {
   background-size: cover;
   background-color: transparent;
 }
-.front-page .home-slice {
-  padding: 0 15px 15px 15px;
+@media (min-width: 992px) {
+  .front-page .home-slice {
+    padding: 0 15px 15px 15px;
+  }
 }
 .front-page-card {
   background-color: rgba(255, 255, 255, 0.9);
   padding: 0 15px 15px 15px;
+}
+@media (min-width: 992px) {
+  .front-page-card {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
 }
 div[ng-view].ng-enter {
   -webkit-animation: Fade-Enter-Anime 0.2s;
@@ -9352,36 +9344,42 @@ footer > .sub-footer {
   padding: 15px 0;
   text-align: center;
 }
-.home-slice-main {
+/*.home-slice-main {
   width: 100%;
   background-color: transparent;
   background-position: 45% 45%;
   background-repeat: no-repeat;
-  /*background-attachment: fixed;*/
-  -webkit-background-size: cover;
-          background-size: cover;
+  */
+/*background-attachment: fixed;*/
+/*
+  background-size: cover;
   background-image: url('/wp-content/uploads/2014/11/quad-sunset-lg.jpg');
-  /*background-blend-mode: screen;
+  */
+/*background-blend-mode: screen;
   background-color: rgba(102,0,0,.3);*/
-}
-.slice,
-.head-slice {
+/*
+}*/
+/*.slice, .head-slice{
   padding-top: 15px;
   padding-bottom: 30px;
   margin-bottom: 15px;
 }
-.slice {
+
+.slice{
   text-align: center;
-}
-.slice:nth-child(odd) {
-  background-color: #f0f0f0;
-}
-.slice > h2 {
-  margin-bottom: 60px;
-}
-.slice > .nav-pills {
-  margin-bottom: 15px;
-}
+
+  &:nth-child(odd){
+    background-color: #f0f0f0;
+  }
+
+  > h2{
+    margin-bottom: 60px;
+  }
+
+  > .nav-pills{
+    margin-bottom: 15px;
+  }
+}*/
 .step-card {
   font-size: 16px;
   padding: 15px;

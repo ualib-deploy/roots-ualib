@@ -8761,7 +8761,9 @@ angular.module('duScroll', [
   //Which events on the container (such as body) should cancel scroll animations
   .value('duScrollCancelOnEvents', 'scroll mousedown mousewheel touchmove keydown')
   //Whether or not to activate the last scrollspy, when page/container bottom is reached
-  .value('duScrollBottomSpy', false);
+  .value('duScrollBottomSpy', false)
+  //Active class name
+  .value('duScrollActiveClass', 'active');
 
 
 angular.module('duScroll.scrollHelpers', ['duScroll.requestAnimation'])
@@ -8979,7 +8981,7 @@ angular.module('duScroll.requestAnimation', ['duScroll.polyfill'])
 
 
 angular.module('duScroll.spyAPI', ['duScroll.scrollContainerAPI'])
-.factory('spyAPI', ["$rootScope", "$timeout", "$window", "$document", "scrollContainerAPI", "duScrollGreedy", "duScrollSpyWait", "duScrollBottomSpy", function($rootScope, $timeout, $window, $document, scrollContainerAPI, duScrollGreedy, duScrollSpyWait, duScrollBottomSpy) {
+.factory('spyAPI', ["$rootScope", "$timeout", "$window", "$document", "scrollContainerAPI", "duScrollGreedy", "duScrollSpyWait", "duScrollBottomSpy", "duScrollActiveClass", function($rootScope, $timeout, $window, $document, scrollContainerAPI, duScrollGreedy, duScrollSpyWait, duScrollBottomSpy, duScrollActiveClass) {
   'use strict';
 
   var createScrollHandler = function(context) {
@@ -9025,11 +9027,11 @@ angular.module('duScroll.spyAPI', ['duScroll.scrollContainerAPI'])
       }
       if(currentlyActive === toBeActive || (duScrollGreedy && !toBeActive)) return;
       if(currentlyActive) {
-        currentlyActive.$element.removeClass('active');
+        currentlyActive.$element.removeClass(duScrollActiveClass);
         $rootScope.$broadcast('duScrollspy:becameInactive', currentlyActive.$element);
       }
       if(toBeActive) {
-        toBeActive.$element.addClass('active');
+        toBeActive.$element.addClass(duScrollActiveClass);
         $rootScope.$broadcast('duScrollspy:becameActive', toBeActive.$element);
       }
       context.currentlyActive = toBeActive;
@@ -41062,14 +41064,29 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
   $templateCache.put("hours-locations/hours-locations.tpl.html",
     "<!--<script src='//maps.googleapis.com/maps/api/js?sensor=false&key=AIzaSyCdXuKwZiDx5W2uP8plV5d-o-jLQ5UQtIQ&mid=z4A8-271j5C8.kowwE312jycE'></script>-->\n" +
     "<div class=\"jumbotron bg-transparent\">\n" +
-    "    <div class=\"container\">\n" +
-    "        <h1>Hours &amp; Locations</h1>\n" +
-    "        <h2>{{library}}</h2>\n" +
-    "    </div>\n" +
+    "    <h1>Hours &amp; Locations</h1>\n" +
+    "    <h2>{{library}}</h2>\n" +
     "</div>\n" +
     "<div class=\"container\">\n" +
-    "    <div class=\"row hours-locations-container\">\n" +
-    "        <div class=\"col-md-9\">\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-3 col-md-push-9\">\n" +
+    "            <div>\n" +
+    "                <ul class=\"nav nav-pills nav-stacked hours-locations-menu\">\n" +
+    "                    <li><a href=\"#\" hours-href=\"{library: 'gorgas', month: 0}\">Gorgas</a>\n" +
+    "                        <ul class=\"nav nav-pills nav-stacked\">\n" +
+    "                            <li><a href=\"#\" hours-href=\"{library: 'music', month: 0}\">Music Library</a></li>\n" +
+    "                            <li><a href=\"#\" hours-href=\"{library: 'media', month: 0}\">Sanford Media Center</a></li>\n" +
+    "                            <li><a href=\"#\" hours-href=\"{library: 'williams', month: 0}\">Williams Americana Collection</a></li>\n" +
+    "                        </ul>\n" +
+    "                    </li>\n" +
+    "                    <li><a href=\"#\" hours-href=\"{library: 'rodgers', month: 0}\">Rodgers</a></li>\n" +
+    "                    <li><a href=\"#\" hours-href=\"{library: 'mclure', month: 0}\">McLure</a></li>\n" +
+    "                    <li><a href=\"#\" hours-href=\"{library: 'hoole', month: 0}\">Hoole</a></li>\n" +
+    "                    <li><a href=\"#\" hours-href=\"{library: 'bruno', month: 0}\">Bruno</a></li>\n" +
+    "                </ul>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-9 col-md-pull-3\">\n" +
     "            <div class=\"row\">\n" +
     "                <div class=\"col-md-12\">\n" +
     "                    <div class=\"hours-calendar\"></div>\n" +
@@ -41119,25 +41136,6 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
     "                        </div>\n" +
     "                    </div>\n" +
     "                </div>\n" +
-    "            </div>\n" +
-    "\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-3 hidden-xs\">\n" +
-    "\n" +
-    "            <div ui-scrollfix bound-by-parent>\n" +
-    "                <ul class=\"nav nav-pills nav-stacked hours-locations-menu\">\n" +
-    "                    <li><a href=\"#\" hours-href=\"{library: 'gorgas', month: 0}\">Gorgas</a>\n" +
-    "                        <ul class=\"nav nav-pills nav-stacked\">\n" +
-    "                            <li><a href=\"#\" hours-href=\"{library: 'music', month: 0}\">Music Library</a></li>\n" +
-    "                            <li><a href=\"#\" hours-href=\"{library: 'media', month: 0}\">Sanford Media Center</a></li>\n" +
-    "                            <li><a href=\"#\" hours-href=\"{library: 'williams', month: 0}\">Williams Americana Collection</a></li>\n" +
-    "                        </ul>\n" +
-    "                    </li>\n" +
-    "                    <li><a href=\"#\" hours-href=\"{library: 'rodgers', month: 0}\">Rodgers</a></li>\n" +
-    "                    <li><a href=\"#\" hours-href=\"{library: 'mclure', month: 0}\">McLure</a></li>\n" +
-    "                    <li><a href=\"#\" hours-href=\"{library: 'hoole', month: 0}\">Hoole</a></li>\n" +
-    "                    <li><a href=\"#\" hours-href=\"{library: 'bruno', month: 0}\">Bruno</a></li>\n" +
-    "                </ul>\n" +
     "            </div>\n" +
     "\n" +
     "        </div>\n" +
@@ -41470,7 +41468,7 @@ angular.module('ualib.hours')
         var libChangeListener;
 
         uiGmapGoogleMapApi.then(function(maps) {
-            updateMap();
+
             //console.log(maps);
             libChangeListener = $scope.$on('hoursLoaded', function(){
                 updateMap();
@@ -50121,6 +50119,34 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "</div>\n" +
     "");
 }]);
+;/*
+(function() {
+    tinymce.create('tinymce.plugins.typekit', {
+        setup : function(ed) {
+            ed.onInit.add(function(ed, evt) {
+
+                // Load a script from a specific URL using the global script loader
+                tinymce.ScriptLoader.load('somescript.js');
+
+                // Load a script using a unique instance of the script loader
+                var scriptLoader = new tinymce.dom.ScriptLoader();
+
+                scriptLoader.load('somescript.js');
+
+            });
+        },
+    getInfo: function() {
+    return {
+        longname:  'TypeKit',
+        author:    'Thomas Griffin',
+        authorurl: 'https://thomasgriffin.io',
+        infourl:   'https://twitter.com/jthomasgriffin',
+        version:   '1.0'
+    };
+}
+});
+tinymce.PluginManager.add('typekit', tinymce.plugins.typekit);
+})();*/
 ;/* ========================================================================
  * DOM-based Routing
  * Based on http://goo.gl/EUTi53 by Paul Irish

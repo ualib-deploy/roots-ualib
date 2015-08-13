@@ -33,6 +33,7 @@
     "grunt-html2js": "~0.3.0",
     "grunt-bower-concat": "~0.4.0",
     "grunt-less-to-sass": "0.0.10",
-    "grunt-ng-annotate": "~1.0.1"
+    "grunt-ng-annotate": "~1.0.1",
+    "grunt-text-replace": "~0.4.0"
   }
 }
