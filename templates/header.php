@@ -415,7 +415,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                     </div>
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="<?php echo site_url(); ?>/forms/reference-request/">
+                                            <a class="service-card" href="<?php echo site_url(); ?>/using-the-library/library-instruction/request-a-research-consultation/">
                                                 <span class="fa fa-comments-o"></span>
                                                 <h4>Request a Research Consultation</h4>
                                                 <p>Meet with a specialist for in-depth research assistance</p>
