@@ -39,7 +39,7 @@
                   <li role="presentation"><a role="menuitem" tabindex="-1" href="http://cis.ua.edu/undergraduates/resources/readingroom/">William E. Winter Reading Room</a></li>
               </ul>
               <button class="btn btn-default btn-xs"  type="button" ng-click="isCollapsed = !isCollapsed">
-                  {{!isCollapsed ? 'Other' : 'Less'}} Libraries...
+                  {{!isCollapsed ? 'Show More' : 'Show Less'}} Libraries...
               </button>
 
         </div>
