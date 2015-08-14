@@ -4697,7 +4697,7 @@ angular.module('ui.utils',  [
  * AngularJS file upload/drop directive and service with progress and abort
  * FileAPI Flash shim for old browsers not supporting FormData
  * @author  Danial  <danial.farid@gmail.com>
- * @version 6.0.4
+ * @version 6.1.2
  */
 
 (function () {
@@ -5125,7 +5125,7 @@ if (!window.FileReader) {
 /**!
  * AngularJS file upload/drop directive and service with progress and abort
  * @author  Danial  <danial.farid@gmail.com>
- * @version 6.0.4
+ * @version 6.1.2
  */
 
 if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
@@ -5146,7 +5146,7 @@ if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
 
 var ngFileUpload = angular.module('ngFileUpload', []);
 
-ngFileUpload.version = '6.0.4';
+ngFileUpload.version = '6.1.2';
 ngFileUpload.defaults = {};
 
 ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, $timeout) {
@@ -5383,6 +5383,7 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
     /** @namespace attr.ngfMultiple */
     /** @namespace attr.ngfCapture */
     /** @namespace attr.ngfAccept */
+    /** @namespace attr.ngfValidate */
     /** @namespace attr.ngfMaxSize */
     /** @namespace attr.ngfMinSize */
     /** @namespace attr.ngfResetOnClick */
@@ -5399,7 +5400,7 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
     });
 
     var disabled = false;
-    if (getAttr(attr, 'ngfSelect').search(/\W+$files\W+/) === -1) {
+    if (getAttr(attr, 'ngfSelect').search(/\W+\$files\W+/) === -1) {
       scope.$watch(getAttr(attr, 'ngfSelect'), function (val) {
         disabled = val === false;
       });
@@ -5425,6 +5426,7 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
               rejFiles.push(file);
             }
           }
+          elem.$$ngfHasFile = true;
           updateModel($parse, $timeout, scope, ngModel, attr,
             getAttr(attr, 'ngfChange') || getAttr(attr, 'ngfSelect'), files, rejFiles, evt);
           if (files.length === 0) evt.target.value = files;
@@ -5482,8 +5484,11 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
     }
 
     function resetModel(evt) {
-      updateModel($parse, $timeout, scope, ngModel, attr,
-        getAttr(attr, 'ngfChange') || getAttr(attr, 'ngfSelect'), [], [], evt, true);
+      if (elem.$$ngfHasFile) {
+        updateModel($parse, $timeout, scope, ngModel, attr,
+          getAttr(attr, 'ngfChange') || getAttr(attr, 'ngfSelect'), [], [], evt, true);
+        delete elem.$$ngfHasFile;
+      }
     }
 
     var initialTouchStartY = 0;
@@ -5590,6 +5595,11 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
       return result;
     }
 
+    var custom = $parse(getAttr(attr, 'ngfValidate'))(scope, {$file: file, $event: evt});
+    if (custom != null && (custom === false || custom.length > 0)) {
+      file.$error = custom ? custom : 'validate';
+      return false;
+    }
     var accept = $parse(getAttr(attr, 'ngfAccept'))(scope, {$file: file, $event: evt});
     var fileSizeMax = $parse(getAttr(attr, 'ngfMaxSize'))(scope, {$file: file, $event: evt}) || 9007199254740991;
     var fileSizeMin = $parse(getAttr(attr, 'ngfMinSize'))(scope, {$file: file, $event: evt}) || -1;
@@ -5738,7 +5748,7 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
     }
 
     var disabled = false;
-    if (getAttr(attr, 'ngfDrop').search(/\W+$files\W+/) === -1) {
+    if (getAttr(attr, 'ngfDrop').search(/\W+\$files\W+/) === -1) {
       scope.$watch(getAttr(attr, 'ngfDrop'), function(val) {
         disabled = val === false;
       });
@@ -50119,34 +50129,6 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "</div>\n" +
     "");
 }]);
-;/*
-(function() {
-    tinymce.create('tinymce.plugins.typekit', {
-        setup : function(ed) {
-            ed.onInit.add(function(ed, evt) {
-
-                // Load a script from a specific URL using the global script loader
-                tinymce.ScriptLoader.load('somescript.js');
-
-                // Load a script using a unique instance of the script loader
-                var scriptLoader = new tinymce.dom.ScriptLoader();
-
-                scriptLoader.load('somescript.js');
-
-            });
-        },
-    getInfo: function() {
-    return {
-        longname:  'TypeKit',
-        author:    'Thomas Griffin',
-        authorurl: 'https://thomasgriffin.io',
-        infourl:   'https://twitter.com/jthomasgriffin',
-        version:   '1.0'
-    };
-}
-});
-tinymce.PluginManager.add('typekit', tinymce.plugins.typekit);
-})();*/
 ;/* ========================================================================
  * DOM-based Routing
  * Based on http://goo.gl/EUTi53 by Paul Irish
