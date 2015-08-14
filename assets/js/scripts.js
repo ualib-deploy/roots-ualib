@@ -36273,8 +36273,9 @@ angular.module("page/templates/page-section.tpl.html", []).run(["$templateCache"
 angular.module("page/templates/page.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("page/templates/page.tpl.html",
     "<div class=\"row\" ng-cloak>\n" +
-    "  <div class=\"col-md-3 col-md-push-9 page-section-menu hidden-sm\">\n" +
-    "    <div ui-scrollfix bound-by-parent>\n" +
+    "    <div class=\"col-md-9\" ng-transclude></div>\n" +
+    "  <div class=\"col-md-3 page-section-menu\">\n" +
+    "    <div ui-scrollfix bound-by-parent class=\"hidden-sm\">\n" +
     "      <ul class=\"nav nav-pills nav-stacked\">\n" +
     "        <li ng-repeat=\"section in menu\" du-scrollspy=\"{{section.link}}\">\n" +
     "          <a ng-href=\"#{{section.link}}\" du-smooth-scroll>\n" +
@@ -36285,7 +36286,6 @@ angular.module("page/templates/page.tpl.html", []).run(["$templateCache", functi
     "      </ul>\n" +
     "    </div>\n" +
     "  </div>\n" +
-    "    <div class=\"col-md-9 col-md-pull-3\" ng-transclude></div>\n" +
     "</div>");
 }]);
 
@@ -36315,7 +36315,7 @@ angular.module("tabs/templates/tabset.tpl.html", []).run(["$templateCache", func
  * angular-ui-bootstrap
  * http://angular-ui.github.io/bootstrap/
 
- * Version: 0.12.1 - 2015-08-11
+ * Version: 0.12.1 - 2015-08-14
  * License: MIT
  */
 angular.module("ui.bootstrap", ["ui.bootstrap.tpls", "ui.bootstrap.transition","ui.bootstrap.collapse","ui.bootstrap.accordion","ui.bootstrap.alert","ui.bootstrap.bindHtml","ui.bootstrap.buttons","ui.bootstrap.dateparser","ui.bootstrap.position","ui.bootstrap.datepicker","ui.bootstrap.pagination","ui.bootstrap.tooltip","ui.bootstrap.popover","ui.bootstrap.timepicker"]);
@@ -38899,14 +38899,14 @@ angular.module('ualib.ui')
       transclude: true,
       replace: true,
       templateUrl: 'page/templates/page.tpl.html',
-      controller: function($scope, $element){
+      controller: ['$scope', '$element', function($scope, $element){
         var menu = $scope.menu = [];
         this.addSection = function(section){
           menu.push(section);
         };
 
         $element.addClass('loaded');
-      }
+      }]
     }
   }])
 
@@ -38980,8 +38980,8 @@ angular.module('ualib.ui').directive('uiScrollfix', [
                     bottomLimit,
                     $target = uiScrollfixTarget && uiScrollfixTarget.$element || angular.element($window);
                 var parent = angular.isDefined(attrs.boundByParent) ? elm.parent() : null;
-                console.log(angular.isDefined(attrs.boundByParent));
-                console.log(attrs);
+               /* console.log(angular.isDefined(attrs.boundByParent));
+                console.log(attrs);*/
 
                 if (!attrs.uiScrollfix) {
                     absolute = false;
@@ -39245,9 +39245,9 @@ angular.module('ualib.ui')
                 //once it inserts the tab's content into the dom
                 onDeselect: '&deselect'
             },
-            controller: function() {
+            controller: [function() {
                 //Empty controller so other directives can require being 'under' a tab
-            },
+            }],
             compile: function(elm, attrs, transclude) {
                 return function postLink(scope, elm, attrs, tabsetCtrl) {
                     scope.$watch('active', function(active) {
@@ -48737,7 +48737,7 @@ angular.module("staff-card/staff-card-list.tpl.html", []).run(["$templateCache",
     "                        <ul class=\"fa-ul\">\n" +
     "                            <li ng-if=\"person.phone\"><span class=\"fa fa-phone fa-li\"></span>{{person.phone}}</li>\n" +
     "                            <li class=\"hidden-xs\" ng-if=\"person.fax\"><span class=\"fa fa-fax fa-li\"></span>{{person.fax}}</li>\n" +
-    "                            <li ng-if=\"person.email\"><span class=\"fa fa-envelope fa-li\"></span>{{person.email}}</li>\n" +
+    "                            <li ng-if=\"person.email\"><span class=\"fa fa-envelope fa-li\"></span><a href=\"mailto:{{person.email}}\">{{person.email}}</a></li>\n" +
     "                        </ul>\n" +
     "                    </div>\n" +
     "                    <div class=\"col-sm-12 subject-specialty hidden-xs\" ng-if=\"person.subjects\">\n" +
@@ -48800,7 +48800,7 @@ angular.module("staff-card/staff-card-md.tpl.html", []).run(["$templateCache", f
     "                    <ul class=\"fa-ul\">\n" +
     "                        <li ng-if=\"staffPerson.phone\"><span class=\"fa fa-phone fa-li\"></span>{{staffPerson.phone}}</li>\n" +
     "                        <li ng-if=\"staffPerson.fax\"><span class=\"fa fa-fax fa-li\"></span>{{staffPerson.fax}}</li>\n" +
-    "                        <li ng-if=\"staffPerson.email\"><span class=\"fa fa-envelope fa-li\"></span>{{staffPerson.email}}</li>\n" +
+    "                        <li ng-if=\"staffPerson.email\"><span class=\"fa fa-envelope fa-li\"></span><a href=\"mailto:{{staffPerson.email}}\">{{staffPerson.email}}</a></li>\n" +
     "                    </ul>\n" +
     "                </div>\n" +
     "            </div>\n" +
@@ -49207,9 +49207,6 @@ angular.module('staffdir', ['ualib.staffdir']);
                 var tpl = 'staff-card/';
 
                 switch (tAttrs.size){
-                    case 'xs':
-                        tpl += 'staff-card-xs.tpl.html';
-                        break;
                     case 'sm':
                         tpl += 'staff-card-sm.tpl.html';
                         break;
