@@ -9048,7 +9048,7 @@ a.service-card:focus {
   margin-top: 2px;
   margin-left: 0;
 }
-.multipage-menu ul > li.active > a {
+.multipage-menu ul > li.active:not(.menu-home) > a {
   border-left: 2px solid #993333;
   background-color: #ececec;
 }
@@ -9064,7 +9064,7 @@ a.service-card:focus {
 .multipage-menu ul > li > ul > li {
   margin-left: 17px;
 }
-.multipage-menu ul > li > ul > li.active > a {
+.multipage-menu ul > li > ul > li.active:not(.menu-home) > a {
   border-left: 2px solid #999999;
 }
 .multipage-menu ul > li > ul > li > a:hover,
