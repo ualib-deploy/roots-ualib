@@ -4,7 +4,7 @@
     .nav-stacked;
 
     > li {
-      &.active {
+      &.active:not(.menu-home) {
         > a {
           border-left: 2px solid @brand-primary;
           background-color: darken(@gray-lighter, 5%);
@@ -25,7 +25,7 @@
         > li {
           margin-left: 17px;
 
-          &.active {
+          &.active:not(.menu-home) {
             > a {
               border-left: 2px solid @gray-light;
             }
