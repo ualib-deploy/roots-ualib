@@ -50117,7 +50117,7 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                <div class=\"front-page-card\">\n" +
     "                    <h2>Events</h2>\n" +
     "                    <div class=\"row\">\n" +
-    "                        <div class=\"animate-repeat\" ng-repeat=\"item in events\" ng-class=\"{'col-md-6': events.length == 2,'col-md-4': events.length == 3, 'col-md-3': events.length == 4}\">\n" +
+    "                        <div class=\"animate-repeat\" ng-repeat=\"item in events\" ng-class=\"{'col-md-12': events.length == 1, 'col-md-6': events.length == 2,'col-md-4': events.length == 3, 'col-md-3': events.length == 4}\">\n" +
     "                            <div news-card=\"item\" news-type=\"event\">\n" +
     "                            </div>\n" +
     "                        </div>\n" +
@@ -50129,6 +50129,34 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "</div>\n" +
     "");
 }]);
+;/*
+(function() {
+    tinymce.create('tinymce.plugins.typekit', {
+        setup : function(ed) {
+            ed.onInit.add(function(ed, evt) {
+
+                // Load a script from a specific URL using the global script loader
+                tinymce.ScriptLoader.load('somescript.js');
+
+                // Load a script using a unique instance of the script loader
+                var scriptLoader = new tinymce.dom.ScriptLoader();
+
+                scriptLoader.load('somescript.js');
+
+            });
+        },
+    getInfo: function() {
+    return {
+        longname:  'TypeKit',
+        author:    'Thomas Griffin',
+        authorurl: 'https://thomasgriffin.io',
+        infourl:   'https://twitter.com/jthomasgriffin',
+        version:   '1.0'
+    };
+}
+});
+tinymce.PluginManager.add('typekit', tinymce.plugins.typekit);
+})();*/
 ;/* ========================================================================
  * DOM-based Routing
  * Based on http://goo.gl/EUTi53 by Paul Irish
@@ -50232,7 +50260,7 @@ $(document).ready(UTIL.loadEvents);
                 $rootScope.appClass = 'front-page';
                 var bgNum = (Math.floor(Math.random() * 1000) % 16) + 1;
                 $rootScope.appStyle = {"background-image": "url('wp-content/themes/roots-ualib/assets/img/quad-sunset-lg_" + bgNum + ".jpg')"};
-                console.log('Background 1.');
+                //console.log('Background 1.');
             }
             $rootScope.appClass += ' webapp';
         });

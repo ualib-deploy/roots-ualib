@@ -267,7 +267,7 @@ module.exports = function(grunt) {
         'autoprefixer:dev',
         'concat'
     ]);
-    grunt.registerTask('build', [
+    grunt.registerTask('live-build', [
         'html2js',
         'jshint',
         'copy',

@@ -23,7 +23,7 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                <div class=\"front-page-card\">\n" +
     "                    <h2>Events</h2>\n" +
     "                    <div class=\"row\">\n" +
-    "                        <div class=\"animate-repeat\" ng-repeat=\"item in events\" ng-class=\"{'col-md-6': events.length == 2,'col-md-4': events.length == 3, 'col-md-3': events.length == 4}\">\n" +
+    "                        <div class=\"animate-repeat\" ng-repeat=\"item in events\" ng-class=\"{'col-md-12': events.length == 1, 'col-md-6': events.length == 2,'col-md-4': events.length == 3, 'col-md-3': events.length == 4}\">\n" +
     "                            <div news-card=\"item\" news-type=\"event\">\n" +
     "                            </div>\n" +
     "                        </div>\n" +

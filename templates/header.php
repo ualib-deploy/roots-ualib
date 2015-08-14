@@ -8,7 +8,6 @@ if (defined('GROUP_ANY_WEBAPP'))
         $showAdminLink = true;
     }
 ?>
-<!-- Dev to Live pull request demo -->
 <header class="page-row" role="banner">
     <nav class="navbar navbar-static-top navbar-mega-inverse" role="navigation">
         <div class="container-fluid">
@@ -80,7 +79,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                 <div class="yamm-content" ng-controller="OneSearchCtrl">
                                     <form ng-submit="search()" class="onesearch-form">
 
-                                        <suggest-one-search prompt="Search journals, articles, books, website, people & more" model="searchText" search="search">
+                                        <suggest-one-search prompt="Search journals, articles, books, website & more" model="searchText" search="search">
 
                                     </form>
                                 </div>
