@@ -235,7 +235,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                 <div class="col-sm-12 col-md-4">
                                                     <a class="service-card" href="<?php echo site_url(); ?>/using-the-library/interlibrary-borrowing/">
                                                         <span class="fa fa-exchange"></span>
-                                                        <h4>Interlibrary Borrowing</h4>
+                                                        <h4>Interlibrary Loan</h4>
                                                         <p>Borrow materials owned by other libraries</p>
                                                     </a>
                                                 </div>
