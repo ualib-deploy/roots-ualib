@@ -224,6 +224,7 @@ if (defined('GROUP_ANY_WEBAPP'))
 
                                                 </ul>
                                             </div>
+                                            
                                             <a class="service-card" href="<?php echo site_url(); ?>/using-the-library/circulation-services/borrowing//">
                                                 <span class="fa fa-book"></span>
                                                 <h4>Borrow, Renew, and Course Reserves</h4>
@@ -233,11 +234,13 @@ if (defined('GROUP_ANY_WEBAPP'))
                                         <div class="col-xs-12 col-sm-6 col-md-9">
                                             <div class="row">
                                                 <div class="col-sm-12 col-md-4">
-                                                    <a class="service-card" href="<?php echo site_url(); ?>/using-the-library/interlibrary-loan/">
-                                                        <span class="fa fa-exchange"></span>
-                                                        <h4>Interlibrary Loan</h4>
-                                                        <p>Borrow materials owned by other libraries</p>
-                                                    </a>
+                                                  <div class="service-list">
+                                                    <h4>Interlibrary Loan</h4>
+                                                        <ul>
+                                                          <li><a href="https://ua.illiad.oclc.org/illiad/">ILL- Borrow materials owned by other libraries</a></li>
+                                                          <li class="menu-computer-availability"><a href="<?php echo site_url(); ?>/using-the-library/interlibrary-loan/">">About interlibrary loan - policies & info</a></li>
+                                                        </ul>
+                                                    </div>
                                                 </div>
                                                 <div class="col-sm-12 col-md-4">
                                                     <a class="service-card" href="<?php echo site_url(); ?>/using-the-library/sanford-media-center/">
