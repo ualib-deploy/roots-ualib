@@ -202,6 +202,15 @@ if (defined('GROUP_ANY_WEBAPP'))
                                             </a>
                                         </div>
                                     </div>
+                                    <div class="row">
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="http://guides.lib.ua.edu/rdmp">
+                                                <span class="fa fa-archive-left"></span>
+                                                <h4>Research Data Services</h4>
+                                                <p>Research data management and curation resources available at the University of Alabama</p>
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
                             </li>
                         </ul>
