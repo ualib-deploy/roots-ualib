@@ -18,18 +18,14 @@
           <div class="col-md-6">
             <div class="card front-page-card">
               <div class="card-heading">
-                <h2>Events</h2>
+                <h2>News</h2>
               </div>
               <div class="card-body">
-                <div class="row">
-                  <div class="animate-repeat" ng-repeat="item in events" ng-class="{'col-md-12': events.length == 1, 'item': events.length == 2,'col-md-4': events.length == 3, 'col-md-3': events.length == 4}">
-                    <div news-card="item" news-type="event">
-                    </div>
-                  </div>
+                <div class="animate-repeat" news-card="item" ng-repeat="item in news">
                 </div>
               </div>
               <div class="card-footer">
-                <a href="http://events.ua.edu/category/22/view/month/" class="more-link">More Events</a>
+                <a href="https://wwwdev2.lib.ua.edu/#/hours" class="more-link">More News</a>
               </div>
             </div>
           </div>
@@ -78,20 +74,26 @@
             </div>
           </div>
 
-          <div class="col-md-6">
+          <div class="col-md-6" ng-if="events">
             <div class="card front-page-card">
-              <div class="card-heading">
-                <h2>News</h2>
-              </div>
+             <div class="card-heading">
+               <h2>Events</h2>
+             </div>
               <div class="card-body">
-                <div class="animate-repeat" news-card="item" ng-repeat="item in news">
+                <div class="row">
+                  <div class="animate-repeat" ng-repeat="item in events" ng-class="{'col-md-12': events.length == 1, 'item': events.length == 2,'col-md-4': events.length == 3, 'col-md-3': events.length == 4}">
+                    <div news-card="item" news-type="event">
+                    </div>
+                  </div>
                 </div>
               </div>
               <div class="card-footer">
-                <a href="https://wwwdev2.lib.ua.edu/#/hours" class="more-link">More News</a>
+                <a href="http://events.ua.edu/category/22/view/month/" class="more-link">More Events</a>
               </div>
             </div>
           </div>
+
+
         </div>
     </div>
 
