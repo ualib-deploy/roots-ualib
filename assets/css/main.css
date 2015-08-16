@@ -8923,10 +8923,11 @@ button.close {
 }
 .service-card .fa,
 .service-list .fa {
-  display: block;
+  width: 1.28571429em;
+  text-align: center;
+  line-height: .7em;
   position: absolute;
-  top: 30px;
-  font-size: 30px;
+  font-size: 1.8em;
   color: #666666;
 }
 .service-card > h1,
@@ -8942,6 +8943,7 @@ button.close {
 .service-card h6,
 .service-list h6 {
   color: #993333;
+  margin-top: 0;
   margin-bottom: 0;
   margin-left: 45px;
 }
@@ -8956,24 +8958,35 @@ a.service-card:focus {
   text-decoration: none;
   color: #333333;
 }
-.service-list > h1,
-.service-list h2,
-.service-list h3,
-.service-list h4,
-.service-list h5,
-.service-list h6 {
-  margin-top: 15px;
-}
 .service-list > ul {
   list-style-type: none;
   padding: 0;
   margin-top: 5px;
   margin-left: 45px;
 }
+.service-list > ul > li {
+  display: table;
+}
+.service-list > ul > li:before {
+  display: inline-block;
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-transform: translate(0, 0);
+      -ms-transform: translate(0, 0);
+       -o-transform: translate(0, 0);
+          transform: translate(0, 0);
+  display: table-cell;
+  content: "\f054";
+  color: #999999;
+  margin-right: 5px;
+}
 .service-list > ul > li > a {
+  display: table-cell;
   color: #333333;
   position: relative;
-  display: block;
   padding: 5px;
   font-size: 16px;
 }
@@ -9171,7 +9184,7 @@ body {
   min-height: 100%;
 }
 div[role="document"] {
-  min-height: 600px;
+  min-height: 500px;
 }
 .front-page > .wrap main,
 .bento > .wrap main {
@@ -9190,20 +9203,30 @@ div[role="document"] {
   background-size: cover;
   background-color: transparent;
 }
-@media (min-width: 992px) {
-  .front-page .home-slice {
-    padding: 0 15px 15px 15px;
-  }
+.front-page .home-slice {
+  padding: 0 15px 30px 15px;
 }
 .front-page-card {
   background-color: rgba(255, 255, 255, 0.9);
-  padding: 0 15px 15px 15px;
+  padding: 15px;
+  margin-bottom: 15px;
+  position: relative;
+  display: block;
 }
-@media (min-width: 992px) {
-  .front-page-card {
-    padding-left: 5px;
-    padding-right: 5px;
-  }
+.front-page-card h1,
+.front-page-card h2,
+.front-page-card h3,
+.front-page-card h4,
+.front-page-card h5,
+.front-page-card h6 {
+  margin-top: 0;
+}
+.front-page-card .service-card {
+  border: 1px solid transparent;
+}
+.front-page-card .service-card:hover {
+  border-radius: 4px;
+  border-color: #993333;
 }
 div[ng-view].ng-enter {
   -webkit-animation: Fade-Enter-Anime 0.2s;

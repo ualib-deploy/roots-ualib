@@ -82,9 +82,7 @@ a.service-card {
 //
 // Styleguide components.service_cards.lists
 .service-list {
-  > h1,h2,h3,h4,h5,h6 {
-    margin-top: 15px;
-  }
+
 
   > ul {
     list-style-type: none;
@@ -92,20 +90,37 @@ a.service-card {
     margin-top: 5px;
     margin-left: 45px;
 
-    > li > a {
-      color: @gray-dark;
-      position: relative;
-      display: block;
-      padding: 5px;
-      font-size: 16px;
 
-      &:hover,
-      &:active,
-      &:focus {
-        background-color: darken(@gray-lighter, 5%);
-        text-decoration: none;
+    > li {
+      display: table;
+
+      &:before {
+        .fa-icon();
+        display: table-cell;
+        content: @fa-var-chevron-right;
+        color: @gray-light;
+        margin-right: 5px;
+      }
+
+
+      > a {
+        display: table-cell;
         color: @gray-dark;
+        position: relative;
+        padding: 5px;
+        font-size: 16px;
+
+
+
+        &:hover,
+        &:active,
+        &:focus {
+          background-color: darken(@gray-lighter, 5%);
+          text-decoration: none;
+          color: @gray-dark;
+        }
       }
     }
+
   }
 }
