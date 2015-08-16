@@ -9206,20 +9206,53 @@ div[role="document"] {
 .front-page .home-slice {
   padding: 0 15px 30px 15px;
 }
-.front-page-card {
-  background-color: rgba(255, 255, 255, 0.9);
-  padding: 15px;
-  margin-bottom: 15px;
+.front-page .home-slice > .row {
+  -moz-column-width: 37em;
+  -webkit-column-width: 37em;
+  -moz-column-gap: .5em;
+  -webkit-column-gap: .5em;
+}
+.front-page .home-slice > .row > .col-md-6 {
+  display: inline-block;
+  padding: .33rem;
+  width: 100%;
+  float: none;
+}
+.front-page .home-slice > .row > .col-md-6 .front-page-card {
   position: relative;
   display: block;
 }
-.front-page-card h1,
-.front-page-card h2,
-.front-page-card h3,
-.front-page-card h4,
-.front-page-card h5,
-.front-page-card h6 {
+.card {
+  margin-bottom: 15px;
+}
+.card > .card-heading h1,
+.card > .card-heading h2,
+.card > .card-heading h3,
+.card > .card-heading h4,
+.card > .card-heading h5,
+.card > .card-heading h6 {
   margin-top: 0;
+}
+.card > .card-body {
+  padding: 15px;
+}
+.card > .card-footer > a {
+  display: block;
+  text-align: center;
+  font-size: 1.45em;
+  padding: 5px;
+  color: #996060;
+  border: 1px solid transparent;
+}
+.card > .card-footer > a:hover,
+.card > .card-footer > a:active {
+  color: #993333;
+  border-top-color: #996060;
+  background-color: #f6f6f6;
+  text-decoration: none;
+}
+.front-page-card {
+  background-color: rgba(255, 255, 255, 0.9);
 }
 .front-page-card .service-card {
   border: 1px solid transparent;
