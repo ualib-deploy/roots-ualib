@@ -355,7 +355,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                             <a class="service-card" href="<?php echo site_url(); ?>/about/library-annex/">
                                                 <span class="fa fa-building"></span>
                                                 <h4>Library Annex</h4>
-                                                <p>Supplemental library collections located off campus</p>
+                                                <p>Library collections located off campus</p>
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
