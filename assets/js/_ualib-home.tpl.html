@@ -13,24 +13,24 @@
                 <a href="https://wwwdev2.lib.ua.edu/#/hours" class="more-link">All Hours</a>
               </div>
             </div>
-          </div>
 
-          <div class="col-md-6">
-            <div class="card front-page-card">
+            <div class="card front-page-card" ng-if="events">
               <div class="card-heading">
-                <h2>News</h2>
+                <h2>Events</h2>
               </div>
               <div class="card-body">
-                <div class="animate-repeat" news-card="item" ng-repeat="item in news">
+                <div news-card="item" news-type="event" ng-repeat="item in events">
                 </div>
               </div>
               <div class="card-footer">
-                <a href="https://wwwdev2.lib.ua.edu/#/news-exhibits" class="more-link">More News</a>
+                <a href="http://events.ua.edu/category/22/view/month/" class="more-link">More Events</a>
               </div>
             </div>
           </div>
 
           <div class="col-md-6">
+
+
             <div class="card front-page-card">
               <div class="card-body">
                 <div class="row">
@@ -77,24 +77,20 @@
                 </div>
               </div>
             </div>
-          </div>
 
-          <div class="col-md-6" ng-if="events">
             <div class="card front-page-card">
-             <div class="card-heading">
-               <h2>Events</h2>
-             </div>
+              <div class="card-heading">
+                <h2>News</h2>
+              </div>
               <div class="card-body">
-                <div news-card="item" news-type="event" ng-repeat="item in events">
+                <div class="animate-repeat" news-card="item" ng-repeat="item in news">
                 </div>
               </div>
               <div class="card-footer">
-                <a href="http://events.ua.edu/category/22/view/month/" class="more-link">More Events</a>
+                <a href="https://wwwdev2.lib.ua.edu/#/news-exhibits" class="more-link">More News</a>
               </div>
             </div>
           </div>
-
-
         </div>
     </div>
 
