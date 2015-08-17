@@ -9213,22 +9213,6 @@ div[role="document"] {
 .front-page .home-slice {
   padding: 0 15px 30px 15px;
 }
-.front-page .home-slice > .row {
-  -moz-column-width: 37em;
-  -webkit-column-width: 37em;
-  -moz-column-gap: .5em;
-  -webkit-column-gap: .5em;
-}
-.front-page .home-slice > .row > .col-md-6 {
-  display: inline-block;
-  padding: .33rem;
-  width: 100%;
-  float: none;
-}
-.front-page .home-slice > .row > .col-md-6 .front-page-card {
-  position: relative;
-  display: block;
-}
 .card {
   margin-bottom: 15px;
 }

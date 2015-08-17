@@ -50249,24 +50249,24 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                <a href=\"https://wwwdev2.lib.ua.edu/#/hours\" class=\"more-link\">All Hours</a>\n" +
     "              </div>\n" +
     "            </div>\n" +
-    "          </div>\n" +
     "\n" +
-    "          <div class=\"col-md-6\">\n" +
-    "            <div class=\"card front-page-card\">\n" +
+    "            <div class=\"card front-page-card\" ng-if=\"events\">\n" +
     "              <div class=\"card-heading\">\n" +
-    "                <h2>News</h2>\n" +
+    "                <h2>Events</h2>\n" +
     "              </div>\n" +
     "              <div class=\"card-body\">\n" +
-    "                <div class=\"animate-repeat\" news-card=\"item\" ng-repeat=\"item in news\">\n" +
+    "                <div news-card=\"item\" news-type=\"event\" ng-repeat=\"item in events\">\n" +
     "                </div>\n" +
     "              </div>\n" +
     "              <div class=\"card-footer\">\n" +
-    "                <a href=\"https://wwwdev2.lib.ua.edu/#/news-exhibits\" class=\"more-link\">More News</a>\n" +
+    "                <a href=\"http://events.ua.edu/category/22/view/month/\" class=\"more-link\">More Events</a>\n" +
     "              </div>\n" +
     "            </div>\n" +
     "          </div>\n" +
     "\n" +
     "          <div class=\"col-md-6\">\n" +
+    "\n" +
+    "\n" +
     "            <div class=\"card front-page-card\">\n" +
     "              <div class=\"card-body\">\n" +
     "                <div class=\"row\">\n" +
@@ -50313,24 +50313,20 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                </div>\n" +
     "              </div>\n" +
     "            </div>\n" +
-    "          </div>\n" +
     "\n" +
-    "          <div class=\"col-md-6\" ng-if=\"events\">\n" +
     "            <div class=\"card front-page-card\">\n" +
-    "             <div class=\"card-heading\">\n" +
-    "               <h2>Events</h2>\n" +
-    "             </div>\n" +
+    "              <div class=\"card-heading\">\n" +
+    "                <h2>News</h2>\n" +
+    "              </div>\n" +
     "              <div class=\"card-body\">\n" +
-    "                <div news-card=\"item\" news-type=\"event\" ng-repeat=\"item in events\">\n" +
+    "                <div class=\"animate-repeat\" news-card=\"item\" ng-repeat=\"item in news\">\n" +
     "                </div>\n" +
     "              </div>\n" +
     "              <div class=\"card-footer\">\n" +
-    "                <a href=\"http://events.ua.edu/category/22/view/month/\" class=\"more-link\">More Events</a>\n" +
+    "                <a href=\"https://wwwdev2.lib.ua.edu/#/news-exhibits\" class=\"more-link\">More News</a>\n" +
     "              </div>\n" +
     "            </div>\n" +
     "          </div>\n" +
-    "\n" +
-    "\n" +
     "        </div>\n" +
     "    </div>\n" +
     "\n" +
