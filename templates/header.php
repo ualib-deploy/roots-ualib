@@ -188,11 +188,15 @@ if (defined('GROUP_ANY_WEBAPP'))
                                             </div>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="<?php echo site_url(); ?>/research-tools/refworks/">
-                                                <span class="fa fa-folder"></span>
-                                                <h4>RefWorks</h4>
-                                                <p>Save citations, organize your research, and create bibliographies</p>
-                                            </a>
+                                          <div class="service-list">
+                                            <span class="fa fa-folder"></span>
+                                            <h4>Citation Managers</h4>
+                                            <p>Save citations, organize your research, and create bibliographies</p>
+                                            <ul>
+                                                    <li class="menu-refworks"><a href="<?php echo site_url(); ?>/research-tools/refworks/">Refworks</a></li>
+                                                    <li class="menu-endnote"><a href="http://oit.ua.edu/oit/services/software-licensing/endnote/">Endnote</a></li>
+                                            </ul>
+                                            </div>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="http://guides.lib.ua.edu/rdmp">
@@ -201,6 +205,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                 <p>Research data management and curation resources available at the University of Alabama</p>
                                             </a>
                                         </div>
+                              
                                     </div>
                                 </div>
                             </li>
