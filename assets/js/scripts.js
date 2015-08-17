@@ -48729,6 +48729,8 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
 
         var filterWatcher = $scope.$watch('vid', function(newVal, oldVal){
             var filtered = videos;
+            console.log('NewVal: ');
+            console.dir(newVal);
 
             filtered = $filter('filter')(filtered, newVal.genre, function(actual, expected){
                 console.log('Actual: ' + actual);
