@@ -96,7 +96,12 @@
   <div class="sub-footer">
     <div class="container">
       University Libraries • Box 870266 • Tuscaloosa, AL 35487-0266 • (205) 348-6047
-        <div> <a href="http://www.ua.edu/disclaimer.html">Disclaimer</a>
+        <div>
+            <a href="http://www.ua.edu/">University of Alabama</a>
+            •
+            <a href="http://www.lib.ua.edu/">University Libraries</a>
+            •
+            <a href="http://www.ua.edu/disclaimer.html">Disclaimer</a>
             •
             <a href="http://www.ua.edu/privacy.html">Privacy</a>
             •

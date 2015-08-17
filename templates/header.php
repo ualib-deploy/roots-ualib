@@ -176,7 +176,6 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                 </ul>
                                             </div>
                                         </div>
-
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <div class="service-list">
                                                 <span class="fa fa-search-plus"></span>
@@ -188,7 +187,6 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                 </ul>
                                             </div>
                                         </div>
-
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="<?php echo site_url(); ?>/research-tools/refworks/">
                                                 <span class="fa fa-folder"></span>
@@ -196,15 +194,6 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                 <p>Save citations, organize your research, and create bibliographies</p>
                                             </a>
                                         </div>
-                                        <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="<?php echo site_url(); ?>/research-tools/citation-finder/">
-                                                <span class="fa fa-quote-left"></span>
-                                                <h4>Citation Finder</h4>
-                                                <p>A quick tool to help you locate articles with citation information</p>
-                                            </a>
-                                        </div>
-                                    </div>
-                                    <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="http://guides.lib.ua.edu/rdmp">
                                                 <span class="fa fa-archive"></span>
