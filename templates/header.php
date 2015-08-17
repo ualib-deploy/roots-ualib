@@ -77,17 +77,19 @@ if (defined('GROUP_ANY_WEBAPP'))
                         <ul class="dropdown-menu onsearch-box">
                             <li>
                                 <div class="yamm-content" ng-controller="OneSearchCtrl">
-                                    <form ng-submit="search()" class="onesearch-form">
+                                    <div class="container">
+                                      <form ng-submit="search()" class="onesearch-form">
 
                                         <suggest-one-search prompt="Search journals, articles, books, website & more" model="searchText" search="search">
 
-                                    </form>
+                                      </form>
+                                    </div>
                                 </div>
                             </li>
                         </ul>
                     </li>
                     <li class="dropdown">
-                        <button type="button" class="dropdown-toggle navbar-toggle collapsed icon-only"ng-click="mainNavbarCollapsed = !mainNavbarCollapsed">
+                        <button type="button" class="dropdown-toggle navbar-toggle collapsed icon-only" ng-click="mainNavbarCollapsed = !mainNavbarCollapsed">
                             <span class="sr-only">Toggle navigation</span>
                             <span class="fa fa-bars"></span>
                         </button>

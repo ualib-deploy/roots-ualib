@@ -8983,19 +8983,21 @@ a.service-card:focus {
   color: #999999;
   margin-right: 5px;
 }
+.service-list > ul > li:hover:before,
+.service-list > ul > li:focus:before {
+  color: #732626;
+}
 .service-list > ul > li > a {
   display: table-cell;
   color: #333333;
   position: relative;
-  padding: 5px;
-  font-size: 16px;
+  padding: 1px 2px;
 }
 .service-list > ul > li > a:hover,
 .service-list > ul > li > a:active,
 .service-list > ul > li > a:focus {
-  background-color: #ececec;
   text-decoration: none;
-  color: #333333;
+  color: #732626;
 }
 .event-card {
   margin-top: 7px;
@@ -9006,6 +9008,14 @@ a.service-card:focus {
 .event-card > div {
   padding: 15px;
   padding-top: 0;
+}
+.multipage-menu .dropdown-menu > li.active > a {
+  background-color: transparent;
+}
+.multipage-menu .dropdown-menu > li > a:hover,
+.multipage-menu .dropdown-menu > li > afocus {
+  color: #993333;
+  background-color: transparent;
 }
 .multipage-menu ul {
   margin-bottom: 0;
@@ -9061,28 +9071,25 @@ a.service-card:focus {
   margin-top: 2px;
   margin-left: 0;
 }
-.multipage-menu ul > li.active:not(.menu-home) > a {
-  border-left: 2px solid #993333;
-  background-color: #ececec;
+.multipage-menu ul li.active > a {
+  color: #993333;
+  font-weight: bold;
+  border-left: 1px solid #993333;
 }
-.multipage-menu ul > li > a {
-  font-size: 1.2em;
-  border-left: 2px solid transparent;
+.multipage-menu ul li > a {
+  color: #666666;
+  font-size: 1.1em;
+  border-left: 1px solid transparent;
 }
-.multipage-menu ul > li > a:hover,
-.multipage-menu ul > li > a:focus {
-  border-left: 2px solid #993333;
-  background-color: #ececec;
+.multipage-menu ul li > a:hover,
+.multipage-menu ul li > a:focus {
+  color: #993333;
+  border-left: 1px solid #993333;
+  background-color: transparent;
 }
-.multipage-menu ul > li > ul > li {
-  margin-left: 17px;
-}
-.multipage-menu ul > li > ul > li.active:not(.menu-home) > a {
-  border-left: 2px solid #999999;
-}
-.multipage-menu ul > li > ul > li > a:hover,
-.multipage-menu ul > li > ul > li > a:focus {
-  border-left: 2px solid #999999;
+.multipage-menu ul li > ul > li > a {
+  font-size: 1em;
+  padding-left: 30px;
 }
 .comment-list ol {
   list-style: none;
@@ -9247,7 +9254,7 @@ div[role="document"] {
 .card > .card-footer > a:hover,
 .card > .card-footer > a:active {
   color: #993333;
-  border-top-color: #996060;
+  border-top-color: #ddd;
   background-color: #ffffff;
   text-decoration: none;
 }
@@ -9331,8 +9338,10 @@ div[ng-view].ng-enter {
   color: #f9f9f9;
   background-color: rgba(46, 36, 36, 0.8);
 }
-.jumbotron-header > .jumbotron a {
+.jumbotron-header > .jumbotron .btn-default {
   color: #f9f9f9;
+  border-color: #f9f9f9;
+  background-color: transparent;
 }
 .jumbotron-header > .jumbotron .well {
   background-color: rgba(25, 20, 20, 0.75);
@@ -10152,8 +10161,9 @@ footer > .sub-footer {
 }
 .library-hours-today {
   position: relative;
-  height: 80px;
+  min-height: 122px;
   opacity: 0;
+  margin-bottom: 15px;
   -o-transition: all 0.2s;
   -webkit-transition: all 0.2s;
   transition: all 0.2s;
