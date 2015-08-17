@@ -48730,7 +48730,11 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
         var filterWatcher = $scope.$watch('vid', function(newVal, oldVal){
             var filtered = videos;
 
-            filtered = $filter('filter')(filtered, newVal.genre);
+            filtered = $filter('filter')(filtered, newVal.genre, function(actual, expected){
+                console.log('Actual: ' + actual);
+                console.log('Expected: ' + expected);
+                return angular.equals(actual.genre, expected);
+            });
             filtered = $filter('filter')(filtered, newVal.language);
             filtered = $filter('filter')(filtered, newVal.format);
 
@@ -48810,7 +48814,7 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
             var params = $location.search();
             var scopeFacets = {};
             angular.copy($scope.vid, scopeFacets);
-            
+
             $scope.activeFilters = params;
 
             if (params['page']){
