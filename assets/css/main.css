@@ -9338,8 +9338,10 @@ div[ng-view].ng-enter {
   color: #f9f9f9;
   background-color: rgba(46, 36, 36, 0.8);
 }
-.jumbotron-header > .jumbotron a:not(.btn) {
+.jumbotron-header > .jumbotron .btn-default {
   color: #f9f9f9;
+  border-color: #f9f9f9;
+  background-color: transparent;
 }
 .jumbotron-header > .jumbotron .well {
   background-color: rgba(25, 20, 20, 0.75);
@@ -10159,8 +10161,9 @@ footer > .sub-footer {
 }
 .library-hours-today {
   position: relative;
-  height: 80px;
+  min-height: 122px;
   opacity: 0;
+  margin-bottom: 15px;
   -o-transition: all 0.2s;
   -webkit-transition: all 0.2s;
   transition: all 0.2s;
