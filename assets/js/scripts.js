@@ -48618,6 +48618,9 @@ angular.module("videos/videos-list.tpl.html", []).run(["$templateCache", functio
     "\n" +
     "                <p class=\"text-justify\" ng-bind-html=\"item.notes | highlight:vid.search\"></p>\n" +
     "            </div>\n" +
+    "            <div class=\"details-context\">\n" +
+    "                <span ng-bind-html=\"item.keywords | highlight:vid.search\"></span>\n" +
+    "            </div>\n" +
     "        </div>\n" +
     "\n" +
     "\n" +
