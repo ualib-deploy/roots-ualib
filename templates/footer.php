@@ -8,7 +8,7 @@
           <ul class="footer-list">
             <li><a href="<?php echo site_url(); ?>/#/hours">Maps and Contact Information</a></li>
             <li><a href="<?php echo site_url(); ?>/about/libraries-policies/electronic-resource-user-policy//">Access and Use of Electronic Resources</a></li>
-            <li><a href="<?php echo site_url(); ?>/using-the-library/accessibility//">Physical Access</a></li>
+            <li><a href="<?php echo site_url(); ?>/using-the-library/accessibility//">Accessibility</a></li>
             <li><a href="<?php echo site_url(); ?>/about/libraries-policies/">Libraries' Policies</a></li>
             <li><a href="<?php echo site_url(); ?>/about/mission-statement/">Mission Statement</a></li>
             <li><a href="<?php echo site_url(); ?>/site-map">Site Map</a></li>
