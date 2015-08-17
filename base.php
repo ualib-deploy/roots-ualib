@@ -18,6 +18,9 @@
     <div role="document">
       <?php
         $fields = get_fields();
+//      print '<pre>';
+//      print var_dump(wp_get_nav_menu_items($fields['multipage_menu']));
+//      print '</pre>';
         if (is_array($fields['jumbotron_header'])){
 
             get_template_part('templates/jumbotron-header');
@@ -27,7 +30,7 @@
         <main class="main" role="main">
             <?php
                 if(isset($fields['multipage_menu']) && $fields['multipage_menu'] !== false){
-                    set_query_var('multipage_menu', $fields['multipage_menu']);
+                    set_query_var('multipage_menu', wp_get_nav_menu_items($fields['multipage_menu']));
                     get_template_part('templates/content-page-submenu');
                 }
             else{

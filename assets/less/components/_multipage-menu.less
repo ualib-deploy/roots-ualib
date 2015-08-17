@@ -1,41 +1,54 @@
 .multipage-menu{
+  .dropdown-menu {
+      > li {
+        &.active {
+          > a {
+            background-color: transparent;
+          }
+        }
+
+        > a {
+          &:hover,
+          &focus {
+            color: @brand-primary;
+            background-color: transparent;
+          }
+        }
+
+      }
+    }
+
   ul {
     .nav;
     .nav-stacked;
 
-    > li {
-      &.active:not(.menu-home) {
+    li {
+
+      &.active {
         > a {
-          border-left: 2px solid @brand-primary;
-          background-color: darken(@gray-lighter, 5%);
+          color: @brand-primary;
+          font-weight: bold;
+          border-left: 1px solid @brand-primary;
         }
       }
       > a {
-        font-size: 1.2em;
-        border-left: 2px solid transparent;
+        color: @gray;
+        font-size: 1.1em;
+        border-left: 1px solid transparent;
 
         &:hover,
         &:focus {
-           border-left: 2px solid @brand-primary;
-           background-color: darken(@gray-lighter, 5%);
+          color: @brand-primary;
+          border-left: 1px solid @brand-primary;
+          background-color: transparent;
          }
 
       }
       > ul {
         > li {
-          margin-left: 17px;
-
-          &.active:not(.menu-home) {
-            > a {
-              border-left: 2px solid @gray-light;
-            }
-          }
-
           > a {
-            &:hover,
-            &:focus {
-              border-left: 2px solid @gray-light;
-            }
+            font-size: 1em;
+            padding-left: 30px;
           }
         }
       }

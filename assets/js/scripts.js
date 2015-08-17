@@ -41303,7 +41303,7 @@ angular.module("lib-hours-today/lib-hours-today.tpl.html", []).run(["$templateCa
     "        <span class=\"label\" ng-class=\"today.status.css\">{{today.status.text}}</span>\n" +
     "    </h2>\n" +
     "    <div class=\"h3\">{{today.hours}}</div>\n" +
-    "    <a ng-href=\"/#hours?library={{today.name}}\" title=\"All hours {{today.name}}\">All hours</a>\n" +
+    "    <a class=\"btn btn-default btn-xs\" ng-href=\"/#hours?library={{today.name}}\" title=\"All hours {{today.name}}\">All hours <span class=\"fa fa-chevron-right\"></span></a>\n" +
     "</div>\n" +
     "");
 }]);
@@ -41507,7 +41507,7 @@ angular.module('ualib.hours')
                         }],
                     email: 'gorgasinfo@ua.edu'
                 },
-                link: '/libraries-and-collections/gorgas-library/'
+                link: '/libraries/gorgas/'
             },
             {
                 id: 2,
@@ -41531,7 +41531,7 @@ angular.module('ualib.hours')
 
                     email: 'brunolibrary@culverhouse.ua.edu'
                 },
-                link: '/libraries-and-collections/bruno/'
+                link: '/libraries/bruno/'
             },
             {
                 id: 3,
@@ -41546,7 +41546,7 @@ angular.module('ualib.hours')
                     }],
                     email: 'scenglib@bama.ua.edu'
                 },
-                link: '/libraries-and-collections/rodgers-science-and-engineering-library/'
+                link: '/libraries/rodgers/'
             },
             {
                 id: 4,
@@ -41559,13 +41559,13 @@ angular.module('ualib.hours')
                         number: '(205) 348-0500',
                         dept: 'Front Desk'
                     }],
-                    email: 'scenglib@bama.ua.edu',
+                    email: 'archives@ua.edu',
                     alert: [{
                         type: 'info',
                         msg: 'For reference questions'
                     }]
                 },
-                link: '/libraries-and-collections/hoole-library/'
+                link: '/libraries/hoole/'
             },
             {
                 id: 5,
@@ -41579,7 +41579,7 @@ angular.module('ualib.hours')
                         dept:   'Reference & Circulation'
                     }]
                 },
-                link: '/libraries-and-collections/mclure-education-library/'
+                link: '/libraries/mclure/'
             },
             {
                 id: 6,
@@ -41587,7 +41587,7 @@ angular.module('ualib.hours')
                 latitude: 33.211803,
                 longitude: -87.546032,
                 icon: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
-                link: '/libraries-and-collections/music-library/'
+                link: '/libraries/music/'
             },
             {
                 id: 7,
@@ -50258,7 +50258,7 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                </div>\n" +
     "              </div>\n" +
     "              <div class=\"card-footer\">\n" +
-    "                <a href=\"https://wwwdev2.lib.ua.edu/#/hours\" class=\"more-link\">More News</a>\n" +
+    "                <a href=\"https://wwwdev2.lib.ua.edu/#/news-exhibits\" class=\"more-link\">More News</a>\n" +
     "              </div>\n" +
     "            </div>\n" +
     "          </div>\n" +
@@ -50274,7 +50274,7 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                    </a>\n" +
     "\n" +
     "                    <a href=\"http://qs7qk6ub8p.search.serialssolutions.com\" class=\"service-card\">\n" +
-    "                      <span class=\"fa fa-exchange\"></span>\n" +
+    "                      <span class=\"fa fa-book\"></span>\n" +
     "                      <h4>E-Journals</h4>\n" +
     "                    </a>\n" +
     "                    <a href=\"http://library.ua.edu/vwebv/searchBasic\" class=\"service-card\">\n" +
@@ -50301,6 +50301,11 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                      <span class=\"fa fa-users\"></span>\n" +
     "                      <h4>Staff Directory</h4>\n" +
     "                    </a>\n" +
+    "\n" +
+    "                    <a href=\"https://wwwdev2.lib.ua.edu/forms/reference-request/\" class=\"service-card\">\n" +
+    "                      <span class=\"fa fa-question-circle\"></span>\n" +
+    "                      <h4>Ask A Librarian</h4>\n" +
+    "                    </a>\n" +
     "                  </div>\n" +
     "                </div>\n" +
     "              </div>\n" +
@@ -50313,11 +50318,7 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "               <h2>Events</h2>\n" +
     "             </div>\n" +
     "              <div class=\"card-body\">\n" +
-    "                <div class=\"row\">\n" +
-    "                  <div class=\"animate-repeat\" ng-repeat=\"item in events\" ng-class=\"{'col-md-12': events.length == 1, 'item': events.length == 2,'col-md-4': events.length == 3, 'col-md-3': events.length == 4}\">\n" +
-    "                    <div news-card=\"item\" news-type=\"event\">\n" +
-    "                    </div>\n" +
-    "                  </div>\n" +
+    "                <div news-card=\"item\" news-type=\"event\" ng-repeat=\"item in events\">\n" +
     "                </div>\n" +
     "              </div>\n" +
     "              <div class=\"card-footer\">\n" +

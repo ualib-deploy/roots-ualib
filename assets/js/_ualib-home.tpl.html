@@ -25,7 +25,7 @@
                 </div>
               </div>
               <div class="card-footer">
-                <a href="https://wwwdev2.lib.ua.edu/#/hours" class="more-link">More News</a>
+                <a href="https://wwwdev2.lib.ua.edu/#/news-exhibits" class="more-link">More News</a>
               </div>
             </div>
           </div>
@@ -41,7 +41,7 @@
                     </a>
 
                     <a href="http://qs7qk6ub8p.search.serialssolutions.com" class="service-card">
-                      <span class="fa fa-exchange"></span>
+                      <span class="fa fa-book"></span>
                       <h4>E-Journals</h4>
                     </a>
                     <a href="http://library.ua.edu/vwebv/searchBasic" class="service-card">
@@ -68,6 +68,11 @@
                       <span class="fa fa-users"></span>
                       <h4>Staff Directory</h4>
                     </a>
+
+                    <a href="https://wwwdev2.lib.ua.edu/forms/reference-request/" class="service-card">
+                      <span class="fa fa-question-circle"></span>
+                      <h4>Ask A Librarian</h4>
+                    </a>
                   </div>
                 </div>
               </div>
@@ -80,11 +85,7 @@
                <h2>Events</h2>
              </div>
               <div class="card-body">
-                <div class="row">
-                  <div class="animate-repeat" ng-repeat="item in events" ng-class="{'col-md-12': events.length == 1, 'item': events.length == 2,'col-md-4': events.length == 3, 'col-md-3': events.length == 4}">
-                    <div news-card="item" news-type="event">
-                    </div>
-                  </div>
+                <div news-card="item" news-type="event" ng-repeat="item in events">
                 </div>
               </div>
               <div class="card-footer">
