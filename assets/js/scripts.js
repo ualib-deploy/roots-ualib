@@ -48111,7 +48111,7 @@ angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", f
     "                    </small>\n" +
     "                </h4>\n" +
     "\n" +
-    "                <p class=\"text-justify\" ng-bind-html=\"item.description | highlight:db.search\"></p>\n" +
+    "                <p class=\"text-justify\" ng-bind-html=\"item.description | customHighlight:db.search\"></p>\n" +
     "\n" +
     "                <div ng-if=\"item.location\">\n" +
     "                    <strong>Access:</strong> {{item.location}}\n" +
@@ -48518,8 +48518,24 @@ angular.module('ualib.databases')
             });*/
         }
 
-    }]);
-
+    }])
+    .filter('customHighlight', function($sce) {
+        return function(text, filterPhrase) {
+            if (filterPhrase) {
+                var tag_re = /(<a\/?[^>]+>)/g;
+                var filter_re = new RegExp('(' + filterPhrase + ')', 'gi');
+                text = text.split(tag_re).map(function(string) {
+                    if (string.match(tag_re)) {
+                        return string;
+                    } else {
+                        return string.replace(filter_re,
+                            '<span class="ui-match">$1</span>');
+                    }
+                }).join('');
+            }
+            return $sce.trustAsHtml(text);
+        };
+    });
 
 ;angular.module('ualib.musicSearch.templates', ['videos/videos-list.tpl.html']);
 
