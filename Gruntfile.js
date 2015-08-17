@@ -187,9 +187,17 @@ module.exports = function(grunt) {
             }
         },
         replace: {
-            devToLive: {
+            devToLiveJS: {
                 src: ['assets/js/scripts.min.js'],
                 dest: 'assets/js/',
+                replacements: [{
+                    from: /(wwwdev2?)/g,
+                    to: 'www'
+                }]
+            },
+            devToLiveCSS: {
+                src: ['assets/css/main.min.css'],
+                dest: 'assets/css/',
                 replacements: [{
                     from: /(wwwdev2?)/g,
                     to: 'www'
@@ -278,7 +286,7 @@ module.exports = function(grunt) {
         'uglify',
         'modernizr',
         'version',
-        'replace:devToLive'
+        'replace'
     ]);
     grunt.registerTask('lessVarsToSass', ['lessToSass:lessVars']);
 };
