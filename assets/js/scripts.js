@@ -48605,17 +48605,15 @@ angular.module("videos/videos-list.tpl.html", []).run(["$templateCache", functio
     "                <h4 class=\"media-heading\">\n" +
     "                    <span ng-bind-html=\"item.title | highlight:vid.search\"></span>\n" +
     "\n" +
-    "                    <small class=\"pull-right\">\n" +
-    "                        <span class=\"label label-success\" ng-if=\"item.hasFullText == 'A'\">All Full Text</span>\n" +
-    "                        <span class=\"label label-info\" ng-if=\"item.hasFullText == 'P'\">Primarily Full Text</span>\n" +
-    "                        <span class=\"label label-warning\" ng-if=\"item.hasFullText == 'S'\">Some Full Text</span>\n" +
-    "                        <span class=\"label label-danger\" ng-if=\"item.hasFullText == 'N'\">No Full Text</span>\n" +
+    "                    <small>\n" +
+    "                        <span ng-bind-html=\"item.series_title | highlight:vid.search\"></span>\n" +
     "                    </small>\n" +
     "                </h4>\n" +
     "\n" +
     "                <div class=\"details-context\">\n" +
     "                    <span ng-bind-html=\"item.call_number | highlight:vid.search\"></span>\n" +
-    "                    <span ng-bind-html=\"item.series_title | highlight:vid.search\" ng-if=\"item.series_title\"></span>\n" +
+    "                    <span ng-bind-html=\"item.genre | highlight:vid.genre\" ng-if=\"item.genre\"></span>\n" +
+    "                    <span ng-bind-html=\"item.language | highlight:vid.language\" ng-if=\"item.language\"></span>\n" +
     "                </div>\n" +
     "\n" +
     "                <p class=\"text-justify\" ng-bind-html=\"item.notes | highlight:vid.search\"></p>\n" +
