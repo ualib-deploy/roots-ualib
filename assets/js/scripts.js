@@ -48188,7 +48188,7 @@ angular.module('ualib.databases')
             return defaults.concat(transform);
         }
 
-        return $resource('https://wwwdev2.lib.ua.edu/databases/api/:db', {db: 'all'}, {
+        return $resource('https://wwwdev2.lib.ua.edu/databases/api/:db', {db: 'active'}, {
             cache: true,
             get: {
                 method: 'GET',
