@@ -48895,7 +48895,8 @@ angular.module("staff-card/staff-card-list.tpl.html", []).run(["$templateCache",
     "                </div>\n" +
     "            </div>\n" +
     "            <div class=\"col-xs-4 col-sm-3\">\n" +
-    "                <img class=\"staff-portrait thumbnail\" ng-src=\"{{person.photo}}\">\n" +
+    "                <img class=\"staff-portrait thumbnail\" ng-src=\"{{person.photo}}\" ng-if=\"person.photo != null\">\n" +
+    "                <img class=\"staff-portrait thumbnail\" ng-src=\"wp-content/themes/roots-ualib/assets/img/user-profile.png\" ng-if=\"person.photo == null\">\n" +
     "            </div>\n" +
     "            <div class=\"col-xs-8\">\n" +
     "                <div class=\"row\">\n" +
