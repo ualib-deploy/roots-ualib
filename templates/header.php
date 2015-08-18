@@ -395,7 +395,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                                 <span class="fa fa-question-circle"></span>
                                                 <h4>How Do I...</h4>
                                                 <ul>
-                                                    <li><a href="<?php echo site_url(); ?>/library-help/how-do-i/">Ask A Librarian: FAQs</a></li>
+                                                    <li><a href="http://ask.lib.ua.edu/">Ask A Librarian: FAQs</a></li>
                                                     <li><a href="<?php echo site_url(); ?>/forms/reference-request/">Ask A Librarian: Reference Questions</a></li>
                                                 </ul>
                                             </div>
