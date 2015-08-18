@@ -41878,7 +41878,7 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                        <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"db.show\"></span>\n" +
     "                        <span class=\"fa fa-fw fa-caret-down\" ng-show=\"db.show\"></span>\n" +
     "                    </a>\n" +
-    "                    <a href=\"{{db.url}}\" target=\"_blank\">{{db.title}}</a>\n" +
+    "                    <a>{{db.title}}</a>\n" +
     "                    <small>{{db.publisher}} <span ng-show=\"db.vendor.length > 0\">: {{db.vendor}}</span></small>\n" +
     "                </h4>\n" +
     "            </div>\n" +
@@ -41916,20 +41916,22 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.url}}\" ng-model=\"db.url\"\n" +
     "                           id=\"{{db.id}}_URL\" maxlength=\"2000\">\n" +
     "                </div>\n" +
-    "                <div class=\"col-md-2 form-group\">\n" +
+    "                <div class=\"col-md-3 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Location\">Location</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.location}}\" ng-model=\"db.location\"\n" +
     "                           id=\"{{db.id}}_Location\" maxlength=\"50\">\n" +
     "                </div>\n" +
-    "                <div class=\"col-md-2 form-group\">\n" +
-    "                    <label for=\"{{db.id}}_NotInEDS\">Not in EDS</label>\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.notInEDS}}\" ng-model=\"db.notInEDS\"\n" +
-    "                           id=\"{{db.id}}_NotInEDS\" maxlength=\"1\">\n" +
+    "                <div class=\"col-md-1 form-group\">\n" +
+    "                    <label for=\"{{db.id}}_NotInEDS\">In EDS</label>\n" +
+    "                    <select class=\"form-control\" ng-model=\"db.notInEDS\" ng-options=\"val for val in inEDSValues\"\n" +
+    "                            id=\"{{db.id}}_NotInEDS\">\n" +
+    "                    </select>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Full-text\">Fulltext</label>\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.hasFullText}}\" ng-model=\"db.hasFullText\"\n" +
-    "                           id=\"{{db.id}}_Full-text\" maxlength=\"1\">\n" +
+    "                    <select class=\"form-control\" ng-model=\"db.hasFullText\" ng-options=\"val for val in fullTextValues\"\n" +
+    "                            id=\"{{db.id}}_Full-text\">\n" +
+    "                    </select>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Authenticate\">Authenticate</label>\n" +
@@ -42075,20 +42077,22 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                <input type=\"text\" class=\"form-control\" placeholder=\"http://www.example.com/\" ng-model=\"newDB.url\"\n" +
     "                       id=\"URL\" maxlength=\"2000\" required>\n" +
     "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
+    "            <div class=\"col-md-3 form-group\">\n" +
     "                <label for=\"Location\">Location</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Location\" ng-model=\"newDB.location\"\n" +
     "                       id=\"Location\" maxlength=\"50\">\n" +
     "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
-    "                <label for=\"NotInEDS\">Not in EDS</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" ng-model=\"newDB.notInEDS\"\n" +
-    "                       id=\"NotInEDS\" maxlength=\"1\">\n" +
+    "            <div class=\"col-md-1 form-group\">\n" +
+    "                <label for=\"NotInEDS\">In EDS</label>\n" +
+    "                <select class=\"form-control\" ng-model=\"newDB.notInEDS\" ng-options=\"val for val in inEDSValues\"\n" +
+    "                        id=\"NotInEDS\">\n" +
+    "                </select>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-1 form-group\">\n" +
     "                <label for=\"Full-text\">Fulltext</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" ng-model=\"newDB.hasFullText\"\n" +
-    "                       id=\"Full-text\" maxlength=\"1\">\n" +
+    "                <select class=\"form-control\" ng-model=\"newDB.hasFullText\" ng-options=\"val for val in fullTextValues\"\n" +
+    "                        id=\"Full-text\">\n" +
+    "                </select>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-1 form-group\">\n" +
     "                <label for=\"Authenticate\">Authenticate</label>\n" +
@@ -44867,6 +44871,8 @@ angular.module('manage.manageDatabases', [])
 
             //primary, secondary
             $scope.subjectValues = [ 1, 2 ];
+            $scope.fullTextValues = [ "", "A", "N", "P", "S" ];
+            $scope.inEDSValues = [ "", "Y", "P" ];
 
             tokenFactory("CSRF-libDatabases");
 
