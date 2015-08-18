@@ -44412,6 +44412,7 @@ angular.module("staffDirectory/staffDirectoryPeople.tpl.html", []).run(["$templa
     "                            <small>{{person.rank}}</small>\n" +
     "                        </span>\n" +
     "                    </h4>\n" +
+    "                    <img ng-src=\"{{person.photo}}\" width=\"180\" height=\"225\" ng-if=\"person.photo != null\" ng-show=\"person.show\">\n" +
     "                </td>\n" +
     "                <td>\n" +
     "                    <h4 ng-hide=\"person.show\">\n" +
@@ -47400,7 +47401,7 @@ angular.module('manage.staffDirectory', [])
     .constant('STAFF_DIR_RANKS', [
         "",
         "Prof.",
-        "Asso. Prof.",
+        "Assoc. Prof.",
         "Asst. Prof."
     ])
 
@@ -48894,7 +48895,7 @@ angular.module("staff-card/staff-card-list.tpl.html", []).run(["$templateCache",
     "                </div>\n" +
     "            </div>\n" +
     "            <div class=\"col-xs-4 col-sm-3\">\n" +
-    "                <img class=\"staff-portrait thumbnail\" ng-src=\"{{person.image}}\">\n" +
+    "                <img class=\"staff-portrait thumbnail\" ng-src=\"{{person.photo}}\">\n" +
     "            </div>\n" +
     "            <div class=\"col-xs-8\">\n" +
     "                <div class=\"row\">\n" +
@@ -48924,7 +48925,7 @@ angular.module("staff-card/staff-card-list.tpl.html", []).run(["$templateCache",
     "                            </tr>\n" +
     "                            </thead>\n" +
     "                            <tbody>\n" +
-    "                            <tr ng-repeat=\"subject in person.subjects | orderBy:subject.subject\">\n" +
+    "                            <tr ng-repeat=\"subject in person.subjects | orderBy:'subject'\">\n" +
     "                                <td>\n" +
     "                                    <a ng-href=\"{{subject.link}}\" title=\"{{subject.subject}}\" ng-if=\"subject.link\" ng-bind-html=\"subject.subject | highlight:staffdir.facet.search\"></a>\n" +
     "                                    <span ng-if=\"!subject.link\" ng-bind-html=\"subject.subject | highlight:staffdir.facet.search\">{{subject.subject}}</span>\n" +
