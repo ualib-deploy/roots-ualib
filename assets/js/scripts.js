@@ -44748,8 +44748,11 @@ angular.module("staffDirectory/staffDirectoryProfile.tpl.html", []).run(["$templ
     "\n" +
     "<div class=\"row\">\n" +
     "    <div class=\"col-md-12 form-group\">\n" +
-    "        <label for=\"profile\">Description (allowed tags: <code><h3>, <h4>, <a>, <img>, <p>, <strong>, <em>, <ul>, <li></code>)</label>\n" +
-    "        <textarea data-ui-tinymce-profile id=\"profile\" data-ng-model=\"userProfile.person.profile\" rows=\"10\"\n" +
+    "        <label for=\"profile\">Description (allowed tags:\n" +
+    "            <code>\n" +
+    "                &lt;h3&gt;, &lt;h4&gt;, &lt;a&gt;, &lt;img&gt;, &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;ul&gt;, &lt;li&gt;\n" +
+    "            </code>)</label>\n" +
+    "        <textarea data-ui-tinymce id=\"profile\" data-ng-model=\"userProfile.person.profile\" rows=\"10\"\n" +
     "                  maxlength=\"64000\"></textarea>\n" +
     "    </div>\n" +
     "    <div class=\"col-md-12 text-center form-group\">\n" +
@@ -44932,6 +44935,71 @@ angular.module("submittedForms/submittedForms.tpl.html", []).run(["$templateCach
 angular.module('manage.common', [
     'common.manage'
 ])
+
+    //from http://codepen.io/paulbhartzog/pen/Ekztl?editors=101
+    .value('uiTinymceConfig', {plugins: 'link spellchecker code', toolbar: 'undo redo | bold italic | link | code', menubar : false})
+    .directive('uiTinymce', ['uiTinymceConfig', function(uiTinymceConfig) {
+        uiTinymceConfig = uiTinymceConfig || {};
+        var generatedIds = 0;
+        return {
+            require: 'ngModel',
+            link: function(scope, elm, attrs, ngModel) {
+                var expression, options, tinyInstance;
+                // generate an ID if not present
+                if (!attrs.id) {
+                    attrs.$set('id', 'uiTinymce' + generatedIds++);
+                }
+                options = {
+                    // Update model when calling setContent (such as from the source editor popup)
+                    setup: function(ed) {
+                        ed.on('init', function(args) {
+                            ngModel.$render();
+                        });
+                        // Update model on button click
+                        ed.on('ExecCommand', function(e) {
+                            ed.save();
+                            ngModel.$setViewValue(elm.val());
+                            if (!scope.$$phase) {
+                                scope.$apply();
+                            }
+                        });
+                        // Update model on keypress
+                        ed.on('KeyUp', function(e) {
+                            console.log(ed.isDirty());
+                            ed.save();
+                            ngModel.$setViewValue(elm.val());
+                            if (!scope.$$phase) {
+                                scope.$apply();
+                            }
+                        });
+                    },
+                    mode: 'exact',
+                    elements: attrs.id
+                };
+                if (attrs.uiTinymce) {
+                    expression = scope.$eval(attrs.uiTinymce);
+                } else {
+                    expression = {};
+                }
+                angular.extend(options, uiTinymceConfig, expression);
+                setTimeout(function() {
+                    tinymce.init(options);
+                });
+
+
+                ngModel.$render = function() {
+                    if (!tinyInstance) {
+                        tinyInstance = tinymce.get(attrs.id);
+                    }
+                    if (tinyInstance) {
+                        tinyInstance.setContent(ngModel.$viewValue || '');
+                    }
+                };
+            }
+        };
+    }])
+
+
 angular.module('common.manage', [])
 
 
@@ -46051,69 +46119,6 @@ angular.module('manage.manageNews', ['ngFileUpload'])
                 );
             },
             templateUrl: 'manageNews/manageNews.tpl.html'
-        };
-    }])
-
-    //from http://codepen.io/paulbhartzog/pen/Ekztl?editors=101
-    .value('uiTinymceConfig', {plugins: 'link spellchecker code', toolbar: 'undo redo | bold italic | link | code', menubar : false})
-    .directive('uiTinymce', ['uiTinymceConfig', function(uiTinymceConfig) {
-        uiTinymceConfig = uiTinymceConfig || {};
-        var generatedIds = 0;
-        return {
-            require: 'ngModel',
-            link: function(scope, elm, attrs, ngModel) {
-                var expression, options, tinyInstance;
-                // generate an ID if not present
-                if (!attrs.id) {
-                    attrs.$set('id', 'uiTinymce' + generatedIds++);
-                }
-                options = {
-                    // Update model when calling setContent (such as from the source editor popup)
-                    setup: function(ed) {
-                        ed.on('init', function(args) {
-                            ngModel.$render();
-                        });
-                        // Update model on button click
-                        ed.on('ExecCommand', function(e) {
-                            ed.save();
-                            ngModel.$setViewValue(elm.val());
-                            if (!scope.$$phase) {
-                                scope.$apply();
-                            }
-                        });
-                        // Update model on keypress
-                        ed.on('KeyUp', function(e) {
-                            console.log(ed.isDirty());
-                            ed.save();
-                            ngModel.$setViewValue(elm.val());
-                            if (!scope.$$phase) {
-                                scope.$apply();
-                            }
-                        });
-                    },
-                    mode: 'exact',
-                    elements: attrs.id
-                };
-                if (attrs.uiTinymce) {
-                    expression = scope.$eval(attrs.uiTinymce);
-                } else {
-                    expression = {};
-                }
-                angular.extend(options, uiTinymceConfig, expression);
-                setTimeout(function() {
-                    tinymce.init(options);
-                });
-
-
-                ngModel.$render = function() {
-                    if (!tinyInstance) {
-                        tinyInstance = tinymce.get(attrs.id);
-                    }
-                    if (tinyInstance) {
-                        tinyInstance.setContent(ngModel.$viewValue || '');
-                    }
-                };
-            }
         };
     }])
 
@@ -48145,68 +48150,6 @@ angular.module('manage.staffDirectory', [])
         };
     }])
 
-    .value('uiTinymceConfig', {plugins: 'link spellchecker code'})
-    .directive('uiTinymceProfile', ['uiTinymceConfig', function(uiTinymceConfig) {
-        uiTinymceConfig = uiTinymceConfig || {};
-        var generatedIds = 0;
-        return {
-            require: 'ngModel',
-            link: function(scope, elm, attrs, ngModel) {
-                var expression, options, tinyInstance;
-                // generate an ID if not present
-                if (!attrs.id) {
-                    attrs.$set('id', 'uiTinymce' + generatedIds++);
-                }
-                options = {
-                    // Update model when calling setContent (such as from the source editor popup)
-                    setup: function(ed) {
-                        ed.on('init', function(args) {
-                            ngModel.$render();
-                        });
-                        // Update model on button click
-                        ed.on('ExecCommand', function(e) {
-                            ed.save();
-                            ngModel.$setViewValue(elm.val());
-                            if (!scope.$$phase) {
-                                scope.$apply();
-                            }
-                        });
-                        // Update model on keypress
-                        ed.on('KeyUp', function(e) {
-                            console.log(ed.isDirty());
-                            ed.save();
-                            ngModel.$setViewValue(elm.val());
-                            if (!scope.$$phase) {
-                                scope.$apply();
-                            }
-                        });
-                    },
-                    mode: 'exact',
-                    elements: attrs.id
-                };
-                if (attrs.uiTinymce) {
-                    expression = scope.$eval(attrs.uiTinymce);
-                } else {
-                    expression = {};
-                }
-                angular.extend(options, uiTinymceConfig, expression);
-                setTimeout(function() {
-                    tinymce.init(options);
-                });
-
-
-                ngModel.$render = function() {
-                    if (!tinyInstance) {
-                        tinyInstance = tinymce.get(attrs.id);
-                    }
-                    if (tinyInstance) {
-                        tinyInstance.setContent(ngModel.$viewValue || '');
-                    }
-                };
-            }
-        };
-    }])
-
     .controller('staffDirProfileCtrl', ['$scope', 'tokenFactory', 'sdFactory', '$window',
     function staffDirProfileCtrl($scope, tokenFactory, sdFactory, $window){
         $scope.userProfile = {};
@@ -48223,6 +48166,7 @@ angular.module('manage.staffDirectory', [])
             });
 
         $scope.update = function(){
+            $scope.userProfile.person.login = $scope.login;
             sdFactory.postData({action : 18}, $scope.userProfile.person)
                 .success(function(data, status, headers, config) {
                     $scope.userProfile.person.formResponse = data;
