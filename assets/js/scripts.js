@@ -4697,7 +4697,7 @@ angular.module('ui.utils',  [
  * AngularJS file upload/drop directive and service with progress and abort
  * FileAPI Flash shim for old browsers not supporting FormData
  * @author  Danial  <danial.farid@gmail.com>
- * @version 7.0.4
+ * @version 7.0.5
  */
 
 (function () {
@@ -5113,7 +5113,7 @@ if (!window.FileReader) {
 /**!
  * AngularJS file upload/drop directive and service with progress and abort
  * @author  Danial  <danial.farid@gmail.com>
- * @version 7.0.4
+ * @version 7.0.5
  */
 
 if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
@@ -5134,7 +5134,7 @@ if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
 
 var ngFileUpload = angular.module('ngFileUpload', []);
 
-ngFileUpload.version = '7.0.4';
+ngFileUpload.version = '7.0.5';
 
 ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, $q, $timeout) {
   function sendHttp(config) {
@@ -5889,6 +5889,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
 
       if (!valid) {
         callback.call(ngModel, ngModel.$ngfValidations);
+        return;
       }
 
       var pendings = 0;
@@ -41981,7 +41982,7 @@ angular.module('hours.list', [])
             templateUrl: 'list/list.tpl.html',
             controller: 'ListCtrl'
         }
-    }]);;angular.module('manage.templates', ['manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageNews/manageNews.tpl.html', 'manageNews/manageNewsAdmins.tpl.html', 'manageNews/manageNewsList.tpl.html', 'manageOneSearch/mainOneSearch.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageOneSearch/oneSearchStat.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareComputerMaps.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html', 'staffDirectory/staffDirectoryDepartments.tpl.html', 'staffDirectory/staffDirectoryPeople.tpl.html', 'staffDirectory/staffDirectorySubjects.tpl.html', 'submittedForms/submittedForms.tpl.html']);
+    }]);;angular.module('manage.templates', ['manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageNews/manageNews.tpl.html', 'manageNews/manageNewsAdmins.tpl.html', 'manageNews/manageNewsList.tpl.html', 'manageOneSearch/mainOneSearch.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageOneSearch/oneSearchStat.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareComputerMaps.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html', 'staffDirectory/staffDirectoryDepartments.tpl.html', 'staffDirectory/staffDirectoryPeople.tpl.html', 'staffDirectory/staffDirectoryProfile.tpl.html', 'staffDirectory/staffDirectorySubjects.tpl.html', 'submittedForms/submittedForms.tpl.html']);
 
 angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageDatabases/manageDatabases.tpl.html",
@@ -44717,6 +44718,55 @@ angular.module("staffDirectory/staffDirectoryPeople.tpl.html", []).run(["$templa
     "</div>");
 }]);
 
+angular.module("staffDirectory/staffDirectoryProfile.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("staffDirectory/staffDirectoryProfile.tpl.html",
+    "<h2>Profile Management</h2>\n" +
+    "\n" +
+    "<div class=\"page-slice\">\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-4\">\n" +
+    "            <img class=\"staff-portrait thumbnail\" ng-src=\"{{person.photo}}\" ng-if=\"person.photo != null\" width=\"180\" height=\"225\">\n" +
+    "            <img class=\"staff-portrait thumbnail\" ng-src=\"wp-content/themes/roots-ualib/assets/img/user-profile.png\"\n" +
+    "                 ng-if=\"person.photo == null\" width=\"180\" height=\"225\">\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-8\">\n" +
+    "            <div class=\"row\">\n" +
+    "                <div class=\"col-xs-12 col-sm-7 name-plate\">\n" +
+    "                    <h3 class=\"name\">\n" +
+    "                        <small ng-if=\"person.rank\">{{person.rank}}</small>\n" +
+    "                        <span ng-bind-html=\"person.firstname\"></span> <span ng-bind-html=\"person.lastname\"></span>\n" +
+    "                    </h3>\n" +
+    "                    <h4 class=\"title\"><span ng-bind-html=\"person.title\"></span></h4>\n" +
+    "                    <h5 class=\"hidden-xs\"><span ng-bind-html=\"person.department\"></span></h5>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-xs-12 col-sm-5\">\n" +
+    "                    <ul class=\"fa-ul\">\n" +
+    "                        <li ng-if=\"person.phone\"><span class=\"fa fa-phone fa-li\"></span>{{person.phone}}</li>\n" +
+    "                        <li class=\"hidden-xs\" ng-if=\"person.fax\"><span class=\"fa fa-fax fa-li\"></span>{{person.fax}}</li>\n" +
+    "                        <li ng-if=\"person.email\"><span class=\"fa fa-envelope fa-li\"></span><a href=\"mailto:{{person.email}}\">{{person.email}}</a></li>\n" +
+    "                    </ul>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "\n" +
+    "<div class=\"page-slice\">\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-12 form-group\">\n" +
+    "            <label for=\"profile\">Profile Content</label>\n" +
+    "            <textarea data-ui-tinymce id=\"profile\" data-ng-model=\"person.profile\" rows=\"10\"\n" +
+    "                      maxlength=\"64000\"></textarea>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-12 text-center form-group\">\n" +
+    "            <button type=\"submit\" class=\"btn btn-success\" ng-disabled=\"uploading\">Update Profile</button><br>\n" +
+    "            {{person.formResponse}}\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "");
+}]);
+
 angular.module("staffDirectory/staffDirectorySubjects.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staffDirectory/staffDirectorySubjects.tpl.html",
     "<div>\n" +
@@ -44952,6 +45002,9 @@ angular.module('common.manage', [])
         return {
             getData: function(){
                 return $http({method: 'GET', url: url + "api/people", params: {}})
+            },
+            getProfile: function(login){
+                return $http({method: 'GET', url: url + "api/profile/" + login, params: {}})
             },
             postData: function(params, data){
                 params = angular.isDefined(params) ? params : {};
@@ -46387,7 +46440,7 @@ angular.module('manage.manageNews', ['ngFileUpload'])
             },
             templateUrl: 'manageNews/manageNewsAdmins.tpl.html'
         };
-    }])
+    }]);
 
 angular.module('manage.manageOneSearch', [])
 
@@ -48097,6 +48150,98 @@ angular.module('manage.staffDirectory', [])
         };
     }])
 
+    .value('uiTinymceConfig', {plugins: 'link spellchecker code'})
+    .directive('uiTinymce', ['uiTinymceConfig', function(uiTinymceConfig) {
+        uiTinymceConfig = uiTinymceConfig || {};
+        var generatedIds = 0;
+        return {
+            require: 'ngModel',
+            link: function(scope, elm, attrs, ngModel) {
+                var expression, options, tinyInstance;
+                // generate an ID if not present
+                if (!attrs.id) {
+                    attrs.$set('id', 'uiTinymce' + generatedIds++);
+                }
+                options = {
+                    // Update model when calling setContent (such as from the source editor popup)
+                    setup: function(ed) {
+                        ed.on('init', function(args) {
+                            ngModel.$render();
+                        });
+                        // Update model on button click
+                        ed.on('ExecCommand', function(e) {
+                            ed.save();
+                            ngModel.$setViewValue(elm.val());
+                            if (!scope.$$phase) {
+                                scope.$apply();
+                            }
+                        });
+                        // Update model on keypress
+                        ed.on('KeyUp', function(e) {
+                            console.log(ed.isDirty());
+                            ed.save();
+                            ngModel.$setViewValue(elm.val());
+                            if (!scope.$$phase) {
+                                scope.$apply();
+                            }
+                        });
+                    },
+                    mode: 'exact',
+                    elements: attrs.id
+                };
+                if (attrs.uiTinymce) {
+                    expression = scope.$eval(attrs.uiTinymce);
+                } else {
+                    expression = {};
+                }
+                angular.extend(options, uiTinymceConfig, expression);
+                setTimeout(function() {
+                    tinymce.init(options);
+                });
+
+
+                ngModel.$render = function() {
+                    if (!tinyInstance) {
+                        tinyInstance = tinymce.get(attrs.id);
+                    }
+                    if (tinyInstance) {
+                        tinyInstance.setContent(ngModel.$viewValue || '');
+                    }
+                };
+            }
+        };
+    }])
+
+    .controller('staffDirProfileCtrl', ['$scope', 'tokenFactory', 'sdFactory',
+    function staffDirProfileCtrl($scope, tokenFactory, sdFactory){
+        $scope.userProfile = {};
+        tokenFactory("CSRF-" + $scope.login);
+
+        sdFactory.getProfile($scope.login)
+            .success(function(data) {
+                console.dir(data);
+                $scope.userProfile = data;
+            })
+            .error(function(data, status, headers, config) {
+                console.log(data);
+            });
+
+    }])
+    .directive('editStaffDirectoryProfile', [ function() {
+        return {
+            restrict: 'AC',
+            require: 'name',
+            scope: {
+                login: '=name'
+            },
+            controller: 'staffDirProfileCtrl',
+            link: function(scope, elm, attrs){
+            },
+            templateUrl: 'staffDirectory/staffDirectoryProfile.tpl.html'
+        };
+    }]);
+
+
 angular.module('manage.submittedForms', [])
     .controller('manageSubFormsCtrl', ['$scope', '$timeout', 'tokenFactory', 'formFactory',
         function manageSubFormsCtrl($scope, $timeout, tokenFactory, formFactory){
@@ -49088,7 +49233,7 @@ angular.module("staff-card/staff-card-list.tpl.html", []).run(["$templateCache",
     "                        <ul class=\"fa-ul\">\n" +
     "                            <li ng-if=\"person.phone\"><span class=\"fa fa-phone fa-li\"></span>{{person.phone}}</li>\n" +
     "                            <li class=\"hidden-xs\" ng-if=\"person.fax\"><span class=\"fa fa-fax fa-li\"></span>{{person.fax}}</li>\n" +
-    "                            <li ng-if=\"person.email\"><span class=\"fa fa-envelope fa-li\"></span><a href=\"mailto:{{person.email}}\">{{person.email}}</a></li>\n" +
+    "                            <li ng-if=\"person.email\"><span class=\"fa fa-envelope fa-li\"></span><a ng-href=\"mailto:{{person.email}}\" title=\"Email {{person.firstname}} {{person.lastname}}\">{{person.email}}</a></li>\n" +
     "                        </ul>\n" +
     "                    </div>\n" +
     "                    <div class=\"col-sm-12 subject-specialty hidden-xs\" ng-if=\"person.subjects\">\n" +
