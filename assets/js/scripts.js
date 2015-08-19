@@ -49677,7 +49677,11 @@ angular.module('staffdir', ['ualib.staffdir']);
                                 }
                                 var rx = /^([\w-]+(?:\.[\w-]+)*)/;
                                 var prefix = val.email.match(rx);
-                                val.emailPrefix = prefix[1];
+                                if (prefix !== null) {
+                                    val.emailPrefix = prefix[0];
+                                } else {
+                                    console.log(val.email);
+                                }
 
                                 //preset alpha index values base on first and last name
                                 val.alphaIndex = {};
