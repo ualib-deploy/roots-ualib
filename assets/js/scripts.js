@@ -49168,15 +49168,14 @@ angular.module("staff-card/staff-card-list.tpl.html", []).run(["$templateCache",
     "                </div>\n" +
     "            </div>\n" +
     "            <div class=\"col-xs-4 col-sm-3\">\n" +
-    "                <img class=\"staff-portrait thumbnail\" ng-src=\"{{person.photo}}\" ng-if=\"person.photo != null\" />\n" +
-    "                <img class=\"staff-portrait thumbnail\" ng-src=\"wp-content/themes/roots-ualib/assets/img/user-profile.png\" ng-if=\"person.photo == null\" />\n" +
+    "                <img class=\"staff-portrait thumbnail\" ng-src=\"{{person.photo}}\" />\n" +
     "            </div>\n" +
     "            <div class=\"col-xs-8\">\n" +
     "                <div class=\"row\">\n" +
     "                    <div class=\"col-xs-12 col-sm-7 name-plate\">\n" +
     "                        <h3 class=\"name\">\n" +
     "                            <small ng-if=\"person.rank\">{{person.rank}}</small>\n" +
-    "                            <a ng-href=\"/#/staffdir/profile/{{person.email}}\" ng-if=\"person.profile !== null\">\n" +
+    "                            <a ng-href=\"/#/staffdir/profile/{{person.emailPrefix}}\" ng-if=\"person.profile !== null\">\n" +
     "                                <span ng-class=\"{'sorting-by': staffdir.facet.sortBy == 'firstname'}\" ng-bind-html=\"person.firstname | highlight:staffdir.facet.search\"></span>\n" +
     "                                <span ng-class=\"{'sorting-by': staffdir.facet.sortBy == 'lastname'}\" ng-bind-html=\"person.lastname | highlight:staffdir.facet.search\"></span>\n" +
     "                            </a>\n" +
@@ -49608,10 +49607,12 @@ angular.module('staffdir', ['ualib.staffdir']);
                             var list = [];
                             angular.forEach(data.list, function(val){
                                 delete val.division;
-                                if (angular.isUndefined(val.image)){
+                                if (val.photo == null){
                                     //TODO: temporary work around because CMS file handling is dumb. Need to fix and make sustainable
-                                    val.image = '/wp-content/themes/roots-ualib/assets/img/user-profile.png';
+                                    val.photo = '/wp-content/themes/roots-ualib/assets/img/user-profile.png';
                                 }
+                                var rx = /^([\w-]+(?:\.[\w-]+)*)/;
+                                val.emailPrefix = rx.exec(val.email);
 
                                 //preset alpha index values base on first and last name
                                 val.alphaIndex = {};
@@ -49865,8 +49866,6 @@ angular.module('staffdir', ['ualib.staffdir']);
                 $scope.profileData = {};
 
                 console.log("Login: " + $scope.login);
-                var rx = /^([\w-]+(?:\.[\w-]+)*)/;
-                var emailPrefix = rx.exec($scope.login);
 
                 StaffFactory.profile().get({login: emailPrefix[0]})
                     .$promise.then(function(data){
