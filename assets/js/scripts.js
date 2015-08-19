@@ -46014,7 +46014,7 @@ angular.module('manage.manageHoursUsers', [])
         };
     }])
 
-angular.module('manage.manageNews', ['ngFileUpload'])
+angular.module('manage.manageNews', ['ngFileUpload', 'common.manage'])
     .controller('manageNewsCtrl', ['$scope', '$window', '$timeout', 'tokenFactory', 'newsFactory',
         function manageNewsCtrl($scope, $window, $timeout, tokenFactory, newsFactory){
             $scope.data = {};
@@ -47633,7 +47633,7 @@ angular.module('manage.siteFeedback', [])
         };
     }])
 
-angular.module('manage.staffDirectory', [])
+angular.module('manage.staffDirectory', ['common.manage'])
     .constant('STAFF_DIR_RANKS', [
         "",
         "Prof.",
@@ -49614,8 +49614,8 @@ angular.module('staffdir', ['ualib.staffdir']);
                                     val.photo = '/wp-content/themes/roots-ualib/assets/img/user-profile.png';
                                 }
                                 var rx = /^([\w-]+(?:\.[\w-]+)*)/;
-                                var emailPrefix = rx.exec(val.email);
-                                val.emailPrefix = emailPrefix[0];
+                                var prefix = rx.match(val.email);
+                                val.emailPrefix = prefix[1];
 
                                 //preset alpha index values base on first and last name
                                 val.alphaIndex = {};
