@@ -44722,49 +44722,45 @@ angular.module("staffDirectory/staffDirectoryProfile.tpl.html", []).run(["$templ
   $templateCache.put("staffDirectory/staffDirectoryProfile.tpl.html",
     "<h2>Profile Management</h2>\n" +
     "\n" +
-    "<div class=\"page-slice\">\n" +
-    "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-4\">\n" +
-    "            <img class=\"staff-portrait thumbnail\" ng-src=\"{{userProfile.person.photo}}\" ng-if=\"userProfile.person.photo != null\"\n" +
-    "                 width=\"180\" height=\"225\">\n" +
-    "            <img class=\"staff-portrait thumbnail\" ng-src=\"wp-content/themes/roots-ualib/assets/img/user-profile.png\"\n" +
-    "                 ng-if=\"userProfile.person.photo == null\" width=\"180\" height=\"225\">\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-8\">\n" +
-    "            <div class=\"row\">\n" +
-    "                <div class=\"col-xs-12 col-sm-7 name-plate\">\n" +
-    "                    <h3 class=\"name\">\n" +
-    "                        <small ng-if=\"userProfile.person.rank\">{{userProfile.person.rank}}</small>\n" +
-    "                        <span ng-bind-html=\"userProfile.person.firstname\"></span> <span ng-bind-html=\"userProfile.person.lastname\"></span>\n" +
-    "                    </h3>\n" +
-    "                    <h4 class=\"title\"><span ng-bind-html=\"userProfile.person.title\"></span></h4>\n" +
-    "                    <h5 class=\"hidden-xs\"><span ng-bind-html=\"userProfile.person.department\"></span></h5>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-xs-12 col-sm-5\">\n" +
-    "                    <ul class=\"fa-ul\">\n" +
-    "                        <li ng-if=\"userProfile.person.phone\"><span class=\"fa fa-phone fa-li\"></span>{{userProfile.person.phone}}</li>\n" +
-    "                        <li class=\"hidden-xs\" ng-if=\"userProfile.person.fax\"><span class=\"fa fa-fax fa-li\"></span>{{userProfile.person.fax}}</li>\n" +
-    "                        <li ng-if=\"userProfile.person.email\"><span class=\"fa fa-envelope fa-li\"></span>\n" +
-    "                            <a href=\"mailto:{{userProfile.person.email}}\">{{userProfile.person.email}}</a>\n" +
-    "                        </li>\n" +
-    "                    </ul>\n" +
-    "                </div>\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-4\">\n" +
+    "        <img class=\"staff-portrait thumbnail\" ng-src=\"{{userProfile.person.photo}}\" ng-if=\"userProfile.person.photo != null\"\n" +
+    "             width=\"180\" height=\"225\">\n" +
+    "        <img class=\"staff-portrait thumbnail\" ng-src=\"wp-content/themes/roots-ualib/assets/img/user-profile.png\"\n" +
+    "             ng-if=\"userProfile.person.photo == null\" width=\"180\" height=\"225\">\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-8\">\n" +
+    "        <div class=\"row\">\n" +
+    "            <div class=\"col-xs-12 col-sm-7 name-plate\">\n" +
+    "                <h3 class=\"name\">\n" +
+    "                    <small ng-if=\"userProfile.person.rank\">{{userProfile.person.rank}}</small>\n" +
+    "                    <span ng-bind-html=\"userProfile.person.firstname\"></span> <span ng-bind-html=\"userProfile.person.lastname\"></span>\n" +
+    "                </h3>\n" +
+    "                <h4 class=\"title\"><span ng-bind-html=\"userProfile.person.title\"></span></h4>\n" +
+    "                <h5 class=\"hidden-xs\"><span ng-bind-html=\"userProfile.person.department\"></span></h5>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-xs-12 col-sm-5\">\n" +
+    "                <ul class=\"fa-ul\">\n" +
+    "                    <li ng-if=\"userProfile.person.phone\"><span class=\"fa fa-phone fa-li\"></span>{{userProfile.person.phone}}</li>\n" +
+    "                    <li class=\"hidden-xs\" ng-if=\"userProfile.person.fax\"><span class=\"fa fa-fax fa-li\"></span>{{userProfile.person.fax}}</li>\n" +
+    "                    <li ng-if=\"userProfile.person.email\"><span class=\"fa fa-envelope fa-li\"></span>\n" +
+    "                        <a href=\"mailto:{{userProfile.person.email}}\">{{userProfile.person.email}}</a>\n" +
+    "                    </li>\n" +
+    "                </ul>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
     "\n" +
-    "<div class=\"page-slice\">\n" +
-    "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-12 form-group\">\n" +
-    "            <label for=\"profile\">Profile Content</label>\n" +
-    "            <textarea data-ui-tinymce id=\"profile\" data-ng-model=\"userProfile.person.profile\" rows=\"10\"\n" +
-    "                      maxlength=\"64000\"></textarea>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-12 text-center form-group\">\n" +
-    "            <button type=\"submit\" class=\"btn btn-success\" ng-disabled=\"uploading\">Update Profile</button><br>\n" +
-    "            {{userProfile.person.formResponse}}\n" +
-    "        </div>\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-12 form-group\">\n" +
+    "        <label for=\"profile\">Profile Content</label>\n" +
+    "        <textarea data-ui-tinymce id=\"profile\" data-ng-model=\"userProfile.person.profile\" rows=\"10\"\n" +
+    "                  maxlength=\"64000\"></textarea>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-12 text-center form-group\">\n" +
+    "        <button type=\"submit\" class=\"btn btn-success\" ng-disabled=\"uploading\">Update Profile</button><br>\n" +
+    "        {{userProfile.person.formResponse}}\n" +
     "    </div>\n" +
     "</div>\n" +
     "");
@@ -48215,9 +48211,10 @@ angular.module('manage.staffDirectory', [])
         };
     }])
 
-    .controller('staffDirProfileCtrl', ['$scope', 'tokenFactory', 'sdFactory',
-    function staffDirProfileCtrl($scope, tokenFactory, sdFactory){
+    .controller('staffDirProfileCtrl', ['$scope', 'tokenFactory', 'sdFactory', '$window',
+    function staffDirProfileCtrl($scope, tokenFactory, sdFactory, $window){
         $scope.userProfile = {};
+        $scope.login = $window.login;
         tokenFactory("CSRF-" + $scope.login);
 
         sdFactory.getProfile($scope.login)
@@ -48233,9 +48230,7 @@ angular.module('manage.staffDirectory', [])
     .directive('editStaffDirectoryProfile', [ function() {
         return {
             restrict: 'AC',
-            scope: {
-                login: '=name'
-            },
+            scope: {},
             controller: 'staffDirProfileCtrl',
             link: function(scope, elm, attrs){
             },
