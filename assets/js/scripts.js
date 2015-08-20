@@ -44925,7 +44925,7 @@ angular.module("staffDirectory/staffDirectoryProfile.tpl.html", []).run(["$templ
     "                &lt;h3&gt;, &lt;h4&gt;, &lt;a&gt;, &lt;img&gt;, &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;ul&gt;, &lt;li&gt;\n" +
     "            </code>)</label>\n" +
     "            <textarea ui-tinymce=\"tinymceOptions\" ng-model=\"userProfile.person.profile\" rows=\"10\"\n" +
-    "                  maxlength=\"64000\"></textarea>\n" +
+    "                  maxlength=\"64000\" ng-if=\"userProfile.person.profile\"></textarea>\n" +
     "    </div>\n" +
     "    <div class=\"col-md-12 text-center form-group\">\n" +
     "        <button type=\"submit\" class=\"btn btn-success\" ng-disabled=\"uploading\" ng-click=\"update()\">\n" +
