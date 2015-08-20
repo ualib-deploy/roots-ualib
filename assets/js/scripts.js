@@ -44894,53 +44894,56 @@ angular.module("staffDirectory/staffDirectoryProfile.tpl.html", []).run(["$templ
   $templateCache.put("staffDirectory/staffDirectoryProfile.tpl.html",
     "<h2>Profile Management</h2>\n" +
     "\n" +
-    "<div class=\"row\">\n" +
-    "    <div class=\"col-md-3\">\n" +
-    "        <img class=\"staff-portrait thumbnail\" ng-src=\"{{userProfile.person.photo}}\" ng-if=\"userProfile.person.photo != null\"\n" +
-    "             width=\"180\" height=\"225\">\n" +
-    "        <img class=\"staff-portrait thumbnail\" ng-src=\"wp-content/themes/roots-ualib/assets/img/user-profile.png\"\n" +
-    "             ng-if=\"userProfile.person.photo == null\" width=\"180\" height=\"225\">\n" +
+    "<div ng-if=\"userProfile.person.profile\">\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-3\">\n" +
+    "            <img class=\"staff-portrait thumbnail\" ng-src=\"{{userProfile.person.photo}}\" ng-if=\"userProfile.person.photo != null\"\n" +
+    "                 width=\"180\" height=\"225\">\n" +
+    "            <img class=\"staff-portrait thumbnail\" ng-src=\"wp-content/themes/roots-ualib/assets/img/user-profile.png\"\n" +
+    "                 ng-if=\"userProfile.person.photo == null\" width=\"180\" height=\"225\">\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-9\">\n" +
+    "            <h3 class=\"name\">\n" +
+    "                <small ng-if=\"userProfile.person.rank\">{{userProfile.person.rank}}</small>\n" +
+    "                <span ng-bind-html=\"userProfile.person.firstname\"></span> <span ng-bind-html=\"userProfile.person.lastname\"></span>\n" +
+    "            </h3>\n" +
+    "            <h4 class=\"title\"><span ng-bind-html=\"userProfile.person.title\"></span></h4>\n" +
+    "            <h5 class=\"hidden-xs\"><span ng-bind-html=\"userProfile.person.department\"></span></h5>\n" +
+    "            <ul class=\"fa-ul\">\n" +
+    "                <li ng-if=\"userProfile.person.phone\"><span class=\"fa fa-phone fa-li\"></span>{{userProfile.person.phone}}</li>\n" +
+    "                <li class=\"hidden-xs\" ng-if=\"userProfile.person.fax\"><span class=\"fa fa-fax fa-li\"></span>{{userProfile.person.fax}}</li>\n" +
+    "                <li ng-if=\"userProfile.person.email\"><span class=\"fa fa-envelope fa-li\"></span>\n" +
+    "                    <a ng-href=\"mailto:{{userProfile.person.email}}\">{{userProfile.person.email}}</a>\n" +
+    "                </li>\n" +
+    "            </ul>\n" +
+    "        </div>\n" +
     "    </div>\n" +
-    "    <div class=\"col-md-9\">\n" +
-    "        <h3 class=\"name\">\n" +
-    "            <small ng-if=\"userProfile.person.rank\">{{userProfile.person.rank}}</small>\n" +
-    "            <span ng-bind-html=\"userProfile.person.firstname\"></span> <span ng-bind-html=\"userProfile.person.lastname\"></span>\n" +
-    "        </h3>\n" +
-    "        <h4 class=\"title\"><span ng-bind-html=\"userProfile.person.title\"></span></h4>\n" +
-    "        <h5 class=\"hidden-xs\"><span ng-bind-html=\"userProfile.person.department\"></span></h5>\n" +
-    "        <ul class=\"fa-ul\">\n" +
-    "            <li ng-if=\"userProfile.person.phone\"><span class=\"fa fa-phone fa-li\"></span>{{userProfile.person.phone}}</li>\n" +
-    "            <li class=\"hidden-xs\" ng-if=\"userProfile.person.fax\"><span class=\"fa fa-fax fa-li\"></span>{{userProfile.person.fax}}</li>\n" +
-    "            <li ng-if=\"userProfile.person.email\"><span class=\"fa fa-envelope fa-li\"></span>\n" +
-    "                <a ng-href=\"mailto:{{userProfile.person.email}}\">{{userProfile.person.email}}</a>\n" +
-    "            </li>\n" +
-    "        </ul>\n" +
+    "\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-12 form-group\">\n" +
+    "            <label>Description (allowed tags:\n" +
+    "                <code>\n" +
+    "                    &lt;h3&gt;, &lt;h4&gt;, &lt;a&gt;, &lt;img&gt;, &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;ul&gt;, &lt;ol&gt;, &lt;li&gt;\n" +
+    "                </code>)</label>\n" +
+    "                <textarea ui-tinymce=\"tinymceOptions\" ng-model=\"userProfile.person.profile\" rows=\"10\"\n" +
+    "                      maxlength=\"64000\" ng-if=\"userProfile.person.profile\"></textarea>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-12 text-center form-group\">\n" +
+    "            <button type=\"submit\" class=\"btn btn-success\" ng-disabled=\"uploading\" ng-click=\"update()\">\n" +
+    "                Update Profile\n" +
+    "            </button><br>\n" +
+    "            {{userProfile.person.formResponse}}\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-12\">\n" +
+    "            <span ng-bind-html=\"userProfile.person.profile\"></span>\n" +
+    "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
     "\n" +
-    "<div class=\"row\">\n" +
-    "    <div class=\"col-md-12 form-group\">\n" +
-    "        <label>Description (allowed tags:\n" +
-    "            <code>\n" +
-    "                &lt;h3&gt;, &lt;h4&gt;, &lt;a&gt;, &lt;img&gt;, &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;ul&gt;, &lt;ol&gt;, &lt;li&gt;\n" +
-    "            </code>)</label>\n" +
-    "            <textarea ui-tinymce=\"tinymceOptions\" ng-model=\"userProfile.person.profile\" rows=\"10\"\n" +
-    "                  maxlength=\"64000\" ng-if=\"userProfile.person.profile\"></textarea>\n" +
-    "    </div>\n" +
-    "    <div class=\"col-md-12 text-center form-group\">\n" +
-    "        <button type=\"submit\" class=\"btn btn-success\" ng-disabled=\"uploading\" ng-click=\"update()\">\n" +
-    "            Update Profile\n" +
-    "        </button><br>\n" +
-    "        {{userProfile.person.formResponse}}\n" +
-    "    </div>\n" +
-    "</div>\n" +
-    "\n" +
-    "<div class=\"row\">\n" +
-    "    <div class=\"col-md-12\">\n" +
-    "        <span ng-bind-html=\"userProfile.person.profile\"></span>\n" +
-    "    </div>\n" +
-    "</div>\n" +
-    "\n" +
+    "<h4 ng-hide=\"userProfile.person.profile\">Can not find your profile!</h4>\n" +
     "");
 }]);
 
