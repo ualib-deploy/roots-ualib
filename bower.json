@@ -33,7 +33,8 @@
     "ualib-softwareList": "https://github.com/ualibweb/softwareList_ui.git",
     "ualib-news": "https://github.com/ualibweb/news_ui.git",
     "angulartics": "~0.18.0",
-    "angular-carousel": "0.3.12"
+    "angular-carousel": "0.3.12",
+    "angular-ui-tinymce": "latest"
   },
   "resolutions": {
     "angular": ">=1 <1.3.0",

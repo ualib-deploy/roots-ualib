@@ -45943,7 +45943,7 @@ angular.module('manage.manageHoursUsers', [])
         };
     }])
 
-angular.module('manage.manageNews', ['ngFileUpload'])
+angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
     .controller('manageNewsCtrl', ['$scope', '$window', '$timeout', 'tokenFactory', 'newsFactory',
         function manageNewsCtrl($scope, $window, $timeout, tokenFactory, newsFactory){
             $scope.data = {};
@@ -47576,7 +47576,7 @@ angular.module('manage.siteFeedback', [])
         };
     }])
 
-angular.module('manage.staffDirectory', [])
+angular.module('manage.staffDirectory', ['ui.tinymce'])
     .constant('STAFF_DIR_RANKS', [
         "",
         "Prof.",
@@ -50685,34 +50685,6 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "</div>\n" +
     "");
 }]);
-;/*
-(function() {
-    tinymce.create('tinymce.plugins.typekit', {
-        setup : function(ed) {
-            ed.onInit.add(function(ed, evt) {
-
-                // Load a script from a specific URL using the global script loader
-                tinymce.ScriptLoader.load('somescript.js');
-
-                // Load a script using a unique instance of the script loader
-                var scriptLoader = new tinymce.dom.ScriptLoader();
-
-                scriptLoader.load('somescript.js');
-
-            });
-        },
-    getInfo: function() {
-    return {
-        longname:  'TypeKit',
-        author:    'Thomas Griffin',
-        authorurl: 'https://thomasgriffin.io',
-        infourl:   'https://twitter.com/jthomasgriffin',
-        version:   '1.0'
-    };
-}
-});
-tinymce.PluginManager.add('typekit', tinymce.plugins.typekit);
-})();*/
 ;/* ========================================================================
  * DOM-based Routing
  * Based on http://goo.gl/EUTi53 by Paul Irish
