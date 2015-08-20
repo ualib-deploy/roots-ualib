@@ -44894,7 +44894,7 @@ angular.module("staffDirectory/staffDirectoryProfile.tpl.html", []).run(["$templ
   $templateCache.put("staffDirectory/staffDirectoryProfile.tpl.html",
     "<h2>Profile Management</h2>\n" +
     "\n" +
-    "<div ng-if=\"userProfile.person.profile\">\n" +
+    "<div ng-if=\"userProfile.person.uid > 0\">\n" +
     "    <div class=\"row\">\n" +
     "        <div class=\"col-md-3\">\n" +
     "            <img class=\"staff-portrait thumbnail\" ng-src=\"{{userProfile.person.photo}}\" ng-if=\"userProfile.person.photo != null\"\n" +
@@ -44926,7 +44926,7 @@ angular.module("staffDirectory/staffDirectoryProfile.tpl.html", []).run(["$templ
     "                    &lt;h3&gt;, &lt;h4&gt;, &lt;a&gt;, &lt;img&gt;, &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;ul&gt;, &lt;ol&gt;, &lt;li&gt;\n" +
     "                </code>)</label>\n" +
     "                <textarea ui-tinymce=\"tinymceOptions\" ng-model=\"userProfile.person.profile\" rows=\"10\"\n" +
-    "                      maxlength=\"64000\" ng-if=\"userProfile.person.profile\"></textarea>\n" +
+    "                      maxlength=\"64000\"></textarea>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-12 text-center form-group\">\n" +
     "            <button type=\"submit\" class=\"btn btn-success\" ng-disabled=\"uploading\" ng-click=\"update()\">\n" +
@@ -44943,7 +44943,7 @@ angular.module("staffDirectory/staffDirectoryProfile.tpl.html", []).run(["$templ
     "    </div>\n" +
     "</div>\n" +
     "\n" +
-    "<h4 ng-hide=\"userProfile.person.profile\">Can not find your profile!</h4>\n" +
+    "<h4 ng-hide=\"userProfile.person.uid > 0\">Can not find your profile!</h4>\n" +
     "");
 }]);
 
