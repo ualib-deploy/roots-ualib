@@ -11,7 +11,7 @@ function roots_ualib_endSession() {
 }
 
 function roots_ualib_scripts() {
-    if ( is_page('news-and-exhibitions') )
+    if ( is_page('news-and-exhibitions') or is_page('edit-directory-profile') )
         wp_enqueue_script(
             'tinyMCE',
             '//tinymce.cachefly.net/4.0/tinymce.min.js'

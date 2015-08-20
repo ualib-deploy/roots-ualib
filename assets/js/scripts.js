@@ -4693,11 +4693,182 @@ angular.module('ui.utils',  [
   'ui.unique',
   'ui.validate'
 ]);
+;/**
+ * Binds a TinyMCE widget to <textarea> elements.
+ */
+angular.module('ui.tinymce', [])
+  .value('uiTinymceConfig', {})
+  .directive('uiTinymce', ['$rootScope', '$compile', '$timeout', '$window', '$sce', 'uiTinymceConfig', function($rootScope, $compile, $timeout, $window, $sce, uiTinymceConfig) {
+    uiTinymceConfig = uiTinymceConfig || {};
+    var generatedIds = 0;
+    var ID_ATTR = 'ui-tinymce';
+    if (uiTinymceConfig.baseUrl) {
+      tinymce.baseURL = uiTinymceConfig.baseUrl;
+    }
+
+    return {
+      require: ['ngModel', '^?form'],
+      link: function(scope, element, attrs, ctrls) {
+        if (!$window.tinymce) {
+          return;
+        }
+
+        var ngModel = ctrls[0],
+          form = ctrls[1] || null;
+
+        var expression, options, tinyInstance,
+          updateView = function(editor) {
+            var content = editor.getContent({format: options.format}).trim();
+            content = $sce.trustAsHtml(content);
+
+            ngModel.$setViewValue(content);
+            if (!$rootScope.$$phase) {
+              scope.$apply();
+            }
+          };
+
+        // generate an ID
+        attrs.$set('id', ID_ATTR + '-' + generatedIds++);
+
+        expression = {};
+
+        angular.extend(expression, scope.$eval(attrs.uiTinymce));
+
+        options = {
+          // Update model when calling setContent
+          // (such as from the source editor popup)
+          setup: function(ed) {
+            ed.on('init', function() {
+              ngModel.$render();
+              ngModel.$setPristine();
+              if (form) {
+                form.$setPristine();
+              }
+            });
+
+            // Update model on button click
+            ed.on('ExecCommand', function() {
+              ed.save();
+              updateView(ed);
+            });
+
+            // Update model on change
+            ed.on('change', function(e) {
+              ed.save();
+              updateView(ed);
+            });
+
+            ed.on('blur', function() {
+              element[0].blur();
+            });
+
+            // Update model when an object has been resized (table, image)
+            ed.on('ObjectResized', function() {
+              ed.save();
+              updateView(ed);
+            });
+
+            ed.on('remove', function() {
+              element.remove();
+            });
+
+            if (expression.setup) {
+              expression.setup(ed, {
+                updateView: updateView
+              });
+            }
+          },
+          format: 'raw',
+          selector: '#' + attrs.id
+        };
+        // extend options with initial uiTinymceConfig and
+        // options from directive attribute value
+        angular.extend(options, uiTinymceConfig, expression);
+        // Wrapped in $timeout due to $tinymce:refresh implementation, requires
+        // element to be present in DOM before instantiating editor when
+        // re-rendering directive
+        $timeout(function() {
+          tinymce.init(options);
+        });
+
+        ngModel.$formatters.unshift(function(modelValue) {
+          return modelValue ? $sce.trustAsHtml(modelValue) : '';
+        });
+
+        ngModel.$parsers.unshift(function(viewValue) {
+          return viewValue ? $sce.getTrustedHtml(viewValue) : '';
+        });
+
+        ngModel.$render = function() {
+          ensureInstance();
+
+          var viewValue = ngModel.$viewValue ?
+            $sce.getTrustedHtml(ngModel.$viewValue) : '';
+
+          // instance.getDoc() check is a guard against null value
+          // when destruction & recreation of instances happen
+          if (tinyInstance &&
+            tinyInstance.getDoc()
+          ) {
+            tinyInstance.setContent(viewValue);
+            tinyInstance.fire('change');
+          }
+        };
+
+        attrs.$observe('disabled', function(disabled) {
+          if (disabled) {
+            ensureInstance();
+
+            if (tinyInstance) {
+              tinyInstance.getBody().setAttribute('contenteditable', false);
+            }
+          } else {
+            ensureInstance();
+
+            if (tinyInstance) {
+              tinyInstance.getBody().setAttribute('contenteditable', true);
+            }
+          }
+        });
+
+        // This block is because of TinyMCE not playing well with removal and
+        // recreation of instances, requiring instances to have different
+        // selectors in order to render new instances properly
+        scope.$on('$tinymce:refresh', function(e, id) {
+          var eid = attrs.id;
+          if (angular.isUndefined(id) || id === eid) {
+            var parentElement = element.parent();
+            var clonedElement = element.clone();
+            clonedElement.removeAttr('id');
+            clonedElement.removeAttr('style');
+            clonedElement.removeAttr('aria-hidden');
+            tinymce.execCommand('mceRemoveEditor', false, eid);
+            parentElement.append($compile(clonedElement)(scope));
+          }
+        });
+
+        scope.$on('$destroy', function() {
+          ensureInstance();
+
+          if (tinyInstance) {
+            tinyInstance.remove();
+            tinyInstance = null;
+          }
+        });
+
+        function ensureInstance() {
+          if (!tinyInstance) {
+            tinyInstance = tinymce.get(attrs.id);
+          }
+        }
+      }
+    };
+  }]);
 ;/**!
  * AngularJS file upload/drop directive and service with progress and abort
  * FileAPI Flash shim for old browsers not supporting FormData
  * @author  Danial  <danial.farid@gmail.com>
- * @version 7.0.4
+ * @version 7.0.6
  */
 
 (function () {
@@ -5113,7 +5284,7 @@ if (!window.FileReader) {
 /**!
  * AngularJS file upload/drop directive and service with progress and abort
  * @author  Danial  <danial.farid@gmail.com>
- * @version 7.0.4
+ * @version 7.0.6
  */
 
 if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
@@ -5134,7 +5305,7 @@ if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
 
 var ngFileUpload = angular.module('ngFileUpload', []);
 
-ngFileUpload.version = '7.0.4';
+ngFileUpload.version = '7.0.6';
 
 ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, $q, $timeout) {
   function sendHttp(config) {
@@ -5499,10 +5670,6 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
       fileElem.css('visibility', 'hidden').css('position', 'absolute').css('overflow', 'hidden')
         .css('width', '0px').css('height', '0px').css('border', 'none')
         .css('margin', '0px').css('padding', '0px').attr('tabindex', '-1');
-      if (elem.$$ngfRefElem) {
-        elem.$$ngfRefElem.remove();
-      }
-      elem.$$ngfRefElem = fileElem;
       document.body.appendChild(fileElem[0]);
 
       return fileElem;
@@ -5620,14 +5787,14 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
 (function () {
 
   ngFileUpload.service('UploadDataUrl', ['UploadBase', '$timeout', '$q', function (UploadBase, $timeout, $q) {
-    var promises = {}, upload = UploadBase;
+    var upload = UploadBase;
     upload.dataUrl = function (file, disallowObjectUrl) {
       if (file.dataUrl) {
         var d = $q.defer();
         $timeout(function() {d.resolve(file.dataUrl);});
         return d.promise;
       }
-      if (promises[file]) return promises[file];
+      if (file.$ngfDataUrlPromise) return file.$ngfDataUrlPromise;
 
       var deferred = $q.defer();
       $timeout(function () {
@@ -5669,11 +5836,11 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
         }
       });
 
-      promises[file] = deferred.promise;
-      promises[file].finally(function() {
-        delete promises[file];
+      file.$ngfDataUrlPromise = deferred.promise;
+      file.$ngfDataUrlPromise.finally(function() {
+        delete file.$ngfDataUrlPromise;
       });
-      return promises[file];
+      return file.$ngfDataUrlPromise;
     };
     return upload;
   }]);
@@ -5685,7 +5852,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
       restrict: 'AE',
       link: function (scope, elem, attr) {
         $timeout(function () {
-          elem.attr('src', '{{(' + attr.ngfSrc + ') | ngfDataUrl' +
+          elem.attr('ng-src', '{{(' + attr.ngfSrc + ') | ngfDataUrl' +
             ($parse(attr.ngfNoObjectUrl)(scope) === true ? ':true' : '') + '}}');
           attr.$set('ngfSrc', null);
           var clone = elem.clone();
@@ -5889,6 +6056,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
 
       if (!valid) {
         callback.call(ngModel, ngModel.$ngfValidations);
+        return;
       }
 
       var pendings = 0;
@@ -5974,7 +6142,6 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
       }
     };
 
-    var dimensionPromises = {}, durationPromises = {};
     upload.imageDimensions = function (file) {
       if (file.width && file.height) {
         var d = $q.defer();
@@ -5983,7 +6150,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
         });
         return d.promise;
       }
-      if (dimensionPromises[file]) return dimensionPromises[file];
+      if (file.$ngfDimensionPromise) return file.$ngfDimensionPromise;
 
       var deferred = $q.defer();
       $timeout(function () {
@@ -6011,11 +6178,11 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
         });
       });
 
-      dimensionPromises[file] = deferred.promise;
-      dimensionPromises[file].finally(function () {
-        delete dimensionPromises[file];
+      file.$ngfDimensionPromise = deferred.promise;
+      file.$ngfDimensionPromise.finally(function () {
+        delete file.$ngfDimensionPromise;
       });
-      return dimensionPromises[file];
+      return file.$ngfDimensionPromise;
     };
 
     upload.mediaDuration = function (file) {
@@ -6026,7 +6193,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
         });
         return d.promise;
       }
-      if (durationPromises[file]) return durationPromises[file];
+      if (file.$ngfDurationPromise) return file.$ngfDurationPromise;
 
       var deferred = $q.defer();
       $timeout(function () {
@@ -6054,11 +6221,11 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
         });
       });
 
-      durationPromises[file] = deferred.promise;
-      durationPromises[file].finally(function () {
-        delete durationPromises[file];
+      file.$ngfDurationPromise = deferred.promise;
+      file.$ngfDurationPromise.finally(function () {
+        delete file.$ngfDurationPromise;
       });
-      return durationPromises[file];
+      return file.$ngfDurationPromise;
     };
     return upload;
   }
@@ -39700,15 +39867,8 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "    </div>\n" +
     "    <div class=\"row\">\n" +
     "        <div class=\"col-md-6\">\n" +
-    "            <div class=\"bento-box\">\n" +
+    "            <div class=\"bento-box\" bento-box=\"googleCS\">\n" +
     "                <h2 id=\"site-search\">Libraries' Website</h2>\n" +
-    "                <div class=\"alert alert-warning\">\n" +
-    "                    <h4><span class=\"fa fa-fw fa-info-circle\"></span> Temporarily disabled</h4>\n" +
-    "                    <p>\n" +
-    "                        We have completely restructured our website for the better. But Google still needs time to catch up!\n" +
-    "                        Searching of the University Libraries' website will be available shortly.\n" +
-    "                    </p>\n" +
-    "                </div>\n" +
     "\n" +
     "            </div>\n" +
     "        </div>\n" +
@@ -40138,6 +40298,12 @@ angular.module('oneSearch.bento', [])
                             //console.log(self.boxes);
                         }
                         else {
+                            res = res.map(function(item, i){
+                                var newItem = item;
+                                newItem.position = i;
+                                return newItem;
+                            });
+                            //console.log(res);
                             // Group the results by defined media types
                             var grouped = mediaTypes.groupBy(res, engine.mediaTypes);
 
@@ -40149,7 +40315,16 @@ angular.module('oneSearch.bento', [])
                                     // Ex: self.boxes['books'].results['catalog'] = group_result;
                                     //
                                     // Also, limit the number of results per group by 3
-                                    self.boxes[type].results[name] = grouped[type];
+                                    // and sort by generation position in the original results list
+                                    self.boxes[type].results[name] = grouped[type].sort(function(a, b){
+                                        if (a.position > b.position){
+                                            return 1;
+                                        }
+                                        if (a.position < b.position){
+                                            return -1;
+                                        }
+                                        return 0;
+                                    });
 
                                     // set resource "more" link
                                     self.boxes[type].resourceLinks[name] = decodeURIComponent(link[engine.id]);
@@ -40749,7 +40924,7 @@ angular.module('common.engines', [
     'engines.catalog',
     'engines.databases',
     'engines.scout',
-    //'engines.googleCS',
+    'engines.googleCS',
     'engines.faq',
     'engines.libguides',
     'engines.ejournals',
@@ -40868,7 +41043,9 @@ angular.module('engines.scout', [])
                 for (var x = 0, len = bibRelationships.length; x < len; x++){
                     if (angular.isDefined(bibRelationships[x].BibEntity.Identifiers) && bibRelationships[x].BibEntity.Identifiers[0].Type === 'issn-print'){
                         // define source title
-                        items[i].source = bibRelationships[x].BibEntity.Titles[0].TitleFull;
+                        if (bibRelationships[x].BibEntity.Titles){
+                            items[i].source = bibRelationships[x].BibEntity.Titles[0].TitleFull;
+                        }
 
                         // Append source volume, issue, etc.
                         if (angular.isDefined(bibRelationships[x].BibEntity.Numbering)){
@@ -41010,7 +41187,7 @@ angular.module('common.mediaTypes', [])
             }
             _types[type].engines.push(engine);
 
-        }
+        };
 
         // Helper function
         // will return a new object to map results from an engines results
@@ -41037,7 +41214,7 @@ angular.module('common.mediaTypes', [])
                 // Honestly, I had almost no clue what to call it...
                 v = invertArrayToObject(v);
                 angular.extend(groups, v);
-            })
+            });
             return groups;
         }
 
@@ -41120,9 +41297,12 @@ angular.module('common.mediaTypes', [])
 angular.module('common.oneSearch', [])
 
     .factory('Search', ['$resource', function($resource){
-        return $resource("//wwwdev2.lib.ua.edu/oneSearch/api/search/:s/engine/:engine/limit/:limit", {}, {cache: true});
-    }])
 
+        return $resource("//wwwdev2.lib.ua.edu/oneSearch/api/search/:s/engine/:engine/limit/:limit", {}, {
+            cache: false
+        });
+    }])
+    
     .provider('oneSearch', ['mediaTypesProvider', function oneSearchProvider(mediaTypesProvider){
         //private object that holds registered engines
         var _engines = {};
@@ -41194,6 +41374,7 @@ angular.module('common.oneSearch', [])
                         // Create results getter function from given results JSON path
                         if (angular.isDefined(engine.resultsPath)){
                             engine.getResults = $parse(engine.resultsPath);
+
                         }
 
                         // Create results getter function from given results JSON path
@@ -41981,7 +42162,7 @@ angular.module('hours.list', [])
             templateUrl: 'list/list.tpl.html',
             controller: 'ListCtrl'
         }
-    }]);;angular.module('manage.templates', ['manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageNews/manageNews.tpl.html', 'manageNews/manageNewsAdmins.tpl.html', 'manageNews/manageNewsList.tpl.html', 'manageOneSearch/mainOneSearch.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageOneSearch/oneSearchStat.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareComputerMaps.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html', 'staffDirectory/staffDirectoryDepartments.tpl.html', 'staffDirectory/staffDirectoryPeople.tpl.html', 'staffDirectory/staffDirectorySubjects.tpl.html', 'submittedForms/submittedForms.tpl.html']);
+    }]);;angular.module('manage.templates', ['manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageNews/manageNews.tpl.html', 'manageNews/manageNewsAdmins.tpl.html', 'manageNews/manageNewsList.tpl.html', 'manageOneSearch/mainOneSearch.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageOneSearch/oneSearchStat.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareComputerMaps.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html', 'staffDirectory/staffDirectoryDepartments.tpl.html', 'staffDirectory/staffDirectoryPeople.tpl.html', 'staffDirectory/staffDirectoryProfile.tpl.html', 'staffDirectory/staffDirectorySubjects.tpl.html', 'submittedForms/submittedForms.tpl.html']);
 
 angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageDatabases/manageDatabases.tpl.html",
@@ -42839,7 +43020,7 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                    <div class=\"col-md-12\">\n" +
     "                        <div class=\"col-md-12 form-group\">\n" +
     "                            <label>Detailed Description</label>\n" +
-    "                            <textarea data-ui-tinymce id=\"description\" data-ng-model=\"newNews.description\" rows=\"5\"\n" +
+    "                            <textarea ui-tinymce=\"tinymceOptions\" ng-model=\"newNews.description\" rows=\"5\"\n" +
     "                                      maxlength=\"64000\" required></textarea>\n" +
     "                        </div>\n" +
     "                    </div>\n" +
@@ -43012,8 +43193,8 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                        <div class=\"row\">\n" +
     "                            <div class=\"col-md-12 form-group\">\n" +
     "                                <label>Detailed Description</label>\n" +
-    "                                <textarea data-ui-tinymce id=\"{{news.nid}}_descr\" data-ng-model=\"news.description\" rows=\"5\"\n" +
-    "                                         maxlength=\"64000\" required></textarea>\n" +
+    "                                <textarea ui-tinymce=\"tinymceOptions\" ng-model=\"news.description\" rows=\"5\"\n" +
+    "                                    maxlength=\"64000\" required></textarea>\n" +
     "                            </div>\n" +
     "                        </div>\n" +
     "                        <h4><small>Select contact person from the list or enter new contact information</small></h4>\n" +
@@ -44226,6 +44407,9 @@ angular.module("manageUserGroups/manageUG.tpl.html", []).run(["$templateCache", 
     "        </div>\n" +
     "        <div ng-show=\"tab.number == 1\">\n" +
     "            <h4>Web applications with data manageable by users:</h4>\n" +
+    "            <h4 class=\"text-center\">\n" +
+    "                <a href=\"/edit-directory-profile/\">Edit my Directory Profile</a>\n" +
+    "            </h4>\n" +
     "            <h4 class=\"text-center\" ng-repeat=\"app in apps\" ng-show=\"$index > 0\">\n" +
     "                <a href=\"{{app.link}}\">{{app.appName}}</a>\n" +
     "            </h4>\n" +
@@ -44243,8 +44427,11 @@ angular.module("manageUserGroups/viewMyWebApps.tpl.html", []).run(["$templateCac
     "<div class=\"form-group\">\n" +
     "    <label for=\"webapps\">Web Application Back-End access links</label>\n" +
     "    <ul class=\"list-group\" id=\"webapps\">\n" +
+    "        <li class=\"list-group-item\">\n" +
+    "            <a href=\"/edit-directory-profile/\">Edit my Directory Profile</a>\n" +
+    "        </li>\n" +
     "        <li class=\"list-group-item\" ng-repeat=\"app in apps\">\n" +
-    "            <a href=\"{{app.link}}\">{{app.appName}}</a>\n" +
+    "            <a ng-href=\"{{app.link}}\">{{app.appName}}</a>\n" +
     "        </li>\n" +
     "    </ul>\n" +
     "</div>");
@@ -44717,6 +44904,63 @@ angular.module("staffDirectory/staffDirectoryPeople.tpl.html", []).run(["$templa
     "</div>");
 }]);
 
+angular.module("staffDirectory/staffDirectoryProfile.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("staffDirectory/staffDirectoryProfile.tpl.html",
+    "<h2>Profile Management</h2>\n" +
+    "\n" +
+    "<div ng-if=\"userProfile.person.uid > 0\">\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-3\">\n" +
+    "            <img class=\"staff-portrait thumbnail\" ng-src=\"{{userProfile.person.photo}}\" ng-if=\"userProfile.person.photo != null\"\n" +
+    "                 width=\"180\" height=\"225\">\n" +
+    "            <img class=\"staff-portrait thumbnail\" ng-src=\"wp-content/themes/roots-ualib/assets/img/user-profile.png\"\n" +
+    "                 ng-if=\"userProfile.person.photo == null\" width=\"180\" height=\"225\">\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-9\">\n" +
+    "            <h3 class=\"name\">\n" +
+    "                <small ng-if=\"userProfile.person.rank\">{{userProfile.person.rank}}</small>\n" +
+    "                <span ng-bind-html=\"userProfile.person.firstname\"></span> <span ng-bind-html=\"userProfile.person.lastname\"></span>\n" +
+    "            </h3>\n" +
+    "            <h4 class=\"title\"><span ng-bind-html=\"userProfile.person.title\"></span></h4>\n" +
+    "            <h5 class=\"hidden-xs\"><span ng-bind-html=\"userProfile.person.department\"></span></h5>\n" +
+    "            <ul class=\"fa-ul\">\n" +
+    "                <li ng-if=\"userProfile.person.phone\"><span class=\"fa fa-phone fa-li\"></span>{{userProfile.person.phone}}</li>\n" +
+    "                <li class=\"hidden-xs\" ng-if=\"userProfile.person.fax\"><span class=\"fa fa-fax fa-li\"></span>{{userProfile.person.fax}}</li>\n" +
+    "                <li ng-if=\"userProfile.person.email\"><span class=\"fa fa-envelope fa-li\"></span>\n" +
+    "                    <a ng-href=\"mailto:{{userProfile.person.email}}\">{{userProfile.person.email}}</a>\n" +
+    "                </li>\n" +
+    "            </ul>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-12 form-group\">\n" +
+    "            <label>Description (allowed tags:\n" +
+    "                <code>\n" +
+    "                    &lt;h3&gt;, &lt;h4&gt;, &lt;a&gt;, &lt;img&gt;, &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;ul&gt;, &lt;ol&gt;, &lt;li&gt;\n" +
+    "                </code>)</label>\n" +
+    "                <textarea ui-tinymce=\"tinymceOptions\" ng-model=\"userProfile.person.profile\" rows=\"10\"\n" +
+    "                      maxlength=\"64000\"></textarea>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-12 text-center form-group\">\n" +
+    "            <button type=\"submit\" class=\"btn btn-success\" ng-disabled=\"uploading\" ng-click=\"update()\">\n" +
+    "                Update Profile\n" +
+    "            </button><br>\n" +
+    "            {{userProfile.person.formResponse}}\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-12\">\n" +
+    "            <span ng-bind-html=\"userProfile.person.profile\"></span>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "\n" +
+    "<h4 ng-hide=\"userProfile.person.uid > 0\">Can not find your profile!</h4>\n" +
+    "");
+}]);
+
 angular.module("staffDirectory/staffDirectorySubjects.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staffDirectory/staffDirectorySubjects.tpl.html",
     "<div>\n" +
@@ -44860,6 +45104,7 @@ angular.module("submittedForms/submittedForms.tpl.html", []).run(["$templateCach
 ;angular.module('manage', [
     'ngAnimate',
     'ui.bootstrap',
+    'ui.tinymce',
     'manage.common',
     'manage.templates',
     'manage.manageHours',
@@ -44887,8 +45132,8 @@ angular.module("submittedForms/submittedForms.tpl.html", []).run(["$templateCach
 angular.module('manage.common', [
     'common.manage'
 ])
-angular.module('common.manage', [])
 
+angular.module('common.manage', [])
 
     .factory('tokenFactory', ['$http', function tokenFactory($http){
         return function(tokenName){
@@ -44953,6 +45198,9 @@ angular.module('common.manage', [])
             getData: function(){
                 return $http({method: 'GET', url: url + "api/people", params: {}})
             },
+            getProfile: function(login){
+                return $http({method: 'GET', url: url + "api/profile/" + login, params: {}})
+            },
             postData: function(params, data){
                 params = angular.isDefined(params) ? params : {};
                 return $http({method: 'POST', url: url + "processData.php", params: params, data: data})
@@ -45005,7 +45253,7 @@ angular.module('common.manage', [])
                 return $http({method: 'POST', url: url + "api/process", params: {}, data: data})
             }
         };
-    }])
+    }]);
 
 angular.module('manage.manageDatabases', [])
     .controller('manageDBCtrl', ['$scope', '$window', 'tokenFactory', 'mdbFactory',
@@ -45890,7 +46138,7 @@ angular.module('manage.manageHoursUsers', [])
         };
     }])
 
-angular.module('manage.manageNews', ['ngFileUpload'])
+angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
     .controller('manageNewsCtrl', ['$scope', '$window', '$timeout', 'tokenFactory', 'newsFactory',
         function manageNewsCtrl($scope, $window, $timeout, tokenFactory, newsFactory){
             $scope.data = {};
@@ -46006,69 +46254,6 @@ angular.module('manage.manageNews', ['ngFileUpload'])
         };
     }])
 
-    //from http://codepen.io/paulbhartzog/pen/Ekztl?editors=101
-    .value('uiTinymceConfig', {plugins: 'link spellchecker code', toolbar: 'undo redo | bold italic | link | code', menubar : false})
-    .directive('uiTinymce', ['uiTinymceConfig', function(uiTinymceConfig) {
-        uiTinymceConfig = uiTinymceConfig || {};
-        var generatedIds = 0;
-        return {
-            require: 'ngModel',
-            link: function(scope, elm, attrs, ngModel) {
-                var expression, options, tinyInstance;
-                // generate an ID if not present
-                if (!attrs.id) {
-                    attrs.$set('id', 'uiTinymce' + generatedIds++);
-                }
-                options = {
-                    // Update model when calling setContent (such as from the source editor popup)
-                    setup: function(ed) {
-                        ed.on('init', function(args) {
-                            ngModel.$render();
-                        });
-                        // Update model on button click
-                        ed.on('ExecCommand', function(e) {
-                            ed.save();
-                            ngModel.$setViewValue(elm.val());
-                            if (!scope.$$phase) {
-                                scope.$apply();
-                            }
-                        });
-                        // Update model on keypress
-                        ed.on('KeyUp', function(e) {
-                            console.log(ed.isDirty());
-                            ed.save();
-                            ngModel.$setViewValue(elm.val());
-                            if (!scope.$$phase) {
-                                scope.$apply();
-                            }
-                        });
-                    },
-                    mode: 'exact',
-                    elements: attrs.id
-                };
-                if (attrs.uiTinymce) {
-                    expression = scope.$eval(attrs.uiTinymce);
-                } else {
-                    expression = {};
-                }
-                angular.extend(options, uiTinymceConfig, expression);
-                setTimeout(function() {
-                    tinymce.init(options);
-                });
-
-
-                ngModel.$render = function() {
-                    if (!tinyInstance) {
-                        tinyInstance = tinymce.get(attrs.id);
-                    }
-                    if (tinyInstance) {
-                        tinyInstance.setContent(ngModel.$viewValue || '');
-                    }
-                };
-            }
-        };
-    }])
-
     .controller('manageNewsListCtrl', ['$scope', '$timeout', 'Upload', 'newsFactory', 'NEWS_URL',
         function manageNewsListCtrl($scope, $timeout, Upload, newsFactory, appURL){
             $scope.titleFilter = '';
@@ -46089,6 +46274,18 @@ angular.module('manage.manageNews', ['ngFileUpload'])
             $scope.currentPage = 1;
             $scope.maxPageSize = 10;
             $scope.perPage = 20;
+
+            $scope.tinymceOptions = {
+                onChange: function(e) {
+                    // put logic here for keypress and cut/paste changes
+                },
+                inline: false,
+                plugins : 'link spellchecker code',
+                toolbar: 'undo redo | bold italic | link | code',
+                menubar : false,
+                skin: 'lightgray',
+                theme : 'modern'
+            };
 
             $scope.onNewsDPFocusFrom = function($event, news){
                 $event.preventDefault();
@@ -46387,7 +46584,9 @@ angular.module('manage.manageNews', ['ngFileUpload'])
             },
             templateUrl: 'manageNews/manageNewsAdmins.tpl.html'
         };
-    }])
+    }]);
+
+
 
 angular.module('manage.manageOneSearch', [])
 
@@ -47572,7 +47771,7 @@ angular.module('manage.siteFeedback', [])
         };
     }])
 
-angular.module('manage.staffDirectory', [])
+angular.module('manage.staffDirectory', ['ui.tinymce'])
     .constant('STAFF_DIR_RANKS', [
         "",
         "Prof.",
@@ -48096,6 +48295,56 @@ angular.module('manage.staffDirectory', [])
             templateUrl: 'staffDirectory/staffDirectoryDepartments.tpl.html'
         };
     }])
+
+    .controller('staffDirProfileCtrl', ['$scope', 'tokenFactory', 'sdFactory', '$window',
+    function staffDirProfileCtrl($scope, tokenFactory, sdFactory, $window){
+        $scope.userProfile = {};
+        $scope.login = $window.login;
+        $scope.tinymceOptions = {
+            onChange: function(e) {
+                // put logic here for keypress and cut/paste changes
+            },
+            inline: false,
+            plugins : 'link image lists spellchecker code print preview',
+            skin: 'lightgray',
+            theme : 'modern'
+        };
+
+        tokenFactory("CSRF-" + $scope.login);
+
+        sdFactory.getProfile($scope.login)
+            .success(function(data) {
+                $scope.userProfile = data;
+                console.dir(data);
+            })
+            .error(function(data, status, headers, config) {
+                console.log(data);
+            });
+
+        $scope.update = function(){
+            $scope.userProfile.person.login = $scope.login;
+            $scope.userProfile.person.formResponse = "";
+            sdFactory.postData({action : 18}, $scope.userProfile.person)
+                .success(function(data, status, headers, config) {
+                    $scope.userProfile.person.formResponse = data;
+                })
+                .error(function(data, status, headers, config) {
+                    $scope.userProfile.person.formResponse = "Error: Could not update profile! " + data;
+                });
+        };
+    }])
+    .directive('editStaffDirectoryProfile', [ function() {
+        return {
+            restrict: 'AC',
+            scope: {},
+            controller: 'staffDirProfileCtrl',
+            link: function(scope, elm, attrs){
+            },
+            templateUrl: 'staffDirectory/staffDirectoryProfile.tpl.html'
+        };
+    }]);
+
+
 
 angular.module('manage.submittedForms', [])
     .controller('manageSubFormsCtrl', ['$scope', '$timeout', 'tokenFactory', 'formFactory',
@@ -49055,7 +49304,7 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
     }]);
 
 
-;angular.module('ualib.staffdir.templates', ['staff-card/staff-card-list.tpl.html', 'staff-card/staff-card-md.tpl.html', 'staff-directory/staff-directory-facets.tpl.html', 'staff-directory/staff-directory-listing.tpl.html', 'staff-directory/staff-directory.tpl.html']);
+;angular.module('ualib.staffdir.templates', ['staff-card/staff-card-list.tpl.html', 'staff-card/staff-card-md.tpl.html', 'staff-directory/staff-directory-facets.tpl.html', 'staff-directory/staff-directory-listing.tpl.html', 'staff-directory/staff-directory.tpl.html', 'staff-profile/staff-profile.tpl.html']);
 
 angular.module("staff-card/staff-card-list.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staff-card/staff-card-list.tpl.html",
@@ -49070,15 +49319,21 @@ angular.module("staff-card/staff-card-list.tpl.html", []).run(["$templateCache",
     "                </div>\n" +
     "            </div>\n" +
     "            <div class=\"col-xs-4 col-sm-3\">\n" +
-    "                <img class=\"staff-portrait thumbnail\" ng-src=\"{{person.photo}}\" ng-if=\"person.photo != null\">\n" +
-    "                <img class=\"staff-portrait thumbnail\" ng-src=\"wp-content/themes/roots-ualib/assets/img/user-profile.png\" ng-if=\"person.photo == null\">\n" +
+    "                <img class=\"staff-portrait thumbnail\" ng-src=\"{{person.photo}}\" />\n" +
     "            </div>\n" +
     "            <div class=\"col-xs-8\">\n" +
     "                <div class=\"row\">\n" +
     "                    <div class=\"col-xs-12 col-sm-7 name-plate\">\n" +
     "                        <h3 class=\"name\">\n" +
     "                            <small ng-if=\"person.rank\">{{person.rank}}</small>\n" +
-    "                            <span ng-class=\"{'sorting-by': staffdir.facet.sortBy == 'firstname'}\" ng-bind-html=\"person.firstname | highlight:staffdir.facet.search\"></span> <span ng-class=\"{'sorting-by': staffdir.facet.sortBy == 'lastname'}\" ng-bind-html=\"person.lastname | highlight:staffdir.facet.search\"></span>\n" +
+    "                            <a ng-href=\"/#/staffdir/profile/{{person.emailPrefix}}\" ng-if=\"person.profile !== null\">\n" +
+    "                                <span ng-class=\"{'sorting-by': staffdir.facet.sortBy == 'firstname'}\" ng-bind-html=\"person.firstname | highlight:staffdir.facet.search\"></span>\n" +
+    "                                <span ng-class=\"{'sorting-by': staffdir.facet.sortBy == 'lastname'}\" ng-bind-html=\"person.lastname | highlight:staffdir.facet.search\"></span>\n" +
+    "                            </a>\n" +
+    "                            <span ng-if=\"person.profile == null\">\n" +
+    "                                <span ng-class=\"{'sorting-by': staffdir.facet.sortBy == 'firstname'}\" ng-bind-html=\"person.firstname | highlight:staffdir.facet.search\"></span>\n" +
+    "                                <span ng-class=\"{'sorting-by': staffdir.facet.sortBy == 'lastname'}\" ng-bind-html=\"person.lastname | highlight:staffdir.facet.search\"></span>\n" +
+    "                            </span>\n" +
     "                        </h3>\n" +
     "                        <h4 class=\"title\"><span ng-bind-html=\"person.title | highlight:staffdir.facet.search\"></span></h4>\n" +
     "                        <h5 class=\"hidden-xs\"><span ng-bind-html=\"person.department | highlight:staffdir.facet.search\"></span></h5>\n" +
@@ -49088,7 +49343,7 @@ angular.module("staff-card/staff-card-list.tpl.html", []).run(["$templateCache",
     "                        <ul class=\"fa-ul\">\n" +
     "                            <li ng-if=\"person.phone\"><span class=\"fa fa-phone fa-li\"></span>{{person.phone}}</li>\n" +
     "                            <li class=\"hidden-xs\" ng-if=\"person.fax\"><span class=\"fa fa-fax fa-li\"></span>{{person.fax}}</li>\n" +
-    "                            <li ng-if=\"person.email\"><span class=\"fa fa-envelope fa-li\"></span><a href=\"mailto:{{person.email}}\">{{person.email}}</a></li>\n" +
+    "                            <li ng-if=\"person.email\"><span class=\"fa fa-envelope fa-li\"></span><a ng-href=\"mailto:{{person.email}}\" title=\"Email {{person.firstname}} {{person.lastname}}\">{{person.email}}</a></li>\n" +
     "                        </ul>\n" +
     "                    </div>\n" +
     "                    <div class=\"col-sm-12 subject-specialty hidden-xs\" ng-if=\"person.subjects\">\n" +
@@ -49335,6 +49590,40 @@ angular.module("staff-directory/staff-directory.tpl.html", []).run(["$templateCa
     "\n" +
     "");
 }]);
+
+angular.module("staff-profile/staff-profile.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("staff-profile/staff-profile.tpl.html",
+    "<h2>Faculty/Staff Profile</h2>\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-3\">\n" +
+    "        <img class=\"staff-portrait thumbnail\" ng-src=\"{{userProfile.person.photo}}\" ng-if=\"userProfile.person.photo != null\"\n" +
+    "             width=\"180\" height=\"225\">\n" +
+    "        <img class=\"staff-portrait thumbnail\" ng-src=\"wp-content/themes/roots-ualib/assets/img/user-profile.png\"\n" +
+    "             ng-if=\"userProfile.person.photo == null\" width=\"180\" height=\"225\">\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-9\">\n" +
+    "        <h3 class=\"name\">\n" +
+    "            <small ng-if=\"userProfile.person.rank\">{{userProfile.person.rank}}</small>\n" +
+    "            <span ng-bind-html=\"userProfile.person.firstname\"></span> <span ng-bind-html=\"userProfile.person.lastname\"></span>\n" +
+    "        </h3>\n" +
+    "        <h4 class=\"title\"><span ng-bind-html=\"userProfile.person.title\"></span></h4>\n" +
+    "        <h5 class=\"hidden-xs\"><span ng-bind-html=\"userProfile.person.department\"></span></h5>\n" +
+    "        <ul class=\"fa-ul\">\n" +
+    "            <li ng-if=\"userProfile.person.phone\"><span class=\"fa fa-phone fa-li\"></span>{{userProfile.person.phone}}</li>\n" +
+    "            <li class=\"hidden-xs\" ng-if=\"userProfile.person.fax\"><span class=\"fa fa-fax fa-li\"></span>{{userProfile.person.fax}}</li>\n" +
+    "            <li ng-if=\"userProfile.person.email\"><span class=\"fa fa-envelope fa-li\"></span>\n" +
+    "                <a href=\"mailto:{{userProfile.person.email}}\">{{userProfile.person.email}}</a>\n" +
+    "            </li>\n" +
+    "        </ul>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-12\">\n" +
+    "        <span ng-bind-html=\"userProfile.person.profile\"></span>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "");
+}]);
 ;angular.module('ualib.staffdir', [
     'ngRoute',
     'ngResource',
@@ -49469,9 +49758,19 @@ angular.module('staffdir', ['ualib.staffdir']);
                             var list = [];
                             angular.forEach(data.list, function(val){
                                 delete val.division;
-                                if (angular.isUndefined(val.image)){
+                                if (val.photo == null){
                                     //TODO: temporary work around because CMS file handling is dumb. Need to fix and make sustainable
-                                    val.image = '/wp-content/themes/roots-ualib/assets/img/user-profile.png';
+                                    val.photo = '/wp-content/themes/roots-ualib/assets/img/user-profile.png';
+                                }
+
+
+                                var rx = /^([\w-]+(?:\.[\w-]+)*)/;
+                                var prefix = val.email.match(rx);
+                                //added in order to prevent crashes from empty email address
+                                if (prefix !== null) {
+                                    val.emailPrefix = prefix[0];
+                                } else {
+                                    console.log(val.email);
                                 }
 
                                 //preset alpha index values base on first and last name
@@ -49518,6 +49817,9 @@ angular.module('staffdir', ['ualib.staffdir']);
             },
             byId: function(){
                 return $resource('https://wwwdev2.lib.ua.edu/staffDir/api/people/search/id/:id', {}, {cache: true});
+            },
+            profile: function(){
+                return $resource('https://wwwdev2.lib.ua.edu/staffDir/api/profile/:login', {}, {cache: true});
             }
         };
     }]);;angular.module('ualib.staffdir')
@@ -49702,7 +50004,40 @@ angular.module('staffdir', ['ualib.staffdir']);
             });
             return alphaIndexed;
         };
-    });;angular.module('ualib.softwareList.templates', ['software-list/software-list.tpl.html']);
+    });;angular.module('ualib.staffdir')
+
+    .config(['$routeProvider', function($routeProvider){
+        $routeProvider.when('/staffdir/profile/:email', {
+            template: function(params) {
+                return '<div class="staff-faculty-profile" email="' + params.email + '"></div>';
+            }
+        });
+    }])
+
+    .directive('staffFacultyProfile', ['StaffFactory', function(StaffFactory){
+        return {
+            restrict: 'AC',
+            scope:{
+                login: '@email'
+            },
+            templateUrl: 'staff-profile/staff-profile.tpl.html',
+            controller: function($scope){
+                $scope.userProfile = {};
+
+                console.log("Login: " + $scope.login);
+
+                StaffFactory.profile().get({login: $scope.login})
+                    .$promise.then(function(data){
+                        $scope.userProfile = data;
+                        console.dir(data);
+                    }, function(data){
+                        console.log('Error: cold not get profile! ' + data);
+                    });
+            }
+        };
+    }]);
+
+;angular.module('ualib.softwareList.templates', ['software-list/software-list.tpl.html']);
 
 angular.module("software-list/software-list.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("software-list/software-list.tpl.html",
@@ -50468,7 +50803,7 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                <h2>Events</h2>\n" +
     "              </div>\n" +
     "              <div class=\"card-body\">\n" +
-    "                <div news-card=\"item\" news-type=\"event\" ng-repeat=\"item in events\">\n" +
+    "                <div news-card=\"item\" news-type=\"event\" ng-repeat=\"item in events | limitTo : 3\">\n" +
     "                </div>\n" +
     "              </div>\n" +
     "              <div class=\"card-footer\">\n" +
@@ -50518,7 +50853,7 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                      <h4>Staff Directory</h4>\n" +
     "                    </a>\n" +
     "\n" +
-    "                    <a href=\"https://wwwdev2.lib.ua.edu/forms/reference-request/\" class=\"service-card\">\n" +
+    "                    <a href=\"http://ask.lib.ua.edu/\" class=\"service-card\">\n" +
     "                      <span class=\"fa fa-question-circle\"></span>\n" +
     "                      <h4>Ask A Librarian</h4>\n" +
     "                    </a>\n" +
@@ -50542,10 +50877,37 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "          </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
-    "\n" +
     "</div>\n" +
     "");
 }]);
+;/*
+(function() {
+    tinymce.create('tinymce.plugins.typekit', {
+        setup : function(ed) {
+            ed.onInit.add(function(ed, evt) {
+
+                // Load a script from a specific URL using the global script loader
+                tinymce.ScriptLoader.load('somescript.js');
+
+                // Load a script using a unique instance of the script loader
+                var scriptLoader = new tinymce.dom.ScriptLoader();
+
+                scriptLoader.load('somescript.js');
+
+            });
+        },
+    getInfo: function() {
+    return {
+        longname:  'TypeKit',
+        author:    'Thomas Griffin',
+        authorurl: 'https://thomasgriffin.io',
+        infourl:   'https://twitter.com/jthomasgriffin',
+        version:   '1.0'
+    };
+}
+});
+tinymce.PluginManager.add('typekit', tinymce.plugins.typekit);
+})();*/
 ;/* ========================================================================
  * DOM-based Routing
  * Based on http://goo.gl/EUTi53 by Paul Irish

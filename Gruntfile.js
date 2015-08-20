@@ -8,6 +8,7 @@ module.exports = function(grunt) {
     var jsFileList = [
         '<%= bower.directory %>/angular-filter/dist/angular-filter.js',
         '<%= bower.directory %>/angular-ui-utils/ui-utils.js',
+        '<%= bower.directory %>/angular-ui-tinymce/src/tinymce.js',
         '<%= bower.directory %>/ng-file-upload/ng-file-upload-all.js',
         '<%= bower.directory %>/angular-carousel/dist/angular-carousel.js',
         '<%= bower.directory %>/angular-touch/angular-touch.js',

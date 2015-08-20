@@ -23,7 +23,7 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                <h2>Events</h2>\n" +
     "              </div>\n" +
     "              <div class=\"card-body\">\n" +
-    "                <div news-card=\"item\" news-type=\"event\" ng-repeat=\"item in events\">\n" +
+    "                <div news-card=\"item\" news-type=\"event\" ng-repeat=\"item in events | limitTo : 3\">\n" +
     "                </div>\n" +
     "              </div>\n" +
     "              <div class=\"card-footer\">\n" +
@@ -73,7 +73,7 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                      <h4>Staff Directory</h4>\n" +
     "                    </a>\n" +
     "\n" +
-    "                    <a href=\"https://wwwdev2.lib.ua.edu/forms/reference-request/\" class=\"service-card\">\n" +
+    "                    <a href=\"http://ask.lib.ua.edu/\" class=\"service-card\">\n" +
     "                      <span class=\"fa fa-question-circle\"></span>\n" +
     "                      <h4>Ask A Librarian</h4>\n" +
     "                    </a>\n" +
@@ -97,7 +97,6 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "          </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
-    "\n" +
     "</div>\n" +
     "");
 }]);
