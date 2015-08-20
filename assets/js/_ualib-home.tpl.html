@@ -19,7 +19,7 @@
                 <h2>Events</h2>
               </div>
               <div class="card-body">
-                <div news-card="item" news-type="event" ng-repeat="item in events">
+                <div news-card="item" news-type="event" ng-repeat="item in events | limitTo : 3">
                 </div>
               </div>
               <div class="card-footer">
@@ -69,7 +69,7 @@
                       <h4>Staff Directory</h4>
                     </a>
 
-                    <a href="https://wwwdev2.lib.ua.edu/forms/reference-request/" class="service-card">
+                    <a href="http://ask.lib.ua.edu/" class="service-card">
                       <span class="fa fa-question-circle"></span>
                       <h4>Ask A Librarian</h4>
                     </a>

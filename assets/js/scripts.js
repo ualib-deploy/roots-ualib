@@ -4697,7 +4697,7 @@ angular.module('ui.utils',  [
  * AngularJS file upload/drop directive and service with progress and abort
  * FileAPI Flash shim for old browsers not supporting FormData
  * @author  Danial  <danial.farid@gmail.com>
- * @version 7.0.5
+ * @version 7.0.6
  */
 
 (function () {
@@ -5113,7 +5113,7 @@ if (!window.FileReader) {
 /**!
  * AngularJS file upload/drop directive and service with progress and abort
  * @author  Danial  <danial.farid@gmail.com>
- * @version 7.0.5
+ * @version 7.0.6
  */
 
 if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
@@ -5134,7 +5134,7 @@ if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
 
 var ngFileUpload = angular.module('ngFileUpload', []);
 
-ngFileUpload.version = '7.0.5';
+ngFileUpload.version = '7.0.6';
 
 ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, $q, $timeout) {
   function sendHttp(config) {
@@ -5499,10 +5499,6 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
       fileElem.css('visibility', 'hidden').css('position', 'absolute').css('overflow', 'hidden')
         .css('width', '0px').css('height', '0px').css('border', 'none')
         .css('margin', '0px').css('padding', '0px').attr('tabindex', '-1');
-      if (elem.$$ngfRefElem) {
-        elem.$$ngfRefElem.remove();
-      }
-      elem.$$ngfRefElem = fileElem;
       document.body.appendChild(fileElem[0]);
 
       return fileElem;
@@ -5620,14 +5616,14 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
 (function () {
 
   ngFileUpload.service('UploadDataUrl', ['UploadBase', '$timeout', '$q', function (UploadBase, $timeout, $q) {
-    var promises = {}, upload = UploadBase;
+    var upload = UploadBase;
     upload.dataUrl = function (file, disallowObjectUrl) {
       if (file.dataUrl) {
         var d = $q.defer();
         $timeout(function() {d.resolve(file.dataUrl);});
         return d.promise;
       }
-      if (promises[file]) return promises[file];
+      if (file.$ngfDataUrlPromise) return file.$ngfDataUrlPromise;
 
       var deferred = $q.defer();
       $timeout(function () {
@@ -5669,11 +5665,11 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
         }
       });
 
-      promises[file] = deferred.promise;
-      promises[file].finally(function() {
-        delete promises[file];
+      file.$ngfDataUrlPromise = deferred.promise;
+      file.$ngfDataUrlPromise.finally(function() {
+        delete file.$ngfDataUrlPromise;
       });
-      return promises[file];
+      return file.$ngfDataUrlPromise;
     };
     return upload;
   }]);
@@ -5685,7 +5681,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
       restrict: 'AE',
       link: function (scope, elem, attr) {
         $timeout(function () {
-          elem.attr('src', '{{(' + attr.ngfSrc + ') | ngfDataUrl' +
+          elem.attr('ng-src', '{{(' + attr.ngfSrc + ') | ngfDataUrl' +
             ($parse(attr.ngfNoObjectUrl)(scope) === true ? ':true' : '') + '}}');
           attr.$set('ngfSrc', null);
           var clone = elem.clone();
@@ -5975,7 +5971,6 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
       }
     };
 
-    var dimensionPromises = {}, durationPromises = {};
     upload.imageDimensions = function (file) {
       if (file.width && file.height) {
         var d = $q.defer();
@@ -5984,7 +5979,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
         });
         return d.promise;
       }
-      if (dimensionPromises[file]) return dimensionPromises[file];
+      if (file.$ngfDimensionPromise) return file.$ngfDimensionPromise;
 
       var deferred = $q.defer();
       $timeout(function () {
@@ -6012,11 +6007,11 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
         });
       });
 
-      dimensionPromises[file] = deferred.promise;
-      dimensionPromises[file].finally(function () {
-        delete dimensionPromises[file];
+      file.$ngfDimensionPromise = deferred.promise;
+      file.$ngfDimensionPromise.finally(function () {
+        delete file.$ngfDimensionPromise;
       });
-      return dimensionPromises[file];
+      return file.$ngfDimensionPromise;
     };
 
     upload.mediaDuration = function (file) {
@@ -6027,7 +6022,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
         });
         return d.promise;
       }
-      if (durationPromises[file]) return durationPromises[file];
+      if (file.$ngfDurationPromise) return file.$ngfDurationPromise;
 
       var deferred = $q.defer();
       $timeout(function () {
@@ -6055,11 +6050,11 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
         });
       });
 
-      durationPromises[file] = deferred.promise;
-      durationPromises[file].finally(function () {
-        delete durationPromises[file];
+      file.$ngfDurationPromise = deferred.promise;
+      file.$ngfDurationPromise.finally(function () {
+        delete file.$ngfDurationPromise;
       });
-      return durationPromises[file];
+      return file.$ngfDurationPromise;
     };
     return upload;
   }
@@ -42840,7 +42835,7 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                    <div class=\"col-md-12\">\n" +
     "                        <div class=\"col-md-12 form-group\">\n" +
     "                            <label>Detailed Description</label>\n" +
-    "                            <textarea data-ui-tinymce id=\"description\" data-ng-model=\"newNews.description\" rows=\"5\"\n" +
+    "                            <textarea ui-tinymce=\"tinymceOptions\" ng-model=\"newNews.description\" rows=\"5\"\n" +
     "                                      maxlength=\"64000\" required></textarea>\n" +
     "                        </div>\n" +
     "                    </div>\n" +
@@ -43013,8 +43008,8 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                        <div class=\"row\">\n" +
     "                            <div class=\"col-md-12 form-group\">\n" +
     "                                <label>Detailed Description</label>\n" +
-    "                                <textarea data-ui-tinymce id=\"{{news.nid}}_descr\" data-ng-model=\"news.description\" rows=\"5\"\n" +
-    "                                         maxlength=\"64000\" required></textarea>\n" +
+    "                                <textarea ui-tinymce=\"tinymceOptions\" ng-model=\"news.description\" rows=\"5\"\n" +
+    "                                    maxlength=\"64000\" required></textarea>\n" +
     "                            </div>\n" +
     "                        </div>\n" +
     "                        <h4><small>Select contact person from the list or enter new contact information</small></h4>\n" +
@@ -44758,7 +44753,7 @@ angular.module("staffDirectory/staffDirectoryProfile.tpl.html", []).run(["$templ
     "            <code>\n" +
     "                &lt;h3&gt;, &lt;h4&gt;, &lt;a&gt;, &lt;img&gt;, &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;ul&gt;, &lt;li&gt;\n" +
     "            </code>)</label>\n" +
-    "        <textarea ui-tinymce ng-model=\"userProfile.person.profile\" rows=\"10\"\n" +
+    "            <textarea ui-tinymce=\"tinymceOptions\" ng-model=\"userProfile.person.profile\" rows=\"10\"\n" +
     "                  maxlength=\"64000\"></textarea>\n" +
     "    </div>\n" +
     "    <div class=\"col-md-12 text-center form-group\">\n" +
@@ -44914,6 +44909,7 @@ angular.module("submittedForms/submittedForms.tpl.html", []).run(["$templateCach
 ;angular.module('manage', [
     'ngAnimate',
     'ui.bootstrap',
+    'ui.tinymce',
     'manage.common',
     'manage.templates',
     'manage.manageHours',
@@ -45062,71 +45058,7 @@ angular.module('common.manage', [])
                 return $http({method: 'POST', url: url + "api/process", params: {}, data: data})
             }
         };
-    }])
-
-    //from http://codepen.io/paulbhartzog/pen/Ekztl?editors=101
-    .value('uiTinymceConfig', {plugins: 'link spellchecker code', toolbar: 'undo redo | bold italic | link | code', menubar : false})
-    .directive('uiTinymce', ['uiTinymceConfig', function(uiTinymceConfig) {
-        uiTinymceConfig = uiTinymceConfig || {};
-        var generatedIds = 0;
-        return {
-            require: 'ngModel',
-            link: function(scope, elm, attrs, ngModel) {
-                var expression, options, tinyInstance;
-                // generate an ID if not present
-                if (!attrs.id) {
-                    attrs.$set('id', 'uiTinymce' + generatedIds++);
-                }
-                options = {
-                    // Update model when calling setContent (such as from the source editor popup)
-                    setup: function(ed) {
-                        ed.on('init', function(args) {
-                            ngModel.$render();
-                        });
-                        // Update model on button click
-                        ed.on('ExecCommand', function(e) {
-                            ed.save();
-                            ngModel.$setViewValue(elm.val());
-                            if (!scope.$$phase) {
-                                scope.$apply();
-                            }
-                        });
-                        // Update model on keypress
-                        ed.on('KeyUp', function(e) {
-                            console.log(ed.isDirty());
-                            ed.save();
-                            ngModel.$setViewValue(elm.val());
-                            if (!scope.$$phase) {
-                                scope.$apply();
-                            }
-                        });
-                    },
-                    mode: 'exact',
-                    elements: attrs.id
-                };
-                if (attrs.uiTinymce) {
-                    expression = scope.$eval(attrs.uiTinymce);
-                } else {
-                    expression = {};
-                }
-                angular.extend(options, uiTinymceConfig, expression);
-                setTimeout(function() {
-                    tinymce.init(options);
-                });
-
-
-                ngModel.$render = function() {
-                    if (!tinyInstance) {
-                        tinyInstance = tinymce.get(attrs.id);
-                    }
-                    if (tinyInstance) {
-                        tinyInstance.setContent(ngModel.$viewValue || '');
-                    }
-                };
-            }
-        };
     }]);
-
 
 angular.module('manage.manageDatabases', [])
     .controller('manageDBCtrl', ['$scope', '$window', 'tokenFactory', 'mdbFactory',
@@ -46147,6 +46079,18 @@ angular.module('manage.manageNews', ['ngFileUpload'])
             $scope.currentPage = 1;
             $scope.maxPageSize = 10;
             $scope.perPage = 20;
+
+            $scope.tinymceOptions = {
+                onChange: function(e) {
+                    // put logic here for keypress and cut/paste changes
+                },
+                inline: false,
+                plugins : 'link spellchecker code',
+                toolbar: 'undo redo | bold italic | link | code',
+                menubar : false,
+                skin: 'lightgray',
+                theme : 'modern'
+            };
 
             $scope.onNewsDPFocusFrom = function($event, news){
                 $event.preventDefault();
@@ -48161,6 +48105,16 @@ angular.module('manage.staffDirectory', [])
     function staffDirProfileCtrl($scope, tokenFactory, sdFactory, $window){
         $scope.userProfile = {};
         $scope.login = $window.login;
+        $scope.tinymceOptions = {
+            onChange: function(e) {
+                // put logic here for keypress and cut/paste changes
+            },
+            inline: false,
+            plugins : 'link image lists spellchecker code print preview',
+            skin: 'lightgray',
+            theme : 'modern'
+        };
+
         tokenFactory("CSRF-" + $scope.login);
 
         sdFactory.getProfile($scope.login)
@@ -50654,7 +50608,7 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                <h2>Events</h2>\n" +
     "              </div>\n" +
     "              <div class=\"card-body\">\n" +
-    "                <div news-card=\"item\" news-type=\"event\" ng-repeat=\"item in events\">\n" +
+    "                <div news-card=\"item\" news-type=\"event\" ng-repeat=\"item in events | limitTo : 3\">\n" +
     "                </div>\n" +
     "              </div>\n" +
     "              <div class=\"card-footer\">\n" +
@@ -50704,7 +50658,7 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                      <h4>Staff Directory</h4>\n" +
     "                    </a>\n" +
     "\n" +
-    "                    <a href=\"https://wwwdev2.lib.ua.edu/forms/reference-request/\" class=\"service-card\">\n" +
+    "                    <a href=\"http://ask.lib.ua.edu/\" class=\"service-card\">\n" +
     "                      <span class=\"fa fa-question-circle\"></span>\n" +
     "                      <h4>Ask A Librarian</h4>\n" +
     "                    </a>\n" +
@@ -50732,6 +50686,34 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "</div>\n" +
     "");
 }]);
+;/*
+(function() {
+    tinymce.create('tinymce.plugins.typekit', {
+        setup : function(ed) {
+            ed.onInit.add(function(ed, evt) {
+
+                // Load a script from a specific URL using the global script loader
+                tinymce.ScriptLoader.load('somescript.js');
+
+                // Load a script using a unique instance of the script loader
+                var scriptLoader = new tinymce.dom.ScriptLoader();
+
+                scriptLoader.load('somescript.js');
+
+            });
+        },
+    getInfo: function() {
+    return {
+        longname:  'TypeKit',
+        author:    'Thomas Griffin',
+        authorurl: 'https://thomasgriffin.io',
+        infourl:   'https://twitter.com/jthomasgriffin',
+        version:   '1.0'
+    };
+}
+});
+tinymce.PluginManager.add('typekit', tinymce.plugins.typekit);
+})();*/
 ;/* ========================================================================
  * DOM-based Routing
  * Based on http://goo.gl/EUTi53 by Paul Irish
