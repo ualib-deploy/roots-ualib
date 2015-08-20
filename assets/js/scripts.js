@@ -50987,7 +50987,7 @@ $(document).ready(UTIL.loadEvents);
 ])
 
 
-    .config(['$routeProvider', function($routeProvider) {
+    .config(['$routeProvider', '$compileProvider', function($routeProvider, $compileProvider) {
         /**
          * Register Bento Box display route with ngRoute's $routeProvider
          */
@@ -50998,6 +50998,9 @@ $(document).ready(UTIL.loadEvents);
             .otherwise({
                 redirectTo: '/home'
             });
+
+        // Extend $compileProvider to allow mailto/file/ftp in ng-href ( without this, links render as "unsafe:...."
+        $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|file):/);
 
     }])
 
