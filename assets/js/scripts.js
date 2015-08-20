@@ -44922,7 +44922,7 @@ angular.module("staffDirectory/staffDirectoryProfile.tpl.html", []).run(["$templ
     "    <div class=\"col-md-12 form-group\">\n" +
     "        <label>Description (allowed tags:\n" +
     "            <code>\n" +
-    "                &lt;h3&gt;, &lt;h4&gt;, &lt;a&gt;, &lt;img&gt;, &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;ul&gt;, &lt;li&gt;\n" +
+    "                &lt;h3&gt;, &lt;h4&gt;, &lt;a&gt;, &lt;img&gt;, &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;ul&gt;, &lt;ol&gt;, &lt;li&gt;\n" +
     "            </code>)</label>\n" +
     "            <textarea ui-tinymce=\"tinymceOptions\" ng-model=\"userProfile.person.profile\" rows=\"10\"\n" +
     "                  maxlength=\"64000\" ng-if=\"userProfile.person.profile\"></textarea>\n" +
@@ -44934,6 +44934,13 @@ angular.module("staffDirectory/staffDirectoryProfile.tpl.html", []).run(["$templ
     "        {{userProfile.person.formResponse}}\n" +
     "    </div>\n" +
     "</div>\n" +
+    "\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-12\">\n" +
+    "        <span ng-bind-html=\"userProfile.person.profile\"></span>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "\n" +
     "");
 }]);
 
