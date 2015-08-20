@@ -4868,7 +4868,7 @@ angular.module('ui.tinymce', [])
  * AngularJS file upload/drop directive and service with progress and abort
  * FileAPI Flash shim for old browsers not supporting FormData
  * @author  Danial  <danial.farid@gmail.com>
- * @version 7.0.6
+ * @version 7.0.9
  */
 
 (function () {
@@ -4963,6 +4963,10 @@ angular.module('ui.tinymce', [])
             jsonp: false, //removes the callback form param
             cache: true, //removes the ?fileapiXXX in the url
             complete: function (err, fileApiXHR) {
+              if (err.indexOf('#2174') !== -1) {
+                // this error seems to be fine the file is being uploaded properly.
+                err = null;
+              }
               xhr.__completed = true;
               if (!err && xhr.__listeners.load)
                 xhr.__listeners.load({
@@ -5284,7 +5288,7 @@ if (!window.FileReader) {
 /**!
  * AngularJS file upload/drop directive and service with progress and abort
  * @author  Danial  <danial.farid@gmail.com>
- * @version 7.0.6
+ * @version 7.0.9
  */
 
 if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
@@ -5305,7 +5309,7 @@ if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
 
 var ngFileUpload = angular.module('ngFileUpload', []);
 
-ngFileUpload.version = '7.0.6';
+ngFileUpload.version = '7.0.9';
 
 ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, $q, $timeout) {
   function sendHttp(config) {
@@ -5509,7 +5513,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
             } else {
               return $parse(this.getAttrWithDefaults(attr, name))(scope);
             }
-          } catch(e) {
+          } catch (e) {
             // hangle string value without single qoute
             if (name.search(/min|max|pattern/i)) {
               return this.getAttrWithDefaults(attr, name);
@@ -5545,7 +5549,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
             }
           }
 
-          var file = files && files.length  ? files[0] : null;
+          var file = files && files.length ? files[0] : null;
           if (ngModel) {
             var singleModel = !upload.attrGetter('ngfMultiple', attr, scope) && !upload.attrGetter('multiple', attr) && !keep;
             $timeout(function () {
@@ -5566,16 +5570,13 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
           }
         }
 
-        if (upload.validate(files, ngModel, attr, scope, upload.attrGetter('ngfValidateLater', attr),
-            function () {
-              if (noDelay) {
-                update();
-              } else {
-                $timeout(function () {
-                  update();
-                });
-              }
-            }));
+        if (noDelay) {
+          update();
+        } else if (upload.validate(files, ngModel, attr, scope, upload.attrGetter('ngfValidateLater', attr), function () {
+            $timeout(function () {
+              update();
+            });
+          }));
       };
 
       return upload;
@@ -5610,13 +5611,6 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
     };
 
     upload.registerValidators(ngModel, attr, scope);
-
-    var disabled = false;
-
-    attr.$observe('ngfSelect', function (value) {
-      if (value === false) elem.attr('disabled', 'disabled');
-      else if (value === true) elem.removeAttr('disabled');
-    });
 
     function isInputTypeFile() {
       return elem[0].tagName.toLowerCase() === 'input' && attr.type && attr.type.toLowerCase() === 'file';
@@ -5678,10 +5672,12 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
     var initialTouchStartY = 0;
 
     function clickHandler(evt) {
-      if (elem.attr('disabled') || disabled) return false;
+      if (elem.attr('disabled') || attrGetter('ngfSelectDisabled', scope)) return false;
 
       var r = handleTouch(evt);
       if (r != null) return r;
+
+      resetModel(evt);
 
       // fix for android native browser < 4.4
       if (shouldClickLater(navigator.userAgent)) {
@@ -5740,12 +5736,8 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
 
     if (!isInputTypeFile()) {
       elem.bind('click touchstart touchend', clickHandler);
-    }
-
-    if (navigator.userAgent.indexOf('Chrome') === -1) {
-      elem.bind('click', function (e) {
-        resetModel(e);
-      });
+    } else {
+      elem.bind('click', resetModel);
     }
 
     function ie10SameFileSelectFix(evt) {
@@ -5791,7 +5783,9 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
     upload.dataUrl = function (file, disallowObjectUrl) {
       if (file.dataUrl) {
         var d = $q.defer();
-        $timeout(function() {d.resolve(file.dataUrl);});
+        $timeout(function () {
+          d.resolve(file.dataUrl);
+        });
         return d.promise;
       }
       if (file.$ngfDataUrlPromise) return file.$ngfDataUrlPromise;
@@ -5822,7 +5816,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
                 deferred.resolve(e.target.result);
               });
             };
-            fileReader.onerror = function() {
+            fileReader.onerror = function () {
               $timeout(function () {
                 file.dataUrl = '';
                 deferred.reject();
@@ -5837,7 +5831,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
       });
 
       file.$ngfDataUrlPromise = deferred.promise;
-      file.$ngfDataUrlPromise.finally(function() {
+      file.$ngfDataUrlPromise['finally'](function () {
         delete file.$ngfDataUrlPromise;
       });
       return file.$ngfDataUrlPromise;
@@ -5845,19 +5839,39 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
     return upload;
   }]);
 
+  function getTagType(el) {
+    if (el.tagName.toLowerCase() === 'img') return 'image';
+    if (el.tagName.toLowerCase() === 'audio') return 'audio';
+    if (el.tagName.toLowerCase() === 'video') return 'video';
+    return /\./;
+  }
+
+  var style = angular.element('<style>.ngf-hide{display:none !important}</style>');
+  document.getElementsByTagName('head')[0].appendChild(style[0]);
+
   /** @namespace attr.ngfSrc */
   /** @namespace attr.ngfNoObjectUrl */
-  ngFileUpload.directive('ngfSrc', ['$parse', '$compile', '$timeout', function ($parse, $compile, $timeout) {
+  ngFileUpload.directive('ngfSrc', ['$compile', '$timeout', 'Upload', function ($compile, $timeout, Upload) {
     return {
       restrict: 'AE',
       link: function (scope, elem, attr) {
         $timeout(function () {
-          elem.attr('ng-src', '{{(' + attr.ngfSrc + ') | ngfDataUrl' +
-            ($parse(attr.ngfNoObjectUrl)(scope) === true ? ':true' : '') + '}}');
-          attr.$set('ngfSrc', null);
-          var clone = elem.clone();
-          elem.replaceWith(clone);
-          $compile(clone)(scope);
+          scope.$watch(attr.ngfSrc, function (file) {
+            if (file && file.type.indexOf(getTagType(elem[0])) === 0) {
+              Upload.dataUrl(file, Upload.attrGetter('ngfNoObjectUrl', attr, scope))['finally'](function () {
+                $timeout(function () {
+                  if (file.dataUrl) {
+                    elem.removeClass('ngf-hide');
+                    elem.attr('src', file.dataUrl);
+                  } else {
+                    elem.addClass('ngf-hide');
+                  }
+                });
+              });
+            } else {
+              elem.addClass('ngf-hide');
+            }
+          });
         });
       }
     };
@@ -5865,17 +5879,26 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
 
   /** @namespace attr.ngfBackground */
   /** @namespace attr.ngfNoObjectUrl */
-  ngFileUpload.directive('ngfBackground', ['$parse', '$compile', '$timeout', function ($parse, $compile, $timeout) {
+  ngFileUpload.directive('ngfBackground', ['Upload', '$compile', '$timeout', function (Upload, $compile, $timeout) {
     return {
       restrict: 'AE',
       link: function (scope, elem, attr) {
         $timeout(function () {
-          elem.attr('style', elem.attr('style') + ';background-image:url(\'{{(' + attr.ngfBackground + ') | ngfDataUrl' +
-            ($parse(attr.ngfNoObjectUrl)(scope) === true ? ':true' : '') + '}}\')');
-          attr.$set('ngfBackground', null);
-          var clone = elem.clone();
-          elem.replaceWith(clone);
-          $compile(clone)(scope);
+          scope.$watch(attr.ngfBackground, function (file) {
+            if (file && file.type.indexOf('image') === 0) {
+              Upload.dataUrl(file, Upload.attrGetter('ngfNoObjectUrl', attr, scope))['finally'](function () {
+                $timeout(function () {
+                  if (file.dataUrl) {
+                    elem.css('background-image', 'url(\'' + file.dataUrl + '\')');
+                  } else {
+                    elem.css('background-image', '');
+                  }
+                });
+              });
+            } else {
+              elem.css('background-image', '');
+            }
+          });
         });
       }
     };
@@ -5896,7 +5919,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
           file.dataUrl = null;
           UploadDataUrl.dataUrl(file, disallowObjectUrl).then(function (url) {
             file.dataUrl = url;
-          }, function() {
+          }, function () {
             file.dataUrl = '';
           });
         }
@@ -6061,7 +6084,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
 
       var pendings = 0;
 
-      function validateASync(name, validatorVal, type, asyncFn, fn) {
+      function validateAsync(name, validatorVal, type, asyncFn, fn) {
         if (files) {
           var thisPendings = 0, hasError = false, dName = 'ngf' + name[0].toUpperCase() + name.substr(1);
           files = files.length === undefined ? [files] : files;
@@ -6069,7 +6092,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
             if (file.type.search(type) !== 0) {
               return true;
             }
-            var val = attrGetter(dName, {'$file': file}) || validatorVal(attrGetter('ngfValidate') || {});
+            var val = attrGetter(dName, {'$file': file}) || validatorVal(attrGetter('ngfValidate', {'$file': file}) || {});
             if (val) {
               pendings++;
               thisPendings++;
@@ -6080,10 +6103,12 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
                   hasError = true;
                 }
               }, function () {
-                file.$error = name;
-                file.$errorParam = val;
-                hasError = true;
-              }).finally(function () {
+                if (attrGetter('ngfValidateForce', {'$file': file})) {
+                  file.$error = name;
+                  file.$errorParam = val;
+                  hasError = true;
+                }
+              })['finally'](function () {
                 pendings--;
                 thisPendings--;
                 if (!thisPendings) {
@@ -6098,38 +6123,38 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
         }
       }
 
-      validateASync('maxHeight', function (cons) {
+      validateAsync('maxHeight', function (cons) {
         return cons.height && cons.height.max;
       }, /image/, this.imageDimensions, function (d, val) {
         return d.height <= val;
       });
-      validateASync('minHeight', function (cons) {
+      validateAsync('minHeight', function (cons) {
         return cons.height && cons.height.min;
       }, /image/, this.imageDimensions, function (d, val) {
         return d.height >= val;
       });
-      validateASync('maxWidth', function (cons) {
+      validateAsync('maxWidth', function (cons) {
         return cons.height && cons.width.max;
       }, /image/, this.imageDimensions, function (d, val) {
         return d.width <= val;
       });
-      validateASync('minWidth', function (cons) {
+      validateAsync('minWidth', function (cons) {
         return cons.height && cons.width.min;
       }, /image/, this.imageDimensions, function (d, val) {
         return d.width >= val;
       });
-      validateASync('maxDuration', function (cons) {
+      validateAsync('maxDuration', function (cons) {
         return cons.height && cons.duration.max;
       }, /audio|video/, this.mediaDuration, function (d, val) {
         return d <= translateScalars(val);
       });
-      validateASync('minDuration', function (cons) {
+      validateAsync('minDuration', function (cons) {
         return cons.height && cons.duration.min;
       }, /audio|video/, this.mediaDuration, function (d, val) {
         return d >= translateScalars(val);
       });
 
-      validateASync('validateAsyncFn', function () {
+      validateAsync('validateAsyncFn', function () {
         return null;
       }, /./, function (file, val) {
         return val;
@@ -6159,27 +6184,47 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
           return;
         }
         upload.dataUrl(file).then(function (dataUrl) {
-          var img = angular.element('<img>').attr('src', dataUrl).css('visibility', 'none').css('position', 'fixed');
-          img.on('load', function () {
+          var img = angular.element('<img>').attr('src', dataUrl).css('visibility', 'hidden').css('position', 'fixed');
+          function success() {
             var width = img[0].clientWidth;
             var height = img[0].clientHeight;
             img.remove();
             file.width = width;
             file.height = height;
             deferred.resolve({width: width, height: height});
-          });
-          img.on('error', function () {
+          }
+
+          function error() {
             img.remove();
             deferred.reject('load error');
-          });
-          angular.element(document.body).append(img);
+          }
+
+          img.on('load', success);
+          img.on('error', error);
+          var count = 0;
+          function checkLoadError() {
+            $timeout(function () {
+              if (img[0].parentNode) {
+                if (img[0].clientWidth) {
+                  success();
+                } else if (count > 10) {
+                  error();
+                } else {
+                  checkLoadError();
+                }
+              }
+            }, 1000);
+          }
+          checkLoadError();
+
+          angular.element(document.getElementsByTagName('body')[0]).append(img);
         }, function () {
           deferred.reject('load error');
         });
       });
 
       file.$ngfDimensionPromise = deferred.promise;
-      file.$ngfDimensionPromise.finally(function () {
+      file.$ngfDimensionPromise['finally'](function () {
         delete file.$ngfDimensionPromise;
       });
       return file.$ngfDimensionPromise;
@@ -6197,24 +6242,44 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
 
       var deferred = $q.defer();
       $timeout(function () {
-        if (file.type.indexOf('audio') === 0 || file.type.indexOf('video') === 0) {
-          deferred.reject('not image');
+        if (file.type.indexOf('audio') !== 0 && file.type.indexOf('video') !== 0) {
+          deferred.reject('not media');
           return;
         }
         upload.dataUrl(file).then(function (dataUrl) {
           var el = angular.element(file.type.indexOf('audio') === 0 ? '<audio>' : '<video>')
             .attr('src', dataUrl).css('visibility', 'none').css('position', 'fixed');
 
-          el.on('loadedmetadata', function () {
+          function success() {
             var duration = el[0].duration;
             file.duration = duration;
             el.remove();
             deferred.resolve(duration);
-          });
-          el.on('error', function () {
+          }
+
+          function error() {
             el.remove();
             deferred.reject('load error');
-          });
+          }
+
+          el.on('loadedmetadata', success);
+          el.on('error', error);
+          var count = 0;
+          function checkLoadError() {
+            $timeout(function () {
+              if (el[0].parentNode) {
+                if (el[0].duration) {
+                  success();
+                } else if (count > 10) {
+                  error();
+                } else {
+                  checkLoadError();
+                }
+              }
+            }, 1000);
+          }
+          checkLoadError();
+
           angular.element(document.body).append(el);
         }, function () {
           deferred.reject('load error');
@@ -6222,7 +6287,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
       });
 
       file.$ngfDurationPromise = deferred.promise;
-      file.$ngfDurationPromise.finally(function () {
+      file.$ngfDurationPromise['finally'](function () {
         delete file.$ngfDurationPromise;
       });
       return file.$ngfDurationPromise;
@@ -6289,13 +6354,11 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
       return;
     }
 
-    upload.registerValidators(ngModel, attr, scope);
+    function isDisabled() {
+      return elem.attr('disabled') || attrGetter('ngfDropDisabled', scope);
+    }
 
-    var disabled = false;
-    attr.$observe('ngfDrop', function(value) {
-      if (value === false) elem.attr('disabled', 'disabled');
-      else if (value === true) elem.removeAttr('disabled');
-    });
+    upload.registerValidators(ngModel, attr, scope);
 
     var leaveTimeout = null;
     var stopPropagation = $parse(attrGetter('ngfStopPropagation'));
@@ -6303,7 +6366,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
     var actualDragOverClass;
 
     elem[0].addEventListener('dragover', function (evt) {
-      if (elem.attr('disabled') || disabled) return;
+      if (isDisabled()) return;
       evt.preventDefault();
       if (stopPropagation(scope)) evt.stopPropagation();
       // handling dragover events from the Chrome download bar
@@ -6321,19 +6384,19 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
       }
     }, false);
     elem[0].addEventListener('dragenter', function (evt) {
-      if (elem.attr('disabled') || disabled) return;
+      if (isDisabled()) return;
       evt.preventDefault();
       if (stopPropagation(scope)) evt.stopPropagation();
     }, false);
     elem[0].addEventListener('dragleave', function () {
-      if (elem.attr('disabled') || disabled) return;
+      if (isDisabled()) return;
       leaveTimeout = $timeout(function () {
         elem.removeClass(actualDragOverClass);
         actualDragOverClass = null;
       }, dragOverDelay || 1);
     }, false);
     elem[0].addEventListener('drop', function (evt) {
-      if (elem.attr('disabled') || disabled) return;
+      if (isDisabled()) return;
       evt.preventDefault();
       if (stopPropagation(scope)) evt.stopPropagation();
       elem.removeClass(actualDragOverClass);
@@ -6344,7 +6407,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
         attrGetter('multiple') || attrGetter('ngfMultiple', scope));
     }, false);
     elem[0].addEventListener('paste', function (evt) {
-      if (elem.attr('disabled') || disabled) return;
+      if (isDisabled()) return;
       var files = [];
       var clipboard = evt.clipboardData || evt.originalEvent.clipboardData;
       if (clipboard && clipboard.items) {
@@ -6487,7 +6550,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
 
   function dropAvailable() {
     var div = document.createElement('div');
-    return ('draggable' in div) && ('ondrop' in div);
+    return ('draggable' in div) && ('ondrop' in div) && !/Edge\/12./i.test(navigator.userAgent);
   }
 
 })();
@@ -45060,20 +45123,20 @@ angular.module("submittedForms/submittedForms.tpl.html", []).run(["$templateCach
     "\n" +
     "    <div class=\"text-center\">\n" +
     "        <pagination total-items=\"filteredForms.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
-    "                    boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredNews.length > 0\"></pagination>\n" +
+    "                    boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredForms.length > 0\"></pagination>\n" +
     "    </div>\n" +
     "    <div class=\"row row-clickable\"\n" +
     "         ng-repeat=\"form in filteredForms = (data.forms | filter:{title:titleFilter}\n" +
-    "                                                         | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\n" +
+    "                                                        | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\n" +
     "        | startFrom:(currentPage-1)*perPage | limitTo:perPage\"\n" +
     "         ng-class=\"{sdOpen: form.show}\">\n" +
-    "        <div class=\"col-md-12\" ng-click=\"toggleForms(form)\">\n" +
+    "        <div class=\"col-md-12 clickable\" ng-click=\"toggleForms(form)\">\n" +
     "            <div class=\"col-md-10\">\n" +
     "                <h4>\n" +
     "                    <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"form.show\"></span>\n" +
     "                    <span class=\"fa fa-fw fa-caret-down\" ng-show=\"form.show\"></span>\n" +
     "                    {{form.title}}\n" +
-    "                    <small>{{form.status}}</small>\n" +
+    "                    <small>{{form.fields[0].value}}</small>\n" +
     "                </h4>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-2\">\n" +
@@ -45081,7 +45144,8 @@ angular.module("submittedForms/submittedForms.tpl.html", []).run(["$templateCach
     "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-12\" ng-show=\"form.show\">\n" +
-    "            <div class=\"col-md-6 panel panel-default\" ng-repeat=\"field in form.fields\">\n" +
+    "            <div class=\"col-md-4 panel panel-default\" ng-repeat=\"field in form.fields\"\n" +
+    "                 ng-show=\"field.name.length > 0 && field.value.length > 0\">\n" +
     "                <div class=\"panel-heading\">\n" +
     "                    <h4 class=\"panel-title\">{{field.name}}</h4>\n" +
     "                </div>\n" +
@@ -45094,7 +45158,7 @@ angular.module("submittedForms/submittedForms.tpl.html", []).run(["$templateCach
     "</div>\n" +
     "<div class=\"text-center\">\n" +
     "    <pagination total-items=\"filteredForms.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
-    "                boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredNews.length > 0\"></pagination>\n" +
+    "                boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredForms.length > 0\"></pagination>\n" +
     "</div>\n" +
     "<div class=\"text-center\">\n" +
     "    <h4 ng-show=\"filteredForms.length == 0\">Nothing found</h4>\n" +
@@ -48382,6 +48446,12 @@ angular.module('manage.submittedForms', [])
                 $scope.data.forms[$scope.data.forms.indexOf(form)].show =
                     !$scope.data.forms[$scope.data.forms.indexOf(form)].show;
             };
+            $scope.sortBy = function(by){
+                if ($scope.sortMode === by)
+                    $scope.sortModes[by].reverse = !$scope.sortModes[by].reverse;
+                else
+                    $scope.sortMode = by;
+            };
         }])
 
     .directive('submittedFormsList', ['$animate', function($animate) {
@@ -50880,34 +50950,6 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "</div>\n" +
     "");
 }]);
-;/*
-(function() {
-    tinymce.create('tinymce.plugins.typekit', {
-        setup : function(ed) {
-            ed.onInit.add(function(ed, evt) {
-
-                // Load a script from a specific URL using the global script loader
-                tinymce.ScriptLoader.load('somescript.js');
-
-                // Load a script using a unique instance of the script loader
-                var scriptLoader = new tinymce.dom.ScriptLoader();
-
-                scriptLoader.load('somescript.js');
-
-            });
-        },
-    getInfo: function() {
-    return {
-        longname:  'TypeKit',
-        author:    'Thomas Griffin',
-        authorurl: 'https://thomasgriffin.io',
-        infourl:   'https://twitter.com/jthomasgriffin',
-        version:   '1.0'
-    };
-}
-});
-tinymce.PluginManager.add('typekit', tinymce.plugins.typekit);
-})();*/
 ;/* ========================================================================
  * DOM-based Routing
  * Based on http://goo.gl/EUTi53 by Paul Irish
