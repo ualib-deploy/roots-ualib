@@ -45136,7 +45136,7 @@ angular.module("submittedForms/submittedForms.tpl.html", []).run(["$templateCach
     "                    <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"form.show\"></span>\n" +
     "                    <span class=\"fa fa-fw fa-caret-down\" ng-show=\"form.show\"></span>\n" +
     "                    {{form.title}}\n" +
-    "                    <small>{{form.status}}</small>\n" +
+    "                    <small>{{form.fields[0].value}}</small>\n" +
     "                </h4>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-2\">\n" +
