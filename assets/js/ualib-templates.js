@@ -14,7 +14,7 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                <div class=\"hours-list\"></div>\n" +
     "              </div>\n" +
     "              <div class=\"card-footer\">\n" +
-    "                <a href=\"https://wwwdev2.lib.ua.edu/#/hours\" class=\"more-link\">All Hours</a>\n" +
+    "                <a href=\"/#/hours\" class=\"more-link\">All Hours</a>\n" +
     "              </div>\n" +
     "            </div>\n" +
     "\n" +
@@ -39,7 +39,7 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "              <div class=\"card-body\">\n" +
     "                <div class=\"row\">\n" +
     "                  <div class=\"col-xs-6\">\n" +
-    "                    <a href=\"http://wwwdev2.lib.ua.edu/#/databases\" class=\"service-card\">\n" +
+    "                    <a href=\"/#/databases\" class=\"service-card\">\n" +
     "                      <span class=\"fa fa-3x fa-database\"></span>\n" +
     "                      <h4>Databases</h4>\n" +
     "                    </a>\n" +
@@ -59,16 +59,16 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                  </div>\n" +
     "\n" +
     "                  <div class=\"col-xs-6\">\n" +
-    "                    <a href=\"https://wwwdev2.lib.ua.edu/research-tools/e-resources/\" class=\"service-card\">\n" +
+    "                    <a href=\"/research-tools/e-resources/\" class=\"service-card\">\n" +
     "                      <span class=\"fa fa-bolt\"></span>\n" +
     "                      <h4>E-Resources</h4>\n" +
     "                    </a>\n" +
     "\n" +
-    "                    <a href=\"http://lib.ua.edu/scout/\" class=\"service-card\">\n" +
+    "                    <a href=\"/scout/\" class=\"service-card\">\n" +
     "                      <span class=\"fa fa-binoculars\"></span>\n" +
     "                      <h4>Scout</h4>\n" +
     "                    </a>\n" +
-    "                    <a href=\"https://wwwdev2.lib.ua.edu/#/staffdir\" class=\"service-card\">\n" +
+    "                    <a href=\"/#/staffdir\" class=\"service-card\">\n" +
     "                      <span class=\"fa fa-users\"></span>\n" +
     "                      <h4>Staff Directory</h4>\n" +
     "                    </a>\n" +
@@ -91,7 +91,7 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                </div>\n" +
     "              </div>\n" +
     "              <div class=\"card-footer\">\n" +
-    "                <a href=\"https://wwwdev2.lib.ua.edu/#/news-exhibits\" class=\"more-link\">More News</a>\n" +
+    "                <a href=\"/#/news-exhibits\" class=\"more-link\">More News</a>\n" +
     "              </div>\n" +
     "            </div>\n" +
     "          </div>\n" +
