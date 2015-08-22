@@ -43076,7 +43076,7 @@ angular.module("manageNews/manageNewsItemFields.tpl.html", []).run(["$templateCa
     "        <label for=\"browse\">Select Images</label>\n" +
     "        <div id=\"browse\">\n" +
     "            <button type=\"file\" ngf-select=\"\" ng-model=\"news.picFile\" accept=\"image/*\" ngf-multiple=\"true\"\n" +
-    "                    ngf-change=\"generateThumb(news.picFile, news)\" class=\"btn btn-success\">\n" +
+    "                    ngf-change=\"generateThumb($files, news)\" class=\"btn btn-success\">\n" +
     "                <span class=\"fa fa-fw fa-plus\"></span>Browse\n" +
     "            </button>\n" +
     "        </div>\n" +
@@ -43202,7 +43202,7 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                                </a>\n" +
     "                            </td>\n" +
     "                            <td style=\"width:64px\">\n" +
-    "                                <img ng-show=\"news.tb.length > 0\" src=\"{{news.tb}}\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
+    "                                <img ng-show=\"news.tb.length > 0\" ng-src=\"{{news.tb}}\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
     "                                <img ng-hide=\"news.tb.length > 0\" ngf-src=\"news.selectedFiles[0]\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
     "                            </td>\n" +
     "                        </tr>\n" +
@@ -46150,6 +46150,7 @@ angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
             $scope.newNews = {};
             $scope.newNews.creator = $window.author;
             $scope.newNews.selectedFiles = [];
+            $scope.newNews.picFile = [];
             $scope.isAdmin = false;
             if (typeof $window.admin !== 'undefined')
                 if ($window.admin === "1")
@@ -46525,8 +46526,8 @@ angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
         }
     }])
 
-    .controller('NewsItemFieldsCtrl', ['$scope',
-        function NewsItemFieldsCtrl($scope){
+    .controller('NewsItemFieldsCtrl', ['$scope', '$timeout',
+        function NewsItemFieldsCtrl($scope, $timeout){
             $scope.dpFormat = 'MM/dd/yyyy';
             $scope.tinymceOptions = {
                 inline: false,
@@ -46537,6 +46538,28 @@ angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
                 theme : 'modern'
             };
 
+            $scope.generateThumb = function(files, news) {
+                if (files.length > 0) {
+                    for (var i = 0; i < files.length; i++){
+                        if (typeof news.creator !== 'undefined') {
+                            $scope.data.news[$scope.data.news.indexOf(news)].selectedFiles.push(files[i]);
+                        } else {
+                            $scope.news.selectedFiles.push(files[i]);
+                        }
+                        if ($scope.fileReaderSupported && files[i].type.indexOf('image') > -1) {
+                            $timeout(function() {
+                                var fileReader = new FileReader();
+                                fileReader.readAsDataURL(files[i]);
+                                fileReader.onload = function(e) {
+                                    $timeout(function() {
+                                        files.dataUrl = e.target.result;
+                                    });
+                                }
+                            });
+                        }
+                    }
+                }
+            };
         }])
 
     .directive('newsItemFieldsList', ['$timeout', function($timeout) {
@@ -46577,28 +46600,6 @@ angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
                         }
                         scope.$apply();
                     }, 0);
-                };
-                scope.generateThumb = function(files, news) {
-                    if (files != null) {
-                        for (var i = 0; i < files.length; i++){
-                            if (typeof news.creator !== 'undefined') {
-                                scope.data.news[scope.data.news.indexOf(news)].selectedFiles.push(files[i]);
-                            } else {
-                                scope.news.selectedFiles.push(files[i]);
-                            }
-                            if (scope.fileReaderSupported && files[i].type.indexOf('image') > -1) {
-                                $timeout(function() {
-                                    var fileReader = new FileReader();
-                                    fileReader.readAsDataURL(files[i]);
-                                    fileReader.onload = function(e) {
-                                        $timeout(function() {
-                                            files[i].dataUrl = e.target.result;
-                                        });
-                                    }
-                                });
-                            }
-                        }
-                    }
                 };
             },
             templateUrl: 'manageNews/manageNewsItemFields.tpl.html'
