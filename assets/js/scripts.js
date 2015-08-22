@@ -46526,8 +46526,8 @@ angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
         }
     }])
 
-    .controller('NewsItemFieldsCtrl', ['$scope', '$timeout',
-        function NewsItemFieldsCtrl($scope, $timeout){
+    .controller('NewsItemFieldsCtrl', ['$scope', '$timeout', 'Upload',
+        function NewsItemFieldsCtrl($scope, $timeout, Upload){
             $scope.dpFormat = 'MM/dd/yyyy';
             $scope.tinymceOptions = {
                 inline: false,
@@ -46539,10 +46539,9 @@ angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
             };
 
             $scope.generateThumb = function(files, news) {
-                console.dir(files);
                 if (files.length > 0 && files !== null) {
                     for (var i = 0; i < files.length; i++){
-                        if (typeof news.creator !== 'undefined') {
+                        if (news.nid > 0) {
                             $scope.data.news[$scope.data.news.indexOf(news)].selectedFiles.push(files[i]);
                         } else {
                             $scope.news.selectedFiles.push(files[i]);
@@ -46576,7 +46575,7 @@ angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
                     $event.preventDefault();
                     $event.stopPropagation();
                     $timeout(function() {
-                        if (typeof news.creator !== 'undefined') {
+                        if (news.nid > 0) {
                             if (scope.data.news[scope.data.news.indexOf(news)].activeFrom == null) {
                                 scope.data.news[scope.data.news.indexOf(news)].activeFrom = new Date();
                             }
@@ -46591,7 +46590,7 @@ angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
                     $event.preventDefault();
                     $event.stopPropagation();
                     $timeout(function() {
-                        if (typeof news.creator !== 'undefined') {
+                        if (news.nid > 0) {
                             if (scope.data.news[scope.data.news.indexOf(news)].activeUntil == null) {
                                 scope.data.news[scope.data.news.indexOf(news)].activeUntil = new Date();
                             }
