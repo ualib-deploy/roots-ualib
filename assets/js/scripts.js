@@ -4868,7 +4868,7 @@ angular.module('ui.tinymce', [])
  * AngularJS file upload/drop directive and service with progress and abort
  * FileAPI Flash shim for old browsers not supporting FormData
  * @author  Danial  <danial.farid@gmail.com>
- * @version 7.0.9
+ * @version 7.0.10
  */
 
 (function () {
@@ -4963,7 +4963,7 @@ angular.module('ui.tinymce', [])
             jsonp: false, //removes the callback form param
             cache: true, //removes the ?fileapiXXX in the url
             complete: function (err, fileApiXHR) {
-              if (err.indexOf('#2174') !== -1) {
+              if (err && angular.isString(err) && err.indexOf('#2174') !== -1) {
                 // this error seems to be fine the file is being uploaded properly.
                 err = null;
               }
@@ -5288,7 +5288,7 @@ if (!window.FileReader) {
 /**!
  * AngularJS file upload/drop directive and service with progress and abort
  * @author  Danial  <danial.farid@gmail.com>
- * @version 7.0.9
+ * @version 7.0.10
  */
 
 if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
@@ -5309,7 +5309,7 @@ if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
 
 var ngFileUpload = angular.module('ngFileUpload', []);
 
-ngFileUpload.version = '7.0.9';
+ngFileUpload.version = '7.0.10';
 
 ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, $q, $timeout) {
   function sendHttp(config) {
@@ -5419,7 +5419,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
             formData.append(key, val);
           }
         } else {
-          val = angular.isString(val) ? val : JSON.stringify(val);
+          val = angular.isString(val) ? val : angular.toJson(val);
           if (config.sendFieldsAs === 'json-blob') {
             formData.append(key, new Blob([val], {type: 'application/json'}));
           } else {
@@ -5781,14 +5781,15 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
   ngFileUpload.service('UploadDataUrl', ['UploadBase', '$timeout', '$q', function (UploadBase, $timeout, $q) {
     var upload = UploadBase;
     upload.dataUrl = function (file, disallowObjectUrl) {
-      if (file.dataUrl) {
+      if ((disallowObjectUrl && file.dataUrl != null) || (!disallowObjectUrl && file.blobUrl != null)) {
         var d = $q.defer();
         $timeout(function () {
-          d.resolve(file.dataUrl);
+          d.resolve(disallowObjectUrl ? file.dataUrl : file.blobUrl);
         });
         return d.promise;
       }
-      if (file.$ngfDataUrlPromise) return file.$ngfDataUrlPromise;
+      var p = disallowObjectUrl ? file.$ngfDataUrlPromise : file.$ngfBlobUrlPromise;
+      if (p) return p;
 
       var deferred = $q.defer();
       $timeout(function () {
@@ -5803,11 +5804,16 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
             try {
               url = URL.createObjectURL(file);
             } catch (e) {
-              deferred.reject();
+              $timeout(function () {
+                file.blobUrl = '';
+                deferred.reject();
+              });
               return;
             }
-            file.dataUrl = url;
-            if (url) deferred.resolve(url);
+            $timeout(function () {
+              file.blobUrl = url;
+              if (url) deferred.resolve(url);
+            });
           } else {
             var fileReader = new FileReader();
             fileReader.onload = function (e) {
@@ -5825,16 +5831,22 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
             fileReader.readAsDataURL(file);
           }
         } else {
-          file.dataUrl = '';
-          deferred.reject();
+          $timeout(function () {
+            file[disallowObjectUrl ? 'dataUrl' : 'blobUrl'] = '';
+            deferred.reject();
+          });
         }
       });
 
-      file.$ngfDataUrlPromise = deferred.promise;
-      file.$ngfDataUrlPromise['finally'](function () {
-        delete file.$ngfDataUrlPromise;
+      if (disallowObjectUrl) {
+        p = file.$ngfDataUrlPromise = deferred.promise;
+      } else {
+        p = file.$ngfBlobUrlPromise = deferred.promise;
+      }
+      p['finally'](function () {
+        delete file[disallowObjectUrl ? '$ngfDataUrlPromise' : '$ngfBlobUrlPromise'];
       });
-      return file.$ngfDataUrlPromise;
+      return p;
     };
     return upload;
   }]);
@@ -5857,12 +5869,17 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
       link: function (scope, elem, attr) {
         $timeout(function () {
           scope.$watch(attr.ngfSrc, function (file) {
+            if (angular.isString(file)) {
+              elem.removeClass('ngf-hide');
+              return elem.attr('src', file);
+            }
             if (file && file.type.indexOf(getTagType(elem[0])) === 0) {
-              Upload.dataUrl(file, Upload.attrGetter('ngfNoObjectUrl', attr, scope))['finally'](function () {
+              var disallowObjectUrl = Upload.attrGetter('ngfNoObjectUrl', attr, scope);
+              Upload.dataUrl(file, disallowObjectUrl)['finally'](function () {
                 $timeout(function () {
-                  if (file.dataUrl) {
+                  if ((disallowObjectUrl && file.dataUrl) || (!disallowObjectUrl && file.blobUrl)) {
                     elem.removeClass('ngf-hide');
-                    elem.attr('src', file.dataUrl);
+                    elem.attr('src', disallowObjectUrl ? file.dataUrl : file.blobUrl);
                   } else {
                     elem.addClass('ngf-hide');
                   }
@@ -5885,11 +5902,13 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
       link: function (scope, elem, attr) {
         $timeout(function () {
           scope.$watch(attr.ngfBackground, function (file) {
+            if (angular.isString(file)) return elem.css('background-image', 'url(\'' + file + '\')');
             if (file && file.type.indexOf('image') === 0) {
-              Upload.dataUrl(file, Upload.attrGetter('ngfNoObjectUrl', attr, scope))['finally'](function () {
+              var disallowObjectUrl = Upload.attrGetter('ngfNoObjectUrl', attr, scope);
+              Upload.dataUrl(file, disallowObjectUrl)['finally'](function () {
                 $timeout(function () {
-                  if (file.dataUrl) {
-                    elem.css('background-image', 'url(\'' + file.dataUrl + '\')');
+                  if ((disallowObjectUrl && file.dataUrl) || (!disallowObjectUrl && file.blobUrl)) {
+                    elem.css('background-image', 'url(\'' + (disallowObjectUrl ? file.dataUrl : file.blobUrl) + '\')');
                   } else {
                     elem.css('background-image', '');
                   }
@@ -5917,11 +5936,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
       if (file && !file.dataUrl) {
         if (file.dataUrl === undefined && angular.isObject(file)) {
           file.dataUrl = null;
-          UploadDataUrl.dataUrl(file, disallowObjectUrl).then(function (url) {
-            file.dataUrl = url;
-          }, function () {
-            file.dataUrl = '';
-          });
+          UploadDataUrl.dataUrl(file, disallowObjectUrl);
         }
         return '';
       }
@@ -5981,14 +5996,11 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
     upload.registerValidators = function (ngModel, attr, scope, later) {
       if (!ngModel) return;
 
-      ngModel.$ngfValidations = ngModel.$ngfValidations || {};
-
+      ngModel.$ngfValidations = [];
       function setValidities(ngModel) {
-        for (var k in ngModel.$ngfValidations) {
-          if (ngModel.$ngfValidations.hasOwnProperty(k)) {
-            ngModel.$setValidity(k, ngModel.$ngfValidations[k]);
-          }
-        }
+        angular.forEach(ngModel.$ngfValidations, function (validation) {
+          ngModel.$setValidity(validation.name, validation.valid);
+        });
       }
 
       ngModel.$formatters.push(function (val) {
@@ -5997,11 +6009,6 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
             setValidities(ngModel);
           });
         } else {
-          for (var k in ngModel.$ngfValidations) {
-            if (ngModel.$ngfValidations.hasOwnProperty(k)) {
-              ngModel.$setValidity(k, ngModel.$ngfValidations[k]);
-            }
-          }
           setValidities(ngModel);
         }
         return val;
@@ -6019,7 +6026,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
 
     upload.validate = function (files, ngModel, attr, scope, later, callback) {
       ngModel = ngModel || {};
-      ngModel.$ngfValidations = ngModel.$ngfValidations || {};
+      ngModel.$ngfValidations = [];
 
       var attrGetter = function (name, params) {
         return upload.attrGetter(name, attr, scope, params);
@@ -6030,54 +6037,56 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
         return;
       }
 
+      files = files.length === undefined ? [files] : files.slice(0);
+
       function validateSync(name, validatorVal, fn) {
         if (files) {
-          var valid = null, dName = 'ngf' + name[0].toUpperCase() + name.substr(1);
-          angular.forEach(files.length === undefined ? [files] : files, function (file) {
+          var dName = 'ngf' + name[0].toUpperCase() + name.substr(1);
+          var i = files.length, valid = null;
+
+          while (i--) {
+            var file = files[i];
             var val = attrGetter(dName, {'$file': file});
             if (val == null) {
               val = validatorVal(attrGetter('ngfValidate') || {});
+              valid = valid == null ? true : valid;
             }
             if (val != null) {
-              valid = true;
               if (!fn(file, val)) {
                 file.$error = name;
                 file.$errorParam = val;
+                files.splice(i, 1);
                 valid = false;
-                return false;
               }
             }
-          });
-          if (valid != null) {
-            ngModel.$ngfValidations[name] = valid;
-            return valid;
+          }
+          if (valid !== null) {
+            ngModel.$ngfValidations.push({name: name, valid: valid});
           }
         }
-        return true;
       }
 
-      var valid = true;
-      valid = valid && validateSync('pattern', function (cons) {
-          return cons.pattern;
-        }, upload.validatePattern);
-      valid = valid && validateSync('minSize', function (cons) {
-          return cons.size && cons.size.min;
-        }, function (file, val) {
-          return file.size >= translateScalars(val);
-        });
-      valid = valid && validateSync('maxSize', function (cons) {
-          return cons.size && cons.size.max;
-        }, function (file, val) {
-          return file.size <= translateScalars(val);
-        });
+      validateSync('pattern', function (cons) {
+        return cons.pattern;
+      }, upload.validatePattern);
+      validateSync('minSize', function (cons) {
+        return cons.size && cons.size.min;
+      }, function (file, val) {
+        return file.size >= translateScalars(val);
+      });
+      validateSync('maxSize', function (cons) {
+        return cons.size && cons.size.max;
+      }, function (file, val) {
+        return file.size <= translateScalars(val);
+      });
 
-      valid = valid && validateSync('validateFn', function () {
-          return null;
-        }, function (file, r) {
-          return r === true || r === null || r === '';
-        });
+      validateSync('validateFn', function () {
+        return null;
+      }, function (file, r) {
+        return r === true || r === null || r === '';
+      });
 
-      if (!valid) {
+      if (!files.length) {
         callback.call(ngModel, ngModel.$ngfValidations);
         return;
       }
@@ -6112,7 +6121,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
                 pendings--;
                 thisPendings--;
                 if (!thisPendings) {
-                  ngModel.$ngfValidations[name] = !hasError;
+                  ngModel.$ngfValidations.push({name: name, valid: !hasError});
                 }
                 if (!pendings) {
                   callback.call(ngModel, ngModel.$ngfValidations);
@@ -6185,6 +6194,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
         }
         upload.dataUrl(file).then(function (dataUrl) {
           var img = angular.element('<img>').attr('src', dataUrl).css('visibility', 'hidden').css('position', 'fixed');
+
           function success() {
             var width = img[0].clientWidth;
             var height = img[0].clientHeight;
@@ -6202,6 +6212,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
           img.on('load', success);
           img.on('error', error);
           var count = 0;
+
           function checkLoadError() {
             $timeout(function () {
               if (img[0].parentNode) {
@@ -6215,6 +6226,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
               }
             }, 1000);
           }
+
           checkLoadError();
 
           angular.element(document.getElementsByTagName('body')[0]).append(img);
@@ -6265,6 +6277,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
           el.on('loadedmetadata', success);
           el.on('error', error);
           var count = 0;
+
           function checkLoadError() {
             $timeout(function () {
               if (el[0].parentNode) {
@@ -6278,6 +6291,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
               }
             }, 1000);
           }
+
           checkLoadError();
 
           angular.element(document.body).append(el);
@@ -6294,10 +6308,9 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
     };
     return upload;
   }
-  ])
-  ;
-})
-();
+  ]);
+
+})();
 
 (function () {
   ngFileUpload.directive('ngfDrop', ['$parse', '$timeout', '$location', 'Upload',
@@ -42225,7 +42238,7 @@ angular.module('hours.list', [])
             templateUrl: 'list/list.tpl.html',
             controller: 'ListCtrl'
         }
-    }]);;angular.module('manage.templates', ['manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageNews/manageNews.tpl.html', 'manageNews/manageNewsAdmins.tpl.html', 'manageNews/manageNewsList.tpl.html', 'manageOneSearch/mainOneSearch.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageOneSearch/oneSearchStat.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareComputerMaps.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html', 'staffDirectory/staffDirectoryDepartments.tpl.html', 'staffDirectory/staffDirectoryPeople.tpl.html', 'staffDirectory/staffDirectoryProfile.tpl.html', 'staffDirectory/staffDirectorySubjects.tpl.html', 'submittedForms/submittedForms.tpl.html']);
+    }]);;angular.module('manage.templates', ['manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageNews/manageNews.tpl.html', 'manageNews/manageNewsAdmins.tpl.html', 'manageNews/manageNewsItemFields.tpl.html', 'manageNews/manageNewsList.tpl.html', 'manageOneSearch/mainOneSearch.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageOneSearch/oneSearchStat.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareComputerMaps.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html', 'staffDirectory/staffDirectoryDepartments.tpl.html', 'staffDirectory/staffDirectoryPeople.tpl.html', 'staffDirectory/staffDirectoryProfile.tpl.html', 'staffDirectory/staffDirectorySubjects.tpl.html', 'submittedForms/submittedForms.tpl.html']);
 
 angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageDatabases/manageDatabases.tpl.html",
@@ -42975,11 +42988,11 @@ angular.module("manageNews/manageNews.tpl.html", []).run(["$templateCache", func
     "\n" +
     "<tabset justified=\"true\">\n" +
     "    <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
-    "        <div ng-if=\"tab.number == 0\">\n" +
+    "        <div ng-show=\"tab.number == 0\">\n" +
     "            <div manage-news-list>\n" +
     "            </div>\n" +
     "        </div>\n" +
-    "        <div ng-if=\"tab.number == 1\" >\n" +
+    "        <div ng-show=\"tab.number == 1\" >\n" +
     "            <div manage-admins-list>\n" +
     "            </div>\n" +
     "        </div>\n" +
@@ -43025,99 +43038,116 @@ angular.module("manageNews/manageNewsAdmins.tpl.html", []).run(["$templateCache"
     "</div>");
 }]);
 
+angular.module("manageNews/manageNewsItemFields.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("manageNews/manageNewsItemFields.tpl.html",
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-6 form-group\">\n" +
+    "        <label for=\"title\">Title</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"News/Exhibit Title\" ng-model=\"news.title\"\n" +
+    "               id=\"title\" maxlength=\"100\" required>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-2 form-group\">\n" +
+    "        <div ng-show=\"news.type > 0\">\n" +
+    "            <label for=\"from\">Active From</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" id=\"from\" datepicker-popup=\"{{dpFormat}}\"\n" +
+    "                   ng-model=\"news.activeFrom\" is-open=\"news.dpFrom\" close-text=\"Close\"\n" +
+    "                   ng-click=\"onNewsDPFocus($event, news, true)\"/>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-2 form-group\">\n" +
+    "        <div ng-show=\"news.type > 0\">\n" +
+    "            <label for=\"until\">Active Until</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" id=\"until\" datepicker-popup=\"{{dpFormat}}\"\n" +
+    "                   ng-model=\"news.activeUntil\" is-open=\"news.dpUntil\" close-text=\"Close\"\n" +
+    "                   ng-click=\"onNewsDPFocus($event, news, false)\"/>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-1 form-group\">\n" +
+    "        <label for=\"isExhibit\">Exhibit</label>\n" +
+    "        <div class=\"checkbox text-center\" id=\"isExhibit\">\n" +
+    "            <input type=\"checkbox\" ng-model=\"news.type\" ng-true-value=\"1\" ng-false-value=\"0\">\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-1 form-group\">\n" +
+    "        <label for=\"sticky\">Sticky</label>\n" +
+    "        <div class=\"checkbox text-center\" id=\"sticky\">\n" +
+    "            <input type=\"checkbox\" ng-model=\"news.sticky\" ng-true-value=\"1\" ng-false-value=\"0\">\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-2 form-group\">\n" +
+    "        <label for=\"browse\">Select Images</label>\n" +
+    "        <div id=\"browse\">\n" +
+    "            <button type=\"file\" ngf-select=\"\" ng-model=\"news.picFile\" accept=\"image/*\" ngf-multiple=\"true\"\n" +
+    "                    ngf-change=\"generateThumb($files, news)\" class=\"btn btn-success\">\n" +
+    "                <span class=\"fa fa-fw fa-plus\"></span>Browse\n" +
+    "            </button>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-10 form-group\">\n" +
+    "        <label for=\"selected\">Selected Images</label>\n" +
+    "        <div id=\"selected\">\n" +
+    "            <div class=\"col-md-3\" ng-repeat=\"img in news.images\">\n" +
+    "                <img ng-src=\"{{img.image}}\" width=\"150px\" height=\"100px\">\n" +
+    "                <button type=\"button\" class=\"btn btn-danger\" ng-click=\"news.images.splice($index,1)\">\n" +
+    "                    <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                </button>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-3\" ng-repeat=\"img in news.selectedFiles\">\n" +
+    "                <img ngf-src=\"img\" width=\"150px\" height=\"100px\">\n" +
+    "                <button type=\"button\" class=\"btn btn-danger\" ng-click=\"news.selectedFiles.splice($index,1)\">\n" +
+    "                    <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                </button>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-12 form-group\">\n" +
+    "        <label>Detailed Description</label>\n" +
+    "        <textarea ui-tinymce=\"tinymceOptions\" ng-model=\"news.description\" rows=\"5\" maxlength=\"64000\" required></textarea>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div class=\"row form-group\">\n" +
+    "    <h4><small>Select contact person from the list or enter new contact information</small></h4>\n" +
+    "    <div class=\"form-group\">\n" +
+    "        <div class=\"col-md-3\">\n" +
+    "            <label for=\"contact1\">Library Faculty and Staff</label>\n" +
+    "            <select class=\"form-control\" id=\"contact1\" ng-options=\"people.fullName for people in data.people\"\n" +
+    "                    ng-model=\"news.contactID\">\n" +
+    "            </select>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-3\">\n" +
+    "            <label for=\"contact2\">Name</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Contact Name\" ng-model=\"news.contactName\"\n" +
+    "                   id=\"contact2\" maxlength=\"60\">\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-3\">\n" +
+    "            <label for=\"contact3\">Email</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Contact Email\" ng-model=\"news.contactEmail\"\n" +
+    "                   id=\"contact3\"  maxlength=\"1024\">\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-3\">\n" +
+    "            <label for=\"contact4\">Phone</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Contact Phone\" ng-model=\"news.contactPhone\"\n" +
+    "                   id=\"contact4\" maxlength=\"20\">\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "");
+}]);
+
 angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageNews/manageNewsList.tpl.html",
     "<div>\n" +
     "    <form name=\"addNewsExh\" ng-submit=\"createNews()\">\n" +
-    "        <div class=\"row\">\n" +
-    "            <div class=\"col-md-12\">\n" +
-    "                <div class=\"col-md-12 sdOpen\">\n" +
-    "                    <h3>Add News Record</h3>\n" +
-    "                    <div class=\"col-md-12\">\n" +
-    "                        <div class=\"col-md-6 form-group\">\n" +
-    "                            <label for=\"title\">Title</label>\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Enter Title\" ng-model=\"newNews.title\"\n" +
-    "                                   id=\"title\" maxlength=\"100\" required>\n" +
-    "                        </div>\n" +
-    "                        <div class=\"col-md-2 form-group\">\n" +
-    "                            <label for=\"sticky\">Make Sticky</label>\n" +
-    "                            <div class=\"checkbox text-center\" id=\"sticky\">\n" +
-    "                                <input type=\"checkbox\" ng-model=\"newNews.sticky\" ng-true-value=\"1\" ng-false-value=\"0\">\n" +
-    "                            </div>\n" +
-    "                        </div>\n" +
-    "                        <div class=\"col-md-2 form-group\">\n" +
-    "                            <label for=\"from\">Active From</label>\n" +
-    "                            <input type=\"text\" class=\"form-control\" id=\"from\" datepicker-popup=\"{{dpFormat}}\"\n" +
-    "                                   ng-model=\"newNews.activeFrom\" is-open=\"newNews.dpFrom\" close-text=\"Close\"\n" +
-    "                                   ng-focus=\"onNewsDPFocusFrom($event)\"/>\n" +
-    "                        </div>\n" +
-    "                        <div class=\"col-md-2 form-group\">\n" +
-    "                            <label for=\"until\">Active Until</label>\n" +
-    "                            <input type=\"text\" class=\"form-control\" id=\"until\" datepicker-popup=\"{{dpFormat}}\"\n" +
-    "                                   ng-model=\"newNews.activeUntil\" is-open=\"newNews.dpUntil\" close-text=\"Close\"\n" +
-    "                                   ng-focus=\"onNewsDPFocusUntil($event)\"/>\n" +
-    "                        </div>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-12\">\n" +
-    "                        <div class=\"col-md-2 form-group\">\n" +
-    "                            <label for=\"browse\">Select Images</label>\n" +
-    "                            <div id=\"browse\">\n" +
-    "                                <button type=\"file\" ngf-select=\"\" ng-model=\"newNews.picFile\" accept=\"image/*\" ngf-multiple=\"true\"\n" +
-    "                                   ngf-change=\"generateThumb(newNews.picFile, null)\" class=\"btn btn-success\">\n" +
-    "                                    <span class=\"fa fa-fw fa-plus\"></span>Browse\n" +
-    "                                </button>\n" +
-    "                            </div>\n" +
-    "                        </div>\n" +
-    "                        <div class=\"col-md-10 form-group\">\n" +
-    "                            <label for=\"selected\">Selected Images</label>\n" +
-    "                            <div id=\"selected\">\n" +
-    "                                <div class=\"col-md-3\" ng-repeat=\"img in newNews.selectedFiles\">\n" +
-    "                                    <img ngf-src=\"img\" width=\"150px\" height=\"100px\">\n" +
-    "                                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"newNews.selectedFiles.splice($index,1)\">\n" +
-    "                                        <span class=\"fa fa-fw fa-close\"></span>\n" +
-    "                                    </button>\n" +
-    "                                </div>\n" +
-    "                            </div>\n" +
-    "                        </div>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-12\">\n" +
-    "                        <div class=\"col-md-12 form-group\">\n" +
-    "                            <label>Detailed Description</label>\n" +
-    "                            <textarea ui-tinymce=\"tinymceOptions\" ng-model=\"newNews.description\" rows=\"5\"\n" +
-    "                                      maxlength=\"64000\" required></textarea>\n" +
-    "                        </div>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-12 form-group\">\n" +
-    "                        <h4><small>Select contact person from the list or enter new contact information</small></h4>\n" +
-    "                        <div class=\"form-group\">\n" +
-    "                            <div class=\"col-md-3\">\n" +
-    "                                <label for=\"contact1\">Library Faculty and Staff</label>\n" +
-    "                                <select class=\"form-control\" id=\"contact1\" ng-options=\"people.fullName for people in data.people\"\n" +
-    "                                        ng-model=\"newNews.contactID\">\n" +
-    "                                </select>\n" +
-    "                            </div>\n" +
-    "                            <div class=\"col-md-3\">\n" +
-    "                                <label for=\"contact2\">Name</label>\n" +
-    "                                <input type=\"text\" class=\"form-control\" placeholder=\"Contact Name\" ng-model=\"newNews.contactName\"\n" +
-    "                                       id=\"contact2\" maxlength=\"60\">\n" +
-    "                            </div>\n" +
-    "                            <div class=\"col-md-3\">\n" +
-    "                                <label for=\"contact3\">Email</label>\n" +
-    "                                <input type=\"text\" class=\"form-control\" placeholder=\"Contact Email\" ng-model=\"newNews.contactEmail\"\n" +
-    "                                       id=\"contact3\"  maxlength=\"1024\">\n" +
-    "                            </div>\n" +
-    "                            <div class=\"col-md-3\">\n" +
-    "                                <label for=\"contact4\">Phone</label>\n" +
-    "                                <input type=\"text\" class=\"form-control\" placeholder=\"Contact Phone\" ng-model=\"newNews.contactPhone\"\n" +
-    "                                       id=\"contact4\" maxlength=\"20\">\n" +
-    "                            </div>\n" +
-    "                        </div>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-12 text-center form-group\">\n" +
-    "                        <button type=\"submit\" class=\"btn btn-success\" ng-disabled=\"uploading\">Create New Record</button><br>\n" +
-    "                        {{newNews.formResponse}}\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
+    "        <div class=\"sdOpen\">\n" +
+    "            <h3>Add News Record</h3>\n" +
+    "            <div news-item-fields-list newsdata=\"newNews\" list=\"data\"></div>\n" +
+    "            <div class=\"row text-center form-group\">\n" +
+    "                <button type=\"submit\" class=\"btn btn-success\" ng-disabled=\"uploading\">Create New Record</button><br>\n" +
+    "                {{newNews.formResponse}}\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </form>\n" +
@@ -43176,7 +43206,7 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                                </a>\n" +
     "                            </td>\n" +
     "                            <td style=\"width:64px\">\n" +
-    "                                <img ng-show=\"news.tb.length > 0\" src=\"{{news.tb}}\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
+    "                                <img ng-show=\"news.tb.length > 0\" ng-src=\"{{news.tb}}\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
     "                                <img ng-hide=\"news.tb.length > 0\" ngf-src=\"news.selectedFiles[0]\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
     "                            </td>\n" +
     "                        </tr>\n" +
@@ -43199,91 +43229,7 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                        </div>\n" +
     "                    </div>\n" +
     "                    <form name=\"editNewsExh{{news.nid}}\" ng-submit=\"updateNews(news)\" ng-if=\"news.show\">\n" +
-    "                    <div>\n" +
-    "                        <div class=\"row\">\n" +
-    "                            <div class=\"col-md-6 form-group\">\n" +
-    "                                <label for=\"{{news.nid}}_title\">Title</label>\n" +
-    "                                <input type=\"text\" class=\"form-control\" placeholder=\"Enter Title\" ng-model=\"news.title\"\n" +
-    "                                       id=\"{{news.nid}}_title\" maxlength=\"100\" required>\n" +
-    "                            </div>\n" +
-    "                            <div class=\"col-md-2 form-group\">\n" +
-    "                                <label for=\"{{news.nid}}_sticky\">Sticky</label>\n" +
-    "                                <div class=\"checkbox text-center\" id=\"{{news.nid}}_sticky\">\n" +
-    "                                    <input type=\"checkbox\" ng-model=\"news.sticky\" ng-true-value=\"1\" ng-false-value=\"0\">\n" +
-    "                                </div>\n" +
-    "                            </div>\n" +
-    "                            <div class=\"col-md-2 form-group\">\n" +
-    "                                <label for=\"{{news.nid}}_from\">Active From</label>\n" +
-    "                                <input type=\"text\" class=\"form-control\" id=\"{{news.nid}}_from\" datepicker-popup=\"{{dpFormat}}\"\n" +
-    "                                       ng-model=\"news.activeFrom\" is-open=\"news.dpFrom\" close-text=\"Close\"\n" +
-    "                                       ng-focus=\"onNewsDPFocusFrom($event, news)\"/>\n" +
-    "                            </div>\n" +
-    "                            <div class=\"col-md-2 form-group\">\n" +
-    "                                <label for=\"{{news.nid}}_until\">Active Until</label>\n" +
-    "                                <input type=\"text\" class=\"form-control\" id=\"{{news.nid}}_until\" datepicker-popup=\"{{dpFormat}}\"\n" +
-    "                                       ng-model=\"news.activeUntil\" is-open=\"news.dpUntil\" close-text=\"Close\"\n" +
-    "                                       ng-focus=\"onNewsDPFocusUntil($event, news)\"/>\n" +
-    "                            </div>\n" +
-    "                        </div>\n" +
-    "                        <div class=\"row\">\n" +
-    "                            <div class=\"col-md-2 form-group\">\n" +
-    "                                <label for=\"{{news.nid}}_browse\">Select Images</label>\n" +
-    "                                <div id=\"{{news.nid}}_browse\">\n" +
-    "                                    <button type=\"file\" ngf-select=\"\" ng-model=\"news.picFile\" accept=\"image/*\" ngf-multiple=\"true\"\n" +
-    "                                            ngf-change=\"generateThumb(news.picFile, news)\" class=\"btn btn-success\">\n" +
-    "                                        <span class=\"fa fa-fw fa-plus\"></span>Browse\n" +
-    "                                    </button>\n" +
-    "                                </div>\n" +
-    "                            </div>\n" +
-    "                            <div class=\"col-md-10 form-group\">\n" +
-    "                                <label for=\"{{news.nid}}_uploaded\">Uploaded Images</label>\n" +
-    "                                <div id=\"{{news.nid}}_uploaded\">\n" +
-    "                                    <div class=\"col-md-3\" ng-repeat=\"img in news.images\">\n" +
-    "                                        <img src=\"{{img.image}}\" width=\"150px\" height=\"100px\">\n" +
-    "                                        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"news.images.splice($index,1)\">\n" +
-    "                                            <span class=\"fa fa-fw fa-close\"></span>\n" +
-    "                                        </button>\n" +
-    "                                    </div>\n" +
-    "                                    <div class=\"col-md-3\" ng-repeat=\"img in news.selectedFiles\">\n" +
-    "                                        <img ngf-src=\"img\" width=\"150px\" height=\"100px\">\n" +
-    "                                        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"news.selectedFiles.splice($index,1)\">\n" +
-    "                                            <span class=\"fa fa-fw fa-close\"></span>\n" +
-    "                                        </button>\n" +
-    "                                    </div>\n" +
-    "                                </div>\n" +
-    "                            </div>\n" +
-    "                        </div>\n" +
-    "                        <div class=\"row\">\n" +
-    "                            <div class=\"col-md-12 form-group\">\n" +
-    "                                <label>Detailed Description</label>\n" +
-    "                                <textarea ui-tinymce=\"tinymceOptions\" ng-model=\"news.description\" rows=\"5\"\n" +
-    "                                    maxlength=\"64000\" required></textarea>\n" +
-    "                            </div>\n" +
-    "                        </div>\n" +
-    "                        <h4><small>Select contact person from the list or enter new contact information</small></h4>\n" +
-    "                        <div class=\"row form-group\">\n" +
-    "                            <div class=\"col-md-3\">\n" +
-    "                                <label for=\"{{news.nid}}_contact1\">Library Faculty and Staff</label>\n" +
-    "                                <select class=\"form-control\" id=\"{{news.nid}}_contact1\" ng-options=\"people.fullName for people in data.people\"\n" +
-    "                                        ng-model=\"news.contactID\">\n" +
-    "                                </select>\n" +
-    "                            </div>\n" +
-    "                            <div class=\"col-md-3\">\n" +
-    "                                <label for=\"{{news.nid}}_contact2\">Name</label>\n" +
-    "                                <input type=\"text\" class=\"form-control\" placeholder=\"Contact Name\" ng-model=\"news.contactName\"\n" +
-    "                                       id=\"{{news.nid}}_contact2\" maxlength=\"60\">\n" +
-    "                            </div>\n" +
-    "                            <div class=\"col-md-3\">\n" +
-    "                                <label for=\"{{news.nid}}_contact3\">Email</label>\n" +
-    "                                <input type=\"text\" class=\"form-control\" placeholder=\"Contact Email\" ng-model=\"news.contactEmail\"\n" +
-    "                                       id=\"{{news.nid}}_contact3\" maxlength=\"1024\">\n" +
-    "                            </div>\n" +
-    "                            <div class=\"col-md-3\">\n" +
-    "                                <label for=\"{{news.nid}}_contact4\">Phone</label>\n" +
-    "                                <input type=\"text\" class=\"form-control\" placeholder=\"Contact Phone\" ng-model=\"news.contactPhone\"\n" +
-    "                                       id=\"{{news.nid}}_contact4\" maxlength=\"20\">\n" +
-    "                            </div>\n" +
-    "                        </div>\n" +
+    "                        <div news-item-fields-list newsdata=\"news\" list=\"data\"></div>\n" +
     "                        <div class=\"row text-center\">\n" +
     "                            <button type=\"submit\" class=\"btn btn-success\" ng-disabled=\"uploading\">Update information</button>\n" +
     "                            <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteNews(news)\">\n" +
@@ -43291,7 +43237,6 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                            </button><br>\n" +
     "                            {{news.formResponse}}\n" +
     "                        </div>\n" +
-    "                    </div>\n" +
     "                    </form>\n" +
     "                </td>\n" +
     "                <td class=\"hidden-xs\" ng-click=\"toggleNews(news)\" style=\"cursor: pointer;\">\n" +
@@ -46203,13 +46148,13 @@ angular.module('manage.manageHoursUsers', [])
     }])
 
 angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
-    .controller('manageNewsCtrl', ['$scope', '$window', '$timeout', 'tokenFactory', 'newsFactory',
-        function manageNewsCtrl($scope, $window, $timeout, tokenFactory, newsFactory){
+    .controller('manageNewsCtrl', ['$scope', '$window', 'tokenFactory', 'newsFactory',
+        function manageNewsCtrl($scope, $window, tokenFactory, newsFactory){
             $scope.data = {};
-            $scope.dpFormat = 'MM/dd/yyyy';
             $scope.newNews = {};
             $scope.newNews.creator = $window.author;
             $scope.newNews.selectedFiles = [];
+            $scope.newNews.picFile = [];
             $scope.isAdmin = false;
             if (typeof $window.admin !== 'undefined')
                 if ($window.admin === "1")
@@ -46257,37 +46202,6 @@ angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
                     number: 1,
                     active: false
                 }];
-            
-            $scope.validateNews = function(news){
-                if (news.title.length < 1)
-                    return "Form error: Please fill out Title!";
-                if (news.description.length < 1)
-                    return "Form error: Please fill out Description!";
-
-                return "";
-            };
-            $scope.generateThumb = function(files, news) {
-                if (files != null) {
-                    for (var i = 0; i < files.length; i++){
-                        if (news !== null) {
-                            $scope.data.news[$scope.data.news.indexOf(news)].selectedFiles.push(files[i]);
-                        } else {
-                            $scope.newNews.selectedFiles.push(files[i]);
-                        }
-                        if ($scope.fileReaderSupported && files[i].type.indexOf('image') > -1) {
-                            $timeout(function() {
-                                var fileReader = new FileReader();
-                                fileReader.readAsDataURL(files[i]);
-                                fileReader.onload = function(e) {
-                                    $timeout(function() {
-                                        files[i].dataUrl = e.target.result;
-                                    });
-                                }
-                            });
-                        }
-                    }
-                }
-            };
         }])
 
     .directive('newsExhibitionsMain', ['$animate', function($animate) {
@@ -46334,47 +46248,11 @@ angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
             $scope.newNews.contactEmail = '';
             $scope.newNews.contactPhone = '';
             $scope.newNews.sticky = 0;
+            $scope.newNews.type = 0;
 
             $scope.currentPage = 1;
             $scope.maxPageSize = 10;
             $scope.perPage = 20;
-
-            $scope.tinymceOptions = {
-                onChange: function(e) {
-                    // put logic here for keypress and cut/paste changes
-                },
-                inline: false,
-                plugins : 'link spellchecker code',
-                toolbar: 'undo redo | bold italic | link | code',
-                menubar : false,
-                skin: 'lightgray',
-                theme : 'modern'
-            };
-
-            $scope.onNewsDPFocusFrom = function($event, news){
-                $event.preventDefault();
-                $event.stopPropagation();
-                if (typeof news != 'undefined') {
-                    if ($scope.data.news[$scope.data.news.indexOf(news)].activeFrom == null) {
-                        $scope.data.news[$scope.data.news.indexOf(news)].activeFrom = new Date();
-                    }
-                    $scope.data.news[$scope.data.news.indexOf(news)].dpFrom = true;
-                } else {
-                    $scope.newNews.dpFrom = true;
-                }
-            };
-            $scope.onNewsDPFocusUntil = function($event, news){
-                $event.preventDefault();
-                $event.stopPropagation();
-                if (typeof news != 'undefined') {
-                    if ($scope.data.news[$scope.data.news.indexOf(news)].activeUntil == null) {
-                        $scope.data.news[$scope.data.news.indexOf(news)].activeUntil = new Date();
-                    }
-                    $scope.data.news[$scope.data.news.indexOf(news)].dpUntil = true;
-                } else {
-                    $scope.newNews.dpUntil = true;
-                }
-            };
 
             $scope.toggleNews = function(news){
                 $scope.data.news[$scope.data.news.indexOf(news)].show =
@@ -46387,6 +46265,14 @@ angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
                     $scope.sortMode = by;
             };
 
+            $scope.validateNews = function(news){
+                if (news.title.length < 1)
+                    return "Form error: Please fill out Title!";
+                if (news.description.length < 1)
+                    return "Form error: Please fill out Description!";
+
+                return "";
+            };
             $scope.approveNews = function(news){
                 news.admin = $scope.newNews.creator;
                 if (confirm("Are you sure you want to approve " + news.title  + "?") == true){
@@ -46428,6 +46314,10 @@ angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
                 if ($scope.data.news[$scope.data.news.indexOf(news)].formResponse.length > 0)
                     return false;
                 $scope.uploading = true;
+                if (news.type < 1) {
+                    news.activeFrom = null;
+                    news.activeUntil = null;
+                }
                 if (news.activeFrom !== null)
                     news.tsFrom = news.activeFrom.valueOf() / 1000;
                 else
@@ -46499,6 +46389,10 @@ angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
                 if ($scope.newNews.formResponse.length > 0)
                     return false;
                 $scope.uploading = true;
+                if ($scope.newNews.type < 1) {
+                    $scope.newNews.activeFrom = null;
+                    $scope.newNews.activeUntil = null;
+                }
                 if ($scope.newNews.activeFrom !== null)
                     $scope.newNews.tsFrom = $scope.newNews.activeFrom.valueOf() / 1000;
                 else
@@ -46537,6 +46431,7 @@ angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
                                 newNews.show = false;
                                 newNews.class = "";
                                 newNews.status = 0;
+                                newNews.type = $scope.newNews.type;
                                 newNews.selectedFiles = [];
                                 $scope.data.news.push(newNews);
                                 $scope.newNews.formResponse = "News has been added.";
@@ -46593,6 +46488,7 @@ angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
                                 newNews.show = false;
                                 newNews.class = "";
                                 newNews.status = 0;
+                                newNews.type = $scope.newNews.type;
                                 newNews.selectedFiles = [];
                                 $scope.data.news.push(newNews);
                                 $scope.newNews.formResponse = "News has been added.";
@@ -46632,6 +46528,84 @@ angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
                 return input;
             return input.slice(start);
         }
+    }])
+
+    .controller('NewsItemFieldsCtrl', ['$scope', '$timeout', 'Upload',
+        function NewsItemFieldsCtrl($scope, $timeout, Upload){
+            $scope.dpFormat = 'MM/dd/yyyy';
+            $scope.tinymceOptions = {
+                inline: false,
+                plugins : 'link spellchecker code',
+                toolbar: 'undo redo | bold italic | link | code',
+                menubar : false,
+                skin: 'lightgray',
+                theme : 'modern'
+            };
+
+            $scope.generateThumb = function(files, news) {
+                if (files.length > 0 && files !== null) {
+                    for (var i = 0; i < files.length; i++){
+                        if (news.nid > 0) {
+                            $scope.data.news[$scope.data.news.indexOf(news)].selectedFiles.push(files[i]);
+                        } else {
+                            $scope.news.selectedFiles.push(files[i]);
+                        }
+                        if ($scope.fileReaderSupported && files[i].type.indexOf('image') > -1) {
+                            $timeout(function() {
+                                var fileReader = new FileReader();
+                                fileReader.readAsDataURL(files[i]);
+                                fileReader.onload = function(e) {
+                                    $timeout(function() {
+                                        files[i].dataUrl = e.target.result;
+                                    });
+                                }
+                            });
+                        }
+                    }
+                }
+            };
+
+            $scope.showDatePicker = function(news, isFrom) {
+                if (news.nid > 0) {
+                    if (isFrom === true) {
+                        if ($scope.data.news[$scope.data.news.indexOf(news)].activeFrom == null) {
+                            $scope.data.news[$scope.data.news.indexOf(news)].activeFrom = new Date();
+                        }
+                        $scope.data.news[$scope.data.news.indexOf(news)].dpFrom = true;
+                    } else {
+                        if ($scope.data.news[$scope.data.news.indexOf(news)].activeUntil == null) {
+                            $scope.data.news[$scope.data.news.indexOf(news)].activeUntil = new Date();
+                        }
+                        $scope.data.news[$scope.data.news.indexOf(news)].dpUntil = true;
+                    }
+                } else {
+                    if (isFrom === true) {
+                        $scope.news.dpFrom = true;
+                    } else {
+                        $scope.news.dpUntil = true;
+                    }
+                }
+            };
+        }])
+
+    .directive('newsItemFieldsList', ['$timeout', function($timeout) {
+        return {
+            restrict: 'AC',
+            scope: {
+                news: '=newsdata',
+                data: '=list'
+            },
+            controller: 'NewsItemFieldsCtrl',
+            link: function(scope, elm, attrs){
+                scope.onNewsDPFocus = function($event, news, isFrom){
+                    $timeout(function() {
+                        scope.showDatePicker(news, isFrom);
+                        scope.$apply();
+                    }, 0);
+                };
+            },
+            templateUrl: 'manageNews/manageNewsItemFields.tpl.html'
+        };
     }])
 
     .controller('manageAdminsListCtrl', ['$scope', 'newsFactory',
@@ -48421,9 +48395,9 @@ angular.module('manage.submittedForms', [])
             $scope.sortModes = [
                 {by:'title', reverse:false},
                 {by:'status', reverse:false},
-                {by:'created', reverse:false}
+                {by:'created', reverse:true}
             ];
-            $scope.sortMode = 0;
+            $scope.sortMode = 2;
             $scope.sortButton = $scope.sortMode;
             $scope.mOver = 0;
 
