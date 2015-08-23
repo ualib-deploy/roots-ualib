@@ -43046,10 +43046,20 @@ angular.module("manageNews/manageNewsItemFields.tpl.html", []).run(["$templateCa
     "        <input type=\"text\" class=\"form-control\" placeholder=\"News/Exhibit Title\" ng-model=\"news.title\"\n" +
     "               id=\"title\" maxlength=\"100\" required>\n" +
     "    </div>\n" +
-    "    <div class=\"col-md-1 form-group\">\n" +
-    "        <label for=\"sticky\">Sticky</label>\n" +
-    "        <div class=\"checkbox text-center\" id=\"sticky\">\n" +
-    "            <input type=\"checkbox\" ng-model=\"news.sticky\" ng-true-value=\"1\" ng-false-value=\"0\">\n" +
+    "    <div class=\"col-md-2 form-group\">\n" +
+    "        <div ng-show=\"news.type > 0\">\n" +
+    "            <label for=\"from\">Active From</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" id=\"from\" datepicker-popup=\"{{dpFormat}}\"\n" +
+    "                   ng-model=\"news.activeFrom\" is-open=\"news.dpFrom\" close-text=\"Close\"\n" +
+    "                   ng-focus=\"onNewsDPFocusFrom($event, news)\"/>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-2 form-group\">\n" +
+    "        <div ng-show=\"news.type > 0\">\n" +
+    "            <label for=\"until\">Active Until</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" id=\"until\" datepicker-popup=\"{{dpFormat}}\"\n" +
+    "                   ng-model=\"news.activeUntil\" is-open=\"news.dpUntil\" close-text=\"Close\"\n" +
+    "                   ng-focus=\"onNewsDPFocusUntil($event, news)\"/>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "    <div class=\"col-md-1 form-group\">\n" +
@@ -43058,17 +43068,11 @@ angular.module("manageNews/manageNewsItemFields.tpl.html", []).run(["$templateCa
     "            <input type=\"checkbox\" ng-model=\"news.type\" ng-true-value=\"1\" ng-false-value=\"0\">\n" +
     "        </div>\n" +
     "    </div>\n" +
-    "    <div class=\"col-md-2 form-group\" ng-show=\"news.type > 0\">\n" +
-    "        <label for=\"from\">Active From</label>\n" +
-    "        <input type=\"text\" class=\"form-control\" id=\"from\" datepicker-popup=\"{{dpFormat}}\"\n" +
-    "               ng-model=\"news.activeFrom\" is-open=\"news.dpFrom\" close-text=\"Close\"\n" +
-    "               ng-focus=\"onNewsDPFocusFrom($event, news)\"/>\n" +
-    "    </div>\n" +
-    "    <div class=\"col-md-2 form-group\" ng-show=\"news.type > 0\">\n" +
-    "        <label for=\"until\">Active Until</label>\n" +
-    "        <input type=\"text\" class=\"form-control\" id=\"until\" datepicker-popup=\"{{dpFormat}}\"\n" +
-    "               ng-model=\"news.activeUntil\" is-open=\"news.dpUntil\" close-text=\"Close\"\n" +
-    "               ng-focus=\"onNewsDPFocusUntil($event, news)\"/>\n" +
+    "    <div class=\"col-md-1 form-group\">\n" +
+    "        <label for=\"sticky\">Sticky</label>\n" +
+    "        <div class=\"checkbox text-center\" id=\"sticky\">\n" +
+    "            <input type=\"checkbox\" ng-model=\"news.sticky\" ng-true-value=\"1\" ng-false-value=\"0\">\n" +
+    "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
     "<div class=\"row\">\n" +
@@ -46560,6 +46564,27 @@ angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
                     }
                 }
             };
+
+            $scope.setDatePickerFrom = function(news) {
+                if (news.nid > 0) {
+                    if ($scope.data.news[$scope.data.news.indexOf(news)].activeFrom == null) {
+                        $scope.data.news[$scope.data.news.indexOf(news)].activeFrom = new Date();
+                    }
+                    $scope.data.news[$scope.data.news.indexOf(news)].dpFrom = true;
+                } else {
+                    $scope.news.dpFrom = true;
+                }
+            };
+            $scope.setDatePickerUntil = function(news) {
+                if (news.nid > 0) {
+                    if ($scope.data.news[$scope.data.news.indexOf(news)].activeUntil == null) {
+                        $scope.data.news[$scope.data.news.indexOf(news)].activeUntil = new Date();
+                    }
+                    $scope.data.news[$scope.data.news.indexOf(news)].dpUntil = true;
+                } else {
+                    $scope.news.dpUntil = true;
+                }
+            };
         }])
 
     .directive('newsItemFieldsList', ['$timeout', function($timeout) {
@@ -46575,14 +46600,7 @@ angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
                     $event.preventDefault();
                     $event.stopPropagation();
                     $timeout(function() {
-                        if (news.nid > 0) {
-                            if (scope.data.news[scope.data.news.indexOf(news)].activeFrom == null) {
-                                scope.data.news[scope.data.news.indexOf(news)].activeFrom = new Date();
-                            }
-                            scope.data.news[scope.data.news.indexOf(news)].dpFrom = true;
-                        } else {
-                            scope.news.dpFrom = true;
-                        }
+                        scope.setDatePickerFrom(news);
                         scope.$apply();
                     }, 0);
                 };
@@ -46590,14 +46608,7 @@ angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
                     $event.preventDefault();
                     $event.stopPropagation();
                     $timeout(function() {
-                        if (news.nid > 0) {
-                            if (scope.data.news[scope.data.news.indexOf(news)].activeUntil == null) {
-                                scope.data.news[scope.data.news.indexOf(news)].activeUntil = new Date();
-                            }
-                            scope.data.news[scope.data.news.indexOf(news)].dpUntil = true;
-                        } else {
-                            scope.news.dpUntil = true;
-                        }
+                        scope.setDatePickerUntil(news);
                         scope.$apply();
                     }, 0);
                 };
