@@ -43051,7 +43051,7 @@ angular.module("manageNews/manageNewsItemFields.tpl.html", []).run(["$templateCa
     "            <label for=\"from\">Active From</label>\n" +
     "            <input type=\"text\" class=\"form-control\" id=\"from\" datepicker-popup=\"{{dpFormat}}\"\n" +
     "                   ng-model=\"news.activeFrom\" is-open=\"news.dpFrom\" close-text=\"Close\"\n" +
-    "                   ng-focus=\"onNewsDPFocusFrom($event, news)\"/>\n" +
+    "                   ng-click=\"onNewsDPFocus($event, news, true)\"/>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "    <div class=\"col-md-2 form-group\">\n" +
@@ -43059,7 +43059,7 @@ angular.module("manageNews/manageNewsItemFields.tpl.html", []).run(["$templateCa
     "            <label for=\"until\">Active Until</label>\n" +
     "            <input type=\"text\" class=\"form-control\" id=\"until\" datepicker-popup=\"{{dpFormat}}\"\n" +
     "                   ng-model=\"news.activeUntil\" is-open=\"news.dpUntil\" close-text=\"Close\"\n" +
-    "                   ng-focus=\"onNewsDPFocusUntil($event, news)\"/>\n" +
+    "                   ng-click=\"onNewsDPFocus($event, news, false)\"/>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "    <div class=\"col-md-1 form-group\">\n" +
@@ -46565,24 +46565,25 @@ angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
                 }
             };
 
-            $scope.setDatePickerFrom = function(news) {
+            $scope.showDatePicker = function(news, isFrom) {
                 if (news.nid > 0) {
-                    if ($scope.data.news[$scope.data.news.indexOf(news)].activeFrom == null) {
-                        $scope.data.news[$scope.data.news.indexOf(news)].activeFrom = new Date();
+                    if (isFrom === true) {
+                        if ($scope.data.news[$scope.data.news.indexOf(news)].activeFrom == null) {
+                            $scope.data.news[$scope.data.news.indexOf(news)].activeFrom = new Date();
+                        }
+                        $scope.data.news[$scope.data.news.indexOf(news)].dpFrom = true;
+                    } else {
+                        if ($scope.data.news[$scope.data.news.indexOf(news)].activeUntil == null) {
+                            $scope.data.news[$scope.data.news.indexOf(news)].activeUntil = new Date();
+                        }
+                        $scope.data.news[$scope.data.news.indexOf(news)].dpUntil = true;
                     }
-                    $scope.data.news[$scope.data.news.indexOf(news)].dpFrom = true;
                 } else {
-                    $scope.news.dpFrom = true;
-                }
-            };
-            $scope.setDatePickerUntil = function(news) {
-                if (news.nid > 0) {
-                    if ($scope.data.news[$scope.data.news.indexOf(news)].activeUntil == null) {
-                        $scope.data.news[$scope.data.news.indexOf(news)].activeUntil = new Date();
+                    if (isFrom === true) {
+                        $scope.news.dpFrom = true;
+                    } else {
+                        $scope.news.dpUntil = true;
                     }
-                    $scope.data.news[$scope.data.news.indexOf(news)].dpUntil = true;
-                } else {
-                    $scope.news.dpUntil = true;
                 }
             };
         }])
@@ -46596,19 +46597,9 @@ angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
             },
             controller: 'NewsItemFieldsCtrl',
             link: function(scope, elm, attrs){
-                scope.onNewsDPFocusFrom = function($event, news){
-                    $event.preventDefault();
-                    $event.stopPropagation();
+                scope.onNewsDPFocus = function($event, news, isFrom){
                     $timeout(function() {
-                        scope.setDatePickerFrom(news);
-                        scope.$apply();
-                    }, 0);
-                };
-                scope.onNewsDPFocusUntil = function($event, news){
-                    $event.preventDefault();
-                    $event.stopPropagation();
-                    $timeout(function() {
-                        scope.setDatePickerUntil(news);
+                        scope.showDatePicker(news, isFrom);
                         scope.$apply();
                     }, 0);
                 };
