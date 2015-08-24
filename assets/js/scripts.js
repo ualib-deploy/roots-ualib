@@ -39976,7 +39976,7 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
     "    </div>\n" +
     "</div>\n" +
     "<div class=\"suggest\" ng-show=\"showSuggestions && selected && (items.suggest.length > 0 || items.recommend.length > 0 || items.subjects[0].subjects.length > 0 || items.faq.length > 0)\">\n" +
-    "    <div class=\"row\" ng-show=\"items.suggest.length > 0\">\n" +
+    "    <div ng-show=\"items.suggest.length > 0\">\n" +
     "        <ul class=\"nav nav-pills nav-stacked\">\n" +
     "            <li role=\"presentation\"\n" +
     "                ng-repeat=\"item in filteredItems = (items.suggest | filter:compare(originalValue)) | limitTo:numShow track by $index\"\n" +
@@ -39988,8 +39988,8 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
     "    </div>\n" +
     "    <div class=\"suggest-row\" ng-show=\"items.recommend.length > 0 || items.subjects[0].subjects.length > 0 || items.faq.length > 0\">\n" +
     "        <div class=\"row\">\n" +
-    "            <div class=\"col-sm-4\" ng-show=\"items.recommend.length > 0\">\n" +
-    "                <div class=\"suggest-col\">\n" +
+    "            <div class=\"col-sm-4 suggest-col\" ng-show=\"items.recommend.length > 0\">\n" +
+    "                <div class=\"\">\n" +
     "                    <h4>Recommended Links</h4>\n" +
     "                    <div ng-repeat=\"recommendation in items.recommend | limitTo:10\">\n" +
     "                        <a href=\"{{recommendation.link}}\" ng-mousedown=\"go(recommendation.link)\">\n" +
@@ -39998,8 +39998,8 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
     "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
-    "            <div class=\"col-sm-4\" ng-show=\"items.subjects[0].subjects.length > 0\">\n" +
-    "                <div class=\"suggest-col\">\n" +
+    "            <div class=\"col-sm-4 suggest-col\" ng-show=\"items.subjects[0].subjects.length > 0\">\n" +
+    "                <div class=\"\">\n" +
     "                    <h4>LibGuides Subjects <a href=\"http://guides.lib.ua.edu/\" class=\"small\" ng-mousedown=\"go('http://guides.lib.ua.edu/')\">more</a></h4>\n" +
     "                    <div ng-repeat=\"person in items.subjects | limitTo:10\">\n" +
     "                        <div ng-repeat=\"subject in person.subjects | limitTo:2\">\n" +
@@ -40014,12 +40014,11 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
     "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
-    "            <div class=\"col-sm-4\" ng-show=\"items.faq.length > 0\">\n" +
-    "                <div class=\"suggest-col\">\n" +
+    "            <div class=\"col-sm-4 suggest-col\" ng-show=\"items.faq.length > 0\">\n" +
+    "                <div class=\"\">\n" +
     "                    <h4>FAQ <a href=\"http://ask.lib.ua.edu/\" class=\"small\" ng-mousedown=\"go('http://ask.lib.ua.edu/')\">more</a></h4>\n" +
     "                    <div ng-repeat=\"faq in items.faq | limitTo:5\">\n" +
-    "                        <a href=\"{{faq.link}}\" ng-mousedown=\"go(faq.link)\">\n" +
-    "                            {{faq.title}}\n" +
+    "                        <a ng-href=\"{{faq.link}}\" ng-mousedown=\"go(faq.link)\" ng-bind-html=\"faq.title\">\n" +
     "                        </a>\n" +
     "                    </div>\n" +
     "                </div>\n" +
@@ -40240,11 +40239,7 @@ angular.module('oneSearch.bento', [])
             .when('/bento/:s', {
                 templateUrl: 'bento/bento.tpl.html',
                 controller: 'BentoCtrl'
-            })
-            .when('/bento-test/:s', {
-                templateUrl: 'bento/bento-test.tpl.html',
-                controller: 'BentoCtrl'
-            })
+            });
     }])
 
 /**
@@ -40336,13 +40331,18 @@ angular.module('oneSearch.bento', [])
                 });
         }
 
-
+        var engines;
 
         // Gets all boxes
         this.getBoxes = function(){
+            if (engines){
+                for (var e in engines){
+                    engines[e].response.abort();
+                }
+            }
             // Search all engines registered with the oneSearch Provider, giving the
             // $routeParams object as the parameter (https://code.angularjs.org/1.3.0/docs/api/ngRoute/service/$routeParams)
-            var engines = oneSearch.searchAll($routeParams);
+            engines = oneSearch.searchAll($routeParams);
 
             // Deep copy media types defined by registered engines to the this.boxes object.
             angular.copy(mediaTypes.types, self.boxes);
@@ -40358,8 +40358,9 @@ angular.module('oneSearch.bento', [])
 
             //  Iterate over the Promises for each engine returned by the oneSearch.searchAll() function
             angular.forEach(engines, function(engine, name){
+
                 engine.response
-                    .$promise.then(function(data){ // If $http call was a success
+                    .then(function(data){ // If $http call was a success
 
                         // User the engine's results getter to get the results object
                         // The results getter is defined by the JSON path defined by the
@@ -41054,7 +41055,7 @@ angular.module('engines.googleCS', [])
             priority: 2,
             resultsPath: 'GoogleCS.items',
             totalsPath: 'GoogleCS.searchInformation.totalResults',
-            filterQuery: '-side:guides.lib.ua.edu -site:ask.lib.ua.edu',
+            filterQuery: '-site:guides.lib.ua.edu -site:ask.lib.ua.edu',
             templateUrl: 'common/engines/google-cs/google-cs.tpl.html'
         })
     }])
@@ -41229,6 +41230,34 @@ function isEmpty(obj) {
 
     return true;
 }
+/**
+ * Adopted from UI Router library
+ * https://github.com/angular-ui/ui-router/blob/master/src/common.js
+ */
+function merge(dst) {
+    forEach(arguments, function(obj) {
+        if (obj !== dst) {
+            forEach(obj, function(value, key) {
+                if (!dst.hasOwnProperty(key)) dst[key] = value;
+            });
+        }
+    });
+    return dst;
+}
+/**
+ * Adopted from UI Router library
+ * https://github.com/angular-ui/ui-router/blob/master/src/common.js
+ */
+// extracted from underscore.js
+// Return a copy of the object omitting the blacklisted properties.
+function omit(obj) {
+    var copy = {};
+    var keys = Array.prototype.concat.apply(Array.prototype, Array.prototype.slice.call(arguments, 1));
+    for (var key in obj) {
+        if (indexOf(keys, key) == -1) copy[key] = obj[key];
+    }
+    return copy;
+}
 // adopted from https://github.com/a8m/angular-filter/blob/master/src/_common.js
 function toArray(object) {
     return Array.isArray(object) ? object :
@@ -41372,13 +41401,49 @@ angular.module('common.mediaTypes', [])
  */
 angular.module('common.oneSearch', [])
 
-    .factory('Search', ['$resource', function($resource){
+    .factory('Search', ['$http', '$q', function($http, $q){
 
-        return $resource("//wwwdev2.lib.ua.edu/oneSearch/api/search/:s/engine/:engine/limit/:limit", {}, {
-            cache: false
-        });
+        function search(params){
+
+            var canceller = $q.defer();
+            var url = '//wwwdev2.lib.ua.edu/oneSearch/api/search/' + params['s'] + '/engine/' + params['engine'] + '/limit/' + params['limit'];
+
+            var request = $http({
+                method: 'GET',
+                url: url,
+                timeout: canceller.promise
+            });
+
+            var promise = request.then(function(data){
+                this.done = true;
+                return data.data;
+            }, function(data){
+                return $q.reject('Error');
+            });
+
+            promise.done = false;
+
+            promise.abort = function(){
+                this.done = true;
+                canceller.resolve();
+            };
+
+            promise.finally(
+                function(){
+                    promise.abort = angular.noop;
+                    canceller = request = promise = null;
+                    this.done = false;
+                }
+            );
+
+            return promise;
+        }
+
+        return {
+            request: search
+        };
     }])
-    
+
     .provider('oneSearch', ['mediaTypesProvider', function oneSearchProvider(mediaTypesProvider){
         //private object that holds registered engines
         var _engines = {};
@@ -41411,15 +41476,14 @@ angular.module('common.oneSearch', [])
             }
         };
 
-        this.$get = ['$http', '$parse', '$filter', 'enginesTemplateFactory', 'SearchParams', 'Search', function($http, $parse, $filter, enginesTemplateFactory, SearchParams, Search){
-            this.resourceLinks = {};
+        this.$get = ['$q', '$parse', '$filter', '$rootScope', 'enginesTemplateFactory', 'SearchParams', 'Search', function($q, $parse, $filter, $rootScope, enginesTemplateFactory, SearchParams, Search){
 
             return {
                 engines: _engines, // Expose engines at Service level
                 searchAll: function(params){
+
                     //extend give params with default SearchParams
                     angular.extend(params, SearchParams);
-
 
                     // Sort engines by 'priority'
                     var prioritized = $filter('orderObjectBy')( _engines, 'priority');
@@ -41444,13 +41508,16 @@ angular.module('common.oneSearch', [])
                          params: p
                          });*/
 
-                        // Store the $http response promise in the engine's object with key 'response
-                        engine.response = Search.get(p); //$http({method: 'GET', url: url, params: p});
+                        if (engine.response){
+                            engine.response.abort();
+                        }
+
+                        // Store the $http response promise in the engine's object with key 'response'
+                        engine.response = Search.request(p);
 
                         // Create results getter function from given results JSON path
                         if (angular.isDefined(engine.resultsPath)){
                             engine.getResults = $parse(engine.resultsPath);
-
                         }
 
                         // Create results getter function from given results JSON path
@@ -41479,10 +41546,17 @@ angular.module('common.oneSearch', [])
         }]
     }])
 
-    .controller('OneSearchCtrl', ['$scope', '$location', '$rootScope', '$resource', function($scope, $location, $rootScope, $resource){
+    .controller('OneSearchCtrl', ['$scope', '$location', '$rootScope', 'oneSearch', function($scope, $location, $rootScope, oneSearch){
         $scope.searchText;
+
         $scope.search = function(){
             if ($scope.searchText){
+                //Cancel any pending searches - prevents mixed results by canceling the ajax requests
+                for (var e in oneSearch.engines){
+                    if (oneSearch.engines[e].response && !oneSearch.engines[e].response.done){
+                        oneSearch.engines[e].response.abort();
+                    }
+                }
                 // Compensate for when not on home page
                 // Since WP pages aren't loaded as angular routes, we must detect if there is no '#/PATH' present
                 // after the URI (or that it's not a 'bento' route), then send the browser to a pre-build URL.
@@ -41500,7 +41574,7 @@ angular.module('common.oneSearch', [])
             return $resource('//wwwdev2.lib.ua.edu/oneSearch/api/recommend/:search')
                 .query({search: val})
                 .$promise.then(function(rec) {
-                    console.log(rec);
+                    //console.log(rec);
 
                     return rec;
                 });
@@ -44939,6 +45013,12 @@ angular.module("staffDirectory/staffDirectoryProfile.tpl.html", []).run(["$templ
     "                </li>\n" +
     "            </ul>\n" +
     "        </div>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"alert alert-info\" role=\"alert\">\n" +
+    "        <span class=\"fa fa-info-circle\"></span> Note: you can edit an optional part of your <a href=\"/#/staffdir\">Library Directory</a>\n" +
+    "        profile here. It is an appropriate place to post the information about your research, interests, publications,\n" +
+    "        photos, personal website, etc.\n" +
     "    </div>\n" +
     "\n" +
     "    <div class=\"row\">\n" +
@@ -50924,6 +51004,34 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "</div>\n" +
     "");
 }]);
+;/*
+(function() {
+    tinymce.create('tinymce.plugins.typekit', {
+        setup : function(ed) {
+            ed.onInit.add(function(ed, evt) {
+
+                // Load a script from a specific URL using the global script loader
+                tinymce.ScriptLoader.load('somescript.js');
+
+                // Load a script using a unique instance of the script loader
+                var scriptLoader = new tinymce.dom.ScriptLoader();
+
+                scriptLoader.load('somescript.js');
+
+            });
+        },
+    getInfo: function() {
+    return {
+        longname:  'TypeKit',
+        author:    'Thomas Griffin',
+        authorurl: 'https://thomasgriffin.io',
+        infourl:   'https://twitter.com/jthomasgriffin',
+        version:   '1.0'
+    };
+}
+});
+tinymce.PluginManager.add('typekit', tinymce.plugins.typekit);
+})();*/
 ;/* ========================================================================
  * DOM-based Routing
  * Based on http://goo.gl/EUTi53 by Paul Irish
