@@ -7,7 +7,7 @@
           <h4>Quick Links</h4>
           <ul class="footer-list">
             <li><a href="/#/hours">Maps and Contact Information</a></li>
-            <li><a href="/about/libraries-policies/electronic-resource-user-policy/">Access and Use of Electronic Resources</a></li>
+            <li><a href="http://ask.lib.ua.edu">Ask-A-Librarian</a></li>
             <li><a href="/using-the-library/accessibility/">Accessibility</a></li>
             <li><a href="/about/libraries-policies/">Libraries' Policies</a></li>
             <li><a href="/about/mission-statement/">Mission Statement</a></li>
