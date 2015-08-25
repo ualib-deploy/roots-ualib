@@ -44021,7 +44021,7 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "        </div>\n" +
     "        <div ng-if=\"sw.show\">\n" +
     "            <form name=\"editSW{{sw.sid}}\" ng-submit=\"updateSW(sw)\">\n" +
-    "                <div software-item-fields-list swdata=\"sw\" list=\"SWList\">\n" +
+    "                <div software-item-fields-list swdata=\"sw\" list=\"SWList\"></div>\n" +
     "                <div class=\"row form-group text-center\">\n" +
     "                    <button type=\"submit\" class=\"btn btn-success\">Update information</button>\n" +
     "                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"unpublishSW(sw)\" ng-hide=\"sw.status == 0\">\n" +
@@ -44050,7 +44050,7 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "<h3>Add New Software</h3>\n" +
     "<form name=\"addNewSW\" ng-submit=\"createSW()\">\n" +
     "    <div class=\"sdOpen\">\n" +
-    "        <div software-item-fields-list swdata=\"newSW\" list=\"SWList\">\n" +
+    "        <div software-item-fields-list swdata=\"newSW\" list=\"SWList\"></div>\n" +
     "        <div class=\"row form-group text-center\">\n" +
     "            <button type=\"submit\" class=\"btn btn-success\">Create Software Record</button><br>\n" +
     "            {{newSW.formResponse}}\n" +
@@ -47000,6 +47000,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
     function SWItemFieldsCtrl($scope, $timeout, Upload, OS){
         $scope.os = OS;
         $scope.generateThumb = function(sw, files) {
+            console.log(files);
             if (files.length > 0 && files !== null) {
                 if ($scope.fileReaderSupported && files[0].type.indexOf('image') > -1) {
                     if (sw.sid > 0) {
