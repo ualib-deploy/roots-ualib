@@ -46962,6 +46962,21 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             };
             $scope.copySW = function(sw) {
                 $scope.newSW = angular.copy(sw);
+                $scope.newSW.selCat = $scope.SWList.categories[0];
+                $scope.newSW.newVer = {};
+                $scope.newSW.newVer.version = "";
+                $scope.newSW.newVer.selOS = OS[0];
+                for (var j = 0; j < $scope.newSW.versions.length; j++){
+                    $scope.newSW.versions[j].newLoc = {};
+                    $scope.newSW.versions[j].newLoc.selLoc = $scope.SWList.locations[0];
+                    $scope.newSW.versions[j].newLoc.devices = [];
+                    for (var k = 0; k < $scope.SWList.devices.length; k++)
+                        $scope.newSW.versions[j].newLoc.devices[k] = false;
+                }
+                for (var j = 0; j < $scope.SWList.licenseModes.length; j++)
+                    if ($scope.SWList.licenseModes[j].lmid === $scope.newSW.lmid){
+                        $scope.newSW.selMode = $scope.SWList.licenseModes[j];
+                    }
             };
             $scope.validateSW = function(sw){
                 if (sw.title.length < 1)
@@ -47000,9 +47015,8 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
     function SWItemFieldsCtrl($scope, $timeout, Upload, OS){
         $scope.os = OS;
         $scope.generateThumb = function(sw, files) {
-            console.log(files);
             if (files.length > 0 && files !== null) {
-                if ($scope.fileReaderSupported && files[0].type.indexOf('image') > -1) {
+                if (files[0].type.indexOf('image') > -1) {
                     if (sw.sid > 0) {
                         $scope.data.software[$scope.data.software.indexOf(sw)].picFile = [];
                         $scope.data.software[$scope.data.software.indexOf(sw)].picFile.push(files[0]);
