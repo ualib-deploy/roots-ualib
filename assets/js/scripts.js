@@ -41831,7 +41831,6 @@ angular.module("lib-hours-today/lib-hours-today.tpl.html", []).run(["$templateCa
 
 angular.module("list/list.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("list/list.tpl.html",
-    "<h2>Hours <small>today</small></h2>\n" +
     "<div class=\"responsive-table\">\n" +
     "  <table class=\"table table-hover\">\n" +
     "    <tbody ng-repeat=\"lib in hoursList track by $index\">\n" +
@@ -42273,17 +42272,13 @@ angular.module('ualib.hours')
 angular.module('hours.list', [])
 
     .controller('ListCtrl', ['$scope', '$element', '$animate', 'hoursFactory', function ListCtrl($scope, $element, $animate, hoursFactory){
-        var spinner = angular.element('<div id="loading-bar-spinner"><div class="spinner-icon"></div></div>');
-        var elm = $element.find('h2');
-        $scope.hoursList = {};
 
-        $animate.enter(spinner, elm, angular.element(elm[0].lastChild));
+        $scope.hoursList = {};
 
         hoursFactory.get({view: 'today'},
             function(data){
                 var list = setStatus(data.libraries);
                 $scope.hoursList = list;
-                $animate.leave(spinner);
             },
             function(msg){
                 console.log(msg);
@@ -43204,7 +43199,9 @@ angular.module("manageNews/manageNewsItemFields.tpl.html", []).run(["$templateCa
     "    </div>\n" +
     "</div>\n" +
     "<div class=\"row form-group\">\n" +
-    "    <h4><small>Select contact person from the list or enter new contact information</small></h4>\n" +
+    "    <div class=\"col-md-12\">\n" +
+    "        <h4><small>Select contact person from the list or enter new contact information</small></h4>\n" +
+    "    </div>\n" +
     "    <div class=\"form-group\">\n" +
     "        <div class=\"col-md-3\">\n" +
     "            <label for=\"contact1\">Library Faculty and Staff</label>\n" +
@@ -44792,7 +44789,7 @@ angular.module("staffDirectory/staffDirectoryProfile.tpl.html", []).run(["$templ
     "    <div class=\"alert alert-info\" role=\"alert\">\n" +
     "        <span class=\"fa fa-info-circle\"></span> Note: you can edit an optional part of your <a href=\"/#/staffdir\">Library Directory</a>\n" +
     "        profile here. It is an appropriate place to post the information about your research, interests, publications,\n" +
-    "        photos, personal website, etc.\n" +
+    "        photos, personal website, etc. Please try to keep your profile professional oriented.\n" +
     "    </div>\n" +
     "\n" +
     "    <div class=\"row\">\n" +
