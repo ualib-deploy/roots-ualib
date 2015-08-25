@@ -41823,7 +41823,7 @@ angular.module("lib-hours-today/lib-hours-today.tpl.html", []).run(["$templateCa
     "            <h3 class=\"media-heading\">Today</h3>\n" +
     "            <h4 class=\"media-heading\">{{today.hours}}</h4>\n" +
     "            <span class=\"label\" ng-class=\"today.status.css\">{{today.status.text}}</span>\n" +
-    "            <a class=\"btn btn-link btn-xs\" ng-href=\"/#hours?library={{today.name}}\" title=\"All hours {{today.name}}\">See all hours <span class=\"fa fa-fw fa-chevron-right\"></span></a>\n" +
+    "            <a class=\"btn btn-default btn-xs\" ng-href=\"/#hours?library={{today.name}}\" title=\"All hours {{today.name}}\">See all hours <span class=\"fa fa-fw fa-chevron-right\"></span></a>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>");
