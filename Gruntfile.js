@@ -69,7 +69,7 @@ module.exports = function(grunt) {
         less: {
             dev: {
                 files: {
-                    'assets/css/main.css': [lessFileList]
+                    'assets/css/main.css': [lessFileList, '!*.min.css']
                 },
                 options: {
                     compress: false,
@@ -262,6 +262,60 @@ module.exports = function(grunt) {
                     dest: 'assets/sass'
                 }]
             }
+        },
+        htmlSnapshot: {
+            all: {
+                options: {
+                    //that's the path where the snapshots should be placed
+                    //it's empty by default which means they will go into the directory
+                    //where your Gruntfile.js is placed
+                    snapshotPath: 'assets/dist/snapshots/',
+                    //This should be either the base path to your index.html file
+                    //or your base URL. Currently the task does not use it's own
+                    //webserver. So if your site needs a webserver to be fully
+                    //functional configure it here.
+                    sitePath: 'https://www.lib.ua.edu/',
+                    //by default the task waits 500ms before fetching the html.
+                    //this is to give the page enough time to to assemble itself.
+                    //if your page needs more time, tweak here.
+                    msWaitForPages: 1000,
+                    //sanitize function to be used for filenames. Converts '#!/' to '_' as default
+                    //has a filename argument, must have a return that is a sanitized string
+                    sanitize: function (requestUri) {
+                        //returns 'index.html' if the url is '/', otherwise a prefix
+                        if (/\?/.test(requestUri)) {
+                            return 'index.html';
+                        } else {
+                            return requestUri.replace(/\/\?/g, 'prefix-');
+                        }
+                    },
+                    //here goes the list of all urls that should be fetched
+                    urls: [
+                        '#/home',
+                        '#/hours',
+                        '#/hours?library=gorgas',
+                        '#/hours?library=music',
+                        '#/hours?library=media',
+                        '#/hours?library=williams',
+                        '#/hours?library=rodgers',
+                        '#/hours?library=mclure',
+                        '#/hours?library=hoole',
+                        '#/hours?library=bruno',
+                        '#/databases',
+                        '#/news-exhibits',
+                        '#/staffdir',
+                        '#/videos'
+                    ],
+                    // options for phantomJs' page object
+                    // see http://phantomjs.org/api/webpage/ for available options
+                    pageOptions: {
+                        viewportSize : {
+                            width: 1200,
+                            height: 800
+                        }
+                    }
+                }
+            }
         }
     });
 
@@ -287,7 +341,8 @@ module.exports = function(grunt) {
         'uglify',
         'modernizr',
         'version',
-        'replace'
+        'replace',
+        'htmlSnapshot'
     ]);
     grunt.registerTask('lessVarsToSass', ['lessToSass:lessVars']);
 };
