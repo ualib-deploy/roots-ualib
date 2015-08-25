@@ -43698,7 +43698,7 @@ angular.module("manageSoftware/manageSoftwareItemFields.tpl.html", []).run(["$te
     "<div class=\"row\">\n" +
     "    <div class=\"col-md-6 form-group\">\n" +
     "        <label for=\"up\">Upload Icon</label>\n" +
-    "        <input type=\"file\" ngf-select=\"\" accept=\"image/png\"\n" +
+    "        <input type=\"file\" ngf-select=\"\" accept=\"image/png\" ng-model=\"sw.picFile\"\n" +
     "               ngf-change=\"generateThumb(sw, $files)\" id=\"up\">\n" +
     "        <span class=\"progress\" ng-show=\"sw.picFile[0].progress >= 0\">\n" +
     "            <div class=\"ng-binding\" style=\"width:{{sw.picFile[0].progress}}%\" ng-bind=\"sw.picFile[0].progress + '%'\"></div>\n" +
@@ -44003,8 +44003,8 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                        </a>\n" +
     "                    </td>\n" +
     "                    <td style=\"width:64px;\">\n" +
-    "                        <img ng-hide=\"sw.picFile[0] != null\" src=\"{{sw.icon}}\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
-    "                        <img ng-show=\"sw.picFile[0] != null\" ngf-src=\"sw.picFile[0]\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
+    "                        <img ng-hide=\"sw.picFile.length > 0\" src=\"{{sw.icon}}\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
+    "                        <img ng-show=\"sw.picFile.length > 0\" ngf-src=\"sw.picFile[0]\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
     "                    </td>\n" +
     "                    <td>\n" +
     "                        <h4>\n" +
@@ -47009,6 +47009,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                         $scope.sw.picFile = [];
                         $scope.sw.picFile.push(files[0]);
                     }
+                    console.dir(sw);
                     $timeout(function() {
                         var fileReader = new FileReader();
                         fileReader.readAsDataURL(files[0]);
