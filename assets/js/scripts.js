@@ -4868,7 +4868,7 @@ angular.module('ui.tinymce', [])
  * AngularJS file upload/drop directive and service with progress and abort
  * FileAPI Flash shim for old browsers not supporting FormData
  * @author  Danial  <danial.farid@gmail.com>
- * @version 7.0.10
+ * @version 7.0.12
  */
 
 (function () {
@@ -5288,7 +5288,7 @@ if (!window.FileReader) {
 /**!
  * AngularJS file upload/drop directive and service with progress and abort
  * @author  Danial  <danial.farid@gmail.com>
- * @version 7.0.10
+ * @version 7.0.12
  */
 
 if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
@@ -5309,7 +5309,7 @@ if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
 
 var ngFileUpload = angular.module('ngFileUpload', []);
 
-ngFileUpload.version = '7.0.10';
+ngFileUpload.version = '7.0.12';
 
 ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, $q, $timeout) {
   function sendHttp(config) {
@@ -5530,31 +5530,35 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
         function update() {
           var keep = upload.attrGetter('ngfKeep', attr, scope);
           if (keep === true) {
-            var prevFiles = (ngModel.$modelValue || []).slice(0);
             if (!files || !files.length) {
-              files = prevFiles;
-            } else if (upload.attrGetter('ngfKeepDistinct', attr, scope) === true) {
-              var len = prevFiles.length;
-              for (var i = 0; i < files.length; i++) {
-                for (var j = 0; j < len; j++) {
-                  if (files[i].name === prevFiles[j].name) break;
-                }
-                if (j === len) {
-                  prevFiles.push(files[i]);
-                }
-              }
-              files = prevFiles;
+              return;
             } else {
-              files = prevFiles.concat(files);
+              var prevFiles = ((ngModel && ngModel.$modelValue) || attr.$$ngfPrevFiles || []).slice(0),
+                hasNew = false;
+              if (upload.attrGetter('ngfKeepDistinct', attr, scope) === true) {
+                var len = prevFiles.length;
+                for (var i = 0; i < files.length; i++) {
+                  for (var j = 0; j < len; j++) {
+                    if (files[i].name === prevFiles[j].name) break;
+                  }
+                  if (j === len) {
+                    prevFiles.push(files[i]);
+                    hasNew = true;
+                  }
+                }
+                if (!hasNew) return;
+                files = prevFiles;
+              } else {
+                files = prevFiles.concat(files);
+              }
             }
           }
 
+          attr.$$ngfPrevFiles = files;
           var file = files && files.length ? files[0] : null;
           if (ngModel) {
             var singleModel = !upload.attrGetter('ngfMultiple', attr, scope) && !upload.attrGetter('multiple', attr) && !keep;
-            $timeout(function () {
-              $parse(upload.attrGetter('ngModel', attr)).assign(scope, singleModel ? file : files);
-            });
+            $parse(upload.attrGetter('ngModel', attr)).assign(scope, singleModel ? file : files);
           }
           var ngfModel = upload.attrGetter('ngfModel', attr);
           if (ngfModel) {
@@ -5573,6 +5577,18 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
         if (noDelay) {
           update();
         } else if (upload.validate(files, ngModel, attr, scope, upload.attrGetter('ngfValidateLater', attr), function () {
+            if (upload.attrGetter('ngfResize', attr, scope)) {
+              var img = angular.element('<img>');
+              img.attr('src', files[0].dataUrl || files[0].blobUrl);
+              img.bind('load', function() {
+                upload.resize(img[0], 100, 100).then(function(rimg) {
+                  console.log(rimg);
+                  document.body.appendChild(rimg);
+                });
+              });
+              document.body.appendChild(img[0]);
+            }
+
             $timeout(function () {
               update();
             });
@@ -41797,19 +41813,25 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
 
 angular.module("lib-hours-today/lib-hours-today.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("lib-hours-today/lib-hours-today.tpl.html",
-    "<div class=\"library-hours-today\">\n" +
-    "    <h2>\n" +
-    "        <span class=\"fa fa-clock-o\"></span> Today\n" +
-    "        <span class=\"label\" ng-class=\"today.status.css\">{{today.status.text}}</span>\n" +
-    "    </h2>\n" +
-    "    <div class=\"h3\">{{today.hours}}</div>\n" +
-    "    <a class=\"btn btn-default btn-xs\" ng-href=\"/#hours?library={{today.name}}\" title=\"All hours {{today.name}}\">See all hours <span class=\"fa fa-fw fa-chevron-right\"></span></a>\n" +
-    "</div>\n" +
-    "");
+    "<div class=\"library-hours-today\" ng-cloak>\n" +
+    "    <div class=\"media\">\n" +
+    "        <div class=\"media-left\">\n" +
+    "            <div class=\"media-object fa fa-2x fa-clock-o\">\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "        <div class=\"media-body\">\n" +
+    "            <h3 class=\"media-heading\">Today</h3>\n" +
+    "            <h4 class=\"media-heading\">{{today.hours}}</h4>\n" +
+    "            <span class=\"label\" ng-class=\"today.status.css\">{{today.status.text}}</span>\n" +
+    "            <a class=\"btn btn-link btn-xs\" ng-href=\"/#hours?library={{today.name}}\" title=\"All hours {{today.name}}\">See all hours <span class=\"fa fa-fw fa-chevron-right\"></span></a>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>");
 }]);
 
 angular.module("list/list.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("list/list.tpl.html",
+    "<h2>Hours <small>today</small></h2>\n" +
     "<div class=\"responsive-table\">\n" +
     "  <table class=\"table table-hover\">\n" +
     "    <tbody ng-repeat=\"lib in hoursList track by $index\">\n" +
@@ -41962,7 +41984,11 @@ angular.module('hours.common', [
 angular.module('common.hours', [])
 
     .factory('hoursFactory', ['$resource', function($resource){
-        return $resource("//wwwdev2.lib.ua.edu/libhours2/api/:view", {cache: true});
+        return $resource("//wwwdev2.lib.ua.edu/libhours2/api/:view", {}, {
+            get: {
+                cache: true
+            }
+        });
     }]);
 
 angular.module('ualib.hours')
@@ -41995,7 +42021,7 @@ angular.module('ualib.hours')
                 name: "Gorgas Library",
                 latitude: 33.211803,
                 longitude: -87.546032,
-                icon: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
+                icon: 'https://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
                 contact: {
                     phone: [{
                             number: '(205) 348-6047',
@@ -42007,38 +42033,30 @@ angular.module('ualib.hours')
                         }],
                     email: 'gorgasinfo@ua.edu'
                 },
-                link: '/libraries/gorgas/'
+                link: '/libraries-and-collections/gorgas-library/'
             },
             {
                 id: 2,
                 name: "Bruno Business Library",
                 latitude: 33.211107,
                 longitude: -87.549255,
-                icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+                icon: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
                 contact: {
-                    phone: [{
-                        number: '(205) 348-1090',
-                        dept:   'Reference'
-                    },
+                    phone: [
                         {
-                            number: '(205) 348-1086',
-                            dept: 'Circulation'
-                        },
-                        {
-                            number: '(205) 348-1085',
-                            dept: 'Reserve Desk'
+                            number: '(205) 348-1080'
                         }],
 
                     email: 'brunolibrary@culverhouse.ua.edu'
                 },
-                link: '/libraries/bruno/'
+                link: '/libraries-and-collections/bruno/'
             },
             {
                 id: 3,
                 name: "Rodgers Library",
                 latitude: 33.2134785,
                 longitude: -87.5427543,
-                icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+                icon: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
                 contact: {
                     phone: [{
                         number: '(205) 348-2100',
@@ -42046,55 +42064,55 @@ angular.module('ualib.hours')
                     }],
                     email: 'scenglib@bama.ua.edu'
                 },
-                link: '/libraries/rodgers/'
+                link: '/libraries-and-collections/rodgers-science-and-engineering-library/'
             },
             {
                 id: 4,
                 name: "Hoole Special Collections",
                 latitude: 33.210927,
                 longitude: -87.543182,
-                icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+                icon: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
                 contact: {
                     phone: [{
                         number: '(205) 348-0500',
                         dept: 'Front Desk'
                     }],
-                    email: 'archives@ua.edu',
+                    email: 'scenglib@bama.ua.edu',
                     alert: [{
                         type: 'info',
                         msg: 'For reference questions'
                     }]
                 },
-                link: '/libraries/hoole/'
+                link: '/libraries-and-collections/hoole-library/'
             },
             {
                 id: 5,
                 name: "McLure Education Library",
                 latitude: 33.2104774,
                 longitude: -87.5490442,
-                icon: 'http://maps.google.com/mapfiles/ms/icons/pink-dot.png',
+                icon: 'https://maps.google.com/mapfiles/ms/icons/pink-dot.png',
                 contact: {
                     phone: [{
                         number: '(205) 348-6055',
                         dept:   'Reference & Circulation'
                     }]
                 },
-                link: '/libraries/mclure/'
+                link: '/libraries-and-collections/mclure-education-library/'
             },
             {
                 id: 6,
                 name: "Music Library",
                 latitude: 33.211803,
                 longitude: -87.546032,
-                icon: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
-                link: '/libraries/music/'
+                icon: 'https://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
+                link: '/libraries-and-collections/music-library/'
             },
             {
                 id: 7,
                 name: "Sanford Media Center",
                 latitude: 33.211803,
                 longitude: -87.546032,
-                icon: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
+                icon: 'https://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
                 contact: {
                     phone: [{
                         number: '(205) 348-4651'
@@ -42107,7 +42125,7 @@ angular.module('ualib.hours')
                 name: "Williams Collection",
                 latitude: 33.211803,
                 longitude: -87.546032,
-                icon: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
+                icon: 'https://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
                 contact: {
                     phone: [{
                         number: '(205) 358-1489'
@@ -42118,14 +42136,12 @@ angular.module('ualib.hours')
         ];
         var libChangeListener;
 
-        uiGmapGoogleMapApi.then(function(maps) {
-
-            //console.log(maps);
-            libChangeListener = $scope.$on('hoursLoaded', function(){
+        libChangeListener = $scope.$on('hoursLoaded', function(){
+            uiGmapGoogleMapApi.then(function(maps) {
                 updateMap();
             });
-
         });
+
 
         $scope.getDirections = function(){
             var link = "https://www.google.com/maps/dir/" + $scope.directionsFrom + "/" + $scope.center.latitude + "," + $scope.center.longitude;
@@ -42208,7 +42224,7 @@ angular.module('ualib.hours')
                 library: '@'
             },
             templateUrl: 'lib-hours-today/lib-hours-today.tpl.html',
-            controller: function($scope, $element){
+            controller: ['$scope', '$element', function($scope, $element){
                 var library = angular.isDefined($scope.library) ? $scope.library : 'gorgas';
                 hoursFactory.get({view: 'today'},
                     function(data){
@@ -42251,19 +42267,23 @@ angular.module('ualib.hours')
                     return hours;
                 }
 
-            }
+            }]
         }
     }])
 angular.module('hours.list', [])
 
     .controller('ListCtrl', ['$scope', '$element', '$animate', 'hoursFactory', function ListCtrl($scope, $element, $animate, hoursFactory){
-
+        var spinner = angular.element('<div id="loading-bar-spinner"><div class="spinner-icon"></div></div>');
+        var elm = $element.find('h2');
         $scope.hoursList = {};
+
+        $animate.enter(spinner, elm, angular.element(elm[0].lastChild));
 
         hoursFactory.get({view: 'today'},
             function(data){
                 var list = setStatus(data.libraries);
                 $scope.hoursList = list;
+                $animate.leave(spinner);
             },
             function(msg){
                 console.log(msg);
@@ -42312,7 +42332,7 @@ angular.module('hours.list', [])
             templateUrl: 'list/list.tpl.html',
             controller: 'ListCtrl'
         }
-    }]);;angular.module('manage.templates', ['manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageNews/manageNews.tpl.html', 'manageNews/manageNewsAdmins.tpl.html', 'manageNews/manageNewsItemFields.tpl.html', 'manageNews/manageNewsList.tpl.html', 'manageOneSearch/mainOneSearch.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageOneSearch/oneSearchStat.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareComputerMaps.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html', 'staffDirectory/staffDirectoryDepartments.tpl.html', 'staffDirectory/staffDirectoryPeople.tpl.html', 'staffDirectory/staffDirectoryProfile.tpl.html', 'staffDirectory/staffDirectorySubjects.tpl.html', 'submittedForms/submittedForms.tpl.html']);
+    }]);;angular.module('manage.templates', ['manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageNews/manageNews.tpl.html', 'manageNews/manageNewsAdmins.tpl.html', 'manageNews/manageNewsItemFields.tpl.html', 'manageNews/manageNewsList.tpl.html', 'manageOneSearch/mainOneSearch.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageOneSearch/oneSearchStat.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareComputerMaps.tpl.html', 'manageSoftware/manageSoftwareItemFields.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html', 'staffDirectory/staffDirectoryDepartments.tpl.html', 'staffDirectory/staffDirectoryPeople.tpl.html', 'staffDirectory/staffDirectoryProfile.tpl.html', 'staffDirectory/staffDirectorySubjects.tpl.html', 'submittedForms/submittedForms.tpl.html']);
 
 angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageDatabases/manageDatabases.tpl.html",
@@ -43673,6 +43693,266 @@ angular.module("manageSoftware/manageSoftwareComputerMaps.tpl.html", []).run(["$
     "</div>");
 }]);
 
+angular.module("manageSoftware/manageSoftwareItemFields.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("manageSoftware/manageSoftwareItemFields.tpl.html",
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-6 form-group\">\n" +
+    "        <label for=\"up\">Upload Icon</label>\n" +
+    "        <input type=\"file\" ngf-select=\"\" ng-model=\"sw.picFile\" accept=\"image/png\"\n" +
+    "               ngf-change=\"generateThumb(sw, $files)\" id=\"up\">\n" +
+    "        <span class=\"progress\" ng-show=\"sw.picFile[0].progress >= 0\">\n" +
+    "            <div class=\"ng-binding\" style=\"width:{{sw.picFile[0].progress}}%\" ng-bind=\"sw.picFile[0].progress + '%'\"></div>\n" +
+    "        </span>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-6 form-group\">\n" +
+    "        <label for=\"title\">Title</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Software Title\" ng-model=\"sw.title\"\n" +
+    "               id=\"title\" maxlength=\"50\" required>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-6 form-group\">\n" +
+    "        <label for=\"descr\">Description</label>\n" +
+    "                        <textarea class=\"form-control\" rows=\"3\" id=\"descr\" ng-model=\"sw.description\"\n" +
+    "                                  maxlength=\"4096\" required></textarea>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-6 form-group\">\n" +
+    "        <label for=\"mod\">List of Installed Modules</label>\n" +
+    "                        <textarea class=\"form-control\" rows=\"3\" id=\"mod\" ng-model=\"sw.modules\"\n" +
+    "                                  maxlength=\"4096\"></textarea>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-12 form-group\">\n" +
+    "        <label for=\"links\">Links</label>\n" +
+    "        <ul class=\"list-group\" id=\"links\">\n" +
+    "            <li class=\"list-group-item\" ng-repeat=\"link in sw.links\">\n" +
+    "                <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteLink(sw,link)\">\n" +
+    "                    <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                </button>\n" +
+    "                {{link.description}} <a ng-href=\"{{link.url}}\">{{link.title}}</a>\n" +
+    "            </li>\n" +
+    "            <li class=\"list-group-item col-md-12\">\n" +
+    "                <div class=\"col-md-4\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Link Description\"\n" +
+    "                           ng-model=\"sw.newLink.description\" maxlength=\"200\">\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-3\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Link Title\"\n" +
+    "                           ng-model=\"sw.newLink.title\" maxlength=\"100\">\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-4\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"http://www.example.com/\"\n" +
+    "                           ng-model=\"sw.newLink.url\" maxlength=\"1024\">\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-1\">\n" +
+    "                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"addLink(sw)\"\n" +
+    "                            ng-disabled=\"sw.newLink.title.length == 0 || sw.newLink.url.length < 2\">\n" +
+    "                        <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "                    </button>\n" +
+    "                </div>\n" +
+    "            </li>\n" +
+    "        </ul>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-12 form-group\">\n" +
+    "        <label for=\"ver\">Versions</label>\n" +
+    "        <ul class=\"list-group\" id=\"ver\">\n" +
+    "            <li class=\"list-group-item col-md-12\" ng-repeat=\"version in sw.versions\">\n" +
+    "                <div class=\"col-md-1\">\n" +
+    "                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteVersion(sw,version)\">\n" +
+    "                        <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                    </button>\n" +
+    "                    <span class=\"fa fa-fw fa-windows\" ng-show=\"version.os == 1\"></span>\n" +
+    "                    <span class=\"fa fa-fw fa-apple\" ng-show=\"version.os == 2\"></span>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-3\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Version\" ng-model=\"version.version\"\n" +
+    "                           maxlength=\"50\">\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-8 form-group\">\n" +
+    "                    <label for=\"loc\">Locations</label>\n" +
+    "                    <ul class=\"list-group\" id=\"loc\">\n" +
+    "                        <li class=\"list-group-item col-md-12\" ng-repeat=\"loc in version.locations\">\n" +
+    "                            <div class=\"col-md-8\">\n" +
+    "                                <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteLocation(sw,version,loc)\">\n" +
+    "                                    <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                                </button>\n" +
+    "                                {{loc.name}}\n" +
+    "                            </div>\n" +
+    "                            <div class=\"col-md-4\">\n" +
+    "                                <div class=\"col-md-6\" ng-show=\"checkDevices(loc.devices, 1)\">\n" +
+    "                                    <span class=\"fa fa-fw fa-windows\"></span>\n" +
+    "                                    <span class=\"fa fa-fw fa-desktop\"></span>\n" +
+    "                                </div>\n" +
+    "                                <div class=\"col-md-6\" ng-show=\"checkDevices(loc.devices, 2)\">\n" +
+    "                                    <span class=\"fa fa-fw fa-apple\"></span>\n" +
+    "                                    <span class=\"fa fa-fw fa-desktop\"></span>\n" +
+    "                                </div>\n" +
+    "                                <div class=\"col-md-6\" ng-show=\"checkDevices(loc.devices, 4)\">\n" +
+    "                                    <span class=\"fa fa-fw fa-windows\"></span>\n" +
+    "                                    <span class=\"fa fa-fw fa-laptop\"></span>\n" +
+    "                                </div>\n" +
+    "                                <div class=\"col-md-6\" ng-show=\"checkDevices(loc.devices, 8)\">\n" +
+    "                                    <span class=\"fa fa-fw fa-apple\"></span>\n" +
+    "                                    <span class=\"fa fa-fw fa-laptop\"></span>\n" +
+    "                                </div>\n" +
+    "                            </div>\n" +
+    "                        </li>\n" +
+    "                        <li class=\"list-group-item col-md-12\">\n" +
+    "                            <div class=\"col-md-8\">\n" +
+    "                                <select class=\"form-control\" ng-model=\"version.newLoc.selLoc\"\n" +
+    "                                        ng-options=\"loc.fullName for loc in data.locations | orderBy:'fullName'\">\n" +
+    "                                </select>\n" +
+    "                            </div>\n" +
+    "                            <div class=\"col-md-3\">\n" +
+    "                                <div class=\"col-md-6\" ng-repeat=\"device in version.newLoc.devices track by $index\"\n" +
+    "                                     ng-show=\"(($index == 0 || $index == 2) && version.os == 1) ||\n" +
+    "                                                              (($index == 1 || $index == 3) && version.os == 2)\">\n" +
+    "                                    <input type=\"checkbox\" ng-model=\"version.newLoc.devices[$index]\">\n" +
+    "                                                    <span ng-show=\"$index <= 1\">\n" +
+    "                                                        <span class=\"fa fa-fw fa-desktop\"></span>\n" +
+    "                                                    </span>\n" +
+    "                                                    <span ng-show=\"$index > 1\">\n" +
+    "                                                        <span class=\"fa fa-fw fa-laptop\"></span>\n" +
+    "                                                    </span>\n" +
+    "                                </div>\n" +
+    "                            </div>\n" +
+    "                            <div class=\"col-md-1\">\n" +
+    "                                <button type=\"button\" class=\"btn btn-success\" ng-click=\"addLocation(sw,version)\">\n" +
+    "                                    <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "                                </button>\n" +
+    "                            </div>\n" +
+    "                        </li>\n" +
+    "                    </ul>\n" +
+    "                </div>\n" +
+    "            </li>\n" +
+    "            <li class=\"list-group-item col-md-6\">\n" +
+    "                <div class=\"col-md-6\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Version\" ng-model=\"sw.newVer.version\"\n" +
+    "                           maxlength=\"50\">\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-4\">\n" +
+    "                    <select class=\"form-control\" ng-model=\"sw.newVer.selOS\" ng-options=\"opSys.name for opSys in os\">\n" +
+    "                    </select>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-2\">\n" +
+    "                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"addVersion(sw)\"\n" +
+    "                            ng-disabled=\"sw.newVer.version.length == 0\">\n" +
+    "                        <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "                    </button>\n" +
+    "                </div>\n" +
+    "            </li>\n" +
+    "        </ul>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-6 form-group\">\n" +
+    "        <label for=\"cat\">Categories</label>\n" +
+    "        <ul class=\"list-group\" id=\"cat\">\n" +
+    "            <li class=\"list-group-item col-md-12\">\n" +
+    "                <div class=\"col-md-4\" ng-repeat=\"category in sw.categories\">\n" +
+    "                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteCategory(sw,category)\">\n" +
+    "                        <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                    </button>\n" +
+    "                    {{category.name}}\n" +
+    "                </div>\n" +
+    "            </li>\n" +
+    "            <li class=\"list-group-item col-md-12\">\n" +
+    "                <div class=\"col-md-10\">\n" +
+    "                    <select class=\"form-control\" ng-model=\"sw.selCat\" ng-options=\"cat.name for cat in data.categories\">\n" +
+    "                    </select>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-2\">\n" +
+    "                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"addCategory(sw)\">\n" +
+    "                        <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "                    </button>\n" +
+    "                </div>\n" +
+    "            </li>\n" +
+    "        </ul>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-3 form-group\">\n" +
+    "        <label for=\"effectDate\">Maintenance Effective Date</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"YYYY-MM-DD\" ng-model=\"sw.main_effect\"\n" +
+    "               maxlength=\"10\" id=\"effectDate\">\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-3 form-group\">\n" +
+    "        <label for=\"expDate\">Maintenance Expiration Date</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"YYYY-MM-DD\" ng-model=\"sw.main_exp\"\n" +
+    "               maxlength=\"10\" id=\"expDate\">\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-2 form-group\">\n" +
+    "        <label for=\"trf\">TRF</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"TRF number\" ng-model=\"sw.trf\"\n" +
+    "               maxlength=\"100\" id=\"trf\">\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-2 form-group\">\n" +
+    "        <label for=\"po\">PO</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"PO number\" ng-model=\"sw.po\"\n" +
+    "               maxlength=\"100\" id=\"po\">\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-2 form-group\">\n" +
+    "        <label for=\"numL\">Number of Licenses</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Number of Licenses\" ng-model=\"sw.num_licenses\"\n" +
+    "               maxlength=\"100\" id=\"numL\">\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-2 form-group\">\n" +
+    "        <label for=\"trfNotes\">TRF Notes</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"TRF notes\" ng-model=\"sw.trf_notes\"\n" +
+    "               maxlength=\"100\" id=\"trfNotes\">\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-2 form-group\">\n" +
+    "        <label for=\"lMode\">License Mode</label>\n" +
+    "        <select class=\"form-control\" ng-model=\"sw.selMode\" ng-options=\"mode.name for mode in data.licenseModes\"\n" +
+    "                id=\"lMode\">\n" +
+    "        </select>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-2 form-group\">\n" +
+    "        <label for=\"purDate\">Purchase Date</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"YYYY-MM-DD\" ng-model=\"sw.purch_date\"\n" +
+    "               maxlength=\"10\" id=\"purDate\">\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-3 form-group\">\n" +
+    "        <label for=\"vendorName\">Vendor Company Name</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Company Name\" ng-model=\"sw.vendor_name\"\n" +
+    "               maxlength=\"60\" id=\"vendorName\">\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-3 form-group\">\n" +
+    "        <label for=\"vendorContact\">Vendor Contact Name</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Contact Name\" ng-model=\"sw.vendor_contact\"\n" +
+    "               maxlength=\"60\" id=\"vendorContact\">\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-3 form-group\">\n" +
+    "        <label for=\"vendorPhone\">Vendor Phone</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Contact Phone\" ng-model=\"sw.vendor_phone\"\n" +
+    "               maxlength=\"20\" id=\"vendorPhone\">\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-3 form-group\">\n" +
+    "        <label for=\"vendorEmail\">Vendor Email</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Contact Email\" ng-model=\"sw.vendor_email\"\n" +
+    "               maxlength=\"255\" id=\"vendorEmail\">\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-6 form-group\">\n" +
+    "        <label for=\"prodKey\">Product Key</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Product Key\" ng-model=\"sw.pkey\"\n" +
+    "               maxlength=\"100\" id=\"prodKey\">\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-6 form-group\">\n" +
+    "        <label for=\"apDev\">Approved for Devices</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"List of Devices\" ng-model=\"sw.devices\"\n" +
+    "               maxlength=\"100\" id=\"apDev\">\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "");
+}]);
+
 angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageSoftware/manageSoftwareList.tpl.html",
     "<div>\n" +
@@ -43741,262 +44021,8 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "        </div>\n" +
     "        <div ng-if=\"sw.show\">\n" +
     "            <form name=\"editSW{{sw.sid}}\" ng-submit=\"updateSW(sw)\">\n" +
-    "                <div class=\"col-md-12\">\n" +
-    "                    <div class=\"col-md-6 form-group\">\n" +
-    "                        <label for=\"{{sw.sid}}_up\">Upload Icon</label>\n" +
-    "                        <input type=\"file\" ngf-select=\"\" ng-model=\"sw.picFile\" accept=\"image/png\"\n" +
-    "                               ngf-change=\"generateThumb(sw.picFile[0], $files)\" id=\"{{sw.sid}}_up\">\n" +
-    "                        <span class=\"progress\" ng-show=\"sw.picFile[0].progress >= 0\">\n" +
-    "                            <div class=\"ng-binding\" style=\"width:{{sw.picFile[0].progress}}%\" ng-bind=\"sw.picFile[0].progress + '%'\"></div>\n" +
-    "                        </span>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-6 form-group\">\n" +
-    "                        <label for=\"{{sw.sid}}_title\">Title</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{sw.title}}\" ng-model=\"sw.title\"\n" +
-    "                               id=\"{{sw.sid}}_title\" maxlength=\"50\" required>\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-12\">\n" +
-    "                    <div class=\"col-md-6 form-group\">\n" +
-    "                        <label for=\"{{sw.sid}}_descr\">Description</label>\n" +
-    "                        <textarea class=\"form-control\" rows=\"3\" id=\"{{sw.sid}}_descr\" ng-model=\"sw.description\"\n" +
-    "                                  maxlength=\"4096\" required></textarea>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-6 form-group\">\n" +
-    "                        <label for=\"{{sw.sid}}_mod\">List of Installed Modules</label>\n" +
-    "                        <textarea class=\"form-control\" rows=\"3\" id=\"{{sw.sid}}_mod\" ng-model=\"sw.modules\"\n" +
-    "                                  maxlength=\"4096\"></textarea>\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-12\">\n" +
-    "                    <div class=\"col-md-12 form-group\">\n" +
-    "                        <label for=\"{{sw.sid}}_links\">Links</label>\n" +
-    "                        <ul class=\"list-group\" id=\"{{sw.sid}}_links\">\n" +
-    "                            <li class=\"list-group-item\" ng-repeat=\"link in sw.links\">\n" +
-    "                                <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteLink(sw,link)\">\n" +
-    "                                    <span class=\"fa fa-fw fa-close\"></span>\n" +
-    "                                </button>\n" +
-    "                                {{link.description}} <a href=\"{{link.url}}\">{{link.title}}</a>\n" +
-    "                            </li>\n" +
-    "                            <li class=\"list-group-item col-md-12\">\n" +
-    "                                <div class=\"col-md-4\">\n" +
-    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"Link Description\"\n" +
-    "                                           ng-model=\"sw.newLink.description\" maxlength=\"200\">\n" +
-    "                                </div>\n" +
-    "                                <div class=\"col-md-3\">\n" +
-    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"Link Title\"\n" +
-    "                                           ng-model=\"sw.newLink.title\" maxlength=\"100\">\n" +
-    "                                </div>\n" +
-    "                                <div class=\"col-md-4\">\n" +
-    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"http://www.example.com/\"\n" +
-    "                                           ng-model=\"sw.newLink.url\" maxlength=\"1024\">\n" +
-    "                                </div>\n" +
-    "                                <div class=\"col-md-1\">\n" +
-    "                                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"addLink(sw)\"\n" +
-    "                                            ng-disabled=\"sw.newLink.title.length == 0 || sw.newLink.url.length < 2\">\n" +
-    "                                        <span class=\"fa fa-fw fa-plus\"></span>\n" +
-    "                                    </button>\n" +
-    "                                </div>\n" +
-    "                            </li>\n" +
-    "                        </ul>\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-12\">\n" +
-    "                    <div class=\"col-md-12 form-group\">\n" +
-    "                        <label for=\"{{sw.sid}}_ver\">Versions</label>\n" +
-    "                        <ul class=\"list-group\" id=\"{{sw.sid}}_ver\">\n" +
-    "                            <li class=\"list-group-item col-md-12\" ng-repeat=\"version in sw.versions\">\n" +
-    "                                <div class=\"col-md-1\">\n" +
-    "                                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteVersion(sw,version)\">\n" +
-    "                                        <span class=\"fa fa-fw fa-close\"></span>\n" +
-    "                                    </button>\n" +
-    "                                    <span class=\"fa fa-fw fa-windows\" ng-show=\"version.os == 1\"></span>\n" +
-    "                                    <span class=\"fa fa-fw fa-apple\" ng-show=\"version.os == 2\"></span>\n" +
-    "                                </div>\n" +
-    "                                <div class=\"col-md-3\">\n" +
-    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"Version\" ng-model=\"version.version\"\n" +
-    "                                           maxlength=\"50\">\n" +
-    "                                </div>\n" +
-    "                                <div class=\"col-md-8 form-group\">\n" +
-    "                                    <label for=\"{{sw.sid}}_loc\">Locations</label>\n" +
-    "                                    <ul class=\"list-group\" id=\"{{sw.sid}}_loc\">\n" +
-    "                                        <li class=\"list-group-item col-md-12\" ng-repeat=\"loc in version.locations\">\n" +
-    "                                            <div class=\"col-md-8\">\n" +
-    "                                                <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteLocation(sw,version,loc)\">\n" +
-    "                                                    <span class=\"fa fa-fw fa-close\"></span>\n" +
-    "                                                </button>\n" +
-    "                                                {{loc.name}}\n" +
-    "                                            </div>\n" +
-    "                                            <div class=\"col-md-4\">\n" +
-    "                                                <div class=\"col-md-6\" ng-show=\"checkDevices(loc.devices, 1)\">\n" +
-    "                                                    <span class=\"fa fa-fw fa-windows\"></span>\n" +
-    "                                                    <span class=\"fa fa-fw fa-desktop\"></span>\n" +
-    "                                                </div>\n" +
-    "                                                <div class=\"col-md-6\" ng-show=\"checkDevices(loc.devices, 2)\">\n" +
-    "                                                    <span class=\"fa fa-fw fa-apple\"></span>\n" +
-    "                                                    <span class=\"fa fa-fw fa-desktop\"></span>\n" +
-    "                                                </div>\n" +
-    "                                                <div class=\"col-md-6\" ng-show=\"checkDevices(loc.devices, 4)\">\n" +
-    "                                                    <span class=\"fa fa-fw fa-windows\"></span>\n" +
-    "                                                    <span class=\"fa fa-fw fa-laptop\"></span>\n" +
-    "                                                </div>\n" +
-    "                                                <div class=\"col-md-6\" ng-show=\"checkDevices(loc.devices, 8)\">\n" +
-    "                                                    <span class=\"fa fa-fw fa-apple\"></span>\n" +
-    "                                                    <span class=\"fa fa-fw fa-laptop\"></span>\n" +
-    "                                                </div>\n" +
-    "                                            </div>\n" +
-    "                                        </li>\n" +
-    "                                        <li class=\"list-group-item col-md-12\">\n" +
-    "                                            <div class=\"col-md-8\">\n" +
-    "                                                <select class=\"form-control\" ng-model=\"version.newLoc.selLoc\"\n" +
-    "                                                        ng-options=\"loc.fullName for loc in SWList.locations | orderBy:'fullName'\">\n" +
-    "                                                </select>\n" +
-    "                                            </div>\n" +
-    "                                            <div class=\"col-md-3\">\n" +
-    "                                                <div class=\"col-md-6\" ng-repeat=\"device in version.newLoc.devices track by $index\"\n" +
-    "                                                     ng-show=\"(($index == 0 || $index == 2) && version.os == 1) ||\n" +
-    "                                                              (($index == 1 || $index == 3) && version.os == 2)\">\n" +
-    "                                                    <input type=\"checkbox\" ng-model=\"version.newLoc.devices[$index]\">\n" +
-    "                                                    <span ng-show=\"$index <= 1\">\n" +
-    "                                                        <span class=\"fa fa-fw fa-desktop\"></span>\n" +
-    "                                                    </span>\n" +
-    "                                                    <span ng-show=\"$index > 1\">\n" +
-    "                                                        <span class=\"fa fa-fw fa-laptop\"></span>\n" +
-    "                                                    </span>\n" +
-    "                                                </div>\n" +
-    "                                            </div>\n" +
-    "                                            <div class=\"col-md-1\">\n" +
-    "                                                <button type=\"button\" class=\"btn btn-success\" ng-click=\"addLocation(sw,version)\">\n" +
-    "                                                    <span class=\"fa fa-fw fa-plus\"></span>\n" +
-    "                                                </button>\n" +
-    "                                            </div>\n" +
-    "                                        </li>\n" +
-    "                                    </ul>\n" +
-    "                                </div>\n" +
-    "                            </li>\n" +
-    "                            <li class=\"list-group-item col-md-6\">\n" +
-    "                                <div class=\"col-md-6\">\n" +
-    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"Version\" ng-model=\"sw.newVer.version\"\n" +
-    "                                           maxlength=\"50\">\n" +
-    "                                </div>\n" +
-    "                                <div class=\"col-md-4\">\n" +
-    "                                    <select class=\"form-control\" ng-model=\"sw.newVer.selOS\" ng-options=\"opSys.name for opSys in os\">\n" +
-    "                                    </select>\n" +
-    "                                </div>\n" +
-    "                                <div class=\"col-md-2\">\n" +
-    "                                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"addVersion(sw)\"\n" +
-    "                                            ng-disabled=\"sw.newVer.version.length == 0\">\n" +
-    "                                        <span class=\"fa fa-fw fa-plus\"></span>\n" +
-    "                                    </button>\n" +
-    "                                </div>\n" +
-    "                            </li>\n" +
-    "                        </ul>\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-12\">\n" +
-    "                    <div class=\"col-md-6 form-group\">\n" +
-    "                        <label for=\"{{sw.sid}}_cat\">Categories</label>\n" +
-    "                        <ul class=\"list-group\" id=\"{{sw.sid}}_cat\">\n" +
-    "                            <li class=\"list-group-item col-md-12\">\n" +
-    "                                <div class=\"col-md-4\" ng-repeat=\"category in sw.categories\">\n" +
-    "                                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteCategory(sw,category)\">\n" +
-    "                                        <span class=\"fa fa-fw fa-close\"></span>\n" +
-    "                                    </button>\n" +
-    "                                    {{category.name}}\n" +
-    "                                </div>\n" +
-    "                            </li>\n" +
-    "                            <li class=\"list-group-item col-md-12\">\n" +
-    "                                <div class=\"col-md-10\">\n" +
-    "                                    <select class=\"form-control\" ng-model=\"sw.selCat\" ng-options=\"cat.name for cat in SWList.categories\">\n" +
-    "                                    </select>\n" +
-    "                                </div>\n" +
-    "                                <div class=\"col-md-2\">\n" +
-    "                                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"addCategory(sw)\">\n" +
-    "                                        <span class=\"fa fa-fw fa-plus\"></span>\n" +
-    "                                    </button>\n" +
-    "                                </div>\n" +
-    "                            </li>\n" +
-    "                        </ul>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-3 form-group\">\n" +
-    "                        <label for=\"{{sw.sid}}_effectDate\">Maintenance Effective Date</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"YYYY-MM-DD\" ng-model=\"sw.main_effect\"\n" +
-    "                               maxlength=\"10\" id=\"{{sw.sid}}_effectDate\">\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-3 form-group\">\n" +
-    "                        <label for=\"{{sw.sid}}_expDate\">Maintenance Expiration Date</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"YYYY-MM-DD\" ng-model=\"sw.main_exp\"\n" +
-    "                               maxlength=\"10\" id=\"{{sw.sid}}_expDate\">\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-12\">\n" +
-    "                    <div class=\"col-md-2 form-group\">\n" +
-    "                        <label for=\"{{sw.sid}}_trf\">TRF</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"TRF number\" ng-model=\"sw.trf\"\n" +
-    "                               maxlength=\"100\" id=\"{{sw.sid}}_trf\">\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-2 form-group\">\n" +
-    "                        <label for=\"{{sw.sid}}_po\">PO</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"PO number\" ng-model=\"sw.po\"\n" +
-    "                               maxlength=\"100\" id=\"{{sw.sid}}_po\">\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-2 form-group\">\n" +
-    "                        <label for=\"{{sw.sid}}_numL\">Number of Licenses</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Number of Licenses\" ng-model=\"sw.num_licenses\"\n" +
-    "                               maxlength=\"100\" id=\"{{sw.sid}}_numL\">\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-2 form-group\">\n" +
-    "                        <label for=\"{{sw.sid}}_trfNotes\">TRF Notes</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"TRF notes\" ng-model=\"sw.trf_notes\"\n" +
-    "                               maxlength=\"100\" id=\"{{sw.sid}}_trfNotes\">\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-2 form-group\">\n" +
-    "                        <label for=\"{{sw.sid}}_lMode\">License Mode</label>\n" +
-    "                        <select class=\"form-control\" ng-model=\"sw.selMode\" ng-options=\"mode.name for mode in SWList.licenseModes\"\n" +
-    "                                id=\"{{sw.sid}}_lMode\">\n" +
-    "                        </select>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-2 form-group\">\n" +
-    "                        <label for=\"{{sw.sid}}_purDate\">Purchase Date</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"YYYY-MM-DD\" ng-model=\"sw.purch_date\"\n" +
-    "                               maxlength=\"10\" id=\"{{sw.sid}}_purDate\">\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-12\">\n" +
-    "                    <div class=\"col-md-3 form-group\">\n" +
-    "                        <label for=\"{{sw.sid}}_vendorName\">Vendor Company Name</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Company Name\" ng-model=\"sw.vendor_name\"\n" +
-    "                               maxlength=\"60\" id=\"{{sw.sid}}_vendorName\">\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-3 form-group\">\n" +
-    "                        <label for=\"{{sw.sid}}_vendorContact\">Vendor Contact Name</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Contact Name\" ng-model=\"sw.vendor_contact\"\n" +
-    "                               maxlength=\"60\" id=\"{{sw.sid}}_vendorContact\">\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-3 form-group\">\n" +
-    "                        <label for=\"{{sw.sid}}_vendorPhone\">Vendor Phone</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Contact Phone\" ng-model=\"sw.vendor_phone\"\n" +
-    "                               maxlength=\"20\" id=\"{{sw.sid}}_vendorPhone\">\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-3 form-group\">\n" +
-    "                        <label for=\"{{sw.sid}}_vendorEmail\">Vendor Email</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Contact Email\" ng-model=\"sw.vendor_email\"\n" +
-    "                               maxlength=\"255\" id=\"{{sw.sid}}_vendorEmail\">\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-12\">\n" +
-    "                    <div class=\"col-md-6 form-group\">\n" +
-    "                        <label for=\"{{sw.sid}}_prodKey\">Product Key</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Product Key\" ng-model=\"sw.pkey\"\n" +
-    "                               maxlength=\"100\" id=\"{{sw.sid}}_prodKey\">\n" +
-    "                    </div>\n" +
-    "                    <div class=\"col-md-6 form-group\">\n" +
-    "                        <label for=\"{{sw.sid}}_apDev\">Approved for Devices</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"List of Devices\" ng-model=\"sw.devices\"\n" +
-    "                               maxlength=\"100\" id=\"{{sw.sid}}_apDev\">\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-12 form-group text-center\">\n" +
+    "                <div software-item-fields-list swdata=\"sw\" list=\"SWList\">\n" +
+    "                <div class=\"row form-group text-center\">\n" +
     "                    <button type=\"submit\" class=\"btn btn-success\">Update information</button>\n" +
     "                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"unpublishSW(sw)\" ng-hide=\"sw.status == 0\">\n" +
     "                        Unpublish\n" +
@@ -44023,261 +44049,9 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "\n" +
     "<h3>Add New Software</h3>\n" +
     "<form name=\"addNewSW\" ng-submit=\"createSW()\">\n" +
-    "    <div class=\"row sdOpen\">\n" +
-    "        <div class=\"col-md-12\">\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"up\">Upload Icon</label>\n" +
-    "                <input type=\"file\" ngf-select=\"\" ng-model=\"newSW.picFile\" accept=\"image/*\"\n" +
-    "                       ngf-change=\"generateThumb(newSW.picFile[0], $files)\" id=\"up\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
-    "                <span class=\"progress\" ng-show=\"newSW.picFile[0].progress >= 0\">\n" +
-    "                    <div class=\"ng-binding\" style=\"width:{{newSW.picFile[0].progress}}%\" ng-bind=\"newSW.picFile[0].progress + '%'\"></div>\n" +
-    "                </span>\n" +
-    "                <img ng-show=\"newSW.picFile[0] != null\" ngf-src=\"newSW.picFile[0]\" class=\"thumb\" width=\"64px\" height=\"64px\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-6 form-group\">\n" +
-    "                <label for=\"title\">Title</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Software Title\" ng-model=\"newSW.title\"\n" +
-    "                       id=\"title\" maxlength=\"50\">\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-12\">\n" +
-    "            <div class=\"col-md-6 form-group\">\n" +
-    "                <label for=\"descr\">Description</label>\n" +
-    "                <textarea class=\"form-control\" rows=\"3\" id=\"descr\" ng-model=\"newSW.description\" maxlength=\"4096\" required></textarea>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-6 form-group\">\n" +
-    "                <label for=\"mod\">List of Installed Modules</label>\n" +
-    "                <textarea class=\"form-control\" rows=\"3\" id=\"mod\" ng-model=\"newSW.modules\" maxlength=\"4096\"></textarea>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-12\">\n" +
-    "            <div class=\"col-md-12 form-group\">\n" +
-    "                <label for=\"links\">Links</label>\n" +
-    "                <ul class=\"list-group\" id=\"links\">\n" +
-    "                    <li class=\"list-group-item\" ng-repeat=\"link in newSW.links\">\n" +
-    "                        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"delNewSWLink(link)\">\n" +
-    "                            <span class=\"fa fa-fw fa-close\"></span>\n" +
-    "                        </button>\n" +
-    "                        {{link.description}} <a href=\"{{link.url}}\">{{link.title}}</a>\n" +
-    "                    </li>\n" +
-    "                    <li class=\"list-group-item col-md-12\">\n" +
-    "                        <div class=\"col-md-4\">\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Link Description\"\n" +
-    "                                   ng-model=\"newSW.newLink.description\" maxlength=\"200\">\n" +
-    "                        </div>\n" +
-    "                        <div class=\"col-md-3\">\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Link Title\"\n" +
-    "                                   ng-model=\"newSW.newLink.title\" maxlength=\"100\">\n" +
-    "                        </div>\n" +
-    "                        <div class=\"col-md-4\">\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"http://www.example.com/\"\n" +
-    "                                   ng-model=\"newSW.newLink.url\" maxlength=\"1024\">\n" +
-    "                        </div>\n" +
-    "                        <div class=\"col-md-1\">\n" +
-    "                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"addNewSWLink()\"\n" +
-    "                                    ng-disabled=\"newSW.newLink.title.length == 0 || newSW.newLink.url.length < 2\">\n" +
-    "                                <span class=\"fa fa-fw fa-plus\"></span>\n" +
-    "                            </button>\n" +
-    "                        </div>\n" +
-    "                    </li>\n" +
-    "                </ul>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-12\">\n" +
-    "            <div class=\"col-md-12 form-group\">\n" +
-    "                <label for=\"ver\">Versions</label>\n" +
-    "                <ul class=\"list-group\" id=\"ver\">\n" +
-    "                    <li class=\"list-group-item col-md-12\" ng-repeat=\"version in newSW.versions\">\n" +
-    "                        <div class=\"col-md-4\">\n" +
-    "                            <button type=\"button\" class=\"btn btn-danger\" ng-click=\"delNewSWVer(version)\">\n" +
-    "                                <span class=\"fa fa-fw fa-close\"></span>\n" +
-    "                            </button>\n" +
-    "                            {{version.version}}\n" +
-    "                            <span class=\"fa fa-fw fa-windows\" ng-show=\"version.os == 1\"></span>\n" +
-    "                            <span class=\"fa fa-fw fa-apple\" ng-show=\"version.os == 2\"></span>\n" +
-    "                        </div>\n" +
-    "                        <div class=\"col-md-8 form-group\">\n" +
-    "                            <label for=\"loc\">Locations</label>\n" +
-    "                            <ul class=\"list-group\" id=\"loc\">\n" +
-    "                                <li class=\"list-group-item col-md-12\" ng-repeat=\"loc in version.locations\">\n" +
-    "                                    <div class=\"col-md-8\">\n" +
-    "                                        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"delNewSWLoc(version,loc)\">\n" +
-    "                                            <span class=\"fa fa-fw fa-close\"></span>\n" +
-    "                                        </button>\n" +
-    "                                        {{loc.name}}\n" +
-    "                                    </div>\n" +
-    "                                    <div class=\"col-md-4\">\n" +
-    "                                        <div class=\"col-md-6\" ng-show=\"checkDevices(loc.devices, 1)\">\n" +
-    "                                            <span class=\"fa fa-fw fa-windows\"></span>\n" +
-    "                                            <span class=\"fa fa-fw fa-desktop\"></span>\n" +
-    "                                        </div>\n" +
-    "                                        <div class=\"col-md-6\" ng-show=\"checkDevices(loc.devices, 2)\">\n" +
-    "                                            <span class=\"fa fa-fw fa-apple\"></span>\n" +
-    "                                            <span class=\"fa fa-fw fa-desktop\"></span>\n" +
-    "                                        </div>\n" +
-    "                                        <div class=\"col-md-6\" ng-show=\"checkDevices(loc.devices, 4)\">\n" +
-    "                                            <span class=\"fa fa-fw fa-windows\"></span>\n" +
-    "                                            <span class=\"fa fa-fw fa-laptop\"></span>\n" +
-    "                                        </div>\n" +
-    "                                        <div class=\"col-md-6\" ng-show=\"checkDevices(loc.devices, 8)\">\n" +
-    "                                            <span class=\"fa fa-fw fa-apple\"></span>\n" +
-    "                                            <span class=\"fa fa-fw fa-laptop\"></span>\n" +
-    "                                        </div>\n" +
-    "                                    </div>\n" +
-    "                                </li>\n" +
-    "                                <li class=\"list-group-item col-md-12\">\n" +
-    "                                    <div class=\"col-md-8\">\n" +
-    "                                        <select class=\"form-control\" ng-model=\"version.newLoc.selLoc\"\n" +
-    "                                                ng-options=\"loc.fullName for loc in SWList.locations | orderBy:'fullName'\">\n" +
-    "                                        </select>\n" +
-    "                                    </div>\n" +
-    "                                    <div class=\"col-md-3\">\n" +
-    "                                        <div class=\"col-md-6\" ng-repeat=\"device in version.newLoc.devices track by $index\"\n" +
-    "                                                ng-show=\"(($index == 0 || $index == 2) && version.os == 1) ||\n" +
-    "                                                         (($index == 1 || $index == 3) && version.os == 2)\">\n" +
-    "                                            <input type=\"checkbox\" ng-model=\"version.newLoc.devices[$index]\">\n" +
-    "                                                    <span ng-show=\"$index <= 1\">\n" +
-    "                                                        <span class=\"fa fa-fw fa-desktop\"></span>\n" +
-    "                                                    </span>\n" +
-    "                                                    <span ng-show=\"$index > 1\">\n" +
-    "                                                        <span class=\"fa fa-fw fa-laptop\"></span>\n" +
-    "                                                    </span>\n" +
-    "                                        </div>\n" +
-    "                                    </div>\n" +
-    "                                    <div class=\"col-md-1\">\n" +
-    "                                        <button type=\"button\" class=\"btn btn-success\" ng-click=\"addNewSWLoc(version)\">\n" +
-    "                                            <span class=\"fa fa-fw fa-plus\"></span>\n" +
-    "                                        </button>\n" +
-    "                                    </div>\n" +
-    "                                </li>\n" +
-    "                            </ul>\n" +
-    "                        </div>\n" +
-    "                    </li>\n" +
-    "                    <li class=\"list-group-item col-md-6\">\n" +
-    "                        <div class=\"col-md-6\">\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Version\" ng-model=\"newSW.newVer.version\"\n" +
-    "                                   maxlength=\"50\">\n" +
-    "                        </div>\n" +
-    "                        <div class=\"col-md-4\">\n" +
-    "                            <select class=\"form-control\" ng-model=\"newSW.newVer.selOS\" ng-options=\"opSys.name for opSys in os\">\n" +
-    "                            </select>\n" +
-    "                        </div>\n" +
-    "                        <div class=\"col-md-2\">\n" +
-    "                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"addNewSWVer()\"\n" +
-    "                                    ng-disabled=\"newSW.newVer.version.length == 0\">\n" +
-    "                                <span class=\"fa fa-fw fa-plus\"></span>\n" +
-    "                            </button>\n" +
-    "                        </div>\n" +
-    "                    </li>\n" +
-    "                </ul>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-12\">\n" +
-    "            <div class=\"col-md-6 form-group\">\n" +
-    "                <label for=\"cat\">Categories</label>\n" +
-    "                <ul class=\"list-group\" id=\"cat\">\n" +
-    "                    <li class=\"list-group-item col-md-12\">\n" +
-    "                        <div class=\"col-md-4\" ng-repeat=\"category in newSW.categories\">\n" +
-    "                            <button type=\"button\" class=\"btn btn-danger\" ng-click=\"delNewSWCat(category)\">\n" +
-    "                                <span class=\"fa fa-fw fa-close\"></span>\n" +
-    "                            </button>\n" +
-    "                            {{category.name}}\n" +
-    "                        </div>\n" +
-    "                    </li>\n" +
-    "                    <li class=\"list-group-item col-md-12\">\n" +
-    "                        <div class=\"col-md-10\">\n" +
-    "                            <select class=\"form-control\" ng-model=\"newSW.selCat\" ng-options=\"cat.name for cat in SWList.categories\">\n" +
-    "                            </select>\n" +
-    "                        </div>\n" +
-    "                        <div class=\"col-md-2\">\n" +
-    "                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"addNewSWCat()\">\n" +
-    "                                <span class=\"fa fa-fw fa-plus\"></span>\n" +
-    "                            </button>\n" +
-    "                        </div>\n" +
-    "                    </li>\n" +
-    "                </ul>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"effectDate\">Maintenance Effective Date</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"MM/DD/YYYY\" ng-model=\"newSW.main_effect\"\n" +
-    "                       maxlength=\"10\" id=\"effectDate\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"expDate\">Maintenance Expiration Date</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"MM/DD/YYYY\" ng-model=\"newSW.main_exp\"\n" +
-    "                       maxlength=\"10\" id=\"expDate\">\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-12\">\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
-    "                <label for=\"trf\">TRF</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"TRF number\" ng-model=\"newSW.trf\"\n" +
-    "                       maxlength=\"100\" id=\"trf\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
-    "                <label for=\"po\">PO</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"PO number\" ng-model=\"newSW.po\"\n" +
-    "                       maxlength=\"100\" id=\"po\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
-    "                <label for=\"numL\">Number of Licenses</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Number of Licenses\" ng-model=\"newSW.num_licenses\"\n" +
-    "                       maxlength=\"100\" id=\"numL\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
-    "                <label for=\"trfNotes\">TRF Notes</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"TRF notes\" ng-model=\"newSW.trf_notes\"\n" +
-    "                       maxlength=\"100\" id=\"trfNotes\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
-    "                <label for=\"lMode\">License Mode</label>\n" +
-    "                <select class=\"form-control\" ng-model=\"newSW.selMode\" ng-options=\"mode.name for mode in SWList.licenseModes\"\n" +
-    "                        id=\"lMode\">\n" +
-    "                </select>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
-    "                <label for=\"purDate\">Purchase Date</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"YYYY-MM-DD\" ng-model=\"newSW.purch_date\"\n" +
-    "                       maxlength=\"10\" id=\"purDate\">\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-12\">\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"vendorName\">Vendor Company Name</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Company Name\" ng-model=\"newSW.vendor_name\"\n" +
-    "                       maxlength=\"60\" id=\"vendorName\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"vendorContact\">Vendor Contact Name</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Contact Name\" ng-model=\"newSW.vendor_contact\"\n" +
-    "                       maxlength=\"60\" id=\"vendorContact\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"vendorPhone\">Vendor Phone</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Contact Phone\" ng-model=\"newSW.vendor_phone\"\n" +
-    "                       maxlength=\"20\" id=\"vendorPhone\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"vendorEmail\">Vendor Email</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Contact Email\" ng-model=\"newSW.vendor_email\"\n" +
-    "                       maxlength=\"255\" id=\"vendorEmail\">\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-12\">\n" +
-    "            <div class=\"col-md-6 form-group\">\n" +
-    "                <label for=\"prodKey\">Product Key</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Product Key\" ng-model=\"newSW.pkey\"\n" +
-    "                       maxlength=\"100\" id=\"prodKey\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-6 form-group\">\n" +
-    "                <label for=\"apDev\">Approved for Devices</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"List of Devices\" ng-model=\"newSW.devices\"\n" +
-    "                       maxlength=\"100\" id=\"apDev\">\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-12 form-group text-center\">\n" +
+    "    <div class=\"sdOpen\">\n" +
+    "        <div software-item-fields-list swdata=\"newSW\" list=\"SWList\">\n" +
+    "        <div class=\"row form-group text-center\">\n" +
     "            <button type=\"submit\" class=\"btn btn-success\">Create Software Record</button><br>\n" +
     "            {{newSW.formResponse}}\n" +
     "        </div>\n" +
@@ -46851,16 +46625,16 @@ angular.module('manage.manageOneSearch', [])
         };
     }]);
 angular.module('manage.manageSoftware', ['ngFileUpload'])
-    .controller('manageSWCtrl', ['$scope', 'tokenFactory', 'swFactory',
-        function manageSWCtrl($scope, tokenFactory, swFactory){
+    .constant('OS', [
+        {name:'MS Windows', value:1},
+        {name:'Apple Mac', value:2}
+    ])
+
+    .controller('manageSWCtrl', ['$scope', 'tokenFactory', 'swFactory', 'OS',
+        function manageSWCtrl($scope, tokenFactory, swFactory, OS){
             $scope.SWList = {};
             $scope.newSW = {};
             $scope.newComp = {};
-
-            $scope.os = [
-                {name:'MS Windows', value:1},
-                {name:'Apple Mac', value:2}
-            ];
 
             tokenFactory("CSRF-libSoftware");
 
@@ -46873,7 +46647,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                         data.software[i].selCat = data.categories[0];
                         data.software[i].newVer = {};
                         data.software[i].newVer.version = "";
-                        data.software[i].newVer.selOS = $scope.os[0];
+                        data.software[i].newVer.selOS = OS[0];
                         for (var j = 0; j < data.software[i].versions.length; j++){
                             data.software[i].versions[j].newLoc = {};
                             data.software[i].versions[j].newLoc.selLoc = data.locations[0];
@@ -46945,8 +46719,8 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
         };
     }])
 
-    .controller('manageSWListCtrl', ['$scope', '$timeout', 'Upload', 'swFactory', 'SOFTWARE_URL',
-        function manageSWListCtrl($scope, $timeout, Upload, swFactory, appURL){
+    .controller('manageSWListCtrl', ['$scope', '$timeout', 'Upload', 'swFactory', 'SOFTWARE_URL', 'OS',
+        function manageSWListCtrl($scope, $timeout, Upload, swFactory, appURL, OS){
             $scope.titleFilter = '';
             $scope.descrFilter = '';
             $scope.sortMode = 0;
@@ -46961,7 +46735,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             $scope.newSW.links = [];
             $scope.newSW.categories = [];
             $scope.newSW.newVer = {};
-            $scope.newSW.newVer.selOS = $scope.os[0];
+            $scope.newSW.newVer.selOS = OS[0];
             $scope.newSW.newVer.version = "";
             $scope.newSW.newLink = {};
             $scope.newSW.newLink.description = "";
@@ -47151,7 +46925,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                             }
                             newSW.selCat = response.data.categories[0];
                             newSW.newVer = {};
-                            newSW.newVer.selOS = $scope.os[0];
+                            newSW.newVer.selOS = OS[0];
                             newSW.newVer.version = "";
                             newSW.newLink = {};
                             newSW.newLink.description = "";
@@ -47201,223 +46975,6 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
 
                 return "";
             };
-            $scope.checkDevices = function(device, number){
-                device = parseInt(device);
-                number = parseInt(number);
-                if ((device & number) === number)
-                    return true;
-                return false;
-            };
-
-            $scope.addVersion = function(sw){
-                if (sw.newVer.version.length > 0){
-                    var newVer = {};
-                    newVer.vid = -1;
-                    newVer.sid = sw.sid;
-                    newVer.version = sw.newVer.version;
-                    newVer.os = sw.newVer.selOS.value;
-                    newVer.locations = [];
-                    newVer.newLoc = {};
-                    newVer.newLoc.selLoc = $scope.SWList.locations[0];
-                    newVer.newLoc.devices = [];
-                    for (var j = 0; j < $scope.SWList.devices.length; j++)
-                        newVer.newLoc.devices[j] = false;
-                    var isPresent = false;
-                    for (var i = 0; i < sw.versions.length; i++)
-                        if (sw.versions[i].version === newVer.version &&
-                            sw.versions[i].os === newVer.os){
-                            isPresent = true;
-                            break;
-                        }
-                    if (!isPresent)
-                        $scope.SWList.software[$scope.SWList.software.indexOf(sw)].versions.push(newVer);
-                }
-            };
-            $scope.deleteVersion = function(sw, version){
-                $scope.SWList.software[$scope.SWList.software.indexOf(sw)].versions.splice(
-                    $scope.SWList.software[$scope.SWList.software.indexOf(sw)].versions.indexOf(version),1
-                );
-            };
-            $scope.addLocation = function(sw,version){
-                var newLoc = {};
-                newLoc.id = -1;
-                newLoc.sid = sw.sid;
-                newLoc.vid = version.vid;
-                newLoc.lid = version.newLoc.selLoc.lid;
-                newLoc.name = version.newLoc.selLoc.name;
-                newLoc.parent = version.newLoc.selLoc.parent;
-                newLoc.devices = 0;
-                var isPresent = false;
-                for (var i = 0; i < version.locations.length; i++)
-                    if (version.locations[i].lid == newLoc.lid){
-                        isPresent = true;
-                        break;
-                    }
-                if (!isPresent){
-                    for (var i = 0; i < $scope.SWList.devices.length; i++)
-                        if (version.newLoc.devices[i])
-                            newLoc.devices += parseInt($scope.SWList.devices[i].did);
-                    if (newLoc.devices > 0)
-                        $scope.SWList.software[$scope.SWList.software.indexOf(sw)].versions[$scope.SWList.software[$scope.SWList.software.indexOf(sw)].versions.indexOf(version)].locations.push(newLoc);
-                    else
-                        alert("Please select at least one device type!");
-                }
-            };
-            $scope.deleteLocation = function(sw, version, location){
-                $scope.SWList.software[$scope.SWList.software.indexOf(sw)].versions[$scope.SWList.software[$scope.SWList.software.indexOf(sw)].versions.indexOf(version)].locations.splice(
-                    $scope.SWList.software[$scope.SWList.software.indexOf(sw)].versions[$scope.SWList.software[$scope.SWList.software.indexOf(sw)].versions.indexOf(version)].locations.indexOf(location),1
-                );
-            };
-            $scope.addCategory = function(sw){
-                var newCat = {};
-                newCat.id = -1;
-                newCat.cid = sw.selCat.cid;
-                newCat.name = sw.selCat.name;
-                var isPresent = false;
-                for (var i = 0; i < sw.categories.length; i++)
-                    if (sw.categories[i].cid == newCat.cid){
-                        isPresent = true;
-                        break;
-                    }
-                if (!isPresent)
-                    $scope.SWList.software[$scope.SWList.software.indexOf(sw)].categories.push(newCat);
-            };
-            $scope.deleteCategory = function(sw, category){
-                $scope.SWList.software[$scope.SWList.software.indexOf(sw)].categories.splice(
-                    $scope.SWList.software[$scope.SWList.software.indexOf(sw)].categories.indexOf(category),1
-                );
-            };
-            $scope.addLink = function(sw){
-                if (sw.newLink.title.length > 0 && sw.newLink.url.length > 1){
-                    var newLink = {};
-                    newLink.linkid = -1;
-                    newLink.sid = sw.sid;
-                    newLink.description = sw.newLink.description;
-                    newLink.title = sw.newLink.title;
-                    newLink.url = sw.newLink.url;
-                    var isPresent = false;
-                    for (var i = 0; i < sw.links.length; i++)
-                        if (sw.links[i].title === newLink.title &&
-                            sw.links[i].url === newLink.url){
-                            isPresent = true;
-                            break;
-                        }
-                    if (!isPresent)
-                        $scope.SWList.software[$scope.SWList.software.indexOf(sw)].links.push(newLink);
-                }
-            };
-            $scope.deleteLink = function(sw, link){
-                $scope.SWList.software[$scope.SWList.software.indexOf(sw)].links.splice(
-                    $scope.SWList.software[$scope.SWList.software.indexOf(sw)].links.indexOf(link),1
-                );
-            };
-
-            $scope.delNewSWVer = function(version){
-                $scope.newSW.versions.splice($scope.newSW.versions.indexOf(version), 1);
-            };
-            $scope.delNewSWLoc = function(version,location){
-                $scope.newSW.versions[$scope.newSW.versions.indexOf(version)].locations.splice(
-                    $scope.newSW.versions[$scope.newSW.versions.indexOf(version)].locations.indexOf(location),
-                    1
-                );
-            };
-            $scope.delNewSWCat = function(category){
-                $scope.newSW.categories.splice($scope.newSW.categories.indexOf(category), 1);
-            };
-            $scope.delNewSWLink = function(link){
-                $scope.newSW.links.splice($scope.newSW.links.indexOf(link), 1);
-            };
-            $scope.addNewSWVer = function(){
-                if ($scope.newSW.newVer.version.length > 0){
-                    var newVersion = {};
-                    newVersion.version = $scope.newSW.newVer.version;
-                    newVersion.os = $scope.newSW.newVer.selOS.value;
-                    newVersion.locations = [];
-                    newVersion.newLoc = {};
-                    newVersion.newLoc.selLoc = $scope.SWList.locations[0];
-                    newVersion.newLoc.devices = [];
-                    for (var j = 0; j < $scope.SWList.devices.length; j++)
-                        newVersion.newLoc.devices[j] = false;
-                    var isPresent = false;
-                    for (var i = 0; i < $scope.newSW.versions.length; i++)
-                        if ($scope.newSW.versions[i].version == newVersion.version &&
-                            $scope.newSW.versions[i].os == newVersion.os){
-                            isPresent = true;
-                            break;
-                        }
-                    if (!isPresent)
-                        $scope.newSW.versions.push(newVersion);
-                }
-            };
-            $scope.addNewSWLoc = function(version){
-                var newLoc = {};
-                newLoc.lid = version.newLoc.selLoc.lid;
-                newLoc.name = version.newLoc.selLoc.name;
-                newLoc.parent = version.newLoc.selLoc.parent;
-                newLoc.devices = 0;
-                var isPresent = false;
-                for (var i = 0; i < version.locations.length; i++)
-                    if (version.locations[i].lid == newLoc.lid){
-                        isPresent = true;
-                        break;
-                    }
-                if (!isPresent){
-                    for (var i = 0; i < $scope.SWList.devices.length; i++)
-                        if (version.newLoc.devices[i])
-                            newLoc.devices += parseInt($scope.SWList.devices[i].did);
-                    if (newLoc.devices > 0)
-                        $scope.newSW.versions[$scope.newSW.versions.indexOf(version)].locations.push(newLoc);
-                    else
-                        alert("Please select at least one device type!");
-                }
-            };
-            $scope.addNewSWCat = function(){
-                var newCategory = {};
-                newCategory.cid = $scope.newSW.selCat.cid;
-                newCategory.name = $scope.newSW.selCat.name;
-                var isPresent = false;
-                for (var i = 0; i < $scope.newSW.categories.length; i++)
-                    if ($scope.newSW.categories[i].cid == newCategory.cid){
-                        isPresent = true;
-                        break;
-                    }
-                if (!isPresent)
-                    $scope.newSW.categories.push(newCategory);
-            };
-            $scope.addNewSWLink = function(){
-                if ($scope.newSW.newLink.title.length > 0 && $scope.newSW.newLink.url.length > 11){
-                    var newLink = {};
-                    newLink.description = $scope.newSW.newLink.description;
-                    newLink.title = $scope.newSW.newLink.title;
-                    newLink.url = $scope.newSW.newLink.url;
-                    var isPresent = false;
-                    for (var i = 0; i < $scope.newSW.links.length; i++)
-                        if ($scope.newSW.links[i].title == newLink.title &&
-                            $scope.newSW.links[i].url == newLink.url){
-                            isPresent = true;
-                            break;
-                        }
-                    if (!isPresent)
-                        $scope.newSW.links.push(newLink);
-                }
-            };
-
-            $scope.generateThumb = function(file) {
-                if (file != null) {
-                    if ($scope.fileReaderSupported && file.type.indexOf('image') > -1) {
-                        $timeout(function() {
-                            var fileReader = new FileReader();
-                            fileReader.readAsDataURL(file);
-                            fileReader.onload = function(e) {
-                                $timeout(function() {
-                                    file.dataUrl = e.target.result;
-                                });
-                            }
-                        });
-                    }
-                }
-            };
-
     }])
 
     .directive('softwareManageList',[  function() {
@@ -47438,8 +46995,243 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             return input.slice(start);
         }
     }])
-    .controller('manageSWLocCatCtrl', ['$scope', '$timeout', 'swFactory',
-        function manageSWLocCatCtrl($scope, $timeout, swFactory){
+
+    .controller('SWItemFieldsCtrl', ['$scope', '$timeout', 'Upload',
+        function SWItemFieldsCtrl($scope, $timeout, Upload){
+            $scope.generateThumb = function(sw, files) {
+                if (files.length > 0 && files !== null) {
+                    if ($scope.fileReaderSupported && files[0].type.indexOf('image') > -1) {
+                        $timeout(function() {
+                            var fileReader = new FileReader();
+                            fileReader.readAsDataURL(files[0]);
+                            fileReader.onload = function(e) {
+                                $timeout(function() {
+                                    files[0].dataUrl = e.target.result;
+                                });
+                            }
+                        });
+                    }
+                }
+            };
+
+            $scope.checkDevices = function(device, number){
+                device = parseInt(device);
+                number = parseInt(number);
+                if ((device & number) === number)
+                    return true;
+                return false;
+            };
+
+            $scope.addVersionBoth = function(sw){
+                if (sw.newVer.version.length > 0){
+                    var isPresent = false;
+                    for (var i = 0; i < sw.versions.length; i++)
+                        if (sw.versions[i].version === sw.newVer.version && sw.versions[i].os === sw.newVer.os){
+                            isPresent = true;
+                            break;
+                        }
+                    if (!isPresent) {
+                        var newVer = {};
+                        newVer.version = sw.newVer.version;
+                        newVer.os = sw.newVer.selOS.value;
+                        newVer.locations = [];
+                        newVer.newLoc = {};
+                        newVer.newLoc.selLoc = $scope.data.locations[0];
+                        newVer.newLoc.devices = [];
+                        for (var j = 0; j < $scope.data.devices.length; j++)
+                            newVer.newLoc.devices[j] = false;
+
+                        if (sw.sid > 0) {
+                            newVer.vid = -1;
+                            newVer.sid = sw.sid;
+                            $scope.data.software[$scope.data.software.indexOf(sw)].versions.push(newVer);
+                        } else {
+                            $scope.sw.versions.push(newVer);
+                        }
+                    }
+                }
+            };
+            $scope.deleteVersionBoth = function(sw, version){
+                if (sw.sid > 0) {
+                    $scope.data.software[$scope.data.software.indexOf(sw)].versions.splice(
+                        $scope.data.software[$scope.data.software.indexOf(sw)].versions.indexOf(version), 1
+                    );
+                } else {
+                    $scope.sw.versions.splice($scope.sw.versions.indexOf(version), 1);
+                }
+            };
+            $scope.addLocationBoth = function(sw,version){
+                var isPresent = false;
+                for (var i = 0; i < version.locations.length; i++)
+                    if (version.locations[i].lid === version.newLoc.selLoc.lid){
+                        isPresent = true;
+                        break;
+                    }
+                if (!isPresent){
+                    var newLoc = {};
+                    newLoc.lid = version.newLoc.selLoc.lid;
+                    newLoc.name = version.newLoc.selLoc.name;
+                    newLoc.parent = version.newLoc.selLoc.parent;
+                    newLoc.devices = 0;
+                    for (var i = 0; i < $scope.data.devices.length; i++)
+                        if (version.newLoc.devices[i])
+                            newLoc.devices += parseInt($scope.data.devices[i].did);
+                    if (newLoc.devices > 0) {
+                        if (sw.sid > 0) {
+                            newLoc.id = -1;
+                            newLoc.sid = sw.sid;
+                            newLoc.vid = version.vid;
+                            $scope.data.software[$scope.data.software.indexOf(sw)].versions[$scope.data.software[$scope.data.software.indexOf(sw)].versions.indexOf(version)].locations.push(newLoc);
+                        } else {
+                            $scope.sw.versions[$scope.sw.versions.indexOf(version)].locations.push(newLoc);
+                        }
+                    } else {
+                        alert("Please select at least one device type!");
+                    }
+                }
+            };
+            $scope.deleteLocationBoth = function(sw, version, location){
+                if (sw.sid > 0) {
+                    $scope.data.software[$scope.data.software.indexOf(sw)].versions[$scope.data.software[$scope.data.software.indexOf(sw)].versions.indexOf(version)].locations
+                        .splice(
+                            $scope.data.software[$scope.data.software.indexOf(sw)].versions[$scope.data.software[$scope.data.software.indexOf(sw)].versions.indexOf(version)].locations.indexOf(location),
+                            1
+                        );
+                } else {
+                    $scope.sw.versions[$scope.sw.versions.indexOf(version)].locations
+                        .splice(
+                            $scope.sw.versions[$scope.sw.versions.indexOf(version)].locations.indexOf(location),
+                            1
+                        );
+                }
+            };
+            $scope.addCategoryBoth = function(sw){
+                var isPresent = false;
+                for (var i = 0; i < sw.categories.length; i++)
+                    if (sw.categories[i].cid === sw.selCat.cid){
+                        isPresent = true;
+                        break;
+                    }
+                if (!isPresent) {
+                    var newCat = {};
+                    newCat.cid = sw.selCat.cid;
+                    newCat.name = sw.selCat.name;
+
+                    if (sw.sid > 0) {
+                        newCat.id = -1;
+                        $scope.data.software[$scope.data.software.indexOf(sw)].categories.push(newCat);
+                    } else {
+                        $scope.sw.categories.push(newCat);
+                    }
+                }
+            };
+            $scope.deleteCategoryBoth = function(sw, category){
+                if (sw.sid > 0) {
+                    $scope.data.software[$scope.data.software.indexOf(sw)].categories.splice(
+                        $scope.data.software[$scope.data.software.indexOf(sw)].categories.indexOf(category), 1
+                    );
+                } else {
+                    $scope.sw.categories.splice($scope.sw.categories.indexOf(category), 1);
+                }
+            };
+            $scope.addLinkBoth = function(sw){
+                if (sw.newLink.title.length > 0 && sw.newLink.url.length > 1){
+                    var isPresent = false;
+                    for (var i = 0; i < sw.links.length; i++)
+                        if (sw.links[i].title === sw.newLink.title && sw.links[i].url === sw.newLink.url){
+                            isPresent = true;
+                            break;
+                        }
+                    if (!isPresent) {
+                        var newLink = {};
+                        newLink.description = sw.newLink.description;
+                        newLink.title = sw.newLink.title;
+                        newLink.url = sw.newLink.url;
+
+                        if (sw.sid > 0) {
+                            newLink.linkid = -1;
+                            newLink.sid = sw.sid;
+                            $scope.data.software[$scope.data.software.indexOf(sw)].links.push(newLink);
+                        } else {
+                            $scope.sw.links.push(newLink);
+                        }
+                    }
+                }
+            };
+            $scope.deleteLinkBoth = function(sw, link){
+                if (sw.sid > 0) {
+                    $scope.data.software[$scope.data.software.indexOf(sw)].links
+                        .splice($scope.data.software[$scope.data.software.indexOf(sw)].links.indexOf(link), 1);
+                } else {
+                    $scope.sw.links.splice($scope.sw.links.indexOf(link), 1);
+                }
+            };
+        }])
+
+    .directive('softwareItemFieldsList', ['$timeout', 'Upload', function($timeout, Upload) {
+        return {
+            restrict: 'AC',
+            scope: {
+                sw: '=swdata',
+                data: '=list'
+            },
+            controller: 'SWItemFieldsCtrl',
+            link: function(scope, elm, attrs){
+                scope.addVersion = function(sw){
+                    $timeout(function() {
+                        scope.addVersionBoth(sw);
+                        scope.$apply();
+                    }, 0);
+                };
+                scope.deleteVersion = function(sw, version){
+                    $timeout(function() {
+                        scope.deleteVersionBoth(sw, version);
+                        scope.$apply();
+                    }, 0);
+                };
+                scope.addLocation = function(sw, version){
+                    $timeout(function() {
+                        scope.addLocationBoth(sw, version);
+                        scope.$apply();
+                    }, 0);
+                };
+                scope.deleteLocation = function(sw, version, location){
+                    $timeout(function() {
+                        scope.deleteLocationBoth(sw, version, location);
+                        scope.$apply();
+                    }, 0);
+                };
+                scope.addCategory = function(sw){
+                    $timeout(function() {
+                        scope.addCategoryBoth(sw);
+                        scope.$apply();
+                    }, 0);
+                };
+                scope.deleteCategory = function(sw, category){
+                    $timeout(function() {
+                        scope.deleteCategoryBoth(sw, category);
+                        scope.$apply();
+                    }, 0);
+                };
+                scope.addLink = function(sw){
+                    $timeout(function() {
+                        scope.addLinkBoth(sw);
+                        scope.$apply();
+                    }, 0);
+                };
+                scope.deleteLink = function(sw, link){
+                    $timeout(function() {
+                        scope.deleteLinkBoth(sw, link);
+                        scope.$apply();
+                    }, 0);
+                };
+            },
+            templateUrl: 'manageSoftware/manageSoftwareItemFields.tpl.html'
+        };
+    }])
+
+    .controller('manageSWLocCatCtrl', ['$scope', '$timeout', 'swFactory', 'OS',
+        function manageSWLocCatCtrl($scope, $timeout, swFactory, OS){
             $scope.selLocation = -1;
             $scope.selCategory = -1;
             $scope.newLocation = {};
@@ -47448,6 +47240,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             $scope.newCategory = '';
             $scope.locResponse = '';
             $scope.catResponse = '';
+            $scope.os = OS;
 
 
             $scope.selectLocation = function(location){
@@ -47581,7 +47374,8 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
         };
     }])
 
-    .controller('manageSWCompMapsCtrl', ['$scope', '$window', 'swFactory', function manageSWCompMapsCtrl($scope, $window, swFactory){
+    .controller('manageSWCompMapsCtrl', ['$scope', '$window', 'swFactory', 'OS',
+    function manageSWCompMapsCtrl($scope, $window, swFactory, OS){
         $scope.selComp = -1;
         $scope.selCompX = 0;
         $scope.selCompY = 0;
@@ -47589,7 +47383,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
         $scope.selCompLoc = {};
         $scope.high = -1;
         $scope.newComp.name = "";
-        $scope.newComp.selType = $scope.os[0];
+        $scope.newComp.selType = OS[0];
         $scope.showCreate = false;
         $scope.compStatus = [
             {name: 'Off', value: 0},
@@ -47606,10 +47400,10 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                 var comp = $scope.selMap.computers[index];
                 $scope.selCompX = parseInt(comp.mapX) + 15;
                 $scope.selCompY = parseInt(comp.mapY) + 15;
-                if (comp.type == $scope.os[0].value)
-                    $scope.selCompOS = $scope.os[0];
+                if (comp.type == OS[0].value)
+                    $scope.selCompOS = OS[0];
                 else
-                    $scope.selCompOS = $scope.os[1];
+                    $scope.selCompOS = OS[1];
                 if (comp.status == 1)
                     $scope.selCompStatus = $scope.compStatus[1];
                 else
@@ -51004,34 +50798,6 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "</div>\n" +
     "");
 }]);
-;/*
-(function() {
-    tinymce.create('tinymce.plugins.typekit', {
-        setup : function(ed) {
-            ed.onInit.add(function(ed, evt) {
-
-                // Load a script from a specific URL using the global script loader
-                tinymce.ScriptLoader.load('somescript.js');
-
-                // Load a script using a unique instance of the script loader
-                var scriptLoader = new tinymce.dom.ScriptLoader();
-
-                scriptLoader.load('somescript.js');
-
-            });
-        },
-    getInfo: function() {
-    return {
-        longname:  'TypeKit',
-        author:    'Thomas Griffin',
-        authorurl: 'https://thomasgriffin.io',
-        infourl:   'https://twitter.com/jthomasgriffin',
-        version:   '1.0'
-    };
-}
-});
-tinymce.PluginManager.add('typekit', tinymce.plugins.typekit);
-})();*/
 ;/* ========================================================================
  * DOM-based Routing
  * Based on http://goo.gl/EUTi53 by Paul Irish
