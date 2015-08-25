@@ -41688,7 +41688,7 @@ angular.module("calendar/calendar.tpl.html", []).run(["$templateCache", function
     "            <h2 class=\"navbar-text navbar-center\">{{cal.month}}</h2>\n" +
     "            <button type=\"button\" class=\"btn btn-primary navbar-btn navbar-right\" ng-class=\"{'disabled': params.month >= 5}\" ng-disabled=\"params.month >= 5\" ng-click=\"getNextMonth()\"><span class=\"fa fa-angle-right\"></span></button>\n" +
     "        </nav>\n" +
-    "        <table class=\"table table-bordered table-condensed table-hover\">\n" +
+    "        <table class=\"table table-bordered table-condensed\">\n" +
     "            <thead>\n" +
     "            <tr>\n" +
     "                <td>Sun</td>\n" +
@@ -41821,7 +41821,7 @@ angular.module("lib-hours-today/lib-hours-today.tpl.html", []).run(["$templateCa
     "        </div>\n" +
     "        <div class=\"media-body\">\n" +
     "            <h3 class=\"media-heading\">Today</h3>\n" +
-    "            <h4 class=\"media-heading\">{{today.hours}}</h4>\n" +
+    "            <h4 class=\"media-heading\">{{today.hours}} <span class=\"fa fa-lg fa-info-circle\" ng-if=\"today.description\" tooltip=\"{{today.description}}\"></span></h4>\n" +
     "            <span class=\"label\" ng-class=\"today.status.css\">{{today.status.text}}</span>\n" +
     "            <a class=\"btn btn-default btn-xs\" ng-href=\"/#hours?library={{today.name}}\" title=\"All hours {{today.name}}\">See all hours <span class=\"fa fa-fw fa-chevron-right\"></span></a>\n" +
     "        </div>\n" +
@@ -50820,6 +50820,34 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "</div>\n" +
     "");
 }]);
+;/*
+(function() {
+    tinymce.create('tinymce.plugins.typekit', {
+        setup : function(ed) {
+            ed.onInit.add(function(ed, evt) {
+
+                // Load a script from a specific URL using the global script loader
+                tinymce.ScriptLoader.load('somescript.js');
+
+                // Load a script using a unique instance of the script loader
+                var scriptLoader = new tinymce.dom.ScriptLoader();
+
+                scriptLoader.load('somescript.js');
+
+            });
+        },
+    getInfo: function() {
+    return {
+        longname:  'TypeKit',
+        author:    'Thomas Griffin',
+        authorurl: 'https://thomasgriffin.io',
+        infourl:   'https://twitter.com/jthomasgriffin',
+        version:   '1.0'
+    };
+}
+});
+tinymce.PluginManager.add('typekit', tinymce.plugins.typekit);
+})();*/
 ;/* ========================================================================
  * DOM-based Routing
  * Based on http://goo.gl/EUTi53 by Paul Irish

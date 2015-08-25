@@ -69,7 +69,7 @@ module.exports = function(grunt) {
         less: {
             dev: {
                 files: {
-                    'assets/css/main.css': [lessFileList]
+                    'assets/css/main.css': [lessFileList, '!*.min.css']
                 },
                 options: {
                     compress: false,
