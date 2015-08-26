@@ -288,16 +288,8 @@ module.exports = function(grunt) {
                     },
                     //here goes the list of all urls that should be fetched
                     urls: [
-                        '#/home',
+                        '',
                         '#/hours',
-                        '#/hours?library=gorgas',
-                        '#/hours?library=music',
-                        '#/hours?library=media',
-                        '#/hours?library=williams',
-                        '#/hours?library=rodgers',
-                        '#/hours?library=mclure',
-                        '#/hours?library=hoole',
-                        '#/hours?library=bruno',
                         '#/databases',
                         '#/news-exhibits',
                         '#/staffdir',
@@ -309,7 +301,17 @@ module.exports = function(grunt) {
                         viewportSize : {
                             width: 1200,
                             height: 800
-                        }
+                        },
+                        ownsPages: [
+                            '#/hours?library=gorgas',
+                            '#/hours?library=music',
+                            '#/hours?library=media',
+                            '#/hours?library=williams',
+                            '#/hours?library=rodgers',
+                            '#/hours?library=mclure',
+                            '#/hours?library=hoole',
+                            '#/hours?library=bruno'
+                        ]
                     }
                 }
             }

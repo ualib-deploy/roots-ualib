@@ -4868,7 +4868,7 @@ angular.module('ui.tinymce', [])
  * AngularJS file upload/drop directive and service with progress and abort
  * FileAPI Flash shim for old browsers not supporting FormData
  * @author  Danial  <danial.farid@gmail.com>
- * @version 7.0.12
+ * @version 7.0.13
  */
 
 (function () {
@@ -5288,7 +5288,7 @@ if (!window.FileReader) {
 /**!
  * AngularJS file upload/drop directive and service with progress and abort
  * @author  Danial  <danial.farid@gmail.com>
- * @version 7.0.12
+ * @version 7.0.13
  */
 
 if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
@@ -5309,7 +5309,7 @@ if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
 
 var ngFileUpload = angular.module('ngFileUpload', []);
 
-ngFileUpload.version = '7.0.12';
+ngFileUpload.version = '7.0.13';
 
 ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, $q, $timeout) {
   function sendHttp(config) {
@@ -5479,7 +5479,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
         if ((window.ArrayBuffer && data instanceof window.ArrayBuffer) || data instanceof Blob) {
           return data;
         }
-        return $http.defaults.transformRequest[0](arguments);
+        return $http.defaults.transformRequest[0].apply(this, arguments);
       };
     return sendHttp(config);
   };
@@ -48514,6 +48514,9 @@ angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", f
     'ualib.ui',
     'databases.templates'
 ])
+    .config(['$locationProvider', function($locationProvider){
+        //$locationProvider.html5Mode(false).hashPrefix('!')
+    }])
 
     .constant('DB_PROXY_PREPEND_URL', 'http://libdata.lib.ua.edu/login?url=');
 
@@ -48533,17 +48536,18 @@ angular.module('ualib.databases')
 
             // We can't guarantee that the default transformation is an array
             defaults = angular.isArray(defaults) ? defaults : [defaults];
-            console.log(defaults.concat(transform));
+            //console.log(defaults.concat(transform));
             // Append the new transformation to the defaults
             return defaults.concat(transform);
         }
 
-        return $resource('https://wwwdev2.lib.ua.edu/databases/api/:db', {db: 'active'}, {
-            cache: true,
+        return $resource('//wwwdev2.lib.ua.edu/databases/api/:db', {db: 'all'}, {
             get: {
+                cache: true,
                 method: 'GET',
                 transformResponse: appendTransform($http.defaults.transformResponse, function(data){
                     var db = angular.fromJson(data);
+
                     //Pre sort databases by title
                     var databases = $filter('orderBy')(db.databases, 'title');
                     // Set position for stable sort
@@ -48552,9 +48556,11 @@ angular.module('ualib.databases')
                         switch (databases[i].location){
                             case 'UA':
                                 access = 'On campus only';
+                                databases[i].url = DB_PROXY_PREPEND_URL + databases[i].url;
                                 break;
                             case 'UA, Remote':
                                 access = 'myBama login required off campus';
+                                databases[i].url = DB_PROXY_PREPEND_URL + databases[i].url;
                                 break;
                             case 'www':
                             case 'WWW':
@@ -48563,8 +48569,6 @@ angular.module('ualib.databases')
                             default:
                                 access = databases[i].location;
                         }
-                        if (databases[i].auth === "1")
-                            databases[i].url = DB_PROXY_PREPEND_URL + databases[i].url;
                         databases[i].access = access;
                         databases[i].position = i;
                         databases[i].inScout = databases[i].notInEDS === 'Y';
@@ -48584,7 +48588,7 @@ angular.module('ualib.databases')
                 reloadOnSearch: false,
                 resolve: {
                     databases: function(databasesFactory){
-                        return databasesFactory.get({db: 'active'})
+                        return databasesFactory.get({db: 'all'})
                             .$promise.then(function(data){
                                 return data;
                             }, function(data, status, headers, config) {
@@ -48636,7 +48640,7 @@ angular.module('ualib.databases')
 
 
             //if (newVal.search && newVal.search.length > 2){
-                filtered = $filter('filter')(filtered, newVal.search);
+                filtered = $filter('fuzzy')(filtered, newVal.search);
             //}
 
             if (newVal.startsWith){
@@ -48821,7 +48825,7 @@ angular.module('ualib.databases')
             var params = $location.search();
             var scopeFacets = {};
             angular.copy($scope.db, scopeFacets);
-            console.log(params);
+            //console.log(params);
             $scope.activeFilters = params;
 
             if (params['page']){
@@ -48875,24 +48879,8 @@ angular.module('ualib.databases')
             });*/
         }
 
-    }])
-    .filter('customHighlight',['$sce', function($sce) {
-        return function(text, filterPhrase) {
-            if (filterPhrase) {
-                var tag_re = /(<a\/?[^>]+>)/g;
-                var filter_re = new RegExp('(' + filterPhrase + ')', 'gi');
-                text = text.split(tag_re).map(function(string) {
-                    if (string.match(tag_re)) {
-                        return string;
-                    } else {
-                        return string.replace(filter_re,
-                            '<span class="ui-match">$1</span>');
-                    }
-                }).join('');
-            }
-            return $sce.trustAsHtml(text);
-        };
     }]);
+
 
 ;angular.module('ualib.musicSearch.templates', ['videos/videos-list.tpl.html']);
 
@@ -49043,9 +49031,12 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
 /**
  * Transform the JSON response - this allows the transformed values to be cached via Angular's $resource service.
  */
-    .factory('videosFactory', ['$resource', '$filter', function($resource, $filter){
-        return $resource('https://wwwdev2.lib.ua.edu/musicsearch/api/:videos', {videos: 'showall'}, {
-            cache: true
+    .factory('videosFactory', ['$resource', function($resource){
+        return $resource('//wwwdev2.lib.ua.edu/musicsearch/api/:videos', {videos: 'showall'}, {
+            get: {
+                method: 'GET',
+                cache: true
+            }
         });
     }]);;angular.module('ualib.musicSearch')
 
@@ -49054,14 +49045,14 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
             .when('/videos', {
                 reloadOnSearch: false,
                 resolve: {
-                    filters: function(videosFactory){
+                    filters: ['videosFactory', function(videosFactory){
                         return videosFactory.get({videos: 'genres'})
                             .$promise.then(function(data){
                                 var newData = data;
                                 for (var f in data){
                                     if (f === 'genres' || f === 'languages'){
                                         newData[f] = data[f].filter(function(d){
-                                            return d.value != 0;
+                                            return d.value !== 0;
                                         });
                                     }
                                 }
@@ -49075,8 +49066,8 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
                                     config: config
                                 });
                             });
-                    },
-                    videos: function(videosFactory){
+                    }],
+                    videos: ['videosFactory', function(videosFactory){
                         return videosFactory.get()
                             .$promise.then(function(data){
                                 return data;
@@ -49089,11 +49080,11 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
                                     config: config
                                 });
                             });
-                    }
+                    }]
                 },
                 templateUrl: 'videos/videos-list.tpl.html',
                 controller: 'VideosListCtrl'
-            })
+            });
     }])
 
     .controller('VideosListCtrl', ['$scope', 'videos', 'filters', '$filter' ,'$location' ,'$document', function($scope, vid, filters, $filter, $location, $document){
@@ -49114,7 +49105,7 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
 
                 //processFacets(videos);
             });
-        })
+        });
 
         $scope.$on('$locationChangeSuccess', function(){
             paramsToScope();
@@ -49166,7 +49157,7 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
         $scope.pageChange = function(){
 
             scopeToParams({page: $scope.pager.page});
-            $document.duScrollTo(0, 30, 500, function (t) { return (--t)*t*t+1 });
+            $document.duScrollTo(0, 30, 500, function (t) { return (--t)*t*t+1; });
         };
 
         $scope.$on('$destroy', function(){
@@ -49206,15 +49197,15 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
 
             $scope.activeFilters = params;
 
-            if (params['page']){
-                $scope.pager.page = params['page'];
+            if (params.page){
+                $scope.pager.page = params.page;
             }
 
             angular.forEach(scopeFacets, function(val, key){
 
                 if (angular.isDefined(params[key])){
 
-                    if (key == 'genres' || key == 'languages'){
+                    if (key === 'genres' || key === 'languages'){
                         var filters = {};
                         params[key].split(',').forEach(function(filter){
                             filters[filter] = true;
@@ -49662,7 +49653,7 @@ angular.module('staffdir', ['ualib.staffdir']);
 
     .factory('StaffFactory', ['$resource', '$filter', '$http', function($resource, $filter, $http){
         //TODO: centralize this function so it can be used with all apps
-        // Extend the default responseTransform array - Straight from Angular 1.2.8 API docs - https://docs.angularjs.org/api/ng/service/$http#overriding-the-default-transformations-per-request
+        // Extend the default responseTransform array - Straight from Angular 1.2.8 API docs - //docs.angularjs.org/api/ng/service/$http#overriding-the-default-transformations-per-request
         function appendTransform(defaults, transform) {
 
             // We can't guarantee that the default transformation is an array
@@ -49674,7 +49665,7 @@ angular.module('staffdir', ['ualib.staffdir']);
 
         return {
             directory: function(){
-                return $resource('https://wwwdev2.lib.ua.edu/staffDir/api/people', {}, {
+                return $resource('//wwwdev2.lib.ua.edu/staffDir/api/people', {}, {
                     cache: true,
                     get: {
                         method: 'GET',
@@ -49742,16 +49733,16 @@ angular.module('staffdir', ['ualib.staffdir']);
                 });
             },
             byEmail: function(){
-                return $resource('https://wwwdev2.lib.ua.edu/staffDir/api/people/search/email/:email', {}, {cache: true});
+                return $resource('//wwwdev2.lib.ua.edu/staffDir/api/people/search/email/:email', {}, {cache: true});
             },
             byName: function(){
-                return $resource('https://wwwdev2.lib.ua.edu/staffDir/api/people/search/firstname/:firstname/lastname/:lastname', {}, {cache: true});
+                return $resource('//wwwdev2.lib.ua.edu/staffDir/api/people/search/firstname/:firstname/lastname/:lastname', {}, {cache: true});
             },
             byId: function(){
-                return $resource('https://wwwdev2.lib.ua.edu/staffDir/api/people/search/id/:id', {}, {cache: true});
+                return $resource('//wwwdev2.lib.ua.edu/staffDir/api/people/search/id/:id', {}, {cache: true});
             },
             profile: function(){
-                return $resource('https://wwwdev2.lib.ua.edu/staffDir/api/profile/:login', {}, {cache: true});
+                return $resource('//wwwdev2.lib.ua.edu/staffDir/api/profile/:login', {}, {cache: true});
             }
         };
     }]);;angular.module('ualib.staffdir')
@@ -50044,7 +50035,7 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
     "            </ol>\n" +
     "        </div>\n" +
     "\n" +
-    "        <div class=\"media software-item\" ng-repeat=\"item in filteredSoft | after:(pager.page-1)*pager.perPage | limitTo:20\">\n" +
+    "        <div class=\"media software-item animate-repeat\" ng-repeat=\"item in filteredSoft | after:(pager.page-1)*pager.perPage | limitTo:20\">\n" +
     "            <div class=\"media-left\">\n" +
     "                <img class=\"media-object\" ng-src=\"{{item.icon}}\" alt=\"{{item.title}}\" title=\"{{item.title}}\">\n" +
     "            </div>\n" +
@@ -50104,6 +50095,7 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
     'ngRoute',
     'ngResource',
     'ngSanitize',
+    'ngAnimate',
     'angular.filter',
     'ui.bootstrap',
     'ui.utils',
@@ -50113,7 +50105,12 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
 ]);;angular.module('ualib.softwareList')
 
     .factory('softwareFactory', ['$resource', function($resource){
-        return $resource('https://wwwdev2.lib.ua.edu/softwareList/api/:software');
+        return $resource('//wwwdev2.lib.ua.edu/softwareList/api/:software', {software: 'all'}, {
+            get: {
+                method: 'GET',
+                cache: true
+            }
+        });
     }]);;angular.module('ualib.softwareList')
 
     .config(['$routeProvider', function($routeProvider){
@@ -50121,7 +50118,7 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
             .when('/software', {
                 reloadOnSearch: false,
                 resolve: {
-                    software: function(softwareFactory){
+                    software: ['softwareFactory', function(softwareFactory){
                         return softwareFactory.get({software: 'all'}, function(data){
                             for (var i = 0, len = data.software.length; i < len; i++){
 
@@ -50152,7 +50149,7 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
                                 config: config
                             });
                         });
-                    }
+                    }]
                 },
                 templateUrl: 'software-list/software-list.tpl.html',
                 controller: 'SoftwareListCtrl'
@@ -50972,3 +50969,4 @@ $(document).ready(UTIL.loadEvents);
             $scope.alerts.push({ type: 'warning', msg: 'Gorgas Music Library will have limited access Wed. 9/2 through Fri. 9/4 due to electrical work.' });
         }, 500);
     }]);
+

@@ -62,3 +62,4 @@ angular.module('ualib', [
             $scope.alerts.push({ type: 'warning', msg: 'Gorgas Music Library will have limited access Wed. 9/2 through Fri. 9/4 due to electrical work.' });
         }, 500);
     }]);
+
