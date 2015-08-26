@@ -50714,7 +50714,12 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
 
 angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("../assets/js/_ualib-home.tpl.html",
-    "<div ng-controller=\"NewsTodayCtrl\">\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-12\"  ng-controller=\"AlertCtrl\">\n" +
+    "        <alert class=\"animate\" ng-repeat=\"alert in alerts\" type=\"{{alert.type}}\" close=\"closeAlert($index)\"><span class=\"fa fa-exclamation-triangle\"></span> {{alert.msg}}</alert>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div ng-controller=\"NewsTodayCtrl\" class=\"animate\">\n" +
     "    <div class=\"home-slice\">\n" +
     "        <div class=\"row\">\n" +
     "          <div class=\"col-md-6\">\n" +
@@ -50951,4 +50956,19 @@ $(document).ready(UTIL.loadEvents);
             $rootScope.appClass += ' webapp';
         });
 
+    }])
+
+    //TODO: Move into full component part of ui-components repo
+    .controller('AlertCtrl', ['$scope', '$timeout', function ($scope, $timeout) {
+        $scope.alerts = [];
+
+
+
+        $scope.closeAlert = function(index) {
+            $scope.alerts.splice(index, 1);
+        };
+
+        $timeout(function(){
+            $scope.alerts.push({ type: 'warning', msg: 'Gorgas Music Library will have limited access Wed. 9/2 through Fri. 9/4 due to electrical work.' });
+        }, 500);
     }]);

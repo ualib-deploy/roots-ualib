@@ -1,4 +1,9 @@
-<div ng-controller="NewsTodayCtrl">
+<div class="row">
+    <div class="col-md-12"  ng-controller="AlertCtrl">
+        <alert class="animate" ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)"><span class="fa fa-exclamation-triangle"></span> {{alert.msg}}</alert>
+    </div>
+</div>
+<div ng-controller="NewsTodayCtrl" class="animate">
     <div class="home-slice">
         <div class="row">
           <div class="col-md-6">

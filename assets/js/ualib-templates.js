@@ -2,7 +2,12 @@ angular.module('ualib.templates', ['../assets/js/_ualib-home.tpl.html']);
 
 angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("../assets/js/_ualib-home.tpl.html",
-    "<div ng-controller=\"NewsTodayCtrl\">\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-12\"  ng-controller=\"AlertCtrl\">\n" +
+    "        <alert class=\"animate\" ng-repeat=\"alert in alerts\" type=\"{{alert.type}}\" close=\"closeAlert($index)\"><span class=\"fa fa-exclamation-triangle\"></span> {{alert.msg}}</alert>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div ng-controller=\"NewsTodayCtrl\" class=\"animate\">\n" +
     "    <div class=\"home-slice\">\n" +
     "        <div class=\"row\">\n" +
     "          <div class=\"col-md-6\">\n" +

@@ -1,0 +1,27 @@
+//TODO: Move into alert LESS context
+.alert {
+  -webkit-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+  -moz-box-shadow:    0 2px 5px 0 rgba(0, 0, 0, 0.26);
+  box-shadow:         0 2px 5px 0 rgba(0, 0, 0, 0.26);
+}
+
+.animate.ng-move,
+.animate.ng-enter,
+.animate.ng-leave {
+  -webkit-transition:all linear 0.2s;
+  transition:all linear 0.2s;
+}
+
+.animate.ng-leave.ng-leave-active,
+.animate.ng-move,
+.animate.ng-enter {
+  opacity:0;
+  max-height:0;
+}
+
+.animate.ng-leave,
+.animate.ng-move.ng-move-active,
+.animate.ng-enter.ng-enter-active {
+  opacity:1;
+  max-height:52px;
+}

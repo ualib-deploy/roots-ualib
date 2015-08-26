@@ -284,11 +284,7 @@ module.exports = function(grunt) {
                     //has a filename argument, must have a return that is a sanitized string
                     sanitize: function (requestUri) {
                         //returns 'index.html' if the url is '/', otherwise a prefix
-                        if (/\?/.test(requestUri)) {
-                            return 'index.html';
-                        } else {
-                            return requestUri.replace(/\/\?/g, 'prefix-');
-                        }
+                        return requestUri.replace(/[\?=&]/g, '_');
                     },
                     //here goes the list of all urls that should be fetched
                     urls: [
