@@ -43,7 +43,7 @@ module.exports = function(grunt) {
         'assets/less/main.less',
         '<%= bower.directory %>/onesearch/src/**/*.less',
         '<%= bower.directory %>/ualib-ui/dist/*.css',
-        '<%= bower.directory %>/ualib-hours/dist/*.css',
+        '<%= bower.directory %>/ualib-hours/dist/hours.css',
         '<%= bower.directory %>/ualib_staffdir/dist/staffdir.css',
         '<%= bower.directory %>/ualib-softwareList/dist/ualib.softwareList.css',
         '<%= bower.directory %>/ualib-news/dist/ualib.news.css',
@@ -269,6 +269,7 @@ module.exports = function(grunt) {
                     //that's the path where the snapshots should be placed
                     //it's empty by default which means they will go into the directory
                     //where your Gruntfile.js is placed
+                    removeScripts: true,
                     snapshotPath: 'assets/dist/snapshots/',
                     //This should be either the base path to your index.html file
                     //or your base URL. Currently the task does not use it's own
