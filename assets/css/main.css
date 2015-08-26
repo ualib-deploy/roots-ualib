@@ -10533,8 +10533,6 @@ footer > .sub-footer {
   min-width: 180px;
   background-position: center center;
   background-repeat: no-repeat;
-  -webkit-background-size: contain;
-          background-size: contain;
 }
 .news-list-tb-news {
   background-image: url('https://wwwdev2.lib.ua.edu/newsApp/images/tb_news.png');

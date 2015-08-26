@@ -50530,7 +50530,7 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
             return defaults.concat(transform);
         }
 
-        return $resource('https://wwwdev2.lib.ua.edu/newsApp/api/:news', {}, {
+        return $resource('//wwwdev2.lib.ua.edu/newsApp/api/:news', {}, {
             cache: false,
             get: {
                 method: 'GET',
