@@ -42319,7 +42319,167 @@ angular.module('hours.list', [])
             templateUrl: 'list/list.tpl.html',
             controller: 'ListCtrl'
         }
-    }]);;angular.module('manage.templates', ['manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageNews/manageNews.tpl.html', 'manageNews/manageNewsAdmins.tpl.html', 'manageNews/manageNewsItemFields.tpl.html', 'manageNews/manageNewsList.tpl.html', 'manageOneSearch/mainOneSearch.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageOneSearch/oneSearchStat.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareComputerMaps.tpl.html', 'manageSoftware/manageSoftwareItemFields.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html', 'staffDirectory/staffDirectoryDepartments.tpl.html', 'staffDirectory/staffDirectoryPeople.tpl.html', 'staffDirectory/staffDirectoryProfile.tpl.html', 'staffDirectory/staffDirectorySubjects.tpl.html', 'submittedForms/submittedForms.tpl.html']);
+    }]);;angular.module('manage.templates', ['manageAlerts/manageAlerts.tpl.html', 'manageAlerts/manageAlertsItemFields.tpl.html', 'manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageNews/manageNews.tpl.html', 'manageNews/manageNewsAdmins.tpl.html', 'manageNews/manageNewsItemFields.tpl.html', 'manageNews/manageNewsList.tpl.html', 'manageOneSearch/mainOneSearch.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageOneSearch/oneSearchStat.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareComputerMaps.tpl.html', 'manageSoftware/manageSoftwareItemFields.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html', 'staffDirectory/staffDirectoryDepartments.tpl.html', 'staffDirectory/staffDirectoryPeople.tpl.html', 'staffDirectory/staffDirectoryProfile.tpl.html', 'staffDirectory/staffDirectorySubjects.tpl.html', 'submittedForms/submittedForms.tpl.html']);
+
+angular.module("manageAlerts/manageAlerts.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("manageAlerts/manageAlerts.tpl.html",
+    "<h2>Manage Website Alerts</h2>\n" +
+    "\n" +
+    "<div>\n" +
+    "    <h3>Add New Alert</h3>\n" +
+    "    <form ng-submit=\"createAlert(newAlert)\">\n" +
+    "        <div class=\"sdOpen\">\n" +
+    "            <div alerts-item-fields alertdata=\"newAlert\" list=\"data\"></div>\n" +
+    "            <div class=\"row form-group text-center\">\n" +
+    "                <button type=\"submit\" class=\"btn btn-success\"\n" +
+    "                        ng-disabled=\"uploading ||\n" +
+    "                                     newAlert.message.length < 1 ||\n" +
+    "                                     newAlert.dateStart.length < 1 ||\n" +
+    "                                     newAlert.dateEnd.length < 1\">\n" +
+    "                    Create New Alert\n" +
+    "                </button><br>\n" +
+    "                {{newAlert.formResponse}}\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </form>\n" +
+    "\n" +
+    "    <h3>Alerts</h3>\n" +
+    "    <div class=\"row form-inline\">\n" +
+    "        <div class=\"form-group col-md-12\">\n" +
+    "            <label for=\"filterBy\">Filter <small>{{filteredList.length}}</small> results by</label>\n" +
+    "            <div id=\"filterBy\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Message contains\" ng-model=\"alertFilter\">\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "    <div class=\"text-center\">\n" +
+    "        <pagination total-items=\"filteredList.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
+    "                    boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredList.length > perPage\"></pagination>\n" +
+    "    </div>\n" +
+    "    <div class=\"table-responsive\">\n" +
+    "        <table class=\"table table-condensed table-hover\">\n" +
+    "            <thead>\n" +
+    "            <tr>\n" +
+    "                <th class=\"hidden-xs\">\n" +
+    "                    <a ng-click=\"sortBy(0)\"\n" +
+    "                       ng-class=\"{'sortable': !sortModes[0].reverse && sortMode == 0, 'sortable-reverse': sortModes[0].reverse && sortMode == 0}\">\n" +
+    "                        Message\n" +
+    "                    </a>\n" +
+    "                </th>\n" +
+    "                <th class=\"hidden-xs\">\n" +
+    "                    <a ng-click=\"sortBy(1)\"\n" +
+    "                       ng-class=\"{'sortable': !sortModes[1].reverse && sortMode == 1, 'sortable-reverse': sortModes[1].reverse && sortMode == 1}\">\n" +
+    "                        Type\n" +
+    "                    </a>\n" +
+    "                </th>\n" +
+    "                <th class=\"hidden-xs\">\n" +
+    "                    <a ng-click=\"sortBy(2)\"\n" +
+    "                       ng-class=\"{'sortable': !sortModes[2].reverse && sortMode == 2, 'sortable-reverse': sortModes[2].reverse && sortMode == 2}\">\n" +
+    "                        Start Date\n" +
+    "                    </a>\n" +
+    "                </th>\n" +
+    "                <th class=\"hidden-xs\">\n" +
+    "                    <a ng-click=\"sortBy(3)\"\n" +
+    "                       ng-class=\"{'sortable': !sortModes[3].reverse && sortMode == 3, 'sortable-reverse': sortModes[3].reverse && sortMode == 3}\">\n" +
+    "                        End Date\n" +
+    "                    </a>\n" +
+    "                </th>\n" +
+    "            </tr>\n" +
+    "            </thead>\n" +
+    "            <tbody>\n" +
+    "            <tr ng-repeat=\"alert in filteredList = (data.alerts | filter:{message:alertFilter}\n" +
+    "                                                                | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\n" +
+    "                                                                | startFrom:(currentPage-1)*perPage\n" +
+    "                                                                | limitTo:perPage\">\n" +
+    "                <td>\n" +
+    "                    <h4 ng-click=\"toggleAlerts(alert)\" style=\"cursor: pointer;\">\n" +
+    "                        <a>\n" +
+    "                            <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"alert.show\"></span>\n" +
+    "                            <span class=\"fa fa-fw fa-caret-down\" ng-show=\"alert.show\"></span>\n" +
+    "                            {{alert.message}}\n" +
+    "                        </a>\n" +
+    "                    </h4>\n" +
+    "                    <div ng-show=\"alert.show\">\n" +
+    "                        <form ng-submit=\"updateAlert(alert)\">\n" +
+    "                            <div alerts-item-fields alertdata=\"alert\" list=\"data\"></div>\n" +
+    "                            <div class=\"row form-group text-center\">\n" +
+    "                                <button type=\"submit\" class=\"btn btn-success\"\n" +
+    "                                        ng-disabled=\"uploading ||\n" +
+    "                                         alert.message.length < 1 ||\n" +
+    "                                         alert.dateStart.length < 1 ||\n" +
+    "                                         alert.dateEnd.length < 1\">\n" +
+    "                                    Update Alert\n" +
+    "                                </button>\n" +
+    "                                <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteAlert(alert)\"\n" +
+    "                                        ng-disabled=\"uploading\">\n" +
+    "                                    Delete Alert\n" +
+    "                                </button>\n" +
+    "                                <br>\n" +
+    "                                {{alert.formResponse}}\n" +
+    "                            </div>\n" +
+    "                        </form>\n" +
+    "                    </div>\n" +
+    "                </td>\n" +
+    "                <td ng-click=\"toggleAlerts(alert)\" style=\"cursor: pointer;\">\n" +
+    "                    <h4>\n" +
+    "                        <small ng-if=\"alert.type == 0\"><span class=\"label label-success\">success</span></small>\n" +
+    "                        <small ng-if=\"alert.type == 1\"><span class=\"label label-warning\">warning</span></small>\n" +
+    "                        <small ng-if=\"alert.type == 2\"><span class=\"label label-danger\">danger</span></small>\n" +
+    "                    </h4>\n" +
+    "                </td>\n" +
+    "                <td ng-click=\"toggleAlerts(alert)\" style=\"cursor: pointer;\">\n" +
+    "                    {{alert.dateStart | date : 'MMM d, y'}}\n" +
+    "                </td>\n" +
+    "                <td ng-click=\"toggleAlerts(alert)\" style=\"cursor: pointer;\">\n" +
+    "                    {{alert.dateEnd | date : 'MMM d, y'}}\n" +
+    "                </td>\n" +
+    "            </tr>\n" +
+    "            </tbody>\n" +
+    "        </table>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"text-center\">\n" +
+    "        <pagination total-items=\"filteredList.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
+    "                    boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredList.length > perPage\"></pagination>\n" +
+    "    </div>\n" +
+    "</div>");
+}]);
+
+angular.module("manageAlerts/manageAlertsItemFields.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("manageAlerts/manageAlertsItemFields.tpl.html",
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-12 form-group\">\n" +
+    "        <label for=\"message\">Message</label>\n" +
+    "        <textarea class=\"form-control\" ng-model=\"alert.message\" rows=\"3\" maxlength=\"200\" id=\"message\" required></textarea>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-2 form-group\">\n" +
+    "        <label for=\"type\">Type</label>\n" +
+    "        <select class=\"form-control\" ng-model=\"alert.selType\" id=\"type\"\n" +
+    "                ng-options=\"type.name for type in types\">\n" +
+    "        </select>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-2 form-group\">\n" +
+    "        <label for=\"from\">Active From</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" id=\"from\" datepicker-popup=\"{{dpFormat}}\"\n" +
+    "               ng-model=\"alert.dateStart\" is-open=\"alert.dpStart\" close-text=\"Close\"\n" +
+    "               ng-click=\"onAlertDPFocus(alert, true)\"/>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-2 form-group\">\n" +
+    "        <label for=\"until\">Active Until</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" id=\"until\" datepicker-popup=\"{{dpFormat}}\"\n" +
+    "               ng-model=\"alert.dateEnd\" is-open=\"alert.dpEnd\" close-text=\"Close\"\n" +
+    "               ng-click=\"onAlertDPFocus(alert, false)\"/>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-6 form-group\">\n" +
+    "        <label for=\"url\">URL (optional)</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"http://lib.ua.edu/more-details/\" ng-model=\"alert.url\"\n" +
+    "               id=\"url\" maxlength=\"1024\">\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "");
+}]);
 
 angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageDatabases/manageDatabases.tpl.html",
@@ -42401,7 +42561,7 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                <div class=\"col-md-6 form-group\">\n" +
     "                    <label for=\"{{db.id}}_title\">Title</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.title}}\" ng-model=\"db.title\"\n" +
-    "                           id=\"{{db.id}}_title\" maxlength=\"200\">\n" +
+    "                           id=\"{{db.id}}_title\" maxlength=\"200\" required>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Publisher\">Publisher</label>\n" +
@@ -42421,7 +42581,7 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                <div class=\"col-md-6 form-group\">\n" +
     "                    <label for=\"{{db.id}}_URL\">URL</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.url}}\" ng-model=\"db.url\"\n" +
-    "                           id=\"{{db.id}}_URL\" maxlength=\"2000\">\n" +
+    "                           id=\"{{db.id}}_URL\" maxlength=\"2000\" required>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-3 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Location\">Location</label>\n" +
@@ -42462,7 +42622,7 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                </div>\n" +
     "                <div class=\"col-md-12 form-group\">\n" +
     "                    <label for=\"{{db.id}}_descr\">Database Description</label>\n" +
-    "                    <textarea class=\"form-control\" rows=\"3\" id=\"{{db.id}}_descr\" ng-model=\"db.description\" maxlength=\"4096\"></textarea>\n" +
+    "                    <textarea class=\"form-control\" rows=\"3\" id=\"{{db.id}}_descr\" ng-model=\"db.description\" maxlength=\"4096\" required></textarea>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{db.id}}_presented\">PresentedBy</label>\n" +
@@ -42609,7 +42769,7 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "            <div class=\"col-md-6 form-group\">\n" +
     "                <label for=\"Coverage\">Coverage</label>\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Database Coverage\" ng-model=\"newDB.coverage\"\n" +
-    "                       id=\"Coverage\" maxlength=\"256\" required>\n" +
+    "                       id=\"Coverage\" maxlength=\"256\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-3 form-group\">\n" +
     "                <label for=\"dAuthor\">Description Author</label>\n" +
@@ -44956,7 +45116,6 @@ angular.module("submittedForms/submittedForms.tpl.html", []).run(["$templateCach
 ;angular.module('manage', [
     'ngAnimate',
     'ui.bootstrap',
-    'ui.tinymce',
     'manage.common',
     'manage.templates',
     'manage.manageHours',
@@ -44968,7 +45127,8 @@ angular.module("submittedForms/submittedForms.tpl.html", []).run(["$templateCach
     'manage.manageDatabases',
     'manage.manageSoftware',
     'manage.manageNews',
-    'manage.submittedForms'
+    'manage.submittedForms',
+    'manage.manageAlerts'
 ])
 
     .constant('HOURS_MANAGE_URL', '//wwwdev2.lib.ua.edu/libhours2/')
@@ -44980,6 +45140,7 @@ angular.module("submittedForms/submittedForms.tpl.html", []).run(["$templateCach
     .constant('SOFTWARE_URL', '//wwwdev2.lib.ua.edu/softwareList/')
     .constant('FORMS_URL', '//wwwdev2.lib.ua.edu/form/')
     .constant('NEWS_URL', '//wwwdev2.lib.ua.edu/newsApp/')
+    .constant('ALERTS_URL', '//wwwdev2.lib.ua.edu/alerts/');
 
 angular.module('manage.common', [
     'common.manage'
@@ -45105,7 +45266,240 @@ angular.module('common.manage', [])
                 return $http({method: 'POST', url: url + "api/process", params: {}, data: data})
             }
         };
+    }])
+    .factory('alertFactory', ['$http', 'ALERTS_URL', function alertFactory($http, url){
+        return {
+            getData: function(){
+                return $http({method: 'GET', url: url + "api/all", params: {}})
+            },
+            postData: function(params, data){
+                params = angular.isDefined(params) ? params : {};
+                return $http({method: 'POST', url: url + "processData.php", params: params, data: data})
+            }
+        };
     }]);
+
+angular.module('manage.manageAlerts', [])
+    .constant('TYPES', [
+        {name:'Success', value:0},
+        {name:'Warning', value:1},
+        {name:'Danger', value:2}
+    ])
+
+    .controller('manageAlertsCtrl', ['$scope', 'tokenFactory', 'alertFactory', 'TYPES',
+    function manageAlertsCtrl($scope, tokenFactory, alertFactory, TYPES){
+        $scope.data = {};
+        $scope.newAlert = {};
+        $scope.newAlert.message = "";
+        $scope.newAlert.selType = TYPES[0];
+        $scope.newAlert.dateStart = new Date();
+        $scope.newAlert.dateEnd = new Date();
+        $scope.newAlert.url = "";
+        $scope.newAlert.dpStart = false;
+        $scope.newAlert.dpEnd = false;
+
+        $scope.uploading = false;
+
+        $scope.sortModes = [
+            {by:'message', reverse:false},
+            {by:'type', reverse:false},
+            {by:'dateStart', reverse:true},
+            {by:'dateEnd', reverse:true}
+        ];
+        $scope.sortMode = $scope.sortModes[2];
+        $scope.sortBy = function(by){
+            if ($scope.sortMode === by)
+                $scope.sortModes[by].reverse = !$scope.sortModes[by].reverse;
+            else
+                $scope.sortMode = by;
+        };
+
+        $scope.currentPage = 1;
+        $scope.maxPageSize = 10;
+        $scope.perPage = 20;
+
+        tokenFactory("CSRF-libAlerts");
+
+        alertFactory.getData("all")
+            .success(function(data) {
+                console.dir(data);
+                for (var i = 0; i < data.alerts.length; i++){
+                    data.alerts[i].show = false;
+                    data.alerts[i].dpStart = false;
+                    data.alerts[i].dpEnd = false;
+                    for (var j = 0; j < TYPES.length; j++)
+                        if (TYPES[j].value == data.alerts[i].type){
+                            data.alerts[i].selType = TYPES[j];
+                            break;
+                        }
+                    data.alerts[i].dateStart = new Date(data.alerts[i].dateStart);
+                    data.alerts[i].dateEnd = new Date(data.alerts[i].dateEnd);
+                }
+                $scope.data = data;
+            })
+            .error(function(data, status, headers, config) {
+                console.log(data);
+            });
+
+        $scope.toggleAlerts = function(alert){
+            $scope.data.alerts[$scope.data.alerts.indexOf(alert)].show =
+                !$scope.data.alerts[$scope.data.alerts.indexOf(alert)].show;
+        };
+
+        $scope.deleteAlert = function(alert){
+            if (confirm("Delete alert permanently?") == true){
+                $scope.uploading = true;
+                alert.formResponse = "";
+                alertFactory.postData({action : 1}, alert)
+                    .success(function(data, status, headers, config) {
+                        if (data == 1){
+                            $scope.data.alerts.splice($scope.data.alerts.indexOf(alert), 1);
+                        } else {
+                            alert.formResponse = "Error: Can not delete alert! " + data;
+                        }
+                        $scope.uploading = false;
+                        console.log(data);
+                    })
+                    .error(function(data, status, headers, config) {
+                        alert.formResponse = "Error: Could not delete alert! " + data;
+                        $scope.uploading = false;
+                        console.log(data);
+                    });
+            }
+        };
+        $scope.updateAlert = function(alert){
+            $scope.uploading = true;
+            alert.formResponse = "";
+            alert.tsStart = alert.dateStart.valueOf() / 1000;
+            alert.tsEnd = alert.dateEnd.valueOf() / 1000;
+            alertFactory.postData({action : 2}, alert)
+                .success(function(data, status, headers, config) {
+                    if (data == 1){
+                        alert.formResponse = "Alert has been updated!";
+                    } else {
+                        alert.formResponse = "Error: Can not update alert! " + data;
+                    }
+                    $scope.uploading = false;
+                    console.log(data);
+                })
+                .error(function(data, status, headers, config) {
+                    alert.formResponse = "Error: Could not update alert! " + data;
+                    $scope.uploading = false;
+                    console.log(data);
+                });
+        };
+        $scope.createAlert = function(alert) {
+            $scope.uploading = true;
+            $scope.newAlert.formResponse = "";
+            alert.tsStart = alert.dateStart.valueOf() / 1000;
+            alert.tsEnd = alert.dateEnd.valueOf() / 1000;
+            alertFactory.postData({action : 3}, alert)
+                .success(function(data, status, headers, config) {
+                    if ((typeof data === 'object') && (data !== null)){
+                        var newAlert = {};
+                        newAlert = angular.copy(alert);
+                        newAlert.aid = data.id;
+                        newAlert.show = false;
+                        for (var j = 0; j < TYPES.length; j++)
+                            if (TYPES[j].value == alert.type){
+                                newAlert.selType = TYPES[j];
+                                break;
+                            }
+                        $scope.data.alerts.push(newAlert);
+                        $scope.newAlert.formResponse = "Alert has been created.";
+                    } else {
+                        $scope.newAlert.formResponse = "Error: Can not create alert! " + data;
+                    }
+                    console.dir(data);
+                    $scope.uploading = false;
+                })
+                .error(function(data, status, headers, config) {
+                    $scope.newAlert.formResponse = "Error: Could not create alert! " + data;
+                    console.log(data);
+                    $scope.uploading = false;
+                });
+        };
+    }])
+
+    .directive('manageAlertsMain', ['$animate', function($animate) {
+        return {
+            restrict: 'AC',
+            scope: {},
+            controller: 'manageAlertsCtrl',
+            link: function(scope, elm, attrs){
+                //Preload the spinner element
+                var spinner = angular.element('<div id="loading-bar-spinner"><div class="spinner-icon"></div></div>');
+                //Preload the location of the boxe's title element (needs to be more dynamic in the future)
+                var titleElm = elm.find('h2');
+                //Enter the spinner animation, appending it to the title element
+                $animate.enter(spinner, titleElm[0]);
+
+                var loadingWatcher = scope.$watch(
+                    'data.totalTime',
+                    function(newVal, oldVal){
+                        if (newVal != oldVal){
+                            $animate.leave(spinner);
+                            console.log("Alerts data loaded");
+                        }
+                    },
+                    true
+                );
+            },
+            templateUrl: 'manageAlerts/manageAlerts.tpl.html'
+        };
+    }])
+    .filter('startFrom', [ function() {
+        return function(input, start) {
+            start = +start; //parse to int
+            if (typeof input == 'undefined')
+                return input;
+            return input.slice(start);
+        }
+    }])
+
+    .controller('manageAlertFieldsCtrl', ['$scope', 'TYPES',
+    function manageAlertFieldsCtrl($scope, TYPES){
+        $scope.types = TYPES;
+        $scope.dpFormat = 'MM/dd/yyyy';
+
+        $scope.showDatePicker = function(alert, isFrom) {
+            if (alert.aid > 0) {
+                if (isFrom === true) {
+                    $scope.data.alerts[$scope.data.alerts.indexOf(alert)].dpStart = true;
+                } else {
+                    $scope.data.alerts[$scope.data.alerts.indexOf(alert)].dpEnd = true;
+                }
+            } else {
+                if (isFrom === true) {
+                    $scope.alert.dpStart = true;
+                } else {
+                    $scope.alert.dpEnd = true;
+                }
+            }
+        };
+
+    }])
+
+    .directive('alertsItemFields', ['$timeout', function($timeout) {
+        return {
+            restrict: 'AC',
+            scope: {
+                alert: '=alertdata',
+                data: '=list'
+            },
+            controller: 'manageAlertFieldsCtrl',
+            link: function(scope, elm, attrs){
+                scope.onAlertDPFocus = function(alert, isFrom){
+                    $timeout(function() {
+                        scope.showDatePicker(alert, isFrom);
+                        scope.$apply();
+                    }, 0);
+                };
+            },
+            templateUrl: 'manageAlerts/manageAlertsItemFields.tpl.html'
+        };
+    }]);
+
 
 angular.module('manage.manageDatabases', [])
     .controller('manageDBCtrl', ['$scope', '$window', 'tokenFactory', 'mdbFactory',
@@ -45134,6 +45528,7 @@ angular.module('manage.manageDatabases', [])
             $scope.newDB.updatedBy = $window.userName;
             $scope.newDB.subjects = [];
             $scope.newDB.types = [];
+
             $scope.currentPage = 1;
             $scope.maxPageSize = 10;
             $scope.perPage = 20;
@@ -45209,10 +45604,6 @@ angular.module('manage.manageDatabases', [])
                 }
                 if (db.url.length < 11){
                     alert("Form error: Please fill out URL field!");
-                    return false;
-                }
-                if (db.coverage.length < 1){
-                    alert("Form error: Please fill out Coverage field!");
                     return false;
                 }
                 if (db.description.length < 1){
@@ -50814,34 +51205,6 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "</div>\n" +
     "");
 }]);
-;/*
-(function() {
-    tinymce.create('tinymce.plugins.typekit', {
-        setup : function(ed) {
-            ed.onInit.add(function(ed, evt) {
-
-                // Load a script from a specific URL using the global script loader
-                tinymce.ScriptLoader.load('somescript.js');
-
-                // Load a script using a unique instance of the script loader
-                var scriptLoader = new tinymce.dom.ScriptLoader();
-
-                scriptLoader.load('somescript.js');
-
-            });
-        },
-    getInfo: function() {
-    return {
-        longname:  'TypeKit',
-        author:    'Thomas Griffin',
-        authorurl: 'https://thomasgriffin.io',
-        infourl:   'https://twitter.com/jthomasgriffin',
-        version:   '1.0'
-    };
-}
-});
-tinymce.PluginManager.add('typekit', tinymce.plugins.typekit);
-})();*/
 ;/* ========================================================================
  * DOM-based Routing
  * Based on http://goo.gl/EUTi53 by Paul Irish
