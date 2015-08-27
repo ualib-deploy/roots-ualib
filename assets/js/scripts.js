@@ -45292,8 +45292,8 @@ angular.module('manage.manageAlerts', [])
         $scope.newAlert = {};
         $scope.newAlert.message = "";
         $scope.newAlert.selType = TYPES[0];
-        $scope.newAlert.dateStart = new Date();
-        $scope.newAlert.dateEnd = new Date();
+        $scope.newAlert.dateStartDP = new Date();
+        $scope.newAlert.dateEndDP = new Date();
         $scope.newAlert.url = "";
         $scope.newAlert.dpStart = false;
         $scope.newAlert.dpEnd = false;
@@ -45334,7 +45334,15 @@ angular.module('manage.manageAlerts', [])
                             break;
                         }
                     data.alerts[i].dateStart = new Date(data.alerts[i].dateStart);
+                    data.alerts[i].dateStart.setTime(
+                        data.alerts[i].dateStart.getTime() +
+                        data.alerts[i].dateStart.getTimezoneOffset()*60*1000
+                    );
                     data.alerts[i].dateEnd = new Date(data.alerts[i].dateEnd);
+                    data.alerts[i].dateEnd.setTime(
+                        data.alerts[i].dateEnd.getTime() +
+                        data.alerts[i].dateEnd.getTimezoneOffset()*60*1000
+                    );
                 }
                 $scope.data = data;
             })
