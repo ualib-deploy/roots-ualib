@@ -42422,9 +42422,9 @@ angular.module("manageAlerts/manageAlerts.tpl.html", []).run(["$templateCache", 
     "                </td>\n" +
     "                <td ng-click=\"toggleAlerts(alert)\" style=\"cursor: pointer;\">\n" +
     "                    <h4>\n" +
-    "                        <small ng-if=\"alert.type == 0\"><span class=\"label label-success\">success</span></small>\n" +
-    "                        <small ng-if=\"alert.type == 1\"><span class=\"label label-warning\">warning</span></small>\n" +
-    "                        <small ng-if=\"alert.type == 2\"><span class=\"label label-danger\">danger</span></small>\n" +
+    "                        <small ng-if=\"alert.selType.value == 0\"><span class=\"label label-success\">success</span></small>\n" +
+    "                        <small ng-if=\"alert.selType.value == 1\"><span class=\"label label-warning\">warning</span></small>\n" +
+    "                        <small ng-if=\"alert.selType.value == 2\"><span class=\"label label-danger\">danger</span></small>\n" +
     "                    </h4>\n" +
     "                </td>\n" +
     "                <td ng-click=\"toggleAlerts(alert)\" style=\"cursor: pointer;\">\n" +
@@ -42448,12 +42448,6 @@ angular.module("manageAlerts/manageAlerts.tpl.html", []).run(["$templateCache", 
 angular.module("manageAlerts/manageAlertsItemFields.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageAlerts/manageAlertsItemFields.tpl.html",
     "<div class=\"row\">\n" +
-    "    <div class=\"col-md-12 form-group\">\n" +
-    "        <label for=\"message\">Message</label>\n" +
-    "        <textarea class=\"form-control\" ng-model=\"alert.message\" rows=\"3\" maxlength=\"200\" id=\"message\" required></textarea>\n" +
-    "    </div>\n" +
-    "</div>\n" +
-    "<div class=\"row\">\n" +
     "    <div class=\"col-md-2 form-group\">\n" +
     "        <label for=\"type\">Type</label>\n" +
     "        <select class=\"form-control\" ng-model=\"alert.selType\" id=\"type\"\n" +
@@ -42476,6 +42470,12 @@ angular.module("manageAlerts/manageAlertsItemFields.tpl.html", []).run(["$templa
     "        <label for=\"url\">URL (optional)</label>\n" +
     "        <input type=\"text\" class=\"form-control\" placeholder=\"http://lib.ua.edu/more-details/\" ng-model=\"alert.url\"\n" +
     "               id=\"url\" maxlength=\"1024\">\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-12 form-group\">\n" +
+    "        <label for=\"message\">Message</label>\n" +
+    "        <textarea class=\"form-control\" ng-model=\"alert.message\" rows=\"3\" maxlength=\"200\" id=\"message\" required></textarea>\n" +
     "    </div>\n" +
     "</div>\n" +
     "");
@@ -45327,7 +45327,8 @@ angular.module('manage.manageAlerts', [])
                     data.alerts[i].show = false;
                     data.alerts[i].dpStart = false;
                     data.alerts[i].dpEnd = false;
-                    for (var j = 0; j < TYPES.length; j++)
+                    data.alerts[i].selType = TYPES[0];
+                    for (var j = 1; j < TYPES.length; j++)
                         if (TYPES[j].value == data.alerts[i].type){
                             data.alerts[i].selType = TYPES[j];
                             break;
@@ -45400,7 +45401,8 @@ angular.module('manage.manageAlerts', [])
                         newAlert = angular.copy(alert);
                         newAlert.aid = data.id;
                         newAlert.show = false;
-                        for (var j = 0; j < TYPES.length; j++)
+                        newAlert.selType = TYPES[0];
+                        for (var j = 1; j < TYPES.length; j++)
                             if (TYPES[j].value == alert.type){
                                 newAlert.selType = TYPES[j];
                                 break;
