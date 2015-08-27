@@ -4868,7 +4868,7 @@ angular.module('ui.tinymce', [])
  * AngularJS file upload/drop directive and service with progress and abort
  * FileAPI Flash shim for old browsers not supporting FormData
  * @author  Danial  <danial.farid@gmail.com>
- * @version 7.0.13
+ * @version 7.0.14
  */
 
 (function () {
@@ -5288,7 +5288,7 @@ if (!window.FileReader) {
 /**!
  * AngularJS file upload/drop directive and service with progress and abort
  * @author  Danial  <danial.farid@gmail.com>
- * @version 7.0.13
+ * @version 7.0.14
  */
 
 if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
@@ -5309,7 +5309,7 @@ if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
 
 var ngFileUpload = angular.module('ngFileUpload', []);
 
-ngFileUpload.version = '7.0.13';
+ngFileUpload.version = '7.0.14';
 
 ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, $q, $timeout) {
   function sendHttp(config) {
@@ -5577,18 +5577,6 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
         if (noDelay) {
           update();
         } else if (upload.validate(files, ngModel, attr, scope, upload.attrGetter('ngfValidateLater', attr), function () {
-            if (upload.attrGetter('ngfResize', attr, scope)) {
-              var img = angular.element('<img>');
-              img.attr('src', files[0].dataUrl || files[0].blobUrl);
-              img.bind('load', function() {
-                upload.resize(img[0], 100, 100).then(function(rimg) {
-                  console.log(rimg);
-                  document.body.appendChild(rimg);
-                });
-              });
-              document.body.appendChild(img[0]);
-            }
-
             $timeout(function () {
               update();
             });
@@ -5600,6 +5588,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
 })();
 
 (function () {
+  var generatedElems = [];
 
   ngFileUpload.directive('ngfSelect', ['$parse', '$timeout', '$compile', 'Upload',
     function ($parse, $timeout, $compile, Upload) {
@@ -5626,8 +5615,6 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
       return upload.attrGetter(name, attr, scope);
     };
 
-    upload.registerValidators(ngModel, attr, scope);
-
     function isInputTypeFile() {
       return elem[0].tagName.toLowerCase() === 'input' && attr.type && attr.type.toLowerCase() === 'file';
     }
@@ -5644,14 +5631,18 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
       upload.updateModel(ngModel, attr, scope, fileChangeAttr(), files.length ? files : null, evt);
     }
 
-    scope.$watch(attrGetter('ngfMultiple'), function() {
+    var unwatches = [];
+    unwatches.push(scope.$watch(attrGetter('ngfMultiple'), function() {
       fileElem.attr('multiple', attrGetter('ngfMultiple', scope));
-    });
-    scope.$watch(attrGetter('ngfCapture'), function() {
+    }));
+    unwatches.push(scope.$watch(attrGetter('ngfCapture'), function() {
       fileElem.attr('capture', attrGetter('ngfCapture', scope));
-    });
+    }));
     attr.$observe('accept', function() {
       fileElem.attr('accept', attrGetter('accept'));
+    });
+    unwatches.push(function () {
+      if (attr.$$observers) delete attr.$$observers.accept;
     });
     function bindAttrToFileInput(fileElem) {
       if (elem !== fileElem) {
@@ -5680,6 +5671,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
       fileElem.css('visibility', 'hidden').css('position', 'absolute').css('overflow', 'hidden')
         .css('width', '0px').css('height', '0px').css('border', 'none')
         .css('margin', '0px').css('padding', '0px').attr('tabindex', '-1');
+      generatedElems.push({el: elem, ref: fileElem});
       document.body.appendChild(fileElem[0]);
 
       return fileElem;
@@ -5756,6 +5748,8 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
       elem.bind('click', resetModel);
     }
 
+    upload.registerValidators(ngModel, fileElem, attr, scope);
+
     function ie10SameFileSelectFix(evt) {
       if (fileElem && !fileElem.attr('__ngf_ie10_Fix_')) {
         if (!fileElem[0].parentNode) {
@@ -5784,7 +5778,22 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
 
     scope.$on('$destroy', function () {
       if (!isInputTypeFile()) fileElem.remove();
+      angular.forEach(unwatches, function(unwatch) {
+        unwatch();
+      });
     });
+
+    function contains(parent, descendant) {
+      return parent === descendant || Boolean(parent.compareDocumentPosition(descendant) & 16);
+    }
+
+    for (var i = 0; i < generatedElems.length; i++) {
+      var g = generatedElems[i];
+      if (!contains(document, g.el[0])) {
+        generatedElems.splice(i, 1);
+        g.ref.remove();
+      }
+    }
 
     if (window.FileAPI && window.FileAPI.ngfFixIE) {
       window.FileAPI.ngfFixIE(elem, fileElem, changeFn);
@@ -6009,7 +6018,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
   ngFileUpload.service('UploadValidate', ['UploadDataUrl', '$q', '$timeout', function (UploadDataUrl, $q, $timeout) {
     var upload = UploadDataUrl;
 
-    upload.registerValidators = function (ngModel, attr, scope, later) {
+    upload.registerValidators = function (ngModel, elem, attr, scope) {
       if (!ngModel) return;
 
       ngModel.$ngfValidations = [];
@@ -6020,12 +6029,22 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
       }
 
       ngModel.$formatters.push(function (val) {
-        if (later) {
+        if (upload.attrGetter('ngfValidateLater', attr, scope) || !ngModel.$$ngfValidated) {
           upload.validate(val, ngModel, attr, scope, false, function () {
             setValidities(ngModel);
+            ngModel.$$ngfValidated = false;
           });
+          if (val && val.length === 0) {
+            val = null;
+          }
+          if (elem && (val == null || val.length === 0)) {
+            if (elem.val()) {
+              elem.val(null);
+            }
+          }
         } else {
           setValidities(ngModel);
+          ngModel.$$ngfValidated = false;
         }
         return val;
       });
@@ -6042,13 +6061,23 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
 
     upload.validate = function (files, ngModel, attr, scope, later, callback) {
       ngModel = ngModel || {};
-      ngModel.$ngfValidations = [];
+      ngModel.$ngfValidations = ngModel.$ngfValidations || [];
+
+      angular.forEach(ngModel.$ngfValidations, function(v) {
+        v.valid = true;
+      });
 
       var attrGetter = function (name, params) {
         return upload.attrGetter(name, attr, scope, params);
       };
 
-      if (later) {
+      if (later ) {
+        callback.call(ngModel);
+        return;
+      }
+      ngModel.$$ngfValidated = true;
+
+      if (files == null || files.length === 0) {
         callback.call(ngModel);
         return;
       }
@@ -6387,7 +6416,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
       return elem.attr('disabled') || attrGetter('ngfDropDisabled', scope);
     }
 
-    upload.registerValidators(ngModel, attr, scope);
+    upload.registerValidators(ngModel, null, attr, scope);
 
     var leaveTimeout = null;
     var stopPropagation = $parse(attrGetter('ngfStopPropagation'));
@@ -48857,7 +48886,7 @@ angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", f
     "            <div class=\"media-body\">\n" +
     "\n" +
     "                <h4 class=\"media-heading\">\n" +
-    "                    <a ng-href=\"{{DB_PROXY_PREPEND_URL}}{{item.url}}\" title=\"{{item.title}}\" ng-bind-html=\"item.title | highlight:db.search\"></a>\n" +
+    "                    <a ng-href=\"{{item.url}}\" title=\"{{item.title}}\" ng-bind-html=\"item.title | highlight:db.search\"></a>\n" +
     "                    <!--<small ng-if=\"item.presentedBy\">({{item.presentedBy}})</small>-->\n" +
     "                    <small ng-bind-html=\"item.coverage | highlight:db.search\"></small>\n" +
     "\n" +
@@ -48957,11 +48986,9 @@ angular.module('ualib.databases')
                         switch (databases[i].location){
                             case 'UA':
                                 access = 'On campus only';
-                                databases[i].url = DB_PROXY_PREPEND_URL + databases[i].url;
                                 break;
                             case 'UA, Remote':
                                 access = 'myBama login required off campus';
-                                databases[i].url = DB_PROXY_PREPEND_URL + databases[i].url;
                                 break;
                             case 'www':
                             case 'WWW':
@@ -48970,6 +48997,8 @@ angular.module('ualib.databases')
                             default:
                                 access = databases[i].location;
                         }
+                        if (databases[i].auth == "1")
+                            databases[i].url = DB_PROXY_PREPEND_URL + databases[i].url;
                         databases[i].access = access;
                         databases[i].position = i;
                         databases[i].inScout = databases[i].notInEDS === 'Y';
@@ -48988,8 +49017,8 @@ angular.module('ualib.databases')
             .when('/databases', {
                 reloadOnSearch: false,
                 resolve: {
-                    databases: function(databasesFactory){
-                        return databasesFactory.get({db: 'all'})
+                    databases: ['databasesFactory', function(databasesFactory){
+                        return databasesFactory.get({db: 'active'})
                             .$promise.then(function(data){
                                 return data;
                             }, function(data, status, headers, config) {
@@ -49001,7 +49030,7 @@ angular.module('ualib.databases')
                                     config: config
                                 });
                             });
-                    }
+                    }]
                 },
                 templateUrl: 'databases/databases-list.tpl.html',
                 controller: 'DatabasesListCtrl'
@@ -49253,35 +49282,26 @@ angular.module('ualib.databases')
                 }
             });
             $scope.db = scopeFacets;
-            /*angular.forEach(params, function(val, key){
-                if (key === 'page'){
-                    $scope.pager.page = val;
-                }
-                else {
-                    if (angular.isDefined(val) && val !== ''){
-                        if (key == 'subjects' || key == 'types'){
-                            var filters = {};
-                            val.split(',').forEach(function(filter){
-                                filters[filter] = true;
-                            });
-                            val = filters;
-                        }
-                        $scope.db[key] = val;
-                    }
-                    else {
-                        if (angular.isObject($scope.db[key])){
-                            $scope.db[key] = {};
-                        }
-                        else{
-                            $scope.db[key] = '';
-                        }
-                    }
-                }
-            });*/
         }
 
+    }])
+    .filter('customHighlight',['$sce', function($sce) {
+        return function(text, filterPhrase) {
+            if (filterPhrase) {
+                var tag_re = /(<a\/?[^>]+>)/g;
+                var filter_re = new RegExp('(' + filterPhrase + ')', 'gi');
+                text = text.split(tag_re).map(function(string) {
+                    if (string.match(tag_re)) {
+                        return string;
+                    } else {
+                        return string.replace(filter_re,
+                            '<span class="ui-match">$1</span>');
+                    }
+                }).join('');
+            }
+            return $sce.trustAsHtml(text);
+        };
     }]);
-
 
 ;angular.module('ualib.musicSearch.templates', ['videos/videos-list.tpl.html']);
 
