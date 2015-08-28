@@ -10059,6 +10059,50 @@ footer > .sub-footer {
      transition: opacity  .2s .1s;
 }
 /*# sourceMappingURL=/wp-content/themes/roots/assets/css/main.css.map */
+.page-with-menu {
+  opacity: 0;
+  display: table;
+  -o-transition: opacity .2s;
+  -webkit-transition: opacity .2s;
+  transition: opacity 0.2s;
+}
+.page-with-menu > div {
+  display: table-cell;
+  float: none;
+}
+.page-with-menu.loaded {
+  opacity: 1;
+}
+.page-section-menu {
+  font-size: 17px;
+}
+.scrollfix {
+  position: fixed;
+  top: 30px;
+}
+.scrollfix-bottom-limit {
+  position: absolute;
+  bottom: 0;
+  top: auto;
+}
+.tabset-vertical > .tab-content {
+  position: relative;
+}
+.tabset-vertical > .tab-content > .tab-pane {
+  top: 0;
+  width: 75%;
+  opacity: 0;
+  -webkit-transition: opacity .2s 0s;
+  -o-transition: opacity 0.2s 0s;
+     transition: opacity 0.2s 0s;
+}
+.tabset-vertical > .tab-content > .tab-pane.active {
+  opacity: 1;
+  -webkit-transition: opacity .2s .1s;
+  -o-transition: opacity 0.2s 0.1s;
+     transition: opacity 0.2s 0.1s;
+}
+/*# sourceMappingURL=/wp-content/themes/roots/assets/css/main.css.map */
 .calendar table > thead > tr > td {
   color: #31708f;
   text-align: center;

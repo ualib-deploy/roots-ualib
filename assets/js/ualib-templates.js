@@ -43,7 +43,7 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "            <div class=\"card front-page-card\">\n" +
     "              <div class=\"card-body\">\n" +
     "                <div class=\"row\">\n" +
-    "                  <div class=\"col-xs-6\">\n" +
+    "                  <div class=\"col-sm-6\">\n" +
     "                    <a href=\"/#/databases\" class=\"service-card\">\n" +
     "                      <span class=\"fa fa-3x fa-database\"></span>\n" +
     "                      <h4>Databases</h4>\n" +
@@ -63,7 +63,7 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                    </a>\n" +
     "                  </div>\n" +
     "\n" +
-    "                  <div class=\"col-xs-6\">\n" +
+    "                  <div class=\"col-sm-6\">\n" +
     "                    <a href=\"/research-tools/e-resources/\" class=\"service-card\">\n" +
     "                      <span class=\"fa fa-bolt\"></span>\n" +
     "                      <h4>E-Resources</h4>\n" +
