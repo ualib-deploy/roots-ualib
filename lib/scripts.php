@@ -30,8 +30,10 @@ function roots_scripts() {
    */
   if (WP_ENV === 'development') {
     $assets = array(
+      'css_bower'       => '/assets/css/main_bower.css',
       'css'       => '/assets/css/main.css',
       'CDN'       => '//fonts.googleapis.com/css?family=Roboto:300,400,500,700|Open+Sans:300,400,600,700|EB+Garamond',
+      'js_bower'        => '/assets/js/scripts_bower.js',
       'js'        => '/assets/js/scripts.js',
       'modernizr' => '/assets/vendor/modernizr/modernizr.js',
       'jquery'    => '//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.js'
@@ -42,13 +44,16 @@ function roots_scripts() {
     $assets     = json_decode($get_assets, true);
     $assets     = array(
       'CDN'       => '//fonts.googleapis.com/css?family=Roboto:400,700|Open+Sans:400,700',
+      'css_bower'       => '/assets/css/main_bower.min.css?' . $assets['assets/css/main_bower.min.css']['hash'],
       'css'       => '/assets/css/main.min.css?' . $assets['assets/css/main.min.css']['hash'],
+      'js_bower'        => '/assets/js/scripts_bower.min.js?' . $assets['assets/js/scripts_bower.min.js']['hash'],
       'js'        => '/assets/js/scripts.min.js?' . $assets['assets/js/scripts.min.js']['hash'],
       'modernizr' => '/assets/js/vendor/modernizr.min.js',
       'jquery'    => '//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js'
     );
   }
 
+    wp_enqueue_style('roots_css_bower', get_template_directory_uri() . $assets['css_bower'], false, null);
     wp_enqueue_style('roots_css', get_template_directory_uri() . $assets['css'], false, null);
     wp_enqueue_style('roots_cdn', $assets['CDN'], false, null);
 
@@ -77,6 +82,7 @@ function roots_scripts() {
         wp_enqueue_script($name, $_cnd, array(), null, true);
     }
 
+    wp_enqueue_script('roots_js_bower', get_template_directory_uri() . $assets['js_bower'], array(), null, true);
     wp_enqueue_script('roots_js', get_template_directory_uri() . $assets['js'], array(), null, true);
 
 
