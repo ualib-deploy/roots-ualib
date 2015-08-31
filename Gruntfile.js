@@ -6,7 +6,6 @@ module.exports = function(grunt) {
     require('time-grunt')(grunt);
 
     var jsFileList = [
-
         'assets/js/ualib-templates.js',
         'assets/js/plugins/*.js',
         'assets/js/_*.js'
@@ -134,7 +133,7 @@ module.exports = function(grunt) {
             dist: {
                 files: [
                     {
-                        'assets/src/scripts.js': ['assets/src/scripts.js']
+                        'assets/js/scripts.js': ['assets/js/scripts.js']
                     }
                 ]
             }
@@ -145,7 +144,7 @@ module.exports = function(grunt) {
             },
             dist: {
                 files: {
-                    'assets/js/scripts.min.js': [jsFileList]
+                    'assets/js/scripts.min.js': ['assets/js/scripts.js']
                 }
             }
         },
@@ -281,7 +280,7 @@ module.exports = function(grunt) {
                     //it's empty by default which means they will go into the directory
                     //where your Gruntfile.js is placed
                     removeScripts: true,
-                    snapshotPath: 'assets/dist/snapshots/',
+                    snapshotPath: 'assets/snapshots/',
                     //This should be either the base path to your index.html file
                     //or your base URL. Currently the task does not use it's own
                     //webserver. So if your site needs a webserver to be fully
@@ -301,6 +300,14 @@ module.exports = function(grunt) {
                     urls: [
                         '',
                         '#/hours',
+                        '#/hours?library=gorgas',
+                        '#/hours?library=music',
+                        '#/hours?library=media',
+                        '#/hours?library=williams',
+                        '#/hours?library=rodgers',
+                        '#/hours?library=mclure',
+                        '#/hours?library=hoole',
+                        '#/hours?library=bruno',
                         '#/databases',
                         '#/news-exhibits',
                         '#/staffdir',
