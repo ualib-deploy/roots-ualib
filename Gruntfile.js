@@ -6,49 +6,14 @@ module.exports = function(grunt) {
     require('time-grunt')(grunt);
 
     var jsFileList = [
-        '<%= bower.directory %>/angular-filter/dist/angular-filter.js',
-        '<%= bower.directory %>/angular-ui-utils/ui-utils.js',
-        '<%= bower.directory %>/angular-ui-tinymce/src/tinymce.js',
-        '<%= bower.directory %>/ng-file-upload/ng-file-upload-all.js',
-        '<%= bower.directory %>/angular-carousel/dist/angular-carousel.js',
-        '<%= bower.directory %>/angular-touch/angular-touch.js',
-        '<%= bower.directory %>/angular-scroll/angular-scroll.js',
-        '<%= bower.directory %>/lodash/lodash.js',
-        '<%= bower.directory %>/angular-google-maps/dist/angular-google-maps.js',
-        '<%= bower.directory %>/ualib-ui/dist/ualib-ui-templates.js',
-        '<%= bower.directory %>/ualib-ui/dist/ualib-ui.js',
-        '<%= bower.directory %>/onesearch/dist/onesearch-templates.js',
-        '<%= bower.directory %>/onesearch/dist/onesearch.js',
-        '<%= bower.directory %>/ualib-hours/dist/hours-templates.js',
-        '<%= bower.directory %>/ualib-hours/dist/hours.js',
-        '<%= bower.directory %>/manage/dist/manage-templates.js',
-        '<%= bower.directory %>/manage/dist/manage.js',
-        '<%= bower.directory %>/databases/dist/databases-templates.js',
-        '<%= bower.directory %>/databases/dist/databases.js',
-        '<%= bower.directory %>/musicSearch/dist/musicSearch-templates.js',
-        '<%= bower.directory %>/musicSearch/dist/musicSearch.js',
-        '<%= bower.directory %>/ualib_staffdir/dist/staffdir-templates.js',
-        '<%= bower.directory %>/ualib_staffdir/dist/staffdir.js',
-        '<%= bower.directory %>/ualib-softwareList/dist/ualib.softwareList-templates.js',
-        '<%= bower.directory %>/ualib-softwareList/dist/ualib.softwareList.js',
-        '<%= bower.directory %>/ualib-news/dist/ualib.news-templates.js',
-        '<%= bower.directory %>/ualib-news/dist/ualib.news.js',
+
         'assets/js/ualib-templates.js',
         'assets/js/plugins/*.js',
         'assets/js/_*.js'
     ];
 
     var lessFileList = [
-        '<%= bower.directory %>/angular-carousel/dist/angular-carousel.css',
-        'assets/less/main.less',
-        '<%= bower.directory %>/onesearch/src/**/*.less',
-        '<%= bower.directory %>/ualib-ui/dist/*.css',
-        '<%= bower.directory %>/ualib-hours/dist/hours.css',
-        '<%= bower.directory %>/ualib_staffdir/dist/staffdir.css',
-        '<%= bower.directory %>/ualib-softwareList/dist/ualib.softwareList.css',
-        '<%= bower.directory %>/ualib-news/dist/ualib.news.css',
-        '<%= bower.directory %>/manage/dist/manage.css',
-        '<%= bower.directory %>/databases/dist/databases.css'
+        'assets/less/main.less'
     ];
 
 
@@ -62,6 +27,7 @@ module.exports = function(grunt) {
             all: [
                 'Gruntfile.js',
                 'assets/js/*.js',
+                '!assets/js/*_bower.js',
                 '!assets/js/scripts.js',
                 '!assets/**/*.min.*'
             ]
@@ -104,6 +70,51 @@ module.exports = function(grunt) {
                 src: [jsFileList],
                 dest: 'assets/js/scripts.js'
             }
+        },
+        bower_concat: {
+            dev: {
+                dest: 'assets/js/scripts_bower.js',
+                cssDest: 'assets/css/main_bower.css',
+                exclude: [
+                    'angular',
+                    'angular-animate',
+                    'angular-route',
+                    'angular-sanitize',
+                    'angular-resource',
+                    'angular-bootstrap',
+                    'bootstrap',
+                    'yamm3'
+                ],
+                callback: function(mainFiles, component) {
+                    return mainFiles.map(function(filepath) {
+                        // Use minified files if available
+                        var min = filepath.replace(/\.min(?=\.)/, '');
+                        return grunt.file.exists(min) ? min : filepath;
+                    });
+                }
+            },
+            build: {
+                dest: 'assets/js/scripts_bower.min.js',
+                cssDest: 'assets/css/main_bower.min.css',
+                exclude: [
+                    'angular',
+                    'angular-animate',
+                    'angular-route',
+                    'angular-sanitize',
+                    'angular-resource',
+                    'angular-bootstrap',
+                    'bootstrap',
+                    'yamm3'
+                ],
+                callback: function(mainFiles, component) {
+                    return mainFiles.map(function(filepath) {
+                        // Use minified files if available
+                        var min = filepath.replace(/\.(js|css)$/, '.min$&');
+                        return grunt.file.exists(min) ? min : filepath;
+                    });
+                }
+            }
+
         },
         copy: {
             dist: {
@@ -183,7 +194,7 @@ module.exports = function(grunt) {
                     }
                 },
                 files: {
-                    'lib/scripts.php': 'assets/{css,js}/{main,scripts}.min.{css,js}'
+                    'lib/scripts.php': 'assets/{css,css,js,js}/{main,main_bower,scripts,scripts_bower}.min.{css,js}'
                 }
             }
         },
@@ -293,7 +304,15 @@ module.exports = function(grunt) {
                         '#/databases',
                         '#/news-exhibits',
                         '#/staffdir',
-                        '#/videos'
+                        '#/videos',
+                        '#/hours?library=gorgas',
+                        '#/hours?library=music',
+                        '#/hours?library=media',
+                        '#/hours?library=williams',
+                        '#/hours?library=rodgers',
+                        '#/hours?library=mclure',
+                        '#/hours?library=hoole',
+                        '#/hours?library=bruno'
                     ],
                     // options for phantomJs' page object
                     // see http://phantomjs.org/api/webpage/ for available options
@@ -301,17 +320,7 @@ module.exports = function(grunt) {
                         viewportSize : {
                             width: 1200,
                             height: 800
-                        },
-                        ownsPages: [
-                            '#/hours?library=gorgas',
-                            '#/hours?library=music',
-                            '#/hours?library=media',
-                            '#/hours?library=williams',
-                            '#/hours?library=rodgers',
-                            '#/hours?library=mclure',
-                            '#/hours?library=hoole',
-                            '#/hours?library=bruno'
-                        ]
+                        }
                     }
                 }
             }
@@ -327,7 +336,8 @@ module.exports = function(grunt) {
         'jshint',
         'less:dev',
         'autoprefixer:dev',
-        'concat'
+        'concat',
+        'bower_concat:dev'
     ]);
     grunt.registerTask('live-build', [
         'html2js',
@@ -341,7 +351,7 @@ module.exports = function(grunt) {
         'modernizr',
         'version',
         'replace',
-        'htmlSnapshot'
+        'bower_concat:build'
     ]);
     grunt.registerTask('lessVarsToSass', ['lessToSass:lessVars']);
 };
