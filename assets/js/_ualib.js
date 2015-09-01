@@ -26,7 +26,8 @@ angular.module('ualib', [
                 redirectTo: '/home'
             });
 
-        // Extend $compileProvider to allow mailto/file/ftp in ng-href ( without this, links render as "unsafe:...."
+        // Extend $compileProvider to allow mailto/file/ftp in ng-href - without this, links render as "unsafe:mailto:..."
+        // This is only requires for Angular 1.2.28 - after upgrade, remove this
         $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|file):/);
 
     }])

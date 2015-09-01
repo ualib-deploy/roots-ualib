@@ -199,7 +199,7 @@ module.exports = function(grunt) {
         },
         replace: {
             devToLiveJS: {
-                src: ['assets/js/scripts.min.js'],
+                src: ['assets/js/scripts.min.js', 'assets/js/scripts_bower.min.js'],
                 dest: 'assets/js/',
                 replacements: [{
                     from: /(wwwdev2?)/g,
@@ -207,7 +207,7 @@ module.exports = function(grunt) {
                 }]
             },
             devToLiveCSS: {
-                src: ['assets/css/main.min.css'],
+                src: ['assets/css/main.min.css', 'assets/js/main_bower.min.css'],
                 dest: 'assets/css/',
                 replacements: [{
                     from: /(wwwdev2?)/g,
@@ -357,8 +357,8 @@ module.exports = function(grunt) {
         'uglify',
         'modernizr',
         'version',
-        'replace',
-        'bower_concat:build'
+        'bower_concat:build',
+        'replace'
     ]);
     grunt.registerTask('lessVarsToSass', ['lessToSass:lessVars']);
 };
