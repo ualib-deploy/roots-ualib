@@ -82,7 +82,8 @@ module.exports = function(grunt) {
                     'angular-resource',
                     'angular-bootstrap',
                     'bootstrap',
-                    'yamm3'
+                    'yamm3',
+                    'tinymce-dist'
                 ],
                 callback: function(mainFiles, component) {
                     return mainFiles.map(function(filepath) {
@@ -103,7 +104,8 @@ module.exports = function(grunt) {
                     'angular-resource',
                     'angular-bootstrap',
                     'bootstrap',
-                    'yamm3'
+                    'yamm3',
+                    'tinymce-dist'
                 ],
                 callback: function(mainFiles, component) {
                     return mainFiles.map(function(filepath) {
