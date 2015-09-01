@@ -13,8 +13,9 @@ if (defined('GROUP_ANY_WEBAPP'))
         <div class="container-fluid">
             <div class="navbar-header">
                 <a class="navbar-brand" href="/#/home">
-                    <img src="<?php print get_template_directory_uri(); ?>/assets/img/new-ualib-logo.png" class="hidden-xs" rel="home" alt="University of Alabama Libraries"/>
-                    <span class="visible-xs">UA Libraries</span>
+                    <img src="<?php print get_template_directory_uri(); ?>/assets/img/ualib-logo-md.png" class="hidden-xs hidden-sm" rel="home" alt="University of Alabama Libraries"/>
+                    <img src="<?php print get_template_directory_uri(); ?>/assets/img/ualib-logo-sm.png" class="visible-xs visible-sm" rel="home" alt="University of Alabama Libraries"/>
+
                 </a>
             </div>
             <div>
