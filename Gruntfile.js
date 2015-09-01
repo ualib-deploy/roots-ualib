@@ -209,7 +209,7 @@ module.exports = function(grunt) {
                 }]
             },
             devToLiveCSS: {
-                src: ['assets/css/main.min.css', 'assets/js/main_bower.min.css'],
+                src: ['assets/css/main.min.css', 'assets/css/main_bower.min.css'],
                 dest: 'assets/css/',
                 replacements: [{
                     from: /(wwwdev2?)/g,
