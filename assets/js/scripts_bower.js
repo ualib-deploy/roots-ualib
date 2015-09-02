@@ -69240,15 +69240,15 @@ angular.module("staff-profile/staff-profile.tpl.html", []).run(["$templateCache"
     "                <li ng-if=\"userProfile.person.resume.length > 11\"><span class=\"fa fa-file-text fa-li\"></span>\n" +
     "                    <a ng-href=\"{{userProfile.person.resume}}\">Resume / CV</a>\n" +
     "                </li>\n" +
-    "                <li ng-if=\"userProfile.person.social1.length > 11\">\n" +
+    "                <li ng-if=\"userProfile.person.social1\">\n" +
     "                    <span ng-class=\"{{userProfile.person.snClass1}}\"></span>\n" +
     "                    <a ng-href=\"{{userProfile.person.social1}}\" class=\"external-link\">{{userProfile.person.snTitle1}}</a>\n" +
     "                </li>\n" +
-    "                <li ng-if=\"userProfile.person.social2.length > 11\">\n" +
+    "                <li ng-if=\"userProfile.person.social2\">\n" +
     "                    <span ng-class=\"{{userProfile.person.snClass2}}\"></span>\n" +
     "                    <a ng-href=\"{{userProfile.person.social2}}\" class=\"external-link\">{{userProfile.person.snTitle2}}</a>\n" +
     "                </li>\n" +
-    "                <li ng-if=\"userProfile.person.social3.length > 11\">\n" +
+    "                <li ng-if=\"userProfile.person.social3\">\n" +
     "                    <span ng-class=\"{{userProfile.person.snClass3}}\"></span>\n" +
     "                    <a ng-href=\"{{userProfile.person.social3}}\" class=\"external-link\">{{userProfile.person.snTitle3}}</a>\n" +
     "                </li>\n" +
@@ -69414,35 +69414,37 @@ angular.module('staffdir', ['ualib.staffdir']);
                                 }
 
                                 for (var i = 1; i < 4; i++) {
-                                    val["snClass" + i] = "fa fa-user fa-li";
-                                    val["snTitle" + i] = "Social Network";
-                                    if (val["social" + i].toLowerCase().indexOf("facebook.com") > 0) {
-                                        val["snClass" + i] = "fa fa-facebook fa-li";
-                                        val["snTitle" + i] = "Facebook";
-                                    }
-                                    if (val["social" + i].toLowerCase().indexOf("twitter.com") > 0) {
-                                        val["snClass" + i] = "fa fa-twitter fa-li";
-                                        val["snTitle" + i] = "Twitter";
-                                    }
-                                    if (val["social" + i].toLowerCase().indexOf("linkedin.com") > 0) {
-                                        val["snClass" + i] = "fa fa-linkedin fa-li";
-                                        val["snTitle" + i] = "LinkedIn";
-                                    }
-                                    if (val["social" + i].toLowerCase().indexOf("vk.com") > 0) {
-                                        val["snClass" + i] = "fa fa-vk fa-li";
-                                        val["snTitle" + i] = "VK";
-                                    }
-                                    if (val["social" + i].toLowerCase().indexOf("plus.google.com") > 0) {
-                                        val["snClass" + i] = "fa fa-google-plus fa-li";
-                                        val["snTitle" + i] = "Google Plus";
-                                    }
-                                    if (val["social" + i].toLowerCase().indexOf("instagram.com") > 0) {
-                                        val["snClass" + i] = "fa fa-instagram fa-li";
-                                        val["snTitle" + i] = "Instagram";
-                                    }
-                                    if (val["social" + i].toLowerCase().indexOf("youtube.com") > 0) {
-                                        val["snClass" + i] = "fa fa-youtube fa-li";
-                                        val["snTitle" + i] = "Youtube";
+                                    if (val["social" + i] !== null) {
+                                        val["snClass" + i] = "fa fa-user fa-li";
+                                        val["snTitle" + i] = "Social Network";
+                                        if (val["social" + i].toLowerCase().indexOf("facebook.com") > 0) {
+                                            val["snClass" + i] = "fa fa-facebook fa-li";
+                                            val["snTitle" + i] = "Facebook";
+                                        }
+                                        if (val["social" + i].toLowerCase().indexOf("twitter.com") > 0) {
+                                            val["snClass" + i] = "fa fa-twitter fa-li";
+                                            val["snTitle" + i] = "Twitter";
+                                        }
+                                        if (val["social" + i].toLowerCase().indexOf("linkedin.com") > 0) {
+                                            val["snClass" + i] = "fa fa-linkedin fa-li";
+                                            val["snTitle" + i] = "LinkedIn";
+                                        }
+                                        if (val["social" + i].toLowerCase().indexOf("vk.com") > 0) {
+                                            val["snClass" + i] = "fa fa-vk fa-li";
+                                            val["snTitle" + i] = "VK";
+                                        }
+                                        if (val["social" + i].toLowerCase().indexOf("plus.google.com") > 0) {
+                                            val["snClass" + i] = "fa fa-google-plus fa-li";
+                                            val["snTitle" + i] = "Google Plus";
+                                        }
+                                        if (val["social" + i].toLowerCase().indexOf("instagram.com") > 0) {
+                                            val["snClass" + i] = "fa fa-instagram fa-li";
+                                            val["snTitle" + i] = "Instagram";
+                                        }
+                                        if (val["social" + i].toLowerCase().indexOf("youtube.com") > 0) {
+                                            val["snClass" + i] = "fa fa-youtube fa-li";
+                                            val["snTitle" + i] = "Youtube";
+                                        }
                                     }
                                 }
 
