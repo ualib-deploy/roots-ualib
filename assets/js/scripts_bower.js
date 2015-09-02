@@ -30891,7 +30891,7 @@ angular.module('manage.manageHours', [])
         $scope.createExc = function(){
             $scope.loading = true;
             $scope.newException.lid = $scope.selLib.lid;
-            $scope.newException.datems = $scope.newException.datems.valueOf() / 1000;
+            $scope.newException.datems2 = $scope.newException.datems.valueOf() / 1000;
             hmFactory.postData({action : 6}, $scope.newException)
                 .success(function(data) {
                     if ((typeof data === 'object') && (data !== null)){
@@ -30899,7 +30899,7 @@ angular.module('manage.manageHours', [])
                         for (i = 0; i < data.length; i++){
                             var newExc = {};
                             newExc.id = data[i].id;
-                            newExc.datems = new Date($scope.newException.datems * 1000);
+                            newExc.datems = new Date($scope.newException.datems2 * 1000);
                             newExc.days = $scope.newException.days;
                             newExc.desc = $scope.newException.desc;
                             newExc.from = $scope.newException.from;
