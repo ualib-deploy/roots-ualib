@@ -2602,14 +2602,15 @@ div.rn-carousel-indicator span {
 /*# sourceMappingURL=dist/ualib.news.css.map */
 .news-list-tb {
   min-width: 180px;
+  min-height: 100px;
   background-position: center center;
   background-repeat: no-repeat;
 }
 .news-list-tb-news {
-  background-image: url('https://wwwdev2.lib.ua.edu/newsApp/images/tb_news.png');
+  background-image: url('/newsApp/images/tb_news.png');
 }
 .news-list-tb-exhibit {
-  background-image: url('https://wwwdev2.lib.ua.edu/newsApp/images/tb_exhibit.png');
+  background-image: url('/newsApp/images/tb_exhibit.png');
 }
 /*# sourceMappingURL=dist/ualib.news.css.map */
 /*
