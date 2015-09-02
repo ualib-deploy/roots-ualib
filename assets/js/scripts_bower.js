@@ -69413,41 +69413,6 @@ angular.module('staffdir', ['ualib.staffdir']);
                                     console.log(val.email);
                                 }
 
-                                for (var i = 1; i < 4; i++) {
-                                    if (val["social" + i] !== null) {
-                                        val["snClass" + i] = "fa fa-user fa-li";
-                                        val["snTitle" + i] = "Social Network";
-                                        if (val["social" + i].toLowerCase().indexOf("facebook.com") > 0) {
-                                            val["snClass" + i] = "fa fa-facebook fa-li";
-                                            val["snTitle" + i] = "Facebook";
-                                        }
-                                        if (val["social" + i].toLowerCase().indexOf("twitter.com") > 0) {
-                                            val["snClass" + i] = "fa fa-twitter fa-li";
-                                            val["snTitle" + i] = "Twitter";
-                                        }
-                                        if (val["social" + i].toLowerCase().indexOf("linkedin.com") > 0) {
-                                            val["snClass" + i] = "fa fa-linkedin fa-li";
-                                            val["snTitle" + i] = "LinkedIn";
-                                        }
-                                        if (val["social" + i].toLowerCase().indexOf("vk.com") > 0) {
-                                            val["snClass" + i] = "fa fa-vk fa-li";
-                                            val["snTitle" + i] = "VK";
-                                        }
-                                        if (val["social" + i].toLowerCase().indexOf("plus.google.com") > 0) {
-                                            val["snClass" + i] = "fa fa-google-plus fa-li";
-                                            val["snTitle" + i] = "Google Plus";
-                                        }
-                                        if (val["social" + i].toLowerCase().indexOf("instagram.com") > 0) {
-                                            val["snClass" + i] = "fa fa-instagram fa-li";
-                                            val["snTitle" + i] = "Instagram";
-                                        }
-                                        if (val["social" + i].toLowerCase().indexOf("youtube.com") > 0) {
-                                            val["snClass" + i] = "fa fa-youtube fa-li";
-                                            val["snTitle" + i] = "Youtube";
-                                        }
-                                    }
-                                }
-
                                 //preset alpha index values base on first and last name
                                 val.alphaIndex = {};
                                 val.alphaIndex.lastname = val.lastname.charAt(0).toUpperCase();
@@ -69703,6 +69668,40 @@ angular.module('staffdir', ['ualib.staffdir']);
 
                 StaffFactory.profile().get({login: $scope.login})
                     .$promise.then(function(data){
+                        for (var i = 1; i < 4; i++) {
+                            if (data.person["social" + i] !== null) {
+                                data.person["snClass" + i] = "fa fa-user fa-li";
+                                data.person["snTitle" + i] = "Social Network";
+                                if (data.person["social" + i].toLowerCase().indexOf("facebook.com") > 0) {
+                                    data.person["snClass" + i] = "fa fa-facebook fa-li";
+                                    data.person["snTitle" + i] = "Facebook";
+                                }
+                                if (data.person["social" + i].toLowerCase().indexOf("twitter.com") > 0) {
+                                    data.person["snClass" + i] = "fa fa-twitter fa-li";
+                                    data.person["snTitle" + i] = "Twitter";
+                                }
+                                if (data.person["social" + i].toLowerCase().indexOf("linkedin.com") > 0) {
+                                    data.person["snClass" + i] = "fa fa-linkedin fa-li";
+                                    data.person["snTitle" + i] = "LinkedIn";
+                                }
+                                if (data.person["social" + i].toLowerCase().indexOf("vk.com") > 0) {
+                                    data.person["snClass" + i] = "fa fa-vk fa-li";
+                                    data.person["snTitle" + i] = "VK";
+                                }
+                                if (data.person["social" + i].toLowerCase().indexOf("plus.google.com") > 0) {
+                                    data.person["snClass" + i] = "fa fa-google-plus fa-li";
+                                    data.person["snTitle" + i] = "Google Plus";
+                                }
+                                if (data.person["social" + i].toLowerCase().indexOf("instagram.com") > 0) {
+                                    data.person["snClass" + i] = "fa fa-instagram fa-li";
+                                    data.person["snTitle" + i] = "Instagram";
+                                }
+                                if (data.person["social" + i].toLowerCase().indexOf("youtube.com") > 0) {
+                                    data.person["snClass" + i] = "fa fa-youtube fa-li";
+                                    data.person["snTitle" + i] = "Youtube";
+                                }
+                            }
+                        }
                         $scope.userProfile = data;
                         console.dir(data);
                     }, function(data){
