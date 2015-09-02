@@ -30625,7 +30625,15 @@ angular.module('manage.manageHours', [])
             $scope.initSemesters = function(semesters){
                 for (var sem = 0; sem < semesters.length; sem++){
                     semesters[sem].startdate = new Date(semesters[sem].startdate);
+                    semesters[sem].startdate.setTime(
+                        semesters[sem].startdate.getTime() +
+                        semesters[sem].startdate.getTimezoneOffset()*60*1000
+                    );
                     semesters[sem].enddate = new Date(semesters[sem].enddate);
+                    semesters[sem].enddate.setTime(
+                        semesters[sem].enddate.getTime() +
+                        semesters[sem].enddate.getTimezoneOffset()*60*1000
+                    );
                     semesters[sem].dp = false;
                 }
                 return semesters;
@@ -30815,10 +30823,6 @@ angular.module('manage.manageHours', [])
         $scope.newException.desc = "";
         $scope.newException.days = 1;
         $scope.newException.datems = new Date();
-        $scope.newException.datems.setTime(
-            $scope.newException.datems.getTime() +
-            $scope.newException.datems.getTimezoneOffset()*60*1000
-        );
         $scope.expExc = -1;
 
         $scope.onExcFocus = function($event, index){
@@ -30882,6 +30886,7 @@ angular.module('manage.manageHours', [])
         $scope.createExc = function(){
             $scope.loading = true;
             $scope.newException.lid = $scope.selLib.lid;
+            $scope.newException.datems = $scope.newException.datems.valueOf() / 1000;
             hmFactory.postData({action : 6}, $scope.newException)
                 .success(function(data) {
                     if ((typeof data === 'object') && (data !== null)){
