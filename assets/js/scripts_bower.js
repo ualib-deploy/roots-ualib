@@ -30031,7 +30031,9 @@ angular.module('manage.manageAlerts', [])
         $scope.newAlert.message = "";
         $scope.newAlert.selType = TYPES[0];
         $scope.newAlert.dateStartDP = new Date();
+        $scope.newAlert.dateStartDP.setHours(0,0,0,0);
         $scope.newAlert.dateEndDP = new Date();
+        $scope.newAlert.dateEndDP.setHours(0,0,0,0);
         $scope.newAlert.url = "";
         $scope.newAlert.dpStart = false;
         $scope.newAlert.dpEnd = false;
@@ -30641,7 +30643,6 @@ angular.module('manage.manageHours', [])
 
             hmFactory.getData("semesters")
                 .success(function(data) {
-                    console.dir(data);
                     $scope.selLib = data.libraries[0];
                     for (var lib = 0; lib < data.libraries.length; lib++){
                         for (var ex = 0; ex < data.exc[lib].length; ex++){
@@ -30650,6 +30651,7 @@ angular.module('manage.manageHours', [])
                         }
                         data.sem[lib] = $scope.initSemesters(data.sem[lib]);
                     }
+                    console.dir(data);
                     $scope.allowedLibraries = data;
                 })
                 .error(function(data, status, headers, config) {
@@ -30704,6 +30706,7 @@ angular.module('manage.manageHours', [])
         $scope.newSemester.dow = [];
         $scope.newSemester.name = "";
         $scope.newSemester.startdate = new Date();
+        $scope.newSemester.startdate.setHours(0,0,0,0);
 
         for (var day = 0; day < 7; day++) {
             $scope.newSemester.dow[day] = {};
@@ -30823,6 +30826,7 @@ angular.module('manage.manageHours', [])
         $scope.newException.desc = "";
         $scope.newException.days = 1;
         $scope.newException.datems = new Date();
+        $scope.newException.datems.setHours(0,0,0,0);
         $scope.expExc = -1;
 
         $scope.onExcFocus = function($event, index){
@@ -31233,7 +31237,9 @@ angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
             $scope.uploading = false;
 
             $scope.newNews.activeFrom = new Date();
+            $scope.newNews.activeFrom.setHours(0,0,0,0);
             $scope.newNews.activeUntil = new Date();
+            $scope.newNews.activeUntil.setHours(0,0,0,0);
             $scope.newNews.dpFrom = false;
             $scope.newNews.dpUntil = false;
             $scope.newNews.contactName = '';
@@ -31562,11 +31568,13 @@ angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
                     if (isFrom === true) {
                         if ($scope.data.news[$scope.data.news.indexOf(news)].activeFrom == null) {
                             $scope.data.news[$scope.data.news.indexOf(news)].activeFrom = new Date();
+                            $scope.data.news[$scope.data.news.indexOf(news)].activeFrom.setHours(0,0,0,0);
                         }
                         $scope.data.news[$scope.data.news.indexOf(news)].dpFrom = true;
                     } else {
                         if ($scope.data.news[$scope.data.news.indexOf(news)].activeUntil == null) {
                             $scope.data.news[$scope.data.news.indexOf(news)].activeUntil = new Date();
+                            $scope.data.news[$scope.data.news.indexOf(news)].activeUntil.setHours(0,0,0,0);
                         }
                         $scope.data.news[$scope.data.news.indexOf(news)].dpUntil = true;
                     }
