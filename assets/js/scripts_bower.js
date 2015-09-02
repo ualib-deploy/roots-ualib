@@ -69474,7 +69474,7 @@ angular.module('staffdir', ['ualib.staffdir']);
         return {
             restrict: 'AC',
             templateUrl: 'staff-card/staff-card-list.tpl.html',
-            controller: function($scope){
+            controller: ['$scope', function($scope){
                 $scope.staffdir = {};
 
                 StaffFactory.directory().get()
@@ -69485,7 +69485,7 @@ angular.module('staffdir', ['ualib.staffdir']);
                     }, function(){
                         console.log('Staffdir Error -- Come on, put in proper error handling already');
                     });
-            }
+            }]
         };
     }])
 
@@ -69661,7 +69661,7 @@ angular.module('staffdir', ['ualib.staffdir']);
                 login: '@email'
             },
             templateUrl: 'staff-profile/staff-profile.tpl.html',
-            controller: function($scope){
+            controller: ['$scope', function($scope){
                 $scope.userProfile = {};
 
                 console.log("Login: " + $scope.login);
@@ -69707,7 +69707,7 @@ angular.module('staffdir', ['ualib.staffdir']);
                     }, function(data){
                         console.log('Error: cold not get profile! ' + data);
                     });
-            }
+            }]
         };
     }]);
 
