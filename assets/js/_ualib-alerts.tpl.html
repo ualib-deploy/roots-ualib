@@ -1,8 +1,4 @@
-<div class="row">
-    <div class="col-md-12">
-        <alert class="animate" ng-repeat="alert in list.alerts" type="{{alert.typeStr}}" close="closeAlert($index)">
-            <span class="fa fa-exclamation-triangle"></span> {{alert.message}}
-            <span ng-if="alert.url"><a ng-href="{{alert.url}}">More...</a></span>
-        </alert>
-    </div>
-</div>
+<alert class="animate" ng-repeat="alert in list.alerts" type="{{alert.typeStr}}" close="closeAlert($index)">
+    <span class="fa fa-exclamation-triangle"></span> {{alert.message}}
+    <span ng-if="alert.url"><a ng-href="{{alert.url}}">More...</a></span>
+</alert>

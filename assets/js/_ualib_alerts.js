@@ -1,7 +1,7 @@
 angular.module('ualib.alerts', [])
-    .constant('ALERTS_URL', '//wwwdev2.lib.ua.edu/alerts/api/today')
+    .constant('VIEW_ALERTS_URL', '//wwwdev2.lib.ua.edu/alerts/api/today')
 
-    .factory('viewAlerts', ['$http', 'ALERTS_URL', function viewAlerts($http, url){
+    .factory('viewAlerts', ['$http', 'VIEW_ALERTS_URL', function viewAlerts($http, url){
         return {
             getData: function(){
                 return $http({method: 'GET', url: url, params: {}});

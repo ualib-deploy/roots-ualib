@@ -2,20 +2,20 @@ angular.module('ualib.templates', ['../assets/js/_ualib-alerts.tpl.html', '../as
 
 angular.module("../assets/js/_ualib-alerts.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("../assets/js/_ualib-alerts.tpl.html",
-    "<div class=\"row\">\n" +
-    "    <div class=\"col-md-12\">\n" +
-    "        <alert class=\"animate\" ng-repeat=\"alert in list.alerts\" type=\"{{alert.typeStr}}\" close=\"closeAlert($index)\">\n" +
-    "            <span class=\"fa fa-exclamation-triangle\"></span> {{alert.message}}\n" +
-    "            <span ng-if=\"alert.url\"><a ng-href=\"{{alert.url}}\">More...</a></span>\n" +
-    "        </alert>\n" +
-    "    </div>\n" +
-    "</div>\n" +
+    "<alert class=\"animate\" ng-repeat=\"alert in list.alerts\" type=\"{{alert.typeStr}}\" close=\"closeAlert($index)\">\n" +
+    "    <span class=\"fa fa-exclamation-triangle\"></span> {{alert.message}}\n" +
+    "    <span ng-if=\"alert.url\"><a ng-href=\"{{alert.url}}\">More...</a></span>\n" +
+    "</alert>\n" +
     "");
 }]);
 
 angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("../assets/js/_ualib-home.tpl.html",
-    "<div ualib-alerts></div>\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-12\">\n" +
+    "        <div ualib-alerts></div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
     "<div ng-controller=\"NewsTodayCtrl\" class=\"animate\">\n" +
     "    <div class=\"home-slice\">\n" +
     "        <div class=\"row\">\n" +
