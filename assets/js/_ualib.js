@@ -10,7 +10,8 @@ angular.module('ualib', [
     'musicSearch',
     'ualib.staffdir',
     'ualib.softwareList',
-    'ualib.news'
+    'ualib.news',
+    'ualib.alerts'
 ])
 
 
@@ -47,20 +48,4 @@ angular.module('ualib', [
             $rootScope.appClass += ' webapp';
         });
 
-    }])
-
-    //TODO: Move into full component part of ui-components repo
-    .controller('AlertCtrl', ['$scope', '$timeout', function ($scope, $timeout) {
-        $scope.alerts = [];
-
-
-
-        $scope.closeAlert = function(index) {
-            $scope.alerts.splice(index, 1);
-        };
-
-        $timeout(function(){
-            $scope.alerts.push({ type: 'warning', msg: 'Gorgas Music Library will have limited access Wed. 9/2 through Fri. 9/4 due to electrical work.' });
-        }, 500);
     }]);
-
