@@ -1,12 +1,21 @@
-angular.module('ualib.templates', ['../assets/js/_ualib-home.tpl.html']);
+angular.module('ualib.templates', ['../assets/js/_alert.tpl.html', '../assets/js/_ualib-home.tpl.html']);
+
+angular.module("../assets/js/_alert.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("../assets/js/_alert.tpl.html",
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-12\">\n" +
+    "        <alert class=\"animate\" ng-repeat=\"alert in list.alerts\" type=\"{{alert.typeStr}}\" close=\"closeAlert($index)\">\n" +
+    "            <span class=\"fa fa-exclamation-triangle\"></span> {{alert.message}}\n" +
+    "            <span ng-if=\"alert.url\"><a ng-href=\"{{alert.url}}\">More...</a></span>\n" +
+    "        </alert>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "");
+}]);
 
 angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("../assets/js/_ualib-home.tpl.html",
-    "<div class=\"row\">\n" +
-    "    <div class=\"col-md-12\"  ng-controller=\"AlertCtrl\">\n" +
-    "        <alert class=\"animate\" ng-repeat=\"alert in alerts\" type=\"{{alert.type}}\" close=\"closeAlert($index)\"><span class=\"fa fa-exclamation-triangle\"></span> {{alert.msg}}</alert>\n" +
-    "    </div>\n" +
-    "</div>\n" +
+    "<div ualib-alerts></div>\n" +
     "<div ng-controller=\"NewsTodayCtrl\" class=\"animate\">\n" +
     "    <div class=\"home-slice\">\n" +
     "        <div class=\"row\">\n" +
@@ -104,6 +113,58 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "    </div>\n" +
     "</div>");
 }]);
+;angular.module('ualib')
+    .constant('ALERTS_URL', '//wwwdev2.lib.ua.edu/alerts/api/today')
+
+    .factory('alertFactory', ['$http', 'ALERTS_URL', function newsFactory($http, url){
+        return {
+            getData: function(){
+                return $http({method: 'GET', url: url, params: {}});
+            }
+        };
+    }])
+    .controller('alertsCtrl', ['$scope', 'alertFactory',
+    function alertsCtrl($scope, alertFactory){
+        $scope.list = {};
+
+        alertFactory.getData()
+            .success(function(data) {
+                for (var i = 0; i < data.alerts.length; i++) {
+                    switch (data.alerts[i].type) {
+                        case 0:
+                            data.alerts[i].typeStr = 'success';
+                            break;
+                        case 1:
+                            data.alerts[i].typeStr = 'warning';
+                            break;
+                        case 2:
+                            data.alerts[i].typeStr = 'danger';
+                            break;
+                        default:
+                            data.alerts[i].typeStr = 'default';
+                            break;
+                    }
+                }
+                $scope.list = data;
+            })
+            .error(function(data, status, headers, config) {
+                console.log(data);
+            });
+
+        $scope.closeAlert = function(index) {
+            $scope.list.alerts.splice(index, 1);
+        };
+    }])
+    .directive('ualibAlerts', [ function() {
+        return {
+            restrict: 'AC',
+            scope: {},
+            controller: 'alertsCtrl',
+            link: function(scope, elm, attrs){
+            },
+            templateUrl: '_alert.tpl.html'
+        };
+    }]);
 ;/* ========================================================================
  * DOM-based Routing
  * Based on http://goo.gl/EUTi53 by Paul Irish
@@ -216,20 +277,4 @@ $(document).ready(UTIL.loadEvents);
             $rootScope.appClass += ' webapp';
         });
 
-    }])
-
-    //TODO: Move into full component part of ui-components repo
-    .controller('AlertCtrl', ['$scope', '$timeout', function ($scope, $timeout) {
-        $scope.alerts = [];
-
-
-
-        $scope.closeAlert = function(index) {
-            $scope.alerts.splice(index, 1);
-        };
-
-        $timeout(function(){
-            $scope.alerts.push({ type: 'warning', msg: 'Gorgas Music Library will have limited access Wed. 9/2 through Fri. 9/4 due to electrical work.' });
-        }, 500);
     }]);
-
