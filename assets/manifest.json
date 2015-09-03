@@ -8,17 +8,17 @@
   },
   "assets/css/main_bower.min.css": {
     "path": "assets/css/main_bower.min.css",
-    "hash": "adff6654c370564b06feaeabe53eca75",
+    "hash": "06fd07c6c32b8a30292df31eceb46379",
     "handle": "roots_css"
   },
   "assets/js/scripts.min.js": {
     "path": "assets/js/scripts.min.js",
-    "hash": "61044b8c2747af2685a02753d3cbe26b",
+    "hash": "fe43f6ca1914c4eaa01b103d0b5297ad",
     "handle": "roots_js"
   },
   "assets/js/scripts_bower.min.js": {
     "path": "assets/js/scripts_bower.min.js",
-    "hash": "2dc42f4dc6e966f7aaa001f18bf74a52",
+    "hash": "72fb24fec7f736d9c0e3b2eb87c9c045",
     "handle": "roots_js"
   }
 }
