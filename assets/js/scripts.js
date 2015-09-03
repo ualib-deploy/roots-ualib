@@ -276,6 +276,6 @@ $(document).ready(UTIL.loadEvents);
             controller: 'alertsCtrl',
             link: function(scope, elm, attrs){
             },
-            templateUrl: '_ualib-alerts.tpl.html'
+            templateUrl: '../assets/js/_ualib-alerts.tpl.html'
         };
     }]);
