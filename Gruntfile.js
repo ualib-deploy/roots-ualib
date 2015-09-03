@@ -110,8 +110,10 @@ module.exports = function(grunt) {
                 callback: function(mainFiles, component) {
                     return mainFiles.map(function(filepath) {
                         // Use minified files if available
-                        var min = filepath.replace(/\.(js|css)$/, '.min$&');
-                        return grunt.file.exists(min) ? min : filepath;
+                        if (!filepath.match(/-templates/g)){
+                            var min = filepath.replace(/\.(js|css)$/, '.min$&');
+                            return grunt.file.exists(min) ? min : filepath;
+                        }
                     });
                 }
             }
