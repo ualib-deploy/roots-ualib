@@ -47,6 +47,6 @@ angular.module('ualib')
             controller: 'alertsCtrl',
             link: function(scope, elm, attrs){
             },
-            templateUrl: '_alert.tpl.html'
+            templateUrl: '_ualib-alerts.tpl.html'
         };
     }]);

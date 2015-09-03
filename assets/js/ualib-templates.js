@@ -1,7 +1,7 @@
-angular.module('ualib.templates', ['../assets/js/_alert.tpl.html', '../assets/js/_ualib-home.tpl.html']);
+angular.module('ualib.templates', ['../assets/js/_ualib-alerts.tpl.html', '../assets/js/_ualib-home.tpl.html']);
 
-angular.module("../assets/js/_alert.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("../assets/js/_alert.tpl.html",
+angular.module("../assets/js/_ualib-alerts.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("../assets/js/_ualib-alerts.tpl.html",
     "<div class=\"row\">\n" +
     "    <div class=\"col-md-12\">\n" +
     "        <alert class=\"animate\" ng-repeat=\"alert in list.alerts\" type=\"{{alert.typeStr}}\" close=\"closeAlert($index)\">\n" +
