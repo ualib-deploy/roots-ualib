@@ -434,7 +434,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                             <a class="service-card" href="/forms/login-problem-report-form/">
                                                 <span class="fa fa-sign-in"></span>
                                                 <h4>Report a Login Problem</h4>
-                                                <p>Contact the libraries with problems accessing our online resources </p>
+                                                <p>Unable to access online resources?  Report the problem</p>
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
