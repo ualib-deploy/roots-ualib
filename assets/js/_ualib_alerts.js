@@ -1,28 +1,28 @@
 angular.module('ualib.alerts', [])
     .constant('ALERTS_URL', '//wwwdev2.lib.ua.edu/alerts/api/today')
 
-    .factory('alertFactory', ['$http', 'ALERTS_URL', function newsFactory($http, url){
+    .factory('viewAlerts', ['$http', 'ALERTS_URL', function viewAlerts($http, url){
         return {
             getData: function(){
                 return $http({method: 'GET', url: url, params: {}});
             }
         };
     }])
-    .controller('alertsCtrl', ['$scope', 'alertFactory',
-    function alertsCtrl($scope, alertFactory){
+    .controller('alertsCtrl', ['$scope', 'viewAlerts',
+    function alertsCtrl($scope, viewAlerts){
         $scope.list = {};
 
-        alertFactory.getData()
+        viewAlerts.getData()
             .success(function(data) {
                 for (var i = 0; i < data.alerts.length; i++) {
                     switch (data.alerts[i].type) {
-                        case 0:
+                        case '0':
                             data.alerts[i].typeStr = 'success';
                             break;
-                        case 1:
+                        case '1':
                             data.alerts[i].typeStr = 'warning';
                             break;
-                        case 2:
+                        case '2':
                             data.alerts[i].typeStr = 'danger';
                             break;
                         default:
