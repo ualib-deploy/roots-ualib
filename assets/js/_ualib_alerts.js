@@ -1,4 +1,4 @@
-angular.module('ualib')
+angular.module('ualib.alerts', [])
     .constant('ALERTS_URL', '//wwwdev2.lib.ua.edu/alerts/api/today')
 
     .factory('alertFactory', ['$http', 'ALERTS_URL', function newsFactory($http, url){

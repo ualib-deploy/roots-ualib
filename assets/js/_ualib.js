@@ -10,7 +10,8 @@ angular.module('ualib', [
     'musicSearch',
     'ualib.staffdir',
     'ualib.softwareList',
-    'ualib.news'
+    'ualib.news',
+    'ualib.alerts'
 ])
 
 
