@@ -80,10 +80,14 @@ module.exports = function(grunt) {
                     'angular-route',
                     'angular-sanitize',
                     'angular-resource',
+                    'angular-ui-bootstrap-bower',
                     'angular-bootstrap',
                     'bootstrap',
                     'yamm3',
-                    'tinymce-dist'
+                    'tinymce-dist',
+                    'jquery',
+                    'modernizr',
+                    'roots-ualib'
                 ],
                 callback: function(mainFiles, component) {
                     return mainFiles.map(function(filepath) {
@@ -102,18 +106,20 @@ module.exports = function(grunt) {
                     'angular-route',
                     'angular-sanitize',
                     'angular-resource',
+                    'angular-ui-bootstrap-bower',
                     'angular-bootstrap',
                     'bootstrap',
                     'yamm3',
-                    'tinymce-dist'
+                    'tinymce-dist',
+                    'jquery',
+                    'modernizr',
+                    'roots-ualib'
                 ],
                 callback: function(mainFiles, component) {
                     return mainFiles.map(function(filepath) {
                         // Use minified files if available
-                        if (!filepath.match(/-templates/g)){
-                            var min = filepath.replace(/\.(js|css)$/, '.min$&');
-                            return grunt.file.exists(min) ? min : filepath;
-                        }
+                        var min = filepath.replace(/\.(js|css)$/, '.min$&');
+                        return grunt.file.exists(min) ? min : filepath;
                     });
                 }
             }
