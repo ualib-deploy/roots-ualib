@@ -29082,10 +29082,10 @@ angular.module("manageUserGroups/manageUG.tpl.html", []).run(["$templateCache", 
     "                </tr>\n" +
     "                </thead>\n" +
     "                <tr ng-repeat=\"user in users | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse\" ng-click=\"expandUser(user)\">\n" +
-    "                    <th scope=\"row\">\n" +
+    "                    <th scope=\"row\" class=\"clickable\">\n" +
     "                        {{user.wpLogin}}\n" +
     "                    </th>\n" +
-    "                    <td class=\"text-center\">\n" +
+    "                    <td class=\"text-center clickable\">\n" +
     "                        {{user.name}}\n" +
     "                    </td>\n" +
     "                    <td>\n" +
@@ -32773,12 +32773,12 @@ angular.module('manage.manageUserGroups', [])
                     if (data == 1){
                         $scope.result = "Saved";
                     } else
-                        $scope.result = "Error! Could not save data!";
+                        $scope.result = "Error! Could not save data! " + data;
                     $scope.isLoading = false;
                     console.dir(data);
                 })
                 .error(function(data, status, headers, config) {
-                    $scope.result = "Error! Could not save data!";
+                    $scope.result = "Error! Could not save data! " + data;
                     $scope.isLoading = false;
                     console.dir(data);
                 });
@@ -32805,12 +32805,12 @@ angular.module('manage.manageUserGroups', [])
                         $scope.users.push(createdUser);
                         $scope.expandUser(createdUser);
                     }else
-                        $scope.result2 = "Error! Could not grant access!";
+                        $scope.result2 = "Error! Could not grant access! " + data;
                     $scope.isLoading = false;
                 })
                 .error(function(data, status, headers, config) {
                     $scope.isLoading = false;
-                    $scope.result2 = "Error! Could not grant access!";
+                    $scope.result2 = "Error! Could not grant access! " + data;
                 });
         };
 
@@ -32823,11 +32823,11 @@ angular.module('manage.manageUserGroups', [])
                             $scope.result = "User access deleted!";
                             $scope.users.splice(index, 1);
                         } else
-                            $scope.result = "Error! Could not delete user access!";
+                            $scope.result = "Error! Could not delete user access! " + data;
                         $scope.isLoading = false;
                     })
                     .error(function(data, status, headers, config) {
-                        $scope.result = "Error! Could not delete user access!";
+                        $scope.result = "Error! Could not delete user access! " + data;
                         $scope.isLoading = false;
                     });
             }
@@ -37778,10 +37778,32 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
+    "\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-4\">\n" +
+    "            <div class=\"bento-box\" bento-box=\"googleCS\">\n" +
+    "                <h2 id=\"site-search\">Libraries' Website</h2>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "\n" +
+    "        <div class=\"col-md-4\">\n" +
+    "            <div class=\"bento-box\" bento-box=\"faq\">\n" +
+    "                <h2>FAQ</h2>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "\n" +
+    "\n" +
+    "        <div class=\"col-md-4\">\n" +
+    "            <div class=\"bento-box\" bento-box=\"libguides\">\n" +
+    "                <h2>Research Guides</h2>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "\n" +
     "    <div class=\"row\">\n" +
     "        <div class=\"col-md-6\">\n" +
-    "            <div class=\"bento-box\" bento-box=\"media\">\n" +
-    "                <h2>Multimedia</h2>\n" +
+    "            <div class=\"bento-box\" bento-box=\"databases\">\n" +
+    "                <h2>Databases </h2>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-6\">\n" +
@@ -37790,34 +37812,16 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
+    "\n" +
     "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-4\">\n" +
-    "            <div class=\"bento-box\" bento-box=\"databases\">\n" +
-    "                <h2>Databases </h2>\n" +
+    "        <div class=\"col-md-6\">\n" +
+    "            <div class=\"bento-box\" bento-box=\"media\">\n" +
+    "                <h2>Multimedia</h2>\n" +
     "            </div>\n" +
     "        </div>\n" +
-    "        <div class=\"col-md-4\">\n" +
+    "        <div class=\"col-md-6\">\n" +
     "            <div class=\"bento-box\" bento-box=\"other\">\n" +
     "                <h2>Other Media</h2>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-sm-12 col-md-4\">\n" +
-    "            <div class=\"bento-box\" bento-box=\"libguides\">\n" +
-    "                <h2>Research Guides</h2>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "    </div>\n" +
-    "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-6\">\n" +
-    "            <div class=\"bento-box\" bento-box=\"googleCS\">\n" +
-    "                <h2 id=\"site-search\">Libraries' Website</h2>\n" +
-    "\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "\n" +
-    "        <div class=\"col-md-6\">\n" +
-    "            <div class=\"bento-box\" bento-box=\"faq\">\n" +
-    "                <h2>FAQ</h2>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
@@ -38191,8 +38195,8 @@ angular.module('oneSearch.bento', [])
                 .then(function(results){
                     var numResults = Object.keys(results).length;
                     var numEngines = self.boxes[box]['engines'].length;
-
-                    if (self.boxes[box].resultLimit < 3 && numResults < 2 && numEngines < 2){
+                    var expecting = numResults + numEngines;
+                    if (expecting < 2 && self.boxes[box].resultLimit < 3){
                         self.boxes[box].resultLimit++;
                     }
                 });
@@ -38955,7 +38959,6 @@ angular.module('engines.scout', [])
                 path: 'Header.PubTypeId',
                 types: {
                     books: ['book', 'ebook'],
-                    //journals: 'serialPeriodical',
                     articles: 'academicJournal',
                     media: ['audio', 'videoRecording']
                 }
