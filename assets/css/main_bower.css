@@ -1952,6 +1952,9 @@ div.rn-carousel-indicator span {
   content: "\f23a";
 }
 
+.clickable {
+    cursor: pointer;
+}
 
 .comps-map{
     margin: 0 auto;
