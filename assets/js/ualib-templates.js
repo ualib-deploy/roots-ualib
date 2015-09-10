@@ -136,7 +136,10 @@ angular.module("../assets/js/_ualib-image-carousel.tpl.html", []).run(["$templat
     "        </li>\n" +
     "    </ul>\n" +
     "    <div class=\"rn-carousel-indicator custom-indicator\">\n" +
-    "        <span ng-repeat=\"img in images\" ng-class=\"{active: $index==$parent.curImage}\" class=\"fa fa-circle-o\" ng-click=\"$parent.curImage = $index\"></span>\n" +
+    "        <span ng-repeat=\"img in images\" ng-click=\"$parent.curImage = $index\">&nbsp;\n" +
+    "            <span class=\"fa fa-circle-o\" ng-show=\"$index != $parent.curImage\"></span>\n" +
+    "            <span class=\"fa fa-circle\" ng-show=\"$index == $parent.curImage\"></span>\n" +
+    "        </span>\n" +
     "    </div>\n" +
     "</div>");
 }]);
