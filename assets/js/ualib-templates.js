@@ -124,8 +124,8 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
 
 angular.module("../assets/js/_ualib-image-carousel.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("../assets/js/_ualib-image-carousel.tpl.html",
-    "<div ng-if=\"images.length > 0\">\n" +
-    "    <ul rn-carousel rn-carousel-auto-slide rn-carousel-buffered\n" +
+    "<div class=\"text-center\" ng-if=\"images.length > 0\">\n" +
+    "    <ul rn-carousel rn-carousel-auto-slide=\"9\" rn-carousel-buffered rn-carousel-transition=\"hexagon\"\n" +
     "        rn-carousel-index=\"curImage\" class=\"image news-carousel-small\">\n" +
     "        <li ng-repeat=\"img in images\">\n" +
     "            <div class=\"layer text-center\">\n" +
