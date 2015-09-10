@@ -97,14 +97,6 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                </div>\n" +
     "\n" +
     "                <div class=\"card front-page-card\">\n" +
-    "                    <div class=\"card-body\">\n" +
-    "                        <div class=\"row\">\n" +
-    "                           <div class=\"ualib-image-carousel\"></div>\n" +
-    "                        </div>\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "\n" +
-    "                <div class=\"card front-page-card\">\n" +
     "                    <div class=\"card-heading\">\n" +
     "                        <h2>News</h2>\n" +
     "                    </div>\n" +
@@ -114,6 +106,14 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                    </div>\n" +
     "                    <div class=\"card-footer\">\n" +
     "                        <a href=\"/#/news-exhibits\" class=\"more-link\">More News</a>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "\n" +
+    "                <div class=\"card front-page-card\">\n" +
+    "                    <div class=\"card-body\">\n" +
+    "                        <div class=\"row\">\n" +
+    "                            <div class=\"ualib-image-carousel\"></div>\n" +
+    "                        </div>\n" +
     "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
