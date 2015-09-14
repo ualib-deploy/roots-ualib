@@ -1,3 +1,139 @@
+(function(){
+    var root = this;
+
+    //消息填充位，补足长度。
+    function fillString(str){
+        var blockAmount = ((str.length + 8) >> 6) + 1,
+            blocks = [],
+            i;
+
+        for(i = 0; i < blockAmount * 16; i++){
+            blocks[i] = 0;
+        }
+        for(i = 0; i < str.length; i++){
+            blocks[i >> 2] |= str.charCodeAt(i) << (24 - (i & 3) * 8);
+        }
+        blocks[i >> 2] |= 0x80 << (24 - (i & 3) * 8);
+        blocks[blockAmount * 16 - 1] = str.length * 8;
+
+        return blocks;
+    }
+
+    //将输入的二进制数组转化为十六进制的字符串。
+    function binToHex(binArray){
+        var hexString = "0123456789abcdef",
+            str = "",
+            i;
+
+        for(i = 0; i < binArray.length * 4; i++){
+            str += hexString.charAt((binArray[i >> 2] >> ((3 - i % 4) * 8 + 4)) & 0xF) +
+                    hexString.charAt((binArray[i >> 2] >> ((3 - i % 4) * 8  )) & 0xF);
+        }
+
+        return str;
+    }
+
+    //核心函数，输出为长度为5的number数组，对应160位的消息摘要。
+    function coreFunction(blockArray){
+        var w = [],
+            a = 0x67452301,
+            b = 0xEFCDAB89,
+            c = 0x98BADCFE,
+            d = 0x10325476,
+            e = 0xC3D2E1F0,
+            olda,
+            oldb,
+            oldc,
+            oldd,
+            olde,
+            t,
+            i,
+            j;
+
+        for(i = 0; i < blockArray.length; i += 16){  //每次处理512位 16*32
+            olda = a;
+            oldb = b;
+            oldc = c;
+            oldd = d;
+            olde = e;
+
+            for(j = 0; j < 80; j++){  //对每个512位进行80步操作
+                if(j < 16){
+                    w[j] = blockArray[i + j];
+                }else{
+                    w[j] = cyclicShift(w[j-3] ^ w[j-8] ^ w[j-14] ^ w[j-16], 1);
+                }
+                t = modPlus(modPlus(cyclicShift(a, 5), ft(j, b, c, d)), modPlus(modPlus(e, w[j]), kt(j)));
+                e = d;
+                d = c;
+                c = cyclicShift(b, 30);
+                b = a;
+                a = t;
+            }
+
+            a = modPlus(a, olda);
+            b = modPlus(b, oldb);
+            c = modPlus(c, oldc);
+            d = modPlus(d, oldd);
+            e = modPlus(e, olde);
+        }
+
+        return [a, b, c, d, e];
+    }
+
+    //根据t值返回相应得压缩函数中用到的f函数。
+    function ft(t, b, c, d){
+        if(t < 20){
+            return (b & c) | ((~b) & d);
+        }else if(t < 40){
+            return b ^ c ^ d;
+        }else if(t < 60){
+            return (b & c) | (b & d) | (c & d);
+        }else{
+            return b ^ c ^ d;
+        }
+    }
+
+    //根据t值返回相应得压缩函数中用到的K值。
+    function kt(t){
+        return (t < 20) ?  0x5A827999 :
+                (t < 40) ? 0x6ED9EBA1 :
+                (t < 60) ? 0x8F1BBCDC : 0xCA62C1D6;
+    }
+
+    //模2的32次方加法，因为JavaScript的number是双精度浮点数表示，所以将32位数拆成高16位和低16位分别进行相加
+    function modPlus(x, y){
+        var low = (x & 0xFFFF) + (y & 0xFFFF),
+            high = (x >> 16) + (y >> 16) + (low >> 16);
+
+        return (high << 16) | (low & 0xFFFF);
+    }
+
+    //对输入的32位的num二进制数进行循环左移 ,因为JavaScript的number是双精度浮点数表示，所以移位需需要注意
+    function cyclicShift(num, k){
+        return (num << k) | (num >>> (32 - k));
+    }
+
+    //主函数根据输入的消息字符串计算消息摘要，返回十六进制表示的消息摘要
+    function sha1(s){
+        return binToHex(coreFunction(fillString(s)));
+    }
+
+    // support AMD and Node
+    if(typeof define === "function" && typeof define.amd){
+        define(function(){
+            return sha1;
+        });
+    }else if(typeof exports !== 'undefined') {
+        if(typeof module !== 'undefined' && module.exports) {
+          exports = module.exports = sha1;
+        }
+        exports.sha1 = sha1;
+    } else {
+        root.sha1 = sha1;
+    }
+
+}).call(this);
 /**
  * @license AngularJS v1.4.5
  * (c) 2010-2015 Google, Inc. http://angularjs.org
@@ -5168,142 +5304,6 @@ angular.module('ui.tinymce', [])
     };
   }]);
 
-(function(){
-    var root = this;
-
-    //消息填充位，补足长度。
-    function fillString(str){
-        var blockAmount = ((str.length + 8) >> 6) + 1,
-            blocks = [],
-            i;
-
-        for(i = 0; i < blockAmount * 16; i++){
-            blocks[i] = 0;
-        }
-        for(i = 0; i < str.length; i++){
-            blocks[i >> 2] |= str.charCodeAt(i) << (24 - (i & 3) * 8);
-        }
-        blocks[i >> 2] |= 0x80 << (24 - (i & 3) * 8);
-        blocks[blockAmount * 16 - 1] = str.length * 8;
-
-        return blocks;
-    }
-
-    //将输入的二进制数组转化为十六进制的字符串。
-    function binToHex(binArray){
-        var hexString = "0123456789abcdef",
-            str = "",
-            i;
-
-        for(i = 0; i < binArray.length * 4; i++){
-            str += hexString.charAt((binArray[i >> 2] >> ((3 - i % 4) * 8 + 4)) & 0xF) +
-                    hexString.charAt((binArray[i >> 2] >> ((3 - i % 4) * 8  )) & 0xF);
-        }
-
-        return str;
-    }
-
-    //核心函数，输出为长度为5的number数组，对应160位的消息摘要。
-    function coreFunction(blockArray){
-        var w = [],
-            a = 0x67452301,
-            b = 0xEFCDAB89,
-            c = 0x98BADCFE,
-            d = 0x10325476,
-            e = 0xC3D2E1F0,
-            olda,
-            oldb,
-            oldc,
-            oldd,
-            olde,
-            t,
-            i,
-            j;
-
-        for(i = 0; i < blockArray.length; i += 16){  //每次处理512位 16*32
-            olda = a;
-            oldb = b;
-            oldc = c;
-            oldd = d;
-            olde = e;
-
-            for(j = 0; j < 80; j++){  //对每个512位进行80步操作
-                if(j < 16){
-                    w[j] = blockArray[i + j];
-                }else{
-                    w[j] = cyclicShift(w[j-3] ^ w[j-8] ^ w[j-14] ^ w[j-16], 1);
-                }
-                t = modPlus(modPlus(cyclicShift(a, 5), ft(j, b, c, d)), modPlus(modPlus(e, w[j]), kt(j)));
-                e = d;
-                d = c;
-                c = cyclicShift(b, 30);
-                b = a;
-                a = t;
-            }
-
-            a = modPlus(a, olda);
-            b = modPlus(b, oldb);
-            c = modPlus(c, oldc);
-            d = modPlus(d, oldd);
-            e = modPlus(e, olde);
-        }
-
-        return [a, b, c, d, e];
-    }
-
-    //根据t值返回相应得压缩函数中用到的f函数。
-    function ft(t, b, c, d){
-        if(t < 20){
-            return (b & c) | ((~b) & d);
-        }else if(t < 40){
-            return b ^ c ^ d;
-        }else if(t < 60){
-            return (b & c) | (b & d) | (c & d);
-        }else{
-            return b ^ c ^ d;
-        }
-    }
-
-    //根据t值返回相应得压缩函数中用到的K值。
-    function kt(t){
-        return (t < 20) ?  0x5A827999 :
-                (t < 40) ? 0x6ED9EBA1 :
-                (t < 60) ? 0x8F1BBCDC : 0xCA62C1D6;
-    }
-
-    //模2的32次方加法，因为JavaScript的number是双精度浮点数表示，所以将32位数拆成高16位和低16位分别进行相加
-    function modPlus(x, y){
-        var low = (x & 0xFFFF) + (y & 0xFFFF),
-            high = (x >> 16) + (y >> 16) + (low >> 16);
-
-        return (high << 16) | (low & 0xFFFF);
-    }
-
-    //对输入的32位的num二进制数进行循环左移 ,因为JavaScript的number是双精度浮点数表示，所以移位需需要注意
-    function cyclicShift(num, k){
-        return (num << k) | (num >>> (32 - k));
-    }
-
-    //主函数根据输入的消息字符串计算消息摘要，返回十六进制表示的消息摘要
-    function sha1(s){
-        return binToHex(coreFunction(fillString(s)));
-    }
-
-    // support AMD and Node
-    if(typeof define === "function" && typeof define.amd){
-        define(function(){
-            return sha1;
-        });
-    }else if(typeof exports !== 'undefined') {
-        if(typeof module !== 'undefined' && module.exports) {
-          exports = module.exports = sha1;
-        }
-        exports.sha1 = sha1;
-    } else {
-        root.sha1 = sha1;
-    }
-
-}).call(this);
 // Generated by CoffeeScript 1.6.2
 /*!
 jQuery Waypoints - v2.0.5
@@ -11181,7 +11181,7 @@ angular.module('ualib.databases')
 /**!
  * AngularJS file upload/drop directive and service with progress and abort
  * @author  Danial  <danial.farid@gmail.com>
- * @version 7.0.17
+ * @version 7.2.1
  */
 
 if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
@@ -11202,7 +11202,7 @@ if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
 
 var ngFileUpload = angular.module('ngFileUpload', []);
 
-ngFileUpload.version = '7.0.17';
+ngFileUpload.version = '7.2.1';
 
 ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, $q, $timeout) {
   function sendHttp(config) {
@@ -11322,15 +11322,35 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
       }
     }
 
+    function isFile(file) {
+      return file instanceof Blob || (file.flashId && file.name && file.size);
+    }
+
+    function addFileToFormData(formData, file, key) {
+      if (isFile(file)) {
+        formData.append(key, file, file.fileName || file.name);
+      } else if (angular.isObject(file)) {
+        for (var k in file) {
+          if (file.hasOwnProperty(k)) {
+            var split = k.split(',');
+            if (split[1]) {
+              file[k].fileName = split[1].replace(/^\s+|\s+$/g, '');
+            }
+            addFileToFormData(formData, file[k], split[0]);
+          }
+        }
+      } else {
+        throw 'Expected file object in Upload.upload file option: ' + file.toString();
+      }
+    }
+
     config.headers = config.headers || {};
     config.headers['Content-Type'] = undefined;
     config.transformRequest = config.transformRequest ?
       (angular.isArray(config.transformRequest) ?
         config.transformRequest : [config.transformRequest]) : [];
     config.transformRequest.push(function (data) {
-      var formData = new FormData();
-      var allFields = {};
-      var key;
+      var formData = new FormData(), allFields = {}, key;
       for (key in config.fields) {
         if (config.fields.hasOwnProperty(key)) {
           allFields[key] = config.fields[key];
@@ -11349,16 +11369,12 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
       }
 
       if (config.file != null) {
-        var fileFormName = config.fileFormDataName || 'file';
-
         if (angular.isArray(config.file)) {
-          var isFileFormNameString = angular.isString(fileFormName);
           for (var i = 0; i < config.file.length; i++) {
-            formData.append(isFileFormNameString ? fileFormName : fileFormName[i], config.file[i],
-              (config.fileName && config.fileName[i]) || config.file[i].name);
+            addFileToFormData(formData, config.file[i], 'file');
           }
         } else {
-          formData.append(fileFormName, config.file, config.fileName || config.file.name);
+          addFileToFormData(formData, config.file, 'file');
         }
       }
       return formData;
@@ -11377,7 +11393,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
     return sendHttp(config);
   };
 
-  this.setDefaults = function(defaults) {
+  this.setDefaults = function (defaults) {
     this.defaults = defaults || {};
   };
 
@@ -11387,115 +11403,146 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
 
 ]);
 
-(function () {
+ngFileUpload.service('Upload', ['$parse', '$timeout', '$compile', 'UploadResize', function ($parse, $timeout, $compile, UploadResize) {
+  var upload = UploadResize;
+  upload.getAttrWithDefaults = function (attr, name) {
+    return attr[name] != null ? attr[name] :
+      (upload.defaults[name] == null ?
+        upload.defaults[name] : upload.defaults[name].toString());
+  };
 
-  ngFileUpload.service('Upload', ['$parse', '$timeout', '$compile', 'UploadValidate',
-    function ($parse, $timeout, $compile, UploadValidate) {
-      var upload = UploadValidate;
-      upload.getAttrWithDefaults = function (attr, name) {
-        return attr[name] != null ? attr[name] :
-          (upload.defaults[name] == null ?
-            upload.defaults[name] : upload.defaults[name].toString());
-      };
-
-      upload.attrGetter = function (name, attr, scope, params) {
-        if (scope) {
-          try {
-            if (params) {
-              return $parse(this.getAttrWithDefaults(attr, name))(scope, params);
-            } else {
-              return $parse(this.getAttrWithDefaults(attr, name))(scope);
-            }
-          } catch (e) {
-            // hangle string value without single qoute
-            if (name.search(/min|max|pattern/i)) {
-              return this.getAttrWithDefaults(attr, name);
-            } else {
-              throw e;
-            }
-          }
+  upload.attrGetter = function (name, attr, scope, params) {
+    if (scope) {
+      try {
+        if (params) {
+          return $parse(this.getAttrWithDefaults(attr, name))(scope, params);
         } else {
+          return $parse(this.getAttrWithDefaults(attr, name))(scope);
+        }
+      } catch (e) {
+        // hangle string value without single qoute
+        if (name.search(/min|max|pattern/i)) {
           return this.getAttrWithDefaults(attr, name);
+        } else {
+          throw e;
         }
-      };
+      }
+    } else {
+      return this.getAttrWithDefaults(attr, name);
+    }
+  };
 
-      upload.updateModel = function (ngModel, attr, scope, fileChange, files, evt, noDelay) {
-        function update() {
-          var file = files && files.length ? files[0] : null;
-          if (ngModel) {
-            var singleModel = !upload.attrGetter('ngfMultiple', attr, scope) && !upload.attrGetter('multiple', attr) && !keep;
-            $parse(upload.attrGetter('ngModel', attr)).assign(scope, singleModel ? file : files);
-          }
-          var ngfModel = upload.attrGetter('ngfModel', attr);
-          if (ngfModel) {
-            $parse(ngfModel).assign(scope, files);
-          }
+  upload.updateModel = function (ngModel, attr, scope, fileChange, files, evt, noDelay) {
+    function update() {
+      var file = files && files.length ? files[0] : null;
+      if (ngModel) {
+        var singleModel = !upload.attrGetter('ngfMultiple', attr, scope) && !upload.attrGetter('multiple', attr) && !keep;
+        $parse(upload.attrGetter('ngModel', attr)).assign(scope, singleModel ? file : files);
+      }
+      var ngfModel = upload.attrGetter('ngfModel', attr);
+      if (ngfModel) {
+        $parse(ngfModel).assign(scope, files);
+      }
 
-          if (fileChange) {
-            $parse(fileChange)(scope, {
-              $files: files,
-              $file: file,
-              $event: evt
-            });
-          }
-          // scope apply changes
-          $timeout(function(){});
-        }
+      if (fileChange) {
+        $parse(fileChange)(scope, {
+          $files: files,
+          $file: file,
+          $event: evt
+        });
+      }
+      // scope apply changes
+      $timeout(function () {
+      });
+    }
 
-        var keep = upload.attrGetter('ngfKeep', attr, scope);
-        if (keep === true) {
-          if (!files || !files.length) {
-            return;
-          } else {
-            var prevFiles = ((ngModel && ngModel.$modelValue) || attr.$$ngfPrevFiles || []).slice(0),
-              hasNew = false;
-            if (upload.attrGetter('ngfKeepDistinct', attr, scope) === true) {
-              var len = prevFiles.length;
-              for (var i = 0; i < files.length; i++) {
-                for (var j = 0; j < len; j++) {
-                  if (files[i].name === prevFiles[j].name) break;
-                }
-                if (j === len) {
-                  prevFiles.push(files[i]);
-                  hasNew = true;
-                }
-              }
-              if (!hasNew) return;
-              files = prevFiles;
-            } else {
-              files = prevFiles.concat(files);
+    var keep = upload.attrGetter('ngfKeep', attr, scope);
+    if (keep === true) {
+      if (!files || !files.length) {
+        return;
+      } else {
+        var prevFiles = ((ngModel && ngModel.$modelValue) || attr.$$ngfPrevFiles || []).slice(0),
+          hasNew = false;
+        if (upload.attrGetter('ngfKeepDistinct', attr, scope) === true) {
+          var len = prevFiles.length;
+          for (var i = 0; i < files.length; i++) {
+            for (var j = 0; j < len; j++) {
+              if (files[i].name === prevFiles[j].name) break;
+            }
+            if (j === len) {
+              prevFiles.push(files[i]);
+              hasNew = true;
             }
           }
+          if (!hasNew) return;
+          files = prevFiles;
+        } else {
+          files = prevFiles.concat(files);
         }
+      }
+    }
 
-        attr.$$ngfPrevFiles = files;
+    attr.$$ngfPrevFiles = files;
 
-        if (noDelay) {
-          update();
-        } else if (upload.validate(files, ngModel, attr, scope, upload.attrGetter('ngfValidateLater', attr), function () {
-            $timeout(function () {
-              update();
-            });
-          }));
+    function resize(files, callback) {
+      var param = upload.attrGetter('ngfResize', attr, scope);
+      if (!param) return callback();
+      var count = files.length;
+      var checkCallback = function () {
+        count--;
+        if (count === 0) callback();
       };
+      var success = function (index) {
+        return function (resizedFile) {
+          files.splice(index, 1, resizedFile);
+          checkCallback();
+        };
+      };
+      var error = function (f) {
+        return function (e) {
+          checkCallback();
+          f.$error = 'resize';
+          f.$errorParam = (e ? (e.message ? e.message : e) + ': ' : '') + (f && f.name);
+        };
+      };
+      for (var i = 0; i < files.length; i++) {
+        var f = files[i];
+        if (!f.$error && f.type.indexOf('image') === 0) {
+          upload.resize(f, param.width, param.height, param.quality).then(success(i), error(f));
+        } else {
+          checkCallback();
+        }
+      }
+    }
 
-      return upload;
-    }]);
-})();
+    if (noDelay) {
+      update();
+    } else if (upload.validate(files, ngModel, attr, scope, upload.attrGetter('ngfValidateLater', attr), function () {
+        resize(files, function () {
+          $timeout(function () {
+            update();
+          });
+        });
+      }));
+  };
 
-(function () {
+  return upload;
+}]);
+
+ngFileUpload.directive('ngfSelect', ['$parse', '$timeout', '$compile', 'Upload', function ($parse, $timeout, $compile, Upload) {
   var generatedElems = [];
 
-  ngFileUpload.directive('ngfSelect', ['$parse', '$timeout', '$compile', 'Upload',
-    function ($parse, $timeout, $compile, Upload) {
-      return {
-        restrict: 'AEC',
-        require: '?ngModel',
-        link: function (scope, elem, attr, ngModel) {
-          linkFileSelect(scope, elem, attr, ngModel, $parse, $timeout, $compile, Upload);
-        }
-      };
-    }]);
+  function isDelayedClickSupported(ua) {
+    // fix for android native browser < 4.4 and safari windows
+    var m = ua.match(/Android[^\d]*(\d+)\.(\d+)/);
+    if (m && m.length > 2) {
+      var v = Upload.defaults.androidFixMinorVersion || 4;
+      return parseInt(m[1]) < 4 || (parseInt(m[1]) === v && parseInt(m[2]) < v);
+    }
+
+    // safari on windows
+    return ua.indexOf('Chrome') === -1 && /.*Windows.*Safari.*/.test(ua);
+  }
 
   function linkFileSelect(scope, elem, attr, ngModel, $parse, $timeout, $compile, upload) {
     /** @namespace attr.ngfSelect */
@@ -11528,13 +11575,13 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
     }
 
     var unwatches = [];
-    unwatches.push(scope.$watch(attrGetter('ngfMultiple'), function() {
+    unwatches.push(scope.$watch(attrGetter('ngfMultiple'), function () {
       fileElem.attr('multiple', attrGetter('ngfMultiple', scope));
     }));
-    unwatches.push(scope.$watch(attrGetter('ngfCapture'), function() {
+    unwatches.push(scope.$watch(attrGetter('ngfCapture'), function () {
       fileElem.attr('capture', attrGetter('ngfCapture', scope));
     }));
-    attr.$observe('accept', function() {
+    attr.$observe('accept', function () {
       fileElem.attr('accept', attrGetter('accept'));
     });
     unwatches.push(function () {
@@ -11583,8 +11630,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
 
       resetModel(evt);
 
-      // fix for android native browser < 4.4
-      if (shouldClickLater(navigator.userAgent)) {
+      if (isDelayedClickSupported(navigator.userAgent)) {
         setTimeout(function () {
           fileElem[0].click();
         }, 0);
@@ -11610,18 +11656,6 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
           if (Math.abs(currentLocation - initialTouchStartY) > 20) return false;
         }
       }
-    }
-
-    function shouldClickLater(ua) {
-      // android below 4.4
-      var m = ua.match(/Android[^\d]*(\d+)\.(\d+)/);
-      if (m && m.length > 2) {
-        var v = upload.defaults.androidFixMinorVersion || 4;
-        return parseInt(m[1]) < 4 || (parseInt(m[1]) === v && parseInt(m[2]) < v);
-      }
-
-      // safari on windows
-      return ua.indexOf('Chrome') === -1 && /.*Windows.*Safari.*/.test(ua);
     }
 
     var fileElem = elem;
@@ -11674,12 +11708,12 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
 
     scope.$on('$destroy', function () {
       if (!isInputTypeFile()) fileElem.remove();
-      angular.forEach(unwatches, function(unwatch) {
+      angular.forEach(unwatches, function (unwatch) {
         unwatch();
       });
     });
 
-    $timeout(function() {
+    $timeout(function () {
       for (var i = 0; i < generatedElems.length; i++) {
         var g = generatedElems[i];
         if (!document.body.contains(g.el[0])) {
@@ -11693,7 +11727,15 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
       window.FileAPI.ngfFixIE(elem, fileElem, changeFn);
     }
   }
-})();
+
+  return {
+    restrict: 'AEC',
+    require: '?ngModel',
+    link: function (scope, elem, attr, ngModel) {
+      linkFileSelect(scope, elem, attr, ngModel, $parse, $timeout, $compile, Upload);
+    }
+  };
+}]);
 
 (function () {
 
@@ -11796,9 +11838,9 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
               var disallowObjectUrl = Upload.attrGetter('ngfNoObjectUrl', attr, scope);
               Upload.dataUrl(file, disallowObjectUrl)['finally'](function () {
                 $timeout(function () {
-                  if ((disallowObjectUrl && file.dataUrl) || (!disallowObjectUrl && file.blobUrl)) {
+                  if (file.blobUrl || file.dataUrl) {
                     elem.removeClass('ngf-hide');
-                    elem.attr('src', disallowObjectUrl ? file.dataUrl : file.blobUrl);
+                    elem.attr('src', (disallowObjectUrl ? file.dataUrl : file.blobUrl) || file.dataUrl);
                   } else {
                     elem.addClass('ngf-hide');
                   }
@@ -11872,7 +11914,9 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
 
 })();
 
-(function () {
+ngFileUpload.service('UploadValidate', ['UploadDataUrl', '$q', '$timeout', function (UploadDataUrl, $q, $timeout) {
+  var upload = UploadDataUrl;
+
   function globStringToRegex(str) {
     if (str.length > 2 && str[0] === '/' && str[str.length - 1] === '/') {
       return str.substring(1, str.length - 1);
@@ -11916,365 +11960,445 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
     return str;
   }
 
-  ngFileUpload.service('UploadValidate', ['UploadDataUrl', '$q', '$timeout', function (UploadDataUrl, $q, $timeout) {
-    var upload = UploadDataUrl;
+  upload.registerValidators = function (ngModel, elem, attr, scope) {
+    if (!ngModel) return;
 
-    upload.registerValidators = function (ngModel, elem, attr, scope) {
-      if (!ngModel) return;
+    ngModel.$ngfValidations = [];
+    function setValidities(ngModel) {
+      angular.forEach(ngModel.$ngfValidations, function (validation) {
+        ngModel.$setValidity(validation.name, validation.valid);
+      });
+    }
 
-      ngModel.$ngfValidations = [];
-      function setValidities(ngModel) {
-        angular.forEach(ngModel.$ngfValidations, function (validation) {
-          ngModel.$setValidity(validation.name, validation.valid);
-        });
-      }
-
-      ngModel.$formatters.push(function (val) {
-        if (upload.attrGetter('ngfValidateLater', attr, scope) || !ngModel.$$ngfValidated) {
-          upload.validate(val, ngModel, attr, scope, false, function () {
-            setValidities(ngModel);
-            ngModel.$$ngfValidated = false;
-          });
-          if (val && val.length === 0) {
-            val = null;
-          }
-          if (elem && (val == null || val.length === 0)) {
-            if (elem.val()) {
-              elem.val(null);
-            }
-          }
-        } else {
+    ngModel.$formatters.push(function (val) {
+      if (upload.attrGetter('ngfValidateLater', attr, scope) || !ngModel.$$ngfValidated) {
+        upload.validate(val, ngModel, attr, scope, false, function () {
           setValidities(ngModel);
           ngModel.$$ngfValidated = false;
+        });
+        if (val && val.length === 0) {
+          val = null;
         }
-        return val;
-      });
+        if (elem && (val == null || val.length === 0)) {
+          if (elem.val()) {
+            elem.val(null);
+          }
+        }
+      } else {
+        setValidities(ngModel);
+        ngModel.$$ngfValidated = false;
+      }
+      return val;
+    });
+  };
+
+  upload.validatePattern = function (file, val) {
+    if (!val) {
+      return true;
+    }
+    var regexp = new RegExp(globStringToRegex(val), 'gi');
+    return (file.type != null && regexp.test(file.type.toLowerCase())) ||
+      (file.name != null && regexp.test(file.name.toLowerCase()));
+  };
+
+  upload.validate = function (files, ngModel, attr, scope, later, callback) {
+    ngModel = ngModel || {};
+    ngModel.$ngfValidations = ngModel.$ngfValidations || [];
+
+    angular.forEach(ngModel.$ngfValidations, function (v) {
+      v.valid = true;
+    });
+
+    var attrGetter = function (name, params) {
+      return upload.attrGetter(name, attr, scope, params);
     };
 
-    upload.validatePattern = function (file, val) {
-      if (!val) {
-        return true;
-      }
-      var regexp = new RegExp(globStringToRegex(val), 'gi');
-      return (file.type != null && regexp.test(file.type.toLowerCase())) ||
-        (file.name != null && regexp.test(file.name.toLowerCase()));
-    };
+    if (later) {
+      callback.call(ngModel);
+      return;
+    }
+    ngModel.$$ngfValidated = true;
 
-    upload.validate = function (files, ngModel, attr, scope, later, callback) {
-      ngModel = ngModel || {};
-      ngModel.$ngfValidations = ngModel.$ngfValidations || [];
+    if (files == null || files.length === 0) {
+      callback.call(ngModel);
+      return;
+    }
 
-      angular.forEach(ngModel.$ngfValidations, function (v) {
-        v.valid = true;
-      });
+    files = files.length === undefined ? [files] : files.slice(0);
 
-      var attrGetter = function (name, params) {
-        return upload.attrGetter(name, attr, scope, params);
-      };
+    function validateSync(name, validatorVal, fn) {
+      if (files) {
+        var dName = 'ngf' + name[0].toUpperCase() + name.substr(1);
+        var i = files.length, valid = null;
 
-      if (later) {
-        callback.call(ngModel);
-        return;
-      }
-      ngModel.$$ngfValidated = true;
-
-      if (files == null || files.length === 0) {
-        callback.call(ngModel);
-        return;
-      }
-
-      files = files.length === undefined ? [files] : files.slice(0);
-
-      function validateSync(name, validatorVal, fn) {
-        if (files) {
-          var dName = 'ngf' + name[0].toUpperCase() + name.substr(1);
-          var i = files.length, valid = null;
-
-          while (i--) {
-            var file = files[i];
-            var val = attrGetter(dName, {'$file': file});
-            if (val == null) {
-              val = validatorVal(attrGetter('ngfValidate') || {});
-              valid = valid == null ? true : valid;
+        while (i--) {
+          var file = files[i];
+          var val = attrGetter(dName, {'$file': file});
+          if (val == null) {
+            val = validatorVal(attrGetter('ngfValidate') || {});
+            valid = valid == null ? true : valid;
+          }
+          if (val != null) {
+            if (!fn(file, val)) {
+              file.$error = name;
+              file.$errorParam = val;
+              files.splice(i, 1);
+              valid = false;
             }
-            if (val != null) {
-              if (!fn(file, val)) {
+          }
+        }
+        if (valid !== null) {
+          ngModel.$ngfValidations.push({name: name, valid: valid});
+        }
+      }
+    }
+
+    validateSync('pattern', function (cons) {
+      return cons.pattern;
+    }, upload.validatePattern);
+    validateSync('minSize', function (cons) {
+      return cons.size && cons.size.min;
+    }, function (file, val) {
+      return file.size >= translateScalars(val);
+    });
+    validateSync('maxSize', function (cons) {
+      return cons.size && cons.size.max;
+    }, function (file, val) {
+      return file.size <= translateScalars(val);
+    });
+
+    validateSync('validateFn', function () {
+      return null;
+    }, function (file, r) {
+      return r === true || r === null || r === '';
+    });
+
+    if (!files.length) {
+      callback.call(ngModel, ngModel.$ngfValidations);
+      return;
+    }
+
+    var pendings = 0;
+
+    function validateAsync(name, validatorVal, type, asyncFn, fn) {
+      if (files) {
+        var thisPendings = 0, hasError = false, dName = 'ngf' + name[0].toUpperCase() + name.substr(1);
+        files = files.length === undefined ? [files] : files;
+        angular.forEach(files, function (file) {
+          if (file.type.search(type) !== 0) {
+            return true;
+          }
+          var val = attrGetter(dName, {'$file': file}) || validatorVal(attrGetter('ngfValidate', {'$file': file}) || {});
+          if (val) {
+            pendings++;
+            thisPendings++;
+            asyncFn(file, val).then(function (d) {
+              if (!fn(d, val)) {
                 file.$error = name;
                 file.$errorParam = val;
-                files.splice(i, 1);
-                valid = false;
+                hasError = true;
               }
-            }
+            }, function () {
+              if (attrGetter('ngfValidateForce', {'$file': file})) {
+                file.$error = name;
+                file.$errorParam = val;
+                hasError = true;
+              }
+            })['finally'](function () {
+              pendings--;
+              thisPendings--;
+              if (!thisPendings) {
+                ngModel.$ngfValidations.push({name: name, valid: !hasError});
+              }
+              if (!pendings) {
+                callback.call(ngModel, ngModel.$ngfValidations);
+              }
+            });
           }
-          if (valid !== null) {
-            ngModel.$ngfValidations.push({name: name, valid: valid});
-          }
+        });
+      }
+    }
+
+    validateAsync('maxHeight', function (cons) {
+      return cons.height && cons.height.max;
+    }, /image/, this.imageDimensions, function (d, val) {
+      return d.height <= val;
+    });
+    validateAsync('minHeight', function (cons) {
+      return cons.height && cons.height.min;
+    }, /image/, this.imageDimensions, function (d, val) {
+      return d.height >= val;
+    });
+    validateAsync('maxWidth', function (cons) {
+      return cons.width && cons.width.max;
+    }, /image/, this.imageDimensions, function (d, val) {
+      return d.width <= val;
+    });
+    validateAsync('minWidth', function (cons) {
+      return cons.width && cons.width.min;
+    }, /image/, this.imageDimensions, function (d, val) {
+      return d.width >= val;
+    });
+    validateAsync('ratio', function (cons) {
+      return cons.ratio;
+    }, /image/, this.imageDimensions, function (d, val) {
+      var split = val.toString().split(','), valid = false;
+
+      for (var i = 0; i < split.length; i++) {
+        var r = split[i], xIndex = r.search(/x/i);
+        if (xIndex > -1) {
+          r = parseFloat(r.substring(0, xIndex)) / parseFloat(r.substring(xIndex + 1));
+        } else {
+          r = parseFloat(r);
+        }
+        if (Math.abs((d.width / d.height) - r) < 0.0001) {
+          valid = true;
         }
       }
+      return valid;
+    });
+    validateAsync('maxDuration', function (cons) {
+      return cons.duration && cons.duration.max;
+    }, /audio|video/, this.mediaDuration, function (d, val) {
+      return d <= translateScalars(val);
+    });
+    validateAsync('minDuration', function (cons) {
+      return cons.duration && cons.duration.min;
+    }, /audio|video/, this.mediaDuration, function (d, val) {
+      return d >= translateScalars(val);
+    });
 
-      validateSync('pattern', function (cons) {
-        return cons.pattern;
-      }, upload.validatePattern);
-      validateSync('minSize', function (cons) {
-        return cons.size && cons.size.min;
-      }, function (file, val) {
-        return file.size >= translateScalars(val);
-      });
-      validateSync('maxSize', function (cons) {
-        return cons.size && cons.size.max;
-      }, function (file, val) {
-        return file.size <= translateScalars(val);
-      });
+    validateAsync('validateAsyncFn', function () {
+      return null;
+    }, /./, function (file, val) {
+      return val;
+    }, function (r) {
+      return r === true || r === null || r === '';
+    });
 
-      validateSync('validateFn', function () {
-        return null;
-      }, function (file, r) {
-        return r === true || r === null || r === '';
-      });
+    if (!pendings) {
+      callback.call(ngModel, ngModel.$ngfValidations);
+    }
+  };
 
-      if (!files.length) {
-        callback.call(ngModel, ngModel.$ngfValidations);
+  upload.imageDimensions = function (file) {
+    if (file.width && file.height) {
+      var d = $q.defer();
+      $timeout(function () {
+        d.resolve({width: file.width, height: file.height});
+      });
+      return d.promise;
+    }
+    if (file.$ngfDimensionPromise) return file.$ngfDimensionPromise;
+
+    var deferred = $q.defer();
+    $timeout(function () {
+      if (file.type.indexOf('image') !== 0) {
+        deferred.reject('not image');
         return;
       }
+      upload.dataUrl(file).then(function (dataUrl) {
+        var img = angular.element('<img>').attr('src', dataUrl).css('visibility', 'hidden').css('position', 'fixed');
 
-      var pendings = 0;
-
-      function validateAsync(name, validatorVal, type, asyncFn, fn) {
-        if (files) {
-          var thisPendings = 0, hasError = false, dName = 'ngf' + name[0].toUpperCase() + name.substr(1);
-          files = files.length === undefined ? [files] : files;
-          angular.forEach(files, function (file) {
-            if (file.type.search(type) !== 0) {
-              return true;
-            }
-            var val = attrGetter(dName, {'$file': file}) || validatorVal(attrGetter('ngfValidate', {'$file': file}) || {});
-            if (val) {
-              pendings++;
-              thisPendings++;
-              asyncFn(file, val).then(function (d) {
-                if (!fn(d, val)) {
-                  file.$error = name;
-                  file.$errorParam = val;
-                  hasError = true;
-                }
-              }, function () {
-                if (attrGetter('ngfValidateForce', {'$file': file})) {
-                  file.$error = name;
-                  file.$errorParam = val;
-                  hasError = true;
-                }
-              })['finally'](function () {
-                pendings--;
-                thisPendings--;
-                if (!thisPendings) {
-                  ngModel.$ngfValidations.push({name: name, valid: !hasError});
-                }
-                if (!pendings) {
-                  callback.call(ngModel, ngModel.$ngfValidations);
-                }
-              });
-            }
-          });
+        function success() {
+          var width = img[0].clientWidth;
+          var height = img[0].clientHeight;
+          img.remove();
+          file.width = width;
+          file.height = height;
+          deferred.resolve({width: width, height: height});
         }
-      }
 
-      validateAsync('maxHeight', function (cons) {
-        return cons.height && cons.height.max;
-      }, /image/, this.imageDimensions, function (d, val) {
-        return d.height <= val;
-      });
-      validateAsync('minHeight', function (cons) {
-        return cons.height && cons.height.min;
-      }, /image/, this.imageDimensions, function (d, val) {
-        return d.height >= val;
-      });
-      validateAsync('maxWidth', function (cons) {
-        return cons.width && cons.width.max;
-      }, /image/, this.imageDimensions, function (d, val) {
-        return d.width <= val;
-      });
-      validateAsync('minWidth', function (cons) {
-        return cons.width && cons.width.min;
-      }, /image/, this.imageDimensions, function (d, val) {
-        return d.width >= val;
-      });
-      validateAsync('ratio', function (cons) {
-        return cons.ratio;
-      }, /image/, this.imageDimensions, function (d, val) {
-        var split = val.toString().split(','), valid = false;
-
-        for (var i = 0; i < split.length; i++) {
-          var r = split[i], xIndex = r.search(/x/i);
-          if (xIndex > -1) {
-            r = parseFloat(r.substring(0, xIndex)) / parseFloat(r.substring(xIndex + 1));
-          } else {
-            r = parseFloat(r);
-          }
-          if (Math.abs((d.width / d.height) - r) < 0.0001) {
-            valid = true;
-          }
-        }
-        return valid;
-      });
-      validateAsync('maxDuration', function (cons) {
-        return cons.duration && cons.duration.max;
-      }, /audio|video/, this.mediaDuration, function (d, val) {
-        return d <= translateScalars(val);
-      });
-      validateAsync('minDuration', function (cons) {
-        return cons.duration && cons.duration.min;
-      }, /audio|video/, this.mediaDuration, function (d, val) {
-        return d >= translateScalars(val);
-      });
-
-      validateAsync('validateAsyncFn', function () {
-        return null;
-      }, /./, function (file, val) {
-        return val;
-      }, function (r) {
-        return r === true || r === null || r === '';
-      });
-
-      if (!pendings) {
-        callback.call(ngModel, ngModel.$ngfValidations);
-      }
-    };
-
-    upload.imageDimensions = function (file) {
-      if (file.width && file.height) {
-        var d = $q.defer();
-        $timeout(function () {
-          d.resolve({width: file.width, height: file.height});
-        });
-        return d.promise;
-      }
-      if (file.$ngfDimensionPromise) return file.$ngfDimensionPromise;
-
-      var deferred = $q.defer();
-      $timeout(function () {
-        if (file.type.indexOf('image') !== 0) {
-          deferred.reject('not image');
-          return;
-        }
-        upload.dataUrl(file).then(function (dataUrl) {
-          var img = angular.element('<img>').attr('src', dataUrl).css('visibility', 'hidden').css('position', 'fixed');
-
-          function success() {
-            var width = img[0].clientWidth;
-            var height = img[0].clientHeight;
-            img.remove();
-            file.width = width;
-            file.height = height;
-            deferred.resolve({width: width, height: height});
-          }
-
-          function error() {
-            img.remove();
-            deferred.reject('load error');
-          }
-
-          img.on('load', success);
-          img.on('error', error);
-          var count = 0;
-
-          function checkLoadError() {
-            $timeout(function () {
-              if (img[0].parentNode) {
-                if (img[0].clientWidth) {
-                  success();
-                } else if (count > 10) {
-                  error();
-                } else {
-                  checkLoadError();
-                }
-              }
-            }, 1000);
-          }
-
-          checkLoadError();
-
-          angular.element(document.getElementsByTagName('body')[0]).append(img);
-        }, function () {
+        function error() {
+          img.remove();
           deferred.reject('load error');
-        });
-      });
-
-      file.$ngfDimensionPromise = deferred.promise;
-      file.$ngfDimensionPromise['finally'](function () {
-        delete file.$ngfDimensionPromise;
-      });
-      return file.$ngfDimensionPromise;
-    };
-
-    upload.mediaDuration = function (file) {
-      if (file.duration) {
-        var d = $q.defer();
-        $timeout(function () {
-          d.resolve(file.duration);
-        });
-        return d.promise;
-      }
-      if (file.$ngfDurationPromise) return file.$ngfDurationPromise;
-
-      var deferred = $q.defer();
-      $timeout(function () {
-        if (file.type.indexOf('audio') !== 0 && file.type.indexOf('video') !== 0) {
-          deferred.reject('not media');
-          return;
         }
-        upload.dataUrl(file).then(function (dataUrl) {
-          var el = angular.element(file.type.indexOf('audio') === 0 ? '<audio>' : '<video>')
-            .attr('src', dataUrl).css('visibility', 'none').css('position', 'fixed');
 
-          function success() {
-            var duration = el[0].duration;
-            file.duration = duration;
-            el.remove();
-            deferred.resolve(duration);
-          }
+        img.on('load', success);
+        img.on('error', error);
+        var count = 0;
 
-          function error() {
-            el.remove();
-            deferred.reject('load error');
-          }
-
-          el.on('loadedmetadata', success);
-          el.on('error', error);
-          var count = 0;
-
-          function checkLoadError() {
-            $timeout(function () {
-              if (el[0].parentNode) {
-                if (el[0].duration) {
-                  success();
-                } else if (count > 10) {
-                  error();
-                } else {
-                  checkLoadError();
-                }
+        function checkLoadError() {
+          $timeout(function () {
+            if (img[0].parentNode) {
+              if (img[0].clientWidth) {
+                success();
+              } else if (count > 10) {
+                error();
+              } else {
+                checkLoadError();
               }
-            }, 1000);
-          }
+            }
+          }, 1000);
+        }
 
-          checkLoadError();
+        checkLoadError();
 
-          angular.element(document.body).append(el);
-        }, function () {
+        angular.element(document.getElementsByTagName('body')[0]).append(img);
+      }, function () {
+        deferred.reject('load error');
+      });
+    });
+
+    file.$ngfDimensionPromise = deferred.promise;
+    file.$ngfDimensionPromise['finally'](function () {
+      delete file.$ngfDimensionPromise;
+    });
+    return file.$ngfDimensionPromise;
+  };
+
+  upload.mediaDuration = function (file) {
+    if (file.duration) {
+      var d = $q.defer();
+      $timeout(function () {
+        d.resolve(file.duration);
+      });
+      return d.promise;
+    }
+    if (file.$ngfDurationPromise) return file.$ngfDurationPromise;
+
+    var deferred = $q.defer();
+    $timeout(function () {
+      if (file.type.indexOf('audio') !== 0 && file.type.indexOf('video') !== 0) {
+        deferred.reject('not media');
+        return;
+      }
+      upload.dataUrl(file).then(function (dataUrl) {
+        var el = angular.element(file.type.indexOf('audio') === 0 ? '<audio>' : '<video>')
+          .attr('src', dataUrl).css('visibility', 'none').css('position', 'fixed');
+
+        function success() {
+          var duration = el[0].duration;
+          file.duration = duration;
+          el.remove();
+          deferred.resolve(duration);
+        }
+
+        function error() {
+          el.remove();
           deferred.reject('load error');
-        });
-      });
+        }
 
-      file.$ngfDurationPromise = deferred.promise;
-      file.$ngfDurationPromise['finally'](function () {
-        delete file.$ngfDurationPromise;
+        el.on('loadedmetadata', success);
+        el.on('error', error);
+        var count = 0;
+
+        function checkLoadError() {
+          $timeout(function () {
+            if (el[0].parentNode) {
+              if (el[0].duration) {
+                success();
+              } else if (count > 10) {
+                error();
+              } else {
+                checkLoadError();
+              }
+            }
+          }, 1000);
+        }
+
+        checkLoadError();
+
+        angular.element(document.body).append(el);
+      }, function () {
+        deferred.reject('load error');
       });
-      return file.$ngfDurationPromise;
+    });
+
+    file.$ngfDurationPromise = deferred.promise;
+    file.$ngfDurationPromise['finally'](function () {
+      delete file.$ngfDurationPromise;
+    });
+    return file.$ngfDurationPromise;
+  };
+  return upload;
+}
+]);
+
+// source: Source: https://github.com/romelgomez/angular-firebase-image-upload/blob/master/app/scripts/fileUpload.js#L89
+
+ngFileUpload.service('UploadResize', ['UploadValidate', '$q', '$timeout', function (UploadValidate, $q, $timeout) {
+  var upload = UploadValidate;
+
+  /**
+   * Conserve aspect ratio of the original region. Useful when shrinking/enlarging
+   * images to fit into a certain area.
+   * Source:  http://stackoverflow.com/a/14731922
+   *
+   * @param {Number} srcWidth Source area width
+   * @param {Number} srcHeight Source area height
+   * @param {Number} maxWidth Nestable area maximum available width
+   * @param {Number} maxHeight Nestable area maximum available height
+   * @return {Object} { width, height }
+   */
+  var calculateAspectRatioFit = function (srcWidth, srcHeight, maxWidth, maxHeight) {
+    var ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
+    return {width: srcWidth * ratio, height: srcHeight * ratio};
+  };
+
+  /**
+   Reduce imagen size and quality.
+   @param {String} imagen is a base64 string
+   @param {Number} width
+   @param {Number} height
+   @param {Number} quality from 0.1 to 1.0
+   @return Promise.<String>
+   **/
+  var resize = function (imagen, width, height, quality, type) {
+    var deferred = $q.defer();
+    var canvasElement = document.createElement('canvas');
+    var imagenElement = document.createElement('img');
+    imagenElement.onload = function () {
+      try {
+        var dimensions = calculateAspectRatioFit(imagenElement.width, imagenElement.height, width, height);
+        canvasElement.width = dimensions.width;
+        canvasElement.height = dimensions.height;
+        var context = canvasElement.getContext('2d');
+        context.drawImage(imagenElement, 0, 0, dimensions.width, dimensions.height);
+        deferred.resolve(canvasElement.toDataURL(type || 'image/WebP', quality || 1.0));
+      } catch(e) {
+        deferred.reject(e);
+      }
     };
-    return upload;
-  }
-  ]);
+    imagenElement.onerror = function () {
+      deferred.reject();
+    };
+    imagenElement.src = imagen;
+    return deferred.promise;
+  };
 
-})();
+  var dataURLtoBlob = function (dataurl) {
+    var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+      bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], {type: mime});
+  };
+
+  upload.resize = function (file, width, height, quality) {
+    var deferred = $q.defer();
+    if (file.type.indexOf('image') !== 0) {
+      $timeout(function() {deferred.resolve('Only images are allowed for resizing!');});
+      return deferred.promise;
+    }
+
+    upload.dataUrl(file, true).then(function (url) {
+      resize(url, width, height, quality, file.type).then(function (dataUrl) {
+        var blob= dataURLtoBlob(dataUrl);
+        blob.name = file.name;
+        deferred.resolve(blob);
+      }, function () {
+        deferred.reject();
+      });
+    }, function () {
+      deferred.reject();
+    });
+    return deferred.promise;
+  };
+
+  return upload;
+}]);
 
 (function () {
   ngFileUpload.directive('ngfDrop', ['$parse', '$timeout', '$location', 'Upload',
