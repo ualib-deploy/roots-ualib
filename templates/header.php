@@ -354,7 +354,7 @@ if (defined('GROUP_ANY_WEBAPP'))
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="/about/library-annex/">
                                                 <span class="fa fa-building"></span>
-                                                <h4>Library Annex</h4>
+                                                <h4>Libraries' Annex</h4>
                                                 <p>Library collections located off campus</p>
                                             </a>
                                         </div>
