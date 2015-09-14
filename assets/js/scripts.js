@@ -1,4 +1,4 @@
-angular.module('ualib.templates', ['../assets/js/_ualib-alerts.tpl.html', '../assets/js/_ualib-home.tpl.html']);
+angular.module('ualib.templates', ['../assets/js/_ualib-alerts.tpl.html', '../assets/js/_ualib-home.tpl.html', '../assets/js/_ualib-image-carousel.tpl.html']);
 
 angular.module("../assets/js/_ualib-alerts.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("../assets/js/_ualib-alerts.tpl.html",
@@ -108,8 +108,40 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                        <a href=\"/#/news-exhibits\" class=\"more-link\">More News</a>\n" +
     "                    </div>\n" +
     "                </div>\n" +
+    "\n" +
+    "                <!--\n" +
+    "                <div class=\"card front-page-card\">\n" +
+    "                    <div class=\"card-body\">\n" +
+    "                        <div class=\"row\">\n" +
+    "                            <div class=\"ualib-image-carousel\"></div>\n" +
+    "                        </div>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "                -->\n" +
     "            </div>\n" +
     "        </div>\n" +
+    "    </div>\n" +
+    "</div>");
+}]);
+
+angular.module("../assets/js/_ualib-image-carousel.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("../assets/js/_ualib-image-carousel.tpl.html",
+    "<div class=\"text-center\" ng-if=\"images.length > 0\">\n" +
+    "    <ul rn-carousel rn-carousel-auto-slide=\"8\" rn-carousel-buffered rn-carousel-transition=\"slide\"\n" +
+    "        rn-carousel-index=\"curImage\" class=\"image news-carousel-small\">\n" +
+    "        <li ng-repeat=\"img in images\">\n" +
+    "            <div class=\"layer text-center\">\n" +
+    "                <div class=\"news-carousel-image-small\"\n" +
+    "                     ng-style=\"{'background-image':'url('+img+')'}\">\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </li>\n" +
+    "    </ul>\n" +
+    "    <div class=\"rn-carousel-indicator custom-indicator\">\n" +
+    "        <span ng-repeat=\"img in images\" ng-click=\"$parent.curImage = $index\">&nbsp;\n" +
+    "            <span class=\"fa fa-circle-o\" ng-show=\"$index != $parent.curImage\"></span>\n" +
+    "            <span class=\"fa fa-circle\" ng-show=\"$index == $parent.curImage\"></span>\n" +
+    "        </span>\n" +
     "    </div>\n" +
     "</div>");
 }]);
@@ -189,7 +221,8 @@ $(document).ready(UTIL.loadEvents);
     'ualib.staffdir',
     'ualib.softwareList',
     'ualib.news',
-    'ualib.alerts'
+    'ualib.alerts',
+    'ualib.imageCarousel'
 ])
 
 
@@ -277,5 +310,38 @@ $(document).ready(UTIL.loadEvents);
             link: function(scope, elm, attrs){
             },
             templateUrl: '../assets/js/_ualib-alerts.tpl.html'
+        };
+    }]);
+;angular.module('ualib.imageCarousel', ['angular-carousel'])
+    .constant('VIEW_IMAGES_URL', '//wwwdev2.lib.ua.edu/digitalSigns/api/all')
+
+    .factory('imageCarouselFactory', ['$http', 'VIEW_IMAGES_URL', function imageCarouselFactory($http, url){
+        return {
+            getData: function(){
+                return $http({method: 'GET', url: url, params: {}});
+            }
+        };
+    }])
+    .controller('imageCarouselCtrl', ['$scope', 'imageCarouselFactory',
+        function imageCarouselCtrl($scope, imageCarouselFactory){
+            $scope.images = [];
+
+            imageCarouselFactory.getData()
+                .success(function(data) {
+                    $scope.images = data.images;
+                })
+                .error(function(data, status, headers, config) {
+                    console.log(data);
+                });
+
+        }])
+    .directive('ualibImageCarousel', [ function() {
+        return {
+            restrict: 'AC',
+            scope: {},
+            controller: 'imageCarouselCtrl',
+            link: function(scope, elm, attrs){
+            },
+            templateUrl: '../assets/js/_ualib-image-carousel.tpl.html'
         };
     }]);

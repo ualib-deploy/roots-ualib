@@ -11,7 +11,8 @@ angular.module('ualib', [
     'ualib.staffdir',
     'ualib.softwareList',
     'ualib.news',
-    'ualib.alerts'
+    'ualib.alerts',
+    'ualib.imageCarousel'
 ])
 
 

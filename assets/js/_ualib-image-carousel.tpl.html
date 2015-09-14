@@ -1,0 +1,18 @@
+<div class="text-center" ng-if="images.length > 0">
+    <ul rn-carousel rn-carousel-auto-slide="8" rn-carousel-buffered rn-carousel-transition="slide"
+        rn-carousel-index="curImage" class="image news-carousel-small">
+        <li ng-repeat="img in images">
+            <div class="layer text-center">
+                <div class="news-carousel-image-small"
+                     ng-style="{'background-image':'url('+img+')'}">
+                </div>
+            </div>
+        </li>
+    </ul>
+    <div class="rn-carousel-indicator custom-indicator">
+        <span ng-repeat="img in images" ng-click="$parent.curImage = $index">&nbsp;
+            <span class="fa fa-circle-o" ng-show="$index != $parent.curImage"></span>
+            <span class="fa fa-circle" ng-show="$index == $parent.curImage"></span>
+        </span>
+    </div>
+</div>
