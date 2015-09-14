@@ -14,6 +14,12 @@
     "jquery": "1.11.1",
     "bootstrap": "3.3.2",
     "respond": "1.4.2",
+    "fontawesome": "~4.3.0",
+    "angular": ">=1 <1.3.0",
+    "angular-route": ">=1 <1.3.0",
+    "angular-resource": ">=1 <1.3.0",
+    "angular-animate": ">=1 <1.3.0",
+    "angular-sanitize": ">=1 <1.3.0",
     "angular-filter": "~0.5.4",
     "ng-file-upload": ">=4",
     "yamm3": "https://github.com/geedmo/yamm3.git#~1.0.0",
@@ -28,14 +34,6 @@
     "ualib-news": "https://github.com/ualibweb/news_ui.git",
     "angular-carousel": "0.3.12",
     "angular-ui-tinymce": "latest"
-  },
-  "devDependencies": {
-    "fontawesome": "~4.3.0",
-    "angular": ">=1 <1.3.0",
-    "angular-route": ">=1 <1.3.0",
-    "angular-resource": ">=1 <1.3.0",
-    "angular-animate": ">=1 <1.3.0",
-    "angular-sanitize": ">=1 <1.3.0"
   },
   "resolutions": {
     "angular": ">=1 <1.3.0",
