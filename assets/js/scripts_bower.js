@@ -12621,6 +12621,82 @@ angular.module("manageSoftware/manageSoftwareItemFields.tpl.html", []).run(["$te
     "               maxlength=\"100\" id=\"apDev\">\n" +
     "    </div>\n" +
     "</div>\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-3 form-group\">\n" +
+    "        <label for=\"ownerDept\">Owner Department</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Owner Department\" ng-model=\"sw.owner.department\"\n" +
+    "               maxlength=\"100\" id=\"ownerDept\" required>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-3 form-group\">\n" +
+    "        <label for=\"ownerName\">Owner Name</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Owner Name\" ng-model=\"sw.owner.name\"\n" +
+    "               maxlength=\"60\" id=\"ownerName\" required>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-3 form-group\">\n" +
+    "        <label for=\"ownerEmail\">Owner Email</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Owner Email\" ng-model=\"sw.owner.email\"\n" +
+    "               maxlength=\"128\" id=\"ownerEmail\" required>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-3 form-group\">\n" +
+    "        <label for=\"ownerPhone\">Owner Phone</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Owner Phone\" ng-model=\"sw.owner.phone\"\n" +
+    "               maxlength=\"13\" id=\"ownerPhone\" required>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div class=\"row\" ng-repeat=\"partner in sw.partners\">\n" +
+    "    <div class=\"col-md-1\">\n" +
+    "        <button type=\"button\" class=\"btn btn-success\" ng-click=\"addPartner(sw)\" ng-if=\"$index == 0\">\n" +
+    "            <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "        </button>\n" +
+    "        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deletePartner(sw, partner)\" ng-if=\"$index !== 0\">\n" +
+    "            <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "        </button>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-11\">\n" +
+    "        <div class=\"col-md-3 form-group\">\n" +
+    "            <label for=\"partnerDept\">Partner Department</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Partner Department\" ng-model=\"partner.department\"\n" +
+    "                   maxlength=\"100\" id=\"partnerDept\" required>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-3 form-group\">\n" +
+    "            <label for=\"partnerName\">Partner Name</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Partner Name\" ng-model=\"partner.name\"\n" +
+    "                   maxlength=\"60\" id=\"partnerName\" required>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-3 form-group\">\n" +
+    "            <label for=\"partnerEmail\">Partner Email</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Partner Email\" ng-model=\"partner.email\"\n" +
+    "                   maxlength=\"128\" id=\"partnerEmail\" required>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-3 form-group\">\n" +
+    "            <label for=\"partnerPhone\">Partner Phone</label>\n" +
+    "            <input type=\"text\" class=\"form-control\" placeholder=\"Partner Phone\" ng-model=\"partner.phone\"\n" +
+    "                   maxlength=\"13\" id=\"partnerPhone\" required>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-md-3 form-group\">\n" +
+    "        <label for=\"requesterDept\">Requester Department</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"requester Department\" ng-model=\"sw.requester.department\"\n" +
+    "               maxlength=\"100\" id=\"requesterDept\" required>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-3 form-group\">\n" +
+    "        <label for=\"requesterName\">Requester Name</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Requester Name\" ng-model=\"sw.requester.name\"\n" +
+    "               maxlength=\"60\" id=\"requesterName\">\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-3 form-group\">\n" +
+    "        <label for=\"requesterEmail\">Requester Email</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Requester Email\" ng-model=\"sw.requester.email\"\n" +
+    "               maxlength=\"128\" id=\"requesterEmail\" required>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-3 form-group\">\n" +
+    "        <label for=\"requesterPhone\">Requester Phone</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Requester Phone\" ng-model=\"sw.requester.phone\"\n" +
+    "               maxlength=\"13\" id=\"requesterPhone\" required>\n" +
+    "    </div>\n" +
+    "</div>\n" +
     "");
 }]);
 
@@ -15723,6 +15799,22 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             $scope.newSW.main_exp = "2015-1-1";
             $scope.newSW.pkey = "";
             $scope.newSW.devices = "";
+            $scope.newSW.owner = {};
+            $scope.newSW.owner.department = "";
+            $scope.newSW.owner.name = "";
+            $scope.newSW.owner.email = "";
+            $scope.newSW.owner.phone = "";
+            $scope.newSW.partners = [];
+            $scope.newSW.partners[0] = {};
+            $scope.newSW.partners[0].department = "";
+            $scope.newSW.partners[0].name = "";
+            $scope.newSW.partners[0].email = "";
+            $scope.newSW.partners[0].phone = "";
+            $scope.newSW.requester = {};
+            $scope.newSW.requester.department = "";
+            $scope.newSW.requester.name = "";
+            $scope.newSW.requester.email = "";
+            $scope.newSW.requester.phone = "";
 
             $scope.currentPage = 1;
             $scope.maxPageSize = 10;
@@ -16158,6 +16250,27 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                 $scope.sw.links.splice($scope.sw.links.indexOf(link), 1);
             }
         };
+        $scope.addPartnerBoth = function(sw){
+            var partner = {};
+            partner.department = "";
+            partner.name = "";
+            partner.email = "";
+            partner.phone = "";
+
+            if (sw.sid > 0) {
+                $scope.data.software[$scope.data.software.indexOf(sw)].partners.push(partner);
+            } else {
+                $scope.sw.partners.push(partner);
+            }
+        };
+        $scope.deletePartnerBoth = function(sw, partner){
+            if (sw.sid > 0) {
+                $scope.data.software[$scope.data.software.indexOf(sw)].partners
+                    .splice($scope.data.software[$scope.data.software.indexOf(sw)].partners.indexOf(partner), 1);
+            } else {
+                $scope.sw.partners.splice($scope.sw.partners.indexOf(partner), 1);
+            }
+        };
     }])
 
     .directive('softwareItemFieldsList', ['$timeout', 'Upload', function($timeout, Upload) {
@@ -16214,6 +16327,18 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                 scope.deleteLink = function(sw, link){
                     $timeout(function() {
                         scope.deleteLinkBoth(sw, link);
+                        scope.$apply();
+                    }, 0);
+                };
+                scope.addPartner = function(sw){
+                    $timeout(function() {
+                        scope.addPartnerBoth(sw);
+                        scope.$apply();
+                    }, 0);
+                };
+                scope.deletePartner = function(sw, partner){
+                    $timeout(function() {
+                        scope.deletePartnerBoth(sw, partner);
                         scope.$apply();
                     }, 0);
                 };
@@ -20189,30 +20314,24 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "    </div>\n" +
     "\n" +
     "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-6\">\n" +
+    "        <div class=\"col-md-4\">\n" +
     "            <div class=\"bento-box\" bento-box=\"databases\">\n" +
     "                <h2>Databases </h2>\n" +
     "            </div>\n" +
     "        </div>\n" +
-    "        <div class=\"col-md-6\">\n" +
+    "        <div class=\"col-md-4\">\n" +
     "            <div class=\"bento-box\" bento-box=\"acumen\">\n" +
     "                <h2 id=\"acumen\">Acumen</h2>\n" +
     "            </div>\n" +
     "        </div>\n" +
-    "    </div>\n" +
-    "\n" +
-    "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-6\">\n" +
-    "            <div class=\"bento-box\" bento-box=\"media\">\n" +
-    "                <h2>Multimedia</h2>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-6\">\n" +
+    "        <div class=\"col-md-4\">\n" +
     "            <div class=\"bento-box\" bento-box=\"other\">\n" +
     "                <h2>Other Media</h2>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
+    "\n" +
+    "    \n" +
     "    <div class=\"row\">\n" +
     "        <div class=\"col-md-12\">\n" +
     "            <div class=\"bento-box well\" bento-box=\"recommend\" hide-if-empty=\"true\" omit-from-menu=\"true\">\n" +
@@ -20289,12 +20408,12 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
 angular.module("common/engines/acumen/acumen.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("common/engines/acumen/acumen.tpl.html",
     "<div class=\"media\">\n" +
-    "    <a class=\"pull-left\" ng-href=\"http://acumen.lib.ua.edu/{{item.link}}\" title=\"{{item.title}}\">\n" +
+    "    <a class=\"pull-left\" ng-href=\"http://acumen.lib.ua.edu/{{item.link}}\" title=\"{{item.title}}\" target=\"_acumen\">\n" +
     "        <img ng-src=\"{{item.thumb_path}}\">\n" +
     "    </a>\n" +
     "    <div class=\"media-body\">\n" +
     "        <h4 class=\"media-heading\">\n" +
-    "            <a ng-href=\"http://acumen.lib.ua.edu/{{item.link}}\" title=\"item.title\">{{item.title | truncate: 40: '...': true}}</a>\n" +
+    "            <a ng-href=\"http://acumen.lib.ua.edu/{{item.link}}\" target=\"_acumen\" title=\"{{item.title}}\">{{item.title | truncate: 40: '...': true}}</a>\n" +
     "        </h4>\n" +
     "        <div class=\"details-context\">\n" +
     "            <span ng-if=\"item.date\" ng-bind-html=\"item.date\"></span>\n" +
@@ -20312,7 +20431,7 @@ angular.module("common/engines/catalog/catalog.tpl.html", []).run(["$templateCac
     "        <h4 class=\"media-heading\">\n" +
     "            <a ng-href=\"{{item.href}}\"\n" +
     "               title=\"{{item.title}}\"\n" +
-    "               ng-bind-html=\"item.title | truncate: 50: '...': true\"></a>\n" +
+    "               ng-bind-html=\"item.title | truncate: 50: '...': true\" target=\"_catalog\"></a>\n" +
     "        </h4>\n" +
     "        <div class=\"details-context\">\n" +
     "            <span ng-if=\"item.year && item.year | number\" ng-bind-html=\"item.year\"></span>\n" +
@@ -20334,7 +20453,7 @@ angular.module("common/engines/databases/databases.tpl.html", []).run(["$templat
     "<div class=\"media\">\n" +
     "    <div class=\"media-body\">\n" +
     "        <h4 class=\"media-heading\">\n" +
-    "            <a ng-href=\"{{item.url}}\" title=\"{{item.title}}\">{{item.title | truncate: 40: '...': true}}</a>\n" +
+    "            <a ng-href=\"{{item.url}}\" title=\"{{item.title}}\" target=\"_databases\">{{item.title | truncate: 40: '...': true}}</a>\n" +
     "        </h4>\n" +
     "        <div class=\"details-context\">\n" +
     "            <span ng-if=\"item.coverage\" ng-bind-html=\"item.coverage\"></span>\n" +
@@ -20351,7 +20470,7 @@ angular.module("common/engines/ejournals/ejournals.tpl.html", []).run(["$templat
     "<div class=\"media\">\n" +
     "    <div class=\"media-body\">\n" +
     "        <h4 class=\"media-heading\">\n" +
-    "            <a ng-href=\"{{item.links[0].href}}\" title=\"{{item.title}}\">{{item.title | ltrim | truncate: 50: '...': true}}</a>\n" +
+    "            <a ng-href=\"{{item.links[0].href}}\" title=\"{{item.title}}\" target=\"_ejournals\">{{item.title | ltrim | truncate: 50: '...': true}}</a>\n" +
     "        </h4>\n" +
     "\n" +
     "        <div class=\"details-context\">\n" +
@@ -20386,7 +20505,7 @@ angular.module("common/engines/google-cs/google-cs.tpl.html", []).run(["$templat
   $templateCache.put("common/engines/google-cs/google-cs.tpl.html",
     "<div class=\"media\">\n" +
     "    <div class=\"media-body\">\n" +
-    "        <h4 class=\"media-heading\"><a ng-href=\"{{item.link}}\" title=\"{{item.title}}\">{{item.title | truncate: 40: '...': true}}</a></h4>\n" +
+    "        <h4 class=\"media-heading\"><a ng-href=\"{{item.link}}\" title=\"{{item.title}}\" target=\"_googlecs\">{{item.title | truncate: 40: '...': true}}</a></h4>\n" +
     "        <p ng-bind-html=\"item.htmlSnippet\"></p>\n" +
     "    </div>\n" +
     "</div>\n" +
@@ -20423,6 +20542,7 @@ angular.module("common/engines/scout/scout.tpl.html", []).run(["$templateCache",
     "        <h4 class=\"media-heading\">\n" +
     "            <a ng-href=\"{{item.PLink}}\"\n" +
     "               title=\"{{item.Items[0].Data}}\"\n" +
+    "               target=\"_scout\"\n" +
     "               ng-bind-html=\"item.RecordInfo.BibRecord.BibEntity.Titles[0].TitleFull | lowercase | ucfirst\"></a>\n" +
     "        </h4>\n" +
     "        <div class=\"details-context\">\n" +
@@ -20579,11 +20699,13 @@ angular.module('oneSearch.bento', [])
         }
 
         function setResultLimit(box){
+
             $q.when(self.boxes[box].results)
                 .then(function(results){
                     var numResults = Object.keys(results).length;
                     var numEngines = self.boxes[box]['engines'].length;
                     var expecting = numResults + numEngines;
+                    
                     if (expecting < 2 && self.boxes[box].resultLimit < 3){
                         self.boxes[box].resultLimit++;
                     }
@@ -20637,6 +20759,7 @@ angular.module('oneSearch.bento', [])
                             //console.log(res);
                             // Group the results by defined media types
                             var grouped = mediaTypes.groupBy(res, engine.mediaTypes);
+                            console.log(grouped);
 
                             // Iterate over the boxes.
                             Object.keys(self.boxes).forEach(function(type){
@@ -20802,7 +20925,7 @@ angular.module('oneSearch.bento', [])
 
                                     // Wrap the template in an element that specifies ng-repeat over the "items" object (i.e., the results),
                                     // gives the generic classes for items in a bento box.
-                                    var template = angular.element('<div class="animate-repeat bento-box-item" ng-repeat="item in items | limitTo: box.resultLimit">'+data+'</div><div class="resource-link-container"><a class="btn btn-link btn-sm" ng-href="{{resourceLink}}" ng-if="resourceLink">More results from {{engine | ucfirst}}  <span class="fa fa-fw fa-external-link"></span></a></div>');
+                                    var template = angular.element('<div class="animate-repeat bento-box-item" ng-repeat="item in items | limitTo: box.resultLimit">'+data+'</div><div class="resource-link-container"><a class="btn btn-link btn-sm" ng-href="{{resourceLink}}" ng-if="resourceLink" target="_{{engine}}">More results from {{engine | ucfirst}}  <span class="fa fa-fw fa-external-link"></span></a></div>');
 
                                     // Compile wrapped template with the isolated scope's context
                                     var html = $compile(template)(engineScope);
@@ -20931,7 +21054,7 @@ angular.module('oneSearch.common')
                 model: '=',
                 search: '='
             },
-            controller: ['$scope', '$window', '$timeout', 'dataFactory', function($scope, $window, $timeout, dataFactory){
+            controller: function($scope, $window, $timeout, dataFactory){
                 $scope.items = {};
                 $scope.filteredItems = [];
                 $scope.model = "";
@@ -21020,7 +21143,7 @@ angular.module('oneSearch.common')
                         return false;
                     };
                 };
-            }],
+            },
             link: function(scope, elem, attrs) {
                 scope.showSuggestions = false;
                 var suggestWatcher = scope.$watch('items', function(newVal, oldVal){
@@ -21114,7 +21237,7 @@ angular.module('engines.acumen', [])
         })
     }])
 
-    .controller('AcumenCtrl', ['$scope', '$filter', function($scope, $filter){
+    .controller('AcumenCtrl', function($scope, $filter){
         var items = $scope.items;
 
         for (var i = 0, len = items.length; i < len; i++) {
@@ -21124,7 +21247,7 @@ angular.module('engines.acumen', [])
                 else items[i].type = items[i].type.sort().shift();
             }
         }
-    }]);
+    });
 angular.module('engines.catalog', [])
 
     .config(['oneSearchProvider', function(oneSearchProvider){
@@ -21137,8 +21260,7 @@ angular.module('engines.catalog', [])
                 path: 'bibFormat',
                 types: {
                     books: ['aa','ac', 'ad', 'am'],
-                    journals: ['ab','as','bb','bs','cb','cs','db','ds','eb','es','fb','fs','gb','gs','ib','is','jb','js','kb','ks','mb','ms','ob','os','pb','ps','rb','rs','tb','ts'],
-                    media: ['ga','gc','gd','gm','ia','ic','id','im','ja','jc','jd','jm']
+                    journals: ['ab','as','bb','bs','cb','cs','db','ds','eb','es','fb','fs','gb','gs','ib','is','jb','js','kb','ks','mb','ms','ob','os','pb','ps','rb','rs','tb','ts']
                 }
             },
             templateUrl: 'common/engines/catalog/catalog.tpl.html',
@@ -21156,7 +21278,7 @@ angular.module('engines.catalog', [])
         }
     }])
 
-    .controller('CatalogCtrl', ['$scope', '$filter', function($scope, $filter){
+    .controller('CatalogCtrl', function($scope, $filter){
         var types = {
             bc: "Archive/Manuscript",
             cm: "Music Score",
@@ -21192,7 +21314,7 @@ angular.module('engines.catalog', [])
         }
 
         $scope.items = items;
-    }]);
+    });
 
 angular.module('engines.databases', [])
 
@@ -21225,7 +21347,7 @@ angular.module('engines.ejournals', [])
         })
     }])
 
-    .controller('EjouralsCtrl', ['$scope', function($scope){
+    .controller('EjouralsCtrl', function($scope){
 
         var param;
         switch ($scope.mediaType){
@@ -21242,7 +21364,7 @@ angular.module('engines.ejournals', [])
         if (param){
             $scope.resourceLink = $scope.resourceLink.replace('SS_searchTypeAll=yes&SS_searchTypeBook=yes&SS_searchTypeJournal=yes&SS_searchTypeOther=yes', param);
         }
-    }]);
+    });
 /**
  * @module common.engines
  *
@@ -21347,8 +21469,7 @@ angular.module('engines.scout', [])
                 path: 'Header.PubTypeId',
                 types: {
                     books: ['book', 'ebook'],
-                    articles: 'academicJournal',
-                    media: ['audio', 'videoRecording']
+                    articles: 'academicJournal'
                 }
             },
             templateUrl: 'common/engines/scout/scout.tpl.html',
@@ -21356,7 +21477,7 @@ angular.module('engines.scout', [])
         })
     }])
 
-    .controller('ScoutCtrl', ['$scope', function($scope){
+    .controller('ScoutCtrl', function($scope){
         var items = $scope.items;
         for (var i = 0; i < items.length; i++){
             if (items[i].Header.PubTypeId == 'audio'){
@@ -21417,7 +21538,7 @@ angular.module('engines.scout', [])
         }
 
         $scope.resourceLink = angular.copy(link);
-    }]);
+    });
 angular.module('filters.nameFilter', [])
 
     .filter('nameFilter', ['$filter', function($filter){
