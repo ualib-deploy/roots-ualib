@@ -13643,6 +13643,14 @@ angular.module("submittedForms/submittedForms.tpl.html", []).run(["$templateCach
     "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-12\" ng-show=\"form.show\">\n" +
+    "            <div class=\"col-md-12 panel panel-default\">\n" +
+    "                <div class=\"panel-heading\">\n" +
+    "                    <h4 class=\"panel-title\">Form was sent to</h4>\n" +
+    "                </div>\n" +
+    "                <div class=\"panel-body\">\n" +
+    "                    {{form.addresseeEmails}}\n" +
+    "                </div>\n" +
+    "            </div>\n" +
     "            <div class=\"col-md-4 panel panel-default\" ng-repeat=\"field in form.fields\"\n" +
     "                 ng-show=\"field.name.length > 0 && field.value.length > 0\">\n" +
     "                <div class=\"panel-heading\">\n" +
