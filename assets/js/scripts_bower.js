@@ -12526,7 +12526,7 @@ angular.module("manageSoftware/manageSoftwareItemFields.tpl.html", []).run(["$te
     "</div>\n" +
     "<div class=\"row\" ng-repeat=\"partner in sw.partners\">\n" +
     "    <div class=\"col-md-1\">\n" +
-    "        <label>Partner {{$index + 1}}</label>\n" +
+    "        <label>Partner{{$index + 1}}</label>\n" +
     "        <button type=\"button\" class=\"btn btn-success\" ng-click=\"addPartner(sw)\" ng-if=\"$index == 0\">\n" +
     "            <span class=\"fa fa-fw fa-plus\"></span>\n" +
     "        </button>\n" +
