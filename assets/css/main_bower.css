@@ -132,6 +132,9 @@
     background-color: #f9f9f9;
 }
 
+.bento-box-container {
+  text-align: justify;
+}
 .bento-box-container > .row > div {
   border: 1px solid transparent;
   -webkit-transition: all 250ms;
@@ -179,6 +182,10 @@
   -webkit-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
   -moz-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
   box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+}
+.bento-box-menu .nav > li.journals,
+.bento-box-menu .nav > li.libguides {
+  border-right: 1px solid #ddd;
 }
 .bento-box-menu .nav > li > a {
   padding: 15px 0;
