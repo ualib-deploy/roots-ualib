@@ -109,6 +109,7 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                    </div>\n" +
     "                </div>\n" +
     "\n" +
+    "                <!--\n" +
     "                <div class=\"card front-page-card\">\n" +
     "                    <div class=\"card-body\">\n" +
     "                        <div class=\"row\">\n" +
@@ -116,6 +117,7 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                        </div>\n" +
     "                    </div>\n" +
     "                </div>\n" +
+    "                -->\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
