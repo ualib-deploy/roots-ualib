@@ -12499,26 +12499,26 @@ angular.module("manageSoftware/manageSoftwareItemFields.tpl.html", []).run(["$te
     "</div>\n" +
     "<div class=\"row\">\n" +
     "    <div class=\"col-md-1\">\n" +
-    "        <h4>Owner</h4>\n" +
+    "        <label>Owner</label>\n" +
     "    </div>\n" +
     "    <div class=\"col-md-11\">\n" +
     "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"ownerDept\">Owner Department</label>\n" +
+    "            <label for=\"ownerDept\">Department</label>\n" +
     "            <input type=\"text\" class=\"form-control\" placeholder=\"Owner Department\" ng-model=\"sw.owner.department\"\n" +
     "                   maxlength=\"100\" id=\"ownerDept\" required>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"ownerName\">Owner Name</label>\n" +
+    "            <label for=\"ownerName\">Name</label>\n" +
     "            <input type=\"text\" class=\"form-control\" placeholder=\"Owner Name\" ng-model=\"sw.owner.name\"\n" +
     "                   maxlength=\"60\" id=\"ownerName\" required>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"ownerEmail\">Owner Email</label>\n" +
+    "            <label for=\"ownerEmail\">Email</label>\n" +
     "            <input type=\"text\" class=\"form-control\" placeholder=\"Owner Email\" ng-model=\"sw.owner.email\"\n" +
     "                   maxlength=\"128\" id=\"ownerEmail\" required>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"ownerPhone\">Owner Phone</label>\n" +
+    "            <label for=\"ownerPhone\">Phone</label>\n" +
     "            <input type=\"text\" class=\"form-control\" placeholder=\"Owner Phone\" ng-model=\"sw.owner.phone\"\n" +
     "                   maxlength=\"13\" id=\"ownerPhone\" required>\n" +
     "        </div>\n" +
@@ -12526,7 +12526,7 @@ angular.module("manageSoftware/manageSoftwareItemFields.tpl.html", []).run(["$te
     "</div>\n" +
     "<div class=\"row\" ng-repeat=\"partner in sw.partners\">\n" +
     "    <div class=\"col-md-1\">\n" +
-    "        <h4>Partners</h4>\n" +
+    "        <label>Partner {{$index + 1}}</label>\n" +
     "        <button type=\"button\" class=\"btn btn-success\" ng-click=\"addPartner(sw)\" ng-if=\"$index == 0\">\n" +
     "            <span class=\"fa fa-fw fa-plus\"></span>\n" +
     "        </button>\n" +
@@ -12536,22 +12536,22 @@ angular.module("manageSoftware/manageSoftwareItemFields.tpl.html", []).run(["$te
     "    </div>\n" +
     "    <div class=\"col-md-11\">\n" +
     "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"partnerDept\">Partner Department</label>\n" +
+    "            <label for=\"partnerDept\">Department</label>\n" +
     "            <input type=\"text\" class=\"form-control\" placeholder=\"Partner Department\" ng-model=\"partner.department\"\n" +
     "                   maxlength=\"100\" id=\"partnerDept\" required>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"partnerName\">Partner Name</label>\n" +
+    "            <label for=\"partnerName\">Name</label>\n" +
     "            <input type=\"text\" class=\"form-control\" placeholder=\"Partner Name\" ng-model=\"partner.name\"\n" +
     "                   maxlength=\"60\" id=\"partnerName\" required>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"partnerEmail\">Partner Email</label>\n" +
+    "            <label for=\"partnerEmail\">Email</label>\n" +
     "            <input type=\"text\" class=\"form-control\" placeholder=\"Partner Email\" ng-model=\"partner.email\"\n" +
     "                   maxlength=\"128\" id=\"partnerEmail\" required>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"partnerPhone\">Partner Phone</label>\n" +
+    "            <label for=\"partnerPhone\">Phone</label>\n" +
     "            <input type=\"text\" class=\"form-control\" placeholder=\"Partner Phone\" ng-model=\"partner.phone\"\n" +
     "                   maxlength=\"13\" id=\"partnerPhone\" required>\n" +
     "        </div>\n" +
@@ -12559,26 +12559,26 @@ angular.module("manageSoftware/manageSoftwareItemFields.tpl.html", []).run(["$te
     "</div>\n" +
     "<div class=\"row\">\n" +
     "    <div class=\"col-md-1\">\n" +
-    "        <h4>Requester</h4>\n" +
+    "        <label>Requester</label>\n" +
     "    </div>\n" +
     "    <div class=\"col-md-11\">\n" +
     "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"requesterDept\">Requester Department</label>\n" +
+    "            <label for=\"requesterDept\">Department</label>\n" +
     "            <input type=\"text\" class=\"form-control\" placeholder=\"requester Department\" ng-model=\"sw.requester.department\"\n" +
     "                   maxlength=\"100\" id=\"requesterDept\">\n" +
     "        </div>\n" +
     "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"requesterName\">Requester Name</label>\n" +
+    "            <label for=\"requesterName\">Name</label>\n" +
     "            <input type=\"text\" class=\"form-control\" placeholder=\"Requester Name\" ng-model=\"sw.requester.name\"\n" +
-    "                   maxlength=\"60\" id=\"requesterName\">\n" +
+    "                   maxlength=\"60\" id=\"requesterName\" required>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"requesterEmail\">Requester Email</label>\n" +
+    "            <label for=\"requesterEmail\">Email</label>\n" +
     "            <input type=\"text\" class=\"form-control\" placeholder=\"Requester Email\" ng-model=\"sw.requester.email\"\n" +
     "                   maxlength=\"128\" id=\"requesterEmail\" required>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-3 form-group\">\n" +
-    "            <label for=\"requesterPhone\">Requester Phone</label>\n" +
+    "            <label for=\"requesterPhone\">Phone</label>\n" +
     "            <input type=\"text\" class=\"form-control\" placeholder=\"Requester Phone\" ng-model=\"sw.requester.phone\"\n" +
     "                   maxlength=\"13\" id=\"requesterPhone\" required>\n" +
     "        </div>\n" +
