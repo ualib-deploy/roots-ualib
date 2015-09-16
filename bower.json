@@ -15,7 +15,6 @@
     "bootstrap": "3.3.2",
     "respond": "1.4.2",
     "angular-filter": "~0.5.4",
-    "ng-file-upload": ">=4",
     "yamm3": "https://github.com/geedmo/yamm3.git#~1.0.0",
     "ualib-ui": "https://github.com/ualibweb/ui-components.git",
     "onesearch": "https://github.com/ualibweb/oneSearch_ui.git",
@@ -25,9 +24,7 @@
     "musicSearch": "https://github.com/ualibweb/musicSearch_ui.git",
     "ualib_staffdir": "https://github.com/ualibweb/staffdir_ui.git",
     "ualib-softwareList": "https://github.com/ualibweb/softwareList_ui.git",
-    "ualib-news": "https://github.com/ualibweb/news_ui.git",
-    "angular-carousel": "0.3.12",
-    "angular-ui-tinymce": "latest"
+    "ualib-news": "https://github.com/ualibweb/news_ui.git"
   },
   "devDependencies": {
     "fontawesome": "~4.3.0",
