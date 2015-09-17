@@ -17491,7 +17491,7 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "        </div>\n" +
     "        <div class=\"col-md-4\">\n" +
     "            <div class=\"bento-box\" bento-box=\"other\">\n" +
-    "                <h2>Other Media</h2>\n" +
+    "                <h2>Other Items</h2>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
@@ -18226,6 +18226,7 @@ angular.module('oneSearch.common')
                 $scope.originalValue = $scope.model;
                 $scope.dataRequested = false;
                 $scope.numShow = 5;
+                $scope.faqSearched = false;
 
                 // hides the list initially
                 $scope.selected = false;
@@ -18240,6 +18241,7 @@ angular.module('oneSearch.common')
                         $scope.setCurrent(-1, false);
                         $scope.dataRequested = false;
                         $scope.selected = false;
+                        $scope.faqSearched = false;
                     }
                     if ($scope.model.length > 2 && !$scope.dataRequested){
                         var fixedString = $scope.model.replace(/\//g, " ");
@@ -18261,12 +18263,17 @@ angular.module('oneSearch.common')
                                 .then(function(data) {
                                     $scope.items.subjects = data;
                                 });
-                            dataFactory.get('https://www.googleapis.com/customsearch/v1?key=AIzaSyCMGfdDaSfjqv5zYoS0mTJnOT3e9MURWkU&cx=003453353330912650815:lfyr_-azrxe&q=' +
-                                encodeURI(fixedString) + '&siteSearch=ask.lib.ua.edu')
-                                .then(function(data) {
-                                    // pluck out the items array for easier 'suggestWatcher' processing
-                                    $scope.items.faq = data.items;
-                                });
+                            var lastTwo = $scope.model.slice(-2);
+                            if (lastTwo.indexOf(" ") === 1 && $scope.model.length > 4 && !$scope.faqSearched) {
+                                console.log("Running GCS search.");
+                                $scope.faqSearched = true;
+                                dataFactory.get('https://www.googleapis.com/customsearch/v1?key=AIzaSyCMGfdDaSfjqv5zYoS0mTJnOT3e9MURWkU&cx=003453353330912650815:lfyr_-azrxe&q=' +
+                                    encodeURI(fixedString) + '&siteSearch=ask.lib.ua.edu')
+                                    .then(function (data) {
+                                        // pluck out the items array for easier 'suggestWatcher' processing
+                                        $scope.items.faq = data.items;
+                                    });
+                            }
                         }, 0);
                     }
                     $scope.originalValue = $scope.model;
@@ -18378,6 +18385,7 @@ angular.module('oneSearch.common')
                         scope.setCurrent(-1, false);
                         scope.dataRequested = false;
                         scope.selected = false;
+                        scope.faqSearched = false;
                         scope.$apply();
                         scope.search();
                     }, 0);
@@ -47916,7 +47924,7 @@ angular.module('hours.list', [])
         }
     }]);
 /**
- * @license AngularJS v1.4.5
+ * @license AngularJS v1.4.6
  * (c) 2010-2015 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -48546,7 +48554,7 @@ makeSwipeDirective('ngSwipeRight', 1, 'swiperight');
 
 /**
  * Angular Carousel - Mobile friendly touch carousel for AngularJS
- * @version v0.3.12 - 2015-06-11
+ * @version v0.3.13 - 2015-06-15
  * @link http://revolunet.github.com/angular-carousel
  * @author Julien Bouquillon <julien@revolunet.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -48999,10 +49007,11 @@ angular.module('angular-carousel').run(['$templateCache', function($templateCach
 
                         if (iAttributes.rnCarouselControls!==undefined) {
                             // dont use a directive for this
+                            var canloop = ((isRepeatBased ? scope[repeatCollection.replace('::', '')].length : currentSlides.length) > 1) ? angular.isDefined(tAttributes['rnCarouselControlsAllowLoop']) : false;
                             var nextSlideIndexCompareValue = isRepeatBased ? repeatCollection.replace('::', '') + '.length - 1' : currentSlides.length - 1;
                             var tpl = '<div class="rn-carousel-controls">\n' +
-                                '  <span class="rn-carousel-control rn-carousel-control-prev" ng-click="prevSlide()" ng-if="carouselIndex > 0"></span>\n' +
-                                '  <span class="rn-carousel-control rn-carousel-control-next" ng-click="nextSlide()" ng-if="carouselIndex < ' + nextSlideIndexCompareValue + '"></span>\n' +
+                                '  <span class="rn-carousel-control rn-carousel-control-prev" ng-click="prevSlide()" ng-if="carouselIndex > 0 || ' + canloop + '"></span>\n' +
+                                '  <span class="rn-carousel-control rn-carousel-control-next" ng-click="nextSlide()" ng-if="carouselIndex < ' + nextSlideIndexCompareValue + ' || ' + canloop + '"></span>\n' +
                                 '</div>';
                             iElement.parent().append($compile(angular.element(tpl))(scope));
                         }
