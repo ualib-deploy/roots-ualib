@@ -18233,6 +18233,7 @@ angular.module('oneSearch.common')
 
                 $scope.onChange = function(){
                     $scope.selected = true;
+                    var fixedString = $scope.model.replace(/\//g, " ");
 
                     if ($scope.model.length < 3 ||
                         ($scope.model.indexOf($scope.originalValue) < 0 && $scope.model.length >= $scope.originalValue.length) ||
@@ -18244,7 +18245,6 @@ angular.module('oneSearch.common')
                         $scope.faqSearched = false;
                     }
                     if ($scope.model.length > 2 && !$scope.dataRequested){
-                        var fixedString = $scope.model.replace(/\//g, " ");
                         dataFactory.get('//wwwdev2.lib.ua.edu/oneSearch/api/suggest/' + encodeURI(fixedString))
                             .then(function(data) {
                                 $scope.items.suggest = data;
@@ -18254,7 +18254,6 @@ angular.module('oneSearch.common')
                     }
                     if ($scope.model.length > 2){
                         $timeout(function() {
-                            var fixedString = $scope.model.replace(/\//g, " ");
                             dataFactory.get('//wwwdev2.lib.ua.edu/oneSearch/api/recommend/' + encodeURI(fixedString))
                                 .then(function(data) {
                                     $scope.items.recommend = data;
@@ -18266,9 +18265,10 @@ angular.module('oneSearch.common')
                         }, 0);
                     }
                     if ($scope.model.length > 4 && !$scope.faqSearched){
+                        console.log("Checking conditions for GCS search...");
                         $timeout(function() {
-                            var lastTwo = $scope.model.slice(-2);
-                            if (lastTwo.indexOf(" ") == 1) {
+                            var lastTwo = fixedString.slice(-2);
+                            if (lastTwo.indexOf(" ") > 0) {
                                 console.log("Running GCS search.");
                                 $scope.faqSearched = true;
                                 dataFactory.get('https://www.googleapis.com/customsearch/v1?key=AIzaSyCMGfdDaSfjqv5zYoS0mTJnOT3e9MURWkU&cx=003453353330912650815:lfyr_-azrxe&q=' +
