@@ -18263,8 +18263,12 @@ angular.module('oneSearch.common')
                                 .then(function(data) {
                                     $scope.items.subjects = data;
                                 });
+                        }, 0);
+                    }
+                    if ($scope.model.length > 4 && !$scope.faqSearched){
+                        $timeout(function() {
                             var lastTwo = $scope.model.slice(-2);
-                            if (lastTwo.indexOf(" ") === 1 && $scope.model.length > 4 && !$scope.faqSearched) {
+                            if (lastTwo.indexOf(" ") == 1) {
                                 console.log("Running GCS search.");
                                 $scope.faqSearched = true;
                                 dataFactory.get('https://www.googleapis.com/customsearch/v1?key=AIzaSyCMGfdDaSfjqv5zYoS0mTJnOT3e9MURWkU&cx=003453353330912650815:lfyr_-azrxe&q=' +
