@@ -18371,6 +18371,11 @@ angular.module('oneSearch.common')
                             scope.selected = true;
                             break;
 
+                        //spacebar
+                        case 32:
+                            scope.onChange();
+                            break;
+
                         default:
                             console.log("KeyCode " + event.keyCode);
                             break;
