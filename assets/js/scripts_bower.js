@@ -18232,6 +18232,7 @@ angular.module('oneSearch.common')
                 $scope.selected = false;
 
                 $scope.onChange = function(){
+                    console.log("OnChange event.");
                     $scope.selected = true;
                     var fixedString = $scope.model.replace(/\//g, " ");
 
@@ -18371,6 +18372,7 @@ angular.module('oneSearch.common')
                             break;
 
                         default:
+                            console.log("KeyCode " + event.keyCode);
                             break;
                     }
                     scope.$apply();
