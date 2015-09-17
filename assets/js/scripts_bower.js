@@ -18373,6 +18373,7 @@ angular.module('oneSearch.common')
 
                         //spacebar
                         case 32:
+                            scope.model = scope.model + " ";
                             scope.onChange();
                             break;
 
