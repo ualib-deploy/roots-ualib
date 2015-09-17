@@ -17431,7 +17431,7 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "    <div class=\"bento-box-menu-container hidden-sm hidden-xs\">\n" +
     "        <nav class=\"bento-box-menu\" ui-scrollfix=\"+0\">\n" +
     "            <ul class=\"nav nav-justified\">\n" +
-    "                <li ng-repeat=\"item in boxMenu\">\n" +
+    "                <li ng-repeat=\"item in boxMenu\" class=\"{{item.box}}\">\n" +
     "                    <a href=\"\" du-smooth-scroll=\"{{item.box}}\" ng-click=\"selectBox(item.box)\">{{item.title}}</a>\n" +
     "                </li>\n" +
     "            </ul>\n" +
@@ -17491,7 +17491,7 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "        </div>\n" +
     "        <div class=\"col-md-4\">\n" +
     "            <div class=\"bento-box\" bento-box=\"other\">\n" +
-    "                <h2>Other Media</h2>\n" +
+    "                <h2>Other Items</h2>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
@@ -17671,7 +17671,7 @@ angular.module("common/engines/google-cs/google-cs.tpl.html", []).run(["$templat
     "<div class=\"media\">\n" +
     "    <div class=\"media-body\">\n" +
     "        <h4 class=\"media-heading\"><a ng-href=\"{{item.link}}\" title=\"{{item.title}}\" target=\"_googlecs\">{{item.title | truncate: 40: '...': true}}</a></h4>\n" +
-    "        <p ng-bind-html=\"item.htmlSnippet\"></p>\n" +
+    "        <p ng-bind-html=\"item.snippet\"></p>\n" +
     "    </div>\n" +
     "</div>\n" +
     "<!--div class=\"media\">\n" +
@@ -17859,19 +17859,18 @@ angular.module('oneSearch.bento', [])
 
         function initResultLimit(box){
             var numEngines = self.boxes[box]['engines'].length;
-            var limit = numEngines > 2 ? 1 : (numEngines < 2 ? 3 : 2);
+            var limit = numEngines > 1 ? 1 : (numEngines < 2 ? 3 : 2);
             self.boxes[box].resultLimit = limit;
         }
 
         function setResultLimit(box){
-
             $q.when(self.boxes[box].results)
                 .then(function(results){
                     var numResults = Object.keys(results).length;
                     var numEngines = self.boxes[box]['engines'].length;
                     var expecting = numResults + numEngines;
-                    
-                    if (expecting < 2 && self.boxes[box].resultLimit < 3){
+
+                    if ((expecting < 2 && self.boxes[box].resultLimit < 3) || (expecting < 3 && self.boxes[box].resultLimit < 2)){
                         self.boxes[box].resultLimit++;
                     }
                 });
@@ -18219,7 +18218,7 @@ angular.module('oneSearch.common')
                 model: '=',
                 search: '='
             },
-            controller: function($scope, $window, $timeout, dataFactory){
+            controller: ['$scope', '$window', '$timeout', 'dataFactory', function($scope, $window, $timeout, dataFactory){
                 $scope.items = {};
                 $scope.filteredItems = [];
                 $scope.model = "";
@@ -18227,12 +18226,15 @@ angular.module('oneSearch.common')
                 $scope.originalValue = $scope.model;
                 $scope.dataRequested = false;
                 $scope.numShow = 5;
+                $scope.faqSearched = false;
 
                 // hides the list initially
                 $scope.selected = false;
 
                 $scope.onChange = function(){
+                    console.log("OnChange event.");
                     $scope.selected = true;
+                    var fixedString = $scope.model.replace(/\//g, " ");
 
                     if ($scope.model.length < 3 ||
                         ($scope.model.indexOf($scope.originalValue) < 0 && $scope.model.length >= $scope.originalValue.length) ||
@@ -18241,9 +18243,9 @@ angular.module('oneSearch.common')
                         $scope.setCurrent(-1, false);
                         $scope.dataRequested = false;
                         $scope.selected = false;
+                        $scope.faqSearched = false;
                     }
                     if ($scope.model.length > 2 && !$scope.dataRequested){
-                        var fixedString = $scope.model.replace(/\//g, " ");
                         dataFactory.get('//wwwdev2.lib.ua.edu/oneSearch/api/suggest/' + encodeURI(fixedString))
                             .then(function(data) {
                                 $scope.items.suggest = data;
@@ -18253,7 +18255,6 @@ angular.module('oneSearch.common')
                     }
                     if ($scope.model.length > 2){
                         $timeout(function() {
-                            var fixedString = $scope.model.replace(/\//g, " ");
                             dataFactory.get('//wwwdev2.lib.ua.edu/oneSearch/api/recommend/' + encodeURI(fixedString))
                                 .then(function(data) {
                                     $scope.items.recommend = data;
@@ -18262,13 +18263,24 @@ angular.module('oneSearch.common')
                                 .then(function(data) {
                                     $scope.items.subjects = data;
                                 });
-                            dataFactory.get('https://www.googleapis.com/customsearch/v1?key=AIzaSyCMGfdDaSfjqv5zYoS0mTJnOT3e9MURWkU&cx=003453353330912650815:lfyr_-azrxe&q=' +
-                                encodeURI(fixedString) + '&siteSearch=ask.lib.ua.edu')
-                                .then(function(data) {
-                                    // pluck out the items array for easier 'suggestWatcher' processing
-                                    $scope.items.faq = data.items;
-                                });
                         }, 0);
+                    }
+                    if ($scope.model.length > 4 && !$scope.faqSearched){
+                        //run GCS only if the last character is a space and prev one is not
+                        var lastTwo = fixedString.slice(-2);
+                        console.log("Checking conditions for GCS search..." + lastTwo);
+                        if (lastTwo.indexOf(" ") > 0) {
+                            console.log("Running GCS search.");
+                            $timeout(function() {
+                                $scope.faqSearched = true;
+                                dataFactory.get('https://www.googleapis.com/customsearch/v1?key=AIzaSyCMGfdDaSfjqv5zYoS0mTJnOT3e9MURWkU&cx=003453353330912650815:lfyr_-azrxe&q=' +
+                                    encodeURI(fixedString) + '&siteSearch=ask.lib.ua.edu')
+                                    .then(function (data) {
+                                        // pluck out the items array for easier 'suggestWatcher' processing
+                                        $scope.items.faq = data.items;
+                                    });
+                            }, 0);
+                        }
                     }
                     $scope.originalValue = $scope.model;
                 };
@@ -18308,7 +18320,7 @@ angular.module('oneSearch.common')
                         return false;
                     };
                 };
-            },
+            }],
             link: function(scope, elem, attrs) {
                 scope.showSuggestions = false;
                 var suggestWatcher = scope.$watch('items', function(newVal, oldVal){
@@ -18359,7 +18371,14 @@ angular.module('oneSearch.common')
                             scope.selected = true;
                             break;
 
+                        //spacebar
+                        case 32:
+                            scope.model = scope.model + " ";
+                            scope.onChange();
+                            break;
+
                         default:
+                            console.log("KeyCode " + event.keyCode);
                             break;
                     }
                     scope.$apply();
@@ -18379,6 +18398,7 @@ angular.module('oneSearch.common')
                         scope.setCurrent(-1, false);
                         scope.dataRequested = false;
                         scope.selected = false;
+                        scope.faqSearched = false;
                         scope.$apply();
                         scope.search();
                     }, 0);
@@ -18402,7 +18422,7 @@ angular.module('engines.acumen', [])
         })
     }])
 
-    .controller('AcumenCtrl', function($scope, $filter){
+    .controller('AcumenCtrl', ['$scope', '$filter', function($scope, $filter){
         var items = $scope.items;
 
         for (var i = 0, len = items.length; i < len; i++) {
@@ -18412,7 +18432,7 @@ angular.module('engines.acumen', [])
                 else items[i].type = items[i].type.sort().shift();
             }
         }
-    });
+    }]);
 angular.module('engines.catalog', [])
 
     .config(['oneSearchProvider', function(oneSearchProvider){
@@ -18443,7 +18463,7 @@ angular.module('engines.catalog', [])
         }
     }])
 
-    .controller('CatalogCtrl', function($scope, $filter){
+    .controller('CatalogCtrl', ['$scope', '$filter', function($scope, $filter){
         var types = {
             bc: "Archive/Manuscript",
             cm: "Music Score",
@@ -18479,7 +18499,7 @@ angular.module('engines.catalog', [])
         }
 
         $scope.items = items;
-    });
+    }]);
 
 angular.module('engines.databases', [])
 
@@ -18512,7 +18532,7 @@ angular.module('engines.ejournals', [])
         })
     }])
 
-    .controller('EjouralsCtrl', function($scope){
+    .controller('EjouralsCtrl', ['$scope', function($scope){
 
         var param;
         switch ($scope.mediaType){
@@ -18529,7 +18549,7 @@ angular.module('engines.ejournals', [])
         if (param){
             $scope.resourceLink = $scope.resourceLink.replace('SS_searchTypeAll=yes&SS_searchTypeBook=yes&SS_searchTypeJournal=yes&SS_searchTypeOther=yes', param);
         }
-    });
+    }]);
 /**
  * @module common.engines
  *
@@ -18642,7 +18662,7 @@ angular.module('engines.scout', [])
         })
     }])
 
-    .controller('ScoutCtrl', function($scope){
+    .controller('ScoutCtrl', ['$scope', function($scope){
         var items = $scope.items;
         for (var i = 0; i < items.length; i++){
             if (items[i].Header.PubTypeId == 'audio'){
@@ -18703,7 +18723,7 @@ angular.module('engines.scout', [])
         }
 
         $scope.resourceLink = angular.copy(link);
-    });
+    }]);
 angular.module('filters.nameFilter', [])
 
     .filter('nameFilter', ['$filter', function($filter){
@@ -47917,7 +47937,7 @@ angular.module('hours.list', [])
         }
     }]);
 /**
- * @license AngularJS v1.4.5
+ * @license AngularJS v1.4.6
  * (c) 2010-2015 Google, Inc. http://angularjs.org
  * License: MIT
  */
