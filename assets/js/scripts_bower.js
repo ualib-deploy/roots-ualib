@@ -18218,7 +18218,7 @@ angular.module('oneSearch.common')
                 model: '=',
                 search: '='
             },
-            controller: function($scope, $window, $timeout, dataFactory){
+            controller: ['$scope', '$window', '$timeout', 'dataFactory', function($scope, $window, $timeout, dataFactory){
                 $scope.items = {};
                 $scope.filteredItems = [];
                 $scope.model = "";
@@ -18320,7 +18320,7 @@ angular.module('oneSearch.common')
                         return false;
                     };
                 };
-            },
+            }],
             link: function(scope, elem, attrs) {
                 scope.showSuggestions = false;
                 var suggestWatcher = scope.$watch('items', function(newVal, oldVal){
@@ -18422,7 +18422,7 @@ angular.module('engines.acumen', [])
         })
     }])
 
-    .controller('AcumenCtrl', function($scope, $filter){
+    .controller('AcumenCtrl', ['$scope', '$filter', function($scope, $filter){
         var items = $scope.items;
 
         for (var i = 0, len = items.length; i < len; i++) {
@@ -18432,7 +18432,7 @@ angular.module('engines.acumen', [])
                 else items[i].type = items[i].type.sort().shift();
             }
         }
-    });
+    }]);
 angular.module('engines.catalog', [])
 
     .config(['oneSearchProvider', function(oneSearchProvider){
@@ -18463,7 +18463,7 @@ angular.module('engines.catalog', [])
         }
     }])
 
-    .controller('CatalogCtrl', function($scope, $filter){
+    .controller('CatalogCtrl', ['$scope', '$filter', function($scope, $filter){
         var types = {
             bc: "Archive/Manuscript",
             cm: "Music Score",
@@ -18499,7 +18499,7 @@ angular.module('engines.catalog', [])
         }
 
         $scope.items = items;
-    });
+    }]);
 
 angular.module('engines.databases', [])
 
@@ -18532,7 +18532,7 @@ angular.module('engines.ejournals', [])
         })
     }])
 
-    .controller('EjouralsCtrl', function($scope){
+    .controller('EjouralsCtrl', ['$scope', function($scope){
 
         var param;
         switch ($scope.mediaType){
@@ -18549,7 +18549,7 @@ angular.module('engines.ejournals', [])
         if (param){
             $scope.resourceLink = $scope.resourceLink.replace('SS_searchTypeAll=yes&SS_searchTypeBook=yes&SS_searchTypeJournal=yes&SS_searchTypeOther=yes', param);
         }
-    });
+    }]);
 /**
  * @module common.engines
  *
@@ -18662,7 +18662,7 @@ angular.module('engines.scout', [])
         })
     }])
 
-    .controller('ScoutCtrl', function($scope){
+    .controller('ScoutCtrl', ['$scope', function($scope){
         var items = $scope.items;
         for (var i = 0; i < items.length; i++){
             if (items[i].Header.PubTypeId == 'audio'){
@@ -18723,7 +18723,7 @@ angular.module('engines.scout', [])
         }
 
         $scope.resourceLink = angular.copy(link);
-    });
+    }]);
 angular.module('filters.nameFilter', [])
 
     .filter('nameFilter', ['$filter', function($filter){
