@@ -18265,11 +18265,12 @@ angular.module('oneSearch.common')
                         }, 0);
                     }
                     if ($scope.model.length > 4 && !$scope.faqSearched){
-                        console.log("Checking conditions for GCS search...");
-                        $timeout(function() {
-                            var lastTwo = fixedString.slice(-2);
-                            if (lastTwo.indexOf(" ") > 0) {
-                                console.log("Running GCS search.");
+                        //run GCS only if the last character is a space and prev one is not
+                        var lastTwo = fixedString.slice(-2);
+                        console.log("Checking conditions for GCS search..." + lastTwo);
+                        if (lastTwo.indexOf(" ") > 0) {
+                            console.log("Running GCS search.");
+                            $timeout(function() {
                                 $scope.faqSearched = true;
                                 dataFactory.get('https://www.googleapis.com/customsearch/v1?key=AIzaSyCMGfdDaSfjqv5zYoS0mTJnOT3e9MURWkU&cx=003453353330912650815:lfyr_-azrxe&q=' +
                                     encodeURI(fixedString) + '&siteSearch=ask.lib.ua.edu')
@@ -18277,8 +18278,8 @@ angular.module('oneSearch.common')
                                         // pluck out the items array for easier 'suggestWatcher' processing
                                         $scope.items.faq = data.items;
                                     });
-                            }
-                        }, 0);
+                            }, 0);
+                        }
                     }
                     $scope.originalValue = $scope.model;
                 };
