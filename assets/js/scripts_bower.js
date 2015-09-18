@@ -6443,7 +6443,7 @@ angular.module('ualib.databases')
     .filter('customHighlight',['$sce', function($sce) {
         return function(text, filterPhrase) {
             if (filterPhrase) {
-                var tag_re = /<(.|\n)*?>/g;
+                var tag_re = /(<\S[^><]*>)/g;
                 var tokens = [].concat.apply([], filterPhrase.split('"').map(function(v,i){
                     return i%2 ? v : v.split(' ');
                 })).filter(Boolean).join('|');
