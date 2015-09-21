@@ -168,9 +168,12 @@
 
 .megamenu(@color: @brand-primary, @hover-color: @gray-lighter, @dropdown-bg: @gray-lighter) {
   border: none;
-  margin-bottom: 0;
   padding-left: 15px;
   padding-right: 15px;
+
+  @media(min-width: @screen-md-min){
+    margin-bottom: 0;
+  }
 
   // Override collapse animation styles from bootstrap/less/component-animations.less
   .collapsing {
@@ -237,11 +240,6 @@
 
       > a, > button {
         .mega-navbar-item();
-
-        &.icon-only {
-          font-size:20px;
-          padding-bottom: 29px;
-        }
 
         &:hover,
         &:focus{
@@ -343,7 +341,6 @@
 
   &.icon-only {
     font-size:20px;
-    padding-bottom: 29px;
   }
 
 }

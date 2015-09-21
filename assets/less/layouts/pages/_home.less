@@ -31,30 +31,9 @@ div[role="document"] {
   background-size: cover;
   background-color: transparent;
 
-  .home-slice{
-    padding: 0 15px 30px 15px;
-
-//    > .row {
-//      -moz-column-width: 37em;
-//      -webkit-column-width: 37em;
-//      -moz-column-gap: .5em;
-//      -webkit-column-gap: .5em;
-//
-//      > .col-md-6 {
-//        display: inline-block;
-//        padding: .33rem;
-//        width: 100%;
-//        float: none;
-//
-//        .front-page-card {
-//          position: relative;
-//          display: block;
-//        }
-//      }
-//    }
+  @media(max-width: @screen-xs-max){
+    background-image: none !important;
   }
-
-
 }
 
 .card {
@@ -94,6 +73,9 @@ div[role="document"] {
 
 .front-page-card {
   background-color: rgba(255, 255, 255, 0.9);
+  -webkit-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+  -moz-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
 
   .service-card {
     border: 1px solid transparent;
@@ -104,49 +86,4 @@ div[role="document"] {
     }
   }
 
-
-
-}
-
-
-div[ng-view].ng-enter {
-  -webkit-animation: Fade-Enter-Anime 0.2s;
-  -moz-animation: Fade-Enter-Anime 0.2s;
-  animation: Fade-Enter-Anime 0.2s;
-}
-.Content-Fade-Leave {
-  -webkit-animation: Fade-Leave-Anime 0.2s;
-  -moz-animation: Fade-Leave-Anime 0.2s;
-  animation: Fade-Leave-Anime 0.2s;
-}
-
-@keyframes Fade-Enter-Anime {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes Fade-Leave-Anime {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-
-@-webkit-keyframes Fade-Enter-Anime {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@-webkit-keyframes Fade-Leave-Anime {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-@-moz-keyframes Fade-Enter-Anime {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@-moz-keyframes Fade-Leave-Anime {
-  from { opacity: 1; }
-  to { opacity: 0; }
 }
