@@ -12937,8 +12937,8 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
         };
     }])
 
-    .controller('manageSWListCtrl', ['$scope', '$timeout', 'Upload', 'swFactory', 'SOFTWARE_URL', 'OS',
-        function manageSWListCtrl($scope, $timeout, Upload, swFactory, appURL, OS){
+    .controller('manageSWListCtrl', ['$scope', '$timeout', '$window', 'Upload', 'swFactory', 'SOFTWARE_URL', 'OS',
+        function manageSWListCtrl($scope, $timeout, $window, Upload, swFactory, appURL, OS){
             $scope.titleFilter = '';
             $scope.descrFilter = '';
             $scope.sortMode = 0;
@@ -12997,8 +12997,8 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             $scope.export = function() {
                 swFactory.getData("export")
                     .success(function(data) {
-                        var blob = new Blob([ data ], { type : 'text/plain' });
-                        $scope.exportUrl = (window.URL || window.webkitURL).createObjectURL( blob );
+                        var blob = new Blob(data, { type : 'text/plain' });
+                        $scope.exportUrl = ($window.URL || $window.webkitURL).createObjectURL( blob );
                     })
                     .error(function(data, status, headers, config) {
                         console.log(data);
