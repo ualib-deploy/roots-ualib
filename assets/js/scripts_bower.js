@@ -11055,7 +11055,7 @@ angular.module('common.manage', [])
     .factory('newsFactory', ['$http', 'NEWS_URL', function newsFactory($http, url){
         return {
             getData: function(pPoint){
-                return $http({method: 'GET', url: url + "api/" + pPoint, params: {}})
+                return $http({method: 'GET', url: url + "api/" + pPoint, params: {}, responseType:'arraybuffer'})
             },
             postData: function(params, data){
                 params = angular.isDefined(params) ? params : {};
@@ -12997,6 +12997,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             $scope.export = function() {
                 swFactory.getData("export")
                     .success(function(data) {
+                        console.dir(data);
                         var exportData = data;
                         var blob = new Blob([exportData], { type:"application/json;charset=utf-8;" });
                         var downloadLink = angular.element('<a></a>');
