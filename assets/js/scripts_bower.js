@@ -9893,10 +9893,10 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                </div>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-3\">\n" +
+    "                <label>Export</label>\n" +
     "                <button type=\"button\" class=\"btn btn-default\" ng-click=\"export()\">\n" +
-    "                    <span class=\"fa fa-fw fa-download\"></span> Export\n" +
+    "                    <span class=\"fa fa-fw fa-download\"></span> Download JSON\n" +
     "                </button>\n" +
-    "                <a download=\"software.json\" ng-href=\"{{exportUrl}}\" ng-show=\"exportUrl\">Download Data</a>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
@@ -12937,8 +12937,8 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
         };
     }])
 
-    .controller('manageSWListCtrl', ['$scope', '$timeout', '$window', 'Upload', 'swFactory', 'SOFTWARE_URL', 'OS',
-        function manageSWListCtrl($scope, $timeout, $window, Upload, swFactory, appURL, OS){
+    .controller('manageSWListCtrl', ['$scope', '$timeout', 'Upload', 'swFactory', 'SOFTWARE_URL', 'OS',
+        function manageSWListCtrl($scope, $timeout, Upload, swFactory, appURL, OS){
             $scope.titleFilter = '';
             $scope.descrFilter = '';
             $scope.sortMode = 0;
@@ -12997,8 +12997,12 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             $scope.export = function() {
                 swFactory.getData("export")
                     .success(function(data) {
-                        var blob = new Blob(data, { type : 'text/plain' });
-                        $scope.exportUrl = ($window.URL || $window.webkitURL).createObjectURL( blob );
+                        var exportData = data;
+                        var blob = new Blob([exportData], { type:"application/json;charset=utf-8;" });
+                        var downloadLink = angular.element('<a></a>');
+                        downloadLink.attr('href',window.URL.createObjectURL(blob));
+                        downloadLink.attr('download', 'softwareData.json');
+                        downloadLink[0].click();
                     })
                     .error(function(data, status, headers, config) {
                         console.log(data);
