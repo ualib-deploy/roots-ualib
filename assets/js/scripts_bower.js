@@ -9900,9 +9900,9 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                <label>Export</label>\n" +
     "                <div>\n" +
     "                    <button type=\"button\" class=\"btn btn-default\" ng-click=\"export()\">\n" +
-    "                        <span class=\"fa fa-fw fa-download\"></span> Download JSON\n" +
+    "                        <span class=\"fa fa-fw fa-download\"></span> JSON\n" +
     "                    </button><br>\n" +
-    "                    <a target=\"_self\" ng-href=\"{{exportUrl}}\" download=\"softwareData.json\" ng-if=\"exportUrl\">Download JSON</a>\n" +
+    "                    <a target=\"_self\" ng-href=\"{{exportUrl}}\" download=\"softwareData.json\" ng-if=\"exportUrl\">Download file</a>\n" +
     "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
@@ -13009,7 +13009,6 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                         downloadLink.attr('target', '_self');
                         downloadLink.attr('download', 'softwareData.json');
                         downloadLink[0].click();
-                        console.dir(downloadLink);
                     })
                     .error(function(data, status, headers, config) {
                         console.log(data);
