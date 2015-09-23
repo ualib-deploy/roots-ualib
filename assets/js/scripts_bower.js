@@ -12942,6 +12942,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
 
     .controller('manageSWListCtrl', ['$scope', '$timeout', 'Upload', 'swFactory', 'SOFTWARE_URL', 'OS',
         function manageSWListCtrl($scope, $timeout, Upload, swFactory, appURL, OS){
+            this.swFactory = swFactory;
             $scope.titleFilter = '';
             $scope.descrFilter = '';
             $scope.sortMode = 0;
@@ -12996,24 +12997,6 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             $scope.currentPage = 1;
             $scope.maxPageSize = 10;
             $scope.perPage = 20;
-
-            $scope.export = function() {
-                swFactory.getData("export")
-                    .success(function(data) {
-                        var blob = new Blob([ JSON.stringify(data) ], { type : 'application/json' });
-                        $scope.exportUrl = (window.URL || window.webkitURL).createObjectURL( blob );
-
-                        var downloadLink = angular.element('<a></a>');
-//                        downloadLink.attr('href', 'data:attachment/json;base64,' + data);
-                        downloadLink.attr('href', $scope.exportUrl);
-                        downloadLink.attr('target', '_self');
-                        downloadLink.attr('download', 'softwareData.json');
-                        downloadLink[0].click();
-                    })
-                    .error(function(data, status, headers, config) {
-                        console.log(data);
-                    });
-            };
 
             $scope.startTitle = function(actual, expected){
                 if (!expected)
@@ -13247,11 +13230,32 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             };
     }])
 
-    .directive('softwareManageList',[  function() {
+    .directive('softwareManageList',['$timeout',  function($timeout) {
         return {
             restrict: 'A',
             controller: 'manageSWListCtrl',
-            link: function(scope, elm, attrs){
+            link: function(scope, elm, attrs, Ctrl){
+                scope.export = function() {
+                    $timeout(function() {
+                        Ctrl.swFactory.getData("export")
+                            .success(function(data) {
+                                var blob = new Blob([ JSON.stringify(data) ], { type : 'application/json' });
+                                scope.exportUrl = (window.URL || window.webkitURL).createObjectURL( blob );
+
+                                var downloadLink = angular.element('<a></a>');
+//                        downloadLink.attr('href', 'data:attachment/json;base64,' + data);
+                                downloadLink.attr('href', scope.exportUrl);
+                                downloadLink.attr('target', '_self');
+                                downloadLink.attr('download', 'softwareData.json');
+                                elm.append(downloadLink);
+                                downloadLink[0].click();
+                                scope.$apply();
+                            })
+                            .error(function(data, status, headers, config) {
+                                console.log(data);
+                            });
+                    }, 0);
+                };
 
             },
             templateUrl: 'manageSoftware/manageSoftwareList.tpl.html'
