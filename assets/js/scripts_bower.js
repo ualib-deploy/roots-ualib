@@ -9897,11 +9897,11 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                </div>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-3\">\n" +
-    "                <label>Export (Chrome only)</label>\n" +
+    "                <label>Export</label>\n" +
     "                <div>\n" +
     "                    <button type=\"button\" class=\"btn btn-default\" ng-click=\"export()\">\n" +
     "                        <span class=\"fa fa-fw fa-download\"></span> Download JSON\n" +
-    "                    </button>\n" +
+    "                    </button><br>\n" +
     "                    <a target=\"_self\" ng-href=\"{{exportUrl}}\" download=\"softwareData.json\" ng-if=\"exportUrl\">Download JSON</a>\n" +
     "                </div>\n" +
     "            </div>\n" +
@@ -13000,7 +13000,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             $scope.export = function() {
                 swFactory.getData("export")
                     .success(function(data) {
-                        var blob = new Blob([ data ], { type : 'text/plain' });
+                        var blob = new Blob([ JSON.stringify(data) ], { type : 'application/json' });
                         $scope.exportUrl = (window.URL || window.webkitURL).createObjectURL( blob );
 
                         var downloadLink = angular.element('<a></a>');
