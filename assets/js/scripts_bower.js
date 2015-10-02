@@ -18388,6 +18388,7 @@ angular.module('oneSearch.common')
                 $scope.onBlur = function(event){
                     console.log("onBlur()");
                     $scope.selected = false;
+                    $document.unbind("click");
                 };
                 $scope.compare = function(query){
                     return function(item){
@@ -18468,9 +18469,18 @@ angular.module('oneSearch.common')
                     console.log("$destroy");
                 });
 
-                $document.bind("click", function (event) {
+                elem.bind("click", function (event) {
                     if (event.target.id === "osTextField") {
                         scope.onFocus();
+                        $document.bind("click", function(event) {
+                            if (event.target.id === "osTextField") {
+                                scope.onFocus();
+                            } else
+                            if (event.button < 1) {
+                                scope.onBlur(event);
+                            }
+                            scope.$apply();
+                        });
                     } else
                     if (event.button < 1) {
                         scope.onBlur(event);
