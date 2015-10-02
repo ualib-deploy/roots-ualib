@@ -17587,7 +17587,7 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
     "                    <h4>LibGuides Subjects <a href=\"http://guides.lib.ua.edu/\" class=\"small\" ng-mousedown=\"go('http://guides.lib.ua.edu/')\">more</a></h4>\n" +
     "                    <div ng-repeat=\"person in items.subjects | limitTo:10\">\n" +
     "                        <div ng-repeat=\"subject in person.subjects | limitTo:2\">\n" +
-    "                            <a ng-if=\"subject.link.length > 7\" href=\"{{subject.link}}\" ng-mousedown=\"go(subject.link)\">\n" +
+    "                            <a ng-if=\"subject.link.length > 7\" ng-href=\"{{subject.link}}\" ng-mousedown=\"go(subject.link)\">\n" +
     "                                {{subject.subject}}\n" +
     "                            </a>\n" +
     "                            <a ng-if=\"subject.link.length <= 7\" href=\"#\"\n" +
@@ -18467,8 +18467,8 @@ angular.module('oneSearch.common')
                     suggestWatcher();
                 });
 
-                elem.bind("click", function (event) {
-                    console.log("Click");
+                elem.bind("mousedown", function (event) {
+                    console.log("Mousedown");
                     if (event.button > 0) {
                         event.stopPropagation();
                         console.dir(event);
