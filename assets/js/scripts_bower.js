@@ -17465,12 +17465,7 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
 
 
 
-angular.module('oneSearch.templates', ['bento/bento-box.tpl.html', 'bento/bento.tpl.html', 'common/directives/suggest/suggest.tpl.html', 'common/engines/acumen/acumen.tpl.html', 'common/engines/catalog/catalog.tpl.html', 'common/engines/databases/databases.tpl.html', 'common/engines/ejournals/ejournals.tpl.html', 'common/engines/google-cs/google-cs.tpl.html', 'common/engines/recommend/recommend.tpl.html', 'common/engines/scout/scout.tpl.html']);
-
-angular.module("bento/bento-box.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("bento/bento-box.tpl.html",
-    "<div");
-}]);
+angular.module('oneSearch.templates', ['bento/bento.tpl.html', 'common/directives/suggest/suggest.tpl.html', 'common/engines/acumen/acumen.tpl.html', 'common/engines/catalog/catalog.tpl.html', 'common/engines/databases/databases.tpl.html', 'common/engines/ejournals/ejournals.tpl.html', 'common/engines/google-cs/google-cs.tpl.html', 'common/engines/recommend/recommend.tpl.html', 'common/engines/scout/scout.tpl.html']);
 
 angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("bento/bento.tpl.html",
@@ -18471,7 +18466,7 @@ angular.module('oneSearch.common')
                 });
 
                 elem.bind("contextmenu", function (event) {
-
+                    event.stopPropagation();
                 });
 
                 scope.handleSelection = function(selectedItem) {
