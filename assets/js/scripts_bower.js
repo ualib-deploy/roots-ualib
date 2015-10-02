@@ -17554,7 +17554,7 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
   $templateCache.put("common/directives/suggest/suggest.tpl.html",
     "<div class=\"input-group input-group-lg\">\n" +
     "    <input type=\"text\" name=\"search\" class=\"form-control onesearch-text\" placeholder=\"{{prompt}}\"\n" +
-    "           ng-model=\"model\" ng-change=\"onChange()\" autocomplete=\"off\" ng-focus=\"onFocus()\" />\n" +
+    "           ng-model=\"model\" ng-change=\"onChange()\" autocomplete=\"off\" ng-blur=\"onBlur($event)\" ng-focus=\"onFocus()\" />\n" +
     "    <div class=\"input-group-btn\">\n" +
     "        <button type=\"submit\" class=\"btn btn-onesearch btn-primary\"><span class=\"fa fa-search\"></span></button>\n" +
     "    </div>\n" +
@@ -18385,9 +18385,12 @@ angular.module('oneSearch.common')
                     }
                     console.log("On Focus");
                 };
-                $scope.onBlur = function(){
-                    $scope.selected = false;
-                    console.log("On Blur");
+                $scope.onBlur = function(event){
+                    console.log("onBlur()");
+                    if (event.button < 1) {
+                        $scope.selected = false;
+                    }
+                    console.dir(event);
                 };
                 $scope.compare = function(query){
                     return function(item){
