@@ -17553,8 +17553,8 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
 angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("common/directives/suggest/suggest.tpl.html",
     "<div class=\"input-group input-group-lg\">\n" +
-    "    <input type=\"text\" name=\"search\" class=\"form-control onesearch-text\" placeholder=\"{{prompt}}\"\n" +
-    "           ng-model=\"model\" ng-change=\"onChange()\" autocomplete=\"off\" ng-blur=\"onBlur($event)\" ng-focus=\"onFocus()\" />\n" +
+    "    <input type=\"text\" name=\"search\" class=\"form-control onesearch-text\" placeholder=\"{{prompt}}\" id=\"osTextField\"\n" +
+    "           ng-model=\"model\" ng-change=\"onChange()\" autocomplete=\"off\" />\n" +
     "    <div class=\"input-group-btn\">\n" +
     "        <button type=\"submit\" class=\"btn btn-onesearch btn-primary\"><span class=\"fa fa-search\"></span></button>\n" +
     "    </div>\n" +
@@ -18285,7 +18285,7 @@ angular.module('oneSearch.common')
             }
         };
     }])
-    .directive('suggestOneSearch', ['$timeout', function($timeout) {
+    .directive('suggestOneSearch', ['$timeout', '$document', function($timeout, $document) {
         return {
             restrict: 'AEC',
             scope: {
@@ -18293,7 +18293,7 @@ angular.module('oneSearch.common')
                 model: '=',
                 search: '='
             },
-            controller: function($scope, $window, $timeout, dataFactory){
+            controller: function($scope, $window, $timeout, $document,  dataFactory){
                 $scope.items = {};
                 $scope.filteredItems = [];
                 $scope.model = "";
@@ -18383,14 +18383,11 @@ angular.module('oneSearch.common')
                     if (angular.isDefined($scope.model) && $scope.model.length > 2){
                         $scope.selected = true;
                     }
-                    console.log("On Focus");
+                    console.log("onFocus()");
                 };
                 $scope.onBlur = function(event){
                     console.log("onBlur()");
-                    if (event.button < 1) {
-                        $scope.selected = false;
-                    }
-                    console.dir(event);
+                    $scope.selected = false;
                 };
                 $scope.compare = function(query){
                     return function(item){
@@ -18468,29 +18465,17 @@ angular.module('oneSearch.common')
                 scope.$on('$destroy', function(){
                     elem.unbind("keydown");
                     suggestWatcher();
+                    console.log("$destroy");
                 });
 
-                elem.bind("blur", function (event) {
-                    console.log("Blur event");
+                $document.bind("click", function (event) {
+                    if (event.target.id === "osTextField") {
+                        scope.onFocus();
+                    } else
                     if (event.button < 1) {
-                        scope.onBlur();
-                        scope.$apply();
+                        scope.onBlur(event);
                     }
-                    console.dir(event);
-                });
-                elem.bind("mousedown", function (event) {
-                    console.log("Mousedown");
-                    if (event.button > 0) {
-                        event.stopPropagation();
-                        console.dir(event);
-                    }
-                });
-                elem.bind("mouseup", function (event) {
-                    console.log("Mouseup");
-                    if (event.button > 0) {
-                        event.stopPropagation();
-                        console.dir(event);
-                    }
+                    scope.$apply();
                 });
 
                 scope.handleSelection = function(selectedItem) {
