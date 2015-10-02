@@ -2572,11 +2572,19 @@ angular.module('duScroll.spyAPI', ['duScroll.scrollContainerAPI'])
       if(currentlyActive === toBeActive || (duScrollGreedy && !toBeActive)) return;
       if(currentlyActive) {
         currentlyActive.$element.removeClass(duScrollActiveClass);
-        $rootScope.$broadcast('duScrollspy:becameInactive', currentlyActive.$element);
+        $rootScope.$broadcast(
+          'duScrollspy:becameInactive',
+          currentlyActive.$element,
+          angular.element(currentlyActive.getTargetElement())
+        );
       }
       if(toBeActive) {
         toBeActive.$element.addClass(duScrollActiveClass);
-        $rootScope.$broadcast('duScrollspy:becameActive', toBeActive.$element);
+        $rootScope.$broadcast(
+          'duScrollspy:becameActive',
+          toBeActive.$element,
+          angular.element(toBeActive.getTargetElement())
+        );
       }
       context.currentlyActive = toBeActive;
     };
@@ -2871,7 +2879,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
 
       // Run this in the next execution loop so that the scroll context has a chance
       // to initialize
-      $timeout(function() {
+      var timeoutPromise = $timeout(function() {
         var spy = new Spy(targetId, $scope, $element, -($attr.offset ? parseInt($attr.offset, 10) : duScrollOffset));
         spyAPI.addSpy(spy);
 
@@ -2882,6 +2890,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
           deregisterOnStateChange();
         });
       }, 0, false);
+      $scope.$on('$destroy', function() {$timeout.cancel(timeoutPromise);});
     }
   };
 }]);
@@ -10467,12 +10476,12 @@ angular.module("staffDirectory/staffDirectoryPeople.tpl.html", []).run(["$templa
     "            </div>\n" +
     "            <div class=\"col-md-2 form-group\">\n" +
     "                <label for=\"phone\">Phone</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Phone\" maxlength=\"8\"\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Phone\" maxlength=\"15\"\n" +
     "                       ng-model=\"newPerson.phone\" id=\"phone\" required>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-2 form-group\">\n" +
     "                <label for=\"fax\">Fax</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Fax\" maxlength=\"8\" ng-model=\"newPerson.fax\" id=\"fax\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Fax\" maxlength=\"15\" ng-model=\"newPerson.fax\" id=\"fax\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-12 form-group text-center\">\n" +
     "                <button type=\"submit\" class=\"btn btn-success\"\n" +
@@ -10643,12 +10652,12 @@ angular.module("staffDirectory/staffDirectoryPeople.tpl.html", []).run(["$templa
     "                    </div>\n" +
     "                    <div class=\"form-group\" ng-show=\"person.show\">\n" +
     "                        <label for=\"{{person.id}}_phone\">Phone</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{person.phone}}\" maxlength=\"8\" ng-model=\"person.phone\" required\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{person.phone}}\" maxlength=\"15\" ng-model=\"person.phone\" required\n" +
     "                               id=\"{{person.id}}_phone\">\n" +
     "                    </div>\n" +
     "                    <div class=\"form-group\" ng-show=\"person.show\">\n" +
     "                        <label for=\"{{person.id}}_fax\">Fax</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{person.fax}}\" maxlength=\"8\" ng-model=\"person.fax\"\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{person.fax}}\" maxlength=\"15\" ng-model=\"person.fax\"\n" +
     "                               id=\"{{person.id}}_fax\">\n" +
     "                    </div>\n" +
     "                </td>\n" +
@@ -13243,7 +13252,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                                 scope.exportUrl = (window.URL || window.webkitURL).createObjectURL( blob );
 
                                 var downloadLink = angular.element('<a></a>');
-//                        downloadLink.attr('href', 'data:attachment/json;base64,' + data);
+//                              downloadLink.attr('href', 'data:attachment/json;base64,' + data);
                                 downloadLink.attr('href', scope.exportUrl);
                                 downloadLink.attr('target', '_self');
                                 downloadLink.attr('download', 'softwareData.json');
@@ -13256,7 +13265,6 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
                             });
                     }, 0);
                 };
-
             },
             templateUrl: 'manageSoftware/manageSoftwareList.tpl.html'
         };
@@ -17573,7 +17581,7 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
     "                <div class=\"\">\n" +
     "                    <h4>Recommended Links</h4>\n" +
     "                    <div ng-repeat=\"recommendation in items.recommend | limitTo:10\">\n" +
-    "                        <a href=\"{{recommendation.link}}\" ng-mousedown=\"go(recommendation.link)\">\n" +
+    "                        <a ng-href=\"{{recommendation.link}}\">\n" +
     "                            {{recommendation.description}}\n" +
     "                        </a>\n" +
     "                    </div>\n" +
@@ -18290,7 +18298,7 @@ angular.module('oneSearch.common')
                 model: '=',
                 search: '='
             },
-            controller: ['$scope', '$window', '$timeout', 'dataFactory', function($scope, $window, $timeout, dataFactory){
+            controller: function($scope, $window, $timeout, dataFactory){
                 $scope.items = {};
                 $scope.filteredItems = [];
                 $scope.model = "";
@@ -18392,7 +18400,7 @@ angular.module('oneSearch.common')
                         return false;
                     };
                 };
-            }],
+            },
             link: function(scope, elem, attrs) {
                 scope.showSuggestions = false;
                 var suggestWatcher = scope.$watch('items', function(newVal, oldVal){
@@ -18462,6 +18470,10 @@ angular.module('oneSearch.common')
                     suggestWatcher();
                 });
 
+                elem.bind("contextmenu", function (event) {
+
+                });
+
                 scope.handleSelection = function(selectedItem) {
                     $timeout(function() {
                         scope.model = selectedItem;
@@ -18494,7 +18506,7 @@ angular.module('engines.acumen', [])
         })
     }])
 
-    .controller('AcumenCtrl', ['$scope', '$filter', function($scope, $filter){
+    .controller('AcumenCtrl', function($scope, $filter){
         var items = $scope.items;
 
         for (var i = 0, len = items.length; i < len; i++) {
@@ -18504,7 +18516,7 @@ angular.module('engines.acumen', [])
                 else items[i].type = items[i].type.sort().shift();
             }
         }
-    }]);
+    });
 angular.module('engines.catalog', [])
 
     .config(['oneSearchProvider', function(oneSearchProvider){
@@ -18535,7 +18547,7 @@ angular.module('engines.catalog', [])
         }
     }])
 
-    .controller('CatalogCtrl', ['$scope', '$filter', function($scope, $filter){
+    .controller('CatalogCtrl', function($scope, $filter){
         var types = {
             bc: "Archive/Manuscript",
             cm: "Music Score",
@@ -18571,7 +18583,7 @@ angular.module('engines.catalog', [])
         }
 
         $scope.items = items;
-    }]);
+    });
 
 angular.module('engines.databases', [])
 
@@ -18604,7 +18616,7 @@ angular.module('engines.ejournals', [])
         })
     }])
 
-    .controller('EjouralsCtrl', ['$scope', function($scope){
+    .controller('EjouralsCtrl', function($scope){
 
         var param;
         switch ($scope.mediaType){
@@ -18621,7 +18633,7 @@ angular.module('engines.ejournals', [])
         if (param){
             $scope.resourceLink = $scope.resourceLink.replace('SS_searchTypeAll=yes&SS_searchTypeBook=yes&SS_searchTypeJournal=yes&SS_searchTypeOther=yes', param);
         }
-    }]);
+    });
 /**
  * @module common.engines
  *
@@ -18734,7 +18746,7 @@ angular.module('engines.scout', [])
         })
     }])
 
-    .controller('ScoutCtrl', ['$scope', function($scope){
+    .controller('ScoutCtrl', function($scope){
         var items = $scope.items;
         for (var i = 0; i < items.length; i++){
             if (items[i].Header.PubTypeId == 'audio'){
@@ -18795,7 +18807,7 @@ angular.module('engines.scout', [])
         }
 
         $scope.resourceLink = angular.copy(link);
-    }]);
+    });
 angular.module('filters.nameFilter', [])
 
     .filter('nameFilter', ['$filter', function($filter){
@@ -48010,7 +48022,7 @@ angular.module('hours.list', [])
         }
     }]);
 /**
- * @license AngularJS v1.4.6
+ * @license AngularJS v1.4.7
  * (c) 2010-2015 Google, Inc. http://angularjs.org
  * License: MIT
  */
