@@ -1,6 +1,6 @@
 /**
  * Bunch of useful filters for angularJS(with no external dependencies!)
- * @version v0.5.5 - 2015-08-07 * @link https://github.com/a8m/angular-filter
+ * @version v0.5.7 - 2015-10-04 * @link https://github.com/a8m/angular-filter
  * @author Ariel Mashraki <ariel@mashraki.co.il>
  * @license MIT License, http://www.opensource.org/licenses/MIT
  */
@@ -416,32 +416,38 @@ angular.module('a8m.before', [])
  * Collect data into fixed-length chunks or blocks
  */
 
-angular.module('a8m.chunk-by', [])
-  .filter('chunkBy', [function () {
-    /**
-     * @description
-     * Get array with size `n` in `val` inside it.
-     * @param n
-     * @param val
-     * @returns {Array}
-     */
-    function fill(n, val) {
-      var ret = [];
-      while(n--) ret[n] = val;
-      return ret;
-    }
+angular.module('a8m.chunk-by', ['a8m.filter-watcher'])
+    .filter('chunkBy', ['filterWatcher', function (filterWatcher) {
+      return function (array, n, fillVal) {
 
-    return function (array, n, fillVal) {
-      if (!isArray(array)) return array;
-      return array.map(function(el, i, self) {
-        i = i * n;
-        el = self.slice(i, i + n);
-        return !isUndefined(fillVal) && el.length < n
-          ? el.concat(fill(n - el.length, fillVal))
-          : el;
-      }).slice(0, Math.ceil(array.length / n));
-    }
-  }]);
+        return filterWatcher.isMemoized('chunkBy', arguments) ||
+            filterWatcher.memoize('chunkBy', arguments, this,
+                _chunkBy(array, n, fillVal));
+        /**
+         * @description
+         * Get array with size `n` in `val` inside it.
+         * @param n
+         * @param val
+         * @returns {Array}
+         */
+        function fill(n, val) {
+          var ret = [];
+          while (n--) ret[n] = val;
+          return ret;
+        }
+
+        function _chunkBy(array, n, fillVal) {
+          if (!isArray(array)) return array;
+          return array.map(function (el, i, self) {
+            i = i * n;
+            el = self.slice(i, i + n);
+            return !isUndefined(fillVal) && el.length < n
+                ? el.concat(fill(n - el.length, fillVal))
+                : el;
+          }).slice(0, Math.ceil(array.length / n));
+        }
+      }
+    }]);
 
 /**
  * @ngdoc filter
@@ -850,11 +856,9 @@ angular.module('a8m.group-by', [ 'a8m.filter-watcher' ])
         return collection;
       }
 
-      var getterFn = $parse(property);
-
       return filterWatcher.isMemoized('groupBy', arguments) ||
         filterWatcher.memoize('groupBy', arguments, this,
-          _groupBy(collection, getterFn));
+          _groupBy(collection, $parse(property)));
 
       /**
        * groupBy function
@@ -2097,7 +2101,20 @@ angular.module('a8m.filter-watcher', [])
        * @returns {string}
        */
       function getHashKey(fName, args) {
-        return [fName, angular.toJson(args)]
+        function replacerFactory() {
+          var cache = [];
+          return function(key, val) {
+            if(isObject(val) && !isNull(val)) {
+              if (~cache.indexOf(val)) return '[Circular]';
+              cache.push(val)
+            }
+            if($window == val) return '$WINDOW';
+            if($window.document == val) return '$DOCUMENT';
+            if(isScope(val)) return '$SCOPE';
+            return val;
+          }
+        }
+        return [fName, JSON.stringify(args, replacerFactory())]
           .join('#')
           .replace(/"/g,'');
       }
@@ -2126,7 +2143,7 @@ angular.module('a8m.filter-watcher', [])
         $$timeout(function() {
           if(!$rootScope.$$phase)
             $$cache = {};
-        });
+        }, 2000);
       }
 
       /**
@@ -2186,7 +2203,6 @@ angular.module('a8m.filter-watcher', [])
         isMemoized: $$isMemoized,
         memoize: $$memoize
       }
-
     }];
   });
   
@@ -2568,11 +2584,19 @@ angular.module('duScroll.spyAPI', ['duScroll.scrollContainerAPI'])
       if(currentlyActive === toBeActive || (duScrollGreedy && !toBeActive)) return;
       if(currentlyActive) {
         currentlyActive.$element.removeClass(duScrollActiveClass);
-        $rootScope.$broadcast('duScrollspy:becameInactive', currentlyActive.$element);
+        $rootScope.$broadcast(
+          'duScrollspy:becameInactive',
+          currentlyActive.$element,
+          angular.element(currentlyActive.getTargetElement())
+        );
       }
       if(toBeActive) {
         toBeActive.$element.addClass(duScrollActiveClass);
-        $rootScope.$broadcast('duScrollspy:becameActive', toBeActive.$element);
+        $rootScope.$broadcast(
+          'duScrollspy:becameActive',
+          toBeActive.$element,
+          angular.element(toBeActive.getTargetElement())
+        );
       }
       context.currentlyActive = toBeActive;
     };
@@ -2867,7 +2891,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
 
       // Run this in the next execution loop so that the scroll context has a chance
       // to initialize
-      $timeout(function() {
+      var timeoutPromise = $timeout(function() {
         var spy = new Spy(targetId, $scope, $element, -($attr.offset ? parseInt($attr.offset, 10) : duScrollOffset));
         spyAPI.addSpy(spy);
 
@@ -2878,6 +2902,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
           deregisterOnStateChange();
         });
       }, 0, false);
+      $scope.$on('$destroy', function() {$timeout.cancel(timeoutPromise);});
     }
   };
 }]);
@@ -6443,7 +6468,7 @@ angular.module('ualib.databases')
     .filter('customHighlight',['$sce', function($sce) {
         return function(text, filterPhrase) {
             if (filterPhrase) {
-                var tag_re = /<(.|\n)*?>/g;
+                var tag_re = /(<\S[^><]*>)/g;
                 var tokens = [].concat.apply([], filterPhrase.split('"').map(function(v,i){
                     return i%2 ? v : v.split(' ');
                 })).filter(Boolean).join('|');
@@ -9877,7 +9902,7 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"Description contains\" ng-model=\"descrFilter\">\n" +
     "                </div>\n" +
     "            </div>\n" +
-    "            <div class=\"col-md-6\">\n" +
+    "            <div class=\"col-md-3\">\n" +
     "                <label for=\"sortBy\">Sort by</label>\n" +
     "                <div id=\"sortBy\">\n" +
     "                    <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"0\" ng-click=\"sortBy(0)\">\n" +
@@ -9890,6 +9915,15 @@ angular.module("manageSoftware/manageSoftwareList.tpl.html", []).run(["$template
     "                        <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[1].reverse\"></span>\n" +
     "                        <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[1].reverse\"></span>\n" +
     "                    </button>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-3\">\n" +
+    "                <label>Export</label>\n" +
+    "                <div>\n" +
+    "                    <button type=\"button\" class=\"btn btn-default\" ng-click=\"export()\">\n" +
+    "                        <span class=\"fa fa-fw fa-download\"></span> JSON\n" +
+    "                    </button><br>\n" +
+    "                    <a target=\"_self\" ng-href=\"{{exportUrl}}\" download=\"softwareData.json\" ng-if=\"exportUrl\">Download file</a>\n" +
     "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
@@ -10454,12 +10488,12 @@ angular.module("staffDirectory/staffDirectoryPeople.tpl.html", []).run(["$templa
     "            </div>\n" +
     "            <div class=\"col-md-2 form-group\">\n" +
     "                <label for=\"phone\">Phone</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Phone\" maxlength=\"8\"\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Phone\" maxlength=\"15\"\n" +
     "                       ng-model=\"newPerson.phone\" id=\"phone\" required>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-2 form-group\">\n" +
     "                <label for=\"fax\">Fax</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Fax\" maxlength=\"8\" ng-model=\"newPerson.fax\" id=\"fax\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Fax\" maxlength=\"15\" ng-model=\"newPerson.fax\" id=\"fax\">\n" +
     "            </div>\n" +
     "            <div class=\"col-md-12 form-group text-center\">\n" +
     "                <button type=\"submit\" class=\"btn btn-success\"\n" +
@@ -10630,12 +10664,12 @@ angular.module("staffDirectory/staffDirectoryPeople.tpl.html", []).run(["$templa
     "                    </div>\n" +
     "                    <div class=\"form-group\" ng-show=\"person.show\">\n" +
     "                        <label for=\"{{person.id}}_phone\">Phone</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{person.phone}}\" maxlength=\"8\" ng-model=\"person.phone\" required\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{person.phone}}\" maxlength=\"15\" ng-model=\"person.phone\" required\n" +
     "                               id=\"{{person.id}}_phone\">\n" +
     "                    </div>\n" +
     "                    <div class=\"form-group\" ng-show=\"person.show\">\n" +
     "                        <label for=\"{{person.id}}_fax\">Fax</label>\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{person.fax}}\" maxlength=\"8\" ng-model=\"person.fax\"\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{person.fax}}\" maxlength=\"15\" ng-model=\"person.fax\"\n" +
     "                               id=\"{{person.id}}_fax\">\n" +
     "                    </div>\n" +
     "                </td>\n" +
@@ -10932,23 +10966,22 @@ angular.module('manage', [
     'manage.manageAlerts'
 ])
 
-    .constant('HOURS_MANAGE_URL', '//wwwdev2.lib.ua.edu/libhours2/')
-    .constant('USER_GROUPS_URL', '//wwwdev2.lib.ua.edu/userGroupsAdmin/')
-    .constant('SITE_FEEDBACK_URL', '//wwwdev2.lib.ua.edu/siteSurvey/')
-    .constant('ONE_SEARCH_URL', '//wwwdev2.lib.ua.edu/oneSearch/')
-    .constant('STAFF_DIR_URL', '//wwwdev2.lib.ua.edu/staffDir/')
-    .constant('DATABASES_URL', '//wwwdev2.lib.ua.edu/databases/')
-    .constant('SOFTWARE_URL', '//wwwdev2.lib.ua.edu/softwareList/')
-    .constant('FORMS_URL', '//wwwdev2.lib.ua.edu/form/')
-    .constant('NEWS_URL', '//wwwdev2.lib.ua.edu/newsApp/')
-    .constant('ALERTS_URL', '//wwwdev2.lib.ua.edu/alerts/');
+    .constant('HOURS_MANAGE_URL', 'https://wwwdev2.lib.ua.edu/libhours2/')
+    .constant('USER_GROUPS_URL', 'https://wwwdev2.lib.ua.edu/userGroupsAdmin/')
+    .constant('SITE_FEEDBACK_URL', 'https://wwwdev2.lib.ua.edu/siteSurvey/')
+    .constant('ONE_SEARCH_URL', 'https://wwwdev2.lib.ua.edu/oneSearch/')
+    .constant('STAFF_DIR_URL', 'https://wwwdev2.lib.ua.edu/staffDir/')
+    .constant('DATABASES_URL', 'https://wwwdev2.lib.ua.edu/databases/')
+    .constant('SOFTWARE_URL', 'https://wwwdev2.lib.ua.edu/softwareList/')
+    .constant('FORMS_URL', 'https://wwwdev2.lib.ua.edu/form/')
+    .constant('NEWS_URL', 'https://wwwdev2.lib.ua.edu/newsApp/')
+    .constant('ALERTS_URL', 'https://wwwdev2.lib.ua.edu/alerts/');
 
 angular.module('manage.common', [
     'common.manage'
 ])
 
 angular.module('common.manage', [])
-
     .factory('tokenFactory', ['$http', function tokenFactory($http){
         return function(tokenName){
             var cookies;
@@ -11034,8 +11067,8 @@ angular.module('common.manage', [])
     }])
     .factory('swFactory', ['$http', 'SOFTWARE_URL', function swFactory($http, url){
         return {
-            getData: function(){
-                return $http({method: 'GET', url: url + "api/all/backend", params: {}})
+            getData: function(pPoint){
+                return $http({method: 'GET', url: url + "api/" + pPoint, params: {}})
             },
             postData: function(params, data){
                 params = angular.isDefined(params) ? params : {};
@@ -11046,7 +11079,7 @@ angular.module('common.manage', [])
     .factory('newsFactory', ['$http', 'NEWS_URL', function newsFactory($http, url){
         return {
             getData: function(pPoint){
-                return $http({method: 'GET', url: url + "api/" + pPoint, params: {}})
+                return $http({method: 'GET', url: url + "api/" + pPoint, params: {}, responseType:'arraybuffer'})
             },
             postData: function(params, data){
                 params = angular.isDefined(params) ? params : {};
@@ -12847,7 +12880,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
 
             tokenFactory("CSRF-libSoftware");
 
-            swFactory.getData()
+            swFactory.getData("all/backend")
                 .success(function(data) {
                     console.dir(data);
                     for (var i = 0; i < data.software.length; i++){
@@ -12930,6 +12963,7 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
 
     .controller('manageSWListCtrl', ['$scope', '$timeout', 'Upload', 'swFactory', 'SOFTWARE_URL', 'OS',
         function manageSWListCtrl($scope, $timeout, Upload, swFactory, appURL, OS){
+            this.swFactory = swFactory;
             $scope.titleFilter = '';
             $scope.descrFilter = '';
             $scope.sortMode = 0;
@@ -13217,12 +13251,32 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             };
     }])
 
-    .directive('softwareManageList',[  function() {
+    .directive('softwareManageList',['$timeout',  function($timeout) {
         return {
             restrict: 'A',
             controller: 'manageSWListCtrl',
-            link: function(scope, elm, attrs){
+            link: function(scope, elm, attrs, Ctrl){
+                scope.export = function() {
+                    $timeout(function() {
+                        Ctrl.swFactory.getData("export")
+                            .success(function(data) {
+                                var blob = new Blob([ JSON.stringify(data) ], { type : 'application/json' });
+                                scope.exportUrl = (window.URL || window.webkitURL).createObjectURL( blob );
 
+                                var downloadLink = angular.element('<a></a>');
+//                              downloadLink.attr('href', 'data:attachment/json;base64,' + data);
+                                downloadLink.attr('href', scope.exportUrl);
+                                downloadLink.attr('target', '_self');
+                                downloadLink.attr('download', 'softwareData.json');
+                                elm.append(downloadLink);
+                                downloadLink[0].click();
+                                scope.$apply();
+                            })
+                            .error(function(data, status, headers, config) {
+                                console.log(data);
+                            });
+                    }, 0);
+                };
             },
             templateUrl: 'manageSoftware/manageSoftwareList.tpl.html'
         };
@@ -17511,8 +17565,8 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
 angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("common/directives/suggest/suggest.tpl.html",
     "<div class=\"input-group input-group-lg\">\n" +
-    "    <input type=\"text\" name=\"search\" class=\"form-control onesearch-text\" placeholder=\"{{prompt}}\"\n" +
-    "           ng-model=\"model\" ng-change=\"onChange()\" autocomplete=\"off\" ng-blur=\"onBlur()\" ng-focus=\"onFocus()\" />\n" +
+    "    <input type=\"text\" name=\"search\" class=\"form-control onesearch-text\" placeholder=\"{{prompt}}\" id=\"osTextField\"\n" +
+    "           ng-model=\"model\" ng-change=\"onChange()\" autocomplete=\"off\" />\n" +
     "    <div class=\"input-group-btn\">\n" +
     "        <button type=\"submit\" class=\"btn btn-onesearch btn-primary\"><span class=\"fa fa-search\"></span></button>\n" +
     "    </div>\n" +
@@ -17524,7 +17578,7 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
     "                ng-repeat=\"item in filteredItems = (items.suggest | filter:compare(originalValue)) | limitTo:numShow track by $index\"\n" +
     "                ng-mousedown=\"handleSelection(item.search)\" ng-class=\"item.class\"\n" +
     "                ng-mouseenter=\"setCurrent($index, false)\">\n" +
-    "                <a href=\"#/bento/{{item.search}}\">{{item.search}}</a>\n" +
+    "                <a href=\"#/bento/{{item.search}}\" ng-click=\"gaTypeAhead(item.search)\">{{item.search}}</a>\n" +
     "            </li>\n" +
     "        </ul>\n" +
     "    </div>\n" +
@@ -17534,7 +17588,7 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
     "                <div class=\"\">\n" +
     "                    <h4>Recommended Links</h4>\n" +
     "                    <div ng-repeat=\"recommendation in items.recommend | limitTo:10\">\n" +
-    "                        <a href=\"{{recommendation.link}}\" ng-mousedown=\"go(recommendation.link)\">\n" +
+    "                        <a ng-href=\"{{recommendation.link}}\" ng-click=\"gaSuggestion(recommendation.description)\">\n" +
     "                            {{recommendation.description}}\n" +
     "                        </a>\n" +
     "                    </div>\n" +
@@ -17545,7 +17599,7 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
     "                    <h4>LibGuides Subjects <a href=\"http://guides.lib.ua.edu/\" class=\"small\" ng-mousedown=\"go('http://guides.lib.ua.edu/')\">more</a></h4>\n" +
     "                    <div ng-repeat=\"person in items.subjects | limitTo:10\">\n" +
     "                        <div ng-repeat=\"subject in person.subjects | limitTo:2\">\n" +
-    "                            <a ng-if=\"subject.link.length > 7\" href=\"{{subject.link}}\" ng-mousedown=\"go(subject.link)\">\n" +
+    "                            <a ng-if=\"subject.link.length > 7\" ng-href=\"{{subject.link}}\" ng-mousedown=\"go(subject.link)\" ng-click=\"gaSuggestion(subject.subject)\">\n" +
     "                                {{subject.subject}}\n" +
     "                            </a>\n" +
     "                            <a ng-if=\"subject.link.length <= 7\" href=\"#\"\n" +
@@ -17560,7 +17614,7 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
     "                <div class=\"\">\n" +
     "                    <h4>FAQ <a href=\"http://ask.lib.ua.edu/\" class=\"small\" ng-mousedown=\"go('http://ask.lib.ua.edu/')\">more</a></h4>\n" +
     "                    <div ng-repeat=\"faq in items.faq | limitTo:5\">\n" +
-    "                        <a ng-href=\"{{faq.link}}\" ng-mousedown=\"go(faq.link)\" ng-bind-html=\"faq.title\">\n" +
+    "                        <a ng-href=\"{{faq.link}}\" ng-mousedown=\"go(faq.link)\"  ng-click=\"gaSuggestion(faq.title)\" ng-bind-html=\"faq.title\">\n" +
     "                        </a>\n" +
     "                    </div>\n" +
     "                </div>\n" +
@@ -17578,7 +17632,7 @@ angular.module("common/engines/acumen/acumen.tpl.html", []).run(["$templateCache
     "    </a>\n" +
     "    <div class=\"media-body\">\n" +
     "        <h4 class=\"media-heading\">\n" +
-    "            <a ng-href=\"http://acumen.lib.ua.edu/{{item.link}}\" target=\"_acumen\" title=\"{{item.title}}\">{{item.title | truncate: 40: '...': true}}</a>\n" +
+    "            <a ng-href=\"http://acumen.lib.ua.edu/{{item.link}}\" target=\"_acumen\" title=\"{{item.title}}\" ng-click=\"gaPush()\">{{item.title | truncate: 40: '...': true}}</a>\n" +
     "        </h4>\n" +
     "        <div class=\"details-context\">\n" +
     "            <span ng-if=\"item.date\" ng-bind-html=\"item.date\"></span>\n" +
@@ -17596,7 +17650,7 @@ angular.module("common/engines/catalog/catalog.tpl.html", []).run(["$templateCac
     "        <h4 class=\"media-heading\">\n" +
     "            <a ng-href=\"{{item.href}}\"\n" +
     "               title=\"{{item.title}}\"\n" +
-    "               ng-bind-html=\"item.title | truncate: 50: '...': true\" target=\"_catalog\"></a>\n" +
+    "               ng-bind-html=\"item.title | truncate: 50: '...': true\" target=\"_catalog\" ng-click=\"gaPush()\"></a>\n" +
     "        </h4>\n" +
     "        <div class=\"details-context\">\n" +
     "            <span ng-if=\"item.year && item.year | number\" ng-bind-html=\"item.year\"></span>\n" +
@@ -17618,7 +17672,7 @@ angular.module("common/engines/databases/databases.tpl.html", []).run(["$templat
     "<div class=\"media\">\n" +
     "    <div class=\"media-body\">\n" +
     "        <h4 class=\"media-heading\">\n" +
-    "            <a ng-href=\"{{item.url}}\" title=\"{{item.title}}\" target=\"_databases\">{{item.title | truncate: 40: '...': true}}</a>\n" +
+    "            <a ng-href=\"{{item.url}}\" title=\"{{item.title}}\" target=\"_databases\" ng-click=\"gaPush()\">{{item.title | truncate: 40: '...': true}}</a>\n" +
     "        </h4>\n" +
     "        <div class=\"details-context\">\n" +
     "            <span ng-if=\"item.coverage\" ng-bind-html=\"item.coverage\"></span>\n" +
@@ -17635,7 +17689,7 @@ angular.module("common/engines/ejournals/ejournals.tpl.html", []).run(["$templat
     "<div class=\"media\">\n" +
     "    <div class=\"media-body\">\n" +
     "        <h4 class=\"media-heading\">\n" +
-    "            <a ng-href=\"{{item.links[0].href}}\" title=\"{{item.title}}\" target=\"_ejournals\">{{item.title | ltrim | truncate: 50: '...': true}}</a>\n" +
+    "            <a ng-href=\"{{item.links[0].href}}\" title=\"{{item.title}}\" target=\"_ejournals\" ng-click=\"gaPush()\">{{item.title | ltrim | truncate: 50: '...': true}}</a>\n" +
     "        </h4>\n" +
     "\n" +
     "        <div class=\"details-context\">\n" +
@@ -17670,28 +17724,10 @@ angular.module("common/engines/google-cs/google-cs.tpl.html", []).run(["$templat
   $templateCache.put("common/engines/google-cs/google-cs.tpl.html",
     "<div class=\"media\">\n" +
     "    <div class=\"media-body\">\n" +
-    "        <h4 class=\"media-heading\"><a ng-href=\"{{item.link}}\" title=\"{{item.title}}\" target=\"_googlecs\">{{item.title | truncate: 40: '...': true}}</a></h4>\n" +
+    "        <h4 class=\"media-heading\"><a ng-href=\"{{item.link}}\" title=\"{{item.title}}\" target=\"_googlecs\" ng-click=\"gaPush()\">{{item.title | truncate: 40: '...': true}}</a></h4>\n" +
     "        <p ng-bind-html=\"item.snippet\"></p>\n" +
     "    </div>\n" +
-    "</div>\n" +
-    "<!--div class=\"media\">\n" +
-    "    <div class=\"media-body\">\n" +
-    "        <h4 class=\"media-heading\"><a href=\"http://guides.lib.ua.edu\">Library Guides</a></h4>\n" +
-    "        <div class=\"media\" ng-repeat=\"guide in items | limitTo:2 | filter:{link:'guides.lib.ua.edu'}\">\n" +
-    "            <a class=\"media-left\" ng-href=\"{{guide.link}}\" title=\"{{guide.title}}\">\n" +
-    "                <img ng-src=\"guide.pagemap.cse_thumbnail[0].src\"\n" +
-    "                     width=\"{{guide.pagemap.cse_thumbnail[0].width}}\"\n" +
-    "                     height=\"{{guide.pagemap.cse_thumbnail[0].height}}\">\n" +
-    "            </a>\n" +
-    "            <div class=\"media-body\">\n" +
-    "                <h4 class=\"media-heading\">\n" +
-    "                    <a ng-href=\"{{guide.link}}\">{{guide.title}}</a>\n" +
-    "                </h4>\n" +
-    "                <p>{{guide.snippet}}</p>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "    </div>\n" +
-    "</div-->");
+    "</div>");
 }]);
 
 angular.module("common/engines/recommend/recommend.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -17708,7 +17744,7 @@ angular.module("common/engines/scout/scout.tpl.html", []).run(["$templateCache",
     "            <a ng-href=\"{{item.PLink}}\"\n" +
     "               title=\"{{item.Items[0].Data}}\"\n" +
     "               target=\"_scout\"\n" +
-    "               ng-bind-html=\"item.RecordInfo.BibRecord.BibEntity.Titles[0].TitleFull | lowercase | ucfirst\"></a>\n" +
+    "               ng-bind-html=\"item.title | lowercase | ucfirst | truncate: 80: '...': true\" ng-click=\"gaPush()\"></a>\n" +
     "        </h4>\n" +
     "        <div class=\"details-context\">\n" +
     "            <span ng-if=\"item.RecordInfo.BibRecord.BibRelationships.IsPartOfRelationships[0].BibEntity.Dates[0]\">{{item.RecordInfo.BibRecord.BibRelationships.IsPartOfRelationships[0].BibEntity.Dates[0].Y}} </span>\n" +
@@ -17923,7 +17959,6 @@ angular.module('oneSearch.bento', [])
                             //console.log(res);
                             // Group the results by defined media types
                             var grouped = mediaTypes.groupBy(res, engine.mediaTypes);
-                            console.log(grouped);
 
                             // Iterate over the boxes.
                             Object.keys(self.boxes).forEach(function(type){
@@ -18001,7 +18036,7 @@ angular.module('oneSearch.bento', [])
 
 
 
-    .directive('bentoBox', ['$rootScope', '$controller', '$compile', '$animate', 'Bento', function($rootScope, $controller, $compile, $animate, Bento){
+    .directive('bentoBox', ['$rootScope', '$controller', '$compile', '$animate', '$timeout', 'Bento', 'oneSearch', function($rootScope, $controller, $compile, $animate, $timeout, Bento, oneSearch){
         return {
             restrict: 'A', //The directive always requires and attribute, so disallow class use to avoid conflict
             scope: {},
@@ -18029,15 +18064,47 @@ angular.module('oneSearch.bento', [])
                 //Enter the spinner animation, appending it to the title element
                 $animate.enter(spinner, titleElm, angular.element(titleElm[0].lastChild));
 
+                var engineTimeout;
+                var waitingMessage = angular.element(' <span class="unresponsive-msg">Awaiting results from provider</span>');
+
+                function checkEngineStatus(){
+                    var engines = angular.copy(Bento.boxes[box]['engines']);
+                    var en = [];
+                    for (var e in oneSearch.engines){
+                        if (engines.indexOf(e) > -1){
+                            if (oneSearch.engines[e].response && !oneSearch.engines[e].response.done){
+                                en.push(e);
+                            }
+
+                        }
+                    }
+                    if (engineTimeout && !spinner.hasClass('unresponsive')){
+                        spinner.addClass('unresponsive');
+
+                        $animate.enter(waitingMessage, spinner, angular.element(spinner[0].lastChild));
+                    }
+
+                    if (en.length){
+                        engineTimeout = $timeout(checkEngineStatus, 500)
+                    }
+
+                }
+
+                $timeout(checkEngineStatus, 2000);
+
                 //Watch the boxes "engines" Array
                 var boxWatcher = scope.$watchCollection(
                     function(){
-
                         return Bento.boxes[box]['engines'];
                     },
                     function(newVal, oldVal) {
                         // Has the "engines" Array changed?
                         if (newVal !== oldVal){
+                            //console.log(box);
+                            //console.log(newVal);
+                            //console.log(oldVal);
+                            //console.log('----------------------------');
+
                             //variable for engine removed from array
                             var engine = '';
 
@@ -18075,21 +18142,29 @@ angular.module('oneSearch.bento', [])
                                 // the new isolated scope.
                                 Bento.engines[engine].tpl.then(function(data){
 
-                                    var EngCtrl = ['$scope', 'Bento', function($scope, Bento){
+                                    var EngCtrl = ['$scope', '$element', 'Bento', function($scope, $element, Bento){
                                         // Extend any controller defined by an engine's config
                                         if (Bento.engines[$scope.engine].controller){
                                             angular.extend(this, $controller(Bento.engines[$scope.engine].controller, {$scope: $scope}));
                                         }
+                                        var gaBox = $scope.boxName.toLowerCase().replace(/\s+/g, '_').replace(/[']+/g, '');
                                         $scope.box = Bento.boxes[box];
+                                        $scope.gaPush = function(){
+                                            ga('send', 'event', 'oneSearch', 'item_click', gaBox);
+                                        };
+                                        $scope.gaMore = function(){
+                                            ga('send', 'event', 'oneSearch', 'more_click', 'more_' + gaBox);
+                                        };
+
                                     }];
 
-                                    var controller = $controller(EngCtrl, {$scope: engineScope});
+                                    var controller = $controller(EngCtrl, {$scope: engineScope, $element: elm});
                                     elm.data('$ngControllerController', controller);
                                     elm.children().data('$ngControllerController', controller);
 
                                     // Wrap the template in an element that specifies ng-repeat over the "items" object (i.e., the results),
                                     // gives the generic classes for items in a bento box.
-                                    var template = angular.element('<div class="animate-repeat bento-box-item" ng-repeat="item in items | limitTo: box.resultLimit">'+data+'</div><div class="resource-link-container"><a class="btn btn-link btn-sm" ng-href="{{resourceLink}}" ng-if="resourceLink" target="_{{engine}}">More results from {{engine | ucfirst}}  <span class="fa fa-fw fa-external-link"></span></a></div>');
+                                    var template = angular.element('<div class="animate-repeat bento-box-item" ng-repeat="item in items | limitTo: box.resultLimit">'+data+'</div><div class="resource-link-container"><a class="btn btn-link btn-sm" ng-href="{{resourceLink}}" ng-if="resourceLink" target="_{{engine}}" ng-click="gaMore()">More results from {{engine | ucfirst}}  <span class="fa fa-fw fa-external-link"></span></a></div>');
 
                                     // Compile wrapped template with the isolated scope's context
                                     var html = $compile(template)(engineScope);
@@ -18141,6 +18216,8 @@ angular.module('oneSearch.bento', [])
                     // Tell spinner to exit animation
                     $animate.leave(spinner);
 
+                    //$timeout.cancel(engineTimeout);
+
                     // Destroy this box's watcher (no need to waste the cycles)
                     boxWatcher();
                 }
@@ -18151,6 +18228,7 @@ angular.module('oneSearch.bento', [])
     .directive('bentoBoxMenu', ['Bento', '$document', '$rootScope', '$timeout', '$q', function(Bento, $document, $rootScope, $timeout, $q){
         return {
             restrict: 'AC',
+            replace: true,
             link: function(scope, elm){
                 var selected;
                 var timeout;
@@ -18210,7 +18288,7 @@ angular.module('oneSearch.common')
             }
         };
     }])
-    .directive('suggestOneSearch', ['$timeout', function($timeout) {
+    .directive('suggestOneSearch', ['$timeout', '$document', function($timeout, $document) {
         return {
             restrict: 'AEC',
             scope: {
@@ -18218,7 +18296,7 @@ angular.module('oneSearch.common')
                 model: '=',
                 search: '='
             },
-            controller: ['$scope', '$window', '$timeout', 'dataFactory', function($scope, $window, $timeout, dataFactory){
+            controller: ['$scope', '$window', '$timeout', '$document', 'dataFactory', function($scope, $window, $timeout, $document,  dataFactory){
                 $scope.items = {};
                 $scope.filteredItems = [];
                 $scope.model = "";
@@ -18232,7 +18310,7 @@ angular.module('oneSearch.common')
                 $scope.selected = false;
 
                 $scope.onChange = function(){
-                    console.log("OnChange event.");
+                    //console.log("OnChange event.");
                     $scope.selected = true;
                     var fixedString = $scope.model.replace(/\//g, " ");
 
@@ -18268,9 +18346,9 @@ angular.module('oneSearch.common')
                     if ($scope.model.length > 4 && !$scope.faqSearched){
                         //run GCS only if the last character is a space and prev one is not
                         var lastTwo = fixedString.slice(-2);
-                        console.log("Checking conditions for GCS search..." + lastTwo);
+                        //console.log("Checking conditions for GCS search..." + lastTwo);
                         if (lastTwo.indexOf(" ") > 0) {
-                            console.log("Running GCS search.");
+                            //console.log("Running GCS search.");
                             $timeout(function() {
                                 $scope.faqSearched = true;
                                 dataFactory.get('https://www.googleapis.com/customsearch/v1?key=AIzaSyCMGfdDaSfjqv5zYoS0mTJnOT3e9MURWkU&cx=003453353330912650815:lfyr_-azrxe&q=' +
@@ -18308,9 +18386,12 @@ angular.module('oneSearch.common')
                     if (angular.isDefined($scope.model) && $scope.model.length > 2){
                         $scope.selected = true;
                     }
+                    //console.log("onFocus()");
                 };
-                $scope.onBlur = function($event){
+                $scope.onBlur = function(event){
+                    //console.log("onBlur()");
                     $scope.selected = false;
+                    $document.unbind("click");
                 };
                 $scope.compare = function(query){
                     return function(item){
@@ -18319,6 +18400,15 @@ angular.module('oneSearch.common')
                             return true;
                         return false;
                     };
+                };
+
+                // This is dumb, but quick fix to get GA events on suggestion box.
+                // TODO: Remove this and add in global GA directives
+                $scope.gaSuggestion = function(linkTitle){
+                    ga('send', 'event', 'oneSearch', 'suggestion_click', linkTitle);
+                };
+                $scope.gaTypeAhead = function(linkTitle){
+                    ga('send', 'event', 'oneSearch', 'type_ahead_click', linkTitle);
                 };
             }],
             link: function(scope, elem, attrs) {
@@ -18362,6 +18452,12 @@ angular.module('oneSearch.common')
                         //Enter
                         case 13:
                             scope.selected = false;
+
+                            // Check if type-ahead selected. If so, trigger GA event
+                            // gaTypeAhead() is also bound to ng-click for each type-ahead link
+                            if (scope.current > -1 && scope.filteredItems[scope.current] && scope.model === scope.filteredItems[scope.current].search){
+                                scope.gaTypeAhead(scope.model);
+                            }
                             break;
 
                         //Backspace
@@ -18378,7 +18474,7 @@ angular.module('oneSearch.common')
                             break;
 
                         default:
-                            console.log("KeyCode " + event.keyCode);
+                            //console.log("KeyCode " + event.keyCode);
                             break;
                     }
                     scope.$apply();
@@ -18388,6 +18484,26 @@ angular.module('oneSearch.common')
                 scope.$on('$destroy', function(){
                     elem.unbind("keydown");
                     suggestWatcher();
+                    //console.log("$destroy");
+                });
+
+                elem.bind("click", function (event) {
+                    if (event.target.id === "osTextField") {
+                        scope.onFocus();
+                        $document.bind("click", function(event) {
+                            if (event.target.id === "osTextField") {
+                                scope.onFocus();
+                            } else
+                            if (event.button < 1) {
+                                scope.onBlur(event);
+                            }
+                            scope.$apply();
+                        });
+                    } else
+                    if (event.button < 1) {
+                        scope.onBlur(event);
+                    }
+                    scope.$apply();
                 });
 
                 scope.handleSelection = function(selectedItem) {
@@ -18663,6 +18779,7 @@ angular.module('engines.scout', [])
     }])
 
     .controller('ScoutCtrl', ['$scope', function($scope){
+        var title; // Title variable to bind to $scope. ".BibRelationships.IsPartOfRelationships" title is used if no item title is present.
         var items = $scope.items;
         for (var i = 0; i < items.length; i++){
             if (items[i].Header.PubTypeId == 'audio'){
@@ -18672,11 +18789,23 @@ angular.module('engines.scout', [])
                 items[i].mediaType = 'Video Recording';
             }
 
+            //Check if item has a title
+            if (items[i].RecordInfo.BibRecord.BibEntity.Titles){
+                title = items[i].RecordInfo.BibRecord.BibEntity.Titles[0].TitleFull;
+            }
+
             //Search for "source"
             var bibRelationships = [];
             if (angular.isDefined(items[i].RecordInfo.BibRecord.BibRelationships.IsPartOfRelationships)){
+
                 bibRelationships = items[i].RecordInfo.BibRecord.BibRelationships.IsPartOfRelationships;
+
                 for (var x = 0, len = bibRelationships.length; x < len; x++){
+                    if (angular.isUndefined(title)){
+                        if (bibRelationships[x].BibEntity && bibRelationships[x].BibEntity.Titles){
+                            title = bibRelationships[x].BibEntity.Titles[0].TitleFull;
+                        }
+                    }
                     if (angular.isDefined(bibRelationships[x].BibEntity.Identifiers) && bibRelationships[x].BibEntity.Identifiers[0].Type === 'issn-print'){
                         // define source title
                         if (bibRelationships[x].BibEntity.Titles){
@@ -18693,7 +18822,6 @@ angular.module('engines.scout', [])
                 }
             }
 
-
             if (angular.isDefined(items[i].Items)){
                 for (var x = 0; x < items[i].Items.length; x++){
                     if (items[i].Items[x].Group == 'Src'){
@@ -18702,6 +18830,9 @@ angular.module('engines.scout', [])
                     }
                 }
             }
+
+            //Set item title
+            items[i].title = title;
         }
         $scope.items = items;
 
@@ -19091,6 +19222,7 @@ angular.module('common.oneSearch', [])
 
                 //Cancel any pending searches - prevents mixed results by canceling the ajax requests
                 abortPendingSearches();
+
                 // Compensate for when not on home page
                 // Since WP pages aren't loaded as angular routes, we must detect if there is no '#/PATH' present
                 // after the URI (or that it's not a 'bento' route), then send the browser to a pre-build URL.
@@ -47937,7 +48069,7 @@ angular.module('hours.list', [])
         }
     }]);
 /**
- * @license AngularJS v1.4.6
+ * @license AngularJS v1.4.7
  * (c) 2010-2015 Google, Inc. http://angularjs.org
  * License: MIT
  */

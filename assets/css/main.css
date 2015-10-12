@@ -6256,7 +6256,6 @@ fieldset[disabled] .navbar-inverse .btn-link:focus {
   background-color: #f9f9f9;
   border-color: #e8e8e8;
   border: none;
-  margin-bottom: 0;
   padding-left: 15px;
   padding-right: 15px;
 }
@@ -6352,6 +6351,11 @@ fieldset[disabled] .navbar-mega .btn-link:hover,
 fieldset[disabled] .navbar-mega .btn-link:focus {
   color: #cccccc;
 }
+@media (min-width: 992px) {
+  .navbar-mega {
+    margin-bottom: 0;
+  }
+}
 .navbar-mega .collapsing {
   position: static;
 }
@@ -6375,7 +6379,6 @@ fieldset[disabled] .navbar-mega .btn-link:focus {
 }
 .navbar-mega .navbar-toggle.icon-only {
   font-size: 20px;
-  padding-bottom: 29px;
 }
 @media (max-width: 991px) {
   .navbar-mega .navbar-toggle {
@@ -6417,12 +6420,6 @@ fieldset[disabled] .navbar-mega .btn-link:focus {
 .navbar-mega .navbar-nav > li > a.icon-only,
 .navbar-mega .navbar-nav > li > button.icon-only {
   font-size: 20px;
-  padding-bottom: 29px;
-}
-.navbar-mega .navbar-nav > li > a.icon-only,
-.navbar-mega .navbar-nav > li > button.icon-only {
-  font-size: 20px;
-  padding-bottom: 29px;
 }
 .navbar-mega .navbar-nav > li > a:hover.dropdown-toggle::before,
 .navbar-mega .navbar-nav > li > button:hover.dropdown-toggle::before,
@@ -6504,7 +6501,6 @@ fieldset[disabled] .navbar-mega .btn-link:focus {
   background-color: #993333;
   border-color: #732626;
   border: none;
-  margin-bottom: 0;
   padding-left: 15px;
   padding-right: 15px;
 }
@@ -6606,6 +6602,11 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:hover,
 fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
   color: #e5d8d8;
 }
+@media (min-width: 992px) {
+  .navbar-mega-inverse {
+    margin-bottom: 0;
+  }
+}
 .navbar-mega-inverse .collapsing {
   position: static;
 }
@@ -6629,7 +6630,6 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
 }
 .navbar-mega-inverse .navbar-toggle.icon-only {
   font-size: 20px;
-  padding-bottom: 29px;
 }
 @media (max-width: 991px) {
   .navbar-mega-inverse .navbar-toggle {
@@ -6671,12 +6671,6 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
 .navbar-mega-inverse .navbar-nav > li > a.icon-only,
 .navbar-mega-inverse .navbar-nav > li > button.icon-only {
   font-size: 20px;
-  padding-bottom: 29px;
-}
-.navbar-mega-inverse .navbar-nav > li > a.icon-only,
-.navbar-mega-inverse .navbar-nav > li > button.icon-only {
-  font-size: 20px;
-  padding-bottom: 29px;
 }
 .navbar-mega-inverse .navbar-nav > li > a:hover.dropdown-toggle::before,
 .navbar-mega-inverse .navbar-nav > li > button:hover.dropdown-toggle::before,
@@ -9086,12 +9080,67 @@ body {
 }
 .main {
   padding-bottom: 60px;
-  /*@media (min-width: @screen-md-min){
-    .make-sm-column(@main-sm-columns);
-    .sidebar-primary & {
-      .make-sm-column(@main-sm-columns - @sidebar-sm-columns);
-    }
-  }*/
+}
+@media (max-width: 767px) {
+  .main {
+    padding-bottom: 0;
+  }
+}
+/*
+* Fade animation for switching between Angular routes used by webapps
+*/
+div[ng-view].ng-enter {
+  -webkit-animation: Fade-Enter-Anime 0.2s;
+  -o-animation: Fade-Enter-Anime 0.2s;
+     animation: Fade-Enter-Anime 0.2s;
+}
+@-o-keyframes Fade-Enter-Anime {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes Fade-Enter-Anime {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@-o-keyframes Fade-Leave-Anime {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes Fade-Leave-Anime {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@-webkit-keyframes Fade-Enter-Anime {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@-webkit-keyframes Fade-Leave-Anime {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 .sidebar {
   position: relative;
@@ -9159,8 +9208,10 @@ div[role="document"] {
   background-size: cover;
   background-color: transparent;
 }
-.front-page .home-slice {
-  padding: 0 15px 30px 15px;
+@media (max-width: 767px) {
+  .front-page {
+    background-image: none !important;
+  }
 }
 .card {
   margin-bottom: 15px;
@@ -9193,6 +9244,8 @@ div[role="document"] {
 }
 .front-page-card {
   background-color: rgba(255, 255, 255, 0.9);
+  -webkit-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
 }
 .front-page-card .service-card {
   border: 1px solid transparent;
@@ -9201,64 +9254,6 @@ div[role="document"] {
   background-color: #fff;
   border-radius: 4px;
   border-color: #993333;
-}
-div[ng-view].ng-enter {
-  -webkit-animation: Fade-Enter-Anime 0.2s;
-  -o-animation: Fade-Enter-Anime 0.2s;
-     animation: Fade-Enter-Anime 0.2s;
-}
-.Content-Fade-Leave {
-  -webkit-animation: Fade-Leave-Anime 0.2s;
-  -o-animation: Fade-Leave-Anime 0.2s;
-     animation: Fade-Leave-Anime 0.2s;
-}
-@-o-keyframes Fade-Enter-Anime {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-@keyframes Fade-Enter-Anime {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-@-o-keyframes Fade-Leave-Anime {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
-}
-@keyframes Fade-Leave-Anime {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
-}
-@-webkit-keyframes Fade-Enter-Anime {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-@-webkit-keyframes Fade-Leave-Anime {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
 }
 .jumbotron-header {
   background-repeat: no-repeat;
