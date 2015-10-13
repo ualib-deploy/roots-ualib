@@ -17535,7 +17535,7 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "    <div class=\"row\">\n" +
     "        <div class=\"col-md-4\">\n" +
     "            <div class=\"bento-box\" bento-box=\"databases\">\n" +
-    "                <h2>Databases </h2>\n" +
+    "                <h2>Databases</h2>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-4\">\n" +
@@ -17566,7 +17566,7 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
   $templateCache.put("common/directives/suggest/suggest.tpl.html",
     "<div class=\"input-group input-group-lg\">\n" +
     "    <input type=\"text\" name=\"search\" class=\"form-control onesearch-text\" placeholder=\"{{prompt}}\" id=\"osTextField\"\n" +
-    "           ng-model=\"model\" ng-change=\"onChange()\" autocomplete=\"off\" />\n" +
+    "           ng-model=\"model\" ng-change=\"onChange()\" ng-trim=\"false\" autocomplete=\"off\" />\n" +
     "    <div class=\"input-group-btn\">\n" +
     "        <button type=\"submit\" class=\"btn btn-onesearch btn-primary\"><span class=\"fa fa-search\"></span></button>\n" +
     "    </div>\n" +
@@ -18055,10 +18055,13 @@ angular.module('oneSearch.bento', [])
                 var titleElm = elm.find('h2');
                 titleElm.attr('id', box);
 
+                // Preserve boxTitle text before any loading/waiting messages are inserted.
+                var boxTitle = titleElm.text();
+
 
                 // Box menu/index scope variables
                 if (!attrs.omitFromMenu){
-                    Bento.boxMenu.push({box: box, title: titleElm.text(), loaded: false, noResults: false});
+                    Bento.boxMenu.push({box: box, title: boxTitle, loaded: false, noResults: false});
                 }
 
                 //Enter the spinner animation, appending it to the title element
@@ -18136,7 +18139,7 @@ angular.module('oneSearch.bento', [])
                                 engineScope.engine = engine;
                                 engineScope.resourceLink = Bento.boxes[box]['resourceLinks'][engine] === "undefined" ? false : Bento.boxes[box]['resourceLinks'][engine];
                                 engineScope.resourceLinkParams = Bento.boxes[box]['resourceLinkParams'][engine];
-                                engineScope.boxName = titleElm.text();
+                                engineScope.boxName = boxTitle;
                                 engineScope.mediaType = box;
                                 // When the engine's promise is ready, then load the engine's controller/template data applying
                                 // the new isolated scope.
@@ -18147,8 +18150,9 @@ angular.module('oneSearch.bento', [])
                                         if (Bento.engines[$scope.engine].controller){
                                             angular.extend(this, $controller(Bento.engines[$scope.engine].controller, {$scope: $scope}));
                                         }
-                                        var gaBox = $scope.boxName.toLowerCase().replace(/\s+/g, '_').replace(/[']+/g, '');
+                                        var gaBox = $scope.boxName.toLowerCase().trim().replace(/\s+/g, '_').replace(/[']+/g, '');
                                         $scope.box = Bento.boxes[box];
+
                                         $scope.gaPush = function(){
                                             ga('send', 'event', 'oneSearch', 'item_click', gaBox);
                                         };
@@ -18465,12 +18469,6 @@ angular.module('oneSearch.common')
                         //Delete
                         case 46:
                             scope.selected = true;
-                            break;
-
-                        //spacebar
-                        case 32:
-                            scope.model = scope.model + " ";
-                            scope.onChange();
                             break;
 
                         default:
