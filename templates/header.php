@@ -74,15 +74,20 @@ if (defined('GROUP_ANY_WEBAPP'))
                         <a href="#" class="dropdown-toggle icon-only" ng-click="mainNavbarCollapsed = false;">
                             <span class="fa fa-search"></span>
                         </a>
-                        <ul class="dropdown-menu onsearch-box">
+                        <ul class="dropdown-menu onesearch-box">
                             <li>
                                 <div class="yamm-content" ng-controller="OneSearchCtrl">
                                     <div class="container">
-                                      <form ng-submit="search()" class="onesearch-form">
+                                      <div class="row">
+                                          <form ng-submit="search()" class="onesearch-form">
 
-                                        <suggest-one-search prompt="Search journals, articles, books, website & more" model="searchText" search="search">
+                                              <suggest-one-search prompt="Search journals, articles, books, website & more" model="searchText" search="search">
 
-                                      </form>
+                                          </form>
+                                      </div>
+                                        <div class="row">
+                                            <a href="http://apps.lib.ua.edu/blogs/webservices/2015/10/12/what-is-onesearch/" class="what-is-link" title="What is oneSearch"><span class="fa fa-info-circle"></span>  What is oneSearch?</a>
+                                        </div>
                                     </div>
                                 </div>
                             </li>
