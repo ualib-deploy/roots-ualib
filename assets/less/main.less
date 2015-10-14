@@ -21,6 +21,7 @@
 // Roots
 @import "_global";                   // Base styling & custom mixins
 @import "components/_buttons";       // Button tweaks
+@import "components/_onesearch-dropdown";       // Button tweaks
 @import "components/_comments";      // Comment styling
 @import "components/_forms";         // Form tweaks
 @import "components/_media";         // WordPress media
@@ -42,83 +43,11 @@ main > p {
   text-align: justify;
 }
 
-// oneSearch Styles
-// --------------
-
-/*.onesearch-container{
-  padding-top: 30px;
-  padding-bottom: 30px;
-  background-color: rgba(248,248,248,.25);
-}*/
-.onesearch-text {
-  height: 60px !important;
-  font-size: 20px !important;
-  border-radius: 0;
-}
-.btn-onesearch {
-  font-size: 30px !important;
-  height: 60px !important;
-  /*background-color: transparent;*/
-  color: #f9f9f9;
-  border-color: transparent;
-  /*text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.35);*/
-}
 
 // Footer Styles
 // ----------
 
-footer {
-  & a:hover {
-    text-decoration: underline;
-  }
 
-  > .footer-wrapper {
-    background-color: #f8f8f8;
-    padding-top: 30px;
-    padding-bottom: 30px;
-    min-height: 60px;
-  }
-
-  & img {
-    -moz-filter:grayscale(100%);
-    -webkit-filter:grayscale(100%);
-    -o-filter:grayscale(100%);
-    -ms-filter:grayscale(100%);
-    filter:grayscale(100%);
-
-    &:hover{
-      -moz-filter:grayscale(0);
-      -webkit-filter:grayscale(0);
-      -o-filter:grayscale(0);
-      -ms-filter:grayscale(0);
-      filter:grayscale(0);
-    }
-  }
-
-  & .footer-list{
-    list-style-type: none;
-
-    &, & > li {
-      margin: 0;
-      padding: 0;
-    }
-
-    & > li > a{
-      display: block;
-      font-size: 14px;
-
-
-    }
-  }
-
-
-
-  > .sub-footer {
-    background-color: #ddd;
-    padding: 15px 0;
-    text-align: center;
-  }
-}
 
 
 // Page Slices (sections)
