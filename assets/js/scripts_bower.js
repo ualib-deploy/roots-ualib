@@ -6044,6 +6044,10 @@ angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", f
     "\n" +
     "        </p>\n" +
     "\n" +
+    "        <div class=\"text-center\">\n" +
+    "            <pagination class=\"pagination-sm\" ng-model=\"pager.page\" total-items=\"pager.totalItems\" max-size=\"pager.maxSize\" boundary-links=\"true\" rotate=\"false\" items-per-page=\"pager.perPage\" ng-change=\"pageChange()\" ng-if=\"pager.totalItems > pager.perPage\"></pagination>\n" +
+    "        </div>\n" +
+    "\n" +
     "        <div class=\"media animate-repeat\" ng-repeat=\"item in filteredDB | after:(pager.page-1)*pager.perPage | limitTo:20\">\n" +
     "            <div class=\"media-body\">\n" +
     "\n" +
