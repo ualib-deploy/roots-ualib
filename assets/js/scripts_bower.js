@@ -6044,6 +6044,10 @@ angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", f
     "\n" +
     "        </p>\n" +
     "\n" +
+    "        <div class=\"text-center\">\n" +
+    "            <pagination class=\"pagination-sm\" ng-model=\"pager.page\" total-items=\"pager.totalItems\" max-size=\"pager.maxSize\" boundary-links=\"true\" rotate=\"false\" items-per-page=\"pager.perPage\" ng-change=\"pageChange()\" ng-if=\"pager.totalItems > pager.perPage\"></pagination>\n" +
+    "        </div>\n" +
+    "\n" +
     "        <div class=\"media animate-repeat\" ng-repeat=\"item in filteredDB | after:(pager.page-1)*pager.perPage | limitTo:20\">\n" +
     "            <div class=\"media-body\">\n" +
     "\n" +
@@ -10973,7 +10977,7 @@ angular.module('manage', [
     .constant('STAFF_DIR_URL', 'https://wwwdev2.lib.ua.edu/staffDir/')
     .constant('DATABASES_URL', 'https://wwwdev2.lib.ua.edu/databases/')
     .constant('SOFTWARE_URL', 'https://wwwdev2.lib.ua.edu/softwareList/')
-    .constant('FORMS_URL', 'https://wwwdev2.lib.ua.edu/form/')
+    .constant('FORMS_URL', '//wwwdev2.lib.ua.edu/form/')
     .constant('NEWS_URL', 'https://wwwdev2.lib.ua.edu/newsApp/')
     .constant('ALERTS_URL', 'https://wwwdev2.lib.ua.edu/alerts/');
 
