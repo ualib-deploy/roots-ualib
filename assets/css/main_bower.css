@@ -1028,6 +1028,9 @@ div.rn-carousel-indicator span {
     padding-bottom: 15px;
   }
 }
+.staff-directory-listing {
+  overflow: auto;
+}
 @media (max-width: 767px) {
   .staff-directory-listing .name-plate h3 {
     font-size: 1.2em;
@@ -1078,6 +1081,31 @@ div.rn-carousel-indicator span {
 .staff-card.staff-card-sm .name {
   font-weight: 700;
 }
-.clear-ri {
-  clear: left;
+.staff-profile .name-plate h2,
+.staff-profile .name-plate h3 {
+  margin-top: 5px;
+}
+.staff-profile .name-plate h1,
+.staff-profile .name-plate h2,
+.staff-profile .name-plate h3:not(:last-of-type) {
+  margin-bottom: 0;
+}
+.staff-profile .name-plate h1 {
+  font-weight: bold;
+  margin-top: 0;
+}
+.staff-profile .name-plate h1 > small {
+  display: block;
+}
+@media (max-width: 767px) {
+  .staff-profile .name-plate h1 {
+    font-size: 2em;
+  }
+  .staff-profile .name-plate h2 {
+    font-size: 1.5em;
+  }
+}
+.staff-profile .subject-specialty {
+  margin-top: 15px;
+  font-size: .9em;
 }
