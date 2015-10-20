@@ -61,18 +61,20 @@
                         <ul class="dropdown-menu onesearch-box">
                             <li>
                                 <div class="yamm-content" ng-controller="OneSearchCtrl">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <form ng-submit="search()" class="onesearch-form">
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <form ng-submit="search()" class="onesearch-form">
 
-                                                <suggest-one-search prompt="Search journals, articles, books, website & more" model="searchText" search="search"></suggest-one-search>
+                                                    <suggest-one-search prompt="Search journals, articles, books, website & more" model="searchText" search="search"></suggest-one-search>
 
-                                            </form>
+                                                </form>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <a href="http://apps.lib.ua.edu/blogs/webservices/2015/10/12/what-is-onesearch/" class="what-is-link" title="What is oneSearch"><span class="fa fa-info-circle"></span>  What is oneSearch?</a>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <a href="http://apps.lib.ua.edu/blogs/webservices/2015/10/12/what-is-onesearch/" class="what-is-link" title="What is oneSearch"><span class="fa fa-info-circle"></span>  What is oneSearch?</a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
