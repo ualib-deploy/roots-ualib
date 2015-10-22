@@ -1,13 +1,3 @@
-<?php
-@include_once WEBAPPS_PATH . "userGroupsAdmin/constants.php";
-@include_once WEBAPPS_PATH . "userGroupsAdmin/functions.php";
-
-$showAdminLink = false;
-if (defined('GROUP_ANY_WEBAPP'))
-    if (($wpUser = gDoesUserHaveAccessWP( GROUP_ANY_WEBAPP )) !== false){
-        $showAdminLink = true;
-    }
-?>
 <header class="page-row" role="banner">
     <nav class="navbar navbar-static-top navbar-mega-inverse" role="navigation">
         <div class="container-fluid">
@@ -19,13 +9,7 @@ if (defined('GROUP_ANY_WEBAPP'))
             </div>
             <div>
                 <ul class="nav navbar-nav navbar-right">
-                    <?php if ($showAdminLink): ?>
-                        <li class="dropdown yamm-fw">
-                            <a href="/user-groups-admin/" class="icon-only" title="WebApps Admin">
-                                <span class="fa fa-spin fa-cog"></span>
-                            </a>
-                        </li>
-                    <?php endif; ?>
+
                     <li class="dropdown yamm-fw">
                         <a href="#" class="dropdown-toggle icon-only" title="My Accounts" ng-click="mainNavbarCollapsed = false;">
                             <span class="fa fa-user"></span>
@@ -78,15 +62,19 @@ if (defined('GROUP_ANY_WEBAPP'))
                             <li>
                                 <div class="yamm-content" ng-controller="OneSearchCtrl">
                                     <div class="container">
-                                      <div class="row">
-                                          <form ng-submit="search()" class="onesearch-form">
-
-                                              <suggest-one-search prompt="Search journals, articles, books, website & more" model="searchText" search="search">
-
-                                          </form>
-                                      </div>
                                         <div class="row">
-                                            <a href="http://apps.lib.ua.edu/blogs/webservices/2015/10/12/what-is-onesearch/" class="what-is-link" title="What is oneSearch"><span class="fa fa-info-circle"></span>  What is oneSearch?</a>
+                                            <div class="col-md-12">
+                                                <form ng-submit="search()" class="onesearch-form">
+
+                                                    <suggest-one-search prompt="Search journals, articles, books, website & more" model="searchText" search="search"></suggest-one-search>
+
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <a href="http://apps.lib.ua.edu/blogs/webservices/2015/10/12/what-is-onesearch/" class="what-is-link" title="What is oneSearch"><span class="fa fa-info-circle"></span>  What is oneSearch?</a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

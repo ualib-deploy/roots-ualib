@@ -6516,7 +6516,7 @@ angular.module('ui.tinymce', [])
         var ngModel = ctrls[0],
           form = ctrls[1] || null;
 
-        var expression, options, tinyInstance,
+        var expression, options = {}, tinyInstance,
           updateView = function(editor) {
             var content = editor.getContent({format: options.format}).trim();
             content = $sce.trustAsHtml(content);
@@ -6527,6 +6527,22 @@ angular.module('ui.tinymce', [])
             }
           };
 
+        function toggleDisable(disabled) {
+          if (disabled) {
+            ensureInstance();
+
+            if (tinyInstance) {
+              tinyInstance.getBody().setAttribute('contenteditable', false);
+            }
+          } else {
+            ensureInstance();
+
+            if (tinyInstance && !tinyInstance.settings.readonly) {
+              tinyInstance.getBody().setAttribute('contenteditable', true);
+            }
+          }
+        }
+
         // generate an ID
         attrs.$set('id', ID_ATTR + '-' + generatedIds++);
 
@@ -6534,7 +6550,7 @@ angular.module('ui.tinymce', [])
 
         angular.extend(expression, scope.$eval(attrs.uiTinymce));
 
-        options = {
+        var setupOptions = {
           // Update model when calling setContent
           // (such as from the source editor popup)
           setup: function(ed) {
@@ -6553,7 +6569,7 @@ angular.module('ui.tinymce', [])
             });
 
             // Update model on change
-            ed.on('change', function(e) {
+            ed.on('change', function() {
               ed.save();
               updateView(ed);
             });
@@ -6578,17 +6594,18 @@ angular.module('ui.tinymce', [])
               });
             }
           },
-          format: 'raw',
+          format: expression.format || 'html',
           selector: '#' + attrs.id
         };
         // extend options with initial uiTinymceConfig and
         // options from directive attribute value
-        angular.extend(options, uiTinymceConfig, expression);
+        angular.extend(options, uiTinymceConfig, expression, setupOptions);
         // Wrapped in $timeout due to $tinymce:refresh implementation, requires
         // element to be present in DOM before instantiating editor when
         // re-rendering directive
         $timeout(function() {
           tinymce.init(options);
+          toggleDisable(scope.$eval(attrs.ngDisabled));
         });
 
         ngModel.$formatters.unshift(function(modelValue) {
@@ -6611,25 +6628,13 @@ angular.module('ui.tinymce', [])
             tinyInstance.getDoc()
           ) {
             tinyInstance.setContent(viewValue);
+            // Triggering change event due to TinyMCE not firing event &
+            // becoming out of sync for change callbacks
             tinyInstance.fire('change');
           }
         };
 
-        attrs.$observe('disabled', function(disabled) {
-          if (disabled) {
-            ensureInstance();
-
-            if (tinyInstance) {
-              tinyInstance.getBody().setAttribute('contenteditable', false);
-            }
-          } else {
-            ensureInstance();
-
-            if (tinyInstance) {
-              tinyInstance.getBody().setAttribute('contenteditable', true);
-            }
-          }
-        });
+        attrs.$observe('disabled', toggleDisable);
 
         // This block is because of TinyMCE not playing well with removal and
         // recreation of instances, requiring instances to have different
@@ -8250,10 +8255,10 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                </h4>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-1 text-right\">\n" +
-    "                <h4 ng-show=\"db.tmpDisabled == 1\"><small>TMP</small></h4>\n" +
+    "                <h4 ng-show=\"db.tmpDisabled == 1\"><small><span class=\"label label-warning\">Tmp</span></small></h4>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-1\">\n" +
-    "                <h4 ng-show=\"db.disabled == 1 || db.tmpDisabled == 1\"><small>DISABLED</small></h4>\n" +
+    "                <h4 ng-show=\"db.disabled == 1 || db.tmpDisabled == 1\"><small><span class=\"label label-danger\">Disabled</span></small></h4>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-12\" ng-show=\"db.show\">\n" +
@@ -11083,7 +11088,7 @@ angular.module('common.manage', [])
     .factory('newsFactory', ['$http', 'NEWS_URL', function newsFactory($http, url){
         return {
             getData: function(pPoint){
-                return $http({method: 'GET', url: url + "api/" + pPoint, params: {}, responseType:'arraybuffer'})
+                return $http({method: 'GET', url: url + "api/" + pPoint, params: {}})
             },
             postData: function(params, data){
                 params = angular.isDefined(params) ? params : {};
@@ -51529,11 +51534,273 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
 
 
     }]);
+/*
+ * angular-lazy-load
+ *
+ * Copyright(c) 2014 Paweł Wszoła <wszola.p@gmail.com>
+ * MIT Licensed
+ *
+ */
+
+/**
+ * @author Paweł Wszoła (wszola.p@gmail.com)
+ *
+ */
+
+angular.module('angularLazyImg', []);
+
+angular.module('angularLazyImg').factory('LazyImgMagic', [
+  '$window', '$rootScope', 'lazyImgConfig', 'lazyImgHelpers',
+  function($window, $rootScope, lazyImgConfig, lazyImgHelpers){
+    'use strict';
+
+    var winDimensions, $win, images, isListening, options;
+    var checkImagesT, saveWinOffsetT, containers;
+
+    images = [];
+    isListening = false;
+    options = lazyImgConfig.getOptions();
+    $win = angular.element($window);
+    winDimensions = lazyImgHelpers.getWinDimensions();
+    saveWinOffsetT = lazyImgHelpers.throttle(function(){
+      winDimensions = lazyImgHelpers.getWinDimensions();
+    }, 60);
+    containers = [options.container || $win];
+
+    function checkImages(){
+      for(var i = images.length - 1; i >= 0; i--){
+        var image = images[i];
+        if(image && lazyImgHelpers.isElementInView(image.$elem[0], options.offset, winDimensions)){
+          loadImage(image);
+          images.splice(i, 1);
+        }
+      }
+      if(images.length === 0){ stopListening(); }
+    }
+
+    checkImagesT = lazyImgHelpers.throttle(checkImages, 30);
+
+    function listen(param){
+      containers.forEach(function (container) {
+        container[param]('scroll', checkImagesT);
+        container[param]('touchmove', checkImagesT);
+      });
+      $win[param]('resize', checkImagesT);
+      $win[param]('resize', saveWinOffsetT);
+    }
+
+    function startListening(){
+      isListening = true;
+      setTimeout(function(){
+        checkImages();
+        listen('on');
+      }, 1);
+    }
+
+    function stopListening(){
+      isListening = false;
+      listen('off');
+    }
+
+    function removeImage(image){
+      var index = images.indexOf(image);
+      if(index !== -1) {
+        images.splice(index, 1);
+      }
+    }
+
+    function loadImage(photo){
+      var img = new Image();
+      img.onerror = function(){
+        if(options.errorClass){
+          photo.$elem.addClass(options.errorClass);
+        }
+        $rootScope.$emit('lazyImg:error', photo);
+        options.onError(photo);
+      };
+      img.onload = function(){
+        setPhotoSrc(photo.$elem, photo.src);
+        if(options.successClass){
+          photo.$elem.addClass(options.successClass);
+        }
+        $rootScope.$emit('lazyImg:success', photo);
+        options.onSuccess(photo);
+      };
+      img.src = photo.src;
+    }
+
+    function setPhotoSrc($elem, src){
+      if ($elem[0].nodeName.toLowerCase() === 'img') {
+        $elem[0].src = src;
+      } else {
+        $elem.css('background-image', 'url("' + src + '")');
+      }
+    }
+
+    // PHOTO
+    function Photo($elem){
+      this.$elem = $elem;
+    }
+
+    Photo.prototype.setSource = function(source){
+      this.src = source;
+      images.unshift(this);
+      if (!isListening){ startListening(); }
+    };
+
+    Photo.prototype.removeImage = function(){
+      removeImage(this);
+      if(images.length === 0){ stopListening(); }
+    };
+
+    Photo.prototype.checkImages = function(){
+      checkImages();
+    };
+
+    Photo.addContainer = function (container) {
+      stopListening();
+      containers.push(container);
+      startListening();
+    };
+
+    Photo.removeContainer = function (container) {
+      stopListening();
+      containers.splice(containers.indexOf(container), 1);
+      startListening();
+    };
+
+    return Photo;
+
+  }
+]);
+
+angular.module('angularLazyImg').provider('lazyImgConfig', function() {
+  'use strict';
+
+  this.options = {
+    offset       : 100,
+    errorClass   : null,
+    successClass : null,
+    onError      : function(){},
+    onSuccess    : function(){}
+  };
+
+  this.$get = function() {
+    var options = this.options;
+    return {
+      getOptions: function() {
+        return options;
+      }
+    };
+  };
+
+  this.setOptions = function(options) {
+    angular.extend(this.options, options);
+  };
+});
+angular.module('angularLazyImg').factory('lazyImgHelpers', [
+  '$window', function($window){
+    'use strict';
+
+    function getWinDimensions(){
+      return {
+        height: $window.innerHeight,
+        width: $window.innerWidth
+      };
+    }
+
+    function isElementInView(elem, offset, winDimensions) {
+      var rect = elem.getBoundingClientRect();
+      var bottomline = winDimensions.height + offset;
+      return (
+       rect.left >= 0 && rect.right <= winDimensions.width + offset && (
+         rect.top >= 0 && rect.top <= bottomline ||
+         rect.bottom <= bottomline && rect.bottom >= 0 - offset
+        )
+      );
+    }
+
+    // http://remysharp.com/2010/07/21/throttling-function-calls/
+    function throttle(fn, threshhold, scope) {
+      var last, deferTimer;
+      return function () {
+        var context = scope || this;
+        var now = +new Date(),
+            args = arguments;
+        if (last && now < last + threshhold) {
+          clearTimeout(deferTimer);
+          deferTimer = setTimeout(function () {
+            last = now;
+            fn.apply(context, args);
+          }, threshhold);
+        } else {
+          last = now;
+          fn.apply(context, args);
+        }
+      };
+    }
+
+    return {
+      isElementInView: isElementInView,
+      getWinDimensions: getWinDimensions,
+      throttle: throttle
+    };
+
+  }
+]);
+angular.module('angularLazyImg')
+  .directive('lazyImg', [
+    '$rootScope', 'LazyImgMagic', function ($rootScope, LazyImgMagic) {
+      'use strict';
+
+      function link(scope, element, attributes) {
+        var lazyImage = new LazyImgMagic(element);
+        attributes.$observe('lazyImg', function (newSource) {
+          if (newSource) {
+            // in angular 1.3 it might be nice to remove observer here
+            lazyImage.setSource(newSource);
+          }
+        });
+        scope.$on('$destroy', function () {
+          lazyImage.removeImage();
+        });
+        $rootScope.$on('lazyImg.runCheck', function () {
+          lazyImage.checkImages();
+        });
+        $rootScope.$on('lazyImg:refresh', function () {
+          lazyImage.checkImages();
+        });
+      }
+
+      return {
+        link: link,
+        restrict: 'A'
+      };
+    }
+  ])
+  .directive('lazyImgContainer', [
+    'LazyImgMagic', function (LazyImgMagic) {
+      'use strict';
+
+      function link(scope, element) {
+        LazyImgMagic.addContainer(element);
+        scope.$on('$destroy', function () {
+          LazyImgMagic.removeContainer(element);
+        });
+      }
+
+      return {
+        link: link,
+        restrict: 'A'
+      };
+    }
+  ]);
+
 angular.module('ualib.staffdir.templates', ['staff-card/staff-card-list.tpl.html', 'staff-card/staff-card-md.tpl.html', 'staff-directory/staff-directory-facets.tpl.html', 'staff-directory/staff-directory-listing.tpl.html', 'staff-directory/staff-directory.tpl.html', 'staff-profile/staff-profile.tpl.html']);
 
 angular.module("staff-card/staff-card-list.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staff-card/staff-card-list.tpl.html",
-    "<div ng-repeat=\"person in filteredList track by $index\">\n" +
+    "<div ng-repeat=\"person in filteredList = (list | filter:staffdir.facet.search | filter:staffdir.facet.department | filter:staffdir.facet.subject:true | filter:staffdir.facet.library | filter:staffdir.specialtyType | orderBy:staffdir.facet.sortBy:staffdir.sortReverse)\">\n" +
     "    <div class=\"page-slice\">\n" +
     "        <div class=\"row\">\n" +
     "            <div class=\"col-xs-12 col-sm-1\">\n" +
@@ -51544,18 +51811,18 @@ angular.module("staff-card/staff-card-list.tpl.html", []).run(["$templateCache",
     "                </div>\n" +
     "            </div>\n" +
     "            <div class=\"col-xs-4 col-sm-3\">\n" +
-    "                <img class=\"staff-portrait thumbnail\" ng-src=\"{{person.photo}}\" />\n" +
+    "                <img class=\"staff-portrait thumbnail\" src=\"http://www.lib.ua.edu/wp-content/themes/roots-ualib/assets/img/user-profile.png\" lazy-img='{{person.photo}}' />\n" +
     "            </div>\n" +
     "            <div class=\"col-xs-8\">\n" +
     "                <div class=\"row\">\n" +
     "                    <div class=\"col-xs-12 col-sm-7 name-plate\">\n" +
     "                        <h3 class=\"name\">\n" +
     "                            <small ng-if=\"person.rank\">{{person.rank}}</small>\n" +
-    "                            <a ng-href=\"/#/staffdir/profile/{{person.emailPrefix}}\" ng-if=\"person.profile !== null\">\n" +
+    "                            <a ng-href=\"#/staffdir/{{person.emailPrefix}}\" ng-if=\"person.profile\">\n" +
     "                                <span ng-class=\"{'sorting-by': staffdir.facet.sortBy == 'firstname'}\" ng-bind-html=\"person.firstname | highlight:staffdir.facet.search\"></span>\n" +
     "                                <span ng-class=\"{'sorting-by': staffdir.facet.sortBy == 'lastname'}\" ng-bind-html=\"person.lastname | highlight:staffdir.facet.search\"></span>\n" +
     "                            </a>\n" +
-    "                            <span ng-if=\"person.profile == null\">\n" +
+    "                            <span ng-if=\"!person.profile\">\n" +
     "                                <span ng-class=\"{'sorting-by': staffdir.facet.sortBy == 'firstname'}\" ng-bind-html=\"person.firstname | highlight:staffdir.facet.search\"></span>\n" +
     "                                <span ng-class=\"{'sorting-by': staffdir.facet.sortBy == 'lastname'}\" ng-bind-html=\"person.lastname | highlight:staffdir.facet.search\"></span>\n" +
     "                            </span>\n" +
@@ -51667,8 +51934,8 @@ angular.module("staff-directory/staff-directory-facets.tpl.html", []).run(["$tem
     "        <h5>Sort by</h5>\n" +
     "        <div class=\"facet-group\">\n" +
     "            <div class=\"btn-group btn-group-justified\">\n" +
-    "                <label class=\"btn btn-default\" ng-model=\"staffdir.facet.sortBy\" btn-radio=\"'lastname'\" uncheckable ng-change=\"staffdir.changeFacet('sortBy')\">Last name</label>\n" +
-    "                <label class=\"btn btn-default\" ng-model=\"staffdir.facet.sortBy\" btn-radio=\"'firstname'\" uncheckable ng-change=\"staffdir.changeFacet('sortBy')\">First name</label>\n" +
+    "                <label class=\"btn btn-default\" ng-model=\"staffdir.facet.sortBy\" btn-radio=\"'lastname'\" ng-change=\"staffdir.changeFacet('sortBy')\">Last name</label>\n" +
+    "                <label class=\"btn btn-default\" ng-model=\"staffdir.facet.sortBy\" btn-radio=\"'firstname'\" ng-change=\"staffdir.changeFacet('sortBy')\">First name</label>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
@@ -51715,8 +51982,8 @@ angular.module("staff-directory/staff-directory-facets.tpl.html", []).run(["$tem
     "        </div>\n" +
     "    </div>\n" +
     "\n" +
-    "    <div class=\"form-group\">\n" +
-    "        <button class=\"btn btn-primary btn-block hidden-xs\" type=\"button\" ng-click=\"staffdir.clearFacets()\">\n" +
+    "    <div class=\"form-group hidden-xs hidden-sm\">\n" +
+    "        <button class=\"btn btn-primary btn-block\" type=\"button\" ng-click=\"staffdir.clearFacets()\">\n" +
     "            <span class=\"fa fa-fw fa-refresh\"></span> Reset Filters\n" +
     "        </button>\n" +
     "    </div>\n" +
@@ -51791,7 +52058,7 @@ angular.module("staff-directory/staff-directory.tpl.html", []).run(["$templateCa
     "</div>\n" +
     "\n" +
     "\n" +
-    "<div class=\"row\">\n" +
+    "<div class=\"row staff-directory\">\n" +
     "    <div class=\"col-md-3 col-md-push-9\">\n" +
     "        <div class=\"staff-directory-facets\" facets=\"staffdir.facets\"></div>\n" +
     "    </div>\n" +
@@ -51807,7 +52074,7 @@ angular.module("staff-directory/staff-directory.tpl.html", []).run(["$templateCa
     "                <li class=\"pull-right\"><button type=\"button\" class=\"btn btn-primary btn-small reset-btn\" title=\"Reset filters\" ng-click=\"facets.clearFacets()\"><i class=\"fa fa-refresh\"></i></button></li>\n" +
     "            </ol>\n" +
     "        </div>\n" +
-    "        <div class=\"staff-directory-listing\" list=\"staffdir.list\" sort-by=\"lastname\"></div>\n" +
+    "        <div class=\"staff-directory-listing\" id=\"staff-directory-listing\" list=\"staffdir.list\" sort-by=\"lastname\"></div>\n" +
     "    </div>\n" +
     "</div>\n" +
     "\n" +
@@ -51818,28 +52085,59 @@ angular.module("staff-directory/staff-directory.tpl.html", []).run(["$templateCa
 
 angular.module("staff-profile/staff-profile.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staff-profile/staff-profile.tpl.html",
-    "<h2>Faculty/Staff Profile</h2>\n" +
-    "<div class=\"row\">\n" +
+    "<div class=\"page-header\">\n" +
+    "    <h2>Faculty/Staff Profile</h2>\n" +
+    "</div>\n" +
+    "\n" +
+    "<div class=\"row staff-profile\">\n" +
     "    <div class=\"col-md-3\">\n" +
-    "        <img class=\"staff-portrait thumbnail\" ng-src=\"{{userProfile.person.photo}}\" ng-if=\"userProfile.person.photo != null\"\n" +
-    "             width=\"180\" height=\"225\">\n" +
-    "        <img class=\"staff-portrait thumbnail\" ng-src=\"wp-content/themes/roots-ualib/assets/img/user-profile.png\"\n" +
-    "             ng-if=\"userProfile.person.photo == null\" width=\"180\" height=\"225\">\n" +
+    "        <img class=\"staff-portrait thumbnail\" ng-src=\"{{userProfile.person.photo}}\" ng-if=\"userProfile.person.photo\">\n" +
+    "        <img class=\"staff-portrait thumbnail\" ng-src=\"wp-content/themes/roots-ualib/assets/img/user-profile.png\" ng-if=\"!userProfile.person.photo\">\n" +
     "    </div>\n" +
     "    <div class=\"col-md-9\">\n" +
-    "        <h3 class=\"name\">\n" +
-    "            <small ng-if=\"userProfile.person.rank\">{{userProfile.person.rank}}</small>\n" +
-    "            <span ng-bind-html=\"userProfile.person.firstname\"></span> <span ng-bind-html=\"userProfile.person.lastname\"></span>\n" +
-    "        </h3>\n" +
-    "        <h4 class=\"title\"><span ng-bind-html=\"userProfile.person.title\"></span></h4>\n" +
-    "        <h5 class=\"hidden-xs\"><span ng-bind-html=\"userProfile.person.department\"></span></h5>\n" +
-    "        <ul class=\"fa-ul\">\n" +
-    "            <li ng-if=\"userProfile.person.phone\"><span class=\"fa fa-phone fa-li\"></span>{{userProfile.person.phone}}</li>\n" +
-    "            <li class=\"hidden-xs\" ng-if=\"userProfile.person.fax\"><span class=\"fa fa-fax fa-li\"></span>{{userProfile.person.fax}}</li>\n" +
-    "            <li ng-if=\"userProfile.person.email\"><span class=\"fa fa-envelope fa-li\"></span>\n" +
-    "                <a href=\"mailto:{{userProfile.person.email}}\">{{userProfile.person.email}}</a>\n" +
-    "            </li>\n" +
-    "        </ul>\n" +
+    "        <div class=\"name-plate\">\n" +
+    "            <h1 class=\"name\">\n" +
+    "                <small ng-if=\"userProfile.person.rank\">{{userProfile.person.rank}}</small>\n" +
+    "                <span ng-bind-html=\"userProfile.person.firstname\"></span> <span ng-bind-html=\"userProfile.person.lastname\"></span>\n" +
+    "            </h1>\n" +
+    "            <h2 class=\"title\"><span ng-bind-html=\"userProfile.person.title\"></span></h2>\n" +
+    "            <h3 class=\"hidden-xs\"><span ng-bind-html=\"userProfile.person.department\"></span></h3>\n" +
+    "        </div>\n" +
+    "        <div class=\"row\">\n" +
+    "            <div class=\"page-slice\">\n" +
+    "                <div class=\"col-md-6\">\n" +
+    "                    <ul class=\"fa-ul\">\n" +
+    "                        <li ng-if=\"userProfile.person.phone\"><span class=\"fa fa-phone fa-li\"></span>{{userProfile.person.phone}}</li>\n" +
+    "                        <li class=\"hidden-xs\" ng-if=\"userProfile.person.fax\"><span class=\"fa fa-fax fa-li\"></span>{{userProfile.person.fax}}</li>\n" +
+    "                        <li ng-if=\"userProfile.person.email\"><span class=\"fa fa-envelope fa-li\"></span>\n" +
+    "                            <a href=\"mailto:{{userProfile.person.email}}\">{{userProfile.person.email}}</a>\n" +
+    "                        </li>\n" +
+    "                        <li ng-if=\"userProfile.person.website.length > 11\"><span class=\"fa fa-external-link-square fa-li\"></span>\n" +
+    "                            <a ng-href=\"{{userProfile.person.website}}\" class=\"external-link\">Personal website</a>\n" +
+    "                        </li>\n" +
+    "                    </ul>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-6\">\n" +
+    "                    <ul class=\"fa-ul\">\n" +
+    "                        <li ng-if=\"userProfile.person.resume.length > 11\"><span class=\"fa fa-file-text fa-li\"></span>\n" +
+    "                            <a ng-href=\"{{userProfile.person.resume}}\">Resume / CV</a>\n" +
+    "                        </li>\n" +
+    "                        <li ng-if=\"userProfile.person.social1\">\n" +
+    "                            <span class=\"{{userProfile.person.snClass1}}\"></span>\n" +
+    "                            <a ng-href=\"{{userProfile.person.social1}}\" class=\"external-link\">{{userProfile.person.snTitle1}}</a>\n" +
+    "                        </li>\n" +
+    "                        <li ng-if=\"userProfile.person.social2\">\n" +
+    "                            <span class=\"{{userProfile.person.snClass2}}\"></span>\n" +
+    "                            <a ng-href=\"{{userProfile.person.social2}}\" class=\"external-link\">{{userProfile.person.snTitle2}}</a>\n" +
+    "                        </li>\n" +
+    "                        <li ng-if=\"userProfile.person.social3\">\n" +
+    "                            <span class=\"{{userProfile.person.snClass3}}\"></span>\n" +
+    "                            <a ng-href=\"{{userProfile.person.social3}}\" class=\"external-link\">{{userProfile.person.snTitle3}}</a>\n" +
+    "                        </li>\n" +
+    "                    </ul>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
     "<div class=\"row\">\n" +
@@ -51857,9 +52155,11 @@ angular.module("staff-profile/staff-profile.tpl.html", []).run(["$templateCache"
     'angular.filter',
     'ui.bootstrap',
     'ui.utils',
+    'angularLazyImg',
     'ualib.ui',
     'ualib.staffdir.templates'
 ]);
+
 
 //Alias for demo purposes
 angular.module('staffdir', ['ualib.staffdir']);
@@ -51867,8 +52167,10 @@ angular.module('staffdir', ['ualib.staffdir']);
 
     // Capture any existing URL facet parameters.
     .run(['StaffDirectoryService', '$location', '$rootScope', function(SDS, $location, $rootScope){
-        $rootScope.$on('$routeChangeStart', function(ev, next, last){
-            if (next.originalPath === '/staffdir'){
+        $rootScope.$on('$locationChangeStart', function(ev, next, last){
+            //console.log(arguments);
+            //console.log($location.path());
+            if ($location.path() === '/staffdir'){
                 var params = $location.search();
                 for (var param in params){
                     //TODO: This must be temporary. Any URI param will cause the facet bar to display on load!!
@@ -51876,7 +52178,6 @@ angular.module('staffdir', ['ualib.staffdir']);
                         SDS.showFacetBar = true;
                     }
                     SDS.facet[param] = params[param];
-                    //console.log(SDS.facet);
                 }
             }
         });
@@ -51925,6 +52226,7 @@ angular.module('staffdir', ['ualib.staffdir']);
             $location.replace();
             self.showFacetBar = !isEmptyObj(self.facet);
             $rootScope.$broadcast('facetsChange');
+
         };
 
         this.specialtyType = function(staff){
@@ -51972,6 +52274,10 @@ angular.module('staffdir', ['ualib.staffdir']);
                     get: {
                         method: 'GET',
                         transformResponse: appendTransform($http.defaults.transformResponse, function(d){
+                            // temporary fix. Not sustainable to manually remove arbitrary fields from API for different views
+                            // TODO: work out proper API output for each view
+                            var toRemove = ['division', 'prefix', 'website','resume','social1','social2','social3'];
+
                             var data = angular.fromJson(d);
                             var staff = {
                                 list: [], // Array for directory listing
@@ -51982,10 +52288,19 @@ angular.module('staffdir', ['ualib.staffdir']);
                             var subj = [];
                             var list = [];
                             angular.forEach(data.list, function(val){
-                                delete val.division;
-                                if (val.photo == null){
-                                    //TODO: temporary work around because CMS file handling is dumb. Need to fix and make sustainable
-                                    val.photo = '/wp-content/themes/roots-ualib/assets/img/user-profile.png';
+                                // Remove all properties listed in the toRemove array
+                                var newVal = {};
+                                for (var prop in val){
+                                    if (val.hasOwnProperty(prop) && toRemove.indexOf(prop) === -1){
+                                        newVal[prop] = val[prop];
+                                    }
+                                }
+                                val = newVal;
+
+                                val.photo = val.photo || "http://www.lib.ua.edu/wp-content/themes/roots-ualib/assets/img/user-profile.png";
+                                //Overwrite "profile" text so its not searchable, set it as a boolean so the tpl knows if to link to a profile
+                                if (val.profile){
+                                    val.profile = true;
                                 }
 
 
@@ -52059,7 +52374,7 @@ angular.module('staffdir', ['ualib.staffdir']);
         return {
             restrict: 'AC',
             templateUrl: 'staff-card/staff-card-list.tpl.html',
-            controller: ['$scope', function($scope){
+            controller: function($scope){
                 $scope.staffdir = {};
 
                 StaffFactory.directory().get()
@@ -52070,7 +52385,7 @@ angular.module('staffdir', ['ualib.staffdir']);
                     }, function(){
                         console.log('Staffdir Error -- Come on, put in proper error handling already');
                     });
-            }]
+            }
         };
     }])
 
@@ -52171,9 +52486,12 @@ angular.module('staffdir', ['ualib.staffdir']);
                 sortBy: '@'
             },
             templateUrl: 'staff-card/staff-card-list.tpl.html',
-            controller: ['$scope', function($scope){
+            controller: ['$scope', '$rootScope', '$timeout', function($scope, $rootScope, $timeout){
                 $scope.filteredList = [];
                 $scope.staffdir = SDS;
+
+                //TODO: temporary work around because CMS file handling is dumb. Need to fix and make sustainable
+                $scope.placeholder = 'http://www.lib.ua.edu/wp-content/themes/roots-ualib/assets/img/user-profile.png';
 
                 //If sortby hasn't been defined in URI, check it default defined with directive
                 if (angular.isUndefined(SDS.facet.sortBy)){
@@ -52182,28 +52500,34 @@ angular.module('staffdir', ['ualib.staffdir']);
 
                 // Update listing when SDS broadcasts "facetsChange" event
                 var facetsListener = $scope.$on('facetsChange', function(ev){
-                    updateList();
+                    $timeout(function(){
+                        // Tell angularLazyImg module to update images (since no lazy load occurred because nothing was "scrolled" into view)
+                        $rootScope.$emit('lazyImg:refresh');
+                    }, 0);
                 });
 
                 // Function to update staff listing
-                function updateList(){
-                    var list = angular.copy($scope.list);
+                /*function updateList(){
+                    $scope.filteredList = filterList($scope.list);
+                }
 
+                function filterList(list){
                     list = $filter('filter')(list, $scope.staffdir.facet.search);
                     list = $filter('filter')(list, $scope.staffdir.facet.department);
                     list = $filter('filter')(list, $scope.staffdir.facet.subject, true);
                     list = $filter('filter')(list, $scope.staffdir.facet.library);
                     list = $filter('filter')(list, $scope.staffdir.specialtyType);
                     list = $filter('orderBy')(list, $scope.staffdir.facet.sortBy, $scope.staffdir.sortReverse);
+                    return list;
+                }*/
 
-                    $scope.filteredList = angular.copy(list);
-                }
+
 
                 $scope.$on('$destroy', function(){
                     facetsListener();
                 });
 
-                updateList();
+                //updateList();
             }]
         };
     }])
@@ -52232,7 +52556,7 @@ angular.module('staffdir', ['ualib.staffdir']);
     });;angular.module('ualib.staffdir')
 
     .config(['$routeProvider', function($routeProvider){
-        $routeProvider.when('/staffdir/profile/:email', {
+        $routeProvider.when('/staffdir/:email', {
             template: function(params) {
                 return '<div class="staff-faculty-profile" email="' + params.email + '"></div>';
             }
@@ -52246,10 +52570,10 @@ angular.module('staffdir', ['ualib.staffdir']);
                 login: '@email'
             },
             templateUrl: 'staff-profile/staff-profile.tpl.html',
-            controller: ['$scope', function($scope){
+            controller: function($scope){
                 $scope.userProfile = {};
 
-                console.log("Login: " + $scope.login);
+                //console.log("Login: " + $scope.login);
 
                 StaffFactory.profile().get({login: $scope.login})
                     .$promise.then(function(data){
@@ -52288,11 +52612,11 @@ angular.module('staffdir', ['ualib.staffdir']);
                             }
                         }
                         $scope.userProfile = data;
-                        console.dir(data);
+                        //console.dir(data);
                     }, function(data){
                         console.log('Error: cold not get profile! ' + data);
                     });
-            }]
+            }
         };
     }]);
 

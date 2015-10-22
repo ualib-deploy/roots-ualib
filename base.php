@@ -12,7 +12,6 @@
   ?>
 
 
-
   <div class="wrap page-row page-row-expanded">
     <div role="document">
       <?php
