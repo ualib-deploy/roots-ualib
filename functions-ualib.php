@@ -25,8 +25,6 @@ function roots_ualib_scripts() {
 
 function add_manage_admin_bar_link() {
     global $wp_admin_bar;
-    if ( !is_super_admin() || !is_admin_bar_showing() )
-        return;
 
     @include_once WEBAPPS_PATH . "userGroupsAdmin/constants.php";
     @include_once WEBAPPS_PATH . "userGroupsAdmin/functions.php";
