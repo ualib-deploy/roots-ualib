@@ -9255,25 +9255,25 @@ body {
 div[role="document"] {
   min-height: 500px;
 }
-.front-page > .wrap main,
-.bento > .wrap main {
+.home-webapp > .wrap main,
+.bento-webapp > .wrap main {
   position: relative;
   margin-top: 135px;
 }
 @media (max-width: 991px) {
-  .front-page > .wrap main,
-  .bento > .wrap main {
+  .home-webapp > .wrap main,
+  .bento-webapp > .wrap main {
     margin-top: 0px;
   }
 }
-.front-page {
+.home-webapp {
   background: no-repeat center center fixed;
   -webkit-background-size: cover;
   background-size: cover;
   background-color: transparent;
 }
 @media (max-width: 767px) {
-  .front-page {
+  .home-webapp {
     background-image: none !important;
   }
 }
@@ -9310,6 +9310,9 @@ div[role="document"] {
   background-color: rgba(255, 255, 255, 0.9);
   -webkit-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
   box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+}
+.front-page-card h2 {
+  padding: 10px;
 }
 .front-page-card .service-card {
   border: 1px solid transparent;

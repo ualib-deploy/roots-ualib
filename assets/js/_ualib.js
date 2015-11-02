@@ -22,7 +22,12 @@ angular.module('ualib', [
          */
         $routeProvider
             .when('/home', {
-                templateUrl: '../assets/js/_ualib-home.tpl.html'
+                templateUrl: '../assets/js/_ualib-home.tpl.html',
+                controller: ['$scope' ,'$rootScope', function($scope, $rootScope){
+                    //$rootScope.appClass = 'front-page';
+                    var bgNum = (Math.floor(Math.random() * 1000) % 16) + 1;
+                    $rootScope.appStyle = {"background-image": "url('wp-content/themes/roots-ualib/assets/img/quad-sunset-lg_" + bgNum + ".jpg')"};
+                }]
             })
             .otherwise({
                 redirectTo: '/home'
@@ -38,15 +43,18 @@ angular.module('ualib', [
 
     .run(['$routeParams', '$location', '$rootScope', '$document', 'duScrollOffset', function($routeParams, $location, $rootScope, $document, duScrollOffset){
         $rootScope.$on('$routeChangeSuccess', function(e, current, pre) {
+            //Send Google Analytics page view when routes are accessed
+            ga('send', 'pageview');
+
             $rootScope.appStyle = {};
-            $rootScope.appClass = $location.path().split('/')[1];
-            if ($rootScope.appClass === 'home') {
-                $rootScope.appClass = 'front-page';
-                var bgNum = (Math.floor(Math.random() * 1000) % 16) + 1;
-                $rootScope.appStyle = {"background-image": "url('wp-content/themes/roots-ualib/assets/img/quad-sunset-lg_" + bgNum + ".jpg')"};
-                //console.log('Background 1.');
-            }
-            $rootScope.appClass += ' webapp';
+            $rootScope.appClass = $location.path().split('/')[1] + '-webapp';
+            //if ($rootScope.appClass === 'home') {
+            //    $rootScope.appClass = 'front-page';
+            //    var bgNum = (Math.floor(Math.random() * 1000) % 16) + 1;
+            //    $rootScope.appStyle = {"background-image": "url('wp-content/themes/roots-ualib/assets/img/quad-sunset-lg_" + bgNum + ".jpg')"};
+            //    //console.log('Background 1.');
+            //}
+            //$rootScope.appClass += ' webapp';
         });
 
     }]);

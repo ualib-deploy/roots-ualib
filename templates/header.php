@@ -3,7 +3,7 @@
         <div class="container-fluid">
             <div class="navbar-header">
                 <a class="navbar-brand" href="/#/home">
-                    <img src="<?php print get_template_directory_uri(); ?>/assets/img/new-ualib-logo.png" class="hidden-xs" rel="home" alt="University of Alabama Libraries"/>
+                    <img src="http://www.lib.ua.edu/wp-content/themes/roots-ualib/assets/img/new-ualib-logo.png" class="hidden-xs" rel="home" alt="University of Alabama Libraries"/>
                     <span class="visible-xs">UA Libraries</span>
                 </a>
             </div>
@@ -54,7 +54,7 @@
                             </li>
                         </ul>
                     </li>
-                    <li class="dropdown yamm-fw" ng-class="{'dropdown-static': (appClass == 'front-page webapp' || appClass == 'bento webapp')}" dropdown-sticky>
+                    <li class="dropdown yamm-fw" ng-class="{'dropdown-static': (appClass == 'home-webapp' || appClass == 'bento-webapp')}" dropdown-sticky>
                         <a href="#" class="dropdown-toggle icon-only" ng-click="mainNavbarCollapsed = false;">
                             <span class="fa fa-search"></span>
                         </a>
@@ -181,14 +181,14 @@
                                             </div>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                          <div class="service-list">
-                                            <span class="fa fa-folder"></span>
-                                            <h4>Citation Managers</h4>
-                                            <p>Save citations, organize your research, and create bibliographies</p>
-                                            <ul>
+                                            <div class="service-list">
+                                                <span class="fa fa-folder"></span>
+                                                <h4>Citation Managers</h4>
+                                                <p>Save citations, organize your research, and create bibliographies</p>
+                                                <ul>
                                                     <li class="menu-refworks"><a href="/research-tools/refworks/">Refworks</a></li>
                                                     <li class="menu-endnote"><a href="http://oit.ua.edu/oit/services/software-licensing/endnote/">Endnote</a></li>
-                                            </ul>
+                                                </ul>
                                             </div>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
@@ -198,7 +198,7 @@
                                                 <p>Research data management and curation resources available at the University of Alabama</p>
                                             </a>
                                         </div>
-                              
+
                                     </div>
                                 </div>
                             </li>
@@ -222,7 +222,7 @@
 
                                                 </ul>
                                             </div>
-                                            
+
                                             <a class="service-card" href="/using-the-library/circulation-services/borrowing/">
                                                 <span class="fa fa-book"></span>
                                                 <h4>Borrow, Renew, and Course Reserves</h4>
@@ -232,12 +232,12 @@
                                         <div class="col-xs-12 col-sm-6 col-md-9">
                                             <div class="row">
                                                 <div class="col-sm-12 col-md-4">
-                                                  <div class="service-list">
-                                                    <span class="fa fa-exchange"></span>
-                                                    <h4>Interlibrary Loan</h4>
+                                                    <div class="service-list">
+                                                        <span class="fa fa-exchange"></span>
+                                                        <h4>Interlibrary Loan</h4>
                                                         <ul>
-                                                          <li><a href="https://ua.illiad.oclc.org/illiad/">ILL- Borrow materials owned by other libraries</a></li>
-                                                          <li class="menu-computer-availability"><a href="/using-the-library/interlibrary-loan/">About interlibrary loan - policies & info</a></li>
+                                                            <li><a href="https://ua.illiad.oclc.org/illiad/">ILL- Borrow materials owned by other libraries</a></li>
+                                                            <li class="menu-computer-availability"><a href="/using-the-library/interlibrary-loan/">About interlibrary loan - policies & info</a></li>
                                                         </ul>
                                                     </div>
                                                 </div>

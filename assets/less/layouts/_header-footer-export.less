@@ -1,0 +1,146 @@
+/**
+ * The University of Alabama Libraries
+ * http://www.lib.ua.edu
+ *
+ * Copyright (c) 2015 Will Jones
+ * Licensed under the ECLv2 license.
+ **/
+
+
+/**
+ * This includes ONLY the styles needed for the header and footer for this theme, so that other UA Lib sites/services can include our
+ * header and footer. This allows us to edit the header and footer in one location, with is updating across different sites/blogs
+ *
+ * Grunt builds these styles to /roots-ualib/assets/css/header-footer-export.min.css
+ *
+ * NOTE: FontAwesome is not built in, since it would require including the fonts as well. Use a CDN.
+ *
+*/
+
+//Custom Styles for when the header and footer are used on other websites
+#show-more-lib-btn {
+  display: none;
+}
+
+
+// Bootstrap
+//
+// Bootstrap
+//
+// Comment out any unused components
+// --------------------------------------------------
+
+// Variables
+@import "../_variables";
+
+// Mixins: Utilities
+@import "../../vendor/bootstrap/less/mixins/hide-text";
+@import "../../vendor/bootstrap/less/mixins/opacity";
+@import "../../vendor/bootstrap/less/mixins/image";
+//@import "../../vendor/bootstrap/less/mixins/labels";
+@import "../../vendor/bootstrap/less/mixins/reset-filter";
+//@import "../../vendor/bootstrap/less/mixins/resize";
+@import "../../vendor/bootstrap/less/mixins/responsive-visibility";
+//@import "../../vendor/bootstrap/less/mixins/size";
+@import "../../vendor/bootstrap/less/mixins/tab-focus";
+@import "../../vendor/bootstrap/less/mixins/text-emphasis";
+@import "../../vendor/bootstrap/less/mixins/text-overflow";
+@import "../../vendor/bootstrap/less/mixins/vendor-prefixes";
+
+// Mixins: Components
+//@import "../../vendor/bootstrap/less/mixins/alerts";
+@import "../_buttons";
+//@import "../../vendor/bootstrap/less/mixins/panels";
+//@import "../../vendor/bootstrap/less/mixins/pagination";
+//@import "../../vendor/bootstrap/less/mixins/list-group";
+@import "../../vendor/bootstrap/less/mixins/nav-divider";
+@import "../../vendor/bootstrap/less/mixins/forms";
+//@import "../../vendor/bootstrap/less/mixins/progress-bar";
+//@import "../../vendor/bootstrap/less/mixins/table-row";
+
+// Mixins: Skins
+@import "../../vendor/bootstrap/less/mixins/background-variant";
+@import "../../vendor/bootstrap/less/mixins/border-radius";
+@import "../../vendor/bootstrap/less/mixins/gradients";
+
+// Mixins: Layout
+@import "../../vendor/bootstrap/less/mixins/clearfix";
+@import "../../vendor/bootstrap/less/mixins/center-block";
+@import "../../vendor/bootstrap/less/mixins/nav-vertical-align";
+@import "../../vendor/bootstrap/less/mixins/grid-framework";
+@import "../../vendor/bootstrap/less/mixins/grid";
+
+// Reset
+@import "../../vendor/bootstrap/less/normalize";
+//@import "../../vendor/bootstrap/less/print";
+//@import "../_glyphicons";
+@import (reference) "../../vendor/fontawesome/less/font-awesome";
+// Core CSS
+//@import "../_scaffolding";
+@import "../../vendor/bootstrap/less/scaffolding";
+@import "../_type";
+//@import "../../vendor/bootstrap/less/code";
+@import "../_grid";
+//@import "../_tables";
+@import "../../vendor/bootstrap/less/forms";
+@import "../../vendor/bootstrap/less/buttons";
+
+// Components
+//@import "../../vendor/bootstrap/less/component-animations";
+@import "../_dropdowns";
+@import "../../vendor/bootstrap/less/button-groups";
+@import "../../vendor/bootstrap/less/input-groups";
+@import "../../vendor/bootstrap/less/navs";
+@import "../_navs";
+@import "../_navbar";
+//@import "../../vendor/bootstrap/less/breadcrumbs";
+//@import "../../vendor/bootstrap/less/pagination";
+//@import "../../vendor/bootstrap/less/pager";
+//@import "../../vendor/bootstrap/less/labels";
+//@import "../_labels";
+//@import "../../vendor/bootstrap/less/badges";
+//@import "../../vendor/bootstrap/less/jumbotron";
+//@import "../../vendor/bootstrap/less/thumbnails";
+//@import "../../vendor/bootstrap/less/alerts";
+//@import "../../vendor/bootstrap/less/progress-bars";
+//@import "../../vendor/bootstrap/less/media";
+//@import "../../vendor/bootstrap/less/list-group";
+//@import "../../vendor/bootstrap/less/panels";
+//@import "../../vendor/bootstrap/less/responsive-embed";
+//@import "../../vendor/bootstrap/less/wells";
+//@import "../../vendor/bootstrap/less/close";
+
+// Components w/ JavaScript
+//@import "../../vendor/bootstrap/less/modals";
+//@import "../../vendor/bootstrap/less/tooltip";
+//@import "../../vendor/bootstrap/less/popovers";
+//@import "../../vendor/bootstrap/less/carousel";
+
+// Utility classes
+@import "../../vendor/bootstrap/less/utilities";
+@import "../../vendor/bootstrap/less/responsive-utilities";
+
+// Mixins: Custom
+//@import "mixins/link-icon";
+@import "../mixins/service-cards";
+
+@import "../components/service-cards";
+//@import "components/event-card";
+//@import "components/_multipage-menu";
+
+// Roots UALib
+//@import "_global";                   // Base styling & custom mixins
+@import "../components/_buttons";       // Button tweaks
+@import "../components/_onesearch-dropdown";       // Button tweaks
+//@import "components/_comments";      // Comment styling
+//@import "components/_forms";         // Form tweaks
+//@import "components/_media";         // WordPress media
+//@import "components/_wp-classes";    // WordPress generated classes
+//@import "layouts/_general";          // General styling
+@import "../layouts/_header";           // Header styling
+//@import "layouts/_sidebar";          // Sidebar styling
+@import "../layouts/_footer";           // Footer styling
+//@import "layouts/_pages";            // Page styling
+//@import "layouts/pages/_home";       // Home page styling
+//@import "layouts/_posts";            // Post styling
+//@import "layouts/_jumbotron-header";            // Post styling
