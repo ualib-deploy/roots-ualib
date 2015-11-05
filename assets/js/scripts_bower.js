@@ -8200,6 +8200,8 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Description contains\" ng-model=\"descrFilter\">\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Subjects contain\" ng-model=\"subjectFilter\">\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Media Types contain\" ng-model=\"typeFilter\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Publisher contains\" ng-model=\"publisherFilter\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Vendor contains\" ng-model=\"vendorFilter\">\n" +
     "                <select class=\"form-control\" ng-model=\"disFilter\" ng-options=\"val.name for val in disValues\">\n" +
     "                </select>\n" +
     "            </div>\n" +
@@ -8239,6 +8241,8 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                                                         | filter:{description:descrFilter}\n" +
     "                                                         | filter:{subjects:subjectFilter}\n" +
     "                                                         | filter:{types:typeFilter}\n" +
+    "                                                         | filter:{publisher:publisherFilter}\n" +
+    "                                                         | filter:{vendor:vendorFilter}\n" +
     "                                                         | filter:{disabled:disFilter.value}\n" +
     "                                                         | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\n" +
     "        | startFrom:(currentPage-1)*perPage | limitTo:perPage\"\n" +
@@ -11365,6 +11369,8 @@ angular.module('manage.manageDatabases', [])
             $scope.descrFilter = '';
             $scope.subjectFilter = '';
             $scope.typeFilter = '';
+            $scope.publisherFilter = '';
+            $scope.vendorFilter = '';
             $scope.disValues = [
                 {name:'Show all', value:''},
                 {name:'Enabled only', value:'0'},
