@@ -8,7 +8,8 @@ module.exports = function(grunt) {
     var jsFileList = [
         'assets/js/ualib-templates.js',
         'assets/js/plugins/*.js',
-        'assets/js/_*.js'
+        'assets/js/_*.js',
+        '!assets/js/_main.js'
     ];
 
     var lessFileList = [
@@ -28,8 +29,12 @@ module.exports = function(grunt) {
                 'assets/js/*.js',
                 '!assets/js/*_bower.js',
                 '!assets/js/scripts.js',
-                '!assets/**/*.min.*'
+                '!assets/**/*.min.*',
+                '!assets/js/header-footer-export.js'
             ]
+        },
+        clean: {
+            header_footer_export: ['assets/js/header-footer-export.js','assets/js/header-footer-export-templates.js']
         },
         less: {
             dev: {
@@ -52,6 +57,14 @@ module.exports = function(grunt) {
                 options: {
                     compress: true
                 }
+            },
+            header_footer_export: {
+                options: {
+                    compress: true
+                },
+                files: {
+                    'assets/css/header-footer-export.min.css': ['assets/less/layouts/_header-footer-export.less']
+                }
             }
         },
         html2js:{
@@ -59,6 +72,10 @@ module.exports = function(grunt) {
                 src: 'assets/js/**/*.tpl.html',
                 dest: 'assets/js/ualib-templates.js',
                 module: 'ualib.templates'
+            },
+            header_footer_export: {
+                src: ['vendor/onesearch/src/app/common/directives/suggest.tpl.html'],
+                dest: 'assets/js/header-footer-export-templates.js'
             }
         },
         concat: {
@@ -68,6 +85,13 @@ module.exports = function(grunt) {
             dist: {
                 src: [jsFileList],
                 dest: 'assets/js/scripts.js'
+            },
+            header_footer_export: {
+              options: {
+                  banner: "angular.module('ualib', ['ngAnimate', 'ui.bootstrap','ualib.ui', 'oneSearch']);angular.module('ui.bootstrap', []);angular.module('ualib.ui', []);\n"
+              },
+              src: ['assets/js/header-footer-export-templates.js', 'assets/js/header-footer-export.js'],
+                dest: 'assets/js/header-footer-export.js'
             }
         },
         bower_concat: {
@@ -122,6 +146,13 @@ module.exports = function(grunt) {
                         return grunt.file.exists(min) ? min : filepath;
                     });
                 }
+            },
+            header_footer_export: {
+                dest: 'assets/js/header-footer-export.js',
+                include: ['ualib-ui', 'onesearch', 'angular-filter', 'angular-scroll'],
+                mainFiles: {
+                    'ualib-ui': ['src/dropdown/dropdown.js', 'src/dropdown/dropdown-sticky.js']
+                }
             }
 
         },
@@ -146,16 +177,30 @@ module.exports = function(grunt) {
                         'assets/js/scripts.js': ['assets/js/scripts.js']
                     }
                 ]
+            },
+            header_footer_export: {
+                files: [{
+                    'assets/js/header-footer-export.js': ['assets/js/header-footer-export.js']
+                }]
             }
         },
         uglify: {
-            options: {
-                mangle: false
-            },
             dist: {
+                options: {
+                    mangle: false
+                },
                 files: {
-                    'assets/js/scripts.min.js': ['assets/js/scripts.js']
+                    'assets/js/scripts.min.js': ['assets/js/scripts.js'],
+                    'assets/js/scripts_bower.min.js': ['assets/js/scripts_bower.min.js']
                 }
+            },
+            header_footer_export: {
+                options: {
+                    mangle: true
+                },
+                files: [{
+                    'assets/js/header-footer-export.min.js': ['assets/js/header-footer-export.js']
+                }]
             }
         },
         autoprefixer: {
@@ -219,6 +264,14 @@ module.exports = function(grunt) {
             devToLiveCSS: {
                 src: ['assets/css/main.min.css', 'assets/css/main_bower.min.css'],
                 dest: 'assets/css/',
+                replacements: [{
+                    from: /(wwwdev2?)/g,
+                    to: 'www'
+                }]
+            },
+            devToLiveTemplates: {
+                src: ['templates/header.php', 'templates/footer.php'],
+                dest: 'templates/',
                 replacements: [{
                     from: /(wwwdev2?)/g,
                     to: 'www'
@@ -353,8 +406,9 @@ module.exports = function(grunt) {
         'jshint',
         'less:dev',
         'autoprefixer:dev',
-        'concat',
-        'bower_concat:dev'
+        'concat:dist',
+        'bower_concat:dev',
+        'headerFooterExport'
     ]);
     grunt.registerTask('live-build', [
         'html2js',
@@ -362,13 +416,22 @@ module.exports = function(grunt) {
         'copy',
         'less:build',
         'autoprefixer:build',
-        'concat',
+        'concat:dist',
         'ngAnnotate',
-        'uglify',
         'modernizr',
         'version',
         'bower_concat:build',
-        'replace'
+        'replace',
+        'uglify:dist',
+        'headerFooterExport'
     ]);
     grunt.registerTask('lessVarsToSass', ['lessToSass:lessVars']);
+    grunt.registerTask('headerFooterExport', [
+        'less:header_footer_export',
+        'bower_concat:header_footer_export',
+        'html2js:header_footer_export',
+        'concat:header_footer_export',
+        'uglify:header_footer_export',
+        'clean:header_footer_export'
+    ]);
 };

@@ -713,25 +713,21 @@ div.rn-carousel-indicator span {
     .rn-carousel-control.rn-carousel-control-next:before {
       content: ">"; }
 
-.front-page h2,
-.front-page .h2 {
-  padding: 10px;
-}
-.front-page .news-card {
+.news-card {
   color: #333;
   display: block;
   padding: 15px;
   margin-top: 0;
   border: 1px solid transparent;
 }
-.front-page .news-card:hover {
+.news-card:hover {
   text-decoration: none;
   background-color: #ffffff;
   border-top-color: #ddd;
   border-bottom-color: #ddd;
 }
-.front-page .news-card h4,
-.front-page .news-card .h4 {
+.news-card h4,
+.news-card .h4 {
   color: #428bca;
 }
 /*# sourceMappingURL=dist/ualib.news.css.map */

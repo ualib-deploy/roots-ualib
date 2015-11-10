@@ -8,7 +8,7 @@ div[role="document"] {
   min-height: 500px;
 }
 
-.front-page, .bento{
+.home-webapp, .bento-webapp{
 
   > .wrap {
     main {
@@ -23,7 +23,7 @@ div[role="document"] {
 }
 
 // Background images set through main ualib webapp in assets/js/_ualib.js
-.front-page {
+.home-webapp {
   background: no-repeat center center fixed;
   -webkit-background-size: cover;
   -moz-background-size: cover;
@@ -34,6 +34,8 @@ div[role="document"] {
   @media(max-width: @screen-xs-max){
     background-image: none !important;
   }
+
+
 }
 
 .card {
@@ -76,6 +78,10 @@ div[role="document"] {
   -webkit-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
   -moz-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
   box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+
+  h2 {
+    padding: 10px;
+  }
 
   .service-card {
     border: 1px solid transparent;

@@ -1,7 +1,7 @@
 <footer class="content-info page-row" role="contentinfo" id="footer">
   <div class="footer-wrapper">
     <div class="container">
-      <?php dynamic_sidebar('sidebar-footer'); ?>
+      <?php //dynamic_sidebar('sidebar-footer'); ?>
       <div class="row">
         <div class="col-sm-3">
           <h4>Quick Links</h4>
@@ -38,7 +38,7 @@
                   <li role="presentation"><a role="menuitem" tabindex="-1" href="http://wrc.ua.edu/library.cfm">Summersell Library</a></li>
                   <li role="presentation"><a role="menuitem" tabindex="-1" href="http://cis.ua.edu/undergraduates/resources/readingroom/">William E. Winter Reading Room</a></li>
               </ul>
-              <button class="btn btn-default btn-xs"  type="button" ng-click="isCollapsed = !isCollapsed">
+              <button id="show-more-lib-btn" class="btn btn-default btn-xs"  type="button" ng-click="isCollapsed = !isCollapsed">
                   {{!isCollapsed ? 'Show More' : 'Show Less'}} Libraries...
               </button>
 
@@ -69,21 +69,19 @@
              </ul>
             </a>
 
-
-
           <a href="http://www.ua.edu">
-              <img src="<?php print get_template_directory_uri(); ?>/assets/img/ua-official-logo.png" class="img-responsive" style="margin: 15px 0 30px;"/>
+              <img src="http://www.lib.ua.edu/wp-content/themes/roots-ualib/assets/img/ua-official-logo.png" class="img-responsive" style="margin: 15px 0 30px;"/>
           </a>
 
           <div class="row">
-            <div class="col-md-6 col-md-push-6">
+            <div class="col-xs-6">
               <a href="http://www.fdlp.gov/">
-                <img src="<?php print get_template_directory_uri(); ?>/assets/img/fdlp_logo.png" class="img-responsive"/>
+                <img src="http://www.lib.ua.edu/wp-content/themes/roots-ualib/assets/img/fdlp_logo.png" class="img-responsive"/>
               </a>
             </div>
-            <div class="col-md-6 col-md-pull-6">
+            <div class="col-xs-6">
                 <a href="http://www.hathitrust.org/" target="_hatti" class="text-right">
-                    <img src="<?php print get_template_directory_uri(); ?>/assets/img/HT-logo.png" class="img-responsive" />
+                    <img src="http://www.lib.ua.edu/wp-content/themes/roots-ualib/assets/img/HT-logo.png" class="img-responsive" />
                 </a>
             </div>
           </div>
@@ -109,9 +107,5 @@
         </div>
     </div>
   </div>
-    <?php
-    //TODO: make a proper angular directive, so we can avoid unnecessary jQuery includes
-//        @include WEBAPPS_PATH . "siteSurvey/loadForm.php";
-    ?>
 </footer>
 

@@ -8200,6 +8200,8 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Description contains\" ng-model=\"descrFilter\">\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Subjects contain\" ng-model=\"subjectFilter\">\n" +
     "                <input type=\"text\" class=\"form-control\" placeholder=\"Media Types contain\" ng-model=\"typeFilter\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Publisher contains\" ng-model=\"publisherFilter\">\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"Vendor contains\" ng-model=\"vendorFilter\">\n" +
     "                <select class=\"form-control\" ng-model=\"disFilter\" ng-options=\"val.name for val in disValues\">\n" +
     "                </select>\n" +
     "            </div>\n" +
@@ -8239,6 +8241,8 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                                                         | filter:{description:descrFilter}\n" +
     "                                                         | filter:{subjects:subjectFilter}\n" +
     "                                                         | filter:{types:typeFilter}\n" +
+    "                                                         | filter:{publisher:publisherFilter}\n" +
+    "                                                         | filter:{vendor:vendorFilter}\n" +
     "                                                         | filter:{disabled:disFilter.value}\n" +
     "                                                         | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\n" +
     "        | startFrom:(currentPage-1)*perPage | limitTo:perPage\"\n" +
@@ -8351,7 +8355,7 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_dAuthor\">Description Author</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.descrAuthor}}\" ng-model=\"db.descrAuthor\"\n" +
-    "                           id=\"{{db.id}}_dAuthor\" maxlength=\"50\">\n" +
+    "                           id=\"{{db.id}}_dAuthor\" maxlength=\"50\" required>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_date1\">Created/Modified</label>\n" +
@@ -11365,6 +11369,8 @@ angular.module('manage.manageDatabases', [])
             $scope.descrFilter = '';
             $scope.subjectFilter = '';
             $scope.typeFilter = '';
+            $scope.publisherFilter = '';
+            $scope.vendorFilter = '';
             $scope.disValues = [
                 {name:'Show all', value:''},
                 {name:'Enabled only', value:'0'},
@@ -17605,7 +17611,7 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
     "            </div>\n" +
     "            <div class=\"col-sm-4 suggest-col\" ng-show=\"items.subjects[0].subjects.length > 0\">\n" +
     "                <div class=\"\">\n" +
-    "                    <h4>LibGuides Subjects <a href=\"http://guides.lib.ua.edu/\" class=\"small\" ng-mousedown=\"go('http://guides.lib.ua.edu/')\">more</a></h4>\n" +
+    "                    <h4>Research Guides&#39; Subjects <a href=\"http://guides.lib.ua.edu/\" class=\"small\" ng-mousedown=\"go('http://guides.lib.ua.edu/')\">more</a></h4>\n" +
     "                    <div ng-repeat=\"person in items.subjects | limitTo:10\">\n" +
     "                        <div ng-repeat=\"subject in person.subjects | limitTo:2\">\n" +
     "                            <a ng-if=\"subject.link.length > 7\" ng-href=\"{{subject.link}}\" ng-mousedown=\"go(subject.link)\" ng-click=\"gaSuggestion(subject.subject)\">\n" +
@@ -17816,7 +17822,7 @@ angular.module('oneSearch', [
         limit: 100
     })
 
-    .value('duScrollOffset', 81)
+    .value('duScrollOffset', 81);
 
 angular.module('oneSearch.bento', [])
 
@@ -18146,6 +18152,9 @@ angular.module('oneSearch.bento', [])
 
                                 ///engineScope.limit = Bento.boxes[box].resultLimit;
                                 engineScope.engine = engine;
+
+                                // engineName used for "more" links. If 'title' property is not set in the engine's config, then use the string used when registering with the oneSearchProvider
+                                engineScope.engineName = oneSearch.engines[engine].title ? oneSearch.engines[engine].title : engine.charAt(0).toUpperCase() + engine.slice(1);
                                 engineScope.resourceLink = Bento.boxes[box]['resourceLinks'][engine] === "undefined" ? false : Bento.boxes[box]['resourceLinks'][engine];
                                 engineScope.resourceLinkParams = Bento.boxes[box]['resourceLinkParams'][engine];
                                 engineScope.boxName = boxTitle;
@@ -18177,7 +18186,7 @@ angular.module('oneSearch.bento', [])
 
                                     // Wrap the template in an element that specifies ng-repeat over the "items" object (i.e., the results),
                                     // gives the generic classes for items in a bento box.
-                                    var template = angular.element('<div class="animate-repeat bento-box-item" ng-repeat="item in items | limitTo: box.resultLimit">'+data+'</div><div class="resource-link-container"><a class="btn btn-link btn-sm" ng-href="{{resourceLink}}" ng-if="resourceLink" target="_{{engine}}" ng-click="gaMore()">More results from {{engine | ucfirst}}  <span class="fa fa-fw fa-external-link"></span></a></div>');
+                                    var template = angular.element('<div class="animate-repeat bento-box-item" ng-repeat="item in items | limitTo: box.resultLimit">'+data+'</div><div class="resource-link-container"><a class="btn btn-link btn-sm" ng-href="{{resourceLink}}" ng-if="resourceLink" target="_{{engine}}" ng-click="gaMore()">More results from {{engineName}}  <span class="fa fa-fw fa-external-link"></span></a></div>');
 
                                     // Compile wrapped template with the isolated scope's context
                                     var html = $compile(template)(engineScope);
@@ -18736,6 +18745,7 @@ angular.module('engines.googleCS', [])
     .config(['oneSearchProvider', function(oneSearchProvider){
         oneSearchProvider.engine('googleCS', {
             id: 16,
+            title: 'Libraries\' Website',
             priority: 2,
             resultsPath: 'GoogleCS.items',
             totalsPath: 'GoogleCS.searchInformation.totalResults',
@@ -18748,6 +18758,7 @@ angular.module('engines.libguides', [])
     .config(['oneSearchProvider', function(oneSearchProvider){
         oneSearchProvider.engine('libguides', {
             id: 16,
+            title: 'Research Guides',
             priority: 2,
             resultsPath: 'GoogleCS.items',
             totalsPath: 'GoogleCS.searchInformation.totalResults',
@@ -18853,12 +18864,13 @@ angular.module('engines.scout', [])
             return index == 0 ? match.toLowerCase() : match.toUpperCase();
         });
 
-        if (link.indexOf('facet=') > 0){
+        /*if (link.indexOf('facet=') > 0){
             link = link.replace(/&facet=(.+)&?/, box);
         }
         else {
             link += '&facet=' + box;
-        }
+        }*/
+        link = link.replace(/(&bquery=)([^&]+)/, '$1$2 OR (_ualib_facet:'+box+')');
 
         $scope.resourceLink = angular.copy(link);
     }]);
@@ -19121,7 +19133,7 @@ angular.module('common.oneSearch', [])
         this.engine = function(name, engine){
             if (angular.isString(name)){
                 var defaults = {
-                    id: null, priority: 10, resultsPath: null, totalsPath: null, mediaTypes: null, templateUrl: null, filterQuery: null, controller: null
+                    id: null, title: null, priority: 10, resultsPath: null, totalsPath: null, mediaTypes: null, templateUrl: null, filterQuery: null, controller: null
                 };
 
                 var e = angular.extend(defaults, engine);
@@ -19234,7 +19246,18 @@ angular.module('common.oneSearch', [])
                 // Since WP pages aren't loaded as angular routes, we must detect if there is no '#/PATH' present
                 // after the URI (or that it's not a 'bento' route), then send the browser to a pre-build URL.
                 if (!$location.path() || $location.path().indexOf('/bento') < 0){
-                    var url = '//' + $location.host() + '#/bento/'+searchText;
+                    var url = '#/bento/' + searchText;
+                    switch ($location.host()){
+                        case 'wwwdev2.lib.ua.edu':
+                        case 'www.lib.ua.edu':
+                            url = '//' + $location.host() + url;
+                            break;
+                        case 'localhost':
+                            url = $location.absUrl().replace(/(#.*)/, '') + url;
+                            break;
+                        default:
+                            url = '//www.lib.ua.edu' + url;
+                    }
                     $window.location = url; //Angular 1.2.8 $location is too limited...
                 }
                 else{
@@ -19255,9 +19278,8 @@ angular.module('common.oneSearch', [])
 
 
         $rootScope.$on('$routeChangeSuccess', function(event,currentRoute){
-            var s = currentRoute.params.s;
-            if ($scope.searchText !== s){
-                $scope.searchText = s;
+            if (currentRoute && $scope.searchText !== currentRoute.params.s){
+                $scope.searchText = currentRoute.params.s;
             }
         });
 
@@ -50932,7 +50954,7 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "                    <small ng-if=\"item.type < 1\">{{item.created | date:mediumDate}}</small>\n" +
     "                </h4>\n" +
     "                <p class=\"text-justify\">\n" +
-    "                    <span ng-bind-html=\"item.description | truncate:250:'...' | highlight:newsFilters.search\">\n" +
+    "                    <span ng-bind-html=\"item.blurb | highlight:newsFilters.search\">\n" +
     "                    </span>\n" +
     "                </p>\n" +
     "            </div>\n" +
@@ -51199,7 +51221,8 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
             filterWatcher();
         });
 
-
+        //TODO: will need to replace highlight filter by a custom one
+        // if we use item.description instead of item.blurb
 
         function paramsToScope(){
             var params = $location.search();
@@ -51297,7 +51320,7 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
     "            Showing {{pager.firstItem}}-{{pager.lastItem}} of {{pager.totalItems}} results\n" +
     "        </h4>\n" +
     "\n" +
-    "        <div ng-if=\"(soft.cat || soft.os || soft.loc) && pager.totalItems > 0\">\n" +
+    "        <div ng-if=\"(soft.cat || soft.os || soft.loc)\">\n" +
     "\n" +
     "            <ol class=\"breadcrumb facetcrumb\">\n" +
     "                <li ng-if=\"soft.os\"><strong>OS:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"soft.os = ''\">{{soft.os == 1 ? 'Windows' : 'OS X'}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
@@ -51324,7 +51347,7 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
     "                            <span class=\"fa fa-{{ver.osName}}\"></span>\n" +
     "                            {{ver.version}}\n" +
     "                        </div>\n" +
-    "                        <span ng-repeat=\"loc in ver.locations\">\n" +
+    "                        <span ng-repeat=\"loc in ver.locations | orderBy:'name'\">\n" +
     "                            <span ng-if=\"loc.parent\" ng-bind-html=\"(locations | filter:loc.parent)[0].name | highlight:soft.search\"></span>\n" +
     "                            <span ng-bind-html=\"loc.name | highlight:soft.search\"></span>\n" +
     "                        </span>\n" +
@@ -51391,8 +51414,9 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
             .when('/software', {
                 reloadOnSearch: false,
                 resolve: {
-                    software: ['softwareFactory', function(softwareFactory){
+                    software: ['$filter', 'softwareFactory', function($filter, softwareFactory){
                         return softwareFactory.get({software: 'all'}, function(data){
+
                             for (var i = 0, len = data.software.length; i < len; i++){
 
                                 // insert OS string names for easier ng-repeat filtering
@@ -51411,7 +51435,10 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
                                     }
                                 }
                                 data.software[i].os = os.join('');
+
+
                             }
+
                             return data;
                         }, function(data, status, headers, config) {
                             console.log('ERROR: software list');
@@ -51512,8 +51539,8 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
         function processSoftwareList(softwareList){
             var filtered = softwareList;
 
-            filtered = $filter('filter')(filtered, $scope.soft.cat);
-            filtered = $filter('filter')(filtered, $scope.soft.loc);
+            filtered = $filter('filter')(filtered, {categories: $scope.soft.cat});
+            filtered = $filter('filter')(filtered, {versions: $scope.soft.loc});
             filtered = $filter('filter')(filtered, $scope.soft.search);
             filtered = $filter('filterBy')(filtered, ['os'], $scope.soft.os);
 
