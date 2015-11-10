@@ -51320,7 +51320,7 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
     "            Showing {{pager.firstItem}}-{{pager.lastItem}} of {{pager.totalItems}} results\n" +
     "        </h4>\n" +
     "\n" +
-    "        <div ng-if=\"(soft.cat || soft.os || soft.loc) && pager.totalItems > 0\">\n" +
+    "        <div ng-if=\"(soft.cat || soft.os || soft.loc)\">\n" +
     "\n" +
     "            <ol class=\"breadcrumb facetcrumb\">\n" +
     "                <li ng-if=\"soft.os\"><strong>OS:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"soft.os = ''\">{{soft.os == 1 ? 'Windows' : 'OS X'}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
@@ -51347,7 +51347,7 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
     "                            <span class=\"fa fa-{{ver.osName}}\"></span>\n" +
     "                            {{ver.version}}\n" +
     "                        </div>\n" +
-    "                        <span ng-repeat=\"loc in ver.locations\">\n" +
+    "                        <span ng-repeat=\"loc in ver.locations | orderBy:'name'\">\n" +
     "                            <span ng-if=\"loc.parent\" ng-bind-html=\"(locations | filter:loc.parent)[0].name | highlight:soft.search\"></span>\n" +
     "                            <span ng-bind-html=\"loc.name | highlight:soft.search\"></span>\n" +
     "                        </span>\n" +
@@ -51414,8 +51414,9 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
             .when('/software', {
                 reloadOnSearch: false,
                 resolve: {
-                    software: ['softwareFactory', function(softwareFactory){
+                    software: ['$filter', 'softwareFactory', function($filter, softwareFactory){
                         return softwareFactory.get({software: 'all'}, function(data){
+
                             for (var i = 0, len = data.software.length; i < len; i++){
 
                                 // insert OS string names for easier ng-repeat filtering
@@ -51434,7 +51435,10 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
                                     }
                                 }
                                 data.software[i].os = os.join('');
+
+
                             }
+
                             return data;
                         }, function(data, status, headers, config) {
                             console.log('ERROR: software list');
@@ -51535,8 +51539,8 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
         function processSoftwareList(softwareList){
             var filtered = softwareList;
 
-            filtered = $filter('filter')(filtered, $scope.soft.cat);
-            filtered = $filter('filter')(filtered, $scope.soft.loc);
+            filtered = $filter('filter')(filtered, {categories: $scope.soft.cat});
+            filtered = $filter('filter')(filtered, {versions: $scope.soft.loc});
             filtered = $filter('filter')(filtered, $scope.soft.search);
             filtered = $filter('filterBy')(filtered, ['os'], $scope.soft.os);
 

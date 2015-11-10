@@ -44,7 +44,7 @@ angular.module('ualib', [
     .run(['$routeParams', '$location', '$rootScope', '$document', 'duScrollOffset', function($routeParams, $location, $rootScope, $document, duScrollOffset){
         $rootScope.$on('$routeChangeSuccess', function(e, current, pre) {
             //Send Google Analytics page view when routes are accessed
-            ga('send', 'pageview');
+            ga('send', 'pageview', $location.url());
 
             $rootScope.appStyle = {};
             $rootScope.appClass = $location.path().split('/')[1] + '-webapp';
