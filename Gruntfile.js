@@ -149,9 +149,10 @@ module.exports = function(grunt) {
             },
             header_footer_export: {
                 dest: 'assets/js/header-footer-export.js',
-                include: ['ualib-ui', 'onesearch', 'angular-filter', 'angular-scroll'],
+                include: ['angular-bootstrap', 'ualib-ui', 'onesearch', 'angular-filter', 'angular-scroll'],
                 mainFiles: {
-                    'ualib-ui': ['src/dropdown/dropdown.js', 'src/dropdown/dropdown-sticky.js']
+                    'ualib-ui': ['src/dropdown/dropdown.js', 'src/dropdown/dropdown-sticky.js'],
+                    'angular-bootstrap': [ 'src/transition/transition.js', 'src/collapse/collapse.js']
                 }
             }
 
@@ -254,7 +255,7 @@ module.exports = function(grunt) {
         },
         replace: {
             devToLiveJS: {
-                src: ['assets/js/scripts.min.js', 'assets/js/scripts_bower.min.js'],
+                src: ['assets/js/scripts.min.js', 'assets/js/scripts_bower.min.js', 'assets/js/header-footer-export.min.js'],
                 dest: 'assets/js/',
                 replacements: [{
                     from: /(wwwdev2?)/g,
@@ -272,6 +273,14 @@ module.exports = function(grunt) {
             devToLiveTemplates: {
                 src: ['templates/header.php', 'templates/footer.php'],
                 dest: 'templates/',
+                replacements: [{
+                    from: /(wwwdev2?)/g,
+                    to: 'www'
+                }]
+            },
+            headerFooterExportJS: {
+                src: ['assets/js/header-footer-export.min.js'],
+                dest: 'assets/js/',
                 replacements: [{
                     from: /(wwwdev2?)/g,
                     to: 'www'
@@ -421,9 +430,9 @@ module.exports = function(grunt) {
         'modernizr',
         'version',
         'bower_concat:build',
-        'replace',
         'uglify:dist',
-        'headerFooterExport'
+        'headerFooterExport',
+        'replace'
     ]);
     grunt.registerTask('lessVarsToSass', ['lessToSass:lessVars']);
     grunt.registerTask('headerFooterExport', [
