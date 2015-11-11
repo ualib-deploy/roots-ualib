@@ -17587,7 +17587,7 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
     "    </div>\n" +
     "</div>\n" +
     "<div class=\"suggest\" ng-show=\"showSuggestions && selected && (items.suggest.length > 0 || items.recommend.length > 0 || items.subjects[0].subjects.length > 0 || items.faq.length > 0)\">\n" +
-    "    <div ng-show=\"items.suggest.length > 0\">\n" +
+    "    <div ng-if=\"items.suggest.length > 0\">\n" +
     "        <ul class=\"nav nav-pills nav-stacked\">\n" +
     "            <li role=\"presentation\"\n" +
     "                ng-repeat=\"item in filteredItems = (items.suggest | filter:compare(originalValue)) | limitTo:numShow track by $index\"\n" +
@@ -18346,11 +18346,13 @@ angular.module('oneSearch.common')
                         $scope.faqSearched = false;
                     }
                     if ($scope.model.length > 2 && !$scope.dataRequested){
+/*
                         dataFactory.get('//wwwdev2.lib.ua.edu/oneSearch/api/suggest/' + encodeURI(fixedString))
                             .then(function(data) {
                                 $scope.items.suggest = data;
                                 $scope.setCurrent(-1, false);
                             });
+*/
                         $scope.dataRequested = true;
                     }
                     if ($scope.model.length > 2){
