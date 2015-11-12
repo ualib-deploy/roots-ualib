@@ -88,7 +88,7 @@ module.exports = function(grunt) {
             },
             header_footer_export: {
               options: {
-                  banner: "angular.module('ualib', ['ngAnimate', 'ui.bootstrap','ualib.ui', 'oneSearch']);angular.module('ui.bootstrap', []);angular.module('ualib.ui', []);\n"
+                  banner: "angular.module('ualib', ['ngAnimate', 'ui.bootstrap','ualib.ui', 'oneSearch']);angular.module('ui.bootstrap', ['ui.bootstrap.collapse']);angular.module('ualib.ui', []);\n"
               },
               src: ['assets/js/header-footer-export-templates.js', 'assets/js/header-footer-export.js'],
                 dest: 'assets/js/header-footer-export.js'
