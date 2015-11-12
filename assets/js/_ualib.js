@@ -27,6 +27,8 @@ angular.module('ualib', [
                     //$rootScope.appClass = 'front-page';
                     var bgNum = (Math.floor(Math.random() * 1000) % 16) + 1;
                     $rootScope.appStyle = {"background-image": "url('wp-content/themes/roots-ualib/assets/img/quad-sunset-lg_" + bgNum + ".jpg')"};
+
+
                 }]
             })
             .otherwise({
@@ -42,12 +44,14 @@ angular.module('ualib', [
 
 
     .run(['$routeParams', '$location', '$rootScope', '$document', 'duScrollOffset', function($routeParams, $location, $rootScope, $document, duScrollOffset){
+        $rootScope.appClass = 'page-loaded';
         $rootScope.$on('$routeChangeSuccess', function(e, current, pre) {
             //Send Google Analytics page view when routes are accessed
             ga('send', 'pageview', $location.url());
-
+            var appRoute = $location.path().split('/')[1];
             $rootScope.appStyle = {};
-            $rootScope.appClass = $location.path().split('/')[1] + '-webapp';
+            $rootScope.appClass = 'webapp ' + appRoute + '-webapp';
+
             //if ($rootScope.appClass === 'home') {
             //    $rootScope.appClass = 'front-page';
             //    var bgNum = (Math.floor(Math.random() * 1000) % 16) + 1;

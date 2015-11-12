@@ -6781,10 +6781,15 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
   right: 0;
 }
 @media (min-width: 990px) {
-  .dropdown-static > .dropdown-toggle {
+  .static .dropdown-menu {
+    -webkit-transition: opacity  .2s 0s, visibility .2s 0s;
+    -o-transition: opacity  .2s 0s, visibility .2s 0s;
+       transition: opacity  .2s 0s, visibility .2s 0s;
+  }
+  .static.dropdown-static > .dropdown-toggle {
     display: none;
   }
-  .dropdown-static > .dropdown-menu {
+  .static.dropdown-static > .dropdown-menu {
     height: auto;
     opacity: 1;
     z-index: 999;
@@ -9253,7 +9258,7 @@ body {
   min-height: 100%;
 }
 div[role="document"] {
-  min-height: 500px;
+  min-height: 705px;
 }
 .home-webapp > .wrap main,
 .bento-webapp > .wrap main {
@@ -9263,14 +9268,50 @@ div[role="document"] {
 @media (max-width: 991px) {
   .home-webapp > .wrap main,
   .bento-webapp > .wrap main {
-    margin-top: 0px;
+    margin-top: 0;
   }
+}
+.home:before {
+  content: '';
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-image: -webkit-gradient(linear, left top, right bottom, from(#ffffff), to(#ffffff));
+  background-image: -webkit-linear-gradient(top left, #ffffff, #ffffff);
+  background-image: -o-linear-gradient(top left, #ffffff, #ffffff);
+  background-image: linear-gradient(to bottom right, #ffffff, #ffffff);
+  opacity: 1;
+  -webkit-transition: opacity 200ms ease-out 200ms;
+  /* property duration timing-function delay */
+  -o-transition: opacity 200ms ease-out 200ms;
+  transition: opacity 200ms ease-out 200ms;
+}
+.home-webapp.home:before {
+  opacity: 0;
+  position: absolute;
+}
+.home .wrap,
+.home header .nav,
+.home footer .container {
+  opacity: 0;
+}
+.webapp .wrap,
+.page-loaded .wrap,
+.webapp header .nav,
+.page-loaded header .nav,
+.webapp footer .container,
+.page-loaded footer .container {
+  opacity: 1;
+  -webkit-transition: opacity 200ms ease-out 200ms;
+  /* property duration timing-function delay */
+  -o-transition: opacity 200ms ease-out 200ms;
+  transition: opacity 200ms ease-out 200ms;
 }
 .home-webapp {
   background: no-repeat center center fixed;
   -webkit-background-size: cover;
   background-size: cover;
-  background-color: transparent;
 }
 @media (max-width: 767px) {
   .home-webapp {
