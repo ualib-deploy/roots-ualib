@@ -416,9 +416,7 @@ module.exports = function(grunt) {
         'less:dev',
         'autoprefixer:dev',
         'concat:dist',
-        'bower_concat:dev',
-        'headerFooterExport',
-        'replace:headerFooterExportJS'
+        'bower_concat:dev'
     ]);
     grunt.registerTask('live-build', [
         'html2js',
