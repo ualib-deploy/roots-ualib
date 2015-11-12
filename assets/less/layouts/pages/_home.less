@@ -5,7 +5,7 @@ html, body {
 }
 
 div[role="document"] {
-  min-height: 500px;
+  min-height: 705px;
 }
 
 .home-webapp, .bento-webapp{
@@ -15,10 +15,46 @@ div[role="document"] {
       position:relative;
       margin-top: 135px;
 
-      @media (max-width: @grid-float-breakpoint) {
-        margin-top: 0px;
+      @media (max-width: @screen-sm-max) {
+        margin-top: 0;
       }
     }
+  }
+}
+
+.home {
+  &:before {
+    & {
+      content: '';
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background-image: linear-gradient(to bottom right,#fff,#fff);
+      opacity: 1;
+      -webkit-transition: opacity 200ms ease-out 200ms; /* property duration timing-function delay */
+      -moz-transition:opacity 200ms ease-out 200ms;
+      -o-transition: opacity 200ms ease-out 200ms;
+      transition: opacity 200ms ease-out 200ms;
+    }
+    .home-webapp&{
+      opacity: 0;
+      position: absolute;
+    }
+  }
+
+  .wrap, header .nav, footer .container {
+    opacity: 0;
+  }
+}
+
+.webapp, .page-loaded {
+  .wrap, header .nav, footer .container {
+    opacity: 1;
+    -webkit-transition: opacity 200ms ease-out 200ms; /* property duration timing-function delay */
+    -moz-transition:opacity 200ms ease-out 200ms;
+    -o-transition: opacity 200ms ease-out 200ms;
+    transition: opacity 200ms ease-out 200ms;
   }
 }
 
@@ -29,12 +65,10 @@ div[role="document"] {
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
-  background-color: transparent;
 
   @media(max-width: @screen-xs-max){
     background-image: none !important;
   }
-
 
 }
 
