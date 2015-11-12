@@ -255,7 +255,7 @@ module.exports = function(grunt) {
         },
         replace: {
             devToLiveJS: {
-                src: ['assets/js/scripts.min.js', 'assets/js/scripts_bower.min.js', 'assets/js/header-footer-export.min.js'],
+                src: ['assets/js/scripts.min.js', 'assets/js/scripts_bower.min.js'],
                 dest: 'assets/js/',
                 replacements: [{
                     from: /(wwwdev2?)/g,
@@ -417,7 +417,8 @@ module.exports = function(grunt) {
         'autoprefixer:dev',
         'concat:dist',
         'bower_concat:dev',
-        'headerFooterExport'
+        'headerFooterExport',
+        'replace:headerFooterExportJS'
     ]);
     grunt.registerTask('live-build', [
         'html2js',
