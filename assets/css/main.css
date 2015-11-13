@@ -3030,10 +3030,6 @@ mark,
 .ui-match {
   background-color: #FCE467;
 }
-mark,
-.mark {
-  padding: .2em;
-}
 .text-muted {
   color: #999999;
 }
@@ -9448,6 +9444,7 @@ main > p {
   font-weight: bold;
   text-align: center;
   margin-bottom: 15px;
+  margin-right: 6px;
   display: block;
   width: 37px;
   height: 37px;
