@@ -8261,7 +8261,10 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                </h4>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-1 text-right\">\n" +
-    "                <h4 ng-show=\"db.tmpDisabled == 1\"><small><span class=\"label label-warning\">Tmp</span></small></h4>\n" +
+    "                <h4>\n" +
+    "                    <small ng-if=\"db.tmpDisabled == 1\"><span class=\"label label-warning\">Tmp</span></small>\n" +
+    "                    <small ng-if=\"db.changed\"><span class=\"label label-danger\">Unsaved</span></small>\n" +
+    "                </h4>\n" +
     "            </div>\n" +
     "            <div class=\"col-md-1\">\n" +
     "                <h4 ng-show=\"db.disabled == 1 || db.tmpDisabled == 1\"><small><span class=\"label label-danger\">Disabled</span></small></h4>\n" +
@@ -8272,83 +8275,84 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                <div class=\"col-md-6 form-group\">\n" +
     "                    <label for=\"{{db.id}}_title\">Title</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.title}}\" ng-model=\"db.title\"\n" +
-    "                           id=\"{{db.id}}_title\" maxlength=\"200\" required>\n" +
+    "                           id=\"{{db.id}}_title\" maxlength=\"200\" required ng-change=\"changed(db)\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Publisher\">Publisher</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.publisher}}\" ng-model=\"db.publisher\"\n" +
-    "                           id=\"{{db.id}}_Publisher\" maxlength=\"100\">\n" +
+    "                           id=\"{{db.id}}_Publisher\" maxlength=\"100\" ng-change=\"changed(db)\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Vendor\">Vendor</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.vendor}}\" ng-model=\"db.vendor\"\n" +
-    "                           id=\"{{db.id}}_Vendor\" maxlength=\"100\">\n" +
+    "                           id=\"{{db.id}}_Vendor\" maxlength=\"100\" ng-change=\"changed(db)\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Format\">Format</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.format}}\" ng-model=\"db.format\"\n" +
-    "                           id=\"{{db.id}}_Format\" maxlength=\"50\">\n" +
+    "                           id=\"{{db.id}}_Format\" maxlength=\"50\" ng-change=\"changed(db)\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-6 form-group\">\n" +
     "                    <label for=\"{{db.id}}_URL\">URL</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.url}}\" ng-model=\"db.url\"\n" +
-    "                           id=\"{{db.id}}_URL\" maxlength=\"2000\" required>\n" +
+    "                           id=\"{{db.id}}_URL\" maxlength=\"2000\" required ng-change=\"changed(db)\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-3 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Location\">Location</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.location}}\" ng-model=\"db.location\"\n" +
-    "                           id=\"{{db.id}}_Location\" maxlength=\"50\">\n" +
+    "                           id=\"{{db.id}}_Location\" maxlength=\"50\" ng-change=\"changed(db)\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{db.id}}_NotInEDS\">In EDS</label>\n" +
     "                    <select class=\"form-control\" ng-model=\"db.notInEDS\" ng-options=\"val for val in inEDSValues\"\n" +
-    "                            id=\"{{db.id}}_NotInEDS\">\n" +
+    "                            id=\"{{db.id}}_NotInEDS\" ng-change=\"changed(db)\">\n" +
     "                    </select>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Full-text\">Fulltext</label>\n" +
     "                    <select class=\"form-control\" ng-model=\"db.hasFullText\" ng-options=\"val for val in fullTextValues\"\n" +
-    "                            id=\"{{db.id}}_Full-text\">\n" +
+    "                            id=\"{{db.id}}_Full-text\" ng-change=\"changed(db)\">\n" +
     "                    </select>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Authenticate\">Authenticate</label>\n" +
     "                    <input type=\"checkbox\" class=\"form-control\" ng-model=\"db.auth\" ng-true-value=\"1\" ng-false-value=\"0\"\n" +
-    "                           id=\"{{db.id}}_Authenticate\">\n" +
+    "                           id=\"{{db.id}}_Authenticate\" ng-change=\"changed(db)\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-6 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Coverage\">Coverage</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.coverage}}\" ng-model=\"db.coverage\"\n" +
-    "                           id=\"{{db.id}}_Coverage\" maxlength=\"256\">\n" +
+    "                           id=\"{{db.id}}_Coverage\" maxlength=\"256\" ng-change=\"changed(db)\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-3 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Notes\">Notes</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.notes}}\" ng-model=\"db.notes\"\n" +
-    "                           id=\"{{db.id}}_Notes\" maxlength=\"100\">\n" +
+    "                           id=\"{{db.id}}_Notes\" maxlength=\"100\" ng-change=\"changed(db)\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-3 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Status\">Status</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.status}}\" ng-model=\"db.status\"\n" +
-    "                           id=\"{{db.id}}_Status\" maxlength=\"100\">\n" +
+    "                           id=\"{{db.id}}_Status\" maxlength=\"100\" ng-change=\"changed(db)\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-12 form-group\">\n" +
     "                    <label for=\"{{db.id}}_descr\">Database Description</label>\n" +
-    "                    <textarea class=\"form-control\" rows=\"3\" id=\"{{db.id}}_descr\" ng-model=\"db.description\" maxlength=\"4096\" required></textarea>\n" +
+    "                    <textarea class=\"form-control\" rows=\"3\" id=\"{{db.id}}_descr\" ng-model=\"db.description\" maxlength=\"4096\"\n" +
+    "                              required ng-change=\"changed(db)\"></textarea>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{db.id}}_presented\">PresentedBy</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.presentedBy}}\" ng-model=\"db.presentedBy\"\n" +
-    "                           id=\"{{db.id}}_presented\" maxlength=\"50\">\n" +
+    "                           id=\"{{db.id}}_presented\" maxlength=\"50\" ng-change=\"changed(db)\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Audience1\">Audience1</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.audience1}}\" ng-model=\"db.audience1\"\n" +
-    "                           id=\"{{db.id}}_Audience1\" maxlength=\"30\">\n" +
+    "                           id=\"{{db.id}}_Audience1\" maxlength=\"30\" ng-change=\"changed(db)\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Audience2\">Audience2</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.audience2}}\" ng-model=\"db.audience2\"\n" +
-    "                           id=\"{{db.id}}_Audience2\" maxlength=\"30\">\n" +
+    "                           id=\"{{db.id}}_Audience2\" maxlength=\"30\" ng-change=\"changed(db)\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_updatedBy\">Updated by</label>\n" +
@@ -8357,7 +8361,7 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_dAuthor\">Description Author</label>\n" +
     "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.descrAuthor}}\" ng-model=\"db.descrAuthor\"\n" +
-    "                           id=\"{{db.id}}_dAuthor\" maxlength=\"50\" required>\n" +
+    "                           id=\"{{db.id}}_dAuthor\" maxlength=\"50\" required ng-change=\"changed(db)\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
     "                    <label for=\"{{db.id}}_date1\">Created/Modified</label>\n" +
@@ -8366,12 +8370,12 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{db.id}}_Disable\">Disabled</label>\n" +
     "                    <input type=\"checkbox\" class=\"form-control\" ng-model=\"db.disabled\" ng-true-value=\"1\" ng-false-value=\"0\"\n" +
-    "                           id=\"{{db.id}}_Disable\">\n" +
+    "                           id=\"{{db.id}}_Disable\" ng-change=\"changed(db)\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-1 form-group\">\n" +
     "                    <label for=\"{{db.id}}_tmpDisable\">TmpDisable</label>\n" +
     "                    <input type=\"checkbox\" class=\"form-control\" ng-model=\"db.tmpDisabled\" ng-true-value=\"1\" ng-false-value=\"0\"\n" +
-    "                           id=\"{{db.id}}_tmpDisable\">\n" +
+    "                           id=\"{{db.id}}_tmpDisable\" ng-change=\"changed(db)\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-12\">\n" +
     "                    <div class=\"col-md-6 form-group\">\n" +
@@ -11408,6 +11412,7 @@ angular.module('manage.manageDatabases', [])
                     console.dir(data);
                     for (var i = 0; i < data.databases.length; i++){
                         data.databases[i].show = false;
+                        data.databases[i].changed = false;
                         data.databases[i].class = "";
                         data.databases[i].selSubj = data.subjects[0];
                         data.databases[i].subjType = 1;
@@ -11438,6 +11443,9 @@ angular.module('manage.manageDatabases', [])
                     $scope.sortModes[by].reverse = !$scope.sortModes[by].reverse;
                 else
                     $scope.sortMode = by;
+            };
+            $scope.changed = function(db){
+                $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].changed = true;
             };
 
             $scope.deleteDB = function(db){
@@ -11481,6 +11489,7 @@ angular.module('manage.manageDatabases', [])
                         } else {
                             $scope.formResponse = "Error: Can not update database! " + data;
                         }
+                        $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].changed = false;
                         alert($scope.formResponse);
                         console.log(data);
                     })
@@ -11501,6 +11510,7 @@ angular.module('manage.manageDatabases', [])
                             newDB.subjects = angular.copy(data.subjects);
                             newDB.types = angular.copy(data.types);
                             newDB.show = false;
+                            newDB.changed = false;
                             newDB.class = "";
                             newDB.selSubj = data.subjects[0];
                             newDB.subjType = 1;
