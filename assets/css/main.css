@@ -3029,6 +3029,7 @@ mark,
 .mark,
 .ui-match {
   background-color: #FCE467;
+  padding: 0;
 }
 .text-muted {
   color: #999999;
