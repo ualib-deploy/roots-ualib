@@ -54,7 +54,7 @@
                             </li>
                         </ul>
                     </li>
-                    <li class="dropdown yamm-fw static" ng-class="{'dropdown-static': (appClass == 'home-webapp' || appClass == 'bento-webapp')}" dropdown-sticky>
+                    <li class="dropdown yamm-fw static" ng-class="{'dropdown-static': (appClass == 'webapp home-webapp' || appClass == 'webapp bento-webapp')}" dropdown-sticky>
                         <a href="#" class="dropdown-toggle icon-only" ng-click="mainNavbarCollapsed = false;">
                             <span class="fa fa-search"></span>
                         </a>
@@ -73,7 +73,7 @@
                                         </div>
                                         <div class="row">
                                             <div class="col-md-12">
-                                                <a href="http://apps.lib.ua.edu/blogs/webservices/2015/10/12/what-is-onesearch/" class="what-is-link" title="What is oneSearch"><span class="fa fa-info-circle"></span>  What is oneSearch?</a>
+                                                <a href="http://apps.lib.ua.edu/blogs/webservices/2015/10/12/what-is-onesearch/" class="what-is-link" title="What am I searching?"><span class="fa fa-info-circle"></span>  What am I searching?</a>
                                             </div>
                                         </div>
                                     </div>
