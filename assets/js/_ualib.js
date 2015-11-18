@@ -50,7 +50,7 @@ angular.module('ualib', [
             ga('send', 'pageview', $location.url());
             var appRoute = $location.path().split('/')[1];
             $rootScope.appStyle = {};
-            $rootScope.appClass = appRoute + '-webapp';
+            $rootScope.appClass = 'webapp ' + appRoute + '-webapp';
 
             //TODO: Temporary!! Remove when either removing or pushing new home/webapp CSS animations
             angular.element(document.querySelector('body')).addClass('webapp');

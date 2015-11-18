@@ -16458,7 +16458,7 @@ angular.module('engines.scout', [])
         else {
             link += '&facet=' + box;
         }*/
-        link = link.replace(/(&bquery=)([^&]+)/, '$1$2 OR (_ualib_facet:'+box+')');
+        //link = link.replace(/(&bquery=)([^&]+)/, '$1$2 OR (_ualib_facet:'+box+')');
 
         $scope.resourceLink = angular.copy(link);
     }]);
