@@ -26,7 +26,7 @@ angular.module('ualib', [
                 controller: ['$scope' ,'$rootScope', function($scope, $rootScope){
                     //$rootScope.appClass = 'front-page';
                     var testVar = 1;
-                    var bgNum = (Math.floor(Math.random() * 1000) % 16) + 1;
+                    var bgNum = (Math.floor(Math.random() * 1000) % 16) + testVar;
                     $rootScope.appStyle = {"background-image": "url('wp-content/themes/roots-ualib/assets/img/quad-sunset-lg_" + bgNum + ".jpg')"};
                 }]
             })
