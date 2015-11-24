@@ -2297,7 +2297,7 @@ var duScrollDefaultEasing = function (x) {
   return 1-Math.pow((1-x)*2, 2)/2;
 };
 
-var duScroll = angular.module('duScroll', [
+angular.module('duScroll', [
   'duScroll.scrollspy',
   'duScroll.smoothScroll',
   'duScroll.scrollContainer',
@@ -2320,10 +2320,6 @@ var duScroll = angular.module('duScroll', [
   .value('duScrollBottomSpy', false)
   //Active class name
   .value('duScrollActiveClass', 'active');
-
-if (typeof module !== 'undefined' && module && module.exports) {
-  module.exports = duScroll;
-}
 
 
 angular.module('duScroll.scrollHelpers', ['duScroll.requestAnimation'])
@@ -2557,8 +2553,7 @@ angular.module('duScroll.spyAPI', ['duScroll.scrollContainerAPI'])
         containerOffset = containerEl.getBoundingClientRect().top;
         bottomReached = Math.round(containerEl.scrollTop + containerEl.clientHeight) >= containerEl.scrollHeight;
       } else {
-        var documentScrollHeight = $document[0].body.scrollHeight || $document[0].documentElement.scrollHeight; // documentElement for IE11
-        bottomReached = Math.round($window.pageYOffset + $window.innerHeight) >= documentScrollHeight;
+        bottomReached = Math.round($window.pageYOffset + $window.innerHeight) >= $document[0].body.scrollHeight;
       }
       var compareProperty = (duScrollBottomSpy && bottomReached ? 'bottom' : 'top');
 
@@ -2705,7 +2700,6 @@ angular.module('duScroll.spyAPI', ['duScroll.scrollContainerAPI'])
   var removeSpy = function(spy) {
     var context = getContextForSpy(spy);
     if(spy === context.currentlyActive) {
-      $rootScope.$broadcast('duScrollspy:becameInactive', context.currentlyActive.$element);
       context.currentlyActive = null;
     }
     var i = context.spies.indexOf(spy);
@@ -45692,7 +45686,7 @@ angular.module('hours.list', [])
         }
     }]);
 /**
- * @license AngularJS v1.4.7
+ * @license AngularJS v1.4.8
  * (c) 2010-2015 Google, Inc. http://angularjs.org
  * License: MIT
  */
