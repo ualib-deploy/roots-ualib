@@ -58,9 +58,9 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                                    <h4>Databases</h4>\n" +
     "                                </a>\n" +
     "\n" +
-    "                                <a href=\"http://qs7qk6ub8p.search.serialssolutions.com\" class=\"service-card\">\n" +
+    "                                <a href=\"http://guides.lib.ua.edu/\" class=\"service-card\">\n" +
     "                                    <span class=\"fa fa-book\"></span>\n" +
-    "                                    <h4>E-Journals</h4>\n" +
+    "                                    <h4>Research Guides</h4>\n" +
     "                                </a>\n" +
     "                                <a href=\"http://library.ua.edu/vwebv/searchBasic\" class=\"service-card\">\n" +
     "                                    <span class=\"fa fa-search\"></span>\n" +
