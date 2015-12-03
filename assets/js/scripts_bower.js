@@ -14707,7 +14707,27 @@ angular.module('manage.submittedForms', ['ngFileUpload'])
         $scope.mailToLib = 0;
         $scope.form = {};
         $scope.form.attachment = [];
+        $scope.form.selectedFiles = [];
         $scope.uploading = false;
+
+        $scope.generateThumb = function(files) {
+            if (files.length > 0 && files !== null) {
+                for (var i = 0; i < files.length; i++){
+                    $scope.form.selectedFiles.push(files[i]);
+                    if ($scope.fileReaderSupported) {
+                        $timeout(function() {
+                            var fileReader = new FileReader();
+                            fileReader.readAsDataURL(files[i]);
+                            fileReader.onload = function(e) {
+                                $timeout(function() {
+                                    files[i].dataUrl = e.target.result;
+                                });
+                            }
+                        });
+                    }
+                }
+            }
+        };
 
         $scope.submit = function(event){
             var form = {};
@@ -14723,7 +14743,7 @@ angular.module('manage.submittedForms', ['ngFileUpload'])
                     if (!event.target[i].checked)
                         form[i].value = "";
             }
-            if ($scope.form.attachment.length < 1) {
+            if ($scope.form.selectedFiles.length < 1) {
                 console.log("No attachment.");
                 formFactory.submitForm(form)
                     .success(function (data) {
@@ -14738,31 +14758,30 @@ angular.module('manage.submittedForms', ['ngFileUpload'])
                 console.log("File attached.");
                 $scope.uploading = true;
                 var names = [];
-                for (var i = 0; i < $scope.form.attachment.length; i++)
-                    names.push($scope.form.attachment[i].name);
-                $scope.form.attachment.upload = Upload.upload({
+                for (var i = 0; i < $scope.form.selectedFiles.length; i++)
+                    names.push($scope.form.selectedFiles[i].name);
+                $scope.form.selectedFiles.upload = Upload.upload({
                     url: API + 'api/process/upload',
                     method: 'POST',
                     fields: {
                         form: form
                     },
-                    file: form.attachment,
+                    file: form.selectedFiles,
                     fileFormDataName: names
                 });
-                $scope.form.attachment.upload.then(function(response) {
+                $scope.form.selectedFiles.upload.then(function(response) {
                     $timeout(function() {
                         $scope.formResponse = response.data;
-                        console.dir(response.data);
                         $scope.uploading = false;
                     });
                 }, function(response) {
-                    $scope.formResponse = response.data;
+                    $scope.formResponse = "Error: " + response.data;
                     console.dir(response.data);
                     $scope.uploading = false;
                 });
-                $scope.form.attachment.upload.progress(function(evt) {
+                $scope.form.selectedFiles.upload.progress(function(evt) {
                     // Math.min is to fix IE which reports 200% sometimes
-                    $scope.form.attachment.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+                    $scope.form.selectedFiles.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
                 });
             }
         };
