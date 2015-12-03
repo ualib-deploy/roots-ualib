@@ -14622,7 +14622,7 @@ angular.module('manage.staffDirectory', ['ui.tinymce'])
 
 
 
-angular.module('manage.submittedForms', [])
+angular.module('manage.submittedForms', ['ngFileUpload'])
     .controller('manageSubFormsCtrl', ['$scope', '$timeout', 'tokenFactory', 'formFactory',
         function manageSubFormsCtrl($scope, $timeout, tokenFactory, formFactory){
             $scope.data = {};
@@ -14702,9 +14702,12 @@ angular.module('manage.submittedForms', [])
         }
     }])
 
-    .controller('customFormCtrl', ['$scope', 'formFactory',
-    function customFormCtrl($scope, formFactory){
+    .controller('customFormCtrl', ['$scope', 'formFactory', 'Upload', 'FORMS_URL',
+    function customFormCtrl($scope, formFactory, Upload, API){
         $scope.mailToLib = 0;
+        $scope.form = {};
+        $scope.form.attachment = [];
+        $scope.uploading = false;
 
         $scope.submit = function(event){
             var form = {};
@@ -14720,16 +14723,48 @@ angular.module('manage.submittedForms', [])
                     if (!event.target[i].checked)
                         form[i].value = "";
             }
-            formFactory.submitForm(form)
-                .success(function(data) {
-                    $scope.formResponse = data;
-                    console.log(data);
-                })
-                .error(function(data, status, headers, config) {
-                    $scope.formResponse = "Error! " + data;
-                    console.log(data);
+            if ($scope.form.attachment.length < 1) {
+                console.log("No attachment.");
+                formFactory.submitForm(form)
+                    .success(function (data) {
+                        $scope.formResponse = data;
+                        console.log(data);
+                    })
+                    .error(function (data, status, headers, config) {
+                        $scope.formResponse = "Error! " + data;
+                        console.log(data);
+                    });
+            } else {
+                console.log("File attached.");
+                $scope.uploading = true;
+                var names = [];
+                for (var i = 0; i < $scope.form.attachment.length; i++)
+                    names.push($scope.form.attachment[i].name);
+                $scope.form.attachment.upload = Upload.upload({
+                    url: API + 'api/process/upload',
+                    method: 'POST',
+                    fields: {
+                        form: form
+                    },
+                    file: form.attachment,
+                    fileFormDataName: names
                 });
-
+                $scope.form.attachment.upload.then(function(response) {
+                    $timeout(function() {
+                        $scope.formResponse = response.data;
+                        console.dir(response.data);
+                        $scope.uploading = false;
+                    });
+                }, function(response) {
+                    $scope.formResponse = response.data;
+                    console.dir(response.data);
+                    $scope.uploading = false;
+                });
+                $scope.form.attachment.upload.progress(function(evt) {
+                    // Math.min is to fix IE which reports 200% sometimes
+                    $scope.form.attachment.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+                });
+            }
         };
     }])
 angular.module('ualib.musicSearch.templates', ['videos/videos-list.tpl.html']);
