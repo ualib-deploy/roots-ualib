@@ -14766,7 +14766,7 @@ angular.module('manage.submittedForms', ['ngFileUpload'])
                     fields: {
                         form: form
                     },
-                    file: form.selectedFiles,
+                    file: $scope.form.selectedFiles,
                     fileFormDataName: names
                 });
                 $scope.form.selectedFiles.upload.then(function(response) {
