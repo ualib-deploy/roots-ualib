@@ -14622,7 +14622,7 @@ angular.module('manage.staffDirectory', ['ui.tinymce'])
 
 
 
-angular.module('manage.submittedForms', [])
+angular.module('manage.submittedForms', ['ngFileUpload'])
     .controller('manageSubFormsCtrl', ['$scope', '$timeout', 'tokenFactory', 'formFactory',
         function manageSubFormsCtrl($scope, $timeout, tokenFactory, formFactory){
             $scope.data = {};
@@ -14702,9 +14702,32 @@ angular.module('manage.submittedForms', [])
         }
     }])
 
-    .controller('customFormCtrl', ['$scope', 'formFactory',
-    function customFormCtrl($scope, formFactory){
+    .controller('customFormCtrl', ['$scope', '$timeout', 'formFactory', 'Upload', 'FORMS_URL',
+    function customFormCtrl($scope, $timeout, formFactory, Upload, API){
         $scope.mailToLib = 0;
+        $scope.form = {};
+        $scope.form.attachment = [];
+        $scope.form.selectedFiles = [];
+        $scope.uploading = false;
+
+        $scope.generateThumb = function(files) {
+            if (files.length > 0 && files !== null) {
+                for (var i = 0; i < files.length; i++){
+                    $scope.form.selectedFiles.push(files[i]);
+                    if ($scope.fileReaderSupported) {
+                        $timeout(function() {
+                            var fileReader = new FileReader();
+                            fileReader.readAsDataURL(files[i]);
+                            fileReader.onload = function(e) {
+                                $timeout(function() {
+                                    files[i].dataUrl = e.target.result;
+                                });
+                            }
+                        });
+                    }
+                }
+            }
+        };
 
         $scope.submit = function(event){
             var form = {};
@@ -14720,18 +14743,49 @@ angular.module('manage.submittedForms', [])
                     if (!event.target[i].checked)
                         form[i].value = "";
             }
-            formFactory.submitForm(form)
-                .success(function(data) {
-                    $scope.formResponse = data;
-                    console.log(data);
-                })
-                .error(function(data, status, headers, config) {
-                    $scope.formResponse = "Error! " + data;
-                    console.log(data);
+            if ($scope.form.selectedFiles.length < 1) {
+                console.log("No attachment.");
+                formFactory.submitForm(form)
+                    .success(function (data) {
+                        $scope.formResponse = data;
+                        console.log(data);
+                    })
+                    .error(function (data, status, headers, config) {
+                        $scope.formResponse = "Error! " + data;
+                        console.log(data);
+                    });
+            } else {
+                console.log("File attached.");
+                $scope.uploading = true;
+                var names = [];
+                for (var i = 0; i < $scope.form.selectedFiles.length; i++)
+                    names.push($scope.form.selectedFiles[i].name);
+                $scope.form.selectedFiles.upload = Upload.upload({
+                    url: API + 'api/process/upload',
+                    method: 'POST',
+                    fields: {
+                        form: form
+                    },
+                    file: $scope.form.selectedFiles,
+                    fileFormDataName: names
                 });
-
+                $scope.form.selectedFiles.upload.then(function(response) {
+                    $timeout(function() {
+                        $scope.formResponse = response.data;
+                        $scope.uploading = false;
+                    });
+                }, function(response) {
+                    $scope.formResponse = "Error: " + response.data;
+                    console.dir(response.data);
+                    $scope.uploading = false;
+                });
+                $scope.form.selectedFiles.upload.progress(function(evt) {
+                    // Math.min is to fix IE which reports 200% sometimes
+                    $scope.form.selectedFiles.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+                });
+            }
         };
-    }])
+    }]);
 angular.module('ualib.musicSearch.templates', ['videos/videos-list.tpl.html']);
 
 angular.module("videos/videos-list.tpl.html", []).run(["$templateCache", function($templateCache) {
