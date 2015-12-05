@@ -242,11 +242,9 @@
   display: block;
 }
 .suggest > .suggest-row {
-  margin-top: 5px;
   margin-bottom: 5px;
   padding-left: 15px;
   padding-right: 15px;
-  border-top: 1px solid #e0e0e0;
   -webkit-transition: all .2s;
   -moz-transition: all .2s;
   transition: all .2s;

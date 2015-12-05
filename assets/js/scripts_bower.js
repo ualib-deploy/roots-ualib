@@ -2297,7 +2297,7 @@ var duScrollDefaultEasing = function (x) {
   return 1-Math.pow((1-x)*2, 2)/2;
 };
 
-angular.module('duScroll', [
+var duScroll = angular.module('duScroll', [
   'duScroll.scrollspy',
   'duScroll.smoothScroll',
   'duScroll.scrollContainer',
@@ -2320,6 +2320,10 @@ angular.module('duScroll', [
   .value('duScrollBottomSpy', false)
   //Active class name
   .value('duScrollActiveClass', 'active');
+
+if (typeof module !== 'undefined' && module && module.exports) {
+  module.exports = duScroll;
+}
 
 
 angular.module('duScroll.scrollHelpers', ['duScroll.requestAnimation'])
@@ -2553,7 +2557,8 @@ angular.module('duScroll.spyAPI', ['duScroll.scrollContainerAPI'])
         containerOffset = containerEl.getBoundingClientRect().top;
         bottomReached = Math.round(containerEl.scrollTop + containerEl.clientHeight) >= containerEl.scrollHeight;
       } else {
-        bottomReached = Math.round($window.pageYOffset + $window.innerHeight) >= $document[0].body.scrollHeight;
+        var documentScrollHeight = $document[0].body.scrollHeight || $document[0].documentElement.scrollHeight; // documentElement for IE11
+        bottomReached = Math.round($window.pageYOffset + $window.innerHeight) >= documentScrollHeight;
       }
       var compareProperty = (duScrollBottomSpy && bottomReached ? 'bottom' : 'top');
 
@@ -2700,6 +2705,7 @@ angular.module('duScroll.spyAPI', ['duScroll.scrollContainerAPI'])
   var removeSpy = function(spy) {
     var context = getContextForSpy(spy);
     if(spy === context.currentlyActive) {
+      $rootScope.$broadcast('duScrollspy:becameInactive', context.currentlyActive.$element);
       context.currentlyActive = null;
     }
     var i = context.spies.indexOf(spy);
@@ -2911,7 +2917,7 @@ angular.module('duScroll.scrollspy', ['duScroll.spyAPI'])
  * angular-ui-bootstrap
  * http://angular-ui.github.io/bootstrap/
 
- * Version: 0.12.1 - 2015-11-17
+ * Version: 0.12.1 - 2015-12-04
  * License: MIT
  */
 angular.module("ui.bootstrap", ["ui.bootstrap.tpls", "ui.bootstrap.transition","ui.bootstrap.collapse","ui.bootstrap.accordion","ui.bootstrap.alert","ui.bootstrap.bindHtml","ui.bootstrap.buttons","ui.bootstrap.dateparser","ui.bootstrap.position","ui.bootstrap.datepicker","ui.bootstrap.pagination","ui.bootstrap.tooltip","ui.bootstrap.popover","ui.bootstrap.timepicker"]);
@@ -5563,6 +5569,35 @@ angular.module('ualib.ui')
     }]);
 angular.module('ualib.ui')
 
+    .run(['$rootScope', '$document', '$location', '$timeout', function($rootScope, $document, $location, $timeout) {
+        if(!window.history || !history.replaceState) {
+            return;
+        }
+
+        $rootScope.$on('PageWithMenu:loaded', function(){
+            var anchor = $location.hash() || $location.path().split('/')[1];
+            if (anchor){
+                $timeout(function(){
+                    $document.scrollToElement(angular.element(document.getElementById(anchor)));
+                }, 200);
+            }
+        });
+        $rootScope.$on('duScrollspy:becameActive', function($event, $element, $target){
+            //Automaticly update location
+            var hash = $element.find('a').eq(0).prop('hash').substr(1);
+            if (hash) {
+                //history.replaceState(null, null, hash);
+                if ($location.hash()){
+                    $location.hash(hash);
+                }
+                else{
+                    $location.path(hash);
+                }
+                $rootScope.$apply();
+            }
+        });
+    }])
+
   .directive('pageWithMenu', [function(){
     return{
       restrict: 'C',
@@ -5580,7 +5615,7 @@ angular.module('ualib.ui')
     }
   }])
 
-  .directive('pageSection', [function(){
+  .directive('pageSection', ['$rootScope', function($rootScope){
     return {
       require: '^pageWithMenu',
       restrict: 'EC',
@@ -5599,6 +5634,7 @@ angular.module('ualib.ui')
             scope.section = title.replace(/[\s\-\\/"'&]+/g, '_');
             Ctrl.addSection({title: title, icon: icon, link: scope.section});
         }
+          $rootScope.$broadcast('PageWithMenu:loaded');
       }
     }
   }]);
@@ -6101,6 +6137,10 @@ angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", f
     "                    <strong>Types of material: </strong>\n" +
     "                    <span ng-repeat=\"type in item.types\" ng-bind-html=\"type.type | highlight:db.search\"></span>\n" +
     "                </div>\n" +
+    "                <div class=\"databases-details\" ng-if=\"item.vendor\">\n" +
+    "                    <strong>Vendor: </strong>\n" +
+    "                    <span ng-bind-html=\"item.vendor | highlight:db.search\"></span>\n" +
+    "                </div>\n" +
     "                <div class=\"scout-coverage\">\n" +
     "                    <strong>Scout coverage: </strong>\n" +
     "                    <span class=\"fa text-info\" ng-class=\"{'fa-circle': item.notInEDS == 'Y', 'fa-adjust': item.notInEDS == 'P', 'fa-circle-o': !item.notInEDS}\">\n" +
@@ -6204,7 +6244,7 @@ angular.module('ualib.databases')
             .when('/databases', {
                 reloadOnSearch: false,
                 resolve: {
-                    databases: function(databasesFactory){
+                    databases: ['databasesFactory', function(databasesFactory){
                         return databasesFactory.get({db: 'active'})
                             .$promise.then(function(data){
                                 return data;
@@ -6217,7 +6257,7 @@ angular.module('ualib.databases')
                                     config: config
                                 });
                             });
-                    }
+                    }]
                 },
                 templateUrl: 'databases/databases-list.tpl.html',
                 controller: 'DatabasesListCtrl'
@@ -14949,7 +14989,7 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
             .when('/videos', {
                 reloadOnSearch: false,
                 resolve: {
-                    filters: function(videosFactory){
+                    filters: ['videosFactory', function(videosFactory){
                         return videosFactory.get({videos: 'genres'})
                             .$promise.then(function(data){
                                 var newData = data;
@@ -14970,8 +15010,8 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
                                     config: config
                                 });
                             });
-                    },
-                    videos: function(videosFactory){
+                    }],
+                    videos: ['videosFactory', function(videosFactory){
                         return videosFactory.get()
                             .$promise.then(function(data){
                                 return data;
@@ -14984,7 +15024,7 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
                                     config: config
                                 });
                             });
-                    }
+                    }]
                 },
                 templateUrl: 'videos/videos-list.tpl.html',
                 controller: 'VideosListCtrl'
@@ -15958,7 +15998,7 @@ angular.module('oneSearch.common')
                 model: '=',
                 search: '='
             },
-            controller: ['$scope', '$window', '$timeout', '$document', 'dataFactory', function($scope, $window, $timeout, $document,  dataFactory){
+            controller: function($scope, $window, $timeout, $document,  dataFactory){
                 $scope.items = {};
                 $scope.filteredItems = [];
                 $scope.model = "";
@@ -16074,7 +16114,7 @@ angular.module('oneSearch.common')
                 $scope.gaTypeAhead = function(linkTitle){
                     ga('send', 'event', 'oneSearch', 'type_ahead_click', linkTitle);
                 };
-            }],
+            },
             link: function(scope, elem, attrs) {
                 scope.showSuggestions = false;
                 var suggestWatcher = scope.$watch('items', function(newVal, oldVal){
@@ -16196,7 +16236,7 @@ angular.module('engines.acumen', [])
         })
     }])
 
-    .controller('AcumenCtrl', ['$scope', '$filter', function($scope, $filter){
+    .controller('AcumenCtrl', function($scope, $filter){
         var items = $scope.items;
 
         for (var i = 0, len = items.length; i < len; i++) {
@@ -16206,7 +16246,7 @@ angular.module('engines.acumen', [])
                 else items[i].type = items[i].type.sort().shift();
             }
         }
-    }]);
+    });
 angular.module('engines.catalog', [])
 
     .config(['oneSearchProvider', function(oneSearchProvider){
@@ -16237,7 +16277,7 @@ angular.module('engines.catalog', [])
         }
     }])
 
-    .controller('CatalogCtrl', ['$scope', '$filter', function($scope, $filter){
+    .controller('CatalogCtrl', function($scope, $filter){
         var types = {
             bc: "Archive/Manuscript",
             cm: "Music Score",
@@ -16273,7 +16313,7 @@ angular.module('engines.catalog', [])
         }
 
         $scope.items = items;
-    }]);
+    });
 
 angular.module('engines.databases', [])
 
@@ -16306,7 +16346,7 @@ angular.module('engines.ejournals', [])
         })
     }])
 
-    .controller('EjouralsCtrl', ['$scope', function($scope){
+    .controller('EjouralsCtrl', function($scope){
 
         var param;
         switch ($scope.mediaType){
@@ -16323,7 +16363,7 @@ angular.module('engines.ejournals', [])
         if (param){
             $scope.resourceLink = $scope.resourceLink.replace('SS_searchTypeAll=yes&SS_searchTypeBook=yes&SS_searchTypeJournal=yes&SS_searchTypeOther=yes', param);
         }
-    }]);
+    });
 /**
  * @module common.engines
  *
@@ -16438,7 +16478,7 @@ angular.module('engines.scout', [])
         })
     }])
 
-    .controller('ScoutCtrl', ['$scope', function($scope){
+    .controller('ScoutCtrl', function($scope){
         var title; // Title variable to bind to $scope. ".BibRelationships.IsPartOfRelationships" title is used if no item title is present.
         var items = $scope.items;
         for (var i = 0; i < items.length; i++){
@@ -16501,21 +16541,25 @@ angular.module('engines.scout', [])
         var link = angular.copy($scope.resourceLink);
 
         // Tokenize box name to camelCase for EDS inject script
-        box = box.replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, function(match, index) {
+        /*box = box.replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, function(match, index) {
             if (+match === 0) return ""; // or if (/\s+/.test(match)) for white spaces
             return index == 0 ? match.toLowerCase() : match.toUpperCase();
-        });
+        });*/
+        if (box === 'Articles'){
+            box = 'AcademicJournals';
+        }
 
-        /*if (link.indexOf('facet=') > 0){
+        if (link.indexOf('facet=') > 0){
+
             link = link.replace(/&facet=(.+)&?/, box);
         }
         else {
             link += '&facet=' + box;
-        }*/
+        }
         //link = link.replace(/(&bquery=)([^&]+)/, '$1$2 OR (_ualib_facet:'+box+')');
 
         $scope.resourceLink = angular.copy(link);
-    }]);
+    });
 angular.module('filters.nameFilter', [])
 
     .filter('nameFilter', ['$filter', function($filter){
@@ -48478,8 +48522,8 @@ angular.module("news-item/event-card.tpl.html", []).run(["$templateCache", funct
     "        </div>\n" +
     "    </div>\n" +
     "    <div class=\"media-body\">\n" +
-    "        <h4 class=\"media-heading\" ng-bind-html=\"newsCard.title\"></h4>\n" +
-    "        <p ng-bind-html=\"newsCard.blurb\"></p>\n" +
+    "        <h4 class=\"media-heading\" ng-bind-html=\"newsCard.title | truncate:50:'...':true\"></h4>\n" +
+    "        <p ng-bind-html=\"newsCard.blurb | truncate:150:'...':true\"></p>\n" +
     "    </div>\n" +
     "</a>");
 }]);
@@ -48489,7 +48533,7 @@ angular.module("news-item/news-card.tpl.html", []).run(["$templateCache", functi
     "<a ng-href=\"#/news-exhibits/{{newsCard.link}}\" class=\"media news-card\">\n" +
     "    <div class=\"media-body\">\n" +
     "        <h4 class=\"media-heading\">\n" +
-    "            <span ng-bind-html=\"newsCard.title\"></span>\n" +
+    "            <span ng-bind-html=\"newsCard.title | truncate:50:'...':true\"></span>\n" +
     "        </h4>\n" +
     "        <div class=\"details-context\" ng-if=\"(newsCard.activeFrom != newsCard.activeUntil && newsCard.type != 0)\">\n" +
     "            {{newsCard.activeFrom | date:mediumDate}} - {{newsCard.activeUntil | date:mediumDate}}\n" +
@@ -48497,7 +48541,7 @@ angular.module("news-item/news-card.tpl.html", []).run(["$templateCache", functi
     "        <div class=\"details-context\" ng-if=\"(newsCard.type == 0)\">\n" +
     "            {{newsCard.created | date:mediumDate}}\n" +
     "        </div>\n" +
-    "        <p ng-bind-html=\"newsCard.blurb\"></p>\n" +
+    "        <p ng-bind-html=\"newsCard.blurb | truncate:150:'...':true\"></p>\n" +
     "    </div>\n" +
     "</a>");
 }]);
@@ -50079,7 +50123,7 @@ angular.module('staffdir', ['ualib.staffdir']);
         return {
             restrict: 'AC',
             templateUrl: 'staff-card/staff-card-list.tpl.html',
-            controller: function($scope){
+            controller: ['$scope', function($scope){
                 $scope.staffdir = {};
 
                 StaffFactory.directory().get()
@@ -50090,7 +50134,7 @@ angular.module('staffdir', ['ualib.staffdir']);
                     }, function(){
                         console.log('Staffdir Error -- Come on, put in proper error handling already');
                     });
-            }
+            }]
         };
     }])
 
@@ -50275,7 +50319,7 @@ angular.module('staffdir', ['ualib.staffdir']);
                 login: '@email'
             },
             templateUrl: 'staff-profile/staff-profile.tpl.html',
-            controller: function($scope){
+            controller: ['$scope', function($scope){
                 $scope.userProfile = {};
 
                 //console.log("Login: " + $scope.login);
@@ -50321,7 +50365,7 @@ angular.module('staffdir', ['ualib.staffdir']);
                     }, function(data){
                         console.log('Error: cold not get profile! ' + data);
                     });
-            }
+            }]
         };
     }]);
 
