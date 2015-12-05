@@ -111,8 +111,7 @@ module.exports = function(grunt) {
                     'tinymce-dist',
                     'jquery',
                     'modernizr',
-                    'roots-ualib',
-                    'angular-ui-utils'
+                    'roots-ualib'
                 ],
                 callback: function(mainFiles, component) {
                     return mainFiles.map(function(filepath) {
