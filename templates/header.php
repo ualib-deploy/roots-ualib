@@ -73,7 +73,7 @@
                                         </div>
                                         <div class="row">
                                             <div class="col-md-12">
-                                                <a href="Guides.lib.ua.edu/onesearch-howto" class="what-is-link" title="What am I searching?"><span class="fa fa-info-circle"></span>  What am I searching?</a>
+                                                <a href="guides.lib.ua.edu/onesearch-howto" class="what-is-link" title="What am I searching?"><span class="fa fa-info-circle"></span>  What am I searching?</a>
                                             </div>
                                         </div>
                                     </div>
