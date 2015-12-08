@@ -222,12 +222,15 @@
 
                                                 </ul>
                                             </div>
-
-                                            <a class="service-card" href="/using-the-library/circulation-services/borrowing/">
+                                            <div class="service-list">
                                                 <span class="fa fa-book"></span>
-                                                <h4>Borrow, Renew, and Course Reserves</h4>
-                                                <p>Check out library materials and find instructor provided resources for your class</p>
-                                            </a>
+                                                <h4>Borrow, Renew, &amp; Course Reserves</h4>
+                                                <ul>
+                                                    <li class="menu-photocopying"><a href="/using-the-library/course-reserves/">Borrow, Renew, and Course Reserves</a></li>
+                                                    <li class="menu-access-reserves"><a href="http://library.ua.edu/vwebv/enterCourseReserve.do">Find and access reserve items</a></li>
+
+                                                </ul>
+                                            </div>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-9">
                                             <div class="row">
