@@ -222,17 +222,15 @@
 
                                                 </ul>
                                             </div>
-                                            <div class="col-sm-12 col-md-4">
-                                             <div class="service-list">
+                                            <div class="service-list">
                                                 <span class="fa fa-book"></span>
                                                 <h4>Borrow, Renew, &amp; Course Reserves</h4>
                                                 <ul>
                                                     <li class="menu-photocopying"><a href="/using-the-library/course-reserves/">Borrow, Renew, and Course Reserves</a></li>
                                                     <li class="menu-access-reserves"><a href="http://library.ua.edu/vwebv/enterCourseReserve.do">Find and access reserve items</a></li>
-                                                    
+
                                                 </ul>
-                                             </div>
-                                          </div>
+                                            </div>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-9">
                                             <div class="row">
@@ -246,13 +244,13 @@
                                                         </ul>
                                                     </div>
                                                 </div>
-                                                
+                                                <div class="col-sm-12 col-md-4">
                                                     <a class="service-card" href="/using-the-library/sanford-media-center/">
                                                         <span class="fa fa-cubes"></span>
                                                         <h4>Sanford Media Center</h4>
                                                         <p>A leading-edge facility for digital media production </p>
                                                     </a>
-                                                
+                                                </div>
                                                 <div class="col-sm-12 col-md-4">
                                                     <a class="service-card" href="/using-the-library/digital-humanities-center/">
                                                         <span class="fa fa-tachometer"></span>
