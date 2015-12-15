@@ -8872,6 +8872,7 @@ button.close {
 .service-card > p,
 .service-list > p {
   margin-left: 45px;
+  color: #333;
 }
 a.service-card:hover,
 a.service-card:active,
