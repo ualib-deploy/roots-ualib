@@ -17,7 +17,7 @@
     "angular-filter": "~0.5.4",
     "yamm3": "https://github.com/geedmo/yamm3.git#~1.0.0",
     "ualib-ui": "https://github.com/ualibweb/ui-components.git",
-    "onesearch": "https://github.com/ualibweb/oneSearch_ui.git",
+    "onesearch": "ualibweb/oneSearch_ui#master",
     "ualib-hours": "https://github.com/ualibweb/hours_ui.git",
     "manage": "https://github.com/ualibweb/manage_ui.git",
     "databases": "https://github.com/ualibweb/databases_ui.git",
