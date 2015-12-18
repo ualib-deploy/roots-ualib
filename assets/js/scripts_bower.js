@@ -6037,131 +6037,180 @@ angular.module('databases.templates', ['databases/databases-list.tpl.html']);
 
 angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("databases/databases-list.tpl.html",
-    "<div class=\"page-header\"><h1>Databases</h1></div>\n" +
+    "<div class=\"jumbotron-header\">\n" +
+    "    <div class=\"jumbotron\">\n" +
+    "        <div class=\"container\">\n" +
+    "            <div class=\"row\">\n" +
+    "                <div class=\"col-md-8\">\n" +
+    "                    <h1>Databases</h1>\n" +
+    "                </div>\n" +
+    "                <div class=\"hidden-xs col-md-4\">\n" +
+    "                    <div class=\"well\">\n" +
+    "                        <p class=\"lead\">Check out our database trials and tell us what you think!</p>\n" +
+    "                        <a class=\"btn btn-primary\" href=\"/research-tools/e-resources/electronic-resource-trials/\" title=\"database trials\">See Trials <span class=\"fa fa-fw fa-eye\"></span></span></a>\n" +
+    "                        <a class=\"btn btn-default\" href=\"/forms/electronic-resource-trial-evaluation-form/\" title=\"database trials evaluation form\">Evaluate <span class=\"fa fa-fw fa-check-square-o\"></span></span></a>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
     "\n" +
-    "<div class=\"row\">\n" +
-    "    <div class=\"col-md-3 col-md-push-9\">\n" +
-    "        <form class=\"facets-form\">\n" +
-    "            <div class=\"form-group\">\n" +
+    "<div class=\"container\">\n" +
+    "\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-sm-3 col-sm-push-9\">\n" +
+    "            <form class=\"facets-form\">\n" +
+    "                <div class=\"form-group\">\n" +
     "                <span class=\"page-header\">\n" +
     "                    <h4>Filter Databases By</h4>\n" +
     "                </span>\n" +
-    "            </div>\n" +
-    "            <div class=\"form-group\">\n" +
-    "                <input type=\"text\" class=\"form-control\" ng-model=\"db.search\" placeholder=\"Keyword search\">\n" +
-    "            </div>\n" +
+    "                </div>\n" +
+    "                <div class=\"form-group\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" ng-model=\"db.search\" placeholder=\"Keyword search\">\n" +
+    "                </div>\n" +
     "\n" +
-    "            <div class=\"form-group hidden-xs\">\n" +
-    "                <h5>Title starts with</h5>\n" +
-    "                <div class=\"facet-group alphanum-group\">\n" +
-    "                    <div class=\"btn-group\">\n" +
-    "                        <label class=\"btn btn-default\" ng-repeat=\"na in numAlpha\" ng-model=\"db.startsWith\" btn-radio=\"'{{na}}'\" ng-disabled=\"startsWithDisabled[na]\" uncheckable>{{na}}</label>\n" +
+    "                <div class=\"form-group hidden-xs\">\n" +
+    "                    <h5>Title starts with</h5>\n" +
+    "                    <div class=\"facet-group alphanum-group\">\n" +
+    "                        <div class=\"btn-group\">\n" +
+    "                            <label class=\"btn btn-default\" ng-repeat=\"na in numAlpha\" ng-model=\"db.startsWith\" btn-radio=\"'{{na}}'\" ng-disabled=\"startsWithDisabled[na]\" uncheckable>{{na}}</label>\n" +
+    "                        </div>\n" +
     "                    </div>\n" +
     "                </div>\n" +
-    "            </div>\n" +
     "\n" +
-    "            <div class=\"form-group hidden-xs\">\n" +
-    "                <h5>Subjects</h5>\n" +
-    "                <div class=\"facet-group\">\n" +
-    "                    <div class=\"radio\" ng-class=\"{'disabled': subj.disabled}\" ng-repeat=\"subj in subjects\">\n" +
-    "                        <label>\n" +
-    "                            <input type=\"checkbox\" ng-model=\"db.subjects[subj.subject]\" ng-disabled=\"subj.disabled\">\n" +
-    "                            {{subj.subject}} ({{subj.total}})\n" +
-    "                        </label>\n" +
+    "                <div class=\"form-group hidden-xs\">\n" +
+    "                    <h5>Subjects</h5>\n" +
+    "                    <div class=\"facet-group\">\n" +
+    "                        <div class=\"radio\" ng-class=\"{'disabled': subj.disabled}\" ng-repeat=\"subj in subjects\">\n" +
+    "                            <label>\n" +
+    "                                <input type=\"checkbox\" ng-model=\"db.subjects[subj.subject]\" ng-disabled=\"subj.disabled\">\n" +
+    "                                {{subj.subject}} ({{subj.total}})\n" +
+    "                            </label>\n" +
+    "                        </div>\n" +
     "                    </div>\n" +
     "                </div>\n" +
-    "            </div>\n" +
     "\n" +
-    "            <div class=\"form-group hidden-xs\">\n" +
-    "                <h5>Types</h5>\n" +
-    "                <div class=\"facet-group\">\n" +
-    "                    <div class=\"radio\" ng-class=\"{'disabled': type.disabled}\" ng-repeat=\"type in types\">\n" +
-    "                        <label>\n" +
-    "                            <input type=\"checkbox\" ng-model=\"db.types[type.type]\"  ng-disabled=\"type.disabled\">\n" +
-    "                            {{type.type}} ({{type.total}})\n" +
-    "                        </label>\n" +
+    "                <div class=\"form-group hidden-xs\">\n" +
+    "                    <h5>Types</h5>\n" +
+    "                    <div class=\"facet-group\">\n" +
+    "                        <div class=\"radio\" ng-class=\"{'disabled': type.disabled}\" ng-repeat=\"type in types\">\n" +
+    "                            <label>\n" +
+    "                                <input type=\"checkbox\" ng-model=\"db.types[type.type]\"  ng-disabled=\"type.disabled\">\n" +
+    "                                {{type.type}} ({{type.total}})\n" +
+    "                            </label>\n" +
+    "                        </div>\n" +
     "                    </div>\n" +
     "                </div>\n" +
-    "            </div>\n" +
-    "            <div class=\"form-group\">\n" +
-    "                <button type=\"button\" class=\"btn btn-block btn-primary\" ng-click=\"resetFilters()\"><span class=\"fa fa-fw fa-refresh\"></span> Reset filters</button>\n" +
-    "            </div>\n" +
-    "        </form>\n" +
-    "    </div>\n" +
-    "    <div class=\"col-md-9 col-md-pull-3 databases-list-container\">\n" +
-    "        <p>\n" +
-    "        <h4 class=\"text-right\">Showing {{pager.firstItem}} - {{pager.lastItem}} of {{pager.totalItems}} results</h4>\n" +
-    "        <div ng-if=\"!!activeFilters.startsWith || activeFilters.subjects || activeFilters.types\">\n" +
-    "\n" +
-    "        <ol class=\"breadcrumb facetcrumb\">\n" +
-    "            <li ng-if=\"!!activeFilters.startsWith\"><strong>Starts with:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"db.startsWith = ''\">\"{{db.startsWith}}\" <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "            <li ng-if=\"activeFilters.subjects\"><strong>Subjects:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"db.subjects[subject] = false\" ng-repeat=\"(subject, key) in db.subjects\">{{subject}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "            <li ng-if=\"activeFilters.types\"><strong>Types:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"db.types[type] = false\" ng-repeat=\"(type, key) in db.types\">{{type}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "            <li class=\"pull-right\"><button type=\"button\" class=\"btn btn-primary btn-small reset-btn\" title=\"Reset filters\" ng-click=\"resetFilters()\"><i class=\"fa fa-refresh\"></i></button></li>\n" +
-    "        </ol>\n" +
+    "                <div class=\"form-group\">\n" +
+    "                    <button type=\"button\" class=\"btn btn-block btn-primary\" ng-click=\"resetFilters()\"><span class=\"fa fa-fw fa-refresh\"></span> Reset filters</button>\n" +
+    "                </div>\n" +
+    "            </form>\n" +
     "        </div>\n" +
+    "        <div class=\"col-sm-9 col-sm-pull-3 databases-list-container\">\n" +
+    "            <p>\n" +
+    "            <h4 class=\"text-right\">Showing {{pager.firstItem}} - {{pager.lastItem}} of {{pager.totalItems}} results</h4>\n" +
+    "            <div ng-if=\"!!activeFilters.startsWith || activeFilters.subjects || activeFilters.types\">\n" +
+    "\n" +
+    "                <ol class=\"breadcrumb facetcrumb\">\n" +
+    "                    <li ng-if=\"!!activeFilters.startsWith\"><strong>Starts with:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"db.startsWith = ''\">\"{{db.startsWith}}\" <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                    <li ng-if=\"activeFilters.subjects\"><strong>Subjects:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"db.subjects[subject] = false\" ng-repeat=\"(subject, key) in db.subjects\">{{subject}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                    <li ng-if=\"activeFilters.types\"><strong>Types:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"db.types[type] = false\" ng-repeat=\"(type, key) in db.types\">{{type}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                    <li class=\"pull-right\"><button type=\"button\" class=\"btn btn-primary btn-small reset-btn\" title=\"Reset filters\" ng-click=\"resetFilters()\"><i class=\"fa fa-refresh\"></i></button></li>\n" +
+    "                </ol>\n" +
+    "            </div>\n" +
     "\n" +
     "\n" +
-    "        </p>\n" +
+    "            </p>\n" +
     "\n" +
-    "        <div class=\"text-center\">\n" +
-    "            <pagination class=\"pagination-sm\" ng-model=\"pager.page\" total-items=\"pager.totalItems\" max-size=\"pager.maxSize\" boundary-links=\"true\" rotate=\"false\" items-per-page=\"pager.perPage\" ng-change=\"pageChange()\" ng-if=\"pager.totalItems > pager.perPage\"></pagination>\n" +
-    "        </div>\n" +
+    "            <div class=\"text-center\">\n" +
+    "                <pagination class=\"pagination-sm\" ng-model=\"pager.page\" total-items=\"pager.totalItems\" max-size=\"pager.maxSize\" boundary-links=\"true\" rotate=\"false\" items-per-page=\"pager.perPage\" ng-change=\"pageChange()\" ng-if=\"pager.totalItems > pager.perPage\"></pagination>\n" +
+    "            </div>\n" +
     "\n" +
-    "        <div class=\"media animate-repeat\" ng-repeat=\"item in filteredDB | after:(pager.page-1)*pager.perPage | limitTo:20\">\n" +
-    "            <div class=\"media-body\">\n" +
+    "            <div class=\"media animate-repeat\" ng-repeat=\"item in filteredDB | after:(pager.page-1)*pager.perPage | limitTo:20\">\n" +
+    "                <div class=\"media-body\">\n" +
     "\n" +
-    "                <h4 class=\"media-heading\">\n" +
-    "                    <a ng-href=\"{{item.url}}\" title=\"{{item.title}}\" ng-bind-html=\"item.title | highlight:db.search\"></a>\n" +
-    "                    <!--<small ng-if=\"item.presentedBy\">({{item.presentedBy}})</small>-->\n" +
-    "                    <small ng-bind-html=\"item.coverage | highlight:db.search\"></small>\n" +
+    "                    <h4 class=\"media-heading\">\n" +
+    "                        <a ng-href=\"{{item.url}}\" title=\"{{item.title}}\" ng-bind-html=\"item.title | highlight:db.search\"></a>\n" +
+    "                        <!--<small ng-if=\"item.presentedBy\">({{item.presentedBy}})</small>-->\n" +
+    "                        <small ng-bind-html=\"item.coverage | highlight:db.search\"></small>\n" +
     "\n" +
-    "                    <small class=\"pull-right\">\n" +
-    "                        <span class=\"label label-success\" ng-if=\"item.hasFullText == 'A'\">All Full Text</span>\n" +
-    "                        <span class=\"label label-info\" ng-if=\"item.hasFullText == 'P'\">Primarily Full Text</span>\n" +
-    "                        <span class=\"label label-warning\" ng-if=\"item.hasFullText == 'S'\">Some Full Text</span>\n" +
-    "                        <span class=\"label label-danger\" ng-if=\"item.hasFullText == 'N'\">No Full Text</span>\n" +
-    "                    </small>\n" +
-    "                </h4>\n" +
+    "                        <small class=\"pull-right\">\n" +
+    "                            <span class=\"label label-success\" ng-if=\"item.hasFullText == 'A'\">All Full Text</span>\n" +
+    "                            <span class=\"label label-info\" ng-if=\"item.hasFullText == 'P'\">Primarily Full Text</span>\n" +
+    "                            <span class=\"label label-warning\" ng-if=\"item.hasFullText == 'S'\">Some Full Text</span>\n" +
+    "                            <span class=\"label label-danger\" ng-if=\"item.hasFullText == 'N'\">No Full Text</span>\n" +
+    "                        </small>\n" +
+    "                    </h4>\n" +
     "\n" +
-    "                <p class=\"text-justify\" ng-bind-html=\"item.description | highlight:db.search\"></p>\n" +
+    "                    <p class=\"text-justify\" ng-bind-html=\"item.description | highlight:db.search\"></p>\n" +
     "\n" +
-    "                <div ng-if=\"item.location\">\n" +
-    "                    <strong>Access:</strong> {{item.location}}\n" +
-    "                </div>\n" +
-    "                <div class=\"databases-details\" ng-if=\"(item.subjects | where:{type:1}).length > 0\">\n" +
-    "                    <strong>Primary subjects: </strong>\n" +
-    "                    <span ng-repeat=\"subj in item.subjects | where:{type:1}\" ng-bind-html=\"subj.subject | highlight:db.search\"></span>\n" +
-    "                </div>\n" +
-    "                <div class=\"databases-details\" ng-if=\"item.types\">\n" +
-    "                    <strong>Types of material: </strong>\n" +
-    "                    <span ng-repeat=\"type in item.types\" ng-bind-html=\"type.type | highlight:db.search\"></span>\n" +
-    "                </div>\n" +
-    "                <div class=\"databases-details\" ng-if=\"item.vendor\">\n" +
-    "                    <strong>Vendor: </strong>\n" +
-    "                    <span ng-bind-html=\"item.vendor | highlight:db.search\"></span>\n" +
-    "                </div>\n" +
-    "                <div class=\"scout-coverage\">\n" +
-    "                    <strong>Scout coverage: </strong>\n" +
+    "                    <div ng-if=\"item.location\">\n" +
+    "                        <strong>Access:</strong> {{item.location}}\n" +
+    "                    </div>\n" +
+    "                    <div class=\"databases-details\" ng-if=\"(item.subjects | where:{type:1}).length > 0\">\n" +
+    "                        <strong>Primary subjects: </strong>\n" +
+    "                        <span ng-repeat=\"subj in item.subjects | where:{type:1}\" ng-bind-html=\"subj.subject | highlight:db.search\"></span>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"databases-details\" ng-if=\"item.types\">\n" +
+    "                        <strong>Types of material: </strong>\n" +
+    "                        <span ng-repeat=\"type in item.types\" ng-bind-html=\"type.type | highlight:db.search\"></span>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"databases-details\" ng-if=\"item.vendor\">\n" +
+    "                        <strong>Vendor: </strong>\n" +
+    "                        <span ng-bind-html=\"item.vendor | highlight:db.search\"></span>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"scout-coverage\">\n" +
+    "                        <strong>Scout coverage: </strong>\n" +
     "                    <span class=\"fa text-info\" ng-class=\"{'fa-circle': item.notInEDS == 'Y', 'fa-adjust': item.notInEDS == 'P', 'fa-circle-o': !item.notInEDS}\">\n" +
     "                    </span>\n" +
-    "                    <span ng-if=\"item.notInEDS == 'Y'\">Full</span>\n" +
-    "                    <span  ng-if=\"item.notInEDS == 'P'\">Partial</span>\n" +
-    "                    <span  ng-if=\"!item.notInEDS\">Not in Scout</span>\n" +
+    "                        <span ng-if=\"item.notInEDS == 'Y'\">Full</span>\n" +
+    "                        <span  ng-if=\"item.notInEDS == 'P'\">Partial</span>\n" +
+    "                        <span  ng-if=\"!item.notInEDS\">Not in Scout</span>\n" +
+    "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
-    "        </div>\n" +
     "\n" +
-    "        <div class=\"text-center\">\n" +
-    "            <pagination class=\"pagination-sm\" ng-model=\"pager.page\" total-items=\"pager.totalItems\" max-size=\"pager.maxSize\" boundary-links=\"true\" rotate=\"false\" items-per-page=\"pager.perPage\" ng-change=\"pageChange()\" ng-if=\"pager.totalItems > pager.perPage\"></pagination>\n" +
-    "        </div>\n" +
+    "            <div class=\"text-center\">\n" +
+    "                <pagination class=\"pagination-sm\" ng-model=\"pager.page\" total-items=\"pager.totalItems\" max-size=\"pager.maxSize\" boundary-links=\"true\" rotate=\"false\" items-per-page=\"pager.perPage\" ng-change=\"pageChange()\" ng-if=\"pager.totalItems > pager.perPage\"></pagination>\n" +
+    "            </div>\n" +
     "\n" +
-    "        <div class=\"alert alert-warning text-center\" role=\"alert\" ng-show=\"pager.totalItems < 1\">\n" +
-    "            <h2>No results found <span ng-if=\"db.search\"> for \"{{db.search}}\"</span></h2>\n" +
+    "            <div class=\"alert alert-warning text-center\" role=\"alert\" ng-show=\"pager.totalItems < 1\">\n" +
+    "                <h2>No results found <span ng-if=\"db.search\"> for \"{{db.search}}\"</span></h2>\n" +
+    "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>");
 }]);
+
+/**
+ * @ngdoc overview
+ * @name index
+ *
+ * @description
+ * # Databases app UI.
+ *
+ * ## Default route: [/#/databases](http://www.lib.ua.edu/#/databases)
+ */
+
+/**
+ * @ngdoc overview
+ * @name databases
+ *
+ *
+ * @requires ngRoute
+ * @requires ngResource
+ * @requires ngAnimate
+ * @requires ngSanitize
+ * @requires ui-bootstrap
+ * @requires angular-filter
+ * @requires duScroll
+ * @requires ualib-ui
+ *
+ * @description
+ * # Databases app UI.
+ * ## Default route: [/#/databases](http://www.lib.ua.edu/#/databases)
+ */
 
 angular.module('ualib.databases', [
     'ngRoute',
@@ -6174,7 +6223,18 @@ angular.module('ualib.databases', [
     'ualib.ui',
     'databases.templates'
 ])
-
+    /**
+     * @ngdoc object
+     * @name databases.constant:DB_PROXY_PREPEND_URL
+     *
+     * @description
+     * Proxy URL to prefix database links
+     *
+     * | constant | value |
+     * |----------|-------|
+     * | DB_PROXY_PREPEND_URL | http://libdata.lib.ua.edu/login?url= |
+     *
+     */
     .constant('DB_PROXY_PREPEND_URL', 'http://libdata.lib.ua.edu/login?url=');
 
 
@@ -6183,12 +6243,39 @@ angular.module('ualib.databases', [
 angular.module('ualib.databases')
 
 /**
- * Transform the JSON response - this allows the transformed values to be cached via Angular's $resource service.
+ * @ngdoc service
+ * @name databases.databasesFactory
+ *
+ * @requires $resource
+ * @requires $http
+ * @requires $filter
+ * @requires databases.constant:DB_PROXY_PREPEND_URL
+ *
+ * @description
+ * Factory service to retrieve databases from the API.
+ *
  */
     .factory('databasesFactory', ['$resource', '$http', '$filter', 'DB_PROXY_PREPEND_URL', function($resource, $http, $filter, DB_PROXY_PREPEND_URL){
 
         //TODO: centralize this function so it can be used with all apps
-        // Extend the default responseTransform array - Straight from Angular 1.2.8 API docs - https://docs.angularjs.org/api/ng/service/$http#overriding-the-default-transformations-per-request
+
+        /**
+         * @ngdoc function
+         * @name databases.databasesFactory#appendTransform
+         * @methodOf databases.databasesFactory
+         *
+         * @param {Array.<function()>} defaults Default `Array` of `$http` transform response transform functions from Angular - will always be `$http.defaults.transformResponse`
+         * @param {function()} transform Transform function to extend the `$http.defaults.transformResponse` Array with.
+         *
+         * @description
+         * <span class="label label-warning">Private</span>
+         * Extend the default responseTransform array - Straight from Angular 1.2.8 API docs - https://docs.angularjs.org/api/ng/service/$http#overriding-the-default-transformations-per-request
+         *
+         * Doing this allows custom modifications of the JSON response from the API to be cached after the initial `$resource` call, instead of
+         * performing these modifications on every `$digest()` cycle (e.g., make modifications once, instead of every time the databases list is refreshed).
+         *
+         * @returns {Array.<function()>} Returns the new `transformResponse` Array
+         */
         function appendTransform(defaults, transform) {
 
             // We can't guarantee that the default transformation is an array
@@ -6264,10 +6351,32 @@ angular.module('ualib.databases')
             })
     }])
 
+    /**
+     * @ngdoc controller
+     * @name databases.Controller:DatabasesListCtrl
+     *
+     * @requires $scope
+     * @requires $filter
+     * @requires $location
+     * @requires $document
+     * @requires databases.databasesFactory
+     *
+     *
+     * @description
+     * Controller for the databases route (`/#/databases`)
+     */
+
     .controller('DatabasesListCtrl', ['$scope', 'databases', '$filter' ,'$location' ,'$document', function($scope, db, $filter, $location, $document){
         var databases = [];
 
-
+        /**
+         * @ngdoc object
+         * @name databases.Controller:DatabasesListCtrl:$scope.numAlpha
+         * @propertyOf databases.Controller:DatabasesListCtrl
+         *
+         * @description
+         * `Array` of characters `a-z` for `Starts With` filter UI
+         */
         $scope.numAlpha = "abcdefghijklmnopqrstuvwxyz".toUpperCase().split("");
         $scope.numAlpha.unshift('0-9');
 
@@ -14830,135 +14939,151 @@ angular.module('ualib.musicSearch.templates', ['videos/videos-list.tpl.html']);
 
 angular.module("videos/videos-list.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("videos/videos-list.tpl.html",
-    "<div class=\"jumbotron bg-transparent\">\n" +
-    "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-7\">\n" +
-    "            <h1>Video Database</h1>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-5\">\n" +
-    "            <div class=\"well\">\n" +
-    "                <p class=\"lead\"> Videos are available through the Music Library</p>\n" +
-    "                <a href=\"https://wwwdev2.lib.ua.edu/libraries-and-collections/music-library/\" class=\"btn btn-primary\" title=\"Music Library\">Get more info <span class=\"fa fa-fw fa-info-circle\"></span></a>\n" +
+    "<div class=\"jumbotron-header\">\n" +
+    "    <div class=\"jumbotron\">\n" +
+    "        <div class=\"container\">\n" +
+    "            <div class=\"row\">\n" +
+    "                <div class=\"col-md-7\">\n" +
+    "                    <h1>Video Database</h1>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-5\">\n" +
+    "                    <div class=\"well\">\n" +
+    "                        <p class=\"lead\"> Videos are available through the Music Library</p>\n" +
+    "                        <a href=\"https://wwwdev2.lib.ua.edu/libraries-and-collections/music-library/\" class=\"btn btn-primary\" title=\"Music Library\">Get more info <span class=\"fa fa-fw fa-info-circle\"></span></a>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
     "\n" +
-    "<div class=\"row\">\n" +
-    "    <div class=\"col-md-3 col-md-push-9\">\n" +
-    "        <form class=\"facets-form\">\n" +
-    "            <div class=\"form-group\">\n" +
+    "<div class=\"container\">\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-3 col-md-push-9\">\n" +
+    "            <form class=\"facets-form\">\n" +
+    "                <div class=\"form-group\">\n" +
     "                <span class=\"page-header\">\n" +
     "                    <h4>Filter Videos By</h4>\n" +
     "                </span>\n" +
-    "            </div>\n" +
-    "            <div class=\"form-group\">\n" +
-    "                <input type=\"text\" class=\"form-control\" ng-model=\"vid.search\" placeholder=\"Keyword search\">\n" +
-    "            </div>\n" +
+    "                </div>\n" +
+    "                <div class=\"form-group\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" ng-model=\"vid.search\" placeholder=\"Keyword search\">\n" +
+    "                </div>\n" +
     "\n" +
-    "            <div class=\"form-group hidden-xs\">\n" +
-    "                <h5>Format</h5>\n" +
-    "                <div class=\"facet-group\">\n" +
-    "                    <div class=\"btn-group btn-group-justified\">\n" +
-    "                        <label class=\"btn btn-default\" ng-model=\"vid.format\" btn-radio=\"''\">All</label>\n" +
-    "                        <label class=\"btn btn-default\" ng-model=\"vid.format\" btn-radio=\"'dvd'\">DVD</label>\n" +
-    "                        <label class=\"btn btn-default\" ng-model=\"vid.format\" btn-radio=\"'vcr'\">VHS</label>\n" +
+    "                <div class=\"form-group hidden-xs\">\n" +
+    "                    <h5>Format</h5>\n" +
+    "                    <div class=\"facet-group\">\n" +
+    "                        <div class=\"btn-group btn-group-justified\">\n" +
+    "                            <label class=\"btn btn-default\" ng-model=\"vid.format\" btn-radio=\"''\">All</label>\n" +
+    "                            <label class=\"btn btn-default\" ng-model=\"vid.format\" btn-radio=\"'dvd'\">DVD</label>\n" +
+    "                            <label class=\"btn btn-default\" ng-model=\"vid.format\" btn-radio=\"'vcr'\">VHS</label>\n" +
+    "                        </div>\n" +
     "                    </div>\n" +
     "                </div>\n" +
-    "            </div>\n" +
     "\n" +
-    "            <div class=\"form-group hidden-xs\">\n" +
-    "                <h5>Genre</h5>\n" +
-    "                <div class=\"facet-group\">\n" +
-    "                    <div class=\"radio\">\n" +
-    "                        <label>\n" +
-    "                            <input type=\"radio\" ng-model=\"vid.genre\" value=\"\">\n" +
-    "                            All Genres\n" +
-    "                        </label>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"radio\" ng-repeat=\"genre in genres\">\n" +
-    "                        <label>\n" +
-    "                            <input type=\"radio\" ng-model=\"vid.genre\" ng-value=\"genre.label\">\n" +
-    "                            {{genre.label}}\n" +
-    "                        </label>\n" +
+    "                <div class=\"form-group hidden-xs\">\n" +
+    "                    <h5>Genre</h5>\n" +
+    "                    <div class=\"facet-group\">\n" +
+    "                        <div class=\"radio\">\n" +
+    "                            <label>\n" +
+    "                                <input type=\"radio\" ng-model=\"vid.genre\" value=\"\">\n" +
+    "                                All Genres\n" +
+    "                            </label>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"radio\" ng-repeat=\"genre in genres\">\n" +
+    "                            <label>\n" +
+    "                                <input type=\"radio\" ng-model=\"vid.genre\" ng-value=\"genre.label\">\n" +
+    "                                {{genre.label}}\n" +
+    "                            </label>\n" +
+    "                        </div>\n" +
     "                    </div>\n" +
     "                </div>\n" +
-    "            </div>\n" +
     "\n" +
-    "            <div class=\"form-group hidden-xs\">\n" +
-    "                <h5>Language</h5>\n" +
-    "                <div class=\"facet-group\">\n" +
-    "                    <div class=\"radio\">\n" +
-    "                        <label>\n" +
-    "                            <input type=\"radio\" ng-model=\"vid.language\" value=\"\">\n" +
-    "                            All Languages\n" +
-    "                        </label>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"radio\" ng-repeat=\"lang in languages\">\n" +
-    "                        <label>\n" +
-    "                            <input type=\"radio\" ng-model=\"vid.language\" ng-value=\"lang.label\">\n" +
-    "                            {{lang.label}}\n" +
-    "                        </label>\n" +
+    "                <div class=\"form-group hidden-xs\">\n" +
+    "                    <h5>Language</h5>\n" +
+    "                    <div class=\"facet-group\">\n" +
+    "                        <div class=\"radio\">\n" +
+    "                            <label>\n" +
+    "                                <input type=\"radio\" ng-model=\"vid.language\" value=\"\">\n" +
+    "                                All Languages\n" +
+    "                            </label>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"radio\" ng-repeat=\"lang in languages\">\n" +
+    "                            <label>\n" +
+    "                                <input type=\"radio\" ng-model=\"vid.language\" ng-value=\"lang.label\">\n" +
+    "                                {{lang.label}}\n" +
+    "                            </label>\n" +
+    "                        </div>\n" +
     "                    </div>\n" +
     "                </div>\n" +
-    "            </div>\n" +
-    "            <div class=\"form-group\">\n" +
-    "                <button type=\"button\" class=\"btn btn-block btn-primary\" ng-click=\"resetFilters()\"><span class=\"fa fa-fw fa-refresh\"></span> Reset filters</button>\n" +
-    "            </div>\n" +
-    "        </form>\n" +
-    "    </div>\n" +
-    "    <div class=\"col-md-9 col-md-pull-3 videos-list-container\">\n" +
-    "        <p>\n" +
-    "        <h4 class=\"text-right\">Showing {{pager.totalItems}} results</h4>\n" +
-    "        <div ng-if=\"activeFilters.format || activeFilters.genre || activeFilters.language\">\n" +
-    "\n" +
-    "            <ol class=\"breadcrumb facetcrumb\">\n" +
-    "                <li ng-if=\"activeFilters.format\"><strong>Format:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"vid.format = ''\">{{vid.format}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "                <li ng-if=\"activeFilters.genre\"><strong>Genre:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"vid.genre = ''\">{{vid.genre}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "                <li ng-if=\"activeFilters.language\"><strong>Language:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"vid.language = ''\">{{vid.language}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "                <li class=\"pull-right\"><button type=\"button\" class=\"btn btn-primary btn-small reset-btn\" title=\"Reset filters\" ng-click=\"resetFilters()\"><i class=\"fa fa-refresh\"></i></button></li>\n" +
-    "            </ol>\n" +
+    "                <div class=\"form-group\">\n" +
+    "                    <button type=\"button\" class=\"btn btn-block btn-primary\" ng-click=\"resetFilters()\"><span class=\"fa fa-fw fa-refresh\"></span> Reset filters</button>\n" +
+    "                </div>\n" +
+    "            </form>\n" +
     "        </div>\n" +
+    "        <div class=\"col-md-9 col-md-pull-3 videos-list-container\">\n" +
+    "            <p>\n" +
+    "            <h4 class=\"text-right\">Showing {{pager.totalItems}} results</h4>\n" +
+    "            <div ng-if=\"activeFilters.format || activeFilters.genre || activeFilters.language\">\n" +
+    "\n" +
+    "                <ol class=\"breadcrumb facetcrumb\">\n" +
+    "                    <li ng-if=\"activeFilters.format\"><strong>Format:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"vid.format = ''\">{{vid.format}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                    <li ng-if=\"activeFilters.genre\"><strong>Genre:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"vid.genre = ''\">{{vid.genre}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                    <li ng-if=\"activeFilters.language\"><strong>Language:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"vid.language = ''\">{{vid.language}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                    <li class=\"pull-right\"><button type=\"button\" class=\"btn btn-primary btn-small reset-btn\" title=\"Reset filters\" ng-click=\"resetFilters()\"><i class=\"fa fa-refresh\"></i></button></li>\n" +
+    "                </ol>\n" +
+    "            </div>\n" +
     "\n" +
     "\n" +
-    "        </p>\n" +
+    "            </p>\n" +
     "\n" +
-    "        <div class=\"media animate-repeat\" ng-repeat=\"item in filteredvidoes | after:(pager.page-1)*pager.perPage | limitTo:20\">\n" +
-    "            <div class=\"media-body\">\n" +
+    "            <div class=\"media animate-repeat\" ng-repeat=\"item in filteredvidoes | after:(pager.page-1)*pager.perPage | limitTo:20\">\n" +
+    "                <div class=\"media-body\">\n" +
     "\n" +
-    "                <h4 class=\"media-heading\">\n" +
-    "                    <span ng-bind-html=\"item.title | highlight:vid.search\"></span>\n" +
+    "                    <h4 class=\"media-heading\">\n" +
+    "                        <span ng-bind-html=\"item.title | highlight:vid.search\"></span>\n" +
     "\n" +
-    "                    <small>\n" +
-    "                        <span ng-bind-html=\"item.series_title | highlight:vid.search\"></span>\n" +
-    "                    </small>\n" +
-    "                </h4>\n" +
+    "                        <small>\n" +
+    "                            <span ng-bind-html=\"item.series_title | highlight:vid.search\"></span>\n" +
+    "                        </small>\n" +
+    "                    </h4>\n" +
     "\n" +
+    "                    <div class=\"details-context\">\n" +
+    "                        <span ng-bind-html=\"item.call_number | highlight:vid.search\"></span>\n" +
+    "                        <span ng-bind-html=\"item.genre | highlight:vid.genre\" ng-if=\"item.genre\"></span>\n" +
+    "                        <span ng-bind-html=\"item.language | highlight:vid.language\" ng-if=\"item.language\"></span>\n" +
+    "                    </div>\n" +
+    "\n" +
+    "                    <p class=\"text-justify\" ng-bind-html=\"item.notes | highlight:vid.search\"></p>\n" +
+    "                </div>\n" +
     "                <div class=\"details-context\">\n" +
-    "                    <span ng-bind-html=\"item.call_number | highlight:vid.search\"></span>\n" +
-    "                    <span ng-bind-html=\"item.genre | highlight:vid.genre\" ng-if=\"item.genre\"></span>\n" +
-    "                    <span ng-bind-html=\"item.language | highlight:vid.language\" ng-if=\"item.language\"></span>\n" +
+    "                    <span ng-bind-html=\"item.keywords | highlight:vid.search\"></span>\n" +
     "                </div>\n" +
-    "\n" +
-    "                <p class=\"text-justify\" ng-bind-html=\"item.notes | highlight:vid.search\"></p>\n" +
     "            </div>\n" +
-    "            <div class=\"details-context\">\n" +
-    "                <span ng-bind-html=\"item.keywords | highlight:vid.search\"></span>\n" +
+    "\n" +
+    "\n" +
+    "            <div class=\"text-center\">\n" +
+    "                <pagination class=\"pagination-sm\" ng-model=\"pager.page\" total-items=\"pager.totalItems\" max-size=\"pager.maxSize\" boundary-links=\"true\" rotate=\"false\" items-per-page=\"pager.perPage\" ng-change=\"pageChange()\" ng-if=\"pager.totalItems > pager.perPage\"></pagination>\n" +
     "            </div>\n" +
-    "        </div>\n" +
     "\n" +
-    "\n" +
-    "        <div class=\"text-center\">\n" +
-    "            <pagination class=\"pagination-sm\" ng-model=\"pager.page\" total-items=\"pager.totalItems\" max-size=\"pager.maxSize\" boundary-links=\"true\" rotate=\"false\" items-per-page=\"pager.perPage\" ng-change=\"pageChange()\" ng-if=\"pager.totalItems > pager.perPage\"></pagination>\n" +
-    "        </div>\n" +
-    "\n" +
-    "        <div class=\"alert alert-warning text-center\" role=\"alert\" ng-show=\"pager.totalItems < 1\">\n" +
-    "            <h2>No results found <span ng-if=\"vid.search\"> for \"{{vid.search}}\"</span></h2>\n" +
+    "            <div class=\"alert alert-warning text-center\" role=\"alert\" ng-show=\"pager.totalItems < 1\">\n" +
+    "                <h2>No results found <span ng-if=\"vid.search\"> for \"{{vid.search}}\"</span></h2>\n" +
+    "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>");
 }]);
-;angular.module('ualib.musicSearch', [
+;/**
+ * @ngdoc overview
+ * @name index
+ *
+ * @description
+ * # The Music Library's Videos search application.
+ * ## URL route [/#/videos](http://www.lib.ua.edu/#/videos)
+ *
+ */
+
+angular.module('ualib.musicSearch', [
     'ngRoute',
     'ngResource',
     'ngAnimate',
@@ -14972,23 +15097,68 @@ angular.module("videos/videos-list.tpl.html", []).run(["$templateCache", functio
 
 angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musicSearch')
 
-/**
- * Transform the JSON response - this allows the transformed values to be cached via Angular's $resource service.
- */
+    /**
+     * @ngdoc service
+     * @name videos.videosFactory
+     *
+     * @requires ng.$resource
+     *
+     * @param {object} params Params object to pass to videos API
+     * @param {string} params.videos videos to show
+     *
+     * @description
+     * Angular Service to call musicSearch API
+     *
+     * @returns {$promise} A $resource promise
+     *
+     * @example
+     * videosFactory
+     *      .get({videos: 'showall'})
+     *      .$promise.then(function(data){
+     *          return data;
+     *      });
+     */
+
     .factory('videosFactory', ['$resource', function($resource){
+
         return $resource('//wwwdev2.lib.ua.edu/musicsearch/api/:videos', {videos: 'showall'}, {
             get: {
                 method: 'GET',
                 cache: true
             }
         });
-    }]);;angular.module('ualib.musicSearch')
+    }]);;/**
+ * @ngdoc overview
+ * @name videos
+ *
+ * @requires ngRoute
+ * @requires ngResource
+ * @requires ngAnimate
+ * @requires ngSanitize
+ * @requires angular-filter
+ * @requires ui-bootstrap
+ * @requires duScroll
+ * @requires ualib-ui
+ *
+ * @description
+ * # The Music Library's Videos search application.
+ * ## URL route [/#/videos](http://www.lib.ua.edu/#/videos)
+ *
+ */
+angular.module('ualib.musicSearch')
 
     .config(['$routeProvider', function($routeProvider){
         $routeProvider
             .when('/videos', {
                 reloadOnSearch: false,
                 resolve: {
+                    /**
+                     * @ngdoc service
+                     * @name videos.filters
+                     *
+                     * @description
+                     * Gets filters available for the videos search UI
+                     */
                     filters: ['videosFactory', function(videosFactory){
                         return videosFactory.get({videos: 'genres'})
                             .$promise.then(function(data){
@@ -15011,6 +15181,13 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
                                 });
                             });
                     }],
+                    /**
+                     * @ngdoc service
+                     * @name videos.videos
+                     *
+                     * @description
+                     * Gets the list of videos available in the Music Library
+                     */
                     videos: ['videosFactory', function(videosFactory){
                         return videosFactory.get()
                             .$promise.then(function(data){
@@ -15031,6 +15208,21 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
             });
     }])
 
+    /**
+     * @ngdoc controller
+     * @name videos.Controller:VideosListCtrl
+     *
+     * @requires $scope
+     * @requires $location
+     * @requires $document
+     * @requires $filter
+     * @requires videos.Resolve:filters
+     * @requires videos.Resolve:videos
+     *
+     * @description
+     * Controller for the `videos` route.
+     */
+
     .controller('VideosListCtrl', ['$scope', 'videos', 'filters', '$filter' ,'$location' ,'$document', function($scope, vid, filters, $filter, $location, $document){
         var videos = [];
 
@@ -15038,7 +15230,7 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
         filters.$promise.then(function(filterData){
             $scope.genres = filterData.genres;
             $scope.languages = filterData.languages;
-            
+
             vid.$promise.then(function(data){
                 videos = data.results;
 
@@ -15082,7 +15274,14 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
             scopeToParams(newParams);
         }, true);
 
-
+        /**
+         * @ngdoc method
+         * @name videos.Controller:VideosListCtrl#$scope.resetFilters
+         * @methodOf videos.Controller:VideosListCtrl
+         *
+         * @description
+         * Method, exposed to `$scope`, that will reset the filters/pager to their default values.
+         */
         $scope.resetFilters = function(){
             $scope.vid = {
                 genre: '',
@@ -15098,6 +15297,15 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
             };
         };
 
+        /**
+         * @ngdoc method
+         * @name videos.Controller:VideosListCtrl#$scope.pageChange
+         * @methodOf videos.Controller:VideosListCtrl
+         *
+         * @description
+         * Method, exposed to `$scope`, that is triggered when navigating to another page.
+         * Once triggered, it will bind the new page value to the URI params and auto-scroll to the top of the page.
+         */
         $scope.pageChange = function(){
 
             scopeToParams({page: $scope.pager.page});
@@ -15107,6 +15315,12 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
         $scope.$on('$destroy', function(){
             filterWatcher();
         });
+
+        /**
+         * Maps Angular $scope variables to URI query params
+         *
+         * `$scope.tasty='chimichangas'` gets mapped to `http://url.com?tasty=chimichangas`
+         */
 
         function scopeToParams(scopeVals){
             angular.forEach(scopeVals, function(val, key){
@@ -15133,6 +15347,12 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
                 }
             });
         }
+
+        /**
+         * Maps URI query params to Angular $scope object
+         *
+         * `http://url.com?tasty=chimichangas` gets mapped to `$scope.tasty='chimichangas'`
+         */
 
         function paramsToScope(){
             var params = $location.search();
@@ -15176,7 +15396,7 @@ angular.module('oneSearch.templates', ['bento/bento.tpl.html', 'common/directive
 
 angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("bento/bento.tpl.html",
-    "<div class=\"bento-box-container\">\n" +
+    "<div class=\"container bento-box-container\">\n" +
     "    <div class=\"bento-box-menu-container hidden-sm hidden-xs\">\n" +
     "        <nav class=\"bento-box-menu\" ui-scrollfix=\"+0\">\n" +
     "            <ul class=\"nav nav-justified\">\n" +
@@ -15477,7 +15697,76 @@ angular.module("common/engines/scout/scout.tpl.html", []).run(["$templateCache",
  * @ngdoc overview
  * @name index
  * @description
- * #test
+ * # Quick Start
+ *
+ * Run the following commands to install:
+ *
+ * ```shell
+ * npm install
+ * bower install
+ * ```
+ *
+ * <div class="alert alert-warning">
+ *     If you are unfamiliar with **Node.js**, **Grunt**, or **Bower** tools *or* have not installed them on your computer,
+ *     read through the instructions in the [Getting Started](#getting-started) section.
+ * </div>
+ *
+ * # Getting Started
+ *
+ * This package requires[Node.js](http://nodejs.org/) - an application platform which many development and automation tools may be run.
+ * Download [Node.js](http://nodejs.org/download/) and install it on your computer.
+ *
+ * > The **Node.js** platform is used to run development tools such as [Grunt](#getting-started_install-grunt) and [Bower](#getting-started_install-bower)
+ *
+ * Once `Node.js` is installed, use the `npm` (node package manager) command to install this project's node dependencies:
+ *
+ * ```shell
+ * npm install
+ * ```
+ *
+ * <div class="alert alert-info">
+ *     When the [npm install](https://docs.npmjs.com/cli/install) command is run without a package (e.g., `npm install <package_name>`),
+ *     it installs dependencies listed in the `package.json` file (located in the root directory of this project).
+ * </div>
+ *
+ *
+ * ## Install Grunt
+ * *This package requires Grunt `~0.4.5`*
+ *
+ * If you have not already installed `Grunt` on your computer, use the following command to install the `Grunt Command Line Interface (grunt-cli)`:
+ *
+ * ```shell
+ * npm install -g grunt-cli
+ * ```
+ * <div class="alert alert-info">
+ *     The **-g** option installs `grunt-cli` globally on you computer. You only need to run this command once.
+ * </div>
+ *
+ * > If you haven't used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started](http://gruntjs.com/getting-started) guide,
+ * > as it explains how to create a [Gruntfile](http://gruntjs.com/sample-gruntfile) as well as install and use Grunt plugins.
+ *
+ *
+ * ## Install Bower
+ *
+ * If `Bower` is not globally installed on your computer, run the following command:
+ *
+ * ```shell
+ * npm install -g bower
+ * ```
+ *
+ * [Bower](http://bower.io/) is also a package manager for front-end web frameworks such as jQuery, Angular, and Bootstrap.
+ * This project uses Bower to manage front-end third-party and peer dependencies.
+ *
+ * Once installed, you can download this project's `Bower` dependencies with the following command:
+ *
+ * ```shell
+ * bower install
+ * ```
+ *
+ * <div class="alert alert-info">
+ *     Similar to `npm install` if `Bower's install` command is not given a package name (e.g., `bower install <package_name>`), it will install
+ *     dependencies listed in the `bower.json` config file.
+ * </div>
  */
 /**
  * @ngdoc overview
@@ -16165,7 +16454,7 @@ angular.module('oneSearch.common')
                 model: '=',
                 search: '='
             },
-            controller: function($scope, $window, $timeout, $document,  dataFactory){
+            controller: ['$scope', '$window', '$timeout', '$document', 'dataFactory', function($scope, $window, $timeout, $document,  dataFactory){
                 $scope.items = {};
                 $scope.filteredItems = [];
                 $scope.model = "";
@@ -16281,7 +16570,7 @@ angular.module('oneSearch.common')
                 $scope.gaTypeAhead = function(linkTitle){
                     ga('send', 'event', 'oneSearch', 'type_ahead_click', linkTitle);
                 };
-            },
+            }],
             link: function(scope, elem, attrs) {
                 scope.showSuggestions = false;
                 var suggestWatcher = scope.$watch('items', function(newVal, oldVal){
@@ -16430,10 +16719,11 @@ angular.module('engines.acumen', [])
      * @name engines.type:acumen:AcumenCtrl
      *
      * @description
+     * Adds a `type` property to each item to display, from genres that may return with the API results.
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('AcumenCtrl', function($scope, $filter){
+    .controller('AcumenCtrl', ['$scope', '$filter', function($scope, $filter){
         var items = $scope.items;
 
         for (var i = 0, len = items.length; i < len; i++) {
@@ -16443,7 +16733,7 @@ angular.module('engines.acumen', [])
                 else items[i].type = items[i].type.sort().shift();
             }
         }
-    });
+    }]);
 angular.module('engines.catalog', [])
 
     /**
@@ -16504,7 +16794,7 @@ angular.module('engines.catalog', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('CatalogCtrl', function($scope, $filter){
+    .controller('CatalogCtrl', ['$scope', '$filter', function($scope, $filter){
         var types = {
             bc: "Archive/Manuscript",
             cm: "Music Score",
@@ -16546,7 +16836,7 @@ angular.module('engines.catalog', [])
         }
 
         $scope.items = items;
-    });
+    }]);
 
 angular.module('engines.databases', [])
 
@@ -16630,7 +16920,7 @@ angular.module('engines.ejournals', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('EjouralsCtrl', function($scope){
+    .controller('EjouralsCtrl', ['$scope', function($scope){
 
         var param;
         switch ($scope.mediaType){
@@ -16647,7 +16937,7 @@ angular.module('engines.ejournals', [])
         if (param){
             $scope.resourceLink = $scope.resourceLink.replace('SS_searchTypeAll=yes&SS_searchTypeBook=yes&SS_searchTypeJournal=yes&SS_searchTypeOther=yes', param);
         }
-    });
+    }]);
 /**
  * @ngdoc overview
  * @name engines
@@ -16995,7 +17285,7 @@ angular.module('engines.scout', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('ScoutCtrl', function($scope){
+    .controller('ScoutCtrl', ['$scope', function($scope){
         var title; // Title variable to bind to $scope. ".BibRelationships.IsPartOfRelationships" title is used if no item title is present.
         var items = $scope.items;
         for (var i = 0; i < items.length; i++){
@@ -17069,7 +17359,7 @@ angular.module('engines.scout', [])
         }
 
         $scope.resourceLink = angular.copy(link);
-    });
+    }]);
 angular.module('filters.nameFilter', [])
 
     .filter('nameFilter', ['$filter', function($filter){
@@ -46164,26 +46454,52 @@ angular.module("calendar/calendar.tpl.html", []).run(["$templateCache", function
 angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("hours-locations/hours-locations.tpl.html",
     "<!--<script src='//maps.googleapis.com/maps/api/js?sensor=false&key=AIzaSyCdXuKwZiDx5W2uP8plV5d-o-jLQ5UQtIQ&mid=z4A8-271j5C8.kowwE312jycE'></script>-->\n" +
-    "<div class=\"jumbotron bg-transparent\">\n" +
-    "    <h1>Hours &amp; Locations</h1>\n" +
-    "    <h2 class=\"hidden-xs hidden-sm\">{{library}}</h2>\n" +
-    "    <div class=\"dropdown multipage-menu visible-xs visible-sm\">\n" +
-    "        <button class=\"btn btn-default btn-lg dropdown-toggle\" id=\"locationMenu\"  type=\"button\">\n" +
-    "            {{library}}\n" +
-    "        </button>\n" +
-    "        <ul class=\"dropdown-menu nav nav-stacked hours-locations-menu\" role=\"menu\" aria-labelledby=\"locationMenu\">\n" +
-    "            <li><a href=\"#\" hours-href=\"{library: 'gorgas', month: 0}\">Gorgas</a>\n" +
-    "                <ul class=\"nav nav-stacked\">\n" +
-    "                    <li><a href=\"#\" hours-href=\"{library: 'music', month: 0}\">Music Library</a></li>\n" +
-    "                    <li><a href=\"#\" hours-href=\"{library: 'media', month: 0}\">Sanford Media Center</a></li>\n" +
-    "                    <li><a href=\"#\" hours-href=\"{library: 'williams', month: 0}\">Williams Americana Collection</a></li>\n" +
-    "                </ul>\n" +
-    "            </li>\n" +
-    "            <li><a href=\"#\" hours-href=\"{library: 'rodgers', month: 0}\">Rodgers</a></li>\n" +
-    "            <li><a href=\"#\" hours-href=\"{library: 'mclure', month: 0}\">McLure</a></li>\n" +
-    "            <li><a href=\"#\" hours-href=\"{library: 'hoole', month: 0}\">Hoole</a></li>\n" +
-    "            <li><a href=\"#\" hours-href=\"{library: 'bruno', month: 0}\">Bruno</a></li>\n" +
-    "        </ul>\n" +
+    "<div class=\"jumbotron-header\">\n" +
+    "    <div class=\"jumbotron\">\n" +
+    "        <div class=\"container\">\n" +
+    "            <div class=\"row\">\n" +
+    "                <div class=\"col-sm-8\">\n" +
+    "                    <h1>Hours & Locations</h1>\n" +
+    "                    <h2 class=\"hidden-xs hidden-sm\">{{library}}</h2>\n" +
+    "                    <div class=\"dropdown multipage-menu visible-xs visible-sm\">\n" +
+    "                        <button class=\"btn btn-default btn-lg dropdown-toggle\" id=\"locationMenu\"  type=\"button\">\n" +
+    "                            {{library}}\n" +
+    "                        </button>\n" +
+    "                        <ul class=\"dropdown-menu nav nav-stacked hours-locations-menu\" role=\"menu\" aria-labelledby=\"locationMenu\">\n" +
+    "                            <li><a href=\"#\" hours-href=\"{library: 'gorgas', month: 0}\">Gorgas</a>\n" +
+    "                                <ul class=\"nav nav-stacked\">\n" +
+    "                                    <li><a href=\"#\" hours-href=\"{library: 'music', month: 0}\">Music Library</a></li>\n" +
+    "                                    <li><a href=\"#\" hours-href=\"{library: 'media', month: 0}\">Sanford Media Center</a></li>\n" +
+    "                                    <li><a href=\"#\" hours-href=\"{library: 'williams', month: 0}\">Williams Americana Collection</a></li>\n" +
+    "                                </ul>\n" +
+    "                            </li>\n" +
+    "                            <li><a href=\"#\" hours-href=\"{library: 'rodgers', month: 0}\">Rodgers</a></li>\n" +
+    "                            <li><a href=\"#\" hours-href=\"{library: 'mclure', month: 0}\">McLure</a></li>\n" +
+    "                            <li><a href=\"#\" hours-href=\"{library: 'hoole', month: 0}\">Hoole</a></li>\n" +
+    "                            <li><a href=\"#\" hours-href=\"{library: 'bruno', month: 0}\">Bruno</a></li>\n" +
+    "                        </ul>\n" +
+    "                    </div>\n" +
+    "                    <ul class=\"list-unstyled fa-ul\" ng-if=\"contact\">\n" +
+    "                        <li ng-if=\"contact.email\"><span class=\"fa fa-li fa-envelope\"></span> <a ng-href=\"mailto:{{contact.email}}\">{{contact.email}}</a></li>\n" +
+    "                        <li ng-if=\"contact.phone\">\n" +
+    "                            <span class=\"fa fa-li fa-phone\"></span>\n" +
+    "                            <ul class=\"list-unstyled\">\n" +
+    "                                <li ng-repeat=\"phone in contact.phone\">\n" +
+    "                                    <span ng-if=\"phone.dept\">{{phone.dept}}: </span>\n" +
+    "                                    <a ng-href=\"tel:+1-205-{{phone.number}}\" title=\"{{library}} phone number\">{{phone.number}}</a>\n" +
+    "                                </li>\n" +
+    "                            </ul>\n" +
+    "                        </li>\n" +
+    "                    </ul>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-sm-4\">\n" +
+    "                    <div class=\"well\">\n" +
+    "                        <p class=\"lead\">What can {{library}} do for you?</p>\n" +
+    "                        <a ng-href=\"{{moreLink}}\" class=\"btn btn-primary\">Learn more <span class=\"fa fa-fw fa-info-circle\"></span></a>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
     "<div class=\"container\">\n" +
@@ -46206,6 +46522,7 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
     "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-9 col-md-pull-3\">\n" +
+    "\n" +
     "            <div class=\"row\">\n" +
     "                <div class=\"col-md-12\">\n" +
     "                    <div class=\"hours-calendar\"></div>\n" +
@@ -46214,7 +46531,7 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
     "\n" +
     "\n" +
     "            <div class=\"row\">\n" +
-    "                <div class=\"col-md-7\">\n" +
+    "                <div class=\"col-md-12\">\n" +
     "                    <div class=\"panel panel-default\">\n" +
     "                        <div class=\"panel-body\">\n" +
     "                            <ui-gmap-google-map center='center' zoom='zoom' id=\"map-canvas\" options=\"{disableDefaultUI: true}\">\n" +
@@ -46232,26 +46549,6 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
     "                        </span>\n" +
     "                                </div>\n" +
     "                            </form>\n" +
-    "                        </div>\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-5\">\n" +
-    "                    <div class=\"panel panel-default\">\n" +
-    "                        <div class=\"panel-heading\">Contact</div>\n" +
-    "                        <div class=\"panel-body\">\n" +
-    "                            <ul class=\"list-unstyled fa-ul\" ng-if=\"contact\">\n" +
-    "                                <li ng-if=\"contact.email\"><span class=\"fa fa-li fa-envelope\"></span> <a ng-href=\"mailto:{{contact.email}}\">{{contact.email}}</a></li>\n" +
-    "                                <li ng-if=\"contact.phone\">\n" +
-    "                                    <span class=\"fa fa-li fa-phone\"></span>\n" +
-    "                                    <ul class=\"list-unstyled\">\n" +
-    "                                        <li ng-repeat=\"phone in contact.phone\">\n" +
-    "                                            <strong ng-if=\"phone.dept\">{{phone.dept}}: </strong>\n" +
-    "                                            {{phone.number}}\n" +
-    "                                        </li>\n" +
-    "                                    </ul>\n" +
-    "                                </li>\n" +
-    "                            </ul>\n" +
-    "                            <a ng-href=\"{{moreLink}}\" class=\"btn btn-block btn-default\">More about {{library}}</a>\n" +
     "                        </div>\n" +
     "                    </div>\n" +
     "                </div>\n" +
@@ -49546,150 +49843,158 @@ angular.module("news-item/news-card.tpl.html", []).run(["$templateCache", functi
 
 angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("news-item/news-item.tpl.html",
-    "<div class=\"page-header\">\n" +
-    "    <h1>{{newsItem.title}}</h1>\n" +
-    "</div>\n" +
-    "<div class=\"row\">\n" +
-    "    <div class=\"col-md-4 col-md-push-8\">\n" +
-    "        <div class=\"well\" ng-if=\"newsItem.contactName\">\n" +
-    "            <h4>For more information contact</h4>\n" +
-    "            <ul class=\"fa-ul\">\n" +
-    "                <li><span class=\"fa fa-user fa-li\"></span>{{newsItem.contactName}}</li>\n" +
-    "                <li><span class=\"fa fa-phone fa-li\"></span>{{newsItem.contactPhone}}</li>\n" +
-    "                <li><span class=\"fa fa-envelope fa-li\"></span>{{newsItem.contactEmail}}</li>\n" +
-    "            </ul>\n" +
-    "        </div>\n" +
-    "        <a href=\"#/news-exhibits\" class=\"btn btn-default\"><span class=\"fa fa-reply\"></span> See all news &amp; exhibits</a>\n" +
+    "<div class=\"container\">\n" +
+    "    <div class=\"page-header\">\n" +
+    "        <h1>{{newsItem.title}}</h1>\n" +
     "    </div>\n" +
-    "    <div class=\"col-md-8 col-md-pull-4\">\n" +
-    "        <div class=\"text-center news-carousel-container-small\" ng-if=\"newsItem.images.length > 0\">\n" +
-    "            <ul rn-carousel rn-carousel-auto-slide rn-carousel-buffered\n" +
-    "                rn-carousel-index=\"curImage\" rn-carousel-locked=\"isLocked\"\n" +
-    "                class=\"image news-carousel-small\">\n" +
-    "                <li ng-repeat=\"img in newsItem.images\">\n" +
-    "                    <div class=\"layer text-center\">\n" +
-    "                        <div class=\"news-carousel-image-small\"\n" +
-    "                             ng-style=\"{'background-image':'url('+img+')'}\" ng-click=\"enlargeImages(true, $index)\">\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-4 col-md-push-8\">\n" +
+    "            <div class=\"well\" ng-if=\"newsItem.contactName\">\n" +
+    "                <h4>For more information contact</h4>\n" +
+    "                <ul class=\"fa-ul\">\n" +
+    "                    <li><span class=\"fa fa-user fa-li\"></span>{{newsItem.contactName}}</li>\n" +
+    "                    <li><span class=\"fa fa-phone fa-li\"></span>{{newsItem.contactPhone}}</li>\n" +
+    "                    <li><span class=\"fa fa-envelope fa-li\"></span>{{newsItem.contactEmail}}</li>\n" +
+    "                </ul>\n" +
+    "            </div>\n" +
+    "            <a href=\"#/news-exhibits\" class=\"btn btn-default\"><span class=\"fa fa-reply\"></span> See all news &amp; exhibits</a>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-8 col-md-pull-4\">\n" +
+    "            <div class=\"text-center news-carousel-container-small\" ng-if=\"newsItem.images.length > 0\">\n" +
+    "                <ul rn-carousel rn-carousel-auto-slide rn-carousel-buffered\n" +
+    "                    rn-carousel-index=\"curImage\" rn-carousel-locked=\"isLocked\"\n" +
+    "                    class=\"image news-carousel-small\">\n" +
+    "                    <li ng-repeat=\"img in newsItem.images\">\n" +
+    "                        <div class=\"layer text-center\">\n" +
+    "                            <div class=\"news-carousel-image-small\"\n" +
+    "                                 ng-style=\"{'background-image':'url('+img+')'}\" ng-click=\"enlargeImages(true, $index)\">\n" +
+    "                            </div>\n" +
     "                        </div>\n" +
-    "                    </div>\n" +
+    "                    </li>\n" +
+    "                </ul>\n" +
+    "                <div rn-carousel-indicators ng-if=\"newsItem.images.length > 1\" slides=\"newsItem.images\" rn-carousel-index=\"curImage\">\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "            <h5 class=\"text-muted\">\n" +
+    "                <span>Created on {{newsItem.created | date:mediumDate}}</span>\n" +
+    "            </h5>\n" +
+    "            <p class=\"text-justify\" ng-bind-html=\"newsItem.description\"></p>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "    <div ng-show=\"showEnlarged\">\n" +
+    "        <div class=\"carousel-lg\" ng-click=\"enlargeImages(false)\">\n" +
+    "            <button type=\"button\" class=\"close\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n" +
+    "            <ul rn-carousel rn-carousel-controls rn-carousel-index=\"curEnlImage\" class=\"image\">\n" +
+    "                <li ng-repeat=\"img in newsItem.images\">\n" +
+    "                    <div class=\"layer\"><img class=\"fullsize-img\" ng-src=\"{{img}}\" ng-click=\"nextSlide()\"/></div>\n" +
     "                </li>\n" +
     "            </ul>\n" +
-    "            <div rn-carousel-indicators ng-if=\"newsItem.images.length > 1\" slides=\"newsItem.images\" rn-carousel-index=\"curImage\">\n" +
-    "            </div>\n" +
+    "            <div class=\"text-center\" rn-carousel-indicators ng-if=\"newsItem.images.length > 1\" slides=\"newsItem.images\" rn-carousel-index=\"curEnlImage\"></div>\n" +
+    "\n" +
     "        </div>\n" +
-    "        <h5 class=\"text-muted\">\n" +
-    "            <span>Created on {{newsItem.created | date:mediumDate}}</span>\n" +
-    "        </h5>\n" +
-    "        <p class=\"text-justify\" ng-bind-html=\"newsItem.description\"></p>\n" +
-    "    </div>\n" +
-    "</div>\n" +
-    "<div ng-show=\"showEnlarged\">\n" +
-    "    <div class=\"carousel-lg\" ng-click=\"enlargeImages(false)\">\n" +
-    "        <button type=\"button\" class=\"close\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n" +
-    "        <ul rn-carousel rn-carousel-controls rn-carousel-index=\"curEnlImage\" class=\"image\">\n" +
-    "            <li ng-repeat=\"img in newsItem.images\">\n" +
-    "                <div class=\"layer\"><img class=\"fullsize-img\" ng-src=\"{{img}}\" ng-click=\"nextSlide()\"/></div>\n" +
-    "            </li>\n" +
-    "        </ul>\n" +
-    "        <div class=\"text-center\" rn-carousel-indicators ng-if=\"newsItem.images.length > 1\" slides=\"newsItem.images\" rn-carousel-index=\"curEnlImage\"></div>\n" +
     "\n" +
-    "    </div>\n" +
-    "\n" +
-    "    <!--<div class=\"news-carousel-container-large\">-->\n" +
+    "        <!--<div class=\"news-carousel-container-large\">-->\n" +
     "        <!--<ul rn-carousel rn-carousel-controls rn-carousel-buffered-->\n" +
-    "            <!--rn-carousel-index=\"curEnlImage\" rn-carousel-transition=\"none\"-->\n" +
-    "            <!--class=\"image news-carousel-large\" rn-carousel-controls-allow-loop>-->\n" +
-    "            <!--<li ng-repeat=\"img in newsItem.images\">-->\n" +
-    "                <!--<div class=\"layer text-center\">-->\n" +
-    "                    <!--<div class=\"news-carousel-image-large\"-->\n" +
-    "                         <!--ng-style=\"{'background-image':'url('+img+')'}\" ng-click=\"setCurEnlImage($event, $index)\">-->\n" +
-    "                    <!--</div>-->\n" +
-    "                <!--</div>-->\n" +
-    "            <!--</li>-->\n" +
+    "        <!--rn-carousel-index=\"curEnlImage\" rn-carousel-transition=\"none\"-->\n" +
+    "        <!--class=\"image news-carousel-large\" rn-carousel-controls-allow-loop>-->\n" +
+    "        <!--<li ng-repeat=\"img in newsItem.images\">-->\n" +
+    "        <!--<div class=\"layer text-center\">-->\n" +
+    "        <!--<div class=\"news-carousel-image-large\"-->\n" +
+    "        <!--ng-style=\"{'background-image':'url('+img+')'}\" ng-click=\"setCurEnlImage($event, $index)\">-->\n" +
+    "        <!--</div>-->\n" +
+    "        <!--</div>-->\n" +
+    "        <!--</li>-->\n" +
     "        <!--</ul>-->\n" +
     "        <!--<div rn-carousel-indicators ng-if=\"newsItem.images.length > 1\" slides=\"newsItem.images\" rn-carousel-index=\"curEnlImage\">-->\n" +
     "        <!--&lt;!&ndash;<div class=\"news-carousel-large-indicators text-center\" ng-if=\"newsItem.images.length > 1\">&ndash;&gt;-->\n" +
-    "            <!--&lt;!&ndash;<span ng-repeat=\"img in newsItem.images\" class=\"clickable-item\"&ndash;&gt;-->\n" +
-    "                  <!--&lt;!&ndash;ng-click=\"setCurEnlImage($event, $index)\">&ndash;&gt;-->\n" +
-    "                <!--&lt;!&ndash;<span class=\"fa fa-2x fa-circle-o\" ng-class=\"{'fa-3x': $index == $parent.curEnlImage}\">&ndash;&gt;-->\n" +
-    "                <!--&lt;!&ndash;</span>&ndash;&gt;-->\n" +
-    "            <!--&lt;!&ndash;</span>&ndash;&gt;-->\n" +
+    "        <!--&lt;!&ndash;<span ng-repeat=\"img in newsItem.images\" class=\"clickable-item\"&ndash;&gt;-->\n" +
+    "        <!--&lt;!&ndash;ng-click=\"setCurEnlImage($event, $index)\">&ndash;&gt;-->\n" +
+    "        <!--&lt;!&ndash;<span class=\"fa fa-2x fa-circle-o\" ng-class=\"{'fa-3x': $index == $parent.curEnlImage}\">&ndash;&gt;-->\n" +
+    "        <!--&lt;!&ndash;</span>&ndash;&gt;-->\n" +
+    "        <!--&lt;!&ndash;</span>&ndash;&gt;-->\n" +
     "        <!--&lt;!&ndash;</div>&ndash;&gt;-->\n" +
-    "    <!--</div>-->\n" +
+    "        <!--</div>-->\n" +
+    "    </div>\n" +
     "</div>\n" +
     "");
 }]);
 
 angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("news/news-list.tpl.html",
-    "<div class=\"jumbotron bg-transparent\">\n" +
-    "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-7\">\n" +
-    "            <h1>News &amp; Exhibits</h1>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-5\">\n" +
-    "            <div class=\"well\">\n" +
-    "                <p class=\"lead\">Looking for upcoming events in the University Libraries?</p>\n" +
-    "                <a href=\"http://events.ua.edu/category/22/\" class=\"btn btn-primary\" target=\"_new\">View event calendar <span class=\"fa fa-external-link\"></span></a>\n" +
+    "<div class=\"jumbotron-header\">\n" +
+    "    <div class=\"jumbotron\">\n" +
+    "        <div class=\"container\">\n" +
+    "            <div class=\"row\">\n" +
+    "                <div class=\"col-sm-7\">\n" +
+    "                    <h1>News &amp; Exhibits</h1>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-sm-5\">\n" +
+    "                    <div class=\"well\">\n" +
+    "                        <p class=\"lead\">Looking for upcoming events in the University Libraries?</p>\n" +
+    "                        <a href=\"http://events.ua.edu/category/22/\" class=\"btn btn-primary\" target=\"_new\">View event calendar <span class=\"fa fa-external-link\"></span></a>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
     "\n" +
     "\n" +
-    "<div class=\"row\">\n" +
-    "    <div class=\"col-md-9\">\n" +
+    "<div class=\"container\">\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-9\">\n" +
     "\n" +
-    "        <div class=\"media animate-repeat\" ng-repeat=\"item in news | filter:{type: newsFilters.type}\n" +
+    "            <div class=\"media animate-repeat\" ng-repeat=\"item in news | filter:{type: newsFilters.type}\n" +
     "                                                                  | filter:newsFilters.search\n" +
     "                                                                  | orderBy:['-sticky','-created']\">\n" +
-    "            <div class=\"media-left hidden-sm hidden-xs\">\n" +
-    "                <a ng-href=\"#/news-exhibits/{{item.link}}\" class=\"news-list-tb\">\n" +
-    "                    <img class=\"media-object\" ng-src=\"{{item.tb}}\" ng-if=\"item.tb\" />\n" +
+    "                <div class=\"media-left hidden-sm hidden-xs\">\n" +
+    "                    <a ng-href=\"#/news-exhibits/{{item.link}}\" class=\"news-list-tb\">\n" +
+    "                        <img class=\"media-object\" ng-src=\"{{item.tb}}\" ng-if=\"item.tb\" />\n" +
     "                    <span class=\"media-object\"\n" +
     "                          ng-if=\"item.type == 0 && !item.tb\"><span class=\"fa fa-newspaper-o\"></span></span>\n" +
     "                    <span class=\"media-object\"\n" +
     "                          ng-if=\"item.type == 1 && !item.tb\"><span class=\"fa fa-calendar\"></span></span>\n" +
-    "                </a>\n" +
-    "            </div>\n" +
-    "            <div class=\"media-body\">\n" +
-    "                <h3 class=\"media-heading\">\n" +
-    "                    <a ng-href=\"#/news-exhibits/{{item.link}}\" ng-bind-html=\"item.title | highlight:newsFilters.search\"></a>\n" +
-    "                </h3>\n" +
+    "                    </a>\n" +
+    "                </div>\n" +
+    "                <div class=\"media-body\">\n" +
+    "                    <h3 class=\"media-heading\">\n" +
+    "                        <a ng-href=\"#/news-exhibits/{{item.link}}\" ng-bind-html=\"item.title | highlight:newsFilters.search\"></a>\n" +
+    "                    </h3>\n" +
     "\n" +
-    "                <h5 class=\"text-muted\" ng-if=\"item.type > 0\">Exhibit {{item.activeFrom | date:mediumDate}} - {{item.activeUntil | date:mediumDate}}</h5>\n" +
-    "                <h5 class=\"text-muted\" ng-if=\"item.type < 1\">Created on {{item.created | date:mediumDate}}</h5>\n" +
-    "                <p class=\"text-justify\">\n" +
+    "                    <h5 class=\"text-muted\" ng-if=\"item.type > 0\">Exhibit {{item.activeFrom | date:mediumDate}} - {{item.activeUntil | date:mediumDate}}</h5>\n" +
+    "                    <h5 class=\"text-muted\" ng-if=\"item.type < 1\">Created on {{item.created | date:mediumDate}}</h5>\n" +
+    "                    <p class=\"text-justify\">\n" +
     "                    <span ng-bind-html=\"item.blurb | highlight:newsFilters.search\">\n" +
     "                    </span>\n" +
-    "                </p>\n" +
+    "                    </p>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "\n" +
+    "            <div class=\"text-center\">\n" +
+    "                <pagination total-items=\"filteredNews.length\" ng-model=\"soft.page\" max-size=\"10\" class=\"pagination-sm\" boundary-links=\"true\" items-per-page=\"soft.perPage\" ng-change=\"update()\" ng-if=\"filteredNews.length > soft.perPage\"></pagination>\n" +
+    "            </div>\n" +
+    "\n" +
+    "            <div class=\"alert alert-warning text-center\" role=\"alert\" ng-show=\"news.length < 1\">\n" +
+    "                <h2>\n" +
+    "                    No\n" +
+    "                    <span ng-show=\"newsFilters.type == ''\">News or Exhibits</span>\n" +
+    "                    <span ng-show=\"newsFilters.type == '0'\">News</span>\n" +
+    "                    <span ng-show=\"newsFilters.type == '1'\">Exhibits</span>\n" +
+    "                    match the search \"<strong>{{newsFilters.search}}</strong>\"</span>\n" +
+    "                </h2>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "\n" +
-    "        <div class=\"text-center\">\n" +
-    "            <pagination total-items=\"filteredNews.length\" ng-model=\"soft.page\" max-size=\"10\" class=\"pagination-sm\" boundary-links=\"true\" items-per-page=\"soft.perPage\" ng-change=\"update()\" ng-if=\"filteredNews.length > soft.perPage\"></pagination>\n" +
+    "        <div class=\"col-md-3 hidden-xs\">\n" +
+    "            <h4>Filters</h4>\n" +
+    "            <form class=\"facets-form\">\n" +
+    "                <div class=\"form-group\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" ng-model=\"newsFilters.search\" placeholder=\"Keyword search\">\n" +
+    "                </div>\n" +
+    "            </form>\n" +
     "        </div>\n" +
     "\n" +
-    "        <div class=\"alert alert-warning text-center\" role=\"alert\" ng-show=\"news.length < 1\">\n" +
-    "            <h2>\n" +
-    "                No\n" +
-    "                <span ng-show=\"newsFilters.type == ''\">News or Exhibits</span>\n" +
-    "                <span ng-show=\"newsFilters.type == '0'\">News</span>\n" +
-    "                <span ng-show=\"newsFilters.type == '1'\">Exhibits</span>\n" +
-    "                match the search \"<strong>{{newsFilters.search}}</strong>\"</span>\n" +
-    "            </h2>\n" +
-    "        </div>\n" +
     "    </div>\n" +
-    "\n" +
-    "    <div class=\"col-md-3 hidden-xs\">\n" +
-    "        <h4>Filters</h4>\n" +
-    "        <form class=\"facets-form\">\n" +
-    "            <div class=\"form-group\">\n" +
-    "                <input type=\"text\" class=\"form-control\" ng-model=\"newsFilters.search\" placeholder=\"Keyword search\">\n" +
-    "            </div>\n" +
-    "        </form>\n" +
-    "    </div>\n" +
-    "\n" +
     "</div>");
 }]);
 
@@ -49982,129 +50287,141 @@ angular.module('ualib.softwareList.templates', ['software-list/software-list.tpl
 
 angular.module("software-list/software-list.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("software-list/software-list.tpl.html",
-    "<div class=\"page-header\"><h1>Libraries' Software List</h1></div>\n" +
+    "<div class=\"jumbotron-header\">\n" +
+    "    <div class=\"jumbotron\">\n" +
+    "        <div class=\"container\">\n" +
+    "            <div class=\"row\">\n" +
+    "                <div class=\"col-md-12\">\n" +
+    "                    <h1>Libraries' Software List</h1>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
     "\n" +
-    "<div class=\"row\">\n" +
-    "    <div class=\"col-md-3 col-md-push-9\">\n" +
-    "        <form>\n" +
-    "            <div class=\"form-group\">\n" +
+    "<div class=\"container\">\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-3 col-md-push-9\">\n" +
+    "            <form>\n" +
+    "                <div class=\"form-group\">\n" +
     "                <span class=\"page-header\">\n" +
     "                    <h4>Filter Software List By</h4>\n" +
     "                </span>\n" +
-    "            </div>\n" +
-    "            <div class=\"form-group\">\n" +
-    "                <input type=\"text\" class=\"form-control\" ng-model=\"soft.search\" placeholder=\"Search software, locations, etc...\">\n" +
-    "            </div>\n" +
-    "            <div class=\"form-group\">\n" +
-    "                <div class=\"btn-group btn-group-justified\">\n" +
-    "                    <label class=\"btn btn-default active\" ng-model=\"soft.os\" btn-radio=\"''\" uncheckable>All</label>\n" +
-    "                    <label class=\"btn btn-default\" ng-model=\"soft.os\" btn-radio=\"'1'\" uncheckable><span class=\"fa fa-fw fa-windows\"></span></label>\n" +
-    "                    <label class=\"btn btn-default\" ng-model=\"soft.os\" btn-radio=\"'2'\" uncheckable><span class=\"fa fa-fw fa-apple\"></span></label>\n" +
     "                </div>\n" +
-    "            </div>\n" +
-    "            <div class=\"form-group hidden-xs\">\n" +
-    "                <h5>Locations</h5>\n" +
-    "                <div class=\"radio\">\n" +
-    "                    <label>\n" +
-    "                        <input type=\"radio\" value=\"\" ng-model=\"soft.loc\" checked>\n" +
-    "                        All Locations\n" +
-    "                    </label>\n" +
+    "                <div class=\"form-group\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" ng-model=\"soft.search\" placeholder=\"Search software, locations, etc...\">\n" +
     "                </div>\n" +
-    "                <div class=\"radio\" ng-repeat=\"loc in locations\">\n" +
-    "                    <label>\n" +
-    "                        <input type=\"radio\" value=\"{{loc.name}}\" ng-model=\"soft.loc\">\n" +
-    "                        {{loc.name}}\n" +
-    "                    </label>\n" +
+    "                <div class=\"form-group\">\n" +
+    "                    <div class=\"btn-group btn-group-justified\">\n" +
+    "                        <label class=\"btn btn-default active\" ng-model=\"soft.os\" btn-radio=\"''\" uncheckable>All</label>\n" +
+    "                        <label class=\"btn btn-default\" ng-model=\"soft.os\" btn-radio=\"'1'\" uncheckable><span class=\"fa fa-fw fa-windows\"></span></label>\n" +
+    "                        <label class=\"btn btn-default\" ng-model=\"soft.os\" btn-radio=\"'2'\" uncheckable><span class=\"fa fa-fw fa-apple\"></span></label>\n" +
+    "                    </div>\n" +
     "                </div>\n" +
-    "            </div>\n" +
-    "            <div class=\"form-group hidden-xs\">\n" +
-    "                <h5>Categories</h5>\n" +
-    "                <div class=\"radio\">\n" +
-    "                    <label>\n" +
-    "                        <input type=\"radio\" value=\"\" ng-model=\"soft.cat\">\n" +
-    "                        All categories\n" +
-    "                    </label>\n" +
+    "                <div class=\"form-group hidden-xs\">\n" +
+    "                    <h5>Locations</h5>\n" +
+    "                    <div class=\"radio\">\n" +
+    "                        <label>\n" +
+    "                            <input type=\"radio\" value=\"\" ng-model=\"soft.loc\" checked>\n" +
+    "                            All Locations\n" +
+    "                        </label>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"radio\" ng-repeat=\"loc in locations\">\n" +
+    "                        <label>\n" +
+    "                            <input type=\"radio\" value=\"{{loc.name}}\" ng-model=\"soft.loc\">\n" +
+    "                            {{loc.name}}\n" +
+    "                        </label>\n" +
+    "                    </div>\n" +
     "                </div>\n" +
-    "                <div class=\"radio\" ng-repeat=\"cat in categories\">\n" +
-    "                    <label>\n" +
-    "                        <input type=\"radio\" value=\"{{cat.name}}\" ng-model=\"soft.cat\">\n" +
-    "                        {{cat.name}}\n" +
-    "                    </label>\n" +
+    "                <div class=\"form-group hidden-xs\">\n" +
+    "                    <h5>Categories</h5>\n" +
+    "                    <div class=\"radio\">\n" +
+    "                        <label>\n" +
+    "                            <input type=\"radio\" value=\"\" ng-model=\"soft.cat\">\n" +
+    "                            All categories\n" +
+    "                        </label>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"radio\" ng-repeat=\"cat in categories\">\n" +
+    "                        <label>\n" +
+    "                            <input type=\"radio\" value=\"{{cat.name}}\" ng-model=\"soft.cat\">\n" +
+    "                            {{cat.name}}\n" +
+    "                        </label>\n" +
+    "                    </div>\n" +
     "                </div>\n" +
-    "            </div>\n" +
-    "            <div class=\"form-group hidden-xs\">\n" +
-    "                <button type=\"button\" class=\"btn btn-block btn-primary\" ng-click=\"resetFilters()\"><span class=\"fa fa-fw fa-refresh\"></span> Reset filters</button>\n" +
-    "            </div>\n" +
-    "        </form>\n" +
-    "    </div>\n" +
-    "    <div class=\"col-md-9 col-md-pull-3 software-list-container\">\n" +
-    "        <h4 class=\"text-right\" ng-show=\"pager.totalItems > 0\">\n" +
-    "            Showing {{pager.firstItem}}-{{pager.lastItem}} of {{pager.totalItems}} results\n" +
-    "        </h4>\n" +
-    "\n" +
-    "        <div ng-if=\"(soft.cat || soft.os || soft.loc)\">\n" +
-    "\n" +
-    "            <ol class=\"breadcrumb facetcrumb\">\n" +
-    "                <li ng-if=\"soft.os\"><strong>OS:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"soft.os = ''\">{{soft.os == 1 ? 'Windows' : 'OS X'}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "                <li ng-if=\"soft.loc\"><strong>Location:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"soft.loc = ''\">{{soft.loc}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "                <li ng-if=\"soft.cat\"><strong>Category:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"soft.cat = ''\">{{soft.cat}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "\n" +
-    "                <li class=\"pull-right\"><button type=\"button\" class=\"btn btn-primary btn-small reset-btn\" title=\"Reset filters\" ng-click=\"resetFilters()\"><i class=\"fa fa-refresh\"></i></button></li>\n" +
-    "            </ol>\n" +
+    "                <div class=\"form-group hidden-xs\">\n" +
+    "                    <button type=\"button\" class=\"btn btn-block btn-primary\" ng-click=\"resetFilters()\"><span class=\"fa fa-fw fa-refresh\"></span> Reset filters</button>\n" +
+    "                </div>\n" +
+    "            </form>\n" +
     "        </div>\n" +
+    "        <div class=\"col-md-9 col-md-pull-3 software-list-container\">\n" +
+    "            <h4 class=\"text-right\" ng-show=\"pager.totalItems > 0\">\n" +
+    "                Showing {{pager.firstItem}}-{{pager.lastItem}} of {{pager.totalItems}} results\n" +
+    "            </h4>\n" +
     "\n" +
-    "        <div class=\"media software-item animate-repeat\" ng-repeat=\"item in filteredSoft | after:(pager.page-1)*pager.perPage | limitTo:20\">\n" +
-    "            <div class=\"media-left\">\n" +
-    "                <img class=\"media-object\" ng-src=\"{{item.icon}}\" alt=\"{{item.title}}\" title=\"{{item.title}}\">\n" +
+    "            <div ng-if=\"(soft.cat || soft.os || soft.loc)\">\n" +
+    "\n" +
+    "                <ol class=\"breadcrumb facetcrumb\">\n" +
+    "                    <li ng-if=\"soft.os\"><strong>OS:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"soft.os = ''\">{{soft.os == 1 ? 'Windows' : 'OS X'}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                    <li ng-if=\"soft.loc\"><strong>Location:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"soft.loc = ''\">{{soft.loc}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                    <li ng-if=\"soft.cat\"><strong>Category:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"soft.cat = ''\">{{soft.cat}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "\n" +
+    "                    <li class=\"pull-right\"><button type=\"button\" class=\"btn btn-primary btn-small reset-btn\" title=\"Reset filters\" ng-click=\"resetFilters()\"><i class=\"fa fa-refresh\"></i></button></li>\n" +
+    "                </ol>\n" +
     "            </div>\n" +
-    "            <div class=\"media-body\">\n" +
-    "                <h3 class=\"media-heading\" ng-bind-html=\"item.title | highlight:soft.search\">\n" +
-    "                </h3>\n" +
     "\n" +
-    "                <div ng-bind-html=\"item.description | highlight:soft.search\"></div>\n" +
+    "            <div class=\"media software-item animate-repeat\" ng-repeat=\"item in filteredSoft | after:(pager.page-1)*pager.perPage | limitTo:20\">\n" +
+    "                <div class=\"media-left\">\n" +
+    "                    <img class=\"media-object\" ng-src=\"{{item.icon}}\" alt=\"{{item.title}}\" title=\"{{item.title}}\">\n" +
+    "                </div>\n" +
+    "                <div class=\"media-body\">\n" +
+    "                    <h3 class=\"media-heading\" ng-bind-html=\"item.title | highlight:soft.search\">\n" +
+    "                    </h3>\n" +
     "\n" +
-    "                <div class=\"row\">\n" +
-    "                    <div class=\"details-context col-md-6\" ng-repeat=\"ver in item.versions | orderBy:os\">\n" +
-    "                        <div class=\"h4 text-muted\">\n" +
-    "                            <span class=\"fa fa-{{ver.osName}}\"></span>\n" +
-    "                            Version {{ver.version}}\n" +
-    "                        </div>\n" +
+    "                    <div ng-bind-html=\"item.description | highlight:soft.search\"></div>\n" +
+    "\n" +
+    "                    <div class=\"row\">\n" +
+    "                        <div class=\"details-context col-md-6\" ng-repeat=\"ver in item.versions | orderBy:os\">\n" +
+    "                            <div class=\"h4 text-muted\">\n" +
+    "                                <span class=\"fa fa-{{ver.osName}}\"></span>\n" +
+    "                                Version {{ver.version}}\n" +
+    "                            </div>\n" +
     "                        <span ng-repeat=\"loc in ver.locations | orderBy:'name'\">\n" +
     "                            <!--<span ng-if=\"loc.parent\" ng-bind-html=\"(locations | filter:loc.parent)[0].name\"></span>-->\n" +
     "                            <span ng-bind-html=\"loc.name | highlight:soft.search | highlight:soft.loc:true\"></span>\n" +
     "                        </span>\n" +
+    "                        </div>\n" +
     "                    </div>\n" +
-    "                </div>\n" +
     "\n" +
-    "                <div class=\"details hidden-xs\">\n" +
-    "                    <div class=\"software-links\">\n" +
-    "                        <ul class=\"list-inline nav-justified\" style=\"margin-top: 5px;\">\n" +
-    "                            <li ng-repeat=\"link in item.links\" ng-if=\"item.links\">\n" +
-    "                                <a ng-href=\"{{link.url}}\" target=\"{{link.title}}\" class=\"external-link\">{{link.title}}</a>\n" +
-    "                            </li>\n" +
-    "                            <li ng-if=\"item.modules\">\n" +
-    "                                <div collapse=\"!isCollapsed\" ng-bind-html=\"item.modules | highlight:soft.search\"></div>\n" +
-    "                                <button class=\"btn btn-default btn-xs\" ng-click=\"isCollapsed = !isCollapsed\">\n" +
-    "                                    {{!isCollapsed ? \"Show\" : \"Hide\"}} Available Modules\n" +
-    "                                </button>\n" +
-    "                            </li>\n" +
-    "                        </ul>\n" +
+    "                    <div class=\"details hidden-xs\">\n" +
+    "                        <div class=\"software-links\">\n" +
+    "                            <ul class=\"list-inline nav-justified\" style=\"margin-top: 5px;\">\n" +
+    "                                <li ng-repeat=\"link in item.links\" ng-if=\"item.links\">\n" +
+    "                                    <a ng-href=\"{{link.url}}\" target=\"{{link.title}}\" class=\"external-link\">{{link.title}}</a>\n" +
+    "                                </li>\n" +
+    "                                <li ng-if=\"item.modules\">\n" +
+    "                                    <div collapse=\"!isCollapsed\" ng-bind-html=\"item.modules | highlight:soft.search\"></div>\n" +
+    "                                    <button class=\"btn btn-default btn-xs\" ng-click=\"isCollapsed = !isCollapsed\">\n" +
+    "                                        {{!isCollapsed ? \"Show\" : \"Hide\"}} Available Modules\n" +
+    "                                    </button>\n" +
+    "                                </li>\n" +
+    "                            </ul>\n" +
+    "                        </div>\n" +
     "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
-    "        </div>\n" +
     "\n" +
-    "        <div class=\"text-center\">\n" +
-    "            <pagination class=\"pagination-sm\" ng-model=\"pager.page\" total-items=\"pager.totalItems\" max-size=\"pager.maxSize\" boundary-links=\"true\" rotate=\"false\" items-per-page=\"pager.perPage\" ng-change=\"pageChange()\" ng-if=\"pager.totalItems > pager.perPage\"></pagination>\n" +
-    "        </div>\n" +
+    "            <div class=\"text-center\">\n" +
+    "                <pagination class=\"pagination-sm\" ng-model=\"pager.page\" total-items=\"pager.totalItems\" max-size=\"pager.maxSize\" boundary-links=\"true\" rotate=\"false\" items-per-page=\"pager.perPage\" ng-change=\"pageChange()\" ng-if=\"pager.totalItems > pager.perPage\"></pagination>\n" +
+    "            </div>\n" +
     "\n" +
-    "        <div class=\"alert alert-warning text-center\" role=\"alert\" ng-show=\"pager.totalItems < 1\">\n" +
-    "            <h2>\n" +
-    "                No <span ng-if=\"soft.cat\"><strong>{{soft.cat | lowercase}}</strong></span> software is available\n" +
-    "                <span ng-if=\"soft.os\">on <strong>{{soft.os == 1 ? 'Windows' : 'OS X'}}</strong> computers</span>\n" +
-    "                <span ng-if=\"soft.loc\">in <strong>{{soft.loc}}</strong></span>\n" +
-    "                <span ng-if=\"soft.search\">that matches the search \"<strong>{{soft.search}}</strong>\"</span>\n" +
-    "            </h2>\n" +
+    "            <div class=\"alert alert-warning text-center\" role=\"alert\" ng-show=\"pager.totalItems < 1\">\n" +
+    "                <h2>\n" +
+    "                    No <span ng-if=\"soft.cat\"><strong>{{soft.cat | lowercase}}</strong></span> software is available\n" +
+    "                    <span ng-if=\"soft.os\">on <strong>{{soft.os == 1 ? 'Windows' : 'OS X'}}</strong> computers</span>\n" +
+    "                    <span ng-if=\"soft.loc\">in <strong>{{soft.loc}}</strong></span>\n" +
+    "                    <span ng-if=\"soft.search\">that matches the search \"<strong>{{soft.search}}</strong>\"</span>\n" +
+    "                </h2>\n" +
+    "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>");
@@ -50558,10 +50875,10 @@ angular.module("staff-card/staff-card-list.tpl.html", []).run(["$templateCache",
     "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
-    "            <div class=\"col-xs-4 col-sm-3\">\n" +
+    "            <div class=\"hidden-xs col-sm-3\">\n" +
     "                <img class=\"staff-portrait thumbnail\" src=\"http://www.lib.ua.edu/wp-content/themes/roots-ualib/assets/img/user-profile.png\" lazy-img='{{person.photo}}' />\n" +
     "            </div>\n" +
-    "            <div class=\"col-xs-8\">\n" +
+    "            <div class=\"col-xs-12 col-sm-7\">\n" +
     "                <div class=\"row\">\n" +
     "                    <div class=\"col-xs-12 col-sm-7 name-plate\">\n" +
     "                        <h3 class=\"name\">\n" +
@@ -50581,7 +50898,7 @@ angular.module("staff-card/staff-card-list.tpl.html", []).run(["$templateCache",
     "                    </div>\n" +
     "                    <div class=\"col-xs-12 col-sm-5\">\n" +
     "                        <ul class=\"fa-ul\">\n" +
-    "                            <li ng-if=\"person.phone\"><span class=\"fa fa-phone fa-li\"></span>{{person.phone}}</li>\n" +
+    "                            <li ng-if=\"person.phone\"><span class=\"fa fa-phone fa-li\"></span><a ng-href=\"tel:+1-205-{{person.phone}}\">(205) {{person.phone}}</a></li>\n" +
     "                            <li class=\"hidden-xs\" ng-if=\"person.fax\"><span class=\"fa fa-fax fa-li\"></span>{{person.fax}}</li>\n" +
     "                            <li ng-if=\"person.email\"><span class=\"fa fa-envelope fa-li\"></span><a ng-href=\"mailto:{{person.email}}\" title=\"Email {{person.firstname}} {{person.lastname}}\">{{person.email}}</a></li>\n" +
     "                        </ul>\n" +
@@ -50644,7 +50961,7 @@ angular.module("staff-card/staff-card-md.tpl.html", []).run(["$templateCache", f
     "                <div class=\"staff-card-detail\">\n" +
     "                    <h6>Contact</h6>\n" +
     "                    <ul class=\"fa-ul\">\n" +
-    "                        <li ng-if=\"staffPerson.phone\"><span class=\"fa fa-phone fa-li\"></span>{{staffPerson.phone}}</li>\n" +
+    "                        <li ng-if=\"staffPerson.phone\"><span class=\"fa fa-phone fa-li\"></span><a ng-href=\"tel:+1-205-{{staffPerson.phone}}\">(205)-{{staffPerson.phone}}</a></li>\n" +
     "                        <li ng-if=\"staffPerson.fax\"><span class=\"fa fa-fax fa-li\"></span>{{staffPerson.fax}}</li>\n" +
     "                        <li ng-if=\"staffPerson.email\"><span class=\"fa fa-envelope fa-li\"></span><a href=\"mailto:{{staffPerson.email}}\">{{staffPerson.email}}</a></li>\n" +
     "                    </ul>\n" +
@@ -50801,28 +51118,38 @@ angular.module("staff-directory/staff-directory-listing.tpl.html", []).run(["$te
 
 angular.module("staff-directory/staff-directory.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staff-directory/staff-directory.tpl.html",
-    "<div class=\"page-header\">\n" +
-    "    <h1>Staff Directory</h1>\n" +
+    "<div class=\"jumbotron-header\">\n" +
+    "    <div class=\"jumbotron\">\n" +
+    "        <div class=\"container\">\n" +
+    "            <div class=\"row\">\n" +
+    "                <div class=\"col-md-12\">\n" +
+    "                    <h1>Staff Directory</h1>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
     "</div>\n" +
     "\n" +
     "\n" +
-    "<div class=\"row staff-directory\">\n" +
-    "    <div class=\"col-md-3 col-md-push-9\">\n" +
-    "        <div class=\"staff-directory-facets\" facets=\"staffdir.facets\"></div>\n" +
-    "    </div>\n" +
-    "    <div class=\"col-md-9 col-md-pull-3\">\n" +
-    "        <div ng-show=\"facets.showFacetBar\">\n" +
-    "            <ol class=\"breadcrumb facetcrumb\">\n" +
-    "                <li ng-if=\"facets.facet.department\"><strong>Department:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"facets.clearFacets('department')\">{{facets.facet.department | truncate : 20 : '...'}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "                <li ng-if=\"facets.facet.library\"><strong>Library:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"facets.clearFacets('library')\">{{facets.facet.library}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "                <li ng-if=\"facets.facet.subject\"><strong>Subject:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"facets.clearFacets('subject')\">{{facets.facet.subject}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "                <li ng-if=\"facets.facet.selector\"><button type=\"button\" class=\"btn btn-default\" ng-click=\"facets.clearFacets('selector')\">Selector <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "                <li ng-if=\"facets.facet.instructor\"><button type=\"button\" class=\"btn btn-default\" ng-click=\"facets.clearFacets('instructor')\">Instructor <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "\n" +
-    "                <li class=\"pull-right\"><button type=\"button\" class=\"btn btn-primary btn-small reset-btn\" title=\"Reset filters\" ng-click=\"facets.clearFacets()\"><i class=\"fa fa-refresh\"></i></button></li>\n" +
-    "            </ol>\n" +
+    "<div class=\"container\">\n" +
+    "    <div class=\"row staff-directory\">\n" +
+    "        <div class=\"col-md-3 col-md-push-9\">\n" +
+    "            <div class=\"staff-directory-facets\" facets=\"staffdir.facets\"></div>\n" +
     "        </div>\n" +
-    "        <div class=\"staff-directory-listing\" id=\"staff-directory-listing\" list=\"staffdir.list\" sort-by=\"lastname\"></div>\n" +
+    "        <div class=\"col-md-9 col-md-pull-3\">\n" +
+    "            <div ng-show=\"facets.showFacetBar\">\n" +
+    "                <ol class=\"breadcrumb facetcrumb\">\n" +
+    "                    <li ng-if=\"facets.facet.department\"><strong>Department:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"facets.clearFacets('department')\">{{facets.facet.department | truncate : 20 : '...'}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                    <li ng-if=\"facets.facet.library\"><strong>Library:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"facets.clearFacets('library')\">{{facets.facet.library}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                    <li ng-if=\"facets.facet.subject\"><strong>Subject:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"facets.clearFacets('subject')\">{{facets.facet.subject}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                    <li ng-if=\"facets.facet.selector\"><button type=\"button\" class=\"btn btn-default\" ng-click=\"facets.clearFacets('selector')\">Selector <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                    <li ng-if=\"facets.facet.instructor\"><button type=\"button\" class=\"btn btn-default\" ng-click=\"facets.clearFacets('instructor')\">Instructor <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "\n" +
+    "                    <li class=\"pull-right\"><button type=\"button\" class=\"btn btn-primary btn-small reset-btn\" title=\"Reset filters\" ng-click=\"facets.clearFacets()\"><i class=\"fa fa-refresh\"></i></button></li>\n" +
+    "                </ol>\n" +
+    "            </div>\n" +
+    "            <div class=\"staff-directory-listing\" id=\"staff-directory-listing\" list=\"staffdir.list\" sort-by=\"lastname\"></div>\n" +
+    "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
     "\n" +
@@ -50833,69 +51160,97 @@ angular.module("staff-directory/staff-directory.tpl.html", []).run(["$templateCa
 
 angular.module("staff-profile/staff-profile.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staff-profile/staff-profile.tpl.html",
-    "<div class=\"page-header\">\n" +
-    "    <h2>Faculty/Staff Profile</h2>\n" +
-    "</div>\n" +
-    "\n" +
-    "<div class=\"row staff-profile\">\n" +
-    "    <div class=\"col-md-3\">\n" +
-    "        <img class=\"staff-portrait thumbnail\" ng-src=\"{{userProfile.person.photo}}\" ng-if=\"userProfile.person.photo\">\n" +
-    "        <img class=\"staff-portrait thumbnail\" ng-src=\"wp-content/themes/roots-ualib/assets/img/user-profile.png\" ng-if=\"!userProfile.person.photo\">\n" +
+    "<div class=\"container\">\n" +
+    "    <div class=\"page-header\">\n" +
+    "        <h2>Faculty/Staff Profile</h2>\n" +
     "    </div>\n" +
-    "    <div class=\"col-md-9\">\n" +
-    "        <div class=\"name-plate\">\n" +
-    "            <h1 class=\"name\">\n" +
-    "                <small ng-if=\"userProfile.person.rank\">{{userProfile.person.rank}}</small>\n" +
-    "                <span ng-bind-html=\"userProfile.person.firstname\"></span> <span ng-bind-html=\"userProfile.person.lastname\"></span>\n" +
-    "            </h1>\n" +
-    "            <h2 class=\"title\"><span ng-bind-html=\"userProfile.person.title\"></span></h2>\n" +
-    "            <h3 class=\"hidden-xs\"><span ng-bind-html=\"userProfile.person.department\"></span></h3>\n" +
+    "\n" +
+    "    <div class=\"row staff-profile\">\n" +
+    "        <div class=\"hidden-xs col-md-3\">\n" +
+    "            <img class=\"staff-portrait thumbnail\" ng-src=\"{{userProfile.person.photo}}\" ng-if=\"userProfile.person.photo\">\n" +
+    "            <img class=\"staff-portrait thumbnail\" ng-src=\"wp-content/themes/roots-ualib/assets/img/user-profile.png\" ng-if=\"!userProfile.person.photo\">\n" +
     "        </div>\n" +
-    "        <div class=\"row\">\n" +
-    "            <div class=\"page-slice\">\n" +
-    "                <div class=\"col-md-6\">\n" +
-    "                    <ul class=\"fa-ul\">\n" +
-    "                        <li ng-if=\"userProfile.person.phone\"><span class=\"fa fa-phone fa-li\"></span>{{userProfile.person.phone}}</li>\n" +
-    "                        <li class=\"hidden-xs\" ng-if=\"userProfile.person.fax\"><span class=\"fa fa-fax fa-li\"></span>{{userProfile.person.fax}}</li>\n" +
-    "                        <li ng-if=\"userProfile.person.email\"><span class=\"fa fa-envelope fa-li\"></span>\n" +
-    "                            <a href=\"mailto:{{userProfile.person.email}}\">{{userProfile.person.email}}</a>\n" +
-    "                        </li>\n" +
-    "                        <li ng-if=\"userProfile.person.website.length > 11\"><span class=\"fa fa-external-link-square fa-li\"></span>\n" +
-    "                            <a ng-href=\"{{userProfile.person.website}}\" class=\"external-link\">Personal website</a>\n" +
-    "                        </li>\n" +
-    "                    </ul>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-6\">\n" +
-    "                    <ul class=\"fa-ul\">\n" +
-    "                        <li ng-if=\"userProfile.person.resume.length > 11\"><span class=\"fa fa-file-text fa-li\"></span>\n" +
-    "                            <a ng-href=\"{{userProfile.person.resume}}\">Resume / CV</a>\n" +
-    "                        </li>\n" +
-    "                        <li ng-if=\"userProfile.person.social1\">\n" +
-    "                            <span class=\"{{userProfile.person.snClass1}}\"></span>\n" +
-    "                            <a ng-href=\"{{userProfile.person.social1}}\" class=\"external-link\">{{userProfile.person.snTitle1}}</a>\n" +
-    "                        </li>\n" +
-    "                        <li ng-if=\"userProfile.person.social2\">\n" +
-    "                            <span class=\"{{userProfile.person.snClass2}}\"></span>\n" +
-    "                            <a ng-href=\"{{userProfile.person.social2}}\" class=\"external-link\">{{userProfile.person.snTitle2}}</a>\n" +
-    "                        </li>\n" +
-    "                        <li ng-if=\"userProfile.person.social3\">\n" +
-    "                            <span class=\"{{userProfile.person.snClass3}}\"></span>\n" +
-    "                            <a ng-href=\"{{userProfile.person.social3}}\" class=\"external-link\">{{userProfile.person.snTitle3}}</a>\n" +
-    "                        </li>\n" +
-    "                    </ul>\n" +
+    "        <div class=\"col-md-9\">\n" +
+    "            <div class=\"name-plate\">\n" +
+    "                <h1 class=\"name\">\n" +
+    "                    <small ng-if=\"userProfile.person.rank\">{{userProfile.person.rank}}</small>\n" +
+    "                    <span ng-bind-html=\"userProfile.person.firstname\"></span> <span ng-bind-html=\"userProfile.person.lastname\"></span>\n" +
+    "                </h1>\n" +
+    "                <h2 class=\"title\"><span ng-bind-html=\"userProfile.person.title\"></span></h2>\n" +
+    "                <h3 class=\"hidden-xs\"><span ng-bind-html=\"userProfile.person.department\"></span></h3>\n" +
+    "            </div>\n" +
+    "            <div class=\"row\">\n" +
+    "                <div class=\"page-slice\">\n" +
+    "                    <div class=\"col-md-6\">\n" +
+    "                        <ul class=\"fa-ul\">\n" +
+    "                            <li ng-if=\"userProfile.person.phone\"><span class=\"fa fa-phone fa-li\"></span><a ng-href=\"tel:+1-205-{{userProfile.person.phone}}\">(205) {{userProfile.person.phone}}</a></li>\n" +
+    "                            <li class=\"hidden-xs\" ng-if=\"userProfile.person.fax\"><span class=\"fa fa-fax fa-li\"></span>{{userProfile.person.fax}}</li>\n" +
+    "                            <li ng-if=\"userProfile.person.email\"><span class=\"fa fa-envelope fa-li\"></span>\n" +
+    "                                <a href=\"mailto:{{userProfile.person.email}}\">{{userProfile.person.email}}</a>\n" +
+    "                            </li>\n" +
+    "                            <li ng-if=\"userProfile.person.website.length > 11\"><span class=\"fa fa-external-link-square fa-li\"></span>\n" +
+    "                                <a ng-href=\"{{userProfile.person.website}}\" class=\"external-link\">Personal website</a>\n" +
+    "                            </li>\n" +
+    "                        </ul>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-6\">\n" +
+    "                        <ul class=\"fa-ul\">\n" +
+    "                            <li ng-if=\"userProfile.person.resume.length > 11\"><span class=\"fa fa-file-text fa-li\"></span>\n" +
+    "                                <a ng-href=\"{{userProfile.person.resume}}\">Resume / CV</a>\n" +
+    "                            </li>\n" +
+    "                            <li ng-if=\"userProfile.person.social1\">\n" +
+    "                                <span class=\"{{userProfile.person.snClass1}}\"></span>\n" +
+    "                                <a ng-href=\"{{userProfile.person.social1}}\" class=\"external-link\">{{userProfile.person.snTitle1}}</a>\n" +
+    "                            </li>\n" +
+    "                            <li ng-if=\"userProfile.person.social2\">\n" +
+    "                                <span class=\"{{userProfile.person.snClass2}}\"></span>\n" +
+    "                                <a ng-href=\"{{userProfile.person.social2}}\" class=\"external-link\">{{userProfile.person.snTitle2}}</a>\n" +
+    "                            </li>\n" +
+    "                            <li ng-if=\"userProfile.person.social3\">\n" +
+    "                                <span class=\"{{userProfile.person.snClass3}}\"></span>\n" +
+    "                                <a ng-href=\"{{userProfile.person.social3}}\" class=\"external-link\">{{userProfile.person.snTitle3}}</a>\n" +
+    "                            </li>\n" +
+    "                        </ul>\n" +
+    "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
-    "</div>\n" +
-    "<div class=\"row\">\n" +
-    "    <div class=\"col-md-12\">\n" +
-    "        <span ng-bind-html=\"userProfile.person.profile\"></span>\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-12\">\n" +
+    "            <span ng-bind-html=\"userProfile.person.profile\"></span>\n" +
+    "        </div>\n" +
     "    </div>\n" +
-    "</div>\n" +
-    "");
+    "\n" +
+    "</div>");
 }]);
-;angular.module('ualib.staffdir', [
+;/**
+ * @ngdoc overview
+ * @name index
+ *
+ * @description
+ * # Staff Directory App
+ * ## default route: [/#/staffdir](http://www.lib.ua.edu/#/staffdir)
+ */
+/**
+ * @ngdoc overview
+ * @name staffdir
+ *
+ * @requires ngRoute
+ * @requires ngResource
+ * @requires ngAnimate
+ * @requires ngSanitize
+ * @requires angular-filter
+ * @requires ui-bootstrap
+ * @requires angularLazyImg
+ * @requires ualib-ui
+ *
+ * @description
+ * # Staff Directory App
+ * ## default route: [/#/staffdir](http://www.lib.ua.edu/#/staffdir)
+ */
+
+angular.module('ualib.staffdir', [
     'ngRoute',
     'ngResource',
     'ngAnimate',
@@ -51002,6 +51357,18 @@ angular.module('staffdir', ['ualib.staffdir']);
 
     }]);;angular.module('ualib.staffdir')
 
+    /**
+     * @ngdoc service
+     * @name staffdir.StaffFactory
+     *
+     * @requires $resource
+     * @requires $http
+     * @requires $filter
+     *
+     * @description
+     * Factory service to get staff directory info from the API.
+     */
+
     .factory('StaffFactory', ['$resource', '$filter', '$http', function($resource, $filter, $http){
         //TODO: centralize this function so it can be used with all apps
         // Extend the default responseTransform array - Straight from Angular 1.2.8 API docs - //docs.angularjs.org/api/ng/service/$http#overriding-the-default-transformations-per-request
@@ -51015,10 +51382,31 @@ angular.module('staffdir', ['ualib.staffdir']);
         }
 
         return {
+            /**
+             * @ngdoc object
+             * @name staffdir.StaffFactory:directory
+             * @methodOf staffdir.StaffFactory
+             *
+             * @description
+             * Gets full list of library faculty and staff
+             *
+             * @example
+             * <pre>
+             *      var list = StaffFactory.directory().get()
+                        .$promise.then(function(data){
+                            return data;
+                        }, function(data, status){
+                            console.log('Error' + status + ': ' + data);
+                            return staff;
+                        });
+             * </pre>
+             *
+             * @returns {Promise} $resource promise
+             */
             directory: function(){
                 return $resource('//wwwdev2.lib.ua.edu/staffDir/api/people', {}, {
-                    cache: true,
                     get: {
+                        cache: true,
                         method: 'GET',
                         transformResponse: appendTransform($http.defaults.transformResponse, function(d){
                             // temporary fix. Not sustainable to manually remove arbitrary fields from API for different views
@@ -51096,15 +51484,112 @@ angular.module('staffdir', ['ualib.staffdir']);
                     }
                 });
             },
+            /**
+             * @ngdoc object
+             * @name staffdir.StaffFactory:byEmail
+             * @methodOf staffdir.StaffFactory
+             *
+             * @param {object} email Email param object
+             * @param {string} email.email Faculty/staff member's email address
+             *
+             * @description
+             * Gets faculty/staff info by email
+             *
+             * @example
+             * <pre>
+             *      var person = StaffFactory.email().get({email: 'email@addres.com'})
+                        .$promise.then(function(data){
+                            return data;
+                        }, function(data, status){
+                            console.log('Error' + status + ': ' + data);
+                            return staff;
+                        });
+             * </pre>
+             *
+             * @returns {Promise} $resource promise
+             */
             byEmail: function(){
                 return $resource('//wwwdev2.lib.ua.edu/staffDir/api/people/search/email/:email', {}, {cache: true});
             },
+            /**
+             * @ngdoc object
+             * @name staffdir.StaffFactory:byName
+             * @methodOf staffdir.StaffFactory
+             *
+             * @param {object} name Name param object
+             * @param {string} name.firstname Faculty/staff member's first name
+             * @param {string} name.lastname Faculty/staff member's last name
+             *
+             * @description
+             * Gets faculty/staff info by full name.
+             *
+             * @example
+             * <pre>
+             *      var person = StaffFactory.email().get({firstname: 'Malcolm', lastname: 'Reynolds'})
+                        .$promise.then(function(data){
+                            return data;
+                        }, function(data, status){
+                            console.log('Error' + status + ': ' + data);
+                            return staff;
+                        });
+             * </pre>
+             *
+             * @returns {Promise} $resource promise
+             */
             byName: function(){
                 return $resource('//wwwdev2.lib.ua.edu/staffDir/api/people/search/firstname/:firstname/lastname/:lastname', {}, {cache: true});
             },
+            /**
+             * @ngdoc object
+             * @name staffdir.StaffFactory:byId
+             * @methodOf staffdir.StaffFactory
+             *
+             * @param {object} id ID param object
+             * @param {number} id.id Faculty/staff member's ID (in the API database)
+             *
+             * @description
+             * Gets faculty/staff info by ID (in the API database).
+             *
+             * @example
+             * <pre>
+             *      var person = StaffFactory.email().get({id: 2468})
+                        .$promise.then(function(data){
+                            return data;
+                        }, function(data, status){
+                            console.log('Error' + status + ': ' + data);
+                            return staff;
+                        });
+             * </pre>
+             *
+             * @returns {Promise} $resource promise
+             */
             byId: function(){
                 return $resource('//wwwdev2.lib.ua.edu/staffDir/api/people/search/id/:id', {}, {cache: true});
             },
+            /**
+             * @ngdoc object
+             * @name staffdir.StaffFactory:profile
+             * @methodOf staffdir.StaffFactory
+             *
+             * @param {object} id ID param object
+             * @param {number} id.id Faculty/staff member's ID (in the API database)
+             *
+             * @description
+             * Gets faculty/staff info by ID (in the API database).
+             *
+             * @example
+             * <pre>
+             *      var person = StaffFactory.email().get({id: 2468})
+                    .$promise.then(function(data){
+                            return data;
+                        }, function(data, status){
+                            console.log('Error' + status + ': ' + data);
+                            return staff;
+                        });
+             * </pre>
+             *
+             * @returns {Promise} $resource promise
+             */
             profile: function(){
                 return $resource('//wwwdev2.lib.ua.edu/staffDir/api/profile/:login', {}, {cache: true});
             }
