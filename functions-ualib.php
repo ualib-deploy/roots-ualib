@@ -45,6 +45,12 @@ function add_manage_admin_bar_link() {
             'href' => __(site_url()."/edit-directory-profile/"),
             'parent' => 'manage_link',
         ));
+    } else {
+        $wp_admin_bar->add_menu( array(
+            'id' => 'manage_profile_link',
+            'title' => __( '<span class="ab-icon dashicons-before dashicons-welcome-write-blog"></span> Edit Profile'),
+            'href' => __(site_url()."/edit-directory-profile/"),
+        ));
     }
     if (($wpUser = gDoesUserHaveAccessWP( GROUP_ONESEARCH)) !== false) {
         $wp_admin_bar->add_menu( array(
