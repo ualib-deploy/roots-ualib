@@ -185,7 +185,7 @@ angular.module("../assets/js/_ualib-image-carousel.tpl.html", []).run(["$templat
 
         // Extend $compileProvider to allow mailto/file/ftp in ng-href - without this, links render as "unsafe:mailto:..."
         // This is only requires for Angular 1.2.28 - after upgrade, remove this
-        $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|mailto|file|blob):/);
+        $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|mailto|file|blob|tel):/);
 
     }])
 

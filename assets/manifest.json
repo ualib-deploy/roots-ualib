@@ -13,12 +13,12 @@
   },
   "assets/js/scripts.min.js": {
     "path": "assets/js/scripts.min.js",
-    "hash": "64eb042ccac9536667641a7f9592e5eb",
+    "hash": "d565c6a57d74944b7b4f94aedfd2773a",
     "handle": "roots_js"
   },
   "assets/js/scripts_bower.min.js": {
     "path": "assets/js/scripts_bower.min.js",
-    "hash": "1df91c6bfb0f131fa1866ef316946214",
+    "hash": "96ab97bbdb670309b3ca2cda4c14dff1",
     "handle": "roots_js"
   }
 }
