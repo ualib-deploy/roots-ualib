@@ -53586,7 +53586,7 @@ angular.module("staff-card/staff-card-list.tpl.html", []).run(["$templateCache",
     "                    </div>\n" +
     "                    <div class=\"col-xs-12 col-sm-5\">\n" +
     "                        <ul class=\"fa-ul\">\n" +
-    "                            <li ng-if=\"person.phone\"><span class=\"fa fa-phone fa-li\"></span><a ng-href=\"tel:+1-205-{{person.phone}}\">(205) {{person.phone}}</a></li>\n" +
+    "                            <li ng-if=\"person.phone\"><span class=\"fa fa-phone fa-li\"></span><a ng-href=\"tel:+1{{person.phone}}\">{{person.phone}}</a></li>\n" +
     "                            <li class=\"hidden-xs\" ng-if=\"person.fax\"><span class=\"fa fa-fax fa-li\"></span>{{person.fax}}</li>\n" +
     "                            <li ng-if=\"person.email\"><span class=\"fa fa-envelope fa-li\"></span><a ng-href=\"mailto:{{person.email}}\" title=\"Email {{person.firstname}} {{person.lastname}}\">{{person.email}}</a></li>\n" +
     "                        </ul>\n" +
