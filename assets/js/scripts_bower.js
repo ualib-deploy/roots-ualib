@@ -2286,6 +2286,2432 @@ angular.module('angular.filter', [
 ]);
 })( window, window.angular );
 /**
+ * angular-ui-utils - Swiss-Army-Knife of AngularJS tools (with no external dependencies!)
+ * @version v0.2.3 - 2015-03-30
+ * @link http://angular-ui.github.com
+ * @license MIT License, http://www.opensource.org/licenses/MIT
+ */
+angular.module('ui.alias', []).config(['$compileProvider', 'uiAliasConfig', function($compileProvider, uiAliasConfig){
+  'use strict';
+
+  uiAliasConfig = uiAliasConfig || {};
+  angular.forEach(uiAliasConfig, function(config, alias){
+    if (angular.isString(config)) {
+      config = {
+        replace: true,
+        template: config
+      };
+    }
+    $compileProvider.directive(alias, function(){
+      return config;
+    });
+  });
+}]);
+
+/**
+ * General-purpose Event binding. Bind any event not natively supported by Angular
+ * Pass an object with keynames for events to ui-event
+ * Allows $event object and $params object to be passed
+ *
+ * @example <input ui-event="{ focus : 'counter++', blur : 'someCallback()' }">
+ * @example <input ui-event="{ myCustomEvent : 'myEventHandler($event, $params)'}">
+ *
+ * @param ui-event {string|object literal} The event to bind to as a string or a hash of events with their callbacks
+ */
+angular.module('ui.event',[]).directive('uiEvent', ['$parse',
+  function ($parse) {
+    'use strict';
+
+    return function ($scope, elm, attrs) {
+      var events = $scope.$eval(attrs.uiEvent);
+      angular.forEach(events, function (uiEvent, eventName) {
+        var fn = $parse(uiEvent);
+        elm.bind(eventName, function (evt) {
+          var params = Array.prototype.slice.call(arguments);
+          //Take out first paramater (event object);
+          params = params.splice(1);
+          fn($scope, {$event: evt, $params: params});
+          if (!$scope.$$phase) {
+            $scope.$apply();
+          }
+        });
+      });
+    };
+  }]);
+
+/**
+ * A replacement utility for internationalization very similar to sprintf.
+ *
+ * @param replace {mixed} The tokens to replace depends on type
+ *  string: all instances of $0 will be replaced
+ *  array: each instance of $0, $1, $2 etc. will be placed with each array item in corresponding order
+ *  object: all attributes will be iterated through, with :key being replaced with its corresponding value
+ * @return string
+ *
+ * @example: 'Hello :name, how are you :day'.format({ name:'John', day:'Today' })
+ * @example: 'Records $0 to $1 out of $2 total'.format(['10', '20', '3000'])
+ * @example: '$0 agrees to all mentions $0 makes in the event that $0 hits a tree while $0 is driving drunk'.format('Bob')
+ */
+angular.module('ui.format',[]).filter('format', function(){
+  'use strict';
+
+  return function(value, replace) {
+    var target = value;
+    if (angular.isString(target) && replace !== undefined) {
+      if (!angular.isArray(replace) && !angular.isObject(replace)) {
+        replace = [replace];
+      }
+      if (angular.isArray(replace)) {
+        var rlen = replace.length;
+        var rfx = function (str, i) {
+          i = parseInt(i, 10);
+          return (i >= 0 && i < rlen) ? replace[i] : str;
+        };
+        target = target.replace(/\$([0-9]+)/g, rfx);
+      }
+      else {
+        angular.forEach(replace, function(value, key){
+          target = target.split(':' + key).join(value);
+        });
+      }
+    }
+    return target;
+  };
+});
+
+/**
+ * Wraps the
+ * @param text {string} haystack to search through
+ * @param search {string} needle to search for
+ * @param [caseSensitive] {boolean} optional boolean to use case-sensitive searching
+ */
+angular.module('ui.highlight',[]).filter('highlight', function () {
+  'use strict';
+
+  return function (text, search, caseSensitive) {
+    if (text && (search || angular.isNumber(search))) {
+      text = text.toString();
+      search = search.toString();
+      if (caseSensitive) {
+        return text.split(search).join('<span class="ui-match">' + search + '</span>');
+      } else {
+        return text.replace(new RegExp(search, 'gi'), '<span class="ui-match">$&</span>');
+      }
+    } else {
+      return text;
+    }
+  };
+});
+
+// modeled after: angular-1.0.7/src/ng/directive/ngInclude.js
+angular.module('ui.include',[])
+.directive('uiInclude', ['$http', '$templateCache', '$anchorScroll', '$compile',
+                 function($http,   $templateCache,   $anchorScroll,   $compile) {
+  'use strict';
+
+  return {
+    restrict: 'ECA',
+    terminal: true,
+    compile: function(element, attr) {
+      var srcExp = attr.uiInclude || attr.src,
+          fragExp = attr.fragment || '',
+          onloadExp = attr.onload || '',
+          autoScrollExp = attr.autoscroll;
+
+      return function(scope, element) {
+        var changeCounter = 0,
+            childScope;
+
+        var clearContent = function() {
+          if (childScope) {
+            childScope.$destroy();
+            childScope = null;
+          }
+
+          element.html('');
+        };
+
+        function ngIncludeWatchAction() {
+          var thisChangeId = ++changeCounter;
+          var src = scope.$eval(srcExp);
+          var fragment = scope.$eval(fragExp);
+
+          if (src) {
+            $http.get(src, {cache: $templateCache}).success(function(response) {
+              if (thisChangeId !== changeCounter) { return; }
+
+              if (childScope) { childScope.$destroy(); }
+              childScope = scope.$new();
+
+              var contents;
+              if (fragment) {
+                contents = angular.element('<div/>').html(response).find(fragment);
+              }
+              else {
+                contents = angular.element('<div/>').html(response).contents();
+              }
+              element.html(contents);
+              $compile(contents)(childScope);
+
+              if (angular.isDefined(autoScrollExp) && (!autoScrollExp || scope.$eval(autoScrollExp))) {
+                $anchorScroll();
+              }
+
+              childScope.$emit('$includeContentLoaded');
+              scope.$eval(onloadExp);
+            }).error(function() {
+              if (thisChangeId === changeCounter) { clearContent(); }
+            });
+          } else { clearContent(); }
+        }
+
+        scope.$watch(fragExp, ngIncludeWatchAction);
+        scope.$watch(srcExp, ngIncludeWatchAction);
+      };
+    }
+  };
+}]);
+
+/**
+ * Provides an easy way to toggle a checkboxes indeterminate property
+ *
+ * @example <input type="checkbox" ui-indeterminate="isUnkown">
+ */
+angular.module('ui.indeterminate',[]).directive('uiIndeterminate', [
+  function () {
+    'use strict';
+
+    return {
+      compile: function(tElm, tAttrs) {
+        if (!tAttrs.type || tAttrs.type.toLowerCase() !== 'checkbox') {
+          return angular.noop;
+        }
+
+        return function ($scope, elm, attrs) {
+          $scope.$watch(attrs.uiIndeterminate, function(newVal) {
+            elm[0].indeterminate = !!newVal;
+          });
+        };
+      }
+    };
+  }]);
+
+/**
+ * Converts variable-esque naming conventions to something presentational, capitalized words separated by space.
+ * @param {String} value The value to be parsed and prettified.
+ * @param {String} [inflector] The inflector to use. Default: humanize.
+ * @return {String}
+ * @example {{ 'Here Is my_phoneNumber' | inflector:'humanize' }} => Here Is My Phone Number
+ *          {{ 'Here Is my_phoneNumber' | inflector:'underscore' }} => here_is_my_phone_number
+ *          {{ 'Here Is my_phoneNumber' | inflector:'variable' }} => hereIsMyPhoneNumber
+ */
+angular.module('ui.inflector',[]).filter('inflector', function () {
+  'use strict';
+
+  function tokenize(text) {
+    text = text.replace(/([A-Z])|([\-|\_])/g, function(_, $1) { return ' ' + ($1 || ''); });
+    return text.replace(/\s\s+/g, ' ').trim().toLowerCase().split(' ');
+  }
+
+  function capitalizeTokens(tokens) {
+    var result = [];
+    angular.forEach(tokens, function(token) {
+      result.push(token.charAt(0).toUpperCase() + token.substr(1));
+    });
+    return result;
+  }
+
+  var inflectors = {
+    humanize: function (value) {
+      return capitalizeTokens(tokenize(value)).join(' ');
+    },
+    underscore: function (value) {
+      return tokenize(value).join('_');
+    },
+    variable: function (value) {
+      value = tokenize(value);
+      value = value[0] + capitalizeTokens(value.slice(1)).join('');
+      return value;
+    }
+  };
+
+  return function (text, inflector) {
+    if (inflector !== false && angular.isString(text)) {
+      inflector = inflector || 'humanize';
+      return inflectors[inflector](text);
+    } else {
+      return text;
+    }
+  };
+});
+
+/**
+ * General-purpose jQuery wrapper. Simply pass the plugin name as the expression.
+ *
+ * It is possible to specify a default set of parameters for each jQuery plugin.
+ * Under the jq key, namespace each plugin by that which will be passed to ui-jq.
+ * Unfortunately, at this time you can only pre-define the first parameter.
+ * @example { jq : { datepicker : { showOn:'click' } } }
+ *
+ * @param ui-jq {string} The $elm.[pluginName]() to call.
+ * @param [ui-options] {mixed} Expression to be evaluated and passed as options to the function
+ *     Multiple parameters can be separated by commas
+ * @param [ui-refresh] {expression} Watch expression and refire plugin on changes
+ *
+ * @example <input ui-jq="datepicker" ui-options="{showOn:'click'},secondParameter,thirdParameter" ui-refresh="iChange">
+ */
+angular.module('ui.jq',[]).
+  value('uiJqConfig',{}).
+  directive('uiJq', ['uiJqConfig', '$timeout', function uiJqInjectingFunction(uiJqConfig, $timeout) {
+  'use strict';
+
+
+  return {
+    restrict: 'A',
+    compile: function uiJqCompilingFunction(tElm, tAttrs) {
+
+      if (!angular.isFunction(tElm[tAttrs.uiJq])) {
+        throw new Error('ui-jq: The "' + tAttrs.uiJq + '" function does not exist');
+      }
+      var options = uiJqConfig && uiJqConfig[tAttrs.uiJq];
+
+      return function uiJqLinkingFunction(scope, elm, attrs) {
+
+        // If change compatibility is enabled, the form input's "change" event will trigger an "input" event
+        if (attrs.ngModel && elm.is('select,input,textarea')) {
+          elm.bind('change', function() {
+            elm.trigger('input');
+          });
+        }
+
+        function createLinkOptions(){
+          var linkOptions = [];
+
+          // If ui-options are passed, merge (or override) them onto global defaults and pass to the jQuery method
+          if (attrs.uiOptions) {
+            linkOptions = scope.$eval('[' + attrs.uiOptions + ']');
+            if (angular.isObject(options) && angular.isObject(linkOptions[0])) {
+              linkOptions[0] = angular.extend({}, options, linkOptions[0]);
+            }
+          } else if (options) {
+            linkOptions = [options];
+          }
+          return linkOptions;
+        }
+
+        // Call jQuery method and pass relevant options
+        function callPlugin() {
+          $timeout(function() {
+            elm[attrs.uiJq].apply(elm, createLinkOptions());
+          }, 0, false);
+        }
+
+        // If ui-refresh is used, re-fire the the method upon every change
+        if (attrs.uiRefresh) {
+          scope.$watch(attrs.uiRefresh, function() {
+            callPlugin();
+          });
+        }
+        callPlugin();
+      };
+    }
+  };
+}]);
+
+angular.module('ui.keypress',[]).
+factory('keypressHelper', ['$parse', function keypress($parse){
+  'use strict';
+
+  var keysByCode = {
+    8: 'backspace',
+    9: 'tab',
+    13: 'enter',
+    27: 'esc',
+    32: 'space',
+    33: 'pageup',
+    34: 'pagedown',
+    35: 'end',
+    36: 'home',
+    37: 'left',
+    38: 'up',
+    39: 'right',
+    40: 'down',
+    45: 'insert',
+    46: 'delete'
+  };
+
+  var capitaliseFirstLetter = function (string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  };
+
+  return function(mode, scope, elm, attrs) {
+    var params, combinations = [];
+    params = scope.$eval(attrs['ui'+capitaliseFirstLetter(mode)]);
+
+    // Prepare combinations for simple checking
+    angular.forEach(params, function (v, k) {
+      var combination, expression;
+      expression = $parse(v);
+
+      angular.forEach(k.split(' '), function(variation) {
+        combination = {
+          expression: expression,
+          keys: {}
+        };
+        angular.forEach(variation.split('-'), function (value) {
+          combination.keys[value] = true;
+        });
+        combinations.push(combination);
+      });
+    });
+
+    // Check only matching of pressed keys one of the conditions
+    elm.bind(mode, function (event) {
+      // No need to do that inside the cycle
+      var metaPressed = !!(event.metaKey && !event.ctrlKey);
+      var altPressed = !!event.altKey;
+      var ctrlPressed = !!event.ctrlKey;
+      var shiftPressed = !!event.shiftKey;
+      var keyCode = event.keyCode;
+
+      // normalize keycodes
+      if (mode === 'keypress' && !shiftPressed && keyCode >= 97 && keyCode <= 122) {
+        keyCode = keyCode - 32;
+      }
+
+      // Iterate over prepared combinations
+      angular.forEach(combinations, function (combination) {
+
+        var mainKeyPressed = combination.keys[keysByCode[keyCode]] || combination.keys[keyCode.toString()];
+
+        var metaRequired = !!combination.keys.meta;
+        var altRequired = !!combination.keys.alt;
+        var ctrlRequired = !!combination.keys.ctrl;
+        var shiftRequired = !!combination.keys.shift;
+
+        if (
+          mainKeyPressed &&
+          ( metaRequired === metaPressed ) &&
+          ( altRequired === altPressed ) &&
+          ( ctrlRequired === ctrlPressed ) &&
+          ( shiftRequired === shiftPressed )
+        ) {
+          // Run the function
+          scope.$apply(function () {
+            combination.expression(scope, { '$event': event });
+          });
+        }
+      });
+    });
+  };
+}]);
+
+/**
+ * Bind one or more handlers to particular keys or their combination
+ * @param hash {mixed} keyBindings Can be an object or string where keybinding expression of keys or keys combinations and AngularJS Exspressions are set. Object syntax: "{ keys1: expression1 [, keys2: expression2 [ , ... ]]}". String syntax: ""expression1 on keys1 [ and expression2 on keys2 [ and ... ]]"". Expression is an AngularJS Expression, and key(s) are dash-separated combinations of keys and modifiers (one or many, if any. Order does not matter). Supported modifiers are 'ctrl', 'shift', 'alt' and key can be used either via its keyCode (13 for Return) or name. Named keys are 'backspace', 'tab', 'enter', 'esc', 'space', 'pageup', 'pagedown', 'end', 'home', 'left', 'up', 'right', 'down', 'insert', 'delete'.
+ * @example <input ui-keypress="{enter:'x = 1', 'ctrl-shift-space':'foo()', 'shift-13':'bar()'}" /> <input ui-keypress="foo = 2 on ctrl-13 and bar('hello') on shift-esc" />
+ **/
+angular.module('ui.keypress').directive('uiKeydown', ['keypressHelper', function(keypressHelper){
+  'use strict';
+
+  return {
+    link: function (scope, elm, attrs) {
+      keypressHelper('keydown', scope, elm, attrs);
+    }
+  };
+}]);
+
+angular.module('ui.keypress').directive('uiKeypress', ['keypressHelper', function(keypressHelper){
+  'use strict';
+
+  return {
+    link: function (scope, elm, attrs) {
+      keypressHelper('keypress', scope, elm, attrs);
+    }
+  };
+}]);
+
+angular.module('ui.keypress').directive('uiKeyup', ['keypressHelper', function(keypressHelper){
+  'use strict';
+
+  return {
+    link: function (scope, elm, attrs) {
+      keypressHelper('keyup', scope, elm, attrs);
+    }
+  };
+}]);
+
+/*
+ Attaches input mask onto input element
+ */
+angular.module('ui.mask', [])
+  .value('uiMaskConfig', {
+    'maskDefinitions': {
+      '9': /\d/,
+      'A': /[a-zA-Z]/,
+      '*': /[a-zA-Z0-9]/
+    },
+    'clearOnBlur': true
+  })
+  .directive('uiMask', ['uiMaskConfig', '$parse', function (maskConfig, $parse) {
+    'use strict';
+
+    return {
+      priority: 100,
+      require: 'ngModel',
+      restrict: 'A',
+      compile: function uiMaskCompilingFunction(){
+        var options = maskConfig;
+
+        return function uiMaskLinkingFunction(scope, iElement, iAttrs, controller){
+          var maskProcessed = false, eventsBound = false,
+            maskCaretMap, maskPatterns, maskPlaceholder, maskComponents,
+          // Minimum required length of the value to be considered valid
+            minRequiredLength,
+            value, valueMasked, isValid,
+          // Vars for initializing/uninitializing
+            originalPlaceholder = iAttrs.placeholder,
+            originalMaxlength = iAttrs.maxlength,
+          // Vars used exclusively in eventHandler()
+            oldValue, oldValueUnmasked, oldCaretPosition, oldSelectionLength;
+
+          function initialize(maskAttr){
+            if (!angular.isDefined(maskAttr)) {
+              return uninitialize();
+            }
+            processRawMask(maskAttr);
+            if (!maskProcessed) {
+              return uninitialize();
+            }
+            initializeElement();
+            bindEventListeners();
+            return true;
+          }
+
+          function initPlaceholder(placeholderAttr) {
+            if(! angular.isDefined(placeholderAttr)) {
+              return;
+            }
+
+            maskPlaceholder = placeholderAttr;
+
+            // If the mask is processed, then we need to update the value
+            if (maskProcessed) {
+              eventHandler();
+            }
+          }
+
+          function formatter(fromModelValue){
+            if (!maskProcessed) {
+              return fromModelValue;
+            }
+            value = unmaskValue(fromModelValue || '');
+            isValid = validateValue(value);
+            controller.$setValidity('mask', isValid);
+            return isValid && value.length ? maskValue(value) : undefined;
+          }
+
+          function parser(fromViewValue){
+            if (!maskProcessed) {
+              return fromViewValue;
+            }
+            value = unmaskValue(fromViewValue || '');
+            isValid = validateValue(value);
+            // We have to set viewValue manually as the reformatting of the input
+            // value performed by eventHandler() doesn't happen until after
+            // this parser is called, which causes what the user sees in the input
+            // to be out-of-sync with what the controller's $viewValue is set to.
+            controller.$viewValue = value.length ? maskValue(value) : '';
+            controller.$setValidity('mask', isValid);
+            if (value === '' && iAttrs.required) {
+                controller.$setValidity('required', !controller.$error.required);
+            }
+            return isValid ? value : undefined;
+          }
+
+          var linkOptions = {};
+
+          if (iAttrs.uiOptions) {
+            linkOptions = scope.$eval('[' + iAttrs.uiOptions + ']');
+            if (angular.isObject(linkOptions[0])) {
+              // we can't use angular.copy nor angular.extend, they lack the power to do a deep merge
+              linkOptions = (function(original, current){
+                for(var i in original) {
+                  if (Object.prototype.hasOwnProperty.call(original, i)) {
+                    if (current[i] === undefined) {
+                      current[i] = angular.copy(original[i]);
+                    } else {
+                      angular.extend(current[i], original[i]);
+                    }
+                  }
+                }
+                return current;
+              })(options, linkOptions[0]);
+            }
+          } else {
+            linkOptions = options;
+          }
+
+          iAttrs.$observe('uiMask', initialize);
+          iAttrs.$observe('placeholder', initPlaceholder);
+          var modelViewValue = false;
+          iAttrs.$observe('modelViewValue', function(val) {
+            if(val === 'true') {
+              modelViewValue = true;
+            }
+          });
+          scope.$watch(iAttrs.ngModel, function(val) {
+            if(modelViewValue && val) {
+              var model = $parse(iAttrs.ngModel);
+              model.assign(scope, controller.$viewValue);
+            }
+          });
+          controller.$formatters.push(formatter);
+          controller.$parsers.push(parser);
+
+          function uninitialize(){
+            maskProcessed = false;
+            unbindEventListeners();
+
+            if (angular.isDefined(originalPlaceholder)) {
+              iElement.attr('placeholder', originalPlaceholder);
+            } else {
+              iElement.removeAttr('placeholder');
+            }
+
+            if (angular.isDefined(originalMaxlength)) {
+              iElement.attr('maxlength', originalMaxlength);
+            } else {
+              iElement.removeAttr('maxlength');
+            }
+
+            iElement.val(controller.$modelValue);
+            controller.$viewValue = controller.$modelValue;
+            return false;
+          }
+
+          function initializeElement(){
+            value = oldValueUnmasked = unmaskValue(controller.$viewValue || '');
+            valueMasked = oldValue = maskValue(value);
+            isValid = validateValue(value);
+            var viewValue = isValid && value.length ? valueMasked : '';
+            if (iAttrs.maxlength) { // Double maxlength to allow pasting new val at end of mask
+              iElement.attr('maxlength', maskCaretMap[maskCaretMap.length - 1] * 2);
+            }
+            iElement.attr('placeholder', maskPlaceholder);
+            iElement.val(viewValue);
+            controller.$viewValue = viewValue;
+            // Not using $setViewValue so we don't clobber the model value and dirty the form
+            // without any kind of user interaction.
+          }
+
+          function bindEventListeners(){
+            if (eventsBound) {
+              return;
+            }
+            iElement.bind('blur', blurHandler);
+            iElement.bind('mousedown mouseup', mouseDownUpHandler);
+            iElement.bind('input keyup click focus', eventHandler);
+            eventsBound = true;
+          }
+
+          function unbindEventListeners(){
+            if (!eventsBound) {
+              return;
+            }
+            iElement.unbind('blur', blurHandler);
+            iElement.unbind('mousedown', mouseDownUpHandler);
+            iElement.unbind('mouseup', mouseDownUpHandler);
+            iElement.unbind('input', eventHandler);
+            iElement.unbind('keyup', eventHandler);
+            iElement.unbind('click', eventHandler);
+            iElement.unbind('focus', eventHandler);
+            eventsBound = false;
+          }
+
+          function validateValue(value){
+            // Zero-length value validity is ngRequired's determination
+            return value.length ? value.length >= minRequiredLength : true;
+          }
+
+          function unmaskValue(value){
+            var valueUnmasked = '',
+              maskPatternsCopy = maskPatterns.slice();
+            // Preprocess by stripping mask components from value
+            value = value.toString();
+            angular.forEach(maskComponents, function (component){
+              value = value.replace(component, '');
+            });
+            angular.forEach(value.split(''), function (chr){
+              if (maskPatternsCopy.length && maskPatternsCopy[0].test(chr)) {
+                valueUnmasked += chr;
+                maskPatternsCopy.shift();
+              }
+            });
+            return valueUnmasked;
+          }
+
+          function maskValue(unmaskedValue){
+            var valueMasked = '',
+                maskCaretMapCopy = maskCaretMap.slice();
+
+            angular.forEach(maskPlaceholder.split(''), function (chr, i){
+              if (unmaskedValue.length && i === maskCaretMapCopy[0]) {
+                valueMasked  += unmaskedValue.charAt(0) || '_';
+                unmaskedValue = unmaskedValue.substr(1);
+                maskCaretMapCopy.shift();
+              }
+              else {
+                valueMasked += chr;
+              }
+            });
+            return valueMasked;
+          }
+
+          function getPlaceholderChar(i) {
+            var placeholder = iAttrs.placeholder;
+
+            if (typeof placeholder !== 'undefined' && placeholder[i]) {
+              return placeholder[i];
+            } else {
+              return '_';
+            }
+          }
+
+          // Generate array of mask components that will be stripped from a masked value
+          // before processing to prevent mask components from being added to the unmasked value.
+          // E.g., a mask pattern of '+7 9999' won't have the 7 bleed into the unmasked value.
+          // If a maskable char is followed by a mask char and has a mask
+          // char behind it, we'll split it into it's own component so if
+          // a user is aggressively deleting in the input and a char ahead
+          // of the maskable char gets deleted, we'll still be able to strip
+          // it in the unmaskValue() preprocessing.
+          function getMaskComponents() {
+            return maskPlaceholder.replace(/[_]+/g, '_').replace(/([^_]+)([a-zA-Z0-9])([^_])/g, '$1$2_$3').split('_');
+          }
+
+          function processRawMask(mask){
+            var characterCount = 0;
+
+            maskCaretMap    = [];
+            maskPatterns    = [];
+            maskPlaceholder = '';
+
+            if (typeof mask === 'string') {
+              minRequiredLength = 0;
+
+              var isOptional = false,
+                  numberOfOptionalCharacters = 0,
+                  splitMask  = mask.split('');
+
+              angular.forEach(splitMask, function (chr, i){
+                if (linkOptions.maskDefinitions[chr]) {
+
+                  maskCaretMap.push(characterCount);
+
+                  maskPlaceholder += getPlaceholderChar(i - numberOfOptionalCharacters);
+                  maskPatterns.push(linkOptions.maskDefinitions[chr]);
+
+                  characterCount++;
+                  if (!isOptional) {
+                    minRequiredLength++;
+                  }
+                }
+                else if (chr === '?') {
+                  isOptional = true;
+                  numberOfOptionalCharacters++;
+                }
+                else {
+                  maskPlaceholder += chr;
+                  characterCount++;
+                }
+              });
+            }
+            // Caret position immediately following last position is valid.
+            maskCaretMap.push(maskCaretMap.slice().pop() + 1);
+
+            maskComponents = getMaskComponents();
+            maskProcessed  = maskCaretMap.length > 1 ? true : false;
+          }
+
+          function blurHandler(){
+            if (linkOptions.clearOnBlur) {
+              oldCaretPosition = 0;
+              oldSelectionLength = 0;
+              if (!isValid || value.length === 0) {
+                valueMasked = '';
+                iElement.val('');
+                scope.$apply(function () {
+                  controller.$setViewValue('');
+                });
+              }
+            }
+          }
+
+          function mouseDownUpHandler(e){
+            if (e.type === 'mousedown') {
+              iElement.bind('mouseout', mouseoutHandler);
+            } else {
+              iElement.unbind('mouseout', mouseoutHandler);
+            }
+          }
+
+          iElement.bind('mousedown mouseup', mouseDownUpHandler);
+
+          function mouseoutHandler(){
+            /*jshint validthis: true */
+            oldSelectionLength = getSelectionLength(this);
+            iElement.unbind('mouseout', mouseoutHandler);
+          }
+
+          function eventHandler(e){
+            /*jshint validthis: true */
+            e = e || {};
+            // Allows more efficient minification
+            var eventWhich = e.which,
+              eventType = e.type;
+
+            // Prevent shift and ctrl from mucking with old values
+            if (eventWhich === 16 || eventWhich === 91) { return;}
+
+            var val = iElement.val(),
+              valOld = oldValue,
+              valMasked,
+              valUnmasked = unmaskValue(val),
+              valUnmaskedOld = oldValueUnmasked,
+              valAltered = false,
+
+              caretPos = getCaretPosition(this) || 0,
+              caretPosOld = oldCaretPosition || 0,
+              caretPosDelta = caretPos - caretPosOld,
+              caretPosMin = maskCaretMap[0],
+              caretPosMax = maskCaretMap[valUnmasked.length] || maskCaretMap.slice().shift(),
+
+              selectionLenOld = oldSelectionLength || 0,
+              isSelected = getSelectionLength(this) > 0,
+              wasSelected = selectionLenOld > 0,
+
+            // Case: Typing a character to overwrite a selection
+              isAddition = (val.length > valOld.length) || (selectionLenOld && val.length > valOld.length - selectionLenOld),
+            // Case: Delete and backspace behave identically on a selection
+              isDeletion = (val.length < valOld.length) || (selectionLenOld && val.length === valOld.length - selectionLenOld),
+              isSelection = (eventWhich >= 37 && eventWhich <= 40) && e.shiftKey, // Arrow key codes
+
+              isKeyLeftArrow = eventWhich === 37,
+            // Necessary due to "input" event not providing a key code
+              isKeyBackspace = eventWhich === 8 || (eventType !== 'keyup' && isDeletion && (caretPosDelta === -1)),
+              isKeyDelete = eventWhich === 46 || (eventType !== 'keyup' && isDeletion && (caretPosDelta === 0 ) && !wasSelected),
+
+            // Handles cases where caret is moved and placed in front of invalid maskCaretMap position. Logic below
+            // ensures that, on click or leftward caret placement, caret is moved leftward until directly right of
+            // non-mask character. Also applied to click since users are (arguably) more likely to backspace
+            // a character when clicking within a filled input.
+              caretBumpBack = (isKeyLeftArrow || isKeyBackspace || eventType === 'click') && caretPos > caretPosMin;
+
+            oldSelectionLength = getSelectionLength(this);
+
+            // These events don't require any action
+            if (isSelection || (isSelected && (eventType === 'click' || eventType === 'keyup'))) {
+              return;
+            }
+
+            // Value Handling
+            // ==============
+
+            // User attempted to delete but raw value was unaffected--correct this grievous offense
+            if ((eventType === 'input') && isDeletion && !wasSelected && valUnmasked === valUnmaskedOld) {
+              while (isKeyBackspace && caretPos > caretPosMin && !isValidCaretPosition(caretPos)) {
+                caretPos--;
+              }
+              while (isKeyDelete && caretPos < caretPosMax && maskCaretMap.indexOf(caretPos) === -1) {
+                caretPos++;
+              }
+              var charIndex = maskCaretMap.indexOf(caretPos);
+              // Strip out non-mask character that user would have deleted if mask hadn't been in the way.
+              valUnmasked = valUnmasked.substring(0, charIndex) + valUnmasked.substring(charIndex + 1);
+              valAltered = true;
+            }
+
+            // Update values
+            valMasked = maskValue(valUnmasked);
+
+            oldValue = valMasked;
+            oldValueUnmasked = valUnmasked;
+            iElement.val(valMasked);
+            if (valAltered) {
+              // We've altered the raw value after it's been $digest'ed, we need to $apply the new value.
+              scope.$apply(function (){
+                controller.$setViewValue(valUnmasked);
+              });
+            }
+
+            // Caret Repositioning
+            // ===================
+
+            // Ensure that typing always places caret ahead of typed character in cases where the first char of
+            // the input is a mask char and the caret is placed at the 0 position.
+            if (isAddition && (caretPos <= caretPosMin)) {
+              caretPos = caretPosMin + 1;
+            }
+
+            if (caretBumpBack) {
+              caretPos--;
+            }
+
+            // Make sure caret is within min and max position limits
+            caretPos = caretPos > caretPosMax ? caretPosMax : caretPos < caretPosMin ? caretPosMin : caretPos;
+
+            // Scoot the caret back or forth until it's in a non-mask position and within min/max position limits
+            while (!isValidCaretPosition(caretPos) && caretPos > caretPosMin && caretPos < caretPosMax) {
+              caretPos += caretBumpBack ? -1 : 1;
+            }
+
+            if ((caretBumpBack && caretPos < caretPosMax) || (isAddition && !isValidCaretPosition(caretPosOld))) {
+              caretPos++;
+            }
+            oldCaretPosition = caretPos;
+            setCaretPosition(this, caretPos);
+          }
+
+          function isValidCaretPosition(pos){ return maskCaretMap.indexOf(pos) > -1; }
+
+          function getCaretPosition(input){
+            if (!input) return 0;
+            if (input.selectionStart !== undefined) {
+              return input.selectionStart;
+            } else if (document.selection) {
+              // Curse you IE
+              input.focus();
+              var selection = document.selection.createRange();
+              selection.moveStart('character', input.value ? -input.value.length : 0);
+              return selection.text.length;
+            }
+            return 0;
+          }
+
+          function setCaretPosition(input, pos){
+            if (!input) return 0;
+            if (input.offsetWidth === 0 || input.offsetHeight === 0) {
+              return; // Input's hidden
+            }
+            if (input.setSelectionRange) {
+              input.focus();
+              input.setSelectionRange(pos, pos);
+            }
+            else if (input.createTextRange) {
+              // Curse you IE
+              var range = input.createTextRange();
+              range.collapse(true);
+              range.moveEnd('character', pos);
+              range.moveStart('character', pos);
+              range.select();
+            }
+          }
+
+          function getSelectionLength(input){
+            if (!input) return 0;
+            if (input.selectionStart !== undefined) {
+              return (input.selectionEnd - input.selectionStart);
+            }
+            if (document.selection) {
+              return (document.selection.createRange().text.length);
+            }
+            return 0;
+          }
+
+          // https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/indexOf
+          if (!Array.prototype.indexOf) {
+            Array.prototype.indexOf = function (searchElement /*, fromIndex */){
+              if (this === null) {
+                throw new TypeError();
+              }
+              var t = Object(this);
+              var len = t.length >>> 0;
+              if (len === 0) {
+                return -1;
+              }
+              var n = 0;
+              if (arguments.length > 1) {
+                n = Number(arguments[1]);
+                if (n !== n) { // shortcut for verifying if it's NaN
+                  n = 0;
+                } else if (n !== 0 && n !== Infinity && n !== -Infinity) {
+                  n = (n > 0 || -1) * Math.floor(Math.abs(n));
+                }
+              }
+              if (n >= len) {
+                return -1;
+              }
+              var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
+              for (; k < len; k++) {
+                if (k in t && t[k] === searchElement) {
+                  return k;
+                }
+              }
+              return -1;
+            };
+          }
+
+        };
+      }
+    };
+  }
+]);
+
+/**
+ * Add a clear button to form inputs to reset their value
+ */
+angular.module('ui.reset',[]).value('uiResetConfig',null).directive('uiReset', ['uiResetConfig', function (uiResetConfig) {
+  'use strict';
+
+  var resetValue = null;
+  if (uiResetConfig !== undefined){
+      resetValue = uiResetConfig;
+  }
+  return {
+    require: 'ngModel',
+    link: function (scope, elm, attrs, ctrl) {
+      var aElement;
+      aElement = angular.element('<a class="ui-reset" />');
+      elm.wrap('<span class="ui-resetwrap" />').after(aElement);
+      aElement.bind('click', function (e) {
+        e.preventDefault();
+        scope.$apply(function () {
+          if (attrs.uiReset){
+            ctrl.$setViewValue(scope.$eval(attrs.uiReset));
+          }else{
+            ctrl.$setViewValue(resetValue);
+          }
+          ctrl.$render();
+        });
+      });
+    }
+  };
+}]);
+
+/**
+ * Set a $uiRoute boolean to see if the current route matches
+ */
+angular.module('ui.route', []).directive('uiRoute', ['$location', '$parse', function ($location, $parse) {
+  'use strict';
+
+  return {
+    restrict: 'AC',
+    scope: true,
+    compile: function(tElement, tAttrs) {
+      var useProperty;
+      if (tAttrs.uiRoute) {
+        useProperty = 'uiRoute';
+      } else if (tAttrs.ngHref) {
+        useProperty = 'ngHref';
+      } else if (tAttrs.href) {
+        useProperty = 'href';
+      } else {
+        throw new Error('uiRoute missing a route or href property on ' + tElement[0]);
+      }
+      return function ($scope, elm, attrs) {
+        var modelSetter = $parse(attrs.ngModel || attrs.routeModel || '$uiRoute').assign;
+        var watcher = angular.noop;
+
+        // Used by href and ngHref
+        function staticWatcher(newVal) {
+          var hash = newVal.indexOf('#');
+          if (hash > -1){
+            newVal = newVal.substr(hash + 1);
+          }
+          watcher = function watchHref() {
+            modelSetter($scope, ($location.path().indexOf(newVal) > -1));
+          };
+          watcher();
+        }
+        // Used by uiRoute
+        function regexWatcher(newVal) {
+          var hash = newVal.indexOf('#');
+          if (hash > -1){
+            newVal = newVal.substr(hash + 1);
+          }
+          watcher = function watchRegex() {
+            var regexp = new RegExp('^' + newVal + '$', ['i']);
+            modelSetter($scope, regexp.test($location.path()));
+          };
+          watcher();
+        }
+
+        switch (useProperty) {
+          case 'uiRoute':
+            // if uiRoute={{}} this will be undefined, otherwise it will have a value and $observe() never gets triggered
+            if (attrs.uiRoute){
+              regexWatcher(attrs.uiRoute);
+            }else{
+              attrs.$observe('uiRoute', regexWatcher);
+            }
+            break;
+          case 'ngHref':
+            // Setup watcher() every time ngHref changes
+            if (attrs.ngHref){
+              staticWatcher(attrs.ngHref);
+            }else{
+              attrs.$observe('ngHref', staticWatcher);
+            }
+            break;
+          case 'href':
+            // Setup watcher()
+            staticWatcher(attrs.href);
+        }
+
+        $scope.$on('$routeChangeSuccess', function(){
+          watcher();
+        });
+
+        //Added for compatibility with ui-router
+        $scope.$on('$stateChangeSuccess', function(){
+          watcher();
+        });
+      };
+    }
+  };
+}]);
+
+angular.module('ui.scroll.jqlite', ['ui.scroll']).service('jqLiteExtras', [
+  '$log', '$window', function(console, window) {
+    'use strict';
+
+    return {
+      registerFor: function(element) {
+        var convertToPx, css, getMeasurements, getStyle, getWidthHeight, isWindow, scrollTo;
+        css = angular.element.prototype.css;
+        element.prototype.css = function(name, value) {
+          var elem, self;
+          self = this;
+          elem = self[0];
+          if (!(!elem || elem.nodeType === 3 || elem.nodeType === 8 || !elem.style)) {
+            return css.call(self, name, value);
+          }
+        };
+        isWindow = function(obj) {
+          return obj && obj.document && obj.location && obj.alert && obj.setInterval;
+        };
+        scrollTo = function(self, direction, value) {
+          var elem, method, preserve, prop, _ref;
+          elem = self[0];
+          _ref = {
+            top: ['scrollTop', 'pageYOffset', 'scrollLeft'],
+            left: ['scrollLeft', 'pageXOffset', 'scrollTop']
+          }[direction], method = _ref[0], prop = _ref[1], preserve = _ref[2];
+          if (isWindow(elem)) {
+            if (angular.isDefined(value)) {
+              return elem.scrollTo(self[preserve].call(self), value);
+            } else {
+              if (prop in elem) {
+                return elem[prop];
+              } else {
+                return elem.document.documentElement[method];
+              }
+            }
+          } else {
+            if (angular.isDefined(value)) {
+              return elem[method] = value;
+            } else {
+              return elem[method];
+            }
+          }
+        };
+        if (window.getComputedStyle) {
+          getStyle = function(elem) {
+            return window.getComputedStyle(elem, null);
+          };
+          convertToPx = function(elem, value) {
+            return parseFloat(value);
+          };
+        } else {
+          getStyle = function(elem) {
+            return elem.currentStyle;
+          };
+          convertToPx = function(elem, value) {
+            var core_pnum, left, result, rnumnonpx, rs, rsLeft, style;
+            core_pnum = /[+-]?(?:\d*\.|)\d+(?:[eE][+-]?\d+|)/.source;
+            rnumnonpx = new RegExp('^(' + core_pnum + ')(?!px)[a-z%]+$', 'i');
+            if (!rnumnonpx.test(value)) {
+              return parseFloat(value);
+            } else {
+              style = elem.style;
+              left = style.left;
+              rs = elem.runtimeStyle;
+              rsLeft = rs && rs.left;
+              if (rs) {
+                rs.left = style.left;
+              }
+              style.left = value;
+              result = style.pixelLeft;
+              style.left = left;
+              if (rsLeft) {
+                rs.left = rsLeft;
+              }
+              return result;
+            }
+          };
+        }
+        getMeasurements = function(elem, measure) {
+          var base, borderA, borderB, computedMarginA, computedMarginB, computedStyle, dirA, dirB, marginA, marginB, paddingA, paddingB, _ref;
+          if (isWindow(elem)) {
+            base = document.documentElement[{
+              height: 'clientHeight',
+              width: 'clientWidth'
+            }[measure]];
+            return {
+              base: base,
+              padding: 0,
+              border: 0,
+              margin: 0
+            };
+          }
+          _ref = {
+            width: [elem.offsetWidth, 'Left', 'Right'],
+            height: [elem.offsetHeight, 'Top', 'Bottom']
+          }[measure], base = _ref[0], dirA = _ref[1], dirB = _ref[2];
+          computedStyle = getStyle(elem);
+          paddingA = convertToPx(elem, computedStyle['padding' + dirA]) || 0;
+          paddingB = convertToPx(elem, computedStyle['padding' + dirB]) || 0;
+          borderA = convertToPx(elem, computedStyle['border' + dirA + 'Width']) || 0;
+          borderB = convertToPx(elem, computedStyle['border' + dirB + 'Width']) || 0;
+          computedMarginA = computedStyle['margin' + dirA];
+          computedMarginB = computedStyle['margin' + dirB];
+          marginA = convertToPx(elem, computedMarginA) || 0;
+          marginB = convertToPx(elem, computedMarginB) || 0;
+          return {
+            base: base,
+            padding: paddingA + paddingB,
+            border: borderA + borderB,
+            margin: marginA + marginB
+          };
+        };
+        getWidthHeight = function(elem, direction, measure) {
+          var computedStyle, measurements, result;
+          measurements = getMeasurements(elem, direction);
+          if (measurements.base > 0) {
+            return {
+              base: measurements.base - measurements.padding - measurements.border,
+              outer: measurements.base,
+              outerfull: measurements.base + measurements.margin
+            }[measure];
+          } else {
+            computedStyle = getStyle(elem);
+            result = computedStyle[direction];
+            if (result < 0 || result === null) {
+              result = elem.style[direction] || 0;
+            }
+            result = parseFloat(result) || 0;
+            return {
+              base: result - measurements.padding - measurements.border,
+              outer: result,
+              outerfull: result + measurements.padding + measurements.border + measurements.margin
+            }[measure];
+          }
+        };
+        return angular.forEach({
+          before: function(newElem) {
+            var children, elem, i, parent, self, _i, _ref;
+            self = this;
+            elem = self[0];
+            parent = self.parent();
+            children = parent.contents();
+            if (children[0] === elem) {
+              return parent.prepend(newElem);
+            } else {
+              for (i = _i = 1, _ref = children.length - 1; 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
+                if (children[i] === elem) {
+                  angular.element(children[i - 1]).after(newElem);
+                  return;
+                }
+              }
+              throw new Error('invalid DOM structure ' + elem.outerHTML);
+            }
+          },
+          height: function(value) {
+            var self;
+            self = this;
+            if (angular.isDefined(value)) {
+              if (angular.isNumber(value)) {
+                value = value + 'px';
+              }
+              return css.call(self, 'height', value);
+            } else {
+              return getWidthHeight(this[0], 'height', 'base');
+            }
+          },
+          outerHeight: function(option) {
+            return getWidthHeight(this[0], 'height', option ? 'outerfull' : 'outer');
+          },
+          /*
+          UIScroller no longer relies on jQuery method offset. The jQLite implementation of the method
+          is kept here just for the reference. Also the offset setter method was never implemented
+          */
+
+          offset: function(value) {
+            var box, doc, docElem, elem, self, win;
+            self = this;
+            if (arguments.length) {
+              if (value === void 0) {
+                return self;
+              } else {
+                throw new Error('offset setter method is not implemented');
+              }
+            }
+            box = {
+              top: 0,
+              left: 0
+            };
+            elem = self[0];
+            doc = elem && elem.ownerDocument;
+            if (!doc) {
+              return;
+            }
+            docElem = doc.documentElement;
+            if (elem.getBoundingClientRect != null) {
+              box = elem.getBoundingClientRect();
+            }
+            win = doc.defaultView || doc.parentWindow;
+            return {
+              top: box.top + (win.pageYOffset || docElem.scrollTop) - (docElem.clientTop || 0),
+              left: box.left + (win.pageXOffset || docElem.scrollLeft) - (docElem.clientLeft || 0)
+            };
+          },
+          scrollTop: function(value) {
+            return scrollTo(this, 'top', value);
+          },
+          scrollLeft: function(value) {
+            return scrollTo(this, 'left', value);
+          }
+        }, function(value, key) {
+          if (!element.prototype[key]) {
+            return element.prototype[key] = value;
+          }
+        });
+      }
+    };
+  }
+]).run([
+  '$log', '$window', 'jqLiteExtras', function(console, window, jqLiteExtras) {
+    'use strict';
+
+    if (!window.jQuery) {
+      return jqLiteExtras.registerFor(angular.element);
+    }
+  }
+]);
+
+/*
+//# sourceURL=src/scripts/ui-scroll-jqlite.js
+*/
+
+
+/*
+ globals: angular, window
+
+ List of used element methods available in JQuery but not in JQuery Lite
+
+ element.before(elem)
+ element.height()
+ element.outerHeight(true)
+ element.height(value) = only for Top/Bottom padding elements
+ element.scrollTop()
+ element.scrollTop(value)
+ */
+
+angular.module('ui.scroll', []).directive('uiScrollViewport', [
+  '$log', function() {
+    'use strict';
+
+    return {
+      controller: [
+        '$scope', '$element', function(scope, element) {
+          this.viewport = element;
+          return this;
+        }
+      ]
+    };
+  }
+]).directive('uiScroll', [
+  '$log', '$injector', '$rootScope', '$timeout', function(console, $injector, $rootScope, $timeout) {
+    'use strict';
+
+    return {
+      require: ['?^uiScrollViewport'],
+      transclude: 'element',
+      priority: 1000,
+      terminal: true,
+      compile: function(elementTemplate, attr, linker) {
+        return function($scope, element, $attr, controllers) {
+          var adapter, adapterOnScope, adjustBuffer, adjustRowHeight, applyUpdate, bof, bottomVisiblePos, buffer, bufferPadding, bufferSize, builder, clipBottom, clipTop, datasource, datasourceName, doAdjustment, doDelete, doInsert, doUpdate, enqueueFetch, eof, eventListener, fetch, finalize, first, getValueChain, hideElementBeforeAppend, insert, isDatasourceValid, itemName, loading, log, match, next, pending, reload, removeFromBuffer, resizeAndScrollHandler, ridActual, scrollHeight, setValueChain, shouldLoadBottom, shouldLoadTop, showElementAfterRender, topVisible, topVisiblePos, viewport, viewportScope, wheelHandler;
+          log = console.debug || console.log;
+          match = $attr.uiScroll.match(/^\s*(\w+)\s+in\s+([\w\.]+)\s*$/);
+          if (!match) {
+            throw new Error('Expected uiScroll in form of \'_item_ in _datasource_\' but got \'' + $attr.uiScroll + '\'');
+          }
+          itemName = match[1];
+          datasourceName = match[2];
+          getValueChain = function(targetScope, target) {
+            var chain;
+            if (!targetScope) {
+              return;
+            }
+            chain = target.match(/^([\w]+)\.(.+)$/);
+            if (!chain || chain.length !== 3) {
+              return targetScope[target];
+            }
+            return getValueChain(targetScope[chain[1]], chain[2]);
+          };
+          setValueChain = function(targetScope, target, value, doNotSet) {
+            var chain;
+            if (!targetScope || !target) {
+              return;
+            }
+            if (!(chain = target.match(/^([\w]+)\.(.+)$/))) {
+              if (target.indexOf('.') !== -1) {
+                return;
+              }
+            }
+            if (!chain || chain.length !== 3) {
+              if (!angular.isObject(targetScope[target]) && !doNotSet) {
+                return targetScope[target] = value;
+              }
+              return targetScope[target] = value;
+            }
+            if (!angular.isObject(targetScope[chain[1]]) && !doNotSet) {
+              targetScope[chain[1]] = {};
+            }
+            return setValueChain(targetScope[chain[1]], chain[2], value, doNotSet);
+          };
+          datasource = getValueChain($scope, datasourceName);
+          isDatasourceValid = function() {
+            return angular.isObject(datasource) && typeof datasource.get === 'function';
+          };
+          if (!isDatasourceValid()) {
+            datasource = $injector.get(datasourceName);
+            if (!isDatasourceValid()) {
+              throw new Error('' + datasourceName + ' is not a valid datasource');
+            }
+          }
+          bufferSize = Math.max(3, +$attr.bufferSize || 10);
+          bufferPadding = function() {
+            return viewport.outerHeight() * Math.max(0.1, +$attr.padding || 0.1);
+          };
+          scrollHeight = function(elem) {
+            var _ref;
+            return (_ref = elem[0].scrollHeight) != null ? _ref : elem[0].document.documentElement.scrollHeight;
+          };
+          builder = null;
+          linker($scope.$new(), function(template) {
+            var bottomPadding, createPadding, padding, repeaterType, topPadding, viewport;
+            repeaterType = template[0].localName;
+            if (repeaterType === 'dl') {
+              throw new Error('ui-scroll directive does not support <' + template[0].localName + '> as a repeating tag: ' + template[0].outerHTML);
+            }
+            if (repeaterType !== 'li' && repeaterType !== 'tr') {
+              repeaterType = 'div';
+            }
+            viewport = controllers[0] && controllers[0].viewport ? controllers[0].viewport : angular.element(window);
+            viewport.css({
+              'overflow-y': 'auto',
+              'display': 'block'
+            });
+            padding = function(repeaterType) {
+              var div, result, table;
+              switch (repeaterType) {
+                case 'tr':
+                  table = angular.element('<table><tr><td><div></div></td></tr></table>');
+                  div = table.find('div');
+                  result = table.find('tr');
+                  result.paddingHeight = function() {
+                    return div.height.apply(div, arguments);
+                  };
+                  return result;
+                default:
+                  result = angular.element('<' + repeaterType + '></' + repeaterType + '>');
+                  result.paddingHeight = result.height;
+                  return result;
+              }
+            };
+            createPadding = function(padding, element, direction) {
+              element[{
+                top: 'before',
+                bottom: 'after'
+              }[direction]](padding);
+              return {
+                paddingHeight: function() {
+                  return padding.paddingHeight.apply(padding, arguments);
+                },
+                insert: function(element) {
+                  return padding[{
+                    top: 'after',
+                    bottom: 'before'
+                  }[direction]](element);
+                }
+              };
+            };
+            topPadding = createPadding(padding(repeaterType), element, 'top');
+            bottomPadding = createPadding(padding(repeaterType), element, 'bottom');
+            $scope.$on('$destroy', template.remove);
+            return builder = {
+              viewport: viewport,
+              topPadding: topPadding.paddingHeight,
+              bottomPadding: bottomPadding.paddingHeight,
+              append: bottomPadding.insert,
+              prepend: topPadding.insert,
+              bottomDataPos: function() {
+                return scrollHeight(viewport) - bottomPadding.paddingHeight();
+              },
+              topDataPos: function() {
+                return topPadding.paddingHeight();
+              }
+            };
+          });
+          viewport = builder.viewport;
+          viewportScope = viewport.scope() || $rootScope;
+          topVisible = function(item) {
+            adapter.topVisible = item.scope[itemName];
+            adapter.topVisibleElement = item.element;
+            adapter.topVisibleScope = item.scope;
+            if ($attr.topVisible) {
+              setValueChain(viewportScope, $attr.topVisible, adapter.topVisible);
+            }
+            if ($attr.topVisibleElement) {
+              setValueChain(viewportScope, $attr.topVisibleElement, adapter.topVisibleElement);
+            }
+            if ($attr.topVisibleScope) {
+              setValueChain(viewportScope, $attr.topVisibleScope, adapter.topVisibleScope);
+            }
+            if (typeof datasource.topVisible === 'function') {
+              return datasource.topVisible(item);
+            }
+          };
+          loading = function(value) {
+            adapter.isLoading = value;
+            if ($attr.isLoading) {
+              setValueChain($scope, $attr.isLoading, value);
+            }
+            if (typeof datasource.loading === 'function') {
+              return datasource.loading(value);
+            }
+          };
+          ridActual = 0;
+          first = 1;
+          next = 1;
+          buffer = [];
+          pending = [];
+          eof = false;
+          bof = false;
+          removeFromBuffer = function(start, stop) {
+            var i, _i;
+            for (i = _i = start; start <= stop ? _i < stop : _i > stop; i = start <= stop ? ++_i : --_i) {
+              buffer[i].scope.$destroy();
+              buffer[i].element.remove();
+            }
+            return buffer.splice(start, stop - start);
+          };
+          reload = function() {
+            ridActual++;
+            first = 1;
+            next = 1;
+            removeFromBuffer(0, buffer.length);
+            builder.topPadding(0);
+            builder.bottomPadding(0);
+            pending = [];
+            eof = false;
+            bof = false;
+            return adjustBuffer(ridActual);
+          };
+          bottomVisiblePos = function() {
+            return viewport.scrollTop() + viewport.outerHeight();
+          };
+          topVisiblePos = function() {
+            return viewport.scrollTop();
+          };
+          shouldLoadBottom = function() {
+            return !eof && builder.bottomDataPos() < bottomVisiblePos() + bufferPadding();
+          };
+          clipBottom = function() {
+            var bottomHeight, i, item, itemHeight, itemTop, newRow, overage, rowTop, _i, _ref;
+            bottomHeight = 0;
+            overage = 0;
+            for (i = _i = _ref = buffer.length - 1; _ref <= 0 ? _i <= 0 : _i >= 0; i = _ref <= 0 ? ++_i : --_i) {
+              item = buffer[i];
+              itemTop = item.element.offset().top;
+              newRow = rowTop !== itemTop;
+              rowTop = itemTop;
+              if (newRow) {
+                itemHeight = item.element.outerHeight(true);
+              }
+              if (builder.bottomDataPos() - bottomHeight - itemHeight > bottomVisiblePos() + bufferPadding()) {
+                if (newRow) {
+                  bottomHeight += itemHeight;
+                }
+                overage++;
+                eof = false;
+              } else {
+                if (newRow) {
+                  break;
+                }
+                overage++;
+              }
+            }
+            if (overage > 0) {
+              builder.bottomPadding(builder.bottomPadding() + bottomHeight);
+              removeFromBuffer(buffer.length - overage, buffer.length);
+              return next -= overage;
+            }
+          };
+          shouldLoadTop = function() {
+            return !bof && (builder.topDataPos() > topVisiblePos() - bufferPadding());
+          };
+          clipTop = function() {
+            var item, itemHeight, itemTop, newRow, overage, rowTop, topHeight, _i, _len;
+            topHeight = 0;
+            overage = 0;
+            for (_i = 0, _len = buffer.length; _i < _len; _i++) {
+              item = buffer[_i];
+              itemTop = item.element.offset().top;
+              newRow = rowTop !== itemTop;
+              rowTop = itemTop;
+              if (newRow) {
+                itemHeight = item.element.outerHeight(true);
+              }
+              if (builder.topDataPos() + topHeight + itemHeight < topVisiblePos() - bufferPadding()) {
+                if (newRow) {
+                  topHeight += itemHeight;
+                }
+                overage++;
+                bof = false;
+              } else {
+                if (newRow) {
+                  break;
+                }
+                overage++;
+              }
+            }
+            if (overage > 0) {
+              builder.topPadding(builder.topPadding() + topHeight);
+              removeFromBuffer(0, overage);
+              return first += overage;
+            }
+          };
+          enqueueFetch = function(rid, direction) {
+            if (!adapter.isLoading) {
+              loading(true);
+            }
+            if (pending.push(direction) === 1) {
+              return fetch(rid);
+            }
+          };
+          hideElementBeforeAppend = function(element) {
+            element.displayTemp = element.css('display');
+            return element.css('display', 'none');
+          };
+          showElementAfterRender = function(element) {
+            if (element.hasOwnProperty('displayTemp')) {
+              return element.css('display', element.displayTemp);
+            }
+          };
+          insert = function(index, item) {
+            var itemScope, toBeAppended, wrapper;
+            itemScope = $scope.$new();
+            itemScope[itemName] = item;
+            toBeAppended = index > first;
+            itemScope.$index = index;
+            if (toBeAppended) {
+              itemScope.$index--;
+            }
+            wrapper = {
+              scope: itemScope
+            };
+            linker(itemScope, function(clone) {
+              wrapper.element = clone;
+              if (toBeAppended) {
+                if (index === next) {
+                  hideElementBeforeAppend(clone);
+                  builder.append(clone);
+                  return buffer.push(wrapper);
+                } else {
+                  buffer[index - first].element.after(clone);
+                  return buffer.splice(index - first + 1, 0, wrapper);
+                }
+              } else {
+                hideElementBeforeAppend(clone);
+                builder.prepend(clone);
+                return buffer.unshift(wrapper);
+              }
+            });
+            return {
+              appended: toBeAppended,
+              wrapper: wrapper
+            };
+          };
+          adjustRowHeight = function(appended, wrapper) {
+            var newHeight;
+            if (appended) {
+              return builder.bottomPadding(Math.max(0, builder.bottomPadding() - wrapper.element.outerHeight(true)));
+            } else {
+              newHeight = builder.topPadding() - wrapper.element.outerHeight(true);
+              if (newHeight >= 0) {
+                return builder.topPadding(newHeight);
+              } else {
+                return viewport.scrollTop(viewport.scrollTop() + wrapper.element.outerHeight(true));
+              }
+            }
+          };
+          doAdjustment = function(rid, finalize) {
+            var item, itemHeight, itemTop, newRow, rowTop, topHeight, _i, _len, _results;
+            if (shouldLoadBottom()) {
+              enqueueFetch(rid, true);
+            } else {
+              if (shouldLoadTop()) {
+                enqueueFetch(rid, false);
+              }
+            }
+            if (finalize) {
+              finalize(rid);
+            }
+            if (pending.length === 0) {
+              topHeight = 0;
+              _results = [];
+              for (_i = 0, _len = buffer.length; _i < _len; _i++) {
+                item = buffer[_i];
+                itemTop = item.element.offset().top;
+                newRow = rowTop !== itemTop;
+                rowTop = itemTop;
+                if (newRow) {
+                  itemHeight = item.element.outerHeight(true);
+                }
+                if (newRow && (builder.topDataPos() + topHeight + itemHeight < topVisiblePos())) {
+                  _results.push(topHeight += itemHeight);
+                } else {
+                  if (newRow) {
+                    topVisible(item);
+                  }
+                  break;
+                }
+              }
+              return _results;
+            }
+          };
+          adjustBuffer = function(rid, newItems, finalize) {
+            if (newItems && newItems.length) {
+              return $timeout(function() {
+                var elt, itemTop, row, rowTop, rows, _i, _j, _len, _len1;
+                rows = [];
+                for (_i = 0, _len = newItems.length; _i < _len; _i++) {
+                  row = newItems[_i];
+                  elt = row.wrapper.element;
+                  showElementAfterRender(elt);
+                  itemTop = elt.offset().top;
+                  if (rowTop !== itemTop) {
+                    rows.push(row);
+                    rowTop = itemTop;
+                  }
+                }
+                for (_j = 0, _len1 = rows.length; _j < _len1; _j++) {
+                  row = rows[_j];
+                  adjustRowHeight(row.appended, row.wrapper);
+                }
+                return doAdjustment(rid, finalize);
+              });
+            } else {
+              return doAdjustment(rid, finalize);
+            }
+          };
+          finalize = function(rid, newItems) {
+            return adjustBuffer(rid, newItems, function() {
+              pending.shift();
+              if (pending.length === 0) {
+                return loading(false);
+              } else {
+                return fetch(rid);
+              }
+            });
+          };
+          fetch = function(rid) {
+            var direction;
+            direction = pending[0];
+            if (direction) {
+              if (buffer.length && !shouldLoadBottom()) {
+                return finalize(rid);
+              } else {
+                return datasource.get(next, bufferSize, function(result) {
+                  var item, newItems, _i, _len;
+                  if ((rid && rid !== ridActual) || $scope.$$destroyed) {
+                    return;
+                  }
+                  newItems = [];
+                  if (result.length < bufferSize) {
+                    eof = true;
+                    builder.bottomPadding(0);
+                  }
+                  if (result.length > 0) {
+                    clipTop();
+                    for (_i = 0, _len = result.length; _i < _len; _i++) {
+                      item = result[_i];
+                      newItems.push(insert(++next, item));
+                    }
+                  }
+                  return finalize(rid, newItems);
+                });
+              }
+            } else {
+              if (buffer.length && !shouldLoadTop()) {
+                return finalize(rid);
+              } else {
+                return datasource.get(first - bufferSize, bufferSize, function(result) {
+                  var i, newItems, _i, _ref;
+                  if ((rid && rid !== ridActual) || $scope.$$destroyed) {
+                    return;
+                  }
+                  newItems = [];
+                  if (result.length < bufferSize) {
+                    bof = true;
+                    builder.topPadding(0);
+                  }
+                  if (result.length > 0) {
+                    if (buffer.length) {
+                      clipBottom();
+                    }
+                    for (i = _i = _ref = result.length - 1; _ref <= 0 ? _i <= 0 : _i >= 0; i = _ref <= 0 ? ++_i : --_i) {
+                      newItems.unshift(insert(--first, result[i]));
+                    }
+                  }
+                  return finalize(rid, newItems);
+                });
+              }
+            }
+          };
+          resizeAndScrollHandler = function() {
+            if (!$rootScope.$$phase && !adapter.isLoading) {
+              adjustBuffer();
+              return $scope.$apply();
+            }
+          };
+          wheelHandler = function(event) {
+            var scrollTop, yMax;
+            scrollTop = viewport[0].scrollTop;
+            yMax = viewport[0].scrollHeight - viewport[0].clientHeight;
+            if ((scrollTop === 0 && !bof) || (scrollTop === yMax && !eof)) {
+              return event.preventDefault();
+            }
+          };
+          viewport.bind('resize', resizeAndScrollHandler);
+          viewport.bind('scroll', resizeAndScrollHandler);
+          viewport.bind('mousewheel', wheelHandler);
+          $scope.$watch(datasource.revision, reload);
+          if (datasource.scope) {
+            eventListener = datasource.scope.$new();
+          } else {
+            eventListener = $scope.$new();
+          }
+          $scope.$on('$destroy', function() {
+            var item, _i, _len;
+            for (_i = 0, _len = buffer.length; _i < _len; _i++) {
+              item = buffer[_i];
+              item.scope.$destroy();
+              item.element.remove();
+            }
+            viewport.unbind('resize', resizeAndScrollHandler);
+            viewport.unbind('scroll', resizeAndScrollHandler);
+            return viewport.unbind('mousewheel', wheelHandler);
+          });
+          adapter = {};
+          adapter.isLoading = false;
+          applyUpdate = function(wrapper, newItems) {
+            var i, inserted, item, ndx, newItem, oldItemNdx, _i, _j, _k, _len, _len1, _len2;
+            inserted = [];
+            if (angular.isArray(newItems)) {
+              if (newItems.length) {
+                if (newItems.length === 1 && newItems[0] === wrapper.scope[itemName]) {
+                  return inserted;
+                } else {
+                  ndx = wrapper.scope.$index;
+                  if (ndx > first) {
+                    oldItemNdx = ndx - first;
+                  } else {
+                    oldItemNdx = 1;
+                  }
+                  for (i = _i = 0, _len = newItems.length; _i < _len; i = ++_i) {
+                    newItem = newItems[i];
+                    inserted.push(insert(ndx + i, newItem));
+                  }
+                  removeFromBuffer(oldItemNdx, oldItemNdx + 1);
+                  for (i = _j = 0, _len1 = buffer.length; _j < _len1; i = ++_j) {
+                    item = buffer[i];
+                    item.scope.$index = first + i;
+                  }
+                }
+              } else {
+                removeFromBuffer(wrapper.scope.$index - first, wrapper.scope.$index - first + 1);
+                next--;
+                for (i = _k = 0, _len2 = buffer.length; _k < _len2; i = ++_k) {
+                  item = buffer[i];
+                  item.scope.$index = first + i;
+                }
+              }
+            }
+            return inserted;
+          };
+          adapter.applyUpdates = function(arg1, arg2) {
+            var inserted, wrapper, _i, _len, _ref, _ref1;
+            inserted = [];
+            ridActual++;
+            if (angular.isFunction(arg1)) {
+              _ref = buffer.slice(0);
+              for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+                wrapper = _ref[_i];
+                inserted.concat(inserted, applyUpdate(wrapper, arg1(wrapper.scope[itemName], wrapper.scope, wrapper.element)));
+              }
+            } else {
+              if (arg1 % 1 === 0) {
+                if ((0 <= (_ref1 = arg1 - first - 1) && _ref1 < buffer.length)) {
+                  inserted = applyUpdate(buffer[arg1 - first], arg2);
+                }
+              } else {
+                throw new Error('applyUpdates - ' + arg1 + ' is not a valid index or outside of range');
+              }
+            }
+            return adjustBuffer(ridActual, inserted);
+          };
+          if ($attr.adapter) {
+            adapterOnScope = getValueChain($scope, $attr.adapter);
+            if (!adapterOnScope) {
+              setValueChain($scope, $attr.adapter, {});
+              adapterOnScope = getValueChain($scope, $attr.adapter);
+            }
+            angular.extend(adapterOnScope, adapter);
+            adapter = adapterOnScope;
+          }
+          doUpdate = function(locator, newItem) {
+            var wrapper, _fn, _i, _len, _ref;
+            if (angular.isFunction(locator)) {
+              _fn = function(wrapper) {
+                return locator(wrapper.scope);
+              };
+              for (_i = 0, _len = buffer.length; _i < _len; _i++) {
+                wrapper = buffer[_i];
+                _fn(wrapper);
+              }
+            } else {
+              if ((0 <= (_ref = locator - first - 1) && _ref < buffer.length)) {
+                buffer[locator - first - 1].scope[itemName] = newItem;
+              }
+            }
+            return null;
+          };
+          doDelete = function(locator) {
+            var i, item, temp, wrapper, _fn, _i, _j, _k, _len, _len1, _len2, _ref;
+            if (angular.isFunction(locator)) {
+              temp = [];
+              for (_i = 0, _len = buffer.length; _i < _len; _i++) {
+                item = buffer[_i];
+                temp.unshift(item);
+              }
+              _fn = function(wrapper) {
+                if (locator(wrapper.scope)) {
+                  removeFromBuffer(temp.length - 1 - i, temp.length - i);
+                  return next--;
+                }
+              };
+              for (i = _j = 0, _len1 = temp.length; _j < _len1; i = ++_j) {
+                wrapper = temp[i];
+                _fn(wrapper);
+              }
+            } else {
+              if ((0 <= (_ref = locator - first - 1) && _ref < buffer.length)) {
+                removeFromBuffer(locator - first - 1, locator - first);
+                next--;
+              }
+            }
+            for (i = _k = 0, _len2 = buffer.length; _k < _len2; i = ++_k) {
+              item = buffer[i];
+              item.scope.$index = first + i;
+            }
+            return adjustBuffer();
+          };
+          doInsert = function(locator, item) {
+            var i, inserted, _i, _len, _ref;
+            inserted = [];
+            if (angular.isFunction(locator)) {
+              throw new Error('not implemented - Insert with locator function');
+            } else {
+              if ((0 <= (_ref = locator - first - 1) && _ref < buffer.length)) {
+                inserted.push(insert(locator, item));
+                next++;
+              }
+            }
+            for (i = _i = 0, _len = buffer.length; _i < _len; i = ++_i) {
+              item = buffer[i];
+              item.scope.$index = first + i;
+            }
+            return adjustBuffer(null, inserted);
+          };
+          eventListener.$on('insert.item', function(event, locator, item) {
+            return doInsert(locator, item);
+          });
+          eventListener.$on('update.items', function(event, locator, newItem) {
+            return doUpdate(locator, newItem);
+          });
+          return eventListener.$on('delete.items', function(event, locator) {
+            return doDelete(locator);
+          });
+        };
+      }
+    };
+  }
+]);
+
+/*
+//# sourceURL=src/scripts/ui-scroll.js
+*/
+
+
+/**
+ * Adds a 'ui-scrollfix' class to the element when the page scrolls past it's position.
+ * @param [offset] {int} optional Y-offset to override the detected offset.
+ *   Takes 300 (absolute) or -300 or +300 (relative to detected)
+ */
+angular.module('ui.scrollfix',[]).directive('uiScrollfix', ['$window', function ($window) {
+  'use strict';
+
+  function getWindowScrollTop() {
+    if (angular.isDefined($window.pageYOffset)) {
+      return $window.pageYOffset;
+    } else {
+      var iebody = (document.compatMode && document.compatMode !== 'BackCompat') ? document.documentElement : document.body;
+      return iebody.scrollTop;
+    }
+  }
+  return {
+    require: '^?uiScrollfixTarget',
+    link: function (scope, elm, attrs, uiScrollfixTarget) {
+      var absolute = true,
+          shift = 0,
+          fixLimit,
+          $target = uiScrollfixTarget && uiScrollfixTarget.$element || angular.element($window);
+
+      if (!attrs.uiScrollfix) {
+          absolute = false;
+      } else if (typeof(attrs.uiScrollfix) === 'string') {
+        // charAt is generally faster than indexOf: http://jsperf.com/indexof-vs-charat
+        if (attrs.uiScrollfix.charAt(0) === '-') {
+          absolute = false;
+          shift = - parseFloat(attrs.uiScrollfix.substr(1));
+        } else if (attrs.uiScrollfix.charAt(0) === '+') {
+          absolute = false;
+          shift = parseFloat(attrs.uiScrollfix.substr(1));
+        }
+      }
+
+      fixLimit = absolute ? attrs.uiScrollfix : elm[0].offsetTop + shift;
+
+      function onScroll() {
+
+        var limit = absolute ? attrs.uiScrollfix : elm[0].offsetTop + shift;
+
+        // if pageYOffset is defined use it, otherwise use other crap for IE
+        var offset = uiScrollfixTarget ? $target[0].scrollTop : getWindowScrollTop();
+        if (!elm.hasClass('ui-scrollfix') && offset > limit) {
+          elm.addClass('ui-scrollfix');
+          fixLimit = limit;
+        } else if (elm.hasClass('ui-scrollfix') && offset < fixLimit) {
+          elm.removeClass('ui-scrollfix');
+        }
+      }
+
+      $target.on('scroll', onScroll);
+
+      // Unbind scroll event handler when directive is removed
+      scope.$on('$destroy', function() {
+        $target.off('scroll', onScroll);
+      });
+    }
+  };
+}]).directive('uiScrollfixTarget', [function () {
+  'use strict';
+  return {
+    controller: ['$element', function($element) {
+      this.$element = $element;
+    }]
+  };
+}]);
+
+/**
+ * uiShow Directive
+ *
+ * Adds a 'ui-show' class to the element instead of display:block
+ * Created to allow tighter control  of CSS without bulkier directives
+ *
+ * @param expression {boolean} evaluated expression to determine if the class should be added
+ */
+angular.module('ui.showhide',[])
+.directive('uiShow', [function () {
+  'use strict';
+
+  return function (scope, elm, attrs) {
+    scope.$watch(attrs.uiShow, function (newVal) {
+      if (newVal) {
+        elm.addClass('ui-show');
+      } else {
+        elm.removeClass('ui-show');
+      }
+    });
+  };
+}])
+
+/**
+ * uiHide Directive
+ *
+ * Adds a 'ui-hide' class to the element instead of display:block
+ * Created to allow tighter control  of CSS without bulkier directives
+ *
+ * @param expression {boolean} evaluated expression to determine if the class should be added
+ */
+.directive('uiHide', [function () {
+  'use strict';
+
+  return function (scope, elm, attrs) {
+    scope.$watch(attrs.uiHide, function (newVal) {
+      if (newVal) {
+        elm.addClass('ui-hide');
+      } else {
+        elm.removeClass('ui-hide');
+      }
+    });
+  };
+}])
+
+/**
+ * uiToggle Directive
+ *
+ * Adds a class 'ui-show' if true, and a 'ui-hide' if false to the element instead of display:block/display:none
+ * Created to allow tighter control  of CSS without bulkier directives. This also allows you to override the
+ * default visibility of the element using either class.
+ *
+ * @param expression {boolean} evaluated expression to determine if the class should be added
+ */
+.directive('uiToggle', [function () {
+  'use strict';
+
+  return function (scope, elm, attrs) {
+    scope.$watch(attrs.uiToggle, function (newVal) {
+      if (newVal) {
+        elm.removeClass('ui-hide').addClass('ui-show');
+      } else {
+        elm.removeClass('ui-show').addClass('ui-hide');
+      }
+    });
+  };
+}]);
+
+/**
+ * Filters out all duplicate items from an array by checking the specified key
+ * @param [key] {string} the name of the attribute of each object to compare for uniqueness
+ if the key is empty, the entire object will be compared
+ if the key === false then no filtering will be performed
+ * @return {array}
+ */
+angular.module('ui.unique',[]).filter('unique', ['$parse', function ($parse) {
+  'use strict';
+
+  return function (items, filterOn) {
+
+    if (filterOn === false) {
+      return items;
+    }
+
+    if ((filterOn || angular.isUndefined(filterOn)) && angular.isArray(items)) {
+      var newItems = [],
+        get = angular.isString(filterOn) ? $parse(filterOn) : function (item) { return item; };
+
+      var extractValueToCompare = function (item) {
+        return angular.isObject(item) ? get(item) : item;
+      };
+
+      angular.forEach(items, function (item) {
+        var isDuplicate = false;
+
+        for (var i = 0; i < newItems.length; i++) {
+          if (angular.equals(extractValueToCompare(newItems[i]), extractValueToCompare(item))) {
+            isDuplicate = true;
+            break;
+          }
+        }
+        if (!isDuplicate) {
+          newItems.push(item);
+        }
+
+      });
+      items = newItems;
+    }
+    return items;
+  };
+}]);
+
+/*
+ * Author: Remy Alain Ticona Carbajal http://realtica.org
+ * Description: The main objective of ng-uploader is to have a user control,
+ * clean, simple, customizable, and above all very easy to implement.
+ * Licence: MIT
+ */
+
+angular.module('ui.uploader', []).service('uiUploader', uiUploader);
+
+uiUploader.$inject = ['$log'];
+
+function uiUploader($log) {
+    'use strict';
+
+    /*jshint validthis: true */
+    var self = this;
+    self.files = [];
+    self.options = {};
+    self.activeUploads = 0;
+    $log.info('uiUploader loaded');
+    
+    function addFiles(files) {
+        for (var i = 0; i < files.length; i++) {
+            self.files.push(files[i]);
+        }
+    }
+
+    function getFiles() {
+        return self.files;
+    }
+
+    function startUpload(options) {
+        self.options = options;
+        for (var i = 0; i < self.files.length; i++) {
+            if (self.activeUploads == self.options.concurrency) {
+                break;
+            }
+            if (self.files[i].active)
+                continue;
+            ajaxUpload(self.files[i], self.options.url);
+        }
+    }
+    
+    function removeFile(file){
+        self.files.splice(self.files.indexOf(file),1);
+    }
+    
+    function removeAll(){
+        self.files.splice(0,self.files.length);
+    }
+    
+    return {
+        addFiles: addFiles,
+        getFiles: getFiles,
+        files: self.files,
+        startUpload: startUpload,
+        removeFile: removeFile,
+        removeAll:removeAll
+    };
+    
+    function getHumanSize(bytes) {
+        var sizes = ['n/a', 'bytes', 'KiB', 'MiB', 'GiB', 'TB', 'PB', 'EiB', 'ZiB', 'YiB'];
+        var i = +Math.floor(Math.log(bytes) / Math.log(1024));
+        return (bytes / Math.pow(1024, i)).toFixed(i ? 1 : 0) + ' ' + sizes[isNaN(bytes) ? 0 : i + 1];
+    }
+
+    function ajaxUpload(file, url) {
+        var xhr, formData, prop, data = '',
+            key = '' || 'file';
+        self.activeUploads += 1;
+        file.active = true;
+        xhr = new window.XMLHttpRequest();
+        formData = new window.FormData();
+        xhr.open('POST', url);
+
+        // Triggered when upload starts:
+        xhr.upload.onloadstart = function() {};
+
+        // Triggered many times during upload:
+        xhr.upload.onprogress = function(event) {
+            if (!event.lengthComputable) {
+                return;
+            }
+            // Update file size because it might be bigger than reported by
+            // the fileSize:
+            //$log.info("progres..");
+            //console.info(event.loaded);
+            file.loaded = event.loaded;
+            file.humanSize = getHumanSize(event.loaded);
+            self.options.onProgress(file);
+        };
+
+        // Triggered when upload is completed:
+        xhr.onload = function() {
+            self.activeUploads -= 1;
+            startUpload(self.options);
+            self.options.onCompleted(file, xhr.responseText);
+        };
+
+        // Triggered when upload fails:
+        xhr.onerror = function() {};
+
+        // Append additional data if provided:
+        if (data) {
+            for (prop in data) {
+                if (data.hasOwnProperty(prop)) {
+                    formData.append(prop, data[prop]);
+                }
+            }
+        }
+
+        // Append file data:
+        formData.append(key, file, file.name);
+
+        // Initiate upload:
+        xhr.send(formData);
+
+        return xhr;
+    }
+
+}
+
+/**
+ * General-purpose validator for ngModel.
+ * angular.js comes with several built-in validation mechanism for input fields (ngRequired, ngPattern etc.) but using
+ * an arbitrary validation function requires creation of a custom formatters and / or parsers.
+ * The ui-validate directive makes it easy to use any function(s) defined in scope as a validator function(s).
+ * A validator function will trigger validation on both model and input changes.
+ *
+ * @example <input ui-validate=" 'myValidatorFunction($value)' ">
+ * @example <input ui-validate="{ foo : '$value > anotherModel', bar : 'validateFoo($value)' }">
+ * @example <input ui-validate="{ foo : '$value > anotherModel' }" ui-validate-watch=" 'anotherModel' ">
+ * @example <input ui-validate="{ foo : '$value > anotherModel', bar : 'validateFoo($value)' }" ui-validate-watch=" { foo : 'anotherModel' } ">
+ *
+ * @param ui-validate {string|object literal} If strings is passed it should be a scope's function to be used as a validator.
+ * If an object literal is passed a key denotes a validation error key while a value should be a validator function.
+ * In both cases validator function should take a value to validate as its argument and should return true/false indicating a validation result.
+ */
+angular.module('ui.validate',[]).directive('uiValidate', function () {
+  'use strict';
+
+  return {
+    restrict: 'A',
+    require: 'ngModel',
+    link: function (scope, elm, attrs, ctrl) {
+      var validateFn, validators = {},
+          validateExpr = scope.$eval(attrs.uiValidate);
+
+      if (!validateExpr){ return;}
+
+      if (angular.isString(validateExpr)) {
+        validateExpr = { validator: validateExpr };
+      }
+
+      angular.forEach(validateExpr, function (exprssn, key) {
+        validateFn = function (valueToValidate) {
+          var expression = scope.$eval(exprssn, { '$value' : valueToValidate });
+          if (angular.isObject(expression) && angular.isFunction(expression.then)) {
+            // expression is a promise
+            expression.then(function(){
+              ctrl.$setValidity(key, true);
+            }, function(){
+              ctrl.$setValidity(key, false);
+            });
+            return valueToValidate;
+          } else if (expression) {
+            // expression is true
+            ctrl.$setValidity(key, true);
+            return valueToValidate;
+          } else {
+            // expression is false
+            ctrl.$setValidity(key, false);
+            return valueToValidate;
+          }
+        };
+        validators[key] = validateFn;
+        ctrl.$formatters.push(validateFn);
+        ctrl.$parsers.push(validateFn);
+      });
+
+      function apply_watch(watch)
+      {
+          //string - update all validators on expression change
+          if (angular.isString(watch))
+          {
+              scope.$watch(watch, function(){
+                  angular.forEach(validators, function(validatorFn){
+                      validatorFn(ctrl.$modelValue);
+                  });
+              });
+              return;
+          }
+
+          //array - update all validators on change of any expression
+          if (angular.isArray(watch))
+          {
+              angular.forEach(watch, function(expression){
+                  scope.$watch(expression, function()
+                  {
+                      angular.forEach(validators, function(validatorFn){
+                          validatorFn(ctrl.$modelValue);
+                      });
+                  });
+              });
+              return;
+          }
+
+          //object - update appropriate validator
+          if (angular.isObject(watch))
+          {
+              angular.forEach(watch, function(expression, validatorKey)
+              {
+                  //value is string - look after one expression
+                  if (angular.isString(expression))
+                  {
+                      scope.$watch(expression, function(){
+                          validators[validatorKey](ctrl.$modelValue);
+                      });
+                  }
+
+                  //value is array - look after all expressions in array
+                  if (angular.isArray(expression))
+                  {
+                      angular.forEach(expression, function(intExpression)
+                      {
+                          scope.$watch(intExpression, function(){
+                              validators[validatorKey](ctrl.$modelValue);
+                          });
+                      });
+                  }
+              });
+          }
+      }
+      // Support for ui-validate-watch
+      if (attrs.uiValidateWatch){
+          apply_watch( scope.$eval(attrs.uiValidateWatch) );
+      }
+    }
+  };
+});
+
+angular.module('ui.utils',  [
+  'ui.event',
+  'ui.format',
+  'ui.highlight',
+  'ui.include',
+  'ui.indeterminate',
+  'ui.inflector',
+  'ui.jq',
+  'ui.keypress',
+  'ui.mask',
+  'ui.reset',
+  'ui.route',
+  'ui.scrollfix',
+  'ui.scroll',
+  'ui.scroll.jqlite',
+  'ui.showhide',
+  'ui.unique',
+  'ui.validate'
+]);
+
+/**
   * x is a value between 0 and 1, indicating where in the animation you are.
   */
 var duScrollDefaultEasing = function (x) {
@@ -6037,131 +8463,180 @@ angular.module('databases.templates', ['databases/databases-list.tpl.html']);
 
 angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("databases/databases-list.tpl.html",
-    "<div class=\"page-header\"><h1>Databases</h1></div>\n" +
+    "<div class=\"jumbotron-header\">\n" +
+    "    <div class=\"jumbotron\">\n" +
+    "        <div class=\"container\">\n" +
+    "            <div class=\"row\">\n" +
+    "                <div class=\"col-md-8\">\n" +
+    "                    <h1>Databases</h1>\n" +
+    "                </div>\n" +
+    "                <div class=\"hidden-xs col-md-4\">\n" +
+    "                    <div class=\"well\">\n" +
+    "                        <p class=\"lead\">Check out our database trials and tell us what you think!</p>\n" +
+    "                        <a class=\"btn btn-primary\" href=\"/research-tools/e-resources/electronic-resource-trials/\" title=\"database trials\">See Trials <span class=\"fa fa-fw fa-eye\"></span></span></a>\n" +
+    "                        <a class=\"btn btn-default\" href=\"/forms/electronic-resource-trial-evaluation-form/\" title=\"database trials evaluation form\">Evaluate <span class=\"fa fa-fw fa-check-square-o\"></span></span></a>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
     "\n" +
-    "<div class=\"row\">\n" +
-    "    <div class=\"col-md-3 col-md-push-9\">\n" +
-    "        <form class=\"facets-form\">\n" +
-    "            <div class=\"form-group\">\n" +
+    "<div class=\"container\">\n" +
+    "\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-sm-3 col-sm-push-9\">\n" +
+    "            <form class=\"facets-form\">\n" +
+    "                <div class=\"form-group\">\n" +
     "                <span class=\"page-header\">\n" +
     "                    <h4>Filter Databases By</h4>\n" +
     "                </span>\n" +
-    "            </div>\n" +
-    "            <div class=\"form-group\">\n" +
-    "                <input type=\"text\" class=\"form-control\" ng-model=\"db.search\" placeholder=\"Keyword search\">\n" +
-    "            </div>\n" +
+    "                </div>\n" +
+    "                <div class=\"form-group\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" ng-model=\"db.search\" placeholder=\"Keyword search\">\n" +
+    "                </div>\n" +
     "\n" +
-    "            <div class=\"form-group hidden-xs\">\n" +
-    "                <h5>Title starts with</h5>\n" +
-    "                <div class=\"facet-group alphanum-group\">\n" +
-    "                    <div class=\"btn-group\">\n" +
-    "                        <label class=\"btn btn-default\" ng-repeat=\"na in numAlpha\" ng-model=\"db.startsWith\" btn-radio=\"'{{na}}'\" ng-disabled=\"startsWithDisabled[na]\" uncheckable>{{na}}</label>\n" +
+    "                <div class=\"form-group hidden-xs\">\n" +
+    "                    <h5>Title starts with</h5>\n" +
+    "                    <div class=\"facet-group alphanum-group\">\n" +
+    "                        <div class=\"btn-group\">\n" +
+    "                            <label class=\"btn btn-default\" ng-repeat=\"na in numAlpha\" ng-model=\"db.startsWith\" btn-radio=\"'{{na}}'\" ng-disabled=\"startsWithDisabled[na]\" uncheckable>{{na}}</label>\n" +
+    "                        </div>\n" +
     "                    </div>\n" +
     "                </div>\n" +
-    "            </div>\n" +
     "\n" +
-    "            <div class=\"form-group hidden-xs\">\n" +
-    "                <h5>Subjects</h5>\n" +
-    "                <div class=\"facet-group\">\n" +
-    "                    <div class=\"radio\" ng-class=\"{'disabled': subj.disabled}\" ng-repeat=\"subj in subjects\">\n" +
-    "                        <label>\n" +
-    "                            <input type=\"checkbox\" ng-model=\"db.subjects[subj.subject]\" ng-disabled=\"subj.disabled\">\n" +
-    "                            {{subj.subject}} ({{subj.total}})\n" +
-    "                        </label>\n" +
+    "                <div class=\"form-group hidden-xs\">\n" +
+    "                    <h5>Subjects</h5>\n" +
+    "                    <div class=\"facet-group\">\n" +
+    "                        <div class=\"radio\" ng-class=\"{'disabled': subj.disabled}\" ng-repeat=\"subj in subjects\">\n" +
+    "                            <label>\n" +
+    "                                <input type=\"checkbox\" ng-model=\"db.subjects[subj.subject]\" ng-disabled=\"subj.disabled\">\n" +
+    "                                {{subj.subject}} ({{subj.total}})\n" +
+    "                            </label>\n" +
+    "                        </div>\n" +
     "                    </div>\n" +
     "                </div>\n" +
-    "            </div>\n" +
     "\n" +
-    "            <div class=\"form-group hidden-xs\">\n" +
-    "                <h5>Types</h5>\n" +
-    "                <div class=\"facet-group\">\n" +
-    "                    <div class=\"radio\" ng-class=\"{'disabled': type.disabled}\" ng-repeat=\"type in types\">\n" +
-    "                        <label>\n" +
-    "                            <input type=\"checkbox\" ng-model=\"db.types[type.type]\"  ng-disabled=\"type.disabled\">\n" +
-    "                            {{type.type}} ({{type.total}})\n" +
-    "                        </label>\n" +
+    "                <div class=\"form-group hidden-xs\">\n" +
+    "                    <h5>Types</h5>\n" +
+    "                    <div class=\"facet-group\">\n" +
+    "                        <div class=\"radio\" ng-class=\"{'disabled': type.disabled}\" ng-repeat=\"type in types\">\n" +
+    "                            <label>\n" +
+    "                                <input type=\"checkbox\" ng-model=\"db.types[type.type]\"  ng-disabled=\"type.disabled\">\n" +
+    "                                {{type.type}} ({{type.total}})\n" +
+    "                            </label>\n" +
+    "                        </div>\n" +
     "                    </div>\n" +
     "                </div>\n" +
-    "            </div>\n" +
-    "            <div class=\"form-group\">\n" +
-    "                <button type=\"button\" class=\"btn btn-block btn-primary\" ng-click=\"resetFilters()\"><span class=\"fa fa-fw fa-refresh\"></span> Reset filters</button>\n" +
-    "            </div>\n" +
-    "        </form>\n" +
-    "    </div>\n" +
-    "    <div class=\"col-md-9 col-md-pull-3 databases-list-container\">\n" +
-    "        <p>\n" +
-    "        <h4 class=\"text-right\">Showing {{pager.firstItem}} - {{pager.lastItem}} of {{pager.totalItems}} results</h4>\n" +
-    "        <div ng-if=\"!!activeFilters.startsWith || activeFilters.subjects || activeFilters.types\">\n" +
-    "\n" +
-    "        <ol class=\"breadcrumb facetcrumb\">\n" +
-    "            <li ng-if=\"!!activeFilters.startsWith\"><strong>Starts with:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"db.startsWith = ''\">\"{{db.startsWith}}\" <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "            <li ng-if=\"activeFilters.subjects\"><strong>Subjects:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"db.subjects[subject] = false\" ng-repeat=\"(subject, key) in db.subjects\">{{subject}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "            <li ng-if=\"activeFilters.types\"><strong>Types:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"db.types[type] = false\" ng-repeat=\"(type, key) in db.types\">{{type}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "            <li class=\"pull-right\"><button type=\"button\" class=\"btn btn-primary btn-small reset-btn\" title=\"Reset filters\" ng-click=\"resetFilters()\"><i class=\"fa fa-refresh\"></i></button></li>\n" +
-    "        </ol>\n" +
+    "                <div class=\"form-group\">\n" +
+    "                    <button type=\"button\" class=\"btn btn-block btn-primary\" ng-click=\"resetFilters()\"><span class=\"fa fa-fw fa-refresh\"></span> Reset filters</button>\n" +
+    "                </div>\n" +
+    "            </form>\n" +
     "        </div>\n" +
+    "        <div class=\"col-sm-9 col-sm-pull-3 databases-list-container\">\n" +
+    "            <p>\n" +
+    "            <h4 class=\"text-right\">Showing {{pager.firstItem}} - {{pager.lastItem}} of {{pager.totalItems}} results</h4>\n" +
+    "            <div ng-if=\"!!activeFilters.startsWith || activeFilters.subjects || activeFilters.types\">\n" +
+    "\n" +
+    "                <ol class=\"breadcrumb facetcrumb\">\n" +
+    "                    <li ng-if=\"!!activeFilters.startsWith\"><strong>Starts with:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"db.startsWith = ''\">\"{{db.startsWith}}\" <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                    <li ng-if=\"activeFilters.subjects\"><strong>Subjects:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"db.subjects[subject] = false\" ng-repeat=\"(subject, key) in db.subjects\">{{subject}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                    <li ng-if=\"activeFilters.types\"><strong>Types:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"db.types[type] = false\" ng-repeat=\"(type, key) in db.types\">{{type}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                    <li class=\"pull-right\"><button type=\"button\" class=\"btn btn-primary btn-small reset-btn\" title=\"Reset filters\" ng-click=\"resetFilters()\"><i class=\"fa fa-refresh\"></i></button></li>\n" +
+    "                </ol>\n" +
+    "            </div>\n" +
     "\n" +
     "\n" +
-    "        </p>\n" +
+    "            </p>\n" +
     "\n" +
-    "        <div class=\"text-center\">\n" +
-    "            <pagination class=\"pagination-sm\" ng-model=\"pager.page\" total-items=\"pager.totalItems\" max-size=\"pager.maxSize\" boundary-links=\"true\" rotate=\"false\" items-per-page=\"pager.perPage\" ng-change=\"pageChange()\" ng-if=\"pager.totalItems > pager.perPage\"></pagination>\n" +
-    "        </div>\n" +
+    "            <div class=\"text-center\">\n" +
+    "                <pagination class=\"pagination-sm\" ng-model=\"pager.page\" total-items=\"pager.totalItems\" max-size=\"pager.maxSize\" boundary-links=\"true\" rotate=\"false\" items-per-page=\"pager.perPage\" ng-change=\"pageChange()\" ng-if=\"pager.totalItems > pager.perPage\"></pagination>\n" +
+    "            </div>\n" +
     "\n" +
-    "        <div class=\"media animate-repeat\" ng-repeat=\"item in filteredDB | after:(pager.page-1)*pager.perPage | limitTo:20\">\n" +
-    "            <div class=\"media-body\">\n" +
+    "            <div class=\"media animate-repeat\" ng-repeat=\"item in filteredDB | after:(pager.page-1)*pager.perPage | limitTo:20\">\n" +
+    "                <div class=\"media-body\">\n" +
     "\n" +
-    "                <h4 class=\"media-heading\">\n" +
-    "                    <a ng-href=\"{{item.url}}\" title=\"{{item.title}}\" ng-bind-html=\"item.title | highlight:db.search\"></a>\n" +
-    "                    <!--<small ng-if=\"item.presentedBy\">({{item.presentedBy}})</small>-->\n" +
-    "                    <small ng-bind-html=\"item.coverage | highlight:db.search\"></small>\n" +
+    "                    <h4 class=\"media-heading\">\n" +
+    "                        <a ng-href=\"{{item.url}}\" title=\"{{item.title}}\" ng-bind-html=\"item.title | highlight:db.search\"></a>\n" +
+    "                        <!--<small ng-if=\"item.presentedBy\">({{item.presentedBy}})</small>-->\n" +
+    "                        <small ng-bind-html=\"item.coverage | highlight:db.search\"></small>\n" +
     "\n" +
-    "                    <small class=\"pull-right\">\n" +
-    "                        <span class=\"label label-success\" ng-if=\"item.hasFullText == 'A'\">All Full Text</span>\n" +
-    "                        <span class=\"label label-info\" ng-if=\"item.hasFullText == 'P'\">Primarily Full Text</span>\n" +
-    "                        <span class=\"label label-warning\" ng-if=\"item.hasFullText == 'S'\">Some Full Text</span>\n" +
-    "                        <span class=\"label label-danger\" ng-if=\"item.hasFullText == 'N'\">No Full Text</span>\n" +
-    "                    </small>\n" +
-    "                </h4>\n" +
+    "                        <small class=\"pull-right\">\n" +
+    "                            <span class=\"label label-success\" ng-if=\"item.hasFullText == 'A'\">All Full Text</span>\n" +
+    "                            <span class=\"label label-info\" ng-if=\"item.hasFullText == 'P'\">Primarily Full Text</span>\n" +
+    "                            <span class=\"label label-warning\" ng-if=\"item.hasFullText == 'S'\">Some Full Text</span>\n" +
+    "                            <span class=\"label label-danger\" ng-if=\"item.hasFullText == 'N'\">No Full Text</span>\n" +
+    "                        </small>\n" +
+    "                    </h4>\n" +
     "\n" +
-    "                <p class=\"text-justify\" ng-bind-html=\"item.description | highlight:db.search\"></p>\n" +
+    "                    <p class=\"text-justify\" ng-bind-html=\"item.description | highlight:db.search\"></p>\n" +
     "\n" +
-    "                <div ng-if=\"item.location\">\n" +
-    "                    <strong>Access:</strong> {{item.location}}\n" +
-    "                </div>\n" +
-    "                <div class=\"databases-details\" ng-if=\"(item.subjects | where:{type:1}).length > 0\">\n" +
-    "                    <strong>Primary subjects: </strong>\n" +
-    "                    <span ng-repeat=\"subj in item.subjects | where:{type:1}\" ng-bind-html=\"subj.subject | highlight:db.search\"></span>\n" +
-    "                </div>\n" +
-    "                <div class=\"databases-details\" ng-if=\"item.types\">\n" +
-    "                    <strong>Types of material: </strong>\n" +
-    "                    <span ng-repeat=\"type in item.types\" ng-bind-html=\"type.type | highlight:db.search\"></span>\n" +
-    "                </div>\n" +
-    "                <div class=\"databases-details\" ng-if=\"item.vendor\">\n" +
-    "                    <strong>Vendor: </strong>\n" +
-    "                    <span ng-bind-html=\"item.vendor | highlight:db.search\"></span>\n" +
-    "                </div>\n" +
-    "                <div class=\"scout-coverage\">\n" +
-    "                    <strong>Scout coverage: </strong>\n" +
+    "                    <div ng-if=\"item.location\">\n" +
+    "                        <strong>Access:</strong> {{item.location}}\n" +
+    "                    </div>\n" +
+    "                    <div class=\"databases-details\" ng-if=\"(item.subjects | where:{type:1}).length > 0\">\n" +
+    "                        <strong>Primary subjects: </strong>\n" +
+    "                        <span ng-repeat=\"subj in item.subjects | where:{type:1}\" ng-bind-html=\"subj.subject | highlight:db.search\"></span>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"databases-details\" ng-if=\"item.types\">\n" +
+    "                        <strong>Types of material: </strong>\n" +
+    "                        <span ng-repeat=\"type in item.types\" ng-bind-html=\"type.type | highlight:db.search\"></span>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"databases-details\" ng-if=\"item.vendor\">\n" +
+    "                        <strong>Vendor: </strong>\n" +
+    "                        <span ng-bind-html=\"item.vendor | highlight:db.search\"></span>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"scout-coverage\">\n" +
+    "                        <strong>Scout coverage: </strong>\n" +
     "                    <span class=\"fa text-info\" ng-class=\"{'fa-circle': item.notInEDS == 'Y', 'fa-adjust': item.notInEDS == 'P', 'fa-circle-o': !item.notInEDS}\">\n" +
     "                    </span>\n" +
-    "                    <span ng-if=\"item.notInEDS == 'Y'\">Full</span>\n" +
-    "                    <span  ng-if=\"item.notInEDS == 'P'\">Partial</span>\n" +
-    "                    <span  ng-if=\"!item.notInEDS\">Not in Scout</span>\n" +
+    "                        <span ng-if=\"item.notInEDS == 'Y'\">Full</span>\n" +
+    "                        <span  ng-if=\"item.notInEDS == 'P'\">Partial</span>\n" +
+    "                        <span  ng-if=\"!item.notInEDS\">Not in Scout</span>\n" +
+    "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
-    "        </div>\n" +
     "\n" +
-    "        <div class=\"text-center\">\n" +
-    "            <pagination class=\"pagination-sm\" ng-model=\"pager.page\" total-items=\"pager.totalItems\" max-size=\"pager.maxSize\" boundary-links=\"true\" rotate=\"false\" items-per-page=\"pager.perPage\" ng-change=\"pageChange()\" ng-if=\"pager.totalItems > pager.perPage\"></pagination>\n" +
-    "        </div>\n" +
+    "            <div class=\"text-center\">\n" +
+    "                <pagination class=\"pagination-sm\" ng-model=\"pager.page\" total-items=\"pager.totalItems\" max-size=\"pager.maxSize\" boundary-links=\"true\" rotate=\"false\" items-per-page=\"pager.perPage\" ng-change=\"pageChange()\" ng-if=\"pager.totalItems > pager.perPage\"></pagination>\n" +
+    "            </div>\n" +
     "\n" +
-    "        <div class=\"alert alert-warning text-center\" role=\"alert\" ng-show=\"pager.totalItems < 1\">\n" +
-    "            <h2>No results found <span ng-if=\"db.search\"> for \"{{db.search}}\"</span></h2>\n" +
+    "            <div class=\"alert alert-warning text-center\" role=\"alert\" ng-show=\"pager.totalItems < 1\">\n" +
+    "                <h2>No results found <span ng-if=\"db.search\"> for \"{{db.search}}\"</span></h2>\n" +
+    "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>");
 }]);
+
+/**
+ * @ngdoc overview
+ * @name index
+ *
+ * @description
+ * # Databases app UI.
+ *
+ * ## Default route: [/#/databases](http://www.lib.ua.edu/#/databases)
+ */
+
+/**
+ * @ngdoc overview
+ * @name databases
+ *
+ *
+ * @requires ngRoute
+ * @requires ngResource
+ * @requires ngAnimate
+ * @requires ngSanitize
+ * @requires ui-bootstrap
+ * @requires angular-filter
+ * @requires duScroll
+ * @requires ualib-ui
+ *
+ * @description
+ * # Databases app UI.
+ * ## Default route: [/#/databases](http://www.lib.ua.edu/#/databases)
+ */
 
 angular.module('ualib.databases', [
     'ngRoute',
@@ -6174,7 +8649,18 @@ angular.module('ualib.databases', [
     'ualib.ui',
     'databases.templates'
 ])
-
+    /**
+     * @ngdoc object
+     * @name databases.constant:DB_PROXY_PREPEND_URL
+     *
+     * @description
+     * Proxy URL to prefix database links
+     *
+     * | constant | value |
+     * |----------|-------|
+     * | DB_PROXY_PREPEND_URL | http://libdata.lib.ua.edu/login?url= |
+     *
+     */
     .constant('DB_PROXY_PREPEND_URL', 'http://libdata.lib.ua.edu/login?url=');
 
 
@@ -6183,12 +8669,39 @@ angular.module('ualib.databases', [
 angular.module('ualib.databases')
 
 /**
- * Transform the JSON response - this allows the transformed values to be cached via Angular's $resource service.
+ * @ngdoc service
+ * @name databases.databasesFactory
+ *
+ * @requires $resource
+ * @requires $http
+ * @requires $filter
+ * @requires databases.constant:DB_PROXY_PREPEND_URL
+ *
+ * @description
+ * Factory service to retrieve databases from the API.
+ *
  */
     .factory('databasesFactory', ['$resource', '$http', '$filter', 'DB_PROXY_PREPEND_URL', function($resource, $http, $filter, DB_PROXY_PREPEND_URL){
 
         //TODO: centralize this function so it can be used with all apps
-        // Extend the default responseTransform array - Straight from Angular 1.2.8 API docs - https://docs.angularjs.org/api/ng/service/$http#overriding-the-default-transformations-per-request
+
+        /**
+         * @ngdoc function
+         * @name databases.databasesFactory#appendTransform
+         * @methodOf databases.databasesFactory
+         *
+         * @param {Array.<function()>} defaults Default `Array` of `$http` transform response transform functions from Angular - will always be `$http.defaults.transformResponse`
+         * @param {function()} transform Transform function to extend the `$http.defaults.transformResponse` Array with.
+         *
+         * @description
+         * <span class="label label-warning">Private</span>
+         * Extend the default responseTransform array - Straight from Angular 1.2.8 API docs - https://docs.angularjs.org/api/ng/service/$http#overriding-the-default-transformations-per-request
+         *
+         * Doing this allows custom modifications of the JSON response from the API to be cached after the initial `$resource` call, instead of
+         * performing these modifications on every `$digest()` cycle (e.g., make modifications once, instead of every time the databases list is refreshed).
+         *
+         * @returns {Array.<function()>} Returns the new `transformResponse` Array
+         */
         function appendTransform(defaults, transform) {
 
             // We can't guarantee that the default transformation is an array
@@ -6264,10 +8777,32 @@ angular.module('ualib.databases')
             })
     }])
 
+    /**
+     * @ngdoc controller
+     * @name databases.Controller:DatabasesListCtrl
+     *
+     * @requires $scope
+     * @requires $filter
+     * @requires $location
+     * @requires $document
+     * @requires databases.databasesFactory
+     *
+     *
+     * @description
+     * Controller for the databases route (`/#/databases`)
+     */
+
     .controller('DatabasesListCtrl', ['$scope', 'databases', '$filter' ,'$location' ,'$document', function($scope, db, $filter, $location, $document){
         var databases = [];
 
-
+        /**
+         * @ngdoc object
+         * @name databases.Controller:DatabasesListCtrl:$scope.numAlpha
+         * @propertyOf databases.Controller:DatabasesListCtrl
+         *
+         * @description
+         * `Array` of characters `a-z` for `Starts With` filter UI
+         */
         $scope.numAlpha = "abcdefghijklmnopqrstuvwxyz".toUpperCase().split("");
         $scope.numAlpha.unshift('0-9');
 
@@ -6611,7 +9146,7 @@ angular.module('ui.tinymce', [])
             });
 
             // Update model on change
-            ed.on('change', function() {
+            ed.on('change NodeChange', function() {
               ed.save();
               updateView(ed);
             });
@@ -6646,6 +9181,9 @@ angular.module('ui.tinymce', [])
         // element to be present in DOM before instantiating editor when
         // re-rendering directive
         $timeout(function() {
+          if (options.baseURL){
+            tinymce.baseURL = options.baseURL;            
+          }
           tinymce.init(options);
           toggleDisable(scope.$eval(attrs.ngDisabled));
         });
@@ -11748,7 +14286,9 @@ angular.module('manage.manageHours', [])
         {name:'10:00 am', value:'1000'},
         {name:'11:00 am', value:'1100'},
         {name:'Noon', value:'1200'},
-        {name:'1:00 pm', value:'1300'}
+        {name:'1:00 pm', value:'1300'},
+        {name:'3:00 pm', value:'1500'},
+        {name:'6:00 pm', value:'1800'}
     ])
     .constant('HOURS_TO', [
         {name:'1:00 am', value:'100'},
@@ -14830,135 +17370,151 @@ angular.module('ualib.musicSearch.templates', ['videos/videos-list.tpl.html']);
 
 angular.module("videos/videos-list.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("videos/videos-list.tpl.html",
-    "<div class=\"jumbotron bg-transparent\">\n" +
-    "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-7\">\n" +
-    "            <h1>Video Database</h1>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-5\">\n" +
-    "            <div class=\"well\">\n" +
-    "                <p class=\"lead\"> Videos are available through the Music Library</p>\n" +
-    "                <a href=\"https://wwwdev2.lib.ua.edu/libraries-and-collections/music-library/\" class=\"btn btn-primary\" title=\"Music Library\">Get more info <span class=\"fa fa-fw fa-info-circle\"></span></a>\n" +
+    "<div class=\"jumbotron-header\">\n" +
+    "    <div class=\"jumbotron\">\n" +
+    "        <div class=\"container\">\n" +
+    "            <div class=\"row\">\n" +
+    "                <div class=\"col-md-7\">\n" +
+    "                    <h1>Video Database</h1>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-5\">\n" +
+    "                    <div class=\"well\">\n" +
+    "                        <p class=\"lead\"> Videos are available through the Music Library</p>\n" +
+    "                        <a href=\"https://wwwdev2.lib.ua.edu/libraries-and-collections/music-library/\" class=\"btn btn-primary\" title=\"Music Library\">Get more info <span class=\"fa fa-fw fa-info-circle\"></span></a>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
     "\n" +
-    "<div class=\"row\">\n" +
-    "    <div class=\"col-md-3 col-md-push-9\">\n" +
-    "        <form class=\"facets-form\">\n" +
-    "            <div class=\"form-group\">\n" +
+    "<div class=\"container\">\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-3 col-md-push-9\">\n" +
+    "            <form class=\"facets-form\">\n" +
+    "                <div class=\"form-group\">\n" +
     "                <span class=\"page-header\">\n" +
     "                    <h4>Filter Videos By</h4>\n" +
     "                </span>\n" +
-    "            </div>\n" +
-    "            <div class=\"form-group\">\n" +
-    "                <input type=\"text\" class=\"form-control\" ng-model=\"vid.search\" placeholder=\"Keyword search\">\n" +
-    "            </div>\n" +
+    "                </div>\n" +
+    "                <div class=\"form-group\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" ng-model=\"vid.search\" placeholder=\"Keyword search\">\n" +
+    "                </div>\n" +
     "\n" +
-    "            <div class=\"form-group hidden-xs\">\n" +
-    "                <h5>Format</h5>\n" +
-    "                <div class=\"facet-group\">\n" +
-    "                    <div class=\"btn-group btn-group-justified\">\n" +
-    "                        <label class=\"btn btn-default\" ng-model=\"vid.format\" btn-radio=\"''\">All</label>\n" +
-    "                        <label class=\"btn btn-default\" ng-model=\"vid.format\" btn-radio=\"'dvd'\">DVD</label>\n" +
-    "                        <label class=\"btn btn-default\" ng-model=\"vid.format\" btn-radio=\"'vcr'\">VHS</label>\n" +
+    "                <div class=\"form-group hidden-xs\">\n" +
+    "                    <h5>Format</h5>\n" +
+    "                    <div class=\"facet-group\">\n" +
+    "                        <div class=\"btn-group btn-group-justified\">\n" +
+    "                            <label class=\"btn btn-default\" ng-model=\"vid.format\" btn-radio=\"''\">All</label>\n" +
+    "                            <label class=\"btn btn-default\" ng-model=\"vid.format\" btn-radio=\"'dvd'\">DVD</label>\n" +
+    "                            <label class=\"btn btn-default\" ng-model=\"vid.format\" btn-radio=\"'vcr'\">VHS</label>\n" +
+    "                        </div>\n" +
     "                    </div>\n" +
     "                </div>\n" +
-    "            </div>\n" +
     "\n" +
-    "            <div class=\"form-group hidden-xs\">\n" +
-    "                <h5>Genre</h5>\n" +
-    "                <div class=\"facet-group\">\n" +
-    "                    <div class=\"radio\">\n" +
-    "                        <label>\n" +
-    "                            <input type=\"radio\" ng-model=\"vid.genre\" value=\"\">\n" +
-    "                            All Genres\n" +
-    "                        </label>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"radio\" ng-repeat=\"genre in genres\">\n" +
-    "                        <label>\n" +
-    "                            <input type=\"radio\" ng-model=\"vid.genre\" ng-value=\"genre.label\">\n" +
-    "                            {{genre.label}}\n" +
-    "                        </label>\n" +
+    "                <div class=\"form-group hidden-xs\">\n" +
+    "                    <h5>Genre</h5>\n" +
+    "                    <div class=\"facet-group\">\n" +
+    "                        <div class=\"radio\">\n" +
+    "                            <label>\n" +
+    "                                <input type=\"radio\" ng-model=\"vid.genre\" value=\"\">\n" +
+    "                                All Genres\n" +
+    "                            </label>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"radio\" ng-repeat=\"genre in genres\">\n" +
+    "                            <label>\n" +
+    "                                <input type=\"radio\" ng-model=\"vid.genre\" ng-value=\"genre.label\">\n" +
+    "                                {{genre.label}}\n" +
+    "                            </label>\n" +
+    "                        </div>\n" +
     "                    </div>\n" +
     "                </div>\n" +
-    "            </div>\n" +
     "\n" +
-    "            <div class=\"form-group hidden-xs\">\n" +
-    "                <h5>Language</h5>\n" +
-    "                <div class=\"facet-group\">\n" +
-    "                    <div class=\"radio\">\n" +
-    "                        <label>\n" +
-    "                            <input type=\"radio\" ng-model=\"vid.language\" value=\"\">\n" +
-    "                            All Languages\n" +
-    "                        </label>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"radio\" ng-repeat=\"lang in languages\">\n" +
-    "                        <label>\n" +
-    "                            <input type=\"radio\" ng-model=\"vid.language\" ng-value=\"lang.label\">\n" +
-    "                            {{lang.label}}\n" +
-    "                        </label>\n" +
+    "                <div class=\"form-group hidden-xs\">\n" +
+    "                    <h5>Language</h5>\n" +
+    "                    <div class=\"facet-group\">\n" +
+    "                        <div class=\"radio\">\n" +
+    "                            <label>\n" +
+    "                                <input type=\"radio\" ng-model=\"vid.language\" value=\"\">\n" +
+    "                                All Languages\n" +
+    "                            </label>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"radio\" ng-repeat=\"lang in languages\">\n" +
+    "                            <label>\n" +
+    "                                <input type=\"radio\" ng-model=\"vid.language\" ng-value=\"lang.label\">\n" +
+    "                                {{lang.label}}\n" +
+    "                            </label>\n" +
+    "                        </div>\n" +
     "                    </div>\n" +
     "                </div>\n" +
-    "            </div>\n" +
-    "            <div class=\"form-group\">\n" +
-    "                <button type=\"button\" class=\"btn btn-block btn-primary\" ng-click=\"resetFilters()\"><span class=\"fa fa-fw fa-refresh\"></span> Reset filters</button>\n" +
-    "            </div>\n" +
-    "        </form>\n" +
-    "    </div>\n" +
-    "    <div class=\"col-md-9 col-md-pull-3 videos-list-container\">\n" +
-    "        <p>\n" +
-    "        <h4 class=\"text-right\">Showing {{pager.totalItems}} results</h4>\n" +
-    "        <div ng-if=\"activeFilters.format || activeFilters.genre || activeFilters.language\">\n" +
-    "\n" +
-    "            <ol class=\"breadcrumb facetcrumb\">\n" +
-    "                <li ng-if=\"activeFilters.format\"><strong>Format:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"vid.format = ''\">{{vid.format}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "                <li ng-if=\"activeFilters.genre\"><strong>Genre:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"vid.genre = ''\">{{vid.genre}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "                <li ng-if=\"activeFilters.language\"><strong>Language:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"vid.language = ''\">{{vid.language}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "                <li class=\"pull-right\"><button type=\"button\" class=\"btn btn-primary btn-small reset-btn\" title=\"Reset filters\" ng-click=\"resetFilters()\"><i class=\"fa fa-refresh\"></i></button></li>\n" +
-    "            </ol>\n" +
+    "                <div class=\"form-group\">\n" +
+    "                    <button type=\"button\" class=\"btn btn-block btn-primary\" ng-click=\"resetFilters()\"><span class=\"fa fa-fw fa-refresh\"></span> Reset filters</button>\n" +
+    "                </div>\n" +
+    "            </form>\n" +
     "        </div>\n" +
+    "        <div class=\"col-md-9 col-md-pull-3 videos-list-container\">\n" +
+    "            <p>\n" +
+    "            <h4 class=\"text-right\">Showing {{pager.totalItems}} results</h4>\n" +
+    "            <div ng-if=\"activeFilters.format || activeFilters.genre || activeFilters.language\">\n" +
+    "\n" +
+    "                <ol class=\"breadcrumb facetcrumb\">\n" +
+    "                    <li ng-if=\"activeFilters.format\"><strong>Format:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"vid.format = ''\">{{vid.format}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                    <li ng-if=\"activeFilters.genre\"><strong>Genre:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"vid.genre = ''\">{{vid.genre}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                    <li ng-if=\"activeFilters.language\"><strong>Language:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"vid.language = ''\">{{vid.language}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                    <li class=\"pull-right\"><button type=\"button\" class=\"btn btn-primary btn-small reset-btn\" title=\"Reset filters\" ng-click=\"resetFilters()\"><i class=\"fa fa-refresh\"></i></button></li>\n" +
+    "                </ol>\n" +
+    "            </div>\n" +
     "\n" +
     "\n" +
-    "        </p>\n" +
+    "            </p>\n" +
     "\n" +
-    "        <div class=\"media animate-repeat\" ng-repeat=\"item in filteredvidoes | after:(pager.page-1)*pager.perPage | limitTo:20\">\n" +
-    "            <div class=\"media-body\">\n" +
+    "            <div class=\"media animate-repeat\" ng-repeat=\"item in filteredvidoes | after:(pager.page-1)*pager.perPage | limitTo:20\">\n" +
+    "                <div class=\"media-body\">\n" +
     "\n" +
-    "                <h4 class=\"media-heading\">\n" +
-    "                    <span ng-bind-html=\"item.title | highlight:vid.search\"></span>\n" +
+    "                    <h4 class=\"media-heading\">\n" +
+    "                        <span ng-bind-html=\"item.title | highlight:vid.search\"></span>\n" +
     "\n" +
-    "                    <small>\n" +
-    "                        <span ng-bind-html=\"item.series_title | highlight:vid.search\"></span>\n" +
-    "                    </small>\n" +
-    "                </h4>\n" +
+    "                        <small>\n" +
+    "                            <span ng-bind-html=\"item.series_title | highlight:vid.search\"></span>\n" +
+    "                        </small>\n" +
+    "                    </h4>\n" +
     "\n" +
+    "                    <div class=\"details-context\">\n" +
+    "                        <span ng-bind-html=\"item.call_number | highlight:vid.search\"></span>\n" +
+    "                        <span ng-bind-html=\"item.genre | highlight:vid.genre\" ng-if=\"item.genre\"></span>\n" +
+    "                        <span ng-bind-html=\"item.language | highlight:vid.language\" ng-if=\"item.language\"></span>\n" +
+    "                    </div>\n" +
+    "\n" +
+    "                    <p class=\"text-justify\" ng-bind-html=\"item.notes | highlight:vid.search\"></p>\n" +
+    "                </div>\n" +
     "                <div class=\"details-context\">\n" +
-    "                    <span ng-bind-html=\"item.call_number | highlight:vid.search\"></span>\n" +
-    "                    <span ng-bind-html=\"item.genre | highlight:vid.genre\" ng-if=\"item.genre\"></span>\n" +
-    "                    <span ng-bind-html=\"item.language | highlight:vid.language\" ng-if=\"item.language\"></span>\n" +
+    "                    <span ng-bind-html=\"item.keywords | highlight:vid.search\"></span>\n" +
     "                </div>\n" +
-    "\n" +
-    "                <p class=\"text-justify\" ng-bind-html=\"item.notes | highlight:vid.search\"></p>\n" +
     "            </div>\n" +
-    "            <div class=\"details-context\">\n" +
-    "                <span ng-bind-html=\"item.keywords | highlight:vid.search\"></span>\n" +
+    "\n" +
+    "\n" +
+    "            <div class=\"text-center\">\n" +
+    "                <pagination class=\"pagination-sm\" ng-model=\"pager.page\" total-items=\"pager.totalItems\" max-size=\"pager.maxSize\" boundary-links=\"true\" rotate=\"false\" items-per-page=\"pager.perPage\" ng-change=\"pageChange()\" ng-if=\"pager.totalItems > pager.perPage\"></pagination>\n" +
     "            </div>\n" +
-    "        </div>\n" +
     "\n" +
-    "\n" +
-    "        <div class=\"text-center\">\n" +
-    "            <pagination class=\"pagination-sm\" ng-model=\"pager.page\" total-items=\"pager.totalItems\" max-size=\"pager.maxSize\" boundary-links=\"true\" rotate=\"false\" items-per-page=\"pager.perPage\" ng-change=\"pageChange()\" ng-if=\"pager.totalItems > pager.perPage\"></pagination>\n" +
-    "        </div>\n" +
-    "\n" +
-    "        <div class=\"alert alert-warning text-center\" role=\"alert\" ng-show=\"pager.totalItems < 1\">\n" +
-    "            <h2>No results found <span ng-if=\"vid.search\"> for \"{{vid.search}}\"</span></h2>\n" +
+    "            <div class=\"alert alert-warning text-center\" role=\"alert\" ng-show=\"pager.totalItems < 1\">\n" +
+    "                <h2>No results found <span ng-if=\"vid.search\"> for \"{{vid.search}}\"</span></h2>\n" +
+    "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>");
 }]);
-;angular.module('ualib.musicSearch', [
+;/**
+ * @ngdoc overview
+ * @name index
+ *
+ * @description
+ * # The Music Library's Videos search application.
+ * ## URL route [/#/videos](http://www.lib.ua.edu/#/videos)
+ *
+ */
+
+angular.module('ualib.musicSearch', [
     'ngRoute',
     'ngResource',
     'ngAnimate',
@@ -14972,23 +17528,68 @@ angular.module("videos/videos-list.tpl.html", []).run(["$templateCache", functio
 
 angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musicSearch')
 
-/**
- * Transform the JSON response - this allows the transformed values to be cached via Angular's $resource service.
- */
+    /**
+     * @ngdoc service
+     * @name videos.videosFactory
+     *
+     * @requires ng.$resource
+     *
+     * @param {object} params Params object to pass to videos API
+     * @param {string} params.videos videos to show
+     *
+     * @description
+     * Angular Service to call musicSearch API
+     *
+     * @returns {$promise} A $resource promise
+     *
+     * @example
+     * videosFactory
+     *      .get({videos: 'showall'})
+     *      .$promise.then(function(data){
+     *          return data;
+     *      });
+     */
+
     .factory('videosFactory', ['$resource', function($resource){
+
         return $resource('//wwwdev2.lib.ua.edu/musicsearch/api/:videos', {videos: 'showall'}, {
             get: {
                 method: 'GET',
                 cache: true
             }
         });
-    }]);;angular.module('ualib.musicSearch')
+    }]);;/**
+ * @ngdoc overview
+ * @name videos
+ *
+ * @requires ngRoute
+ * @requires ngResource
+ * @requires ngAnimate
+ * @requires ngSanitize
+ * @requires angular-filter
+ * @requires ui-bootstrap
+ * @requires duScroll
+ * @requires ualib-ui
+ *
+ * @description
+ * # The Music Library's Videos search application.
+ * ## URL route [/#/videos](http://www.lib.ua.edu/#/videos)
+ *
+ */
+angular.module('ualib.musicSearch')
 
     .config(['$routeProvider', function($routeProvider){
         $routeProvider
             .when('/videos', {
                 reloadOnSearch: false,
                 resolve: {
+                    /**
+                     * @ngdoc service
+                     * @name videos.filters
+                     *
+                     * @description
+                     * Gets filters available for the videos search UI
+                     */
                     filters: ['videosFactory', function(videosFactory){
                         return videosFactory.get({videos: 'genres'})
                             .$promise.then(function(data){
@@ -15011,6 +17612,13 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
                                 });
                             });
                     }],
+                    /**
+                     * @ngdoc service
+                     * @name videos.videos
+                     *
+                     * @description
+                     * Gets the list of videos available in the Music Library
+                     */
                     videos: ['videosFactory', function(videosFactory){
                         return videosFactory.get()
                             .$promise.then(function(data){
@@ -15031,6 +17639,21 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
             });
     }])
 
+    /**
+     * @ngdoc controller
+     * @name videos.Controller:VideosListCtrl
+     *
+     * @requires $scope
+     * @requires $location
+     * @requires $document
+     * @requires $filter
+     * @requires videos.Resolve:filters
+     * @requires videos.Resolve:videos
+     *
+     * @description
+     * Controller for the `videos` route.
+     */
+
     .controller('VideosListCtrl', ['$scope', 'videos', 'filters', '$filter' ,'$location' ,'$document', function($scope, vid, filters, $filter, $location, $document){
         var videos = [];
 
@@ -15038,7 +17661,7 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
         filters.$promise.then(function(filterData){
             $scope.genres = filterData.genres;
             $scope.languages = filterData.languages;
-            
+
             vid.$promise.then(function(data){
                 videos = data.results;
 
@@ -15082,7 +17705,14 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
             scopeToParams(newParams);
         }, true);
 
-
+        /**
+         * @ngdoc method
+         * @name videos.Controller:VideosListCtrl#$scope.resetFilters
+         * @methodOf videos.Controller:VideosListCtrl
+         *
+         * @description
+         * Method, exposed to `$scope`, that will reset the filters/pager to their default values.
+         */
         $scope.resetFilters = function(){
             $scope.vid = {
                 genre: '',
@@ -15098,6 +17728,15 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
             };
         };
 
+        /**
+         * @ngdoc method
+         * @name videos.Controller:VideosListCtrl#$scope.pageChange
+         * @methodOf videos.Controller:VideosListCtrl
+         *
+         * @description
+         * Method, exposed to `$scope`, that is triggered when navigating to another page.
+         * Once triggered, it will bind the new page value to the URI params and auto-scroll to the top of the page.
+         */
         $scope.pageChange = function(){
 
             scopeToParams({page: $scope.pager.page});
@@ -15107,6 +17746,12 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
         $scope.$on('$destroy', function(){
             filterWatcher();
         });
+
+        /**
+         * Maps Angular $scope variables to URI query params
+         *
+         * `$scope.tasty='chimichangas'` gets mapped to `http://url.com?tasty=chimichangas`
+         */
 
         function scopeToParams(scopeVals){
             angular.forEach(scopeVals, function(val, key){
@@ -15133,6 +17778,12 @@ angular.module('musicSearch', ['ualib.musicSearch']);;angular.module('ualib.musi
                 }
             });
         }
+
+        /**
+         * Maps URI query params to Angular $scope object
+         *
+         * `http://url.com?tasty=chimichangas` gets mapped to `$scope.tasty='chimichangas'`
+         */
 
         function paramsToScope(){
             var params = $location.search();
@@ -15176,7 +17827,7 @@ angular.module('oneSearch.templates', ['bento/bento.tpl.html', 'common/directive
 
 angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("bento/bento.tpl.html",
-    "<div class=\"bento-box-container\">\n" +
+    "<div class=\"container bento-box-container\">\n" +
     "    <div class=\"bento-box-menu-container hidden-sm hidden-xs\">\n" +
     "        <nav class=\"bento-box-menu\" ui-scrollfix=\"+0\">\n" +
     "            <ul class=\"nav nav-justified\">\n" +
@@ -15477,7 +18128,76 @@ angular.module("common/engines/scout/scout.tpl.html", []).run(["$templateCache",
  * @ngdoc overview
  * @name index
  * @description
- * #test
+ * # Quick Start
+ *
+ * Run the following commands to install:
+ *
+ * ```shell
+ * npm install
+ * bower install
+ * ```
+ *
+ * <div class="alert alert-warning">
+ *     If you are unfamiliar with **Node.js**, **Grunt**, or **Bower** tools *or* have not installed them on your computer,
+ *     read through the instructions in the [Getting Started](#getting-started) section.
+ * </div>
+ *
+ * # Getting Started
+ *
+ * This package requires[Node.js](http://nodejs.org/) - an application platform which many development and automation tools may be run.
+ * Download [Node.js](http://nodejs.org/download/) and install it on your computer.
+ *
+ * > The **Node.js** platform is used to run development tools such as [Grunt](#getting-started_install-grunt) and [Bower](#getting-started_install-bower)
+ *
+ * Once `Node.js` is installed, use the `npm` (node package manager) command to install this project's node dependencies:
+ *
+ * ```shell
+ * npm install
+ * ```
+ *
+ * <div class="alert alert-info">
+ *     When the [npm install](https://docs.npmjs.com/cli/install) command is run without a package (e.g., `npm install <package_name>`),
+ *     it installs dependencies listed in the `package.json` file (located in the root directory of this project).
+ * </div>
+ *
+ *
+ * ## Install Grunt
+ * *This package requires Grunt `~0.4.5`*
+ *
+ * If you have not already installed `Grunt` on your computer, use the following command to install the `Grunt Command Line Interface (grunt-cli)`:
+ *
+ * ```shell
+ * npm install -g grunt-cli
+ * ```
+ * <div class="alert alert-info">
+ *     The **-g** option installs `grunt-cli` globally on you computer. You only need to run this command once.
+ * </div>
+ *
+ * > If you haven't used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started](http://gruntjs.com/getting-started) guide,
+ * > as it explains how to create a [Gruntfile](http://gruntjs.com/sample-gruntfile) as well as install and use Grunt plugins.
+ *
+ *
+ * ## Install Bower
+ *
+ * If `Bower` is not globally installed on your computer, run the following command:
+ *
+ * ```shell
+ * npm install -g bower
+ * ```
+ *
+ * [Bower](http://bower.io/) is also a package manager for front-end web frameworks such as jQuery, Angular, and Bootstrap.
+ * This project uses Bower to manage front-end third-party and peer dependencies.
+ *
+ * Once installed, you can download this project's `Bower` dependencies with the following command:
+ *
+ * ```shell
+ * bower install
+ * ```
+ *
+ * <div class="alert alert-info">
+ *     Similar to `npm install` if `Bower's install` command is not given a package name (e.g., `bower install <package_name>`), it will install
+ *     dependencies listed in the `bower.json` config file.
+ * </div>
  */
 /**
  * @ngdoc overview
@@ -16165,7 +18885,7 @@ angular.module('oneSearch.common')
                 model: '=',
                 search: '='
             },
-            controller: function($scope, $window, $timeout, $document,  dataFactory){
+            controller: ['$scope', '$window', '$timeout', '$document', 'dataFactory', function($scope, $window, $timeout, $document,  dataFactory){
                 $scope.items = {};
                 $scope.filteredItems = [];
                 $scope.model = "";
@@ -16281,7 +19001,7 @@ angular.module('oneSearch.common')
                 $scope.gaTypeAhead = function(linkTitle){
                     ga('send', 'event', 'oneSearch', 'type_ahead_click', linkTitle);
                 };
-            },
+            }],
             link: function(scope, elem, attrs) {
                 scope.showSuggestions = false;
                 var suggestWatcher = scope.$watch('items', function(newVal, oldVal){
@@ -16430,10 +19150,11 @@ angular.module('engines.acumen', [])
      * @name engines.type:acumen:AcumenCtrl
      *
      * @description
+     * Adds a `type` property to each item to display, from genres that may return with the API results.
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('AcumenCtrl', function($scope, $filter){
+    .controller('AcumenCtrl', ['$scope', '$filter', function($scope, $filter){
         var items = $scope.items;
 
         for (var i = 0, len = items.length; i < len; i++) {
@@ -16443,7 +19164,7 @@ angular.module('engines.acumen', [])
                 else items[i].type = items[i].type.sort().shift();
             }
         }
-    });
+    }]);
 angular.module('engines.catalog', [])
 
     /**
@@ -16504,7 +19225,7 @@ angular.module('engines.catalog', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('CatalogCtrl', function($scope, $filter){
+    .controller('CatalogCtrl', ['$scope', '$filter', function($scope, $filter){
         var types = {
             bc: "Archive/Manuscript",
             cm: "Music Score",
@@ -16546,7 +19267,7 @@ angular.module('engines.catalog', [])
         }
 
         $scope.items = items;
-    });
+    }]);
 
 angular.module('engines.databases', [])
 
@@ -16630,7 +19351,7 @@ angular.module('engines.ejournals', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('EjouralsCtrl', function($scope){
+    .controller('EjouralsCtrl', ['$scope', function($scope){
 
         var param;
         switch ($scope.mediaType){
@@ -16647,7 +19368,7 @@ angular.module('engines.ejournals', [])
         if (param){
             $scope.resourceLink = $scope.resourceLink.replace('SS_searchTypeAll=yes&SS_searchTypeBook=yes&SS_searchTypeJournal=yes&SS_searchTypeOther=yes', param);
         }
-    });
+    }]);
 /**
  * @ngdoc overview
  * @name engines
@@ -16995,7 +19716,7 @@ angular.module('engines.scout', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('ScoutCtrl', function($scope){
+    .controller('ScoutCtrl', ['$scope', function($scope){
         var title; // Title variable to bind to $scope. ".BibRelationships.IsPartOfRelationships" title is used if no item title is present.
         var items = $scope.items;
         for (var i = 0; i < items.length; i++){
@@ -17069,7 +19790,7 @@ angular.module('engines.scout', [])
         }
 
         $scope.resourceLink = angular.copy(link);
-    });
+    }]);
 angular.module('filters.nameFilter', [])
 
     .filter('nameFilter', ['$filter', function($filter){
@@ -46164,26 +48885,52 @@ angular.module("calendar/calendar.tpl.html", []).run(["$templateCache", function
 angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("hours-locations/hours-locations.tpl.html",
     "<!--<script src='//maps.googleapis.com/maps/api/js?sensor=false&key=AIzaSyCdXuKwZiDx5W2uP8plV5d-o-jLQ5UQtIQ&mid=z4A8-271j5C8.kowwE312jycE'></script>-->\n" +
-    "<div class=\"jumbotron bg-transparent\">\n" +
-    "    <h1>Hours &amp; Locations</h1>\n" +
-    "    <h2 class=\"hidden-xs hidden-sm\">{{library}}</h2>\n" +
-    "    <div class=\"dropdown multipage-menu visible-xs visible-sm\">\n" +
-    "        <button class=\"btn btn-default btn-lg dropdown-toggle\" id=\"locationMenu\"  type=\"button\">\n" +
-    "            {{library}}\n" +
-    "        </button>\n" +
-    "        <ul class=\"dropdown-menu nav nav-stacked hours-locations-menu\" role=\"menu\" aria-labelledby=\"locationMenu\">\n" +
-    "            <li><a href=\"#\" hours-href=\"{library: 'gorgas', month: 0}\">Gorgas</a>\n" +
-    "                <ul class=\"nav nav-stacked\">\n" +
-    "                    <li><a href=\"#\" hours-href=\"{library: 'music', month: 0}\">Music Library</a></li>\n" +
-    "                    <li><a href=\"#\" hours-href=\"{library: 'media', month: 0}\">Sanford Media Center</a></li>\n" +
-    "                    <li><a href=\"#\" hours-href=\"{library: 'williams', month: 0}\">Williams Americana Collection</a></li>\n" +
-    "                </ul>\n" +
-    "            </li>\n" +
-    "            <li><a href=\"#\" hours-href=\"{library: 'rodgers', month: 0}\">Rodgers</a></li>\n" +
-    "            <li><a href=\"#\" hours-href=\"{library: 'mclure', month: 0}\">McLure</a></li>\n" +
-    "            <li><a href=\"#\" hours-href=\"{library: 'hoole', month: 0}\">Hoole</a></li>\n" +
-    "            <li><a href=\"#\" hours-href=\"{library: 'bruno', month: 0}\">Bruno</a></li>\n" +
-    "        </ul>\n" +
+    "<div class=\"jumbotron-header\">\n" +
+    "    <div class=\"jumbotron\">\n" +
+    "        <div class=\"container\">\n" +
+    "            <div class=\"row\">\n" +
+    "                <div class=\"col-sm-8\">\n" +
+    "                    <h1>Hours & Locations</h1>\n" +
+    "                    <h2 class=\"hidden-xs hidden-sm\">{{library}}</h2>\n" +
+    "                    <div class=\"dropdown multipage-menu visible-xs visible-sm\">\n" +
+    "                        <button class=\"btn btn-default btn-lg dropdown-toggle\" id=\"locationMenu\"  type=\"button\">\n" +
+    "                            {{library}}\n" +
+    "                        </button>\n" +
+    "                        <ul class=\"dropdown-menu nav nav-stacked hours-locations-menu\" role=\"menu\" aria-labelledby=\"locationMenu\">\n" +
+    "                            <li><a href=\"#\" hours-href=\"{library: 'gorgas', month: 0}\">Gorgas</a>\n" +
+    "                                <ul class=\"nav nav-stacked\">\n" +
+    "                                    <li><a href=\"#\" hours-href=\"{library: 'music', month: 0}\">Music Library</a></li>\n" +
+    "                                    <li><a href=\"#\" hours-href=\"{library: 'media', month: 0}\">Sanford Media Center</a></li>\n" +
+    "                                    <li><a href=\"#\" hours-href=\"{library: 'williams', month: 0}\">Williams Americana Collection</a></li>\n" +
+    "                                </ul>\n" +
+    "                            </li>\n" +
+    "                            <li><a href=\"#\" hours-href=\"{library: 'rodgers', month: 0}\">Rodgers</a></li>\n" +
+    "                            <li><a href=\"#\" hours-href=\"{library: 'mclure', month: 0}\">McLure</a></li>\n" +
+    "                            <li><a href=\"#\" hours-href=\"{library: 'hoole', month: 0}\">Hoole</a></li>\n" +
+    "                            <li><a href=\"#\" hours-href=\"{library: 'bruno', month: 0}\">Bruno</a></li>\n" +
+    "                        </ul>\n" +
+    "                    </div>\n" +
+    "                    <ul class=\"list-unstyled fa-ul\" ng-if=\"contact\">\n" +
+    "                        <li ng-if=\"contact.email\"><span class=\"fa fa-li fa-envelope\"></span> <a ng-href=\"mailto:{{contact.email}}\">{{contact.email}}</a></li>\n" +
+    "                        <li ng-if=\"contact.phone\">\n" +
+    "                            <span class=\"fa fa-li fa-phone\"></span>\n" +
+    "                            <ul class=\"list-unstyled\">\n" +
+    "                                <li ng-repeat=\"phone in contact.phone\">\n" +
+    "                                    <span ng-if=\"phone.dept\">{{phone.dept}}: </span>\n" +
+    "                                    <a ng-href=\"tel:+1-205-{{phone.number}}\" title=\"{{library}} phone number\">{{phone.number}}</a>\n" +
+    "                                </li>\n" +
+    "                            </ul>\n" +
+    "                        </li>\n" +
+    "                    </ul>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-sm-4\">\n" +
+    "                    <div class=\"well\">\n" +
+    "                        <p class=\"lead\">What can {{library}} do for you?</p>\n" +
+    "                        <a ng-href=\"{{moreLink}}\" class=\"btn btn-primary\">Learn more <span class=\"fa fa-fw fa-info-circle\"></span></a>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
     "<div class=\"container\">\n" +
@@ -46206,6 +48953,7 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
     "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-9 col-md-pull-3\">\n" +
+    "\n" +
     "            <div class=\"row\">\n" +
     "                <div class=\"col-md-12\">\n" +
     "                    <div class=\"hours-calendar\"></div>\n" +
@@ -46214,7 +48962,7 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
     "\n" +
     "\n" +
     "            <div class=\"row\">\n" +
-    "                <div class=\"col-md-7\">\n" +
+    "                <div class=\"col-md-12\">\n" +
     "                    <div class=\"panel panel-default\">\n" +
     "                        <div class=\"panel-body\">\n" +
     "                            <ui-gmap-google-map center='center' zoom='zoom' id=\"map-canvas\" options=\"{disableDefaultUI: true}\">\n" +
@@ -46232,26 +48980,6 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
     "                        </span>\n" +
     "                                </div>\n" +
     "                            </form>\n" +
-    "                        </div>\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-5\">\n" +
-    "                    <div class=\"panel panel-default\">\n" +
-    "                        <div class=\"panel-heading\">Contact</div>\n" +
-    "                        <div class=\"panel-body\">\n" +
-    "                            <ul class=\"list-unstyled fa-ul\" ng-if=\"contact\">\n" +
-    "                                <li ng-if=\"contact.email\"><span class=\"fa fa-li fa-envelope\"></span> <a ng-href=\"mailto:{{contact.email}}\">{{contact.email}}</a></li>\n" +
-    "                                <li ng-if=\"contact.phone\">\n" +
-    "                                    <span class=\"fa fa-li fa-phone\"></span>\n" +
-    "                                    <ul class=\"list-unstyled\">\n" +
-    "                                        <li ng-repeat=\"phone in contact.phone\">\n" +
-    "                                            <strong ng-if=\"phone.dept\">{{phone.dept}}: </strong>\n" +
-    "                                            {{phone.number}}\n" +
-    "                                        </li>\n" +
-    "                                    </ul>\n" +
-    "                                </li>\n" +
-    "                            </ul>\n" +
-    "                            <a ng-href=\"{{moreLink}}\" class=\"btn btn-block btn-default\">More about {{library}}</a>\n" +
     "                        </div>\n" +
     "                    </div>\n" +
     "                </div>\n" +
@@ -49546,150 +52274,176 @@ angular.module("news-item/news-card.tpl.html", []).run(["$templateCache", functi
 
 angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("news-item/news-item.tpl.html",
-    "<div class=\"page-header\">\n" +
-    "    <h1>{{newsItem.title}}</h1>\n" +
-    "</div>\n" +
-    "<div class=\"row\">\n" +
-    "    <div class=\"col-md-4 col-md-push-8\">\n" +
-    "        <div class=\"well\" ng-if=\"newsItem.contactName\">\n" +
-    "            <h4>For more information contact</h4>\n" +
-    "            <ul class=\"fa-ul\">\n" +
-    "                <li><span class=\"fa fa-user fa-li\"></span>{{newsItem.contactName}}</li>\n" +
-    "                <li><span class=\"fa fa-phone fa-li\"></span>{{newsItem.contactPhone}}</li>\n" +
-    "                <li><span class=\"fa fa-envelope fa-li\"></span>{{newsItem.contactEmail}}</li>\n" +
-    "            </ul>\n" +
-    "        </div>\n" +
-    "        <a href=\"#/news-exhibits\" class=\"btn btn-default\"><span class=\"fa fa-reply\"></span> See all news &amp; exhibits</a>\n" +
-    "    </div>\n" +
-    "    <div class=\"col-md-8 col-md-pull-4\">\n" +
-    "        <div class=\"text-center news-carousel-container-small\" ng-if=\"newsItem.images.length > 0\">\n" +
-    "            <ul rn-carousel rn-carousel-auto-slide rn-carousel-buffered\n" +
-    "                rn-carousel-index=\"curImage\" rn-carousel-locked=\"isLocked\"\n" +
-    "                class=\"image news-carousel-small\">\n" +
-    "                <li ng-repeat=\"img in newsItem.images\">\n" +
-    "                    <div class=\"layer text-center\">\n" +
-    "                        <div class=\"news-carousel-image-small\"\n" +
-    "                             ng-style=\"{'background-image':'url('+img+')'}\" ng-click=\"enlargeImages(true, $index)\">\n" +
-    "                        </div>\n" +
+    "<div class=\"jumbotron-header\">\n" +
+    "    <div class=\"jumbotron\">\n" +
+    "        <div class=\"container\">\n" +
+    "            <div class=\"row\">\n" +
+    "                <div class=\"col-sm-7\">\n" +
+    "                    <h1>News &amp; Exhibits</h1>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-sm-5\">\n" +
+    "                    <div class=\"well\">\n" +
+    "                        <p class=\"lead\">Looking for upcoming events in the University Libraries?</p>\n" +
+    "                        <a href=\"http://events.ua.edu/category/22/\" class=\"btn btn-primary\" target=\"_new\">View event calendar <span class=\"fa fa-external-link\"></span></a>\n" +
     "                    </div>\n" +
-    "                </li>\n" +
-    "            </ul>\n" +
-    "            <div rn-carousel-indicators ng-if=\"newsItem.images.length > 1\" slides=\"newsItem.images\" rn-carousel-index=\"curImage\">\n" +
+    "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
-    "        <h5 class=\"text-muted\">\n" +
-    "            <span>Created on {{newsItem.created | date:mediumDate}}</span>\n" +
-    "        </h5>\n" +
-    "        <p class=\"text-justify\" ng-bind-html=\"newsItem.description\"></p>\n" +
     "    </div>\n" +
     "</div>\n" +
-    "<div ng-show=\"showEnlarged\">\n" +
-    "    <div class=\"carousel-lg\" ng-click=\"enlargeImages(false)\">\n" +
-    "        <button type=\"button\" class=\"close\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n" +
-    "        <ul rn-carousel rn-carousel-controls rn-carousel-index=\"curEnlImage\" class=\"image\">\n" +
-    "            <li ng-repeat=\"img in newsItem.images\">\n" +
-    "                <div class=\"layer\"><img class=\"fullsize-img\" ng-src=\"{{img}}\" ng-click=\"nextSlide()\"/></div>\n" +
-    "            </li>\n" +
-    "        </ul>\n" +
-    "        <div class=\"text-center\" rn-carousel-indicators ng-if=\"newsItem.images.length > 1\" slides=\"newsItem.images\" rn-carousel-index=\"curEnlImage\"></div>\n" +
     "\n" +
+    "<div class=\"container\">\n" +
+    "    <div class=\"page-header\">\n" +
+    "        <h2>{{newsItem.title}}</h2>\n" +
     "    </div>\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-4 col-md-push-8\">\n" +
+    "            <div class=\"well\" ng-if=\"newsItem.contactName\">\n" +
+    "                <h4>For more information contact</h4>\n" +
+    "                <ul class=\"fa-ul\">\n" +
+    "                    <li><span class=\"fa fa-user fa-li\"></span>{{newsItem.contactName}}</li>\n" +
+    "                    <li><span class=\"fa fa-phone fa-li\"></span>{{newsItem.contactPhone}}</li>\n" +
+    "                    <li><span class=\"fa fa-envelope fa-li\"></span>{{newsItem.contactEmail}}</li>\n" +
+    "                </ul>\n" +
+    "            </div>\n" +
+    "            <a href=\"#/news-exhibits\" class=\"btn btn-default\"><span class=\"fa fa-reply\"></span> See all news &amp; exhibits</a>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-8 col-md-pull-4\">\n" +
+    "            <div class=\"text-center news-carousel-container-small\" ng-if=\"newsItem.images.length > 0\">\n" +
+    "                <ul rn-carousel rn-carousel-auto-slide rn-carousel-buffered\n" +
+    "                    rn-carousel-index=\"curImage\" rn-carousel-locked=\"isLocked\"\n" +
+    "                    class=\"image news-carousel-small\">\n" +
+    "                    <li ng-repeat=\"img in newsItem.images\">\n" +
+    "                        <div class=\"layer text-center\">\n" +
+    "                            <div class=\"news-carousel-image-small\"\n" +
+    "                                 ng-style=\"{'background-image':'url('+img+')'}\" ng-click=\"enlargeImages(true, $index)\">\n" +
+    "                            </div>\n" +
+    "                        </div>\n" +
+    "                    </li>\n" +
+    "                </ul>\n" +
+    "                <div rn-carousel-indicators ng-if=\"newsItem.images.length > 1\" slides=\"newsItem.images\" rn-carousel-index=\"curImage\">\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "            <h5 class=\"text-muted\">\n" +
+    "                <span>Created on {{newsItem.created | date:mediumDate}}</span>\n" +
+    "            </h5>\n" +
+    "            <p class=\"text-justify\" ng-bind-html=\"newsItem.description\"></p>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "    <div ng-show=\"showEnlarged\">\n" +
+    "        <div class=\"carousel-lg\" ng-click=\"enlargeImages(false)\">\n" +
+    "            <button type=\"button\" class=\"close\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n" +
+    "            <ul rn-carousel rn-carousel-controls rn-carousel-index=\"curEnlImage\" class=\"image\">\n" +
+    "                <li ng-repeat=\"img in newsItem.images\">\n" +
+    "                    <div class=\"layer\"><img class=\"fullsize-img\" ng-src=\"{{img}}\" ng-click=\"nextSlide()\"/></div>\n" +
+    "                </li>\n" +
+    "            </ul>\n" +
+    "            <div class=\"text-center\" rn-carousel-indicators ng-if=\"newsItem.images.length > 1\" slides=\"newsItem.images\" rn-carousel-index=\"curEnlImage\"></div>\n" +
     "\n" +
-    "    <!--<div class=\"news-carousel-container-large\">-->\n" +
+    "        </div>\n" +
+    "\n" +
+    "        <!--<div class=\"news-carousel-container-large\">-->\n" +
     "        <!--<ul rn-carousel rn-carousel-controls rn-carousel-buffered-->\n" +
-    "            <!--rn-carousel-index=\"curEnlImage\" rn-carousel-transition=\"none\"-->\n" +
-    "            <!--class=\"image news-carousel-large\" rn-carousel-controls-allow-loop>-->\n" +
-    "            <!--<li ng-repeat=\"img in newsItem.images\">-->\n" +
-    "                <!--<div class=\"layer text-center\">-->\n" +
-    "                    <!--<div class=\"news-carousel-image-large\"-->\n" +
-    "                         <!--ng-style=\"{'background-image':'url('+img+')'}\" ng-click=\"setCurEnlImage($event, $index)\">-->\n" +
-    "                    <!--</div>-->\n" +
-    "                <!--</div>-->\n" +
-    "            <!--</li>-->\n" +
+    "        <!--rn-carousel-index=\"curEnlImage\" rn-carousel-transition=\"none\"-->\n" +
+    "        <!--class=\"image news-carousel-large\" rn-carousel-controls-allow-loop>-->\n" +
+    "        <!--<li ng-repeat=\"img in newsItem.images\">-->\n" +
+    "        <!--<div class=\"layer text-center\">-->\n" +
+    "        <!--<div class=\"news-carousel-image-large\"-->\n" +
+    "        <!--ng-style=\"{'background-image':'url('+img+')'}\" ng-click=\"setCurEnlImage($event, $index)\">-->\n" +
+    "        <!--</div>-->\n" +
+    "        <!--</div>-->\n" +
+    "        <!--</li>-->\n" +
     "        <!--</ul>-->\n" +
     "        <!--<div rn-carousel-indicators ng-if=\"newsItem.images.length > 1\" slides=\"newsItem.images\" rn-carousel-index=\"curEnlImage\">-->\n" +
     "        <!--&lt;!&ndash;<div class=\"news-carousel-large-indicators text-center\" ng-if=\"newsItem.images.length > 1\">&ndash;&gt;-->\n" +
-    "            <!--&lt;!&ndash;<span ng-repeat=\"img in newsItem.images\" class=\"clickable-item\"&ndash;&gt;-->\n" +
-    "                  <!--&lt;!&ndash;ng-click=\"setCurEnlImage($event, $index)\">&ndash;&gt;-->\n" +
-    "                <!--&lt;!&ndash;<span class=\"fa fa-2x fa-circle-o\" ng-class=\"{'fa-3x': $index == $parent.curEnlImage}\">&ndash;&gt;-->\n" +
-    "                <!--&lt;!&ndash;</span>&ndash;&gt;-->\n" +
-    "            <!--&lt;!&ndash;</span>&ndash;&gt;-->\n" +
+    "        <!--&lt;!&ndash;<span ng-repeat=\"img in newsItem.images\" class=\"clickable-item\"&ndash;&gt;-->\n" +
+    "        <!--&lt;!&ndash;ng-click=\"setCurEnlImage($event, $index)\">&ndash;&gt;-->\n" +
+    "        <!--&lt;!&ndash;<span class=\"fa fa-2x fa-circle-o\" ng-class=\"{'fa-3x': $index == $parent.curEnlImage}\">&ndash;&gt;-->\n" +
+    "        <!--&lt;!&ndash;</span>&ndash;&gt;-->\n" +
+    "        <!--&lt;!&ndash;</span>&ndash;&gt;-->\n" +
     "        <!--&lt;!&ndash;</div>&ndash;&gt;-->\n" +
-    "    <!--</div>-->\n" +
+    "        <!--</div>-->\n" +
+    "    </div>\n" +
     "</div>\n" +
     "");
 }]);
 
 angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("news/news-list.tpl.html",
-    "<div class=\"jumbotron bg-transparent\">\n" +
-    "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-7\">\n" +
-    "            <h1>News &amp; Exhibits</h1>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-5\">\n" +
-    "            <div class=\"well\">\n" +
-    "                <p class=\"lead\">Looking for upcoming events in the University Libraries?</p>\n" +
-    "                <a href=\"http://events.ua.edu/category/22/\" class=\"btn btn-primary\" target=\"_new\">View event calendar <span class=\"fa fa-external-link\"></span></a>\n" +
+    "<div class=\"jumbotron-header\">\n" +
+    "    <div class=\"jumbotron\">\n" +
+    "        <div class=\"container\">\n" +
+    "            <div class=\"row\">\n" +
+    "                <div class=\"col-sm-7\">\n" +
+    "                    <h1>News &amp; Exhibits</h1>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-sm-5\">\n" +
+    "                    <div class=\"well\">\n" +
+    "                        <p class=\"lead\">Looking for upcoming events in the University Libraries?</p>\n" +
+    "                        <a href=\"http://events.ua.edu/category/22/\" class=\"btn btn-primary\" target=\"_new\">View event calendar <span class=\"fa fa-external-link\"></span></a>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
     "\n" +
     "\n" +
-    "<div class=\"row\">\n" +
-    "    <div class=\"col-md-9\">\n" +
+    "<div class=\"container\">\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-9\">\n" +
     "\n" +
-    "        <div class=\"media animate-repeat\" ng-repeat=\"item in news | filter:{type: newsFilters.type}\n" +
+    "            <div class=\"media animate-repeat\" ng-repeat=\"item in news | filter:{type: newsFilters.type}\n" +
     "                                                                  | filter:newsFilters.search\n" +
     "                                                                  | orderBy:['-sticky','-created']\">\n" +
-    "            <div class=\"media-left hidden-sm hidden-xs\">\n" +
-    "                <a ng-href=\"#/news-exhibits/{{item.link}}\" class=\"news-list-tb\">\n" +
-    "                    <img class=\"media-object\" ng-src=\"{{item.tb}}\" ng-if=\"item.tb\" />\n" +
+    "                <div class=\"media-left hidden-sm hidden-xs\">\n" +
+    "                    <a ng-href=\"#/news-exhibits/{{item.link}}\" class=\"news-list-tb\">\n" +
+    "                        <img class=\"media-object\" ng-src=\"{{item.tb}}\" ng-if=\"item.tb\" />\n" +
     "                    <span class=\"media-object\"\n" +
     "                          ng-if=\"item.type == 0 && !item.tb\"><span class=\"fa fa-newspaper-o\"></span></span>\n" +
     "                    <span class=\"media-object\"\n" +
     "                          ng-if=\"item.type == 1 && !item.tb\"><span class=\"fa fa-calendar\"></span></span>\n" +
-    "                </a>\n" +
-    "            </div>\n" +
-    "            <div class=\"media-body\">\n" +
-    "                <h3 class=\"media-heading\">\n" +
-    "                    <a ng-href=\"#/news-exhibits/{{item.link}}\" ng-bind-html=\"item.title | highlight:newsFilters.search\"></a>\n" +
-    "                </h3>\n" +
+    "                    </a>\n" +
+    "                </div>\n" +
+    "                <div class=\"media-body\">\n" +
+    "                    <h3 class=\"media-heading\">\n" +
+    "                        <a ng-href=\"#/news-exhibits/{{item.link}}\" ng-bind-html=\"item.title | highlight:newsFilters.search\"></a>\n" +
+    "                    </h3>\n" +
     "\n" +
-    "                <h5 class=\"text-muted\" ng-if=\"item.type > 0\">Exhibit {{item.activeFrom | date:mediumDate}} - {{item.activeUntil | date:mediumDate}}</h5>\n" +
-    "                <h5 class=\"text-muted\" ng-if=\"item.type < 1\">Created on {{item.created | date:mediumDate}}</h5>\n" +
-    "                <p class=\"text-justify\">\n" +
+    "                    <h5 class=\"text-muted\" ng-if=\"item.type > 0\">Exhibit {{item.activeFrom | date:mediumDate}} - {{item.activeUntil | date:mediumDate}}</h5>\n" +
+    "                    <h5 class=\"text-muted\" ng-if=\"item.type < 1\">Created on {{item.created | date:mediumDate}}</h5>\n" +
+    "                    <p class=\"text-justify\">\n" +
     "                    <span ng-bind-html=\"item.blurb | highlight:newsFilters.search\">\n" +
     "                    </span>\n" +
-    "                </p>\n" +
+    "                    </p>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "\n" +
+    "            <div class=\"text-center\">\n" +
+    "                <pagination total-items=\"filteredNews.length\" ng-model=\"soft.page\" max-size=\"10\" class=\"pagination-sm\" boundary-links=\"true\" items-per-page=\"soft.perPage\" ng-change=\"update()\" ng-if=\"filteredNews.length > soft.perPage\"></pagination>\n" +
+    "            </div>\n" +
+    "\n" +
+    "            <div class=\"alert alert-warning text-center\" role=\"alert\" ng-show=\"news.length < 1\">\n" +
+    "                <h2>\n" +
+    "                    No\n" +
+    "                    <span ng-show=\"newsFilters.type == ''\">News or Exhibits</span>\n" +
+    "                    <span ng-show=\"newsFilters.type == '0'\">News</span>\n" +
+    "                    <span ng-show=\"newsFilters.type == '1'\">Exhibits</span>\n" +
+    "                    match the search \"<strong>{{newsFilters.search}}</strong>\"</span>\n" +
+    "                </h2>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "\n" +
-    "        <div class=\"text-center\">\n" +
-    "            <pagination total-items=\"filteredNews.length\" ng-model=\"soft.page\" max-size=\"10\" class=\"pagination-sm\" boundary-links=\"true\" items-per-page=\"soft.perPage\" ng-change=\"update()\" ng-if=\"filteredNews.length > soft.perPage\"></pagination>\n" +
+    "        <div class=\"col-md-3 hidden-xs\">\n" +
+    "            <h4>Filters</h4>\n" +
+    "            <form class=\"facets-form\">\n" +
+    "                <div class=\"form-group\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" ng-model=\"newsFilters.search\" placeholder=\"Keyword search\">\n" +
+    "                </div>\n" +
+    "            </form>\n" +
     "        </div>\n" +
     "\n" +
-    "        <div class=\"alert alert-warning text-center\" role=\"alert\" ng-show=\"news.length < 1\">\n" +
-    "            <h2>\n" +
-    "                No\n" +
-    "                <span ng-show=\"newsFilters.type == ''\">News or Exhibits</span>\n" +
-    "                <span ng-show=\"newsFilters.type == '0'\">News</span>\n" +
-    "                <span ng-show=\"newsFilters.type == '1'\">Exhibits</span>\n" +
-    "                match the search \"<strong>{{newsFilters.search}}</strong>\"</span>\n" +
-    "            </h2>\n" +
-    "        </div>\n" +
     "    </div>\n" +
-    "\n" +
-    "    <div class=\"col-md-3 hidden-xs\">\n" +
-    "        <h4>Filters</h4>\n" +
-    "        <form class=\"facets-form\">\n" +
-    "            <div class=\"form-group\">\n" +
-    "                <input type=\"text\" class=\"form-control\" ng-model=\"newsFilters.search\" placeholder=\"Keyword search\">\n" +
-    "            </div>\n" +
-    "        </form>\n" +
-    "    </div>\n" +
-    "\n" +
     "</div>");
 }]);
 
@@ -49716,7 +52470,83 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
     "\n" +
     "</div>");
 }]);
-;angular.module('ualib.news', [
+;/**
+ * @ngdoc overview
+ * @name index
+ * @description
+ * # Quick Start
+ *
+ * Run the following commands to install:
+ *
+ * ```shell
+ * npm install
+ * bower install
+ * ```
+ *
+ * <div class="alert alert-warning">
+ *     If you are unfamiliar with **Node.js**, **Grunt**, or **Bower** tools *or* have not installed them on your computer,
+ *     read through the instructions in the [Getting Started](#getting-started) section.
+ * </div>
+ *
+ * # Getting Started
+ *
+ * This package requires[Node.js](http://nodejs.org/) - an application platform which many development and automation tools may be run.
+ * Download [Node.js](http://nodejs.org/download/) and install it on your computer.
+ *
+ * > The **Node.js** platform is used to run development tools such as [Grunt](#getting-started_install-grunt) and [Bower](#getting-started_install-bower)
+ *
+ * Once `Node.js` is installed, use the `npm` (node package manager) command to install this project's node dependencies:
+ *
+ * ```shell
+ * npm install
+ * ```
+ *
+ * <div class="alert alert-info">
+ *     When the [npm install](https://docs.npmjs.com/cli/install) command is run without a package (e.g., `npm install <package_name>`),
+ *     it installs dependencies listed in the `package.json` file (located in the root directory of this project).
+ * </div>
+ *
+ *
+ * ## Install Grunt
+ * *This package requires Grunt `~0.4.5`*
+ *
+ * If you have not already installed `Grunt` on your computer, use the following command to install the `Grunt Command Line Interface (grunt-cli)`:
+ *
+ * ```shell
+ * npm install -g grunt-cli
+ * ```
+ * <div class="alert alert-info">
+ *     The **-g** option installs `grunt-cli` globally on you computer. You only need to run this command once.
+ * </div>
+ *
+ * > If you haven't used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started](http://gruntjs.com/getting-started) guide,
+ * > as it explains how to create a [Gruntfile](http://gruntjs.com/sample-gruntfile) as well as install and use Grunt plugins.
+ *
+ *
+ * ## Install Bower
+ *
+ * If `Bower` is not globally installed on your computer, run the following command:
+ *
+ * ```shell
+ * npm install -g bower
+ * ```
+ *
+ * [Bower](http://bower.io/) is also a package manager for front-end web frameworks such as jQuery, Angular, and Bootstrap.
+ * This project uses Bower to manage front-end third-party and peer dependencies.
+ *
+ * Once installed, you can download this project's `Bower` dependencies with the following command:
+ *
+ * ```shell
+ * bower install
+ * ```
+ *
+ * <div class="alert alert-info">
+ *     Similar to `npm install` if `Bower's install` command is not given a package name (e.g., `bower install <package_name>`), it will install
+ *     dependencies listed in the `bower.json` config file.
+ * </div>
+ */
+
+angular.module('ualib.news', [
     'ngRoute',
     'ngResource',
     'ngSanitize',
@@ -49728,6 +52558,16 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
     'ualib.ui',
     'ualib.news.templates'
 ]);;angular.module('ualib.news')
+
+    /**
+     * @ngdoc service
+     * @name news.ualibNewsFactory
+     *
+     * @requires $resource
+     * @requires $sce
+     * @requires $filters
+     * @requires $http
+     */
 
     .factory('ualibNewsFactory', ['$resource', '$sce', '$filter', '$http', function($resource, $sce, $filter, $http){
 
@@ -49772,6 +52612,24 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
 
         //TODO: centralize this function so it can be used with all apps
         // Extend the default responseTransform array - Straight from Angular 1.2.8 API docs - https://docs.angularjs.org/api/ng/service/$http#overriding-the-default-transformations-per-request
+        
+        /**
+         * @ngdoc function
+         * @name news.ualibNewsFactory#appendTransform
+         * @methodOf news.ualibNewsFactory
+         *
+         * @param {Array.<function()>} defaults Default `Array` of `$http` transform response transform functions from Angular - will always be `$http.defaults.transformResponse`
+         * @param {function()} transform Transform function to extend the `$http.defaults.transformResponse` Array with.
+         *
+         * @description
+         * <span class="label label-warning">Private</span>
+         * Extend the default responseTransform array - Straight from Angular 1.2.8 API docs - https://docs.angularjs.org/api/ng/service/$http#overriding-the-default-transformations-per-request
+         *
+         * Doing this allows custom modifications of the JSON response from the API to be cached after the initial `$resource` call, instead of
+         * performing these modifications on every `$digest()` cycle (e.g., make modifications once, instead of every time the news list is refreshed).
+         *
+         * @returns {Array.<function()>} Returns the new `transformResponse` Array
+         */
         function appendTransform(defaults, transform) {
 
             // We can't guarantee that the default transformation is an array1
@@ -49780,6 +52638,57 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
             // Append the new transformation to the defaults
             return defaults.concat(transform);
         }
+
+        /**
+         * @ngdoc method
+         * @name news.ualibNewsFactory:get
+         * @methodOf news.ualibNewsFactory
+         *
+         * @param {object.<string>=} params REST params object to send to the API
+         * @param {string} params.news News list identifier
+         *
+         * Available `identifiers`:
+         * - `archive` - Retrieves all news items from the API.
+         *
+         * @example
+         * <pre>
+         ualibNewsFactory.get({news: 'archive'})
+            .$promise
+            .then(function(data){
+                $scope.news = data;
+            }, function(data, status, headers, config) {
+                console.log({
+                    data: data,
+                    status: status,
+                    headers: headers,
+                    config: config
+                });
+            });
+         * </pre>
+         *
+         * @returns {Promise} Returns a [promise](https://code.angularjs.org/1.2.29/docs/api/ng/service/$q).
+         */
+
+        /**
+         * @ngdoc method
+         * @name news.ualibNewsFactory:today
+         * @methodOf news.ualibNewsFactory
+         *
+         * @description
+         * Retrieves *current* news items from the API and upcoming events from the [UA Events Calendar](http://events.ua.edu/category/22/).
+         *
+         * @example
+         * <pre>
+         *     ualibNewsFactory.today()
+         .$promise
+         .then(function(data){
+                $scope.news = data.news;
+                $scope.events = data.events;
+            });
+         * </pre>
+         *
+         * @returns {Promise} Returns a [promise](https://code.angularjs.org/1.2.29/docs/api/ng/service/$q).
+         */
 
         return $resource('//wwwdev2.lib.ua.edu/newsApp/api/:news', {}, {
             get: {
@@ -49811,6 +52720,20 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
             }
         });
     }]);;angular.module('ualib.news')
+
+    /**
+     * @ngdoc overview
+     * @name news.news-item
+     *
+     * @description
+     * #Route
+     *
+     * ```
+     * /#/news-exhibits/:news-item
+     * ```
+     *
+     *
+     */
 
     .config(['$routeProvider', function($routeProvider){
         $routeProvider
@@ -49895,7 +52818,26 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
                 return 'news-item/' + type + '-card.tpl.html';
             }
         };
-    }]);;angular.module('ualib.news')
+    }]);;/**
+ * @ngdoc overview
+ * @name news
+ * 
+ * @requires  ngRoute
+ * @requires ngResource
+ * @requires ngSanitize
+ * @requires ngAnimate
+ * @requires angular.filter
+ * @requires duScroll
+ * @requires ui.bootstrap
+ * @requires angular-carousel
+ * @requires ualib.ui
+ *
+ * @description
+ * News and Events web app
+ *
+ * **default route: [/#/news-exhibits](http://www.lib.ua.edu/#/news-exhibits/)**
+ */
+angular.module('ualib.news')
 
     .config(['$routeProvider', function($routeProvider){
         $routeProvider
@@ -49921,13 +52863,44 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
             });
     }])
 
+    /**
+     * @ngdoc controller
+     * @name news.Controller:newsListCtrl
+     *
+     * @requires $scope
+     * @requires $location
+     * @requires news.ualibNewsFactory
+     *
+     * @description
+     * Controller for the News and Exhibits web app route
+     *
+     */
+
     .controller('newsListCtrl', ['$scope', '$location', 'newsList', function($scope, $location, newsList){
         var filterWatcher;
+        /**
+         * @ngdoc object
+         * @name news.Controller:newsListCtrl:$scope.newsFilter
+         * @propertyOf news.Controller:newsListCtrl
+         * @type {Object.<string>}
+         *
+         * @description
+         * `$scope` object for the news list filters
+         */
         $scope.newsFilters = {
             sort: 'created',
             type: '',
             search: ''
         };
+
+        /**
+         * @ngdoc object
+         * @name news.Controller:newsListCtrl:$scope.news
+         * @propertyOf news.Controller:newsListCtrl
+         *
+         * @description
+         * `$scope` variable for the list of news items return from the API via the {@link news.ualibNewsFactory ualibNewsFactory} service.
+         */
 
         newsList.$promise.then(function(data){
             $scope.news = data.news;
@@ -49946,6 +52919,16 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
         //TODO: will need to replace highlight filter by a custom one
         // if we use item.description instead of item.blurb
 
+        /**
+         * @ngdoc function
+         * @name news.Controller:newsListCtrl#paramsToScope
+         * @methodOf news.Controller:newsListCtrl
+         *
+         * @description
+         * <span class="label label-danger">private</span>
+         *
+         * Function to bind `URI query params` to `$scope.newsFilters`.
+         */
         function paramsToScope(){
             var params = $location.search();
             for (var param in params){
@@ -49955,6 +52938,16 @@ angular.module("today/news-today.tpl.html", []).run(["$templateCache", function(
             }
         }
 
+        /**
+         * @ngdoc function
+         * @name news.Controller:newsListCtrl#processFilters
+         * @methodOf news.Controller:newsListCtrl
+         *
+         * @description
+         * <span class="label label-danger">private</span>
+         *
+         * Function to bind `$scope.newsFilters` to `URI query params`.
+         */
         function processFilters(){
             var f = $scope.newsFilters;
             var params = $location.search();
@@ -49982,129 +52975,141 @@ angular.module('ualib.softwareList.templates', ['software-list/software-list.tpl
 
 angular.module("software-list/software-list.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("software-list/software-list.tpl.html",
-    "<div class=\"page-header\"><h1>Libraries' Software List</h1></div>\n" +
+    "<div class=\"jumbotron-header\">\n" +
+    "    <div class=\"jumbotron\">\n" +
+    "        <div class=\"container\">\n" +
+    "            <div class=\"row\">\n" +
+    "                <div class=\"col-md-12\">\n" +
+    "                    <h1>Libraries' Software List</h1>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
     "\n" +
-    "<div class=\"row\">\n" +
-    "    <div class=\"col-md-3 col-md-push-9\">\n" +
-    "        <form>\n" +
-    "            <div class=\"form-group\">\n" +
+    "<div class=\"container\">\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-3 col-md-push-9\">\n" +
+    "            <form>\n" +
+    "                <div class=\"form-group\">\n" +
     "                <span class=\"page-header\">\n" +
     "                    <h4>Filter Software List By</h4>\n" +
     "                </span>\n" +
-    "            </div>\n" +
-    "            <div class=\"form-group\">\n" +
-    "                <input type=\"text\" class=\"form-control\" ng-model=\"soft.search\" placeholder=\"Search software, locations, etc...\">\n" +
-    "            </div>\n" +
-    "            <div class=\"form-group\">\n" +
-    "                <div class=\"btn-group btn-group-justified\">\n" +
-    "                    <label class=\"btn btn-default active\" ng-model=\"soft.os\" btn-radio=\"''\" uncheckable>All</label>\n" +
-    "                    <label class=\"btn btn-default\" ng-model=\"soft.os\" btn-radio=\"'1'\" uncheckable><span class=\"fa fa-fw fa-windows\"></span></label>\n" +
-    "                    <label class=\"btn btn-default\" ng-model=\"soft.os\" btn-radio=\"'2'\" uncheckable><span class=\"fa fa-fw fa-apple\"></span></label>\n" +
     "                </div>\n" +
-    "            </div>\n" +
-    "            <div class=\"form-group hidden-xs\">\n" +
-    "                <h5>Locations</h5>\n" +
-    "                <div class=\"radio\">\n" +
-    "                    <label>\n" +
-    "                        <input type=\"radio\" value=\"\" ng-model=\"soft.loc\" checked>\n" +
-    "                        All Locations\n" +
-    "                    </label>\n" +
+    "                <div class=\"form-group\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" ng-model=\"soft.search\" placeholder=\"Search software, locations, etc...\">\n" +
     "                </div>\n" +
-    "                <div class=\"radio\" ng-repeat=\"loc in locations\">\n" +
-    "                    <label>\n" +
-    "                        <input type=\"radio\" value=\"{{loc.name}}\" ng-model=\"soft.loc\">\n" +
-    "                        {{loc.name}}\n" +
-    "                    </label>\n" +
+    "                <div class=\"form-group\">\n" +
+    "                    <div class=\"btn-group btn-group-justified\">\n" +
+    "                        <label class=\"btn btn-default active\" ng-model=\"soft.os\" btn-radio=\"''\" uncheckable>All</label>\n" +
+    "                        <label class=\"btn btn-default\" ng-model=\"soft.os\" btn-radio=\"'1'\" uncheckable><span class=\"fa fa-fw fa-windows\"></span></label>\n" +
+    "                        <label class=\"btn btn-default\" ng-model=\"soft.os\" btn-radio=\"'2'\" uncheckable><span class=\"fa fa-fw fa-apple\"></span></label>\n" +
+    "                    </div>\n" +
     "                </div>\n" +
-    "            </div>\n" +
-    "            <div class=\"form-group hidden-xs\">\n" +
-    "                <h5>Categories</h5>\n" +
-    "                <div class=\"radio\">\n" +
-    "                    <label>\n" +
-    "                        <input type=\"radio\" value=\"\" ng-model=\"soft.cat\">\n" +
-    "                        All categories\n" +
-    "                    </label>\n" +
+    "                <div class=\"form-group hidden-xs\">\n" +
+    "                    <h5>Locations</h5>\n" +
+    "                    <div class=\"radio\">\n" +
+    "                        <label>\n" +
+    "                            <input type=\"radio\" value=\"\" ng-model=\"soft.loc\" checked>\n" +
+    "                            All Locations\n" +
+    "                        </label>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"radio\" ng-repeat=\"loc in locations\">\n" +
+    "                        <label>\n" +
+    "                            <input type=\"radio\" value=\"{{loc.name}}\" ng-model=\"soft.loc\">\n" +
+    "                            {{loc.name}}\n" +
+    "                        </label>\n" +
+    "                    </div>\n" +
     "                </div>\n" +
-    "                <div class=\"radio\" ng-repeat=\"cat in categories\">\n" +
-    "                    <label>\n" +
-    "                        <input type=\"radio\" value=\"{{cat.name}}\" ng-model=\"soft.cat\">\n" +
-    "                        {{cat.name}}\n" +
-    "                    </label>\n" +
+    "                <div class=\"form-group hidden-xs\">\n" +
+    "                    <h5>Categories</h5>\n" +
+    "                    <div class=\"radio\">\n" +
+    "                        <label>\n" +
+    "                            <input type=\"radio\" value=\"\" ng-model=\"soft.cat\">\n" +
+    "                            All categories\n" +
+    "                        </label>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"radio\" ng-repeat=\"cat in categories\">\n" +
+    "                        <label>\n" +
+    "                            <input type=\"radio\" value=\"{{cat.name}}\" ng-model=\"soft.cat\">\n" +
+    "                            {{cat.name}}\n" +
+    "                        </label>\n" +
+    "                    </div>\n" +
     "                </div>\n" +
-    "            </div>\n" +
-    "            <div class=\"form-group hidden-xs\">\n" +
-    "                <button type=\"button\" class=\"btn btn-block btn-primary\" ng-click=\"resetFilters()\"><span class=\"fa fa-fw fa-refresh\"></span> Reset filters</button>\n" +
-    "            </div>\n" +
-    "        </form>\n" +
-    "    </div>\n" +
-    "    <div class=\"col-md-9 col-md-pull-3 software-list-container\">\n" +
-    "        <h4 class=\"text-right\" ng-show=\"pager.totalItems > 0\">\n" +
-    "            Showing {{pager.firstItem}}-{{pager.lastItem}} of {{pager.totalItems}} results\n" +
-    "        </h4>\n" +
-    "\n" +
-    "        <div ng-if=\"(soft.cat || soft.os || soft.loc)\">\n" +
-    "\n" +
-    "            <ol class=\"breadcrumb facetcrumb\">\n" +
-    "                <li ng-if=\"soft.os\"><strong>OS:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"soft.os = ''\">{{soft.os == 1 ? 'Windows' : 'OS X'}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "                <li ng-if=\"soft.loc\"><strong>Location:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"soft.loc = ''\">{{soft.loc}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "                <li ng-if=\"soft.cat\"><strong>Category:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"soft.cat = ''\">{{soft.cat}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "\n" +
-    "                <li class=\"pull-right\"><button type=\"button\" class=\"btn btn-primary btn-small reset-btn\" title=\"Reset filters\" ng-click=\"resetFilters()\"><i class=\"fa fa-refresh\"></i></button></li>\n" +
-    "            </ol>\n" +
+    "                <div class=\"form-group hidden-xs\">\n" +
+    "                    <button type=\"button\" class=\"btn btn-block btn-primary\" ng-click=\"resetFilters()\"><span class=\"fa fa-fw fa-refresh\"></span> Reset filters</button>\n" +
+    "                </div>\n" +
+    "            </form>\n" +
     "        </div>\n" +
+    "        <div class=\"col-md-9 col-md-pull-3 software-list-container\">\n" +
+    "            <h4 class=\"text-right\" ng-show=\"pager.totalItems > 0\">\n" +
+    "                Showing {{pager.firstItem}}-{{pager.lastItem}} of {{pager.totalItems}} results\n" +
+    "            </h4>\n" +
     "\n" +
-    "        <div class=\"media software-item animate-repeat\" ng-repeat=\"item in filteredSoft | after:(pager.page-1)*pager.perPage | limitTo:20\">\n" +
-    "            <div class=\"media-left\">\n" +
-    "                <img class=\"media-object\" ng-src=\"{{item.icon}}\" alt=\"{{item.title}}\" title=\"{{item.title}}\">\n" +
+    "            <div ng-if=\"(soft.cat || soft.os || soft.loc)\">\n" +
+    "\n" +
+    "                <ol class=\"breadcrumb facetcrumb\">\n" +
+    "                    <li ng-if=\"soft.os\"><strong>OS:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"soft.os = ''\">{{soft.os == 1 ? 'Windows' : 'OS X'}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                    <li ng-if=\"soft.loc\"><strong>Location:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"soft.loc = ''\">{{soft.loc}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                    <li ng-if=\"soft.cat\"><strong>Category:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"soft.cat = ''\">{{soft.cat}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "\n" +
+    "                    <li class=\"pull-right\"><button type=\"button\" class=\"btn btn-primary btn-small reset-btn\" title=\"Reset filters\" ng-click=\"resetFilters()\"><i class=\"fa fa-refresh\"></i></button></li>\n" +
+    "                </ol>\n" +
     "            </div>\n" +
-    "            <div class=\"media-body\">\n" +
-    "                <h3 class=\"media-heading\" ng-bind-html=\"item.title | highlight:soft.search\">\n" +
-    "                </h3>\n" +
     "\n" +
-    "                <div ng-bind-html=\"item.description | highlight:soft.search\"></div>\n" +
+    "            <div class=\"media software-item animate-repeat\" ng-repeat=\"item in filteredSoft | after:(pager.page-1)*pager.perPage | limitTo:20\">\n" +
+    "                <div class=\"media-left\">\n" +
+    "                    <img class=\"media-object\" ng-src=\"{{item.icon}}\" alt=\"{{item.title}}\" title=\"{{item.title}}\">\n" +
+    "                </div>\n" +
+    "                <div class=\"media-body\">\n" +
+    "                    <h3 class=\"media-heading\" ng-bind-html=\"item.title | highlight:soft.search\">\n" +
+    "                    </h3>\n" +
     "\n" +
-    "                <div class=\"row\">\n" +
-    "                    <div class=\"details-context col-md-6\" ng-repeat=\"ver in item.versions | orderBy:os\">\n" +
-    "                        <div class=\"h4 text-muted\">\n" +
-    "                            <span class=\"fa fa-{{ver.osName}}\"></span>\n" +
-    "                            Version {{ver.version}}\n" +
-    "                        </div>\n" +
+    "                    <div ng-bind-html=\"item.description | highlight:soft.search\"></div>\n" +
+    "\n" +
+    "                    <div class=\"row\">\n" +
+    "                        <div class=\"details-context col-md-6\" ng-repeat=\"ver in item.versions | orderBy:os\">\n" +
+    "                            <div class=\"h4 text-muted\">\n" +
+    "                                <span class=\"fa fa-{{ver.osName}}\"></span>\n" +
+    "                                Version {{ver.version}}\n" +
+    "                            </div>\n" +
     "                        <span ng-repeat=\"loc in ver.locations | orderBy:'name'\">\n" +
     "                            <!--<span ng-if=\"loc.parent\" ng-bind-html=\"(locations | filter:loc.parent)[0].name\"></span>-->\n" +
     "                            <span ng-bind-html=\"loc.name | highlight:soft.search | highlight:soft.loc:true\"></span>\n" +
     "                        </span>\n" +
+    "                        </div>\n" +
     "                    </div>\n" +
-    "                </div>\n" +
     "\n" +
-    "                <div class=\"details hidden-xs\">\n" +
-    "                    <div class=\"software-links\">\n" +
-    "                        <ul class=\"list-inline nav-justified\" style=\"margin-top: 5px;\">\n" +
-    "                            <li ng-repeat=\"link in item.links\" ng-if=\"item.links\">\n" +
-    "                                <a ng-href=\"{{link.url}}\" target=\"{{link.title}}\" class=\"external-link\">{{link.title}}</a>\n" +
-    "                            </li>\n" +
-    "                            <li ng-if=\"item.modules\">\n" +
-    "                                <div collapse=\"!isCollapsed\" ng-bind-html=\"item.modules | highlight:soft.search\"></div>\n" +
-    "                                <button class=\"btn btn-default btn-xs\" ng-click=\"isCollapsed = !isCollapsed\">\n" +
-    "                                    {{!isCollapsed ? \"Show\" : \"Hide\"}} Available Modules\n" +
-    "                                </button>\n" +
-    "                            </li>\n" +
-    "                        </ul>\n" +
+    "                    <div class=\"details hidden-xs\">\n" +
+    "                        <div class=\"software-links\">\n" +
+    "                            <ul class=\"list-inline nav-justified\" style=\"margin-top: 5px;\">\n" +
+    "                                <li ng-repeat=\"link in item.links\" ng-if=\"item.links\">\n" +
+    "                                    <a ng-href=\"{{link.url}}\" target=\"{{link.title}}\" class=\"external-link\">{{link.title}}</a>\n" +
+    "                                </li>\n" +
+    "                                <li ng-if=\"item.modules\">\n" +
+    "                                    <div collapse=\"!isCollapsed\" ng-bind-html=\"item.modules | highlight:soft.search\"></div>\n" +
+    "                                    <button class=\"btn btn-default btn-xs\" ng-click=\"isCollapsed = !isCollapsed\">\n" +
+    "                                        {{!isCollapsed ? \"Show\" : \"Hide\"}} Available Modules\n" +
+    "                                    </button>\n" +
+    "                                </li>\n" +
+    "                            </ul>\n" +
+    "                        </div>\n" +
     "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
-    "        </div>\n" +
     "\n" +
-    "        <div class=\"text-center\">\n" +
-    "            <pagination class=\"pagination-sm\" ng-model=\"pager.page\" total-items=\"pager.totalItems\" max-size=\"pager.maxSize\" boundary-links=\"true\" rotate=\"false\" items-per-page=\"pager.perPage\" ng-change=\"pageChange()\" ng-if=\"pager.totalItems > pager.perPage\"></pagination>\n" +
-    "        </div>\n" +
+    "            <div class=\"text-center\">\n" +
+    "                <pagination class=\"pagination-sm\" ng-model=\"pager.page\" total-items=\"pager.totalItems\" max-size=\"pager.maxSize\" boundary-links=\"true\" rotate=\"false\" items-per-page=\"pager.perPage\" ng-change=\"pageChange()\" ng-if=\"pager.totalItems > pager.perPage\"></pagination>\n" +
+    "            </div>\n" +
     "\n" +
-    "        <div class=\"alert alert-warning text-center\" role=\"alert\" ng-show=\"pager.totalItems < 1\">\n" +
-    "            <h2>\n" +
-    "                No <span ng-if=\"soft.cat\"><strong>{{soft.cat | lowercase}}</strong></span> software is available\n" +
-    "                <span ng-if=\"soft.os\">on <strong>{{soft.os == 1 ? 'Windows' : 'OS X'}}</strong> computers</span>\n" +
-    "                <span ng-if=\"soft.loc\">in <strong>{{soft.loc}}</strong></span>\n" +
-    "                <span ng-if=\"soft.search\">that matches the search \"<strong>{{soft.search}}</strong>\"</span>\n" +
-    "            </h2>\n" +
+    "            <div class=\"alert alert-warning text-center\" role=\"alert\" ng-show=\"pager.totalItems < 1\">\n" +
+    "                <h2>\n" +
+    "                    No <span ng-if=\"soft.cat\"><strong>{{soft.cat | lowercase}}</strong></span> software is available\n" +
+    "                    <span ng-if=\"soft.os\">on <strong>{{soft.os == 1 ? 'Windows' : 'OS X'}}</strong> computers</span>\n" +
+    "                    <span ng-if=\"soft.loc\">in <strong>{{soft.loc}}</strong></span>\n" +
+    "                    <span ng-if=\"soft.search\">that matches the search \"<strong>{{soft.search}}</strong>\"</span>\n" +
+    "                </h2>\n" +
+    "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>");
@@ -50558,10 +53563,10 @@ angular.module("staff-card/staff-card-list.tpl.html", []).run(["$templateCache",
     "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
-    "            <div class=\"col-xs-4 col-sm-3\">\n" +
+    "            <div class=\"hidden-xs col-sm-3\">\n" +
     "                <img class=\"staff-portrait thumbnail\" src=\"http://www.lib.ua.edu/wp-content/themes/roots-ualib/assets/img/user-profile.png\" lazy-img='{{person.photo}}' />\n" +
     "            </div>\n" +
-    "            <div class=\"col-xs-8\">\n" +
+    "            <div class=\"col-xs-12 col-sm-7\">\n" +
     "                <div class=\"row\">\n" +
     "                    <div class=\"col-xs-12 col-sm-7 name-plate\">\n" +
     "                        <h3 class=\"name\">\n" +
@@ -50581,7 +53586,7 @@ angular.module("staff-card/staff-card-list.tpl.html", []).run(["$templateCache",
     "                    </div>\n" +
     "                    <div class=\"col-xs-12 col-sm-5\">\n" +
     "                        <ul class=\"fa-ul\">\n" +
-    "                            <li ng-if=\"person.phone\"><span class=\"fa fa-phone fa-li\"></span>{{person.phone}}</li>\n" +
+    "                            <li ng-if=\"person.phone\"><span class=\"fa fa-phone fa-li\"></span><a ng-href=\"tel:+1-205-{{person.phone}}\">(205) {{person.phone}}</a></li>\n" +
     "                            <li class=\"hidden-xs\" ng-if=\"person.fax\"><span class=\"fa fa-fax fa-li\"></span>{{person.fax}}</li>\n" +
     "                            <li ng-if=\"person.email\"><span class=\"fa fa-envelope fa-li\"></span><a ng-href=\"mailto:{{person.email}}\" title=\"Email {{person.firstname}} {{person.lastname}}\">{{person.email}}</a></li>\n" +
     "                        </ul>\n" +
@@ -50644,7 +53649,7 @@ angular.module("staff-card/staff-card-md.tpl.html", []).run(["$templateCache", f
     "                <div class=\"staff-card-detail\">\n" +
     "                    <h6>Contact</h6>\n" +
     "                    <ul class=\"fa-ul\">\n" +
-    "                        <li ng-if=\"staffPerson.phone\"><span class=\"fa fa-phone fa-li\"></span>{{staffPerson.phone}}</li>\n" +
+    "                        <li ng-if=\"staffPerson.phone\"><span class=\"fa fa-phone fa-li\"></span><a ng-href=\"tel:+1-205-{{staffPerson.phone}}\">(205)-{{staffPerson.phone}}</a></li>\n" +
     "                        <li ng-if=\"staffPerson.fax\"><span class=\"fa fa-fax fa-li\"></span>{{staffPerson.fax}}</li>\n" +
     "                        <li ng-if=\"staffPerson.email\"><span class=\"fa fa-envelope fa-li\"></span><a href=\"mailto:{{staffPerson.email}}\">{{staffPerson.email}}</a></li>\n" +
     "                    </ul>\n" +
@@ -50801,28 +53806,38 @@ angular.module("staff-directory/staff-directory-listing.tpl.html", []).run(["$te
 
 angular.module("staff-directory/staff-directory.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staff-directory/staff-directory.tpl.html",
-    "<div class=\"page-header\">\n" +
-    "    <h1>Staff Directory</h1>\n" +
+    "<div class=\"jumbotron-header\">\n" +
+    "    <div class=\"jumbotron\">\n" +
+    "        <div class=\"container\">\n" +
+    "            <div class=\"row\">\n" +
+    "                <div class=\"col-md-12\">\n" +
+    "                    <h1>Staff Directory</h1>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
     "</div>\n" +
     "\n" +
     "\n" +
-    "<div class=\"row staff-directory\">\n" +
-    "    <div class=\"col-md-3 col-md-push-9\">\n" +
-    "        <div class=\"staff-directory-facets\" facets=\"staffdir.facets\"></div>\n" +
-    "    </div>\n" +
-    "    <div class=\"col-md-9 col-md-pull-3\">\n" +
-    "        <div ng-show=\"facets.showFacetBar\">\n" +
-    "            <ol class=\"breadcrumb facetcrumb\">\n" +
-    "                <li ng-if=\"facets.facet.department\"><strong>Department:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"facets.clearFacets('department')\">{{facets.facet.department | truncate : 20 : '...'}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "                <li ng-if=\"facets.facet.library\"><strong>Library:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"facets.clearFacets('library')\">{{facets.facet.library}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "                <li ng-if=\"facets.facet.subject\"><strong>Subject:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"facets.clearFacets('subject')\">{{facets.facet.subject}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "                <li ng-if=\"facets.facet.selector\"><button type=\"button\" class=\"btn btn-default\" ng-click=\"facets.clearFacets('selector')\">Selector <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "                <li ng-if=\"facets.facet.instructor\"><button type=\"button\" class=\"btn btn-default\" ng-click=\"facets.clearFacets('instructor')\">Instructor <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
-    "\n" +
-    "                <li class=\"pull-right\"><button type=\"button\" class=\"btn btn-primary btn-small reset-btn\" title=\"Reset filters\" ng-click=\"facets.clearFacets()\"><i class=\"fa fa-refresh\"></i></button></li>\n" +
-    "            </ol>\n" +
+    "<div class=\"container\">\n" +
+    "    <div class=\"row staff-directory\">\n" +
+    "        <div class=\"col-md-3 col-md-push-9\">\n" +
+    "            <div class=\"staff-directory-facets\" facets=\"staffdir.facets\"></div>\n" +
     "        </div>\n" +
-    "        <div class=\"staff-directory-listing\" id=\"staff-directory-listing\" list=\"staffdir.list\" sort-by=\"lastname\"></div>\n" +
+    "        <div class=\"col-md-9 col-md-pull-3\">\n" +
+    "            <div ng-show=\"facets.showFacetBar\">\n" +
+    "                <ol class=\"breadcrumb facetcrumb\">\n" +
+    "                    <li ng-if=\"facets.facet.department\"><strong>Department:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"facets.clearFacets('department')\">{{facets.facet.department | truncate : 20 : '...'}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                    <li ng-if=\"facets.facet.library\"><strong>Library:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"facets.clearFacets('library')\">{{facets.facet.library}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                    <li ng-if=\"facets.facet.subject\"><strong>Subject:</strong> <button type=\"button\" class=\"btn btn-default\" ng-click=\"facets.clearFacets('subject')\">{{facets.facet.subject}} <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                    <li ng-if=\"facets.facet.selector\"><button type=\"button\" class=\"btn btn-default\" ng-click=\"facets.clearFacets('selector')\">Selector <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "                    <li ng-if=\"facets.facet.instructor\"><button type=\"button\" class=\"btn btn-default\" ng-click=\"facets.clearFacets('instructor')\">Instructor <span class=\"text-muted\" aria-hidden=\"true\">&times;</span></button></li>\n" +
+    "\n" +
+    "                    <li class=\"pull-right\"><button type=\"button\" class=\"btn btn-primary btn-small reset-btn\" title=\"Reset filters\" ng-click=\"facets.clearFacets()\"><i class=\"fa fa-refresh\"></i></button></li>\n" +
+    "                </ol>\n" +
+    "            </div>\n" +
+    "            <div class=\"staff-directory-listing\" id=\"staff-directory-listing\" list=\"staffdir.list\" sort-by=\"lastname\"></div>\n" +
+    "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
     "\n" +
@@ -50833,69 +53848,97 @@ angular.module("staff-directory/staff-directory.tpl.html", []).run(["$templateCa
 
 angular.module("staff-profile/staff-profile.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staff-profile/staff-profile.tpl.html",
-    "<div class=\"page-header\">\n" +
-    "    <h2>Faculty/Staff Profile</h2>\n" +
-    "</div>\n" +
-    "\n" +
-    "<div class=\"row staff-profile\">\n" +
-    "    <div class=\"col-md-3\">\n" +
-    "        <img class=\"staff-portrait thumbnail\" ng-src=\"{{userProfile.person.photo}}\" ng-if=\"userProfile.person.photo\">\n" +
-    "        <img class=\"staff-portrait thumbnail\" ng-src=\"wp-content/themes/roots-ualib/assets/img/user-profile.png\" ng-if=\"!userProfile.person.photo\">\n" +
+    "<div class=\"container\">\n" +
+    "    <div class=\"page-header\">\n" +
+    "        <h2>Faculty/Staff Profile</h2>\n" +
     "    </div>\n" +
-    "    <div class=\"col-md-9\">\n" +
-    "        <div class=\"name-plate\">\n" +
-    "            <h1 class=\"name\">\n" +
-    "                <small ng-if=\"userProfile.person.rank\">{{userProfile.person.rank}}</small>\n" +
-    "                <span ng-bind-html=\"userProfile.person.firstname\"></span> <span ng-bind-html=\"userProfile.person.lastname\"></span>\n" +
-    "            </h1>\n" +
-    "            <h2 class=\"title\"><span ng-bind-html=\"userProfile.person.title\"></span></h2>\n" +
-    "            <h3 class=\"hidden-xs\"><span ng-bind-html=\"userProfile.person.department\"></span></h3>\n" +
+    "\n" +
+    "    <div class=\"row staff-profile\">\n" +
+    "        <div class=\"hidden-xs col-md-3\">\n" +
+    "            <img class=\"staff-portrait thumbnail\" ng-src=\"{{userProfile.person.photo}}\" ng-if=\"userProfile.person.photo\">\n" +
+    "            <img class=\"staff-portrait thumbnail\" ng-src=\"wp-content/themes/roots-ualib/assets/img/user-profile.png\" ng-if=\"!userProfile.person.photo\">\n" +
     "        </div>\n" +
-    "        <div class=\"row\">\n" +
-    "            <div class=\"page-slice\">\n" +
-    "                <div class=\"col-md-6\">\n" +
-    "                    <ul class=\"fa-ul\">\n" +
-    "                        <li ng-if=\"userProfile.person.phone\"><span class=\"fa fa-phone fa-li\"></span>{{userProfile.person.phone}}</li>\n" +
-    "                        <li class=\"hidden-xs\" ng-if=\"userProfile.person.fax\"><span class=\"fa fa-fax fa-li\"></span>{{userProfile.person.fax}}</li>\n" +
-    "                        <li ng-if=\"userProfile.person.email\"><span class=\"fa fa-envelope fa-li\"></span>\n" +
-    "                            <a href=\"mailto:{{userProfile.person.email}}\">{{userProfile.person.email}}</a>\n" +
-    "                        </li>\n" +
-    "                        <li ng-if=\"userProfile.person.website.length > 11\"><span class=\"fa fa-external-link-square fa-li\"></span>\n" +
-    "                            <a ng-href=\"{{userProfile.person.website}}\" class=\"external-link\">Personal website</a>\n" +
-    "                        </li>\n" +
-    "                    </ul>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-6\">\n" +
-    "                    <ul class=\"fa-ul\">\n" +
-    "                        <li ng-if=\"userProfile.person.resume.length > 11\"><span class=\"fa fa-file-text fa-li\"></span>\n" +
-    "                            <a ng-href=\"{{userProfile.person.resume}}\">Resume / CV</a>\n" +
-    "                        </li>\n" +
-    "                        <li ng-if=\"userProfile.person.social1\">\n" +
-    "                            <span class=\"{{userProfile.person.snClass1}}\"></span>\n" +
-    "                            <a ng-href=\"{{userProfile.person.social1}}\" class=\"external-link\">{{userProfile.person.snTitle1}}</a>\n" +
-    "                        </li>\n" +
-    "                        <li ng-if=\"userProfile.person.social2\">\n" +
-    "                            <span class=\"{{userProfile.person.snClass2}}\"></span>\n" +
-    "                            <a ng-href=\"{{userProfile.person.social2}}\" class=\"external-link\">{{userProfile.person.snTitle2}}</a>\n" +
-    "                        </li>\n" +
-    "                        <li ng-if=\"userProfile.person.social3\">\n" +
-    "                            <span class=\"{{userProfile.person.snClass3}}\"></span>\n" +
-    "                            <a ng-href=\"{{userProfile.person.social3}}\" class=\"external-link\">{{userProfile.person.snTitle3}}</a>\n" +
-    "                        </li>\n" +
-    "                    </ul>\n" +
+    "        <div class=\"col-md-9\">\n" +
+    "            <div class=\"name-plate\">\n" +
+    "                <h1 class=\"name\">\n" +
+    "                    <small ng-if=\"userProfile.person.rank\">{{userProfile.person.rank}}</small>\n" +
+    "                    <span ng-bind-html=\"userProfile.person.firstname\"></span> <span ng-bind-html=\"userProfile.person.lastname\"></span>\n" +
+    "                </h1>\n" +
+    "                <h2 class=\"title\"><span ng-bind-html=\"userProfile.person.title\"></span></h2>\n" +
+    "                <h3 class=\"hidden-xs\"><span ng-bind-html=\"userProfile.person.department\"></span></h3>\n" +
+    "            </div>\n" +
+    "            <div class=\"row\">\n" +
+    "                <div class=\"page-slice\">\n" +
+    "                    <div class=\"col-md-6\">\n" +
+    "                        <ul class=\"fa-ul\">\n" +
+    "                            <li ng-if=\"userProfile.person.phone\"><span class=\"fa fa-phone fa-li\"></span><a ng-href=\"tel:+1-205-{{userProfile.person.phone}}\">(205) {{userProfile.person.phone}}</a></li>\n" +
+    "                            <li class=\"hidden-xs\" ng-if=\"userProfile.person.fax\"><span class=\"fa fa-fax fa-li\"></span>{{userProfile.person.fax}}</li>\n" +
+    "                            <li ng-if=\"userProfile.person.email\"><span class=\"fa fa-envelope fa-li\"></span>\n" +
+    "                                <a href=\"mailto:{{userProfile.person.email}}\">{{userProfile.person.email}}</a>\n" +
+    "                            </li>\n" +
+    "                            <li ng-if=\"userProfile.person.website.length > 11\"><span class=\"fa fa-external-link-square fa-li\"></span>\n" +
+    "                                <a ng-href=\"{{userProfile.person.website}}\" class=\"external-link\">Personal website</a>\n" +
+    "                            </li>\n" +
+    "                        </ul>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-6\">\n" +
+    "                        <ul class=\"fa-ul\">\n" +
+    "                            <li ng-if=\"userProfile.person.resume.length > 11\"><span class=\"fa fa-file-text fa-li\"></span>\n" +
+    "                                <a ng-href=\"{{userProfile.person.resume}}\">Resume / CV</a>\n" +
+    "                            </li>\n" +
+    "                            <li ng-if=\"userProfile.person.social1\">\n" +
+    "                                <span class=\"{{userProfile.person.snClass1}}\"></span>\n" +
+    "                                <a ng-href=\"{{userProfile.person.social1}}\" class=\"external-link\">{{userProfile.person.snTitle1}}</a>\n" +
+    "                            </li>\n" +
+    "                            <li ng-if=\"userProfile.person.social2\">\n" +
+    "                                <span class=\"{{userProfile.person.snClass2}}\"></span>\n" +
+    "                                <a ng-href=\"{{userProfile.person.social2}}\" class=\"external-link\">{{userProfile.person.snTitle2}}</a>\n" +
+    "                            </li>\n" +
+    "                            <li ng-if=\"userProfile.person.social3\">\n" +
+    "                                <span class=\"{{userProfile.person.snClass3}}\"></span>\n" +
+    "                                <a ng-href=\"{{userProfile.person.social3}}\" class=\"external-link\">{{userProfile.person.snTitle3}}</a>\n" +
+    "                            </li>\n" +
+    "                        </ul>\n" +
+    "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
-    "</div>\n" +
-    "<div class=\"row\">\n" +
-    "    <div class=\"col-md-12\">\n" +
-    "        <span ng-bind-html=\"userProfile.person.profile\"></span>\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-12\">\n" +
+    "            <span ng-bind-html=\"userProfile.person.profile\"></span>\n" +
+    "        </div>\n" +
     "    </div>\n" +
-    "</div>\n" +
-    "");
+    "\n" +
+    "</div>");
 }]);
-;angular.module('ualib.staffdir', [
+;/**
+ * @ngdoc overview
+ * @name index
+ *
+ * @description
+ * # Staff Directory App
+ * ## default route: [/#/staffdir](http://www.lib.ua.edu/#/staffdir)
+ */
+/**
+ * @ngdoc overview
+ * @name staffdir
+ *
+ * @requires ngRoute
+ * @requires ngResource
+ * @requires ngAnimate
+ * @requires ngSanitize
+ * @requires angular-filter
+ * @requires ui-bootstrap
+ * @requires angularLazyImg
+ * @requires ualib-ui
+ *
+ * @description
+ * # Staff Directory App
+ * ## default route: [/#/staffdir](http://www.lib.ua.edu/#/staffdir)
+ */
+
+angular.module('ualib.staffdir', [
     'ngRoute',
     'ngResource',
     'ngAnimate',
@@ -51002,6 +54045,18 @@ angular.module('staffdir', ['ualib.staffdir']);
 
     }]);;angular.module('ualib.staffdir')
 
+    /**
+     * @ngdoc service
+     * @name staffdir.StaffFactory
+     *
+     * @requires $resource
+     * @requires $http
+     * @requires $filter
+     *
+     * @description
+     * Factory service to get staff directory info from the API.
+     */
+
     .factory('StaffFactory', ['$resource', '$filter', '$http', function($resource, $filter, $http){
         //TODO: centralize this function so it can be used with all apps
         // Extend the default responseTransform array - Straight from Angular 1.2.8 API docs - //docs.angularjs.org/api/ng/service/$http#overriding-the-default-transformations-per-request
@@ -51015,10 +54070,31 @@ angular.module('staffdir', ['ualib.staffdir']);
         }
 
         return {
+            /**
+             * @ngdoc object
+             * @name staffdir.StaffFactory:directory
+             * @methodOf staffdir.StaffFactory
+             *
+             * @description
+             * Gets full list of library faculty and staff
+             *
+             * @example
+             * <pre>
+             *      var list = StaffFactory.directory().get()
+                        .$promise.then(function(data){
+                            return data;
+                        }, function(data, status){
+                            console.log('Error' + status + ': ' + data);
+                            return staff;
+                        });
+             * </pre>
+             *
+             * @returns {Promise} $resource promise
+             */
             directory: function(){
                 return $resource('//wwwdev2.lib.ua.edu/staffDir/api/people', {}, {
-                    cache: true,
                     get: {
+                        cache: true,
                         method: 'GET',
                         transformResponse: appendTransform($http.defaults.transformResponse, function(d){
                             // temporary fix. Not sustainable to manually remove arbitrary fields from API for different views
@@ -51096,15 +54172,112 @@ angular.module('staffdir', ['ualib.staffdir']);
                     }
                 });
             },
+            /**
+             * @ngdoc object
+             * @name staffdir.StaffFactory:byEmail
+             * @methodOf staffdir.StaffFactory
+             *
+             * @param {object} email Email param object
+             * @param {string} email.email Faculty/staff member's email address
+             *
+             * @description
+             * Gets faculty/staff info by email
+             *
+             * @example
+             * <pre>
+             *      var person = StaffFactory.email().get({email: 'email@addres.com'})
+                        .$promise.then(function(data){
+                            return data;
+                        }, function(data, status){
+                            console.log('Error' + status + ': ' + data);
+                            return staff;
+                        });
+             * </pre>
+             *
+             * @returns {Promise} $resource promise
+             */
             byEmail: function(){
                 return $resource('//wwwdev2.lib.ua.edu/staffDir/api/people/search/email/:email', {}, {cache: true});
             },
+            /**
+             * @ngdoc object
+             * @name staffdir.StaffFactory:byName
+             * @methodOf staffdir.StaffFactory
+             *
+             * @param {object} name Name param object
+             * @param {string} name.firstname Faculty/staff member's first name
+             * @param {string} name.lastname Faculty/staff member's last name
+             *
+             * @description
+             * Gets faculty/staff info by full name.
+             *
+             * @example
+             * <pre>
+             *      var person = StaffFactory.email().get({firstname: 'Malcolm', lastname: 'Reynolds'})
+                        .$promise.then(function(data){
+                            return data;
+                        }, function(data, status){
+                            console.log('Error' + status + ': ' + data);
+                            return staff;
+                        });
+             * </pre>
+             *
+             * @returns {Promise} $resource promise
+             */
             byName: function(){
                 return $resource('//wwwdev2.lib.ua.edu/staffDir/api/people/search/firstname/:firstname/lastname/:lastname', {}, {cache: true});
             },
+            /**
+             * @ngdoc object
+             * @name staffdir.StaffFactory:byId
+             * @methodOf staffdir.StaffFactory
+             *
+             * @param {object} id ID param object
+             * @param {number} id.id Faculty/staff member's ID (in the API database)
+             *
+             * @description
+             * Gets faculty/staff info by ID (in the API database).
+             *
+             * @example
+             * <pre>
+             *      var person = StaffFactory.email().get({id: 2468})
+                        .$promise.then(function(data){
+                            return data;
+                        }, function(data, status){
+                            console.log('Error' + status + ': ' + data);
+                            return staff;
+                        });
+             * </pre>
+             *
+             * @returns {Promise} $resource promise
+             */
             byId: function(){
                 return $resource('//wwwdev2.lib.ua.edu/staffDir/api/people/search/id/:id', {}, {cache: true});
             },
+            /**
+             * @ngdoc object
+             * @name staffdir.StaffFactory:profile
+             * @methodOf staffdir.StaffFactory
+             *
+             * @param {object} id ID param object
+             * @param {number} id.id Faculty/staff member's ID (in the API database)
+             *
+             * @description
+             * Gets faculty/staff info by ID (in the API database).
+             *
+             * @example
+             * <pre>
+             *      var person = StaffFactory.email().get({id: 2468})
+                    .$promise.then(function(data){
+                            return data;
+                        }, function(data, status){
+                            console.log('Error' + status + ': ' + data);
+                            return staff;
+                        });
+             * </pre>
+             *
+             * @returns {Promise} $resource promise
+             */
             profile: function(){
                 return $resource('//wwwdev2.lib.ua.edu/staffDir/api/profile/:login', {}, {cache: true});
             }
