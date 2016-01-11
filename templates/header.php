@@ -20,7 +20,7 @@
                                     <h2>My Accounts</h2>
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-4">
-                                            <a class="service-card" href="http://library.ua.edu/vwebv/login">
+                                            <a class="service-card" href="http://library.ua.edu/vwebv/myAccount">
                                                 <h4>My Library (Catalog)</h4>
                                             </a>
                                         </div>
@@ -105,7 +105,7 @@
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="http://library.ua.edu/vwebv/myAccount">
+                                            <a class="service-card" href="http://library.ua.edu/vwebv/searchBasic">
                                                 <span class="fa fa-search"></span>
                                                 <h4>Libraries' Catalog</h4>
                                                 <p>Search the libraries' classic catalog</p>
