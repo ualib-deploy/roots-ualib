@@ -105,7 +105,7 @@
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="http://library.ua.edu/vwebv/searchBasic">
+                                            <a class="service-card" href="http://library.ua.edu/vwebv/myAccount">
                                                 <span class="fa fa-search"></span>
                                                 <h4>Libraries' Catalog</h4>
                                                 <p>Search the libraries' classic catalog</p>
