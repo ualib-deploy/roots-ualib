@@ -2286,4247 +2286,6 @@ angular.module('angular.filter', [
 ]);
 })( window, window.angular );
 /**
- * angular-ui-utils - Swiss-Army-Knife of AngularJS tools (with no external dependencies!)
- * @version v0.2.3 - 2015-03-30
- * @link http://angular-ui.github.com
- * @license MIT License, http://www.opensource.org/licenses/MIT
- */
-angular.module('ui.alias', []).config(['$compileProvider', 'uiAliasConfig', function($compileProvider, uiAliasConfig){
-  'use strict';
-
-  uiAliasConfig = uiAliasConfig || {};
-  angular.forEach(uiAliasConfig, function(config, alias){
-    if (angular.isString(config)) {
-      config = {
-        replace: true,
-        template: config
-      };
-    }
-    $compileProvider.directive(alias, function(){
-      return config;
-    });
-  });
-}]);
-
-/**
- * General-purpose Event binding. Bind any event not natively supported by Angular
- * Pass an object with keynames for events to ui-event
- * Allows $event object and $params object to be passed
- *
- * @example <input ui-event="{ focus : 'counter++', blur : 'someCallback()' }">
- * @example <input ui-event="{ myCustomEvent : 'myEventHandler($event, $params)'}">
- *
- * @param ui-event {string|object literal} The event to bind to as a string or a hash of events with their callbacks
- */
-angular.module('ui.event',[]).directive('uiEvent', ['$parse',
-  function ($parse) {
-    'use strict';
-
-    return function ($scope, elm, attrs) {
-      var events = $scope.$eval(attrs.uiEvent);
-      angular.forEach(events, function (uiEvent, eventName) {
-        var fn = $parse(uiEvent);
-        elm.bind(eventName, function (evt) {
-          var params = Array.prototype.slice.call(arguments);
-          //Take out first paramater (event object);
-          params = params.splice(1);
-          fn($scope, {$event: evt, $params: params});
-          if (!$scope.$$phase) {
-            $scope.$apply();
-          }
-        });
-      });
-    };
-  }]);
-
-/**
- * A replacement utility for internationalization very similar to sprintf.
- *
- * @param replace {mixed} The tokens to replace depends on type
- *  string: all instances of $0 will be replaced
- *  array: each instance of $0, $1, $2 etc. will be placed with each array item in corresponding order
- *  object: all attributes will be iterated through, with :key being replaced with its corresponding value
- * @return string
- *
- * @example: 'Hello :name, how are you :day'.format({ name:'John', day:'Today' })
- * @example: 'Records $0 to $1 out of $2 total'.format(['10', '20', '3000'])
- * @example: '$0 agrees to all mentions $0 makes in the event that $0 hits a tree while $0 is driving drunk'.format('Bob')
- */
-angular.module('ui.format',[]).filter('format', function(){
-  'use strict';
-
-  return function(value, replace) {
-    var target = value;
-    if (angular.isString(target) && replace !== undefined) {
-      if (!angular.isArray(replace) && !angular.isObject(replace)) {
-        replace = [replace];
-      }
-      if (angular.isArray(replace)) {
-        var rlen = replace.length;
-        var rfx = function (str, i) {
-          i = parseInt(i, 10);
-          return (i >= 0 && i < rlen) ? replace[i] : str;
-        };
-        target = target.replace(/\$([0-9]+)/g, rfx);
-      }
-      else {
-        angular.forEach(replace, function(value, key){
-          target = target.split(':' + key).join(value);
-        });
-      }
-    }
-    return target;
-  };
-});
-
-/**
- * Wraps the
- * @param text {string} haystack to search through
- * @param search {string} needle to search for
- * @param [caseSensitive] {boolean} optional boolean to use case-sensitive searching
- */
-angular.module('ui.highlight',[]).filter('highlight', function () {
-  'use strict';
-
-  return function (text, search, caseSensitive) {
-    if (text && (search || angular.isNumber(search))) {
-      text = text.toString();
-      search = search.toString();
-      if (caseSensitive) {
-        return text.split(search).join('<span class="ui-match">' + search + '</span>');
-      } else {
-        return text.replace(new RegExp(search, 'gi'), '<span class="ui-match">$&</span>');
-      }
-    } else {
-      return text;
-    }
-  };
-});
-
-// modeled after: angular-1.0.7/src/ng/directive/ngInclude.js
-angular.module('ui.include',[])
-.directive('uiInclude', ['$http', '$templateCache', '$anchorScroll', '$compile',
-                 function($http,   $templateCache,   $anchorScroll,   $compile) {
-  'use strict';
-
-  return {
-    restrict: 'ECA',
-    terminal: true,
-    compile: function(element, attr) {
-      var srcExp = attr.uiInclude || attr.src,
-          fragExp = attr.fragment || '',
-          onloadExp = attr.onload || '',
-          autoScrollExp = attr.autoscroll;
-
-      return function(scope, element) {
-        var changeCounter = 0,
-            childScope;
-
-        var clearContent = function() {
-          if (childScope) {
-            childScope.$destroy();
-            childScope = null;
-          }
-
-          element.html('');
-        };
-
-        function ngIncludeWatchAction() {
-          var thisChangeId = ++changeCounter;
-          var src = scope.$eval(srcExp);
-          var fragment = scope.$eval(fragExp);
-
-          if (src) {
-            $http.get(src, {cache: $templateCache}).success(function(response) {
-              if (thisChangeId !== changeCounter) { return; }
-
-              if (childScope) { childScope.$destroy(); }
-              childScope = scope.$new();
-
-              var contents;
-              if (fragment) {
-                contents = angular.element('<div/>').html(response).find(fragment);
-              }
-              else {
-                contents = angular.element('<div/>').html(response).contents();
-              }
-              element.html(contents);
-              $compile(contents)(childScope);
-
-              if (angular.isDefined(autoScrollExp) && (!autoScrollExp || scope.$eval(autoScrollExp))) {
-                $anchorScroll();
-              }
-
-              childScope.$emit('$includeContentLoaded');
-              scope.$eval(onloadExp);
-            }).error(function() {
-              if (thisChangeId === changeCounter) { clearContent(); }
-            });
-          } else { clearContent(); }
-        }
-
-        scope.$watch(fragExp, ngIncludeWatchAction);
-        scope.$watch(srcExp, ngIncludeWatchAction);
-      };
-    }
-  };
-}]);
-
-/**
- * Provides an easy way to toggle a checkboxes indeterminate property
- *
- * @example <input type="checkbox" ui-indeterminate="isUnkown">
- */
-angular.module('ui.indeterminate',[]).directive('uiIndeterminate', [
-  function () {
-    'use strict';
-
-    return {
-      compile: function(tElm, tAttrs) {
-        if (!tAttrs.type || tAttrs.type.toLowerCase() !== 'checkbox') {
-          return angular.noop;
-        }
-
-        return function ($scope, elm, attrs) {
-          $scope.$watch(attrs.uiIndeterminate, function(newVal) {
-            elm[0].indeterminate = !!newVal;
-          });
-        };
-      }
-    };
-  }]);
-
-/**
- * Converts variable-esque naming conventions to something presentational, capitalized words separated by space.
- * @param {String} value The value to be parsed and prettified.
- * @param {String} [inflector] The inflector to use. Default: humanize.
- * @return {String}
- * @example {{ 'Here Is my_phoneNumber' | inflector:'humanize' }} => Here Is My Phone Number
- *          {{ 'Here Is my_phoneNumber' | inflector:'underscore' }} => here_is_my_phone_number
- *          {{ 'Here Is my_phoneNumber' | inflector:'variable' }} => hereIsMyPhoneNumber
- */
-angular.module('ui.inflector',[]).filter('inflector', function () {
-  'use strict';
-
-  function tokenize(text) {
-    text = text.replace(/([A-Z])|([\-|\_])/g, function(_, $1) { return ' ' + ($1 || ''); });
-    return text.replace(/\s\s+/g, ' ').trim().toLowerCase().split(' ');
-  }
-
-  function capitalizeTokens(tokens) {
-    var result = [];
-    angular.forEach(tokens, function(token) {
-      result.push(token.charAt(0).toUpperCase() + token.substr(1));
-    });
-    return result;
-  }
-
-  var inflectors = {
-    humanize: function (value) {
-      return capitalizeTokens(tokenize(value)).join(' ');
-    },
-    underscore: function (value) {
-      return tokenize(value).join('_');
-    },
-    variable: function (value) {
-      value = tokenize(value);
-      value = value[0] + capitalizeTokens(value.slice(1)).join('');
-      return value;
-    }
-  };
-
-  return function (text, inflector) {
-    if (inflector !== false && angular.isString(text)) {
-      inflector = inflector || 'humanize';
-      return inflectors[inflector](text);
-    } else {
-      return text;
-    }
-  };
-});
-
-/**
- * General-purpose jQuery wrapper. Simply pass the plugin name as the expression.
- *
- * It is possible to specify a default set of parameters for each jQuery plugin.
- * Under the jq key, namespace each plugin by that which will be passed to ui-jq.
- * Unfortunately, at this time you can only pre-define the first parameter.
- * @example { jq : { datepicker : { showOn:'click' } } }
- *
- * @param ui-jq {string} The $elm.[pluginName]() to call.
- * @param [ui-options] {mixed} Expression to be evaluated and passed as options to the function
- *     Multiple parameters can be separated by commas
- * @param [ui-refresh] {expression} Watch expression and refire plugin on changes
- *
- * @example <input ui-jq="datepicker" ui-options="{showOn:'click'},secondParameter,thirdParameter" ui-refresh="iChange">
- */
-angular.module('ui.jq',[]).
-  value('uiJqConfig',{}).
-  directive('uiJq', ['uiJqConfig', '$timeout', function uiJqInjectingFunction(uiJqConfig, $timeout) {
-  'use strict';
-
-
-  return {
-    restrict: 'A',
-    compile: function uiJqCompilingFunction(tElm, tAttrs) {
-
-      if (!angular.isFunction(tElm[tAttrs.uiJq])) {
-        throw new Error('ui-jq: The "' + tAttrs.uiJq + '" function does not exist');
-      }
-      var options = uiJqConfig && uiJqConfig[tAttrs.uiJq];
-
-      return function uiJqLinkingFunction(scope, elm, attrs) {
-
-        // If change compatibility is enabled, the form input's "change" event will trigger an "input" event
-        if (attrs.ngModel && elm.is('select,input,textarea')) {
-          elm.bind('change', function() {
-            elm.trigger('input');
-          });
-        }
-
-        function createLinkOptions(){
-          var linkOptions = [];
-
-          // If ui-options are passed, merge (or override) them onto global defaults and pass to the jQuery method
-          if (attrs.uiOptions) {
-            linkOptions = scope.$eval('[' + attrs.uiOptions + ']');
-            if (angular.isObject(options) && angular.isObject(linkOptions[0])) {
-              linkOptions[0] = angular.extend({}, options, linkOptions[0]);
-            }
-          } else if (options) {
-            linkOptions = [options];
-          }
-          return linkOptions;
-        }
-
-        // Call jQuery method and pass relevant options
-        function callPlugin() {
-          $timeout(function() {
-            elm[attrs.uiJq].apply(elm, createLinkOptions());
-          }, 0, false);
-        }
-
-        // If ui-refresh is used, re-fire the the method upon every change
-        if (attrs.uiRefresh) {
-          scope.$watch(attrs.uiRefresh, function() {
-            callPlugin();
-          });
-        }
-        callPlugin();
-      };
-    }
-  };
-}]);
-
-angular.module('ui.keypress',[]).
-factory('keypressHelper', ['$parse', function keypress($parse){
-  'use strict';
-
-  var keysByCode = {
-    8: 'backspace',
-    9: 'tab',
-    13: 'enter',
-    27: 'esc',
-    32: 'space',
-    33: 'pageup',
-    34: 'pagedown',
-    35: 'end',
-    36: 'home',
-    37: 'left',
-    38: 'up',
-    39: 'right',
-    40: 'down',
-    45: 'insert',
-    46: 'delete'
-  };
-
-  var capitaliseFirstLetter = function (string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-  };
-
-  return function(mode, scope, elm, attrs) {
-    var params, combinations = [];
-    params = scope.$eval(attrs['ui'+capitaliseFirstLetter(mode)]);
-
-    // Prepare combinations for simple checking
-    angular.forEach(params, function (v, k) {
-      var combination, expression;
-      expression = $parse(v);
-
-      angular.forEach(k.split(' '), function(variation) {
-        combination = {
-          expression: expression,
-          keys: {}
-        };
-        angular.forEach(variation.split('-'), function (value) {
-          combination.keys[value] = true;
-        });
-        combinations.push(combination);
-      });
-    });
-
-    // Check only matching of pressed keys one of the conditions
-    elm.bind(mode, function (event) {
-      // No need to do that inside the cycle
-      var metaPressed = !!(event.metaKey && !event.ctrlKey);
-      var altPressed = !!event.altKey;
-      var ctrlPressed = !!event.ctrlKey;
-      var shiftPressed = !!event.shiftKey;
-      var keyCode = event.keyCode;
-
-      // normalize keycodes
-      if (mode === 'keypress' && !shiftPressed && keyCode >= 97 && keyCode <= 122) {
-        keyCode = keyCode - 32;
-      }
-
-      // Iterate over prepared combinations
-      angular.forEach(combinations, function (combination) {
-
-        var mainKeyPressed = combination.keys[keysByCode[keyCode]] || combination.keys[keyCode.toString()];
-
-        var metaRequired = !!combination.keys.meta;
-        var altRequired = !!combination.keys.alt;
-        var ctrlRequired = !!combination.keys.ctrl;
-        var shiftRequired = !!combination.keys.shift;
-
-        if (
-          mainKeyPressed &&
-          ( metaRequired === metaPressed ) &&
-          ( altRequired === altPressed ) &&
-          ( ctrlRequired === ctrlPressed ) &&
-          ( shiftRequired === shiftPressed )
-        ) {
-          // Run the function
-          scope.$apply(function () {
-            combination.expression(scope, { '$event': event });
-          });
-        }
-      });
-    });
-  };
-}]);
-
-/**
- * Bind one or more handlers to particular keys or their combination
- * @param hash {mixed} keyBindings Can be an object or string where keybinding expression of keys or keys combinations and AngularJS Exspressions are set. Object syntax: "{ keys1: expression1 [, keys2: expression2 [ , ... ]]}". String syntax: ""expression1 on keys1 [ and expression2 on keys2 [ and ... ]]"". Expression is an AngularJS Expression, and key(s) are dash-separated combinations of keys and modifiers (one or many, if any. Order does not matter). Supported modifiers are 'ctrl', 'shift', 'alt' and key can be used either via its keyCode (13 for Return) or name. Named keys are 'backspace', 'tab', 'enter', 'esc', 'space', 'pageup', 'pagedown', 'end', 'home', 'left', 'up', 'right', 'down', 'insert', 'delete'.
- * @example <input ui-keypress="{enter:'x = 1', 'ctrl-shift-space':'foo()', 'shift-13':'bar()'}" /> <input ui-keypress="foo = 2 on ctrl-13 and bar('hello') on shift-esc" />
- **/
-angular.module('ui.keypress').directive('uiKeydown', ['keypressHelper', function(keypressHelper){
-  'use strict';
-
-  return {
-    link: function (scope, elm, attrs) {
-      keypressHelper('keydown', scope, elm, attrs);
-    }
-  };
-}]);
-
-angular.module('ui.keypress').directive('uiKeypress', ['keypressHelper', function(keypressHelper){
-  'use strict';
-
-  return {
-    link: function (scope, elm, attrs) {
-      keypressHelper('keypress', scope, elm, attrs);
-    }
-  };
-}]);
-
-angular.module('ui.keypress').directive('uiKeyup', ['keypressHelper', function(keypressHelper){
-  'use strict';
-
-  return {
-    link: function (scope, elm, attrs) {
-      keypressHelper('keyup', scope, elm, attrs);
-    }
-  };
-}]);
-
-/*
- Attaches input mask onto input element
- */
-angular.module('ui.mask', [])
-  .value('uiMaskConfig', {
-    'maskDefinitions': {
-      '9': /\d/,
-      'A': /[a-zA-Z]/,
-      '*': /[a-zA-Z0-9]/
-    },
-    'clearOnBlur': true
-  })
-  .directive('uiMask', ['uiMaskConfig', '$parse', function (maskConfig, $parse) {
-    'use strict';
-
-    return {
-      priority: 100,
-      require: 'ngModel',
-      restrict: 'A',
-      compile: function uiMaskCompilingFunction(){
-        var options = maskConfig;
-
-        return function uiMaskLinkingFunction(scope, iElement, iAttrs, controller){
-          var maskProcessed = false, eventsBound = false,
-            maskCaretMap, maskPatterns, maskPlaceholder, maskComponents,
-          // Minimum required length of the value to be considered valid
-            minRequiredLength,
-            value, valueMasked, isValid,
-          // Vars for initializing/uninitializing
-            originalPlaceholder = iAttrs.placeholder,
-            originalMaxlength = iAttrs.maxlength,
-          // Vars used exclusively in eventHandler()
-            oldValue, oldValueUnmasked, oldCaretPosition, oldSelectionLength;
-
-          function initialize(maskAttr){
-            if (!angular.isDefined(maskAttr)) {
-              return uninitialize();
-            }
-            processRawMask(maskAttr);
-            if (!maskProcessed) {
-              return uninitialize();
-            }
-            initializeElement();
-            bindEventListeners();
-            return true;
-          }
-
-          function initPlaceholder(placeholderAttr) {
-            if(! angular.isDefined(placeholderAttr)) {
-              return;
-            }
-
-            maskPlaceholder = placeholderAttr;
-
-            // If the mask is processed, then we need to update the value
-            if (maskProcessed) {
-              eventHandler();
-            }
-          }
-
-          function formatter(fromModelValue){
-            if (!maskProcessed) {
-              return fromModelValue;
-            }
-            value = unmaskValue(fromModelValue || '');
-            isValid = validateValue(value);
-            controller.$setValidity('mask', isValid);
-            return isValid && value.length ? maskValue(value) : undefined;
-          }
-
-          function parser(fromViewValue){
-            if (!maskProcessed) {
-              return fromViewValue;
-            }
-            value = unmaskValue(fromViewValue || '');
-            isValid = validateValue(value);
-            // We have to set viewValue manually as the reformatting of the input
-            // value performed by eventHandler() doesn't happen until after
-            // this parser is called, which causes what the user sees in the input
-            // to be out-of-sync with what the controller's $viewValue is set to.
-            controller.$viewValue = value.length ? maskValue(value) : '';
-            controller.$setValidity('mask', isValid);
-            if (value === '' && iAttrs.required) {
-                controller.$setValidity('required', !controller.$error.required);
-            }
-            return isValid ? value : undefined;
-          }
-
-          var linkOptions = {};
-
-          if (iAttrs.uiOptions) {
-            linkOptions = scope.$eval('[' + iAttrs.uiOptions + ']');
-            if (angular.isObject(linkOptions[0])) {
-              // we can't use angular.copy nor angular.extend, they lack the power to do a deep merge
-              linkOptions = (function(original, current){
-                for(var i in original) {
-                  if (Object.prototype.hasOwnProperty.call(original, i)) {
-                    if (current[i] === undefined) {
-                      current[i] = angular.copy(original[i]);
-                    } else {
-                      angular.extend(current[i], original[i]);
-                    }
-                  }
-                }
-                return current;
-              })(options, linkOptions[0]);
-            }
-          } else {
-            linkOptions = options;
-          }
-
-          iAttrs.$observe('uiMask', initialize);
-          iAttrs.$observe('placeholder', initPlaceholder);
-          var modelViewValue = false;
-          iAttrs.$observe('modelViewValue', function(val) {
-            if(val === 'true') {
-              modelViewValue = true;
-            }
-          });
-          scope.$watch(iAttrs.ngModel, function(val) {
-            if(modelViewValue && val) {
-              var model = $parse(iAttrs.ngModel);
-              model.assign(scope, controller.$viewValue);
-            }
-          });
-          controller.$formatters.push(formatter);
-          controller.$parsers.push(parser);
-
-          function uninitialize(){
-            maskProcessed = false;
-            unbindEventListeners();
-
-            if (angular.isDefined(originalPlaceholder)) {
-              iElement.attr('placeholder', originalPlaceholder);
-            } else {
-              iElement.removeAttr('placeholder');
-            }
-
-            if (angular.isDefined(originalMaxlength)) {
-              iElement.attr('maxlength', originalMaxlength);
-            } else {
-              iElement.removeAttr('maxlength');
-            }
-
-            iElement.val(controller.$modelValue);
-            controller.$viewValue = controller.$modelValue;
-            return false;
-          }
-
-          function initializeElement(){
-            value = oldValueUnmasked = unmaskValue(controller.$viewValue || '');
-            valueMasked = oldValue = maskValue(value);
-            isValid = validateValue(value);
-            var viewValue = isValid && value.length ? valueMasked : '';
-            if (iAttrs.maxlength) { // Double maxlength to allow pasting new val at end of mask
-              iElement.attr('maxlength', maskCaretMap[maskCaretMap.length - 1] * 2);
-            }
-            iElement.attr('placeholder', maskPlaceholder);
-            iElement.val(viewValue);
-            controller.$viewValue = viewValue;
-            // Not using $setViewValue so we don't clobber the model value and dirty the form
-            // without any kind of user interaction.
-          }
-
-          function bindEventListeners(){
-            if (eventsBound) {
-              return;
-            }
-            iElement.bind('blur', blurHandler);
-            iElement.bind('mousedown mouseup', mouseDownUpHandler);
-            iElement.bind('input keyup click focus', eventHandler);
-            eventsBound = true;
-          }
-
-          function unbindEventListeners(){
-            if (!eventsBound) {
-              return;
-            }
-            iElement.unbind('blur', blurHandler);
-            iElement.unbind('mousedown', mouseDownUpHandler);
-            iElement.unbind('mouseup', mouseDownUpHandler);
-            iElement.unbind('input', eventHandler);
-            iElement.unbind('keyup', eventHandler);
-            iElement.unbind('click', eventHandler);
-            iElement.unbind('focus', eventHandler);
-            eventsBound = false;
-          }
-
-          function validateValue(value){
-            // Zero-length value validity is ngRequired's determination
-            return value.length ? value.length >= minRequiredLength : true;
-          }
-
-          function unmaskValue(value){
-            var valueUnmasked = '',
-              maskPatternsCopy = maskPatterns.slice();
-            // Preprocess by stripping mask components from value
-            value = value.toString();
-            angular.forEach(maskComponents, function (component){
-              value = value.replace(component, '');
-            });
-            angular.forEach(value.split(''), function (chr){
-              if (maskPatternsCopy.length && maskPatternsCopy[0].test(chr)) {
-                valueUnmasked += chr;
-                maskPatternsCopy.shift();
-              }
-            });
-            return valueUnmasked;
-          }
-
-          function maskValue(unmaskedValue){
-            var valueMasked = '',
-                maskCaretMapCopy = maskCaretMap.slice();
-
-            angular.forEach(maskPlaceholder.split(''), function (chr, i){
-              if (unmaskedValue.length && i === maskCaretMapCopy[0]) {
-                valueMasked  += unmaskedValue.charAt(0) || '_';
-                unmaskedValue = unmaskedValue.substr(1);
-                maskCaretMapCopy.shift();
-              }
-              else {
-                valueMasked += chr;
-              }
-            });
-            return valueMasked;
-          }
-
-          function getPlaceholderChar(i) {
-            var placeholder = iAttrs.placeholder;
-
-            if (typeof placeholder !== 'undefined' && placeholder[i]) {
-              return placeholder[i];
-            } else {
-              return '_';
-            }
-          }
-
-          // Generate array of mask components that will be stripped from a masked value
-          // before processing to prevent mask components from being added to the unmasked value.
-          // E.g., a mask pattern of '+7 9999' won't have the 7 bleed into the unmasked value.
-          // If a maskable char is followed by a mask char and has a mask
-          // char behind it, we'll split it into it's own component so if
-          // a user is aggressively deleting in the input and a char ahead
-          // of the maskable char gets deleted, we'll still be able to strip
-          // it in the unmaskValue() preprocessing.
-          function getMaskComponents() {
-            return maskPlaceholder.replace(/[_]+/g, '_').replace(/([^_]+)([a-zA-Z0-9])([^_])/g, '$1$2_$3').split('_');
-          }
-
-          function processRawMask(mask){
-            var characterCount = 0;
-
-            maskCaretMap    = [];
-            maskPatterns    = [];
-            maskPlaceholder = '';
-
-            if (typeof mask === 'string') {
-              minRequiredLength = 0;
-
-              var isOptional = false,
-                  numberOfOptionalCharacters = 0,
-                  splitMask  = mask.split('');
-
-              angular.forEach(splitMask, function (chr, i){
-                if (linkOptions.maskDefinitions[chr]) {
-
-                  maskCaretMap.push(characterCount);
-
-                  maskPlaceholder += getPlaceholderChar(i - numberOfOptionalCharacters);
-                  maskPatterns.push(linkOptions.maskDefinitions[chr]);
-
-                  characterCount++;
-                  if (!isOptional) {
-                    minRequiredLength++;
-                  }
-                }
-                else if (chr === '?') {
-                  isOptional = true;
-                  numberOfOptionalCharacters++;
-                }
-                else {
-                  maskPlaceholder += chr;
-                  characterCount++;
-                }
-              });
-            }
-            // Caret position immediately following last position is valid.
-            maskCaretMap.push(maskCaretMap.slice().pop() + 1);
-
-            maskComponents = getMaskComponents();
-            maskProcessed  = maskCaretMap.length > 1 ? true : false;
-          }
-
-          function blurHandler(){
-            if (linkOptions.clearOnBlur) {
-              oldCaretPosition = 0;
-              oldSelectionLength = 0;
-              if (!isValid || value.length === 0) {
-                valueMasked = '';
-                iElement.val('');
-                scope.$apply(function () {
-                  controller.$setViewValue('');
-                });
-              }
-            }
-          }
-
-          function mouseDownUpHandler(e){
-            if (e.type === 'mousedown') {
-              iElement.bind('mouseout', mouseoutHandler);
-            } else {
-              iElement.unbind('mouseout', mouseoutHandler);
-            }
-          }
-
-          iElement.bind('mousedown mouseup', mouseDownUpHandler);
-
-          function mouseoutHandler(){
-            /*jshint validthis: true */
-            oldSelectionLength = getSelectionLength(this);
-            iElement.unbind('mouseout', mouseoutHandler);
-          }
-
-          function eventHandler(e){
-            /*jshint validthis: true */
-            e = e || {};
-            // Allows more efficient minification
-            var eventWhich = e.which,
-              eventType = e.type;
-
-            // Prevent shift and ctrl from mucking with old values
-            if (eventWhich === 16 || eventWhich === 91) { return;}
-
-            var val = iElement.val(),
-              valOld = oldValue,
-              valMasked,
-              valUnmasked = unmaskValue(val),
-              valUnmaskedOld = oldValueUnmasked,
-              valAltered = false,
-
-              caretPos = getCaretPosition(this) || 0,
-              caretPosOld = oldCaretPosition || 0,
-              caretPosDelta = caretPos - caretPosOld,
-              caretPosMin = maskCaretMap[0],
-              caretPosMax = maskCaretMap[valUnmasked.length] || maskCaretMap.slice().shift(),
-
-              selectionLenOld = oldSelectionLength || 0,
-              isSelected = getSelectionLength(this) > 0,
-              wasSelected = selectionLenOld > 0,
-
-            // Case: Typing a character to overwrite a selection
-              isAddition = (val.length > valOld.length) || (selectionLenOld && val.length > valOld.length - selectionLenOld),
-            // Case: Delete and backspace behave identically on a selection
-              isDeletion = (val.length < valOld.length) || (selectionLenOld && val.length === valOld.length - selectionLenOld),
-              isSelection = (eventWhich >= 37 && eventWhich <= 40) && e.shiftKey, // Arrow key codes
-
-              isKeyLeftArrow = eventWhich === 37,
-            // Necessary due to "input" event not providing a key code
-              isKeyBackspace = eventWhich === 8 || (eventType !== 'keyup' && isDeletion && (caretPosDelta === -1)),
-              isKeyDelete = eventWhich === 46 || (eventType !== 'keyup' && isDeletion && (caretPosDelta === 0 ) && !wasSelected),
-
-            // Handles cases where caret is moved and placed in front of invalid maskCaretMap position. Logic below
-            // ensures that, on click or leftward caret placement, caret is moved leftward until directly right of
-            // non-mask character. Also applied to click since users are (arguably) more likely to backspace
-            // a character when clicking within a filled input.
-              caretBumpBack = (isKeyLeftArrow || isKeyBackspace || eventType === 'click') && caretPos > caretPosMin;
-
-            oldSelectionLength = getSelectionLength(this);
-
-            // These events don't require any action
-            if (isSelection || (isSelected && (eventType === 'click' || eventType === 'keyup'))) {
-              return;
-            }
-
-            // Value Handling
-            // ==============
-
-            // User attempted to delete but raw value was unaffected--correct this grievous offense
-            if ((eventType === 'input') && isDeletion && !wasSelected && valUnmasked === valUnmaskedOld) {
-              while (isKeyBackspace && caretPos > caretPosMin && !isValidCaretPosition(caretPos)) {
-                caretPos--;
-              }
-              while (isKeyDelete && caretPos < caretPosMax && maskCaretMap.indexOf(caretPos) === -1) {
-                caretPos++;
-              }
-              var charIndex = maskCaretMap.indexOf(caretPos);
-              // Strip out non-mask character that user would have deleted if mask hadn't been in the way.
-              valUnmasked = valUnmasked.substring(0, charIndex) + valUnmasked.substring(charIndex + 1);
-              valAltered = true;
-            }
-
-            // Update values
-            valMasked = maskValue(valUnmasked);
-
-            oldValue = valMasked;
-            oldValueUnmasked = valUnmasked;
-            iElement.val(valMasked);
-            if (valAltered) {
-              // We've altered the raw value after it's been $digest'ed, we need to $apply the new value.
-              scope.$apply(function (){
-                controller.$setViewValue(valUnmasked);
-              });
-            }
-
-            // Caret Repositioning
-            // ===================
-
-            // Ensure that typing always places caret ahead of typed character in cases where the first char of
-            // the input is a mask char and the caret is placed at the 0 position.
-            if (isAddition && (caretPos <= caretPosMin)) {
-              caretPos = caretPosMin + 1;
-            }
-
-            if (caretBumpBack) {
-              caretPos--;
-            }
-
-            // Make sure caret is within min and max position limits
-            caretPos = caretPos > caretPosMax ? caretPosMax : caretPos < caretPosMin ? caretPosMin : caretPos;
-
-            // Scoot the caret back or forth until it's in a non-mask position and within min/max position limits
-            while (!isValidCaretPosition(caretPos) && caretPos > caretPosMin && caretPos < caretPosMax) {
-              caretPos += caretBumpBack ? -1 : 1;
-            }
-
-            if ((caretBumpBack && caretPos < caretPosMax) || (isAddition && !isValidCaretPosition(caretPosOld))) {
-              caretPos++;
-            }
-            oldCaretPosition = caretPos;
-            setCaretPosition(this, caretPos);
-          }
-
-          function isValidCaretPosition(pos){ return maskCaretMap.indexOf(pos) > -1; }
-
-          function getCaretPosition(input){
-            if (!input) return 0;
-            if (input.selectionStart !== undefined) {
-              return input.selectionStart;
-            } else if (document.selection) {
-              // Curse you IE
-              input.focus();
-              var selection = document.selection.createRange();
-              selection.moveStart('character', input.value ? -input.value.length : 0);
-              return selection.text.length;
-            }
-            return 0;
-          }
-
-          function setCaretPosition(input, pos){
-            if (!input) return 0;
-            if (input.offsetWidth === 0 || input.offsetHeight === 0) {
-              return; // Input's hidden
-            }
-            if (input.setSelectionRange) {
-              input.focus();
-              input.setSelectionRange(pos, pos);
-            }
-            else if (input.createTextRange) {
-              // Curse you IE
-              var range = input.createTextRange();
-              range.collapse(true);
-              range.moveEnd('character', pos);
-              range.moveStart('character', pos);
-              range.select();
-            }
-          }
-
-          function getSelectionLength(input){
-            if (!input) return 0;
-            if (input.selectionStart !== undefined) {
-              return (input.selectionEnd - input.selectionStart);
-            }
-            if (document.selection) {
-              return (document.selection.createRange().text.length);
-            }
-            return 0;
-          }
-
-          // https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/indexOf
-          if (!Array.prototype.indexOf) {
-            Array.prototype.indexOf = function (searchElement /*, fromIndex */){
-              if (this === null) {
-                throw new TypeError();
-              }
-              var t = Object(this);
-              var len = t.length >>> 0;
-              if (len === 0) {
-                return -1;
-              }
-              var n = 0;
-              if (arguments.length > 1) {
-                n = Number(arguments[1]);
-                if (n !== n) { // shortcut for verifying if it's NaN
-                  n = 0;
-                } else if (n !== 0 && n !== Infinity && n !== -Infinity) {
-                  n = (n > 0 || -1) * Math.floor(Math.abs(n));
-                }
-              }
-              if (n >= len) {
-                return -1;
-              }
-              var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
-              for (; k < len; k++) {
-                if (k in t && t[k] === searchElement) {
-                  return k;
-                }
-              }
-              return -1;
-            };
-          }
-
-        };
-      }
-    };
-  }
-]);
-
-/**
- * Add a clear button to form inputs to reset their value
- */
-angular.module('ui.reset',[]).value('uiResetConfig',null).directive('uiReset', ['uiResetConfig', function (uiResetConfig) {
-  'use strict';
-
-  var resetValue = null;
-  if (uiResetConfig !== undefined){
-      resetValue = uiResetConfig;
-  }
-  return {
-    require: 'ngModel',
-    link: function (scope, elm, attrs, ctrl) {
-      var aElement;
-      aElement = angular.element('<a class="ui-reset" />');
-      elm.wrap('<span class="ui-resetwrap" />').after(aElement);
-      aElement.bind('click', function (e) {
-        e.preventDefault();
-        scope.$apply(function () {
-          if (attrs.uiReset){
-            ctrl.$setViewValue(scope.$eval(attrs.uiReset));
-          }else{
-            ctrl.$setViewValue(resetValue);
-          }
-          ctrl.$render();
-        });
-      });
-    }
-  };
-}]);
-
-/**
- * Set a $uiRoute boolean to see if the current route matches
- */
-angular.module('ui.route', []).directive('uiRoute', ['$location', '$parse', function ($location, $parse) {
-  'use strict';
-
-  return {
-    restrict: 'AC',
-    scope: true,
-    compile: function(tElement, tAttrs) {
-      var useProperty;
-      if (tAttrs.uiRoute) {
-        useProperty = 'uiRoute';
-      } else if (tAttrs.ngHref) {
-        useProperty = 'ngHref';
-      } else if (tAttrs.href) {
-        useProperty = 'href';
-      } else {
-        throw new Error('uiRoute missing a route or href property on ' + tElement[0]);
-      }
-      return function ($scope, elm, attrs) {
-        var modelSetter = $parse(attrs.ngModel || attrs.routeModel || '$uiRoute').assign;
-        var watcher = angular.noop;
-
-        // Used by href and ngHref
-        function staticWatcher(newVal) {
-          var hash = newVal.indexOf('#');
-          if (hash > -1){
-            newVal = newVal.substr(hash + 1);
-          }
-          watcher = function watchHref() {
-            modelSetter($scope, ($location.path().indexOf(newVal) > -1));
-          };
-          watcher();
-        }
-        // Used by uiRoute
-        function regexWatcher(newVal) {
-          var hash = newVal.indexOf('#');
-          if (hash > -1){
-            newVal = newVal.substr(hash + 1);
-          }
-          watcher = function watchRegex() {
-            var regexp = new RegExp('^' + newVal + '$', ['i']);
-            modelSetter($scope, regexp.test($location.path()));
-          };
-          watcher();
-        }
-
-        switch (useProperty) {
-          case 'uiRoute':
-            // if uiRoute={{}} this will be undefined, otherwise it will have a value and $observe() never gets triggered
-            if (attrs.uiRoute){
-              regexWatcher(attrs.uiRoute);
-            }else{
-              attrs.$observe('uiRoute', regexWatcher);
-            }
-            break;
-          case 'ngHref':
-            // Setup watcher() every time ngHref changes
-            if (attrs.ngHref){
-              staticWatcher(attrs.ngHref);
-            }else{
-              attrs.$observe('ngHref', staticWatcher);
-            }
-            break;
-          case 'href':
-            // Setup watcher()
-            staticWatcher(attrs.href);
-        }
-
-        $scope.$on('$routeChangeSuccess', function(){
-          watcher();
-        });
-
-        //Added for compatibility with ui-router
-        $scope.$on('$stateChangeSuccess', function(){
-          watcher();
-        });
-      };
-    }
-  };
-}]);
-
-angular.module('ui.scroll.jqlite', ['ui.scroll']).service('jqLiteExtras', [
-  '$log', '$window', function(console, window) {
-    'use strict';
-
-    return {
-      registerFor: function(element) {
-        var convertToPx, css, getMeasurements, getStyle, getWidthHeight, isWindow, scrollTo;
-        css = angular.element.prototype.css;
-        element.prototype.css = function(name, value) {
-          var elem, self;
-          self = this;
-          elem = self[0];
-          if (!(!elem || elem.nodeType === 3 || elem.nodeType === 8 || !elem.style)) {
-            return css.call(self, name, value);
-          }
-        };
-        isWindow = function(obj) {
-          return obj && obj.document && obj.location && obj.alert && obj.setInterval;
-        };
-        scrollTo = function(self, direction, value) {
-          var elem, method, preserve, prop, _ref;
-          elem = self[0];
-          _ref = {
-            top: ['scrollTop', 'pageYOffset', 'scrollLeft'],
-            left: ['scrollLeft', 'pageXOffset', 'scrollTop']
-          }[direction], method = _ref[0], prop = _ref[1], preserve = _ref[2];
-          if (isWindow(elem)) {
-            if (angular.isDefined(value)) {
-              return elem.scrollTo(self[preserve].call(self), value);
-            } else {
-              if (prop in elem) {
-                return elem[prop];
-              } else {
-                return elem.document.documentElement[method];
-              }
-            }
-          } else {
-            if (angular.isDefined(value)) {
-              return elem[method] = value;
-            } else {
-              return elem[method];
-            }
-          }
-        };
-        if (window.getComputedStyle) {
-          getStyle = function(elem) {
-            return window.getComputedStyle(elem, null);
-          };
-          convertToPx = function(elem, value) {
-            return parseFloat(value);
-          };
-        } else {
-          getStyle = function(elem) {
-            return elem.currentStyle;
-          };
-          convertToPx = function(elem, value) {
-            var core_pnum, left, result, rnumnonpx, rs, rsLeft, style;
-            core_pnum = /[+-]?(?:\d*\.|)\d+(?:[eE][+-]?\d+|)/.source;
-            rnumnonpx = new RegExp('^(' + core_pnum + ')(?!px)[a-z%]+$', 'i');
-            if (!rnumnonpx.test(value)) {
-              return parseFloat(value);
-            } else {
-              style = elem.style;
-              left = style.left;
-              rs = elem.runtimeStyle;
-              rsLeft = rs && rs.left;
-              if (rs) {
-                rs.left = style.left;
-              }
-              style.left = value;
-              result = style.pixelLeft;
-              style.left = left;
-              if (rsLeft) {
-                rs.left = rsLeft;
-              }
-              return result;
-            }
-          };
-        }
-        getMeasurements = function(elem, measure) {
-          var base, borderA, borderB, computedMarginA, computedMarginB, computedStyle, dirA, dirB, marginA, marginB, paddingA, paddingB, _ref;
-          if (isWindow(elem)) {
-            base = document.documentElement[{
-              height: 'clientHeight',
-              width: 'clientWidth'
-            }[measure]];
-            return {
-              base: base,
-              padding: 0,
-              border: 0,
-              margin: 0
-            };
-          }
-          _ref = {
-            width: [elem.offsetWidth, 'Left', 'Right'],
-            height: [elem.offsetHeight, 'Top', 'Bottom']
-          }[measure], base = _ref[0], dirA = _ref[1], dirB = _ref[2];
-          computedStyle = getStyle(elem);
-          paddingA = convertToPx(elem, computedStyle['padding' + dirA]) || 0;
-          paddingB = convertToPx(elem, computedStyle['padding' + dirB]) || 0;
-          borderA = convertToPx(elem, computedStyle['border' + dirA + 'Width']) || 0;
-          borderB = convertToPx(elem, computedStyle['border' + dirB + 'Width']) || 0;
-          computedMarginA = computedStyle['margin' + dirA];
-          computedMarginB = computedStyle['margin' + dirB];
-          marginA = convertToPx(elem, computedMarginA) || 0;
-          marginB = convertToPx(elem, computedMarginB) || 0;
-          return {
-            base: base,
-            padding: paddingA + paddingB,
-            border: borderA + borderB,
-            margin: marginA + marginB
-          };
-        };
-        getWidthHeight = function(elem, direction, measure) {
-          var computedStyle, measurements, result;
-          measurements = getMeasurements(elem, direction);
-          if (measurements.base > 0) {
-            return {
-              base: measurements.base - measurements.padding - measurements.border,
-              outer: measurements.base,
-              outerfull: measurements.base + measurements.margin
-            }[measure];
-          } else {
-            computedStyle = getStyle(elem);
-            result = computedStyle[direction];
-            if (result < 0 || result === null) {
-              result = elem.style[direction] || 0;
-            }
-            result = parseFloat(result) || 0;
-            return {
-              base: result - measurements.padding - measurements.border,
-              outer: result,
-              outerfull: result + measurements.padding + measurements.border + measurements.margin
-            }[measure];
-          }
-        };
-        return angular.forEach({
-          before: function(newElem) {
-            var children, elem, i, parent, self, _i, _ref;
-            self = this;
-            elem = self[0];
-            parent = self.parent();
-            children = parent.contents();
-            if (children[0] === elem) {
-              return parent.prepend(newElem);
-            } else {
-              for (i = _i = 1, _ref = children.length - 1; 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
-                if (children[i] === elem) {
-                  angular.element(children[i - 1]).after(newElem);
-                  return;
-                }
-              }
-              throw new Error('invalid DOM structure ' + elem.outerHTML);
-            }
-          },
-          height: function(value) {
-            var self;
-            self = this;
-            if (angular.isDefined(value)) {
-              if (angular.isNumber(value)) {
-                value = value + 'px';
-              }
-              return css.call(self, 'height', value);
-            } else {
-              return getWidthHeight(this[0], 'height', 'base');
-            }
-          },
-          outerHeight: function(option) {
-            return getWidthHeight(this[0], 'height', option ? 'outerfull' : 'outer');
-          },
-          /*
-          UIScroller no longer relies on jQuery method offset. The jQLite implementation of the method
-          is kept here just for the reference. Also the offset setter method was never implemented
-          */
-
-          offset: function(value) {
-            var box, doc, docElem, elem, self, win;
-            self = this;
-            if (arguments.length) {
-              if (value === void 0) {
-                return self;
-              } else {
-                throw new Error('offset setter method is not implemented');
-              }
-            }
-            box = {
-              top: 0,
-              left: 0
-            };
-            elem = self[0];
-            doc = elem && elem.ownerDocument;
-            if (!doc) {
-              return;
-            }
-            docElem = doc.documentElement;
-            if (elem.getBoundingClientRect != null) {
-              box = elem.getBoundingClientRect();
-            }
-            win = doc.defaultView || doc.parentWindow;
-            return {
-              top: box.top + (win.pageYOffset || docElem.scrollTop) - (docElem.clientTop || 0),
-              left: box.left + (win.pageXOffset || docElem.scrollLeft) - (docElem.clientLeft || 0)
-            };
-          },
-          scrollTop: function(value) {
-            return scrollTo(this, 'top', value);
-          },
-          scrollLeft: function(value) {
-            return scrollTo(this, 'left', value);
-          }
-        }, function(value, key) {
-          if (!element.prototype[key]) {
-            return element.prototype[key] = value;
-          }
-        });
-      }
-    };
-  }
-]).run([
-  '$log', '$window', 'jqLiteExtras', function(console, window, jqLiteExtras) {
-    'use strict';
-
-    if (!window.jQuery) {
-      return jqLiteExtras.registerFor(angular.element);
-    }
-  }
-]);
-
-/*
-//# sourceURL=src/scripts/ui-scroll-jqlite.js
-*/
-
-
-/*
- globals: angular, window
-
- List of used element methods available in JQuery but not in JQuery Lite
-
- element.before(elem)
- element.height()
- element.outerHeight(true)
- element.height(value) = only for Top/Bottom padding elements
- element.scrollTop()
- element.scrollTop(value)
- */
-
-angular.module('ui.scroll', []).directive('uiScrollViewport', [
-  '$log', function() {
-    'use strict';
-
-    return {
-      controller: [
-        '$scope', '$element', function(scope, element) {
-          this.viewport = element;
-          return this;
-        }
-      ]
-    };
-  }
-]).directive('uiScroll', [
-  '$log', '$injector', '$rootScope', '$timeout', function(console, $injector, $rootScope, $timeout) {
-    'use strict';
-
-    return {
-      require: ['?^uiScrollViewport'],
-      transclude: 'element',
-      priority: 1000,
-      terminal: true,
-      compile: function(elementTemplate, attr, linker) {
-        return function($scope, element, $attr, controllers) {
-          var adapter, adapterOnScope, adjustBuffer, adjustRowHeight, applyUpdate, bof, bottomVisiblePos, buffer, bufferPadding, bufferSize, builder, clipBottom, clipTop, datasource, datasourceName, doAdjustment, doDelete, doInsert, doUpdate, enqueueFetch, eof, eventListener, fetch, finalize, first, getValueChain, hideElementBeforeAppend, insert, isDatasourceValid, itemName, loading, log, match, next, pending, reload, removeFromBuffer, resizeAndScrollHandler, ridActual, scrollHeight, setValueChain, shouldLoadBottom, shouldLoadTop, showElementAfterRender, topVisible, topVisiblePos, viewport, viewportScope, wheelHandler;
-          log = console.debug || console.log;
-          match = $attr.uiScroll.match(/^\s*(\w+)\s+in\s+([\w\.]+)\s*$/);
-          if (!match) {
-            throw new Error('Expected uiScroll in form of \'_item_ in _datasource_\' but got \'' + $attr.uiScroll + '\'');
-          }
-          itemName = match[1];
-          datasourceName = match[2];
-          getValueChain = function(targetScope, target) {
-            var chain;
-            if (!targetScope) {
-              return;
-            }
-            chain = target.match(/^([\w]+)\.(.+)$/);
-            if (!chain || chain.length !== 3) {
-              return targetScope[target];
-            }
-            return getValueChain(targetScope[chain[1]], chain[2]);
-          };
-          setValueChain = function(targetScope, target, value, doNotSet) {
-            var chain;
-            if (!targetScope || !target) {
-              return;
-            }
-            if (!(chain = target.match(/^([\w]+)\.(.+)$/))) {
-              if (target.indexOf('.') !== -1) {
-                return;
-              }
-            }
-            if (!chain || chain.length !== 3) {
-              if (!angular.isObject(targetScope[target]) && !doNotSet) {
-                return targetScope[target] = value;
-              }
-              return targetScope[target] = value;
-            }
-            if (!angular.isObject(targetScope[chain[1]]) && !doNotSet) {
-              targetScope[chain[1]] = {};
-            }
-            return setValueChain(targetScope[chain[1]], chain[2], value, doNotSet);
-          };
-          datasource = getValueChain($scope, datasourceName);
-          isDatasourceValid = function() {
-            return angular.isObject(datasource) && typeof datasource.get === 'function';
-          };
-          if (!isDatasourceValid()) {
-            datasource = $injector.get(datasourceName);
-            if (!isDatasourceValid()) {
-              throw new Error('' + datasourceName + ' is not a valid datasource');
-            }
-          }
-          bufferSize = Math.max(3, +$attr.bufferSize || 10);
-          bufferPadding = function() {
-            return viewport.outerHeight() * Math.max(0.1, +$attr.padding || 0.1);
-          };
-          scrollHeight = function(elem) {
-            var _ref;
-            return (_ref = elem[0].scrollHeight) != null ? _ref : elem[0].document.documentElement.scrollHeight;
-          };
-          builder = null;
-          linker($scope.$new(), function(template) {
-            var bottomPadding, createPadding, padding, repeaterType, topPadding, viewport;
-            repeaterType = template[0].localName;
-            if (repeaterType === 'dl') {
-              throw new Error('ui-scroll directive does not support <' + template[0].localName + '> as a repeating tag: ' + template[0].outerHTML);
-            }
-            if (repeaterType !== 'li' && repeaterType !== 'tr') {
-              repeaterType = 'div';
-            }
-            viewport = controllers[0] && controllers[0].viewport ? controllers[0].viewport : angular.element(window);
-            viewport.css({
-              'overflow-y': 'auto',
-              'display': 'block'
-            });
-            padding = function(repeaterType) {
-              var div, result, table;
-              switch (repeaterType) {
-                case 'tr':
-                  table = angular.element('<table><tr><td><div></div></td></tr></table>');
-                  div = table.find('div');
-                  result = table.find('tr');
-                  result.paddingHeight = function() {
-                    return div.height.apply(div, arguments);
-                  };
-                  return result;
-                default:
-                  result = angular.element('<' + repeaterType + '></' + repeaterType + '>');
-                  result.paddingHeight = result.height;
-                  return result;
-              }
-            };
-            createPadding = function(padding, element, direction) {
-              element[{
-                top: 'before',
-                bottom: 'after'
-              }[direction]](padding);
-              return {
-                paddingHeight: function() {
-                  return padding.paddingHeight.apply(padding, arguments);
-                },
-                insert: function(element) {
-                  return padding[{
-                    top: 'after',
-                    bottom: 'before'
-                  }[direction]](element);
-                }
-              };
-            };
-            topPadding = createPadding(padding(repeaterType), element, 'top');
-            bottomPadding = createPadding(padding(repeaterType), element, 'bottom');
-            $scope.$on('$destroy', template.remove);
-            return builder = {
-              viewport: viewport,
-              topPadding: topPadding.paddingHeight,
-              bottomPadding: bottomPadding.paddingHeight,
-              append: bottomPadding.insert,
-              prepend: topPadding.insert,
-              bottomDataPos: function() {
-                return scrollHeight(viewport) - bottomPadding.paddingHeight();
-              },
-              topDataPos: function() {
-                return topPadding.paddingHeight();
-              }
-            };
-          });
-          viewport = builder.viewport;
-          viewportScope = viewport.scope() || $rootScope;
-          topVisible = function(item) {
-            adapter.topVisible = item.scope[itemName];
-            adapter.topVisibleElement = item.element;
-            adapter.topVisibleScope = item.scope;
-            if ($attr.topVisible) {
-              setValueChain(viewportScope, $attr.topVisible, adapter.topVisible);
-            }
-            if ($attr.topVisibleElement) {
-              setValueChain(viewportScope, $attr.topVisibleElement, adapter.topVisibleElement);
-            }
-            if ($attr.topVisibleScope) {
-              setValueChain(viewportScope, $attr.topVisibleScope, adapter.topVisibleScope);
-            }
-            if (typeof datasource.topVisible === 'function') {
-              return datasource.topVisible(item);
-            }
-          };
-          loading = function(value) {
-            adapter.isLoading = value;
-            if ($attr.isLoading) {
-              setValueChain($scope, $attr.isLoading, value);
-            }
-            if (typeof datasource.loading === 'function') {
-              return datasource.loading(value);
-            }
-          };
-          ridActual = 0;
-          first = 1;
-          next = 1;
-          buffer = [];
-          pending = [];
-          eof = false;
-          bof = false;
-          removeFromBuffer = function(start, stop) {
-            var i, _i;
-            for (i = _i = start; start <= stop ? _i < stop : _i > stop; i = start <= stop ? ++_i : --_i) {
-              buffer[i].scope.$destroy();
-              buffer[i].element.remove();
-            }
-            return buffer.splice(start, stop - start);
-          };
-          reload = function() {
-            ridActual++;
-            first = 1;
-            next = 1;
-            removeFromBuffer(0, buffer.length);
-            builder.topPadding(0);
-            builder.bottomPadding(0);
-            pending = [];
-            eof = false;
-            bof = false;
-            return adjustBuffer(ridActual);
-          };
-          bottomVisiblePos = function() {
-            return viewport.scrollTop() + viewport.outerHeight();
-          };
-          topVisiblePos = function() {
-            return viewport.scrollTop();
-          };
-          shouldLoadBottom = function() {
-            return !eof && builder.bottomDataPos() < bottomVisiblePos() + bufferPadding();
-          };
-          clipBottom = function() {
-            var bottomHeight, i, item, itemHeight, itemTop, newRow, overage, rowTop, _i, _ref;
-            bottomHeight = 0;
-            overage = 0;
-            for (i = _i = _ref = buffer.length - 1; _ref <= 0 ? _i <= 0 : _i >= 0; i = _ref <= 0 ? ++_i : --_i) {
-              item = buffer[i];
-              itemTop = item.element.offset().top;
-              newRow = rowTop !== itemTop;
-              rowTop = itemTop;
-              if (newRow) {
-                itemHeight = item.element.outerHeight(true);
-              }
-              if (builder.bottomDataPos() - bottomHeight - itemHeight > bottomVisiblePos() + bufferPadding()) {
-                if (newRow) {
-                  bottomHeight += itemHeight;
-                }
-                overage++;
-                eof = false;
-              } else {
-                if (newRow) {
-                  break;
-                }
-                overage++;
-              }
-            }
-            if (overage > 0) {
-              builder.bottomPadding(builder.bottomPadding() + bottomHeight);
-              removeFromBuffer(buffer.length - overage, buffer.length);
-              return next -= overage;
-            }
-          };
-          shouldLoadTop = function() {
-            return !bof && (builder.topDataPos() > topVisiblePos() - bufferPadding());
-          };
-          clipTop = function() {
-            var item, itemHeight, itemTop, newRow, overage, rowTop, topHeight, _i, _len;
-            topHeight = 0;
-            overage = 0;
-            for (_i = 0, _len = buffer.length; _i < _len; _i++) {
-              item = buffer[_i];
-              itemTop = item.element.offset().top;
-              newRow = rowTop !== itemTop;
-              rowTop = itemTop;
-              if (newRow) {
-                itemHeight = item.element.outerHeight(true);
-              }
-              if (builder.topDataPos() + topHeight + itemHeight < topVisiblePos() - bufferPadding()) {
-                if (newRow) {
-                  topHeight += itemHeight;
-                }
-                overage++;
-                bof = false;
-              } else {
-                if (newRow) {
-                  break;
-                }
-                overage++;
-              }
-            }
-            if (overage > 0) {
-              builder.topPadding(builder.topPadding() + topHeight);
-              removeFromBuffer(0, overage);
-              return first += overage;
-            }
-          };
-          enqueueFetch = function(rid, direction) {
-            if (!adapter.isLoading) {
-              loading(true);
-            }
-            if (pending.push(direction) === 1) {
-              return fetch(rid);
-            }
-          };
-          hideElementBeforeAppend = function(element) {
-            element.displayTemp = element.css('display');
-            return element.css('display', 'none');
-          };
-          showElementAfterRender = function(element) {
-            if (element.hasOwnProperty('displayTemp')) {
-              return element.css('display', element.displayTemp);
-            }
-          };
-          insert = function(index, item) {
-            var itemScope, toBeAppended, wrapper;
-            itemScope = $scope.$new();
-            itemScope[itemName] = item;
-            toBeAppended = index > first;
-            itemScope.$index = index;
-            if (toBeAppended) {
-              itemScope.$index--;
-            }
-            wrapper = {
-              scope: itemScope
-            };
-            linker(itemScope, function(clone) {
-              wrapper.element = clone;
-              if (toBeAppended) {
-                if (index === next) {
-                  hideElementBeforeAppend(clone);
-                  builder.append(clone);
-                  return buffer.push(wrapper);
-                } else {
-                  buffer[index - first].element.after(clone);
-                  return buffer.splice(index - first + 1, 0, wrapper);
-                }
-              } else {
-                hideElementBeforeAppend(clone);
-                builder.prepend(clone);
-                return buffer.unshift(wrapper);
-              }
-            });
-            return {
-              appended: toBeAppended,
-              wrapper: wrapper
-            };
-          };
-          adjustRowHeight = function(appended, wrapper) {
-            var newHeight;
-            if (appended) {
-              return builder.bottomPadding(Math.max(0, builder.bottomPadding() - wrapper.element.outerHeight(true)));
-            } else {
-              newHeight = builder.topPadding() - wrapper.element.outerHeight(true);
-              if (newHeight >= 0) {
-                return builder.topPadding(newHeight);
-              } else {
-                return viewport.scrollTop(viewport.scrollTop() + wrapper.element.outerHeight(true));
-              }
-            }
-          };
-          doAdjustment = function(rid, finalize) {
-            var item, itemHeight, itemTop, newRow, rowTop, topHeight, _i, _len, _results;
-            if (shouldLoadBottom()) {
-              enqueueFetch(rid, true);
-            } else {
-              if (shouldLoadTop()) {
-                enqueueFetch(rid, false);
-              }
-            }
-            if (finalize) {
-              finalize(rid);
-            }
-            if (pending.length === 0) {
-              topHeight = 0;
-              _results = [];
-              for (_i = 0, _len = buffer.length; _i < _len; _i++) {
-                item = buffer[_i];
-                itemTop = item.element.offset().top;
-                newRow = rowTop !== itemTop;
-                rowTop = itemTop;
-                if (newRow) {
-                  itemHeight = item.element.outerHeight(true);
-                }
-                if (newRow && (builder.topDataPos() + topHeight + itemHeight < topVisiblePos())) {
-                  _results.push(topHeight += itemHeight);
-                } else {
-                  if (newRow) {
-                    topVisible(item);
-                  }
-                  break;
-                }
-              }
-              return _results;
-            }
-          };
-          adjustBuffer = function(rid, newItems, finalize) {
-            if (newItems && newItems.length) {
-              return $timeout(function() {
-                var elt, itemTop, row, rowTop, rows, _i, _j, _len, _len1;
-                rows = [];
-                for (_i = 0, _len = newItems.length; _i < _len; _i++) {
-                  row = newItems[_i];
-                  elt = row.wrapper.element;
-                  showElementAfterRender(elt);
-                  itemTop = elt.offset().top;
-                  if (rowTop !== itemTop) {
-                    rows.push(row);
-                    rowTop = itemTop;
-                  }
-                }
-                for (_j = 0, _len1 = rows.length; _j < _len1; _j++) {
-                  row = rows[_j];
-                  adjustRowHeight(row.appended, row.wrapper);
-                }
-                return doAdjustment(rid, finalize);
-              });
-            } else {
-              return doAdjustment(rid, finalize);
-            }
-          };
-          finalize = function(rid, newItems) {
-            return adjustBuffer(rid, newItems, function() {
-              pending.shift();
-              if (pending.length === 0) {
-                return loading(false);
-              } else {
-                return fetch(rid);
-              }
-            });
-          };
-          fetch = function(rid) {
-            var direction;
-            direction = pending[0];
-            if (direction) {
-              if (buffer.length && !shouldLoadBottom()) {
-                return finalize(rid);
-              } else {
-                return datasource.get(next, bufferSize, function(result) {
-                  var item, newItems, _i, _len;
-                  if ((rid && rid !== ridActual) || $scope.$$destroyed) {
-                    return;
-                  }
-                  newItems = [];
-                  if (result.length < bufferSize) {
-                    eof = true;
-                    builder.bottomPadding(0);
-                  }
-                  if (result.length > 0) {
-                    clipTop();
-                    for (_i = 0, _len = result.length; _i < _len; _i++) {
-                      item = result[_i];
-                      newItems.push(insert(++next, item));
-                    }
-                  }
-                  return finalize(rid, newItems);
-                });
-              }
-            } else {
-              if (buffer.length && !shouldLoadTop()) {
-                return finalize(rid);
-              } else {
-                return datasource.get(first - bufferSize, bufferSize, function(result) {
-                  var i, newItems, _i, _ref;
-                  if ((rid && rid !== ridActual) || $scope.$$destroyed) {
-                    return;
-                  }
-                  newItems = [];
-                  if (result.length < bufferSize) {
-                    bof = true;
-                    builder.topPadding(0);
-                  }
-                  if (result.length > 0) {
-                    if (buffer.length) {
-                      clipBottom();
-                    }
-                    for (i = _i = _ref = result.length - 1; _ref <= 0 ? _i <= 0 : _i >= 0; i = _ref <= 0 ? ++_i : --_i) {
-                      newItems.unshift(insert(--first, result[i]));
-                    }
-                  }
-                  return finalize(rid, newItems);
-                });
-              }
-            }
-          };
-          resizeAndScrollHandler = function() {
-            if (!$rootScope.$$phase && !adapter.isLoading) {
-              adjustBuffer();
-              return $scope.$apply();
-            }
-          };
-          wheelHandler = function(event) {
-            var scrollTop, yMax;
-            scrollTop = viewport[0].scrollTop;
-            yMax = viewport[0].scrollHeight - viewport[0].clientHeight;
-            if ((scrollTop === 0 && !bof) || (scrollTop === yMax && !eof)) {
-              return event.preventDefault();
-            }
-          };
-          viewport.bind('resize', resizeAndScrollHandler);
-          viewport.bind('scroll', resizeAndScrollHandler);
-          viewport.bind('mousewheel', wheelHandler);
-          $scope.$watch(datasource.revision, reload);
-          if (datasource.scope) {
-            eventListener = datasource.scope.$new();
-          } else {
-            eventListener = $scope.$new();
-          }
-          $scope.$on('$destroy', function() {
-            var item, _i, _len;
-            for (_i = 0, _len = buffer.length; _i < _len; _i++) {
-              item = buffer[_i];
-              item.scope.$destroy();
-              item.element.remove();
-            }
-            viewport.unbind('resize', resizeAndScrollHandler);
-            viewport.unbind('scroll', resizeAndScrollHandler);
-            return viewport.unbind('mousewheel', wheelHandler);
-          });
-          adapter = {};
-          adapter.isLoading = false;
-          applyUpdate = function(wrapper, newItems) {
-            var i, inserted, item, ndx, newItem, oldItemNdx, _i, _j, _k, _len, _len1, _len2;
-            inserted = [];
-            if (angular.isArray(newItems)) {
-              if (newItems.length) {
-                if (newItems.length === 1 && newItems[0] === wrapper.scope[itemName]) {
-                  return inserted;
-                } else {
-                  ndx = wrapper.scope.$index;
-                  if (ndx > first) {
-                    oldItemNdx = ndx - first;
-                  } else {
-                    oldItemNdx = 1;
-                  }
-                  for (i = _i = 0, _len = newItems.length; _i < _len; i = ++_i) {
-                    newItem = newItems[i];
-                    inserted.push(insert(ndx + i, newItem));
-                  }
-                  removeFromBuffer(oldItemNdx, oldItemNdx + 1);
-                  for (i = _j = 0, _len1 = buffer.length; _j < _len1; i = ++_j) {
-                    item = buffer[i];
-                    item.scope.$index = first + i;
-                  }
-                }
-              } else {
-                removeFromBuffer(wrapper.scope.$index - first, wrapper.scope.$index - first + 1);
-                next--;
-                for (i = _k = 0, _len2 = buffer.length; _k < _len2; i = ++_k) {
-                  item = buffer[i];
-                  item.scope.$index = first + i;
-                }
-              }
-            }
-            return inserted;
-          };
-          adapter.applyUpdates = function(arg1, arg2) {
-            var inserted, wrapper, _i, _len, _ref, _ref1;
-            inserted = [];
-            ridActual++;
-            if (angular.isFunction(arg1)) {
-              _ref = buffer.slice(0);
-              for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-                wrapper = _ref[_i];
-                inserted.concat(inserted, applyUpdate(wrapper, arg1(wrapper.scope[itemName], wrapper.scope, wrapper.element)));
-              }
-            } else {
-              if (arg1 % 1 === 0) {
-                if ((0 <= (_ref1 = arg1 - first - 1) && _ref1 < buffer.length)) {
-                  inserted = applyUpdate(buffer[arg1 - first], arg2);
-                }
-              } else {
-                throw new Error('applyUpdates - ' + arg1 + ' is not a valid index or outside of range');
-              }
-            }
-            return adjustBuffer(ridActual, inserted);
-          };
-          if ($attr.adapter) {
-            adapterOnScope = getValueChain($scope, $attr.adapter);
-            if (!adapterOnScope) {
-              setValueChain($scope, $attr.adapter, {});
-              adapterOnScope = getValueChain($scope, $attr.adapter);
-            }
-            angular.extend(adapterOnScope, adapter);
-            adapter = adapterOnScope;
-          }
-          doUpdate = function(locator, newItem) {
-            var wrapper, _fn, _i, _len, _ref;
-            if (angular.isFunction(locator)) {
-              _fn = function(wrapper) {
-                return locator(wrapper.scope);
-              };
-              for (_i = 0, _len = buffer.length; _i < _len; _i++) {
-                wrapper = buffer[_i];
-                _fn(wrapper);
-              }
-            } else {
-              if ((0 <= (_ref = locator - first - 1) && _ref < buffer.length)) {
-                buffer[locator - first - 1].scope[itemName] = newItem;
-              }
-            }
-            return null;
-          };
-          doDelete = function(locator) {
-            var i, item, temp, wrapper, _fn, _i, _j, _k, _len, _len1, _len2, _ref;
-            if (angular.isFunction(locator)) {
-              temp = [];
-              for (_i = 0, _len = buffer.length; _i < _len; _i++) {
-                item = buffer[_i];
-                temp.unshift(item);
-              }
-              _fn = function(wrapper) {
-                if (locator(wrapper.scope)) {
-                  removeFromBuffer(temp.length - 1 - i, temp.length - i);
-                  return next--;
-                }
-              };
-              for (i = _j = 0, _len1 = temp.length; _j < _len1; i = ++_j) {
-                wrapper = temp[i];
-                _fn(wrapper);
-              }
-            } else {
-              if ((0 <= (_ref = locator - first - 1) && _ref < buffer.length)) {
-                removeFromBuffer(locator - first - 1, locator - first);
-                next--;
-              }
-            }
-            for (i = _k = 0, _len2 = buffer.length; _k < _len2; i = ++_k) {
-              item = buffer[i];
-              item.scope.$index = first + i;
-            }
-            return adjustBuffer();
-          };
-          doInsert = function(locator, item) {
-            var i, inserted, _i, _len, _ref;
-            inserted = [];
-            if (angular.isFunction(locator)) {
-              throw new Error('not implemented - Insert with locator function');
-            } else {
-              if ((0 <= (_ref = locator - first - 1) && _ref < buffer.length)) {
-                inserted.push(insert(locator, item));
-                next++;
-              }
-            }
-            for (i = _i = 0, _len = buffer.length; _i < _len; i = ++_i) {
-              item = buffer[i];
-              item.scope.$index = first + i;
-            }
-            return adjustBuffer(null, inserted);
-          };
-          eventListener.$on('insert.item', function(event, locator, item) {
-            return doInsert(locator, item);
-          });
-          eventListener.$on('update.items', function(event, locator, newItem) {
-            return doUpdate(locator, newItem);
-          });
-          return eventListener.$on('delete.items', function(event, locator) {
-            return doDelete(locator);
-          });
-        };
-      }
-    };
-  }
-]);
-
-/*
-//# sourceURL=src/scripts/ui-scroll.js
-*/
-
-
-/**
- * Adds a 'ui-scrollfix' class to the element when the page scrolls past it's position.
- * @param [offset] {int} optional Y-offset to override the detected offset.
- *   Takes 300 (absolute) or -300 or +300 (relative to detected)
- */
-angular.module('ui.scrollfix',[]).directive('uiScrollfix', ['$window', function ($window) {
-  'use strict';
-
-  function getWindowScrollTop() {
-    if (angular.isDefined($window.pageYOffset)) {
-      return $window.pageYOffset;
-    } else {
-      var iebody = (document.compatMode && document.compatMode !== 'BackCompat') ? document.documentElement : document.body;
-      return iebody.scrollTop;
-    }
-  }
-  return {
-    require: '^?uiScrollfixTarget',
-    link: function (scope, elm, attrs, uiScrollfixTarget) {
-      var absolute = true,
-          shift = 0,
-          fixLimit,
-          $target = uiScrollfixTarget && uiScrollfixTarget.$element || angular.element($window);
-
-      if (!attrs.uiScrollfix) {
-          absolute = false;
-      } else if (typeof(attrs.uiScrollfix) === 'string') {
-        // charAt is generally faster than indexOf: http://jsperf.com/indexof-vs-charat
-        if (attrs.uiScrollfix.charAt(0) === '-') {
-          absolute = false;
-          shift = - parseFloat(attrs.uiScrollfix.substr(1));
-        } else if (attrs.uiScrollfix.charAt(0) === '+') {
-          absolute = false;
-          shift = parseFloat(attrs.uiScrollfix.substr(1));
-        }
-      }
-
-      fixLimit = absolute ? attrs.uiScrollfix : elm[0].offsetTop + shift;
-
-      function onScroll() {
-
-        var limit = absolute ? attrs.uiScrollfix : elm[0].offsetTop + shift;
-
-        // if pageYOffset is defined use it, otherwise use other crap for IE
-        var offset = uiScrollfixTarget ? $target[0].scrollTop : getWindowScrollTop();
-        if (!elm.hasClass('ui-scrollfix') && offset > limit) {
-          elm.addClass('ui-scrollfix');
-          fixLimit = limit;
-        } else if (elm.hasClass('ui-scrollfix') && offset < fixLimit) {
-          elm.removeClass('ui-scrollfix');
-        }
-      }
-
-      $target.on('scroll', onScroll);
-
-      // Unbind scroll event handler when directive is removed
-      scope.$on('$destroy', function() {
-        $target.off('scroll', onScroll);
-      });
-    }
-  };
-}]).directive('uiScrollfixTarget', [function () {
-  'use strict';
-  return {
-    controller: ['$element', function($element) {
-      this.$element = $element;
-    }]
-  };
-}]);
-
-/**
- * uiShow Directive
- *
- * Adds a 'ui-show' class to the element instead of display:block
- * Created to allow tighter control  of CSS without bulkier directives
- *
- * @param expression {boolean} evaluated expression to determine if the class should be added
- */
-angular.module('ui.showhide',[])
-.directive('uiShow', [function () {
-  'use strict';
-
-  return function (scope, elm, attrs) {
-    scope.$watch(attrs.uiShow, function (newVal) {
-      if (newVal) {
-        elm.addClass('ui-show');
-      } else {
-        elm.removeClass('ui-show');
-      }
-    });
-  };
-}])
-
-/**
- * uiHide Directive
- *
- * Adds a 'ui-hide' class to the element instead of display:block
- * Created to allow tighter control  of CSS without bulkier directives
- *
- * @param expression {boolean} evaluated expression to determine if the class should be added
- */
-.directive('uiHide', [function () {
-  'use strict';
-
-  return function (scope, elm, attrs) {
-    scope.$watch(attrs.uiHide, function (newVal) {
-      if (newVal) {
-        elm.addClass('ui-hide');
-      } else {
-        elm.removeClass('ui-hide');
-      }
-    });
-  };
-}])
-
-/**
- * uiToggle Directive
- *
- * Adds a class 'ui-show' if true, and a 'ui-hide' if false to the element instead of display:block/display:none
- * Created to allow tighter control  of CSS without bulkier directives. This also allows you to override the
- * default visibility of the element using either class.
- *
- * @param expression {boolean} evaluated expression to determine if the class should be added
- */
-.directive('uiToggle', [function () {
-  'use strict';
-
-  return function (scope, elm, attrs) {
-    scope.$watch(attrs.uiToggle, function (newVal) {
-      if (newVal) {
-        elm.removeClass('ui-hide').addClass('ui-show');
-      } else {
-        elm.removeClass('ui-show').addClass('ui-hide');
-      }
-    });
-  };
-}]);
-
-/**
- * Filters out all duplicate items from an array by checking the specified key
- * @param [key] {string} the name of the attribute of each object to compare for uniqueness
- if the key is empty, the entire object will be compared
- if the key === false then no filtering will be performed
- * @return {array}
- */
-angular.module('ui.unique',[]).filter('unique', ['$parse', function ($parse) {
-  'use strict';
-
-  return function (items, filterOn) {
-
-    if (filterOn === false) {
-      return items;
-    }
-
-    if ((filterOn || angular.isUndefined(filterOn)) && angular.isArray(items)) {
-      var newItems = [],
-        get = angular.isString(filterOn) ? $parse(filterOn) : function (item) { return item; };
-
-      var extractValueToCompare = function (item) {
-        return angular.isObject(item) ? get(item) : item;
-      };
-
-      angular.forEach(items, function (item) {
-        var isDuplicate = false;
-
-        for (var i = 0; i < newItems.length; i++) {
-          if (angular.equals(extractValueToCompare(newItems[i]), extractValueToCompare(item))) {
-            isDuplicate = true;
-            break;
-          }
-        }
-        if (!isDuplicate) {
-          newItems.push(item);
-        }
-
-      });
-      items = newItems;
-    }
-    return items;
-  };
-}]);
-
-/*
- * Author: Remy Alain Ticona Carbajal http://realtica.org
- * Description: The main objective of ng-uploader is to have a user control,
- * clean, simple, customizable, and above all very easy to implement.
- * Licence: MIT
- */
-
-angular.module('ui.uploader', []).service('uiUploader', uiUploader);
-
-uiUploader.$inject = ['$log'];
-
-function uiUploader($log) {
-    'use strict';
-
-    /*jshint validthis: true */
-    var self = this;
-    self.files = [];
-    self.options = {};
-    self.activeUploads = 0;
-    $log.info('uiUploader loaded');
-    
-    function addFiles(files) {
-        for (var i = 0; i < files.length; i++) {
-            self.files.push(files[i]);
-        }
-    }
-
-    function getFiles() {
-        return self.files;
-    }
-
-    function startUpload(options) {
-        self.options = options;
-        for (var i = 0; i < self.files.length; i++) {
-            if (self.activeUploads == self.options.concurrency) {
-                break;
-            }
-            if (self.files[i].active)
-                continue;
-            ajaxUpload(self.files[i], self.options.url);
-        }
-    }
-    
-    function removeFile(file){
-        self.files.splice(self.files.indexOf(file),1);
-    }
-    
-    function removeAll(){
-        self.files.splice(0,self.files.length);
-    }
-    
-    return {
-        addFiles: addFiles,
-        getFiles: getFiles,
-        files: self.files,
-        startUpload: startUpload,
-        removeFile: removeFile,
-        removeAll:removeAll
-    };
-    
-    function getHumanSize(bytes) {
-        var sizes = ['n/a', 'bytes', 'KiB', 'MiB', 'GiB', 'TB', 'PB', 'EiB', 'ZiB', 'YiB'];
-        var i = +Math.floor(Math.log(bytes) / Math.log(1024));
-        return (bytes / Math.pow(1024, i)).toFixed(i ? 1 : 0) + ' ' + sizes[isNaN(bytes) ? 0 : i + 1];
-    }
-
-    function ajaxUpload(file, url) {
-        var xhr, formData, prop, data = '',
-            key = '' || 'file';
-        self.activeUploads += 1;
-        file.active = true;
-        xhr = new window.XMLHttpRequest();
-        formData = new window.FormData();
-        xhr.open('POST', url);
-
-        // Triggered when upload starts:
-        xhr.upload.onloadstart = function() {};
-
-        // Triggered many times during upload:
-        xhr.upload.onprogress = function(event) {
-            if (!event.lengthComputable) {
-                return;
-            }
-            // Update file size because it might be bigger than reported by
-            // the fileSize:
-            //$log.info("progres..");
-            //console.info(event.loaded);
-            file.loaded = event.loaded;
-            file.humanSize = getHumanSize(event.loaded);
-            self.options.onProgress(file);
-        };
-
-        // Triggered when upload is completed:
-        xhr.onload = function() {
-            self.activeUploads -= 1;
-            startUpload(self.options);
-            self.options.onCompleted(file, xhr.responseText);
-        };
-
-        // Triggered when upload fails:
-        xhr.onerror = function() {};
-
-        // Append additional data if provided:
-        if (data) {
-            for (prop in data) {
-                if (data.hasOwnProperty(prop)) {
-                    formData.append(prop, data[prop]);
-                }
-            }
-        }
-
-        // Append file data:
-        formData.append(key, file, file.name);
-
-        // Initiate upload:
-        xhr.send(formData);
-
-        return xhr;
-    }
-
-}
-
-/**
- * General-purpose validator for ngModel.
- * angular.js comes with several built-in validation mechanism for input fields (ngRequired, ngPattern etc.) but using
- * an arbitrary validation function requires creation of a custom formatters and / or parsers.
- * The ui-validate directive makes it easy to use any function(s) defined in scope as a validator function(s).
- * A validator function will trigger validation on both model and input changes.
- *
- * @example <input ui-validate=" 'myValidatorFunction($value)' ">
- * @example <input ui-validate="{ foo : '$value > anotherModel', bar : 'validateFoo($value)' }">
- * @example <input ui-validate="{ foo : '$value > anotherModel' }" ui-validate-watch=" 'anotherModel' ">
- * @example <input ui-validate="{ foo : '$value > anotherModel', bar : 'validateFoo($value)' }" ui-validate-watch=" { foo : 'anotherModel' } ">
- *
- * @param ui-validate {string|object literal} If strings is passed it should be a scope's function to be used as a validator.
- * If an object literal is passed a key denotes a validation error key while a value should be a validator function.
- * In both cases validator function should take a value to validate as its argument and should return true/false indicating a validation result.
- */
-angular.module('ui.validate',[]).directive('uiValidate', function () {
-  'use strict';
-
-  return {
-    restrict: 'A',
-    require: 'ngModel',
-    link: function (scope, elm, attrs, ctrl) {
-      var validateFn, validators = {},
-          validateExpr = scope.$eval(attrs.uiValidate);
-
-      if (!validateExpr){ return;}
-
-      if (angular.isString(validateExpr)) {
-        validateExpr = { validator: validateExpr };
-      }
-
-      angular.forEach(validateExpr, function (exprssn, key) {
-        validateFn = function (valueToValidate) {
-          var expression = scope.$eval(exprssn, { '$value' : valueToValidate });
-          if (angular.isObject(expression) && angular.isFunction(expression.then)) {
-            // expression is a promise
-            expression.then(function(){
-              ctrl.$setValidity(key, true);
-            }, function(){
-              ctrl.$setValidity(key, false);
-            });
-            return valueToValidate;
-          } else if (expression) {
-            // expression is true
-            ctrl.$setValidity(key, true);
-            return valueToValidate;
-          } else {
-            // expression is false
-            ctrl.$setValidity(key, false);
-            return valueToValidate;
-          }
-        };
-        validators[key] = validateFn;
-        ctrl.$formatters.push(validateFn);
-        ctrl.$parsers.push(validateFn);
-      });
-
-      function apply_watch(watch)
-      {
-          //string - update all validators on expression change
-          if (angular.isString(watch))
-          {
-              scope.$watch(watch, function(){
-                  angular.forEach(validators, function(validatorFn){
-                      validatorFn(ctrl.$modelValue);
-                  });
-              });
-              return;
-          }
-
-          //array - update all validators on change of any expression
-          if (angular.isArray(watch))
-          {
-              angular.forEach(watch, function(expression){
-                  scope.$watch(expression, function()
-                  {
-                      angular.forEach(validators, function(validatorFn){
-                          validatorFn(ctrl.$modelValue);
-                      });
-                  });
-              });
-              return;
-          }
-
-          //object - update appropriate validator
-          if (angular.isObject(watch))
-          {
-              angular.forEach(watch, function(expression, validatorKey)
-              {
-                  //value is string - look after one expression
-                  if (angular.isString(expression))
-                  {
-                      scope.$watch(expression, function(){
-                          validators[validatorKey](ctrl.$modelValue);
-                      });
-                  }
-
-                  //value is array - look after all expressions in array
-                  if (angular.isArray(expression))
-                  {
-                      angular.forEach(expression, function(intExpression)
-                      {
-                          scope.$watch(intExpression, function(){
-                              validators[validatorKey](ctrl.$modelValue);
-                          });
-                      });
-                  }
-              });
-          }
-      }
-      // Support for ui-validate-watch
-      if (attrs.uiValidateWatch){
-          apply_watch( scope.$eval(attrs.uiValidateWatch) );
-      }
-    }
-  };
-});
-
-angular.module('ui.utils',  [
-  'ui.event',
-  'ui.format',
-  'ui.highlight',
-  'ui.include',
-  'ui.indeterminate',
-  'ui.inflector',
-  'ui.jq',
-  'ui.keypress',
-  'ui.mask',
-  'ui.reset',
-  'ui.route',
-  'ui.scrollfix',
-  'ui.scroll',
-  'ui.scroll.jqlite',
-  'ui.showhide',
-  'ui.unique',
-  'ui.validate'
-]);
-
-(function(){
-    var root = this;
-
-    //消息填充位，补足长度。
-    function fillString(str){
-        var blockAmount = ((str.length + 8) >> 6) + 1,
-            blocks = [],
-            i;
-
-        for(i = 0; i < blockAmount * 16; i++){
-            blocks[i] = 0;
-        }
-        for(i = 0; i < str.length; i++){
-            blocks[i >> 2] |= str.charCodeAt(i) << (24 - (i & 3) * 8);
-        }
-        blocks[i >> 2] |= 0x80 << (24 - (i & 3) * 8);
-        blocks[blockAmount * 16 - 1] = str.length * 8;
-
-        return blocks;
-    }
-
-    //将输入的二进制数组转化为十六进制的字符串。
-    function binToHex(binArray){
-        var hexString = "0123456789abcdef",
-            str = "",
-            i;
-
-        for(i = 0; i < binArray.length * 4; i++){
-            str += hexString.charAt((binArray[i >> 2] >> ((3 - i % 4) * 8 + 4)) & 0xF) +
-                    hexString.charAt((binArray[i >> 2] >> ((3 - i % 4) * 8  )) & 0xF);
-        }
-
-        return str;
-    }
-
-    //核心函数，输出为长度为5的number数组，对应160位的消息摘要。
-    function coreFunction(blockArray){
-        var w = [],
-            a = 0x67452301,
-            b = 0xEFCDAB89,
-            c = 0x98BADCFE,
-            d = 0x10325476,
-            e = 0xC3D2E1F0,
-            olda,
-            oldb,
-            oldc,
-            oldd,
-            olde,
-            t,
-            i,
-            j;
-
-        for(i = 0; i < blockArray.length; i += 16){  //每次处理512位 16*32
-            olda = a;
-            oldb = b;
-            oldc = c;
-            oldd = d;
-            olde = e;
-
-            for(j = 0; j < 80; j++){  //对每个512位进行80步操作
-                if(j < 16){
-                    w[j] = blockArray[i + j];
-                }else{
-                    w[j] = cyclicShift(w[j-3] ^ w[j-8] ^ w[j-14] ^ w[j-16], 1);
-                }
-                t = modPlus(modPlus(cyclicShift(a, 5), ft(j, b, c, d)), modPlus(modPlus(e, w[j]), kt(j)));
-                e = d;
-                d = c;
-                c = cyclicShift(b, 30);
-                b = a;
-                a = t;
-            }
-
-            a = modPlus(a, olda);
-            b = modPlus(b, oldb);
-            c = modPlus(c, oldc);
-            d = modPlus(d, oldd);
-            e = modPlus(e, olde);
-        }
-
-        return [a, b, c, d, e];
-    }
-
-    //根据t值返回相应得压缩函数中用到的f函数。
-    function ft(t, b, c, d){
-        if(t < 20){
-            return (b & c) | ((~b) & d);
-        }else if(t < 40){
-            return b ^ c ^ d;
-        }else if(t < 60){
-            return (b & c) | (b & d) | (c & d);
-        }else{
-            return b ^ c ^ d;
-        }
-    }
-
-    //根据t值返回相应得压缩函数中用到的K值。
-    function kt(t){
-        return (t < 20) ?  0x5A827999 :
-                (t < 40) ? 0x6ED9EBA1 :
-                (t < 60) ? 0x8F1BBCDC : 0xCA62C1D6;
-    }
-
-    //模2的32次方加法，因为JavaScript的number是双精度浮点数表示，所以将32位数拆成高16位和低16位分别进行相加
-    function modPlus(x, y){
-        var low = (x & 0xFFFF) + (y & 0xFFFF),
-            high = (x >> 16) + (y >> 16) + (low >> 16);
-
-        return (high << 16) | (low & 0xFFFF);
-    }
-
-    //对输入的32位的num二进制数进行循环左移 ,因为JavaScript的number是双精度浮点数表示，所以移位需需要注意
-    function cyclicShift(num, k){
-        return (num << k) | (num >>> (32 - k));
-    }
-
-    //主函数根据输入的消息字符串计算消息摘要，返回十六进制表示的消息摘要
-    function sha1(s){
-        return binToHex(coreFunction(fillString(s)));
-    }
-
-    // support AMD and Node
-    if(typeof define === "function" && typeof define.amd){
-        define(function(){
-            return sha1;
-        });
-    }else if(typeof exports !== 'undefined') {
-        if(typeof module !== 'undefined' && module.exports) {
-          exports = module.exports = sha1;
-        }
-        exports.sha1 = sha1;
-    } else {
-        root.sha1 = sha1;
-    }
-
-}).call(this);
-// Generated by CoffeeScript 1.6.2
-/*!
-jQuery Waypoints - v2.0.5
-Copyright (c) 2011-2014 Caleb Troughton
-Licensed under the MIT license.
-https://github.com/imakewebthings/jquery-waypoints/blob/master/licenses.txt
-*/
-
-
-(function() {
-  var __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
-    __slice = [].slice;
-
-  (function(root, factory) {
-    if (typeof define === 'function' && define.amd) {
-      return define('waypoints', ['jquery'], function($) {
-        return factory($, root);
-      });
-    } else {
-      return factory(root.jQuery, root);
-    }
-  })(window, function($, window) {
-    var $w, Context, Waypoint, allWaypoints, contextCounter, contextKey, contexts, isTouch, jQMethods, methods, resizeEvent, scrollEvent, waypointCounter, waypointKey, wp, wps;
-
-    $w = $(window);
-    isTouch = __indexOf.call(window, 'ontouchstart') >= 0;
-    allWaypoints = {
-      horizontal: {},
-      vertical: {}
-    };
-    contextCounter = 1;
-    contexts = {};
-    contextKey = 'waypoints-context-id';
-    resizeEvent = 'resize.waypoints';
-    scrollEvent = 'scroll.waypoints';
-    waypointCounter = 1;
-    waypointKey = 'waypoints-waypoint-ids';
-    wp = 'waypoint';
-    wps = 'waypoints';
-    Context = (function() {
-      function Context($element) {
-        var _this = this;
-
-        this.$element = $element;
-        this.element = $element[0];
-        this.didResize = false;
-        this.didScroll = false;
-        this.id = 'context' + contextCounter++;
-        this.oldScroll = {
-          x: $element.scrollLeft(),
-          y: $element.scrollTop()
-        };
-        this.waypoints = {
-          horizontal: {},
-          vertical: {}
-        };
-        this.element[contextKey] = this.id;
-        contexts[this.id] = this;
-        $element.bind(scrollEvent, function() {
-          var scrollHandler;
-
-          if (!(_this.didScroll || isTouch)) {
-            _this.didScroll = true;
-            scrollHandler = function() {
-              _this.doScroll();
-              return _this.didScroll = false;
-            };
-            return window.setTimeout(scrollHandler, $[wps].settings.scrollThrottle);
-          }
-        });
-        $element.bind(resizeEvent, function() {
-          var resizeHandler;
-
-          if (!_this.didResize) {
-            _this.didResize = true;
-            resizeHandler = function() {
-              $[wps]('refresh');
-              return _this.didResize = false;
-            };
-            return window.setTimeout(resizeHandler, $[wps].settings.resizeThrottle);
-          }
-        });
-      }
-
-      Context.prototype.doScroll = function() {
-        var axes,
-          _this = this;
-
-        axes = {
-          horizontal: {
-            newScroll: this.$element.scrollLeft(),
-            oldScroll: this.oldScroll.x,
-            forward: 'right',
-            backward: 'left'
-          },
-          vertical: {
-            newScroll: this.$element.scrollTop(),
-            oldScroll: this.oldScroll.y,
-            forward: 'down',
-            backward: 'up'
-          }
-        };
-        if (isTouch && (!axes.vertical.oldScroll || !axes.vertical.newScroll)) {
-          $[wps]('refresh');
-        }
-        $.each(axes, function(aKey, axis) {
-          var direction, isForward, triggered;
-
-          triggered = [];
-          isForward = axis.newScroll > axis.oldScroll;
-          direction = isForward ? axis.forward : axis.backward;
-          $.each(_this.waypoints[aKey], function(wKey, waypoint) {
-            var _ref, _ref1;
-
-            if ((axis.oldScroll < (_ref = waypoint.offset) && _ref <= axis.newScroll)) {
-              return triggered.push(waypoint);
-            } else if ((axis.newScroll < (_ref1 = waypoint.offset) && _ref1 <= axis.oldScroll)) {
-              return triggered.push(waypoint);
-            }
-          });
-          triggered.sort(function(a, b) {
-            return a.offset - b.offset;
-          });
-          if (!isForward) {
-            triggered.reverse();
-          }
-          return $.each(triggered, function(i, waypoint) {
-            if (waypoint.options.continuous || i === triggered.length - 1) {
-              return waypoint.trigger([direction]);
-            }
-          });
-        });
-        return this.oldScroll = {
-          x: axes.horizontal.newScroll,
-          y: axes.vertical.newScroll
-        };
-      };
-
-      Context.prototype.refresh = function() {
-        var axes, cOffset, isWin,
-          _this = this;
-
-        isWin = $.isWindow(this.element);
-        cOffset = this.$element.offset();
-        this.doScroll();
-        axes = {
-          horizontal: {
-            contextOffset: isWin ? 0 : cOffset.left,
-            contextScroll: isWin ? 0 : this.oldScroll.x,
-            contextDimension: this.$element.width(),
-            oldScroll: this.oldScroll.x,
-            forward: 'right',
-            backward: 'left',
-            offsetProp: 'left'
-          },
-          vertical: {
-            contextOffset: isWin ? 0 : cOffset.top,
-            contextScroll: isWin ? 0 : this.oldScroll.y,
-            contextDimension: isWin ? $[wps]('viewportHeight') : this.$element.height(),
-            oldScroll: this.oldScroll.y,
-            forward: 'down',
-            backward: 'up',
-            offsetProp: 'top'
-          }
-        };
-        return $.each(axes, function(aKey, axis) {
-          return $.each(_this.waypoints[aKey], function(i, waypoint) {
-            var adjustment, elementOffset, oldOffset, _ref, _ref1;
-
-            adjustment = waypoint.options.offset;
-            oldOffset = waypoint.offset;
-            elementOffset = $.isWindow(waypoint.element) ? 0 : waypoint.$element.offset()[axis.offsetProp];
-            if ($.isFunction(adjustment)) {
-              adjustment = adjustment.apply(waypoint.element);
-            } else if (typeof adjustment === 'string') {
-              adjustment = parseFloat(adjustment);
-              if (waypoint.options.offset.indexOf('%') > -1) {
-                adjustment = Math.ceil(axis.contextDimension * adjustment / 100);
-              }
-            }
-            waypoint.offset = elementOffset - axis.contextOffset + axis.contextScroll - adjustment;
-            if ((waypoint.options.onlyOnScroll && (oldOffset != null)) || !waypoint.enabled) {
-              return;
-            }
-            if (oldOffset !== null && (oldOffset < (_ref = axis.oldScroll) && _ref <= waypoint.offset)) {
-              return waypoint.trigger([axis.backward]);
-            } else if (oldOffset !== null && (oldOffset > (_ref1 = axis.oldScroll) && _ref1 >= waypoint.offset)) {
-              return waypoint.trigger([axis.forward]);
-            } else if (oldOffset === null && axis.oldScroll >= waypoint.offset) {
-              return waypoint.trigger([axis.forward]);
-            }
-          });
-        });
-      };
-
-      Context.prototype.checkEmpty = function() {
-        if ($.isEmptyObject(this.waypoints.horizontal) && $.isEmptyObject(this.waypoints.vertical)) {
-          this.$element.unbind([resizeEvent, scrollEvent].join(' '));
-          return delete contexts[this.id];
-        }
-      };
-
-      return Context;
-
-    })();
-    Waypoint = (function() {
-      function Waypoint($element, context, options) {
-        var idList, _ref;
-
-        if (options.offset === 'bottom-in-view') {
-          options.offset = function() {
-            var contextHeight;
-
-            contextHeight = $[wps]('viewportHeight');
-            if (!$.isWindow(context.element)) {
-              contextHeight = context.$element.height();
-            }
-            return contextHeight - $(this).outerHeight();
-          };
-        }
-        this.$element = $element;
-        this.element = $element[0];
-        this.axis = options.horizontal ? 'horizontal' : 'vertical';
-        this.callback = options.handler;
-        this.context = context;
-        this.enabled = options.enabled;
-        this.id = 'waypoints' + waypointCounter++;
-        this.offset = null;
-        this.options = options;
-        context.waypoints[this.axis][this.id] = this;
-        allWaypoints[this.axis][this.id] = this;
-        idList = (_ref = this.element[waypointKey]) != null ? _ref : [];
-        idList.push(this.id);
-        this.element[waypointKey] = idList;
-      }
-
-      Waypoint.prototype.trigger = function(args) {
-        if (!this.enabled) {
-          return;
-        }
-        if (this.callback != null) {
-          this.callback.apply(this.element, args);
-        }
-        if (this.options.triggerOnce) {
-          return this.destroy();
-        }
-      };
-
-      Waypoint.prototype.disable = function() {
-        return this.enabled = false;
-      };
-
-      Waypoint.prototype.enable = function() {
-        this.context.refresh();
-        return this.enabled = true;
-      };
-
-      Waypoint.prototype.destroy = function() {
-        delete allWaypoints[this.axis][this.id];
-        delete this.context.waypoints[this.axis][this.id];
-        return this.context.checkEmpty();
-      };
-
-      Waypoint.getWaypointsByElement = function(element) {
-        var all, ids;
-
-        ids = element[waypointKey];
-        if (!ids) {
-          return [];
-        }
-        all = $.extend({}, allWaypoints.horizontal, allWaypoints.vertical);
-        return $.map(ids, function(id) {
-          return all[id];
-        });
-      };
-
-      return Waypoint;
-
-    })();
-    methods = {
-      init: function(f, options) {
-        var _ref;
-
-        options = $.extend({}, $.fn[wp].defaults, options);
-        if ((_ref = options.handler) == null) {
-          options.handler = f;
-        }
-        this.each(function() {
-          var $this, context, contextElement, _ref1;
-
-          $this = $(this);
-          contextElement = (_ref1 = options.context) != null ? _ref1 : $.fn[wp].defaults.context;
-          if (!$.isWindow(contextElement)) {
-            contextElement = $this.closest(contextElement);
-          }
-          contextElement = $(contextElement);
-          context = contexts[contextElement[0][contextKey]];
-          if (!context) {
-            context = new Context(contextElement);
-          }
-          return new Waypoint($this, context, options);
-        });
-        $[wps]('refresh');
-        return this;
-      },
-      disable: function() {
-        return methods._invoke.call(this, 'disable');
-      },
-      enable: function() {
-        return methods._invoke.call(this, 'enable');
-      },
-      destroy: function() {
-        return methods._invoke.call(this, 'destroy');
-      },
-      prev: function(axis, selector) {
-        return methods._traverse.call(this, axis, selector, function(stack, index, waypoints) {
-          if (index > 0) {
-            return stack.push(waypoints[index - 1]);
-          }
-        });
-      },
-      next: function(axis, selector) {
-        return methods._traverse.call(this, axis, selector, function(stack, index, waypoints) {
-          if (index < waypoints.length - 1) {
-            return stack.push(waypoints[index + 1]);
-          }
-        });
-      },
-      _traverse: function(axis, selector, push) {
-        var stack, waypoints;
-
-        if (axis == null) {
-          axis = 'vertical';
-        }
-        if (selector == null) {
-          selector = window;
-        }
-        waypoints = jQMethods.aggregate(selector);
-        stack = [];
-        this.each(function() {
-          var index;
-
-          index = $.inArray(this, waypoints[axis]);
-          return push(stack, index, waypoints[axis]);
-        });
-        return this.pushStack(stack);
-      },
-      _invoke: function(method) {
-        this.each(function() {
-          var waypoints;
-
-          waypoints = Waypoint.getWaypointsByElement(this);
-          return $.each(waypoints, function(i, waypoint) {
-            waypoint[method]();
-            return true;
-          });
-        });
-        return this;
-      }
-    };
-    $.fn[wp] = function() {
-      var args, method;
-
-      method = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-      if (methods[method]) {
-        return methods[method].apply(this, args);
-      } else if ($.isFunction(method)) {
-        return methods.init.apply(this, arguments);
-      } else if ($.isPlainObject(method)) {
-        return methods.init.apply(this, [null, method]);
-      } else if (!method) {
-        return $.error("jQuery Waypoints needs a callback function or handler option.");
-      } else {
-        return $.error("The " + method + " method does not exist in jQuery Waypoints.");
-      }
-    };
-    $.fn[wp].defaults = {
-      context: window,
-      continuous: true,
-      enabled: true,
-      horizontal: false,
-      offset: 0,
-      triggerOnce: false
-    };
-    jQMethods = {
-      refresh: function() {
-        return $.each(contexts, function(i, context) {
-          return context.refresh();
-        });
-      },
-      viewportHeight: function() {
-        var _ref;
-
-        return (_ref = window.innerHeight) != null ? _ref : $w.height();
-      },
-      aggregate: function(contextSelector) {
-        var collection, waypoints, _ref;
-
-        collection = allWaypoints;
-        if (contextSelector) {
-          collection = (_ref = contexts[$(contextSelector)[0][contextKey]]) != null ? _ref.waypoints : void 0;
-        }
-        if (!collection) {
-          return [];
-        }
-        waypoints = {
-          horizontal: [],
-          vertical: []
-        };
-        $.each(waypoints, function(axis, arr) {
-          $.each(collection[axis], function(key, waypoint) {
-            return arr.push(waypoint);
-          });
-          arr.sort(function(a, b) {
-            return a.offset - b.offset;
-          });
-          waypoints[axis] = $.map(arr, function(waypoint) {
-            return waypoint.element;
-          });
-          return waypoints[axis] = $.unique(waypoints[axis]);
-        });
-        return waypoints;
-      },
-      above: function(contextSelector) {
-        if (contextSelector == null) {
-          contextSelector = window;
-        }
-        return jQMethods._filter(contextSelector, 'vertical', function(context, waypoint) {
-          return waypoint.offset <= context.oldScroll.y;
-        });
-      },
-      below: function(contextSelector) {
-        if (contextSelector == null) {
-          contextSelector = window;
-        }
-        return jQMethods._filter(contextSelector, 'vertical', function(context, waypoint) {
-          return waypoint.offset > context.oldScroll.y;
-        });
-      },
-      left: function(contextSelector) {
-        if (contextSelector == null) {
-          contextSelector = window;
-        }
-        return jQMethods._filter(contextSelector, 'horizontal', function(context, waypoint) {
-          return waypoint.offset <= context.oldScroll.x;
-        });
-      },
-      right: function(contextSelector) {
-        if (contextSelector == null) {
-          contextSelector = window;
-        }
-        return jQMethods._filter(contextSelector, 'horizontal', function(context, waypoint) {
-          return waypoint.offset > context.oldScroll.x;
-        });
-      },
-      enable: function() {
-        return jQMethods._invoke('enable');
-      },
-      disable: function() {
-        return jQMethods._invoke('disable');
-      },
-      destroy: function() {
-        return jQMethods._invoke('destroy');
-      },
-      extendFn: function(methodName, f) {
-        return methods[methodName] = f;
-      },
-      _invoke: function(method) {
-        var waypoints;
-
-        waypoints = $.extend({}, allWaypoints.vertical, allWaypoints.horizontal);
-        return $.each(waypoints, function(key, waypoint) {
-          waypoint[method]();
-          return true;
-        });
-      },
-      _filter: function(selector, axis, test) {
-        var context, waypoints;
-
-        context = contexts[$(selector)[0][contextKey]];
-        if (!context) {
-          return [];
-        }
-        waypoints = [];
-        $.each(context.waypoints[axis], function(i, waypoint) {
-          if (test(context, waypoint)) {
-            return waypoints.push(waypoint);
-          }
-        });
-        waypoints.sort(function(a, b) {
-          return a.offset - b.offset;
-        });
-        return $.map(waypoints, function(waypoint) {
-          return waypoint.element;
-        });
-      }
-    };
-    $[wps] = function() {
-      var args, method;
-
-      method = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-      if (jQMethods[method]) {
-        return jQMethods[method].apply(null, args);
-      } else {
-        return jQMethods.aggregate.call(null, method);
-      }
-    };
-    $[wps].settings = {
-      resizeThrottle: 100,
-      scrollThrottle: 30
-    };
-    return $w.on('load.waypoints', function() {
-      return $[wps]('refresh');
-    });
-  });
-
-}).call(this);
-
-/**
- * @license Angulartics v0.17.2
- * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
- * License: MIT
- */
-(function(angular, analytics) {
-'use strict';
-
-var angulartics = window.angulartics || (window.angulartics = {});
-angulartics.waitForVendorCount = 0;
-angulartics.waitForVendorApi = function (objectName, delay, containsField, registerFn, onTimeout) {
-  if (!onTimeout) { angulartics.waitForVendorCount++; }
-  if (!registerFn) { registerFn = containsField; containsField = undefined; }
-  if (!Object.prototype.hasOwnProperty.call(window, objectName) || (containsField !== undefined && window[objectName][containsField] === undefined)) {
-    setTimeout(function () { angulartics.waitForVendorApi(objectName, delay, containsField, registerFn, true); }, delay);
-  }
-  else {
-    angulartics.waitForVendorCount--;
-    registerFn(window[objectName]);
-  }
-};
-
-/**
- * @ngdoc overview
- * @name angulartics
- */
-angular.module('angulartics', [])
-.provider('$analytics', function () {
-  var settings = {
-    pageTracking: {
-      autoTrackFirstPage: true,
-      autoTrackVirtualPages: true,
-      trackRelativePath: false,
-      autoBasePath: false,
-      basePath: ''
-    },
-    eventTracking: {},
-    bufferFlushDelay: 1000, // Support only one configuration for buffer flush delay to simplify buffering
-    developerMode: false // Prevent sending data in local/development environment
-  };
-
-  // List of known handlers that plugins can register themselves for
-  var knownHandlers = [
-    'pageTrack',
-    'eventTrack',
-    'setAlias',
-    'setUsername',
-    'setAlias',
-    'setUserProperties',
-    'setUserPropertiesOnce',
-    'setSuperProperties',
-    'setSuperPropertiesOnce'
-  ];
-  // Cache and handler properties will match values in 'knownHandlers' as the buffering functons are installed.
-  var cache = {};
-  var handlers = {};
-
-  // General buffering handler
-  var bufferedHandler = function(handlerName){
-    return function(){
-      if(angulartics.waitForVendorCount){
-        if(!cache[handlerName]){ cache[handlerName] = []; }
-        cache[handlerName].push(arguments);
-      }
-    };
-  };
-
-  // As handlers are installed by plugins, they get pushed into a list and invoked in order.
-  var updateHandlers = function(handlerName, fn){
-    if(!handlers[handlerName]){
-      handlers[handlerName] = [];
-    }
-    handlers[handlerName].push(fn);
-    return function(){
-      var handlerArgs = arguments;
-      angular.forEach(handlers[handlerName], function(handler){
-        handler.apply(this, handlerArgs);
-      }, this);
-    };
-  };
-
-  // The api (returned by this provider) gets populated with handlers below.
-  var api = {
-    settings: settings
-  };
-
-  // Will run setTimeout if delay is > 0
-  // Runs immediately if no delay to make sure cache/buffer is flushed before anything else.
-  // Plugins should take care to register handlers by order of precedence.
-  var onTimeout = function(fn, delay){
-    if(delay){
-      setTimeout(fn, delay);
-    } else {
-      fn();
-    }
-  };
-
-  var provider = {
-    $get: function() { return api; },
-    api: api,
-    settings: settings,
-    virtualPageviews: function (value) { this.settings.pageTracking.autoTrackVirtualPages = value; },
-    firstPageview: function (value) { this.settings.pageTracking.autoTrackFirstPage = value; },
-    withBase: function (value) { this.settings.pageTracking.basePath = (value) ? angular.element('base').attr('href').slice(0, -1) : ''; },
-    withAutoBase: function (value) { this.settings.pageTracking.autoBasePath = value; },
-    developerMode: function(value) { this.settings.developerMode = value; }
-  };
-
-  // General function to register plugin handlers. Flushes buffers immediately upon registration according to the specified delay.
-  var register = function(handlerName, fn){
-    api[handlerName] = updateHandlers(handlerName, fn);
-    var handlerSettings = settings[handlerName];
-    var handlerDelay = (handlerSettings) ? handlerSettings.bufferFlushDelay : null;
-    var delay = (handlerDelay !== null) ? handlerDelay : settings.bufferFlushDelay;
-    angular.forEach(cache[handlerName], function (args, index) {
-      onTimeout(function () { fn.apply(this, args); }, index * delay);
-    });
-  };
-
-  var capitalize = function (input) {
-      return input.replace(/^./, function (match) {
-          return match.toUpperCase();
-      });
-  };
-
-  // Adds to the provider a 'register#{handlerName}' function that manages multiple plugins and buffer flushing.
-  var installHandlerRegisterFunction = function(handlerName){
-    var registerName = 'register'+capitalize(handlerName);
-    provider[registerName] = function(fn){
-      register(handlerName, fn);
-    };
-    api[handlerName] = updateHandlers(handlerName, bufferedHandler(handlerName));
-  };
-
-  // Set up register functions for each known handler
-  angular.forEach(knownHandlers, installHandlerRegisterFunction);
-  return provider;
-})
-
-.run(['$rootScope', '$window', '$analytics', '$injector', function ($rootScope, $window, $analytics, $injector) {
-  if ($analytics.settings.pageTracking.autoTrackFirstPage) {
-    $injector.invoke(['$location', function ($location) {
-      /* Only track the 'first page' if there are no routes or states on the page */
-      var noRoutesOrStates = true;
-      if ($injector.has('$route')) {
-         var $route = $injector.get('$route');
-         for (var route in $route.routes) {
-           noRoutesOrStates = false;
-           break;
-         }
-      } else if ($injector.has('$state')) {
-        var $state = $injector.get('$state');
-        for (var state in $state.get()) {
-          noRoutesOrStates = false;
-          break;
-        }
-      }
-      if (noRoutesOrStates) {
-        if ($analytics.settings.pageTracking.autoBasePath) {
-          $analytics.settings.pageTracking.basePath = $window.location.pathname;
-        }
-        if ($analytics.settings.pageTracking.trackRelativePath) {
-          var url = $analytics.settings.pageTracking.basePath + $location.url();
-          $analytics.pageTrack(url, $location);
-        } else {
-          $analytics.pageTrack($location.absUrl(), $location);
-        }
-      }
-    }]);
-  }
-
-  if ($analytics.settings.pageTracking.autoTrackVirtualPages) {
-    $injector.invoke(['$location', function ($location) {
-      if ($analytics.settings.pageTracking.autoBasePath) {
-        /* Add the full route to the base. */
-        $analytics.settings.pageTracking.basePath = $window.location.pathname + "#";
-      }
-      if ($injector.has('$route')) {
-        $rootScope.$on('$routeChangeSuccess', function (event, current) {
-          if (current && (current.$$route||current).redirectTo) return;
-          var url = $analytics.settings.pageTracking.basePath + $location.url();
-          $analytics.pageTrack(url, $location);
-        });
-      }
-      if ($injector.has('$state')) {
-        $rootScope.$on('$stateChangeSuccess', function (event, current) {
-          var url = $analytics.settings.pageTracking.basePath + $location.url();
-          $analytics.pageTrack(url, $location);
-        });
-      }
-    }]);
-  }
-  if ($analytics.settings.developerMode) {
-    angular.forEach($analytics, function(attr, name) {
-      if (typeof attr === 'function') {
-        $analytics[name] = function(){};
-      }
-    });
-  }
-}])
-
-.directive('analyticsOn', ['$analytics', function ($analytics) {
-  function isCommand(element) {
-    return ['a:','button:','button:button','button:submit','input:button','input:submit'].indexOf(
-      element.tagName.toLowerCase()+':'+(element.type||'')) >= 0;
-  }
-
-  function inferEventType(element) {
-    if (isCommand(element)) return 'click';
-    return 'click';
-  }
-
-  function inferEventName(element) {
-    if (isCommand(element)) return element.innerText || element.value;
-    return element.id || element.name || element.tagName;
-  }
-
-  function isProperty(name) {
-    return name.substr(0, 9) === 'analytics' && ['On', 'Event', 'If', 'Properties', 'EventType'].indexOf(name.substr(9)) === -1;
-  }
-
-  function propertyName(name) {
-    var s = name.slice(9); // slice off the 'analytics' prefix
-    if (typeof s !== 'undefined' && s!==null && s.length > 0) {
-      return s.substring(0, 1).toLowerCase() + s.substring(1);
-    }
-    else {
-      return s;
-    }
-  }
-
-  return {
-    restrict: 'A',
-    link: function ($scope, $element, $attrs) {
-      var eventType = $attrs.analyticsOn || inferEventType($element[0]);
-      var trackingData = {};
-
-      angular.forEach($attrs.$attr, function(attr, name) {
-        if (isProperty(name)) {
-          trackingData[propertyName(name)] = $attrs[name];
-          $attrs.$observe(name, function(value){
-            trackingData[propertyName(name)] = value;
-          });
-        }
-      });
-
-      angular.element($element[0]).bind(eventType, function ($event) {
-        var eventName = $attrs.analyticsEvent || inferEventName($element[0]);
-        trackingData.eventType = $event.type;
-
-        if($attrs.analyticsIf){
-          if(! $scope.$eval($attrs.analyticsIf)){
-            return; // Cancel this event if we don't pass the analytics-if condition
-          }
-        }
-        // Allow components to pass through an expression that gets merged on to the event properties
-        // eg. analytics-properites='myComponentScope.someConfigExpression.$analyticsProperties'
-        if($attrs.analyticsProperties){
-          angular.extend(trackingData, $scope.$eval($attrs.analyticsProperties));
-        }
-        $analytics.eventTrack(eventName, trackingData);
-      });
-    }
-  };
-}]);
-})(angular);
-
-/**
- * @license Angulartics v0.17.2
- * (c) 2014 Luis Farzati http://luisfarzati.github.io/angulartics
- * Adobe analytics(Omniture) update contributed by http://github.com/ajayk
- * License: MIT
- */
-(function(angular) {
-'use strict';
-
-/**
- * @ngdoc overview
- * @name angulartics.adobe.analytics
- * Enables analytics support for Adobe Analytics (http://adobe.com/analytics)
- */
-angular.module('angulartics.adobe.analytics', ['angulartics'])
-.config(['$analyticsProvider', function ($analyticsProvider) {
-
-  $analyticsProvider.settings.trackRelativePath = true;
-
-  $analyticsProvider.registerPageTrack(function (path) {
-    if (window.s) s.t({pageName:path});
-  });
-
-  /**
-   * Track Event in Adobe Analytics
-   * @name eventTrack
-   *
-   * @param {string} action Required 'action' (string) associated with the event
-   *
-   *
-   */
-  $analyticsProvider.registerEventTrack(function (action) {
-    if (window.s) {
-      if(action) {
-        if(action.toUpperCase() === "DOWNLOAD")
-          s.tl(this,'d',action);
-        else if(action.toUpperCase() === "EXIT")
-          s.tl(this,'e',action);
-        else
-          s.tl(this,'o',action);
-      }
-    }
-  });
-
-}]);
-})(angular);
-
-/**
- * @license Angulartics v0.17.2
- * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
- * Contributed by http://github.com/chechoacosta
- * License: MIT
- */
-(function(angular) {
-'use strict';
-
-/**
- * @ngdoc overview
- * @name angulartics.chartbeat
- * Enables analytics support for Chartbeat (http://chartbeat.com)
- */
-angular.module('angulartics.chartbeat', ['angulartics'])
-.config(['$analyticsProvider', function ($analyticsProvider) {
-
-  angulartics.waitForVendorApi('pSUPERFLY', 500, function (pSUPERFLY) {
-    $analyticsProvider.registerPageTrack(function (path) {
-      pSUPERFLY.virtualPage(path);
-    });
-  });
-
-  $analyticsProvider.registerEventTrack(function () {
-    console.warn('Chartbeat doesn\'t support event tracking -- silently ignored.');
-  });
-
-}]);
-})(angular);
-
-(function(angular) {
-  'use strict';
-
-  /**
-   * @ngdoc overview
-   * @name angulartics.cnzz
-   * Enables analytics support for CNZZ (http://www.cnzz.com)
-   */
-  angular.module('angulartics.cnzz', ['angulartics'])
-    .config(['$analyticsProvider', function ($analyticsProvider) {
-      window._czc = _czc || [];
-      _czc.push(['_setAutoPageview', false]);
-
-      $analyticsProvider.registerPageTrack(function (path) {
-        _czc.push(['_trackPageview', path]);
-      });
-
-      $analyticsProvider.registerEventTrack(function (action, prop) {
-        _czc.push([
-          '_trackEvent',
-          prop.category,
-          action,
-          prop.label,
-          prop.value,
-          prop.nodeid
-        ]);
-      });
-    }]);
-})(angular);
-
-/**
- * @license Angulartics v0.17.2
- * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
- * Contributed by http://github.com/samanbarghi
- * License: MIT
- */
-
-(function(angular) {
-'use strict';
-
-/**
- * @ngdoc overview
- * @name angulartics.flurry
- * Enables analytics support for flurry (http://flurry.com)
- */
-angular.module('angulartics.flurry', ['angulartics'])
-.config(['$analyticsProvider', function ($analyticsProvider) {
-
-
-  $analyticsProvider.registerPageTrack(function (path) {
-    //No separate track page functionality
-  });
-
-  $analyticsProvider.registerEventTrack(function (action, properties) {
-    FlurryAgent.logEvent(action, properties);
-  });
-
-}]);
-})(angular);
-
-/**
- * @license Angulartics v0.17.2
- * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
- * License: MIT
- */
-(function(angular) {
-'use strict';
-
-/**
- * @ngdoc overview
- * @name angulartics.google.analytics
- * Enables analytics support for Google Analytics (http://google.com/analytics)
- */
-angular.module('angulartics.google.analytics.cordova', ['angulartics'])
-
-.provider('googleAnalyticsCordova', function () {
-  var GoogleAnalyticsCordova = [
-  '$q', '$log', 'ready', 'debug', 'trackingId', 'period',
-  function ($q, $log, ready, debug, trackingId, period) {
-    var deferred = $q.defer();
-    var deviceReady = false;
-
-    window.addEventListener('deviceReady', function () {
-      deviceReady = true;
-      deferred.resolve();
-    });
-
-    setTimeout(function () {
-      if (!deviceReady) {
-        deferred.resolve();
-      }
-    }, 3000);
-
-    function success() {
-      if (debug) {
-        $log.info(arguments);
-      }
-    }
-
-    function failure(err) {
-      if (debug) {
-        $log.error(err);
-      }
-    }
-
-    this.init = function () {
-      return deferred.promise.then(function () {
-        var analytics = window.plugins && window.plugins.gaPlugin;
-        if (analytics) {
-          analytics.init(function onInit() {
-            ready(analytics, success, failure);
-          }, failure, trackingId, period || 10);
-        } else if (debug) {
-          $log.error('Google Analytics for Cordova is not available');
-        }
-      });
-    };
-  }];
-
-  return {
-    $get: ['$injector', function ($injector) {
-      return $injector.instantiate(GoogleAnalyticsCordova, {
-        ready: this._ready || angular.noop,
-        debug: this.debug,
-        trackingId: this.trackingId,
-        period: this.period
-      });
-    }],
-    ready: function (fn) {
-      this._ready = fn;
-    }
-  };
-})
-
-.config(['$analyticsProvider', 'googleAnalyticsCordovaProvider', function ($analyticsProvider, googleAnalyticsCordovaProvider) {
-  googleAnalyticsCordovaProvider.ready(function (analytics, success, failure) {
-    $analyticsProvider.registerPageTrack(function (path) {
-      analytics.trackPage(success, failure, path);
-    });
-
-    $analyticsProvider.registerEventTrack(function (action, properties) {
-      analytics.trackEvent(success, failure, properties.category, action, properties.label, properties.value);
-    });
-  });
-}])
-
-.run(['googleAnalyticsCordova', function (googleAnalyticsCordova) {
-  googleAnalyticsCordova.init();
-}]);
-
-})(angular);
-
-/**
- * @license Angulartics v0.17.2
- * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
- * Universal Analytics update contributed by http://github.com/willmcclellan
- * License: MIT
- */
-(function(angular) {
-'use strict';
-
-/**
- * @ngdoc overview
- * @name angulartics.google.analytics
- * Enables analytics support for Google Analytics (http://google.com/analytics)
- */
-angular.module('angulartics.google.analytics', ['angulartics'])
-.config(['$analyticsProvider', function ($analyticsProvider) {
-
-  // GA already supports buffered invocations so we don't need
-  // to wrap these inside angulartics.waitForVendorApi
-
-  $analyticsProvider.settings.trackRelativePath = true;
-
-  // Set the default settings for this module
-  $analyticsProvider.settings.ga = {
-    // array of additional account names (only works for analyticsjs)
-    additionalAccountNames: undefined,
-    userId: null
-  };
-
-  $analyticsProvider.registerPageTrack(function (path) {
-    if (window._gaq) _gaq.push(['_trackPageview', path]);
-    if (window.ga) {
-      if ($analyticsProvider.settings.ga.userId) {
-        ga('set', '&uid', $analyticsProvider.settings.ga.userId);
-      }
-      ga('send', 'pageview', path);
-      angular.forEach($analyticsProvider.settings.ga.additionalAccountNames, function (accountName){
-        ga(accountName +'.send', 'pageview', path);
-      });
-    }
-  });
-
-  /**
-   * Track Event in GA
-   * @name eventTrack
-   *
-   * @param {string} action Required 'action' (string) associated with the event
-   * @param {object} properties Comprised of the mandatory field 'category' (string) and optional  fields 'label' (string), 'value' (integer) and 'noninteraction' (boolean)
-   *
-   * @link https://developers.google.com/analytics/devguides/collection/gajs/eventTrackerGuide#SettingUpEventTracking
-   *
-   * @link https://developers.google.com/analytics/devguides/collection/analyticsjs/events
-   */
-  $analyticsProvider.registerEventTrack(function (action, properties) {
-
-    // Google Analytics requires an Event Category
-    if (!properties || !properties.category) {
-    	properties = properties || {};
-		properties.category = 'Event';
-	}
-    // GA requires that eventValue be an integer, see:
-    // https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference#eventValue
-    // https://github.com/luisfarzati/angulartics/issues/81
-    if (properties.value) {
-      var parsed = parseInt(properties.value, 10);
-      properties.value = isNaN(parsed) ? 0 : parsed;
-    }
-
-    if (window.ga) {
-
-      var eventOptions = {
-        eventCategory: properties.category,
-        eventAction: action,
-        eventLabel: properties.label,
-        eventValue: properties.value,
-        nonInteraction: properties.noninteraction,
-        page: properties.page || window.location.hash.substring(1),
-        userId: $analyticsProvider.settings.ga.userId
-      };
-
-      // add custom dimensions and metrics
-      for(var idx = 1; idx<=20;idx++) {
-      if (properties['dimension' +idx.toString()]) {
-        eventOptions['dimension' +idx.toString()] = properties['dimension' +idx.toString()];
-      }
-      if (properties['metric' +idx.toString()]) {
-        eventOptions['metric' +idx.toString()] = properties['metric' +idx.toString()];
-        }
-      }
-      ga('send', 'event', eventOptions);
-      angular.forEach($analyticsProvider.settings.ga.additionalAccountNames, function (accountName){
-        ga(accountName +'.send', 'event', eventOptions);
-      });
-    }
-
-    else if (window._gaq) {
-      _gaq.push(['_trackEvent', properties.category, action, properties.label, properties.value, properties.noninteraction]);
-    }
-
-  });
-
-  $analyticsProvider.registerSetUsername(function (userId) {
-    $analyticsProvider.settings.ga.userId = userId;
-  });
-
-}]);
-})(angular);
-
-/**
- * @license Angulartics v0.17.2
- * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
- * Google Tag Manager Plugin Contributed by http://github.com/danrowe49
- * License: MIT
- */
-
-(function(angular){
-'use strict';
-
-
-/**
- * @ngdoc overview
- * @name angulartics.google.analytics
- * Enables analytics support for Google Tag Manager (http://google.com/tagmanager)
- */
-
-angular.module('angulartics.google.tagmanager', ['angulartics'])
-.config(['$analyticsProvider', function($analyticsProvider){
-
-	/**
-	* Send content views to the dataLayer
-	*
-	* @param {string} path Required 'content name' (string) describes the content loaded
-	*/
-
-	$analyticsProvider.registerPageTrack(function(path){
-		var dataLayer = window.dataLayer = window.dataLayer || [];
-		dataLayer.push({
-			'event': 'content-view',
-			'content-name': path
-		});
-	});
-
-	/**
-   * Send interactions to the dataLayer, i.e. for event tracking in Google Analytics
-   * @name eventTrack
-   *
-   * @param {string} action Required 'action' (string) associated with the event
-   * @param {object} properties Comprised of the mandatory field 'category' (string) and optional  fields 'label' (string), 'value' (integer) and 'noninteraction' (boolean)
-   */
-
-	$analyticsProvider.registerEventTrack(function(action, properties){
-		var dataLayer = window.dataLayer = window.dataLayer || [];
-		dataLayer.push({
-			'event': 'interaction',
-			'target': properties.category,
-			'action': action,
-			'target-properties': properties.label,
-			'value': properties.value,
-			'interaction-type': properties.noninteraction
-		});
-
-	});
-}]);
-
-})(angular);
-
-/**
- * @license Angulartics v0.17.2
- * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
- * License: MIT
- */
-(function(angular) {
-'use strict';
-
-/**
- * @ngdoc overview
- * @name angulartics.kissmetrics
- * Enables analytics support for KISSmetrics (http://kissmetrics.com)
- */
-angular.module('angulartics.kissmetrics', ['angulartics'])
-.config(['$analyticsProvider', function ($analyticsProvider) {
-
-  // KM already supports buffered invocations so we don't need
-  // to wrap these inside angulartics.waitForVendorApi
-
-  // Creates the _kqm array if it doesn't exist already
-  // Useful if you want to load angulartics before kissmetrics
-
-  if (typeof(_kmq) == "undefined") {
-    window._kmq = [];
-  } else {
-    window._kmq = _kmq;
-  }
-
-  $analyticsProvider.registerPageTrack(function (path) {
-    window._kmq.push(['record', 'Pageview', { 'Page': path }]);
-  });
-
-  $analyticsProvider.registerEventTrack(function (action, properties) {
-    window._kmq.push(['record', action, properties]);
-  });
-
-  $analyticsProvider.registerSetUsername(function (uuid) {
-    window._kmq.push(['identify', uuid]);
-  });
-
-  $analyticsProvider.registerSetUserProperties(function (properties) {
-    window._kmq.push(['set', properties]);
-  });
-
-}]);
-})(angular);
-
-/**
- * @license Angulartics v0.17.2
- * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
- * Contributed by http://github.com/L42y
- * License: MIT
- */
-(function(angular) {
-'use strict';
-
-/**
- * @ngdoc overview
- * @name angulartics.mixpanel
- * Enables analytics support for Mixpanel (http://mixpanel.com)
- */
-angular.module('angulartics.mixpanel', ['angulartics'])
-.config(['$analyticsProvider', function ($analyticsProvider) {
-
-  angulartics.waitForVendorApi('mixpanel', 500, '__loaded', function (mixpanel) {
-    $analyticsProvider.registerSetUsername(function (userId) {
-      mixpanel.identify(userId);
-    });
-  });
-  
-  angulartics.waitForVendorApi('mixpanel', 500, '__loaded', function (mixpanel) {
-    $analyticsProvider.registerSetAlias(function (userId) {
-      mixpanel.alias(userId);
-    });
-  });
-
-  angulartics.waitForVendorApi('mixpanel', 500, '__loaded', function (mixpanel) {
-    $analyticsProvider.registerSetSuperPropertiesOnce(function (properties) {
-      mixpanel.register_once(properties);
-    });
-  });
-
-  angulartics.waitForVendorApi('mixpanel', 500, '__loaded', function (mixpanel) {
-    $analyticsProvider.registerSetSuperProperties(function (properties) {
-      mixpanel.register(properties);
-    });
-  });
-
-  angulartics.waitForVendorApi('mixpanel', 500, '__loaded', function (mixpanel) {
-    $analyticsProvider.registerSetUserPropertiesOnce(function (properties) {
-      mixpanel.people.set_once(properties);
-    });
-  });
-
-  angulartics.waitForVendorApi('mixpanel', 500, '__loaded', function (mixpanel) {
-    $analyticsProvider.registerSetUserProperties(function (properties) {
-      mixpanel.people.set(properties);
-    });
-  });
-
-  angulartics.waitForVendorApi('mixpanel', 500, '__loaded', function (mixpanel) {
-    $analyticsProvider.registerPageTrack(function (path) {
-      mixpanel.track( "Page Viewed", { "page": path } );
-    });
-  });
-
-  angulartics.waitForVendorApi('mixpanel', 500, '__loaded', function (mixpanel) {
-    $analyticsProvider.registerEventTrack(function (action, properties) {
-      mixpanel.track(action, properties);
-    });
-  });
-
-}]);
-})(angular);
-
-/**
- * @license Angulartics v0.17.2
- * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
- * Piwik 2.1.x update contributed by http://github.com/highskillz
- * License: MIT
- */
-(function(angular) {
-    'use strict';
-
-    /**
-     * @ngdoc overview
-     * @name angulartics.piwik
-     * Enables analytics support for Piwik (http://piwik.org/docs/tracking-api/)
-     */
-    angular.module('angulartics.piwik', ['angulartics'])
-        .config(['$analyticsProvider',
-            function($analyticsProvider) {
-
-                // Piwik seems to suppors buffered invocations so we don't need
-                // to wrap these inside angulartics.waitForVendorApi
-
-                $analyticsProvider.settings.trackRelativePath = true;
-
-                $analyticsProvider.registerPageTrack(function(path) {
-                    if (window._paq) {
-                        _paq.push(['setCustomUrl', path]);
-                        _paq.push(['trackPageView']);
-                    }
-                });
-
-                $analyticsProvider.registerEventTrack(function(action, properties) {
-                    // PAQ requires that eventValue be an integer, see:
-                    // http://piwik.org/docs/event-tracking/
-                    if(properties.value) {
-                        var parsed = parseInt(properties.value, 10);
-                        properties.value = isNaN(parsed) ? 0 : parsed;
-                    }
-
-                    if (window._paq) {
-                        _paq.push(['trackEvent', properties.category, action, properties.label, properties.value]);
-                    }
-                });
-
-            }
-        ]);
-})(angular);
-
-/**
- * @license Angulartics v0.17.2
- * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
- * License: MIT
- */
-(function (angular) {
-'use strict';
-
-/**
- * @ngdoc overview
- * @name angulartics.scroll
- * Provides an implementation of jQuery Waypoints (http://imakewebthings.com/jquery-waypoints/)
- * for use as a valid DOM event in analytics-on.
- */
-angular.module('angulartics.scroll', ['angulartics'])
-.directive('analyticsOn', ['$analytics', function ($analytics) {
-  function isProperty(name) {
-    return name.substr(0, 8) === 'scrollby';
-  }
-  function cast(value) {
-    if (['', 'true', 'false'].indexOf(value) > -1) {
-      return value.replace('', 'true') === 'true';
-    }
-    return value;
-  }
-
-  return {
-    restrict: 'A',
-    priority: 5,
-    scope: false,
-    link: function ($scope, $element, $attrs) {
-      if ($attrs.analyticsOn !== 'scrollby') return;
-
-      var properties = { continuous: false, triggerOnce: true };
-      angular.forEach($attrs.$attr, function(attr, name) {
-        if (isProperty(attr)) {
-          properties[name.slice(8,9).toLowerCase()+name.slice(9)] = cast($attrs[name]);
-        }
-      });
-
-      $element.waypoint(function () {
-        $element.triggerHandler('scrollby');
-      }, properties);
-    }
-  };
-}]);
-})(angular);
-
-/**
- * @license Angulartics v0.17.2
- * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
- * License: MIT
- */
-(function(angular) {
-  'use strict';
-
-  /**
-   * @ngdoc overview
-   * @name angulartics.segment.io
-   * Enables analytics support for Segment.io (http://segment.io)
-   */
-  angular.module('angulartics.segment.io', ['angulartics'])
-    .config(['$analyticsProvider', function ($analyticsProvider) {
-
-      // https://segment.com/docs/libraries/analytics.js/#page
-      // analytics.page([category], [name], [properties], [options], [callback]);
-      // TODO : Support optional parameters where the parameter order and type changes their meaning
-      // e.g.
-      // (string) is (name)
-      // (string, string) is (category, name)
-      // (string, object) is (name, properties)
-      $analyticsProvider.registerPageTrack(function (path) {
-        try {
-          analytics.page(path);
-        } catch (e) {
-          if (!(e instanceof ReferenceError)) {
-            throw e;
-          }
-        }
-      });
-
-      // https://segment.com/docs/libraries/analytics.js/#track
-      // analytics.track(event, [properties], [options], [callback]);
-      $analyticsProvider.registerEventTrack(function (event, properties, options, callback) {
-        try {
-          analytics.track(event, properties, options, callback);
-        } catch (e) {
-          if (!(e instanceof ReferenceError)) {
-            throw e;
-          }
-        }
-      });
-
-      // Segment Identify Method
-      // https://segment.com/docs/libraries/analytics.js/#identify
-      // analytics.identify([userId], [traits], [options], [callback]);
-      $analyticsProvider.registerSetUserProperties(function (userId, traits, options, callback) {
-        try {
-          analytics.identify(userId, traits, options, callback);
-        } catch (e) {
-          if (!(e instanceof ReferenceError)) {
-            throw e;
-          }
-        }
-      });
-
-      // Segment Identify Method
-      // https://segment.com/docs/libraries/analytics.js/#identify
-      // analytics.identify([userId], [traits], [options], [callback]);
-      $analyticsProvider.registerSetUserPropertiesOnce(function (userId, traits, options, callback) {
-        try {
-          analytics.identify(userId, traits, options, callback);
-        } catch (e) {
-          if (!(e instanceof ReferenceError)) {
-            throw e;
-          }
-        }
-      });
-      
-      // Segment Alias Method
-      // https://segment.com/docs/libraries/analytics.js/#alias
-      // analytics.alias(userId, previousId, options, callback);
-      $analyticsProvider.registerSetAlias(function (userId, previousId, options, callback) {
-        try {
-          analytics.alias(userId, previousId, options, callback);
-        } catch (e) {
-          if (!(e instanceof ReferenceError)) {
-            throw e;
-          }
-        }
-      });
-
-    }]);
-})(angular);
-
-/**
- * @license Angulartics v0.17.2
- * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
- * License: MIT
- */
-(function (angular) {
-  'use strict';
-
-  /**
-   * @ngdoc overview
-   * @name angulartics.splunk
-   * Enables analytics support for with custom collection backend API
-   * using (sp.js as described in http://blogs.splunk.com/2013/10/17/still-using-3rd-party-web-analytics-providers-build-your-own-using-splunk/)
-   */
-  angular.module('angulartics.splunk', ['angulartics'])
-  .config(['$analyticsProvider', function ($analyticsProvider) {
-
-    var errorFunction = function(){
-      throw "Define sp ";
-    };
-
-    var _getSp = function () {
-        return window.sp || { pageview: errorFunction, track: errorFunction };
-    };
-
-    $analyticsProvider.registerPageTrack(function (path) {
-        _getSp().pageview(path);
-    });
-
-    $analyticsProvider.registerEventTrack(function (action, properties) {
-        _getSp().track(action, properties);
-    });
-
-  }]);
-})(angular);
-
-
-/**
- * @license Angulartics v0.17.2
- * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
- * License: MIT
- */
-(function(angular) {
-'use strict';
-
-/**
- * @ngdoc overview
- * @name angulartics.woopra
- * Enables analytics support for Woopra (http://www.woopra.com)
- */
-angular.module('angulartics.woopra', ['angulartics'])
-.config(['$analyticsProvider', function ($analyticsProvider) {
-  $analyticsProvider.registerPageTrack(function (path) {
-    woopra.track('pv', {
-      url: path
-    });
-  });
-
-  $analyticsProvider.registerEventTrack(function (action, properties) {
-    woopra.track(action, properties);
-  });
-
-  $analyticsProvider.registerSetUsername(function (email) {
-    woopra
-      .identify('email', email)
-      .push();
-  });
-
-  $analyticsProvider.registerSetUserProperties(function (properties) {
-    if (properties.email) {
-      woopra
-        .identify(properties)
-        .push();
-    }
-  });
-}]);
-})(angular);
-
-/**
- * @license Angulartics v0.17.2
- * (c) 2014 Carl Thorner http://luisfarzati.github.io/angulartics
- * Contributed by http://github.com/L42y
- * License: MIT
- */
-(function(angular) {
-'use strict';
-
-/**
- * @ngdoc overview
- * @name angulartics.marketo
- * Enables analytics support for Marketo (http://www.marketo.com)
- *
- * Will not be considered loaded until the sKey attribute is set on the Munckin object, like so:
- *
- * Munckin.skey = 'my-secret-key';
- *
- * for event tracking email is a required attribute
- */
-angular.module('angulartics.marketo', ['angulartics'])
-.config(['$analyticsProvider', function ($analyticsProvider) {
-  angulartics.waitForVendorApi('Munchkin', 500, 'sKey', function (Munchkin) {
-    $analyticsProvider.registerPageTrack(function (path) {
-      Munchkin.munchkinFunction("visitWebPage", {url: path} );
-    });
-  });
-
-  // If a path is set as a property we do a page tracking event.
-  angulartics.waitForVendorApi('Munchkin', 500, 'sKey', function (Munchkin) {
-   $analyticsProvider.registerEventTrack(function (action, properties) {
-    if(properties.path !== undefined) {
-     var params = [];
-     for(var prop in properties){
-      if(prop !== 'path') {
-       params.push(prop + "=" + properties[prop]);
-      }
-     }
-     if(action.toUpperCase() == 'CLICK'){
-      Munchkin.munchkinFunction('clickLink', {
-       href: properties.path
-      });
-     }
-     Munchkin.munchkinFunction("visitWebPage", {url: properties.path, params: params.join("&")});
-    }
-   });
-  });
-
-  var associateLead = function(properties){
-    if(properties.email !== undefined) {
-      email = properties.email;
-      email_sha = sha1(Munckin.sKey + email);
-      properties.Email = properties.email;
-      Munchkin.munchkinFunction('associateLead', properties, email_sha);
-    }
-  };
-
-  angulartics.waitForVendorApi('Munchkin', 500, function (Munchkin) {
-    $analyticsProvider.registerSetUsername(function (userId) {
-      if(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}/.test(userId)){
-       associateLead({'Email': userId});
-      }
-    });
-  });
-
-  angulartics.waitForVendorApi('Munchkin', 500, function (Munchkin) {
-    $analyticsProvider.registerSetUserProperties(function (properties) {
-     associateLead(properties);
-    });
-  });
-
-  angulartics.waitForVendorApi('Munchkin', 500, function (Munchkin) {
-    $analyticsProvider.registerSetUserPropertiesOnce(function (properties) {
-     associateLead(properties);
-    });
-  });
-}]);
-})(angular);
-
-/**
- * @license Angulartics v0.15.20
- * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
- * Universal Analytics update contributed by http://github.com/willmcclellan
- * License: MIT
- */
-(function(angular) {
-'use strict';
-
-/**
- * @ngdoc overview
- * @name angulartics.intercom
- * Enables analytics support for Intercom (https://www.intercom.io/)
- */
-angular.module('angulartics.intercom', ['angulartics'])
-.config(['$analyticsProvider', function ($analyticsProvider) {
-
-  $analyticsProvider.registerSetUsername(function (userId) {
-    if(window.Intercom) {
-      window.Intercom('update', { user_id: userId });
-    }
-  });
-
-  /**
-   * Track Event in Intercom
-   * @name eventTrack
-   *
-   * @param {string} action Required 'action' (string) associated with the event
-   * @param {object} properties = metadata
-   *
-   * @link http://doc.intercom.io/api/?javascript#submitting-events
-   *
-   * @example
-   *   Intercom('trackEvent', 'invited-friend');
-   */
-  $analyticsProvider.registerEventTrack(function (action, properties) {
-    if(window.Intercom) {
-      window.Intercom('trackEvent', action, properties);
-    }
-  });
-
-}]);
-})(angular);
-
-
-/**
   * x is a value between 0 and 1, indicating where in the animation you are.
   */
 var duScrollDefaultEasing = function (x) {
@@ -19638,1344 +15397,6 @@ angular.module('ualib.musicSearch')
 
 
 
-/**
- * oclazyload - Load modules on demand (lazy load) with angularJS
- * @version v1.0.9
- * @link https://github.com/ocombe/ocLazyLoad
- * @license MIT
- * @author Olivier Combe <olivier.combe@gmail.com>
- */
-(function (angular, window) {
-    'use strict';
-
-    var regModules = ['ng', 'oc.lazyLoad'],
-        regInvokes = {},
-        regConfigs = [],
-        modulesToLoad = [],
-        // modules to load from angular.module or other sources
-    realModules = [],
-        // real modules called from angular.module
-    recordDeclarations = [],
-        broadcast = angular.noop,
-        runBlocks = {},
-        justLoaded = [];
-
-    var ocLazyLoad = angular.module('oc.lazyLoad', ['ng']);
-
-    ocLazyLoad.provider('$ocLazyLoad', ["$controllerProvider", "$provide", "$compileProvider", "$filterProvider", "$injector", "$animateProvider", function ($controllerProvider, $provide, $compileProvider, $filterProvider, $injector, $animateProvider) {
-        var modules = {},
-            providers = {
-            $controllerProvider: $controllerProvider,
-            $compileProvider: $compileProvider,
-            $filterProvider: $filterProvider,
-            $provide: $provide, // other things (constant, decorator, provider, factory, service)
-            $injector: $injector,
-            $animateProvider: $animateProvider
-        },
-            debug = false,
-            events = false,
-            moduleCache = [],
-            modulePromises = {};
-
-        moduleCache.push = function (value) {
-            if (this.indexOf(value) === -1) {
-                Array.prototype.push.apply(this, arguments);
-            }
-        };
-
-        this.config = function (config) {
-            // If we want to define modules configs
-            if (angular.isDefined(config.modules)) {
-                if (angular.isArray(config.modules)) {
-                    angular.forEach(config.modules, function (moduleConfig) {
-                        modules[moduleConfig.name] = moduleConfig;
-                    });
-                } else {
-                    modules[config.modules.name] = config.modules;
-                }
-            }
-
-            if (angular.isDefined(config.debug)) {
-                debug = config.debug;
-            }
-
-            if (angular.isDefined(config.events)) {
-                events = config.events;
-            }
-        };
-
-        /**
-         * Get the list of existing registered modules
-         * @param element
-         */
-        this._init = function _init(element) {
-            // this is probably useless now because we override angular.bootstrap
-            if (modulesToLoad.length === 0) {
-                var elements = [element],
-                    names = ['ng:app', 'ng-app', 'x-ng-app', 'data-ng-app'],
-                    NG_APP_CLASS_REGEXP = /\sng[:\-]app(:\s*([\w\d_]+);?)?\s/,
-                    append = function append(elm) {
-                    return elm && elements.push(elm);
-                };
-
-                angular.forEach(names, function (name) {
-                    names[name] = true;
-                    append(document.getElementById(name));
-                    name = name.replace(':', '\\:');
-                    if (typeof element[0] !== 'undefined' && element[0].querySelectorAll) {
-                        angular.forEach(element[0].querySelectorAll('.' + name), append);
-                        angular.forEach(element[0].querySelectorAll('.' + name + '\\:'), append);
-                        angular.forEach(element[0].querySelectorAll('[' + name + ']'), append);
-                    }
-                });
-
-                angular.forEach(elements, function (elm) {
-                    if (modulesToLoad.length === 0) {
-                        var className = ' ' + element.className + ' ';
-                        var match = NG_APP_CLASS_REGEXP.exec(className);
-                        if (match) {
-                            modulesToLoad.push((match[2] || '').replace(/\s+/g, ','));
-                        } else {
-                            angular.forEach(elm.attributes, function (attr) {
-                                if (modulesToLoad.length === 0 && names[attr.name]) {
-                                    modulesToLoad.push(attr.value);
-                                }
-                            });
-                        }
-                    }
-                });
-            }
-
-            if (modulesToLoad.length === 0 && !((window.jasmine || window.mocha) && angular.isDefined(angular.mock))) {
-                console.error('No module found during bootstrap, unable to init ocLazyLoad. You should always use the ng-app directive or angular.boostrap when you use ocLazyLoad.');
-            }
-
-            var addReg = function addReg(moduleName) {
-                if (regModules.indexOf(moduleName) === -1) {
-                    // register existing modules
-                    regModules.push(moduleName);
-                    var mainModule = angular.module(moduleName);
-
-                    // register existing components (directives, services, ...)
-                    _invokeQueue(null, mainModule._invokeQueue, moduleName);
-                    _invokeQueue(null, mainModule._configBlocks, moduleName); // angular 1.3+
-
-                    angular.forEach(mainModule.requires, addReg);
-                }
-            };
-
-            angular.forEach(modulesToLoad, function (moduleName) {
-                addReg(moduleName);
-            });
-
-            modulesToLoad = []; // reset for next bootstrap
-            recordDeclarations.pop(); // wait for the next lazy load
-        };
-
-        /**
-         * Like JSON.stringify but that doesn't throw on circular references
-         * @param obj
-         */
-        var stringify = function stringify(obj) {
-            try {
-                return JSON.stringify(obj);
-            } catch (e) {
-                var cache = [];
-                return JSON.stringify(obj, function (key, value) {
-                    if (angular.isObject(value) && value !== null) {
-                        if (cache.indexOf(value) !== -1) {
-                            // Circular reference found, discard key
-                            return;
-                        }
-                        // Store value in our collection
-                        cache.push(value);
-                    }
-                    return value;
-                });
-            }
-        };
-
-        var hashCode = function hashCode(str) {
-            var hash = 0,
-                i,
-                chr,
-                len;
-            if (str.length == 0) {
-                return hash;
-            }
-            for (i = 0, len = str.length; i < len; i++) {
-                chr = str.charCodeAt(i);
-                hash = (hash << 5) - hash + chr;
-                hash |= 0; // Convert to 32bit integer
-            }
-            return hash;
-        };
-
-        function _register(providers, registerModules, params) {
-            if (registerModules) {
-                var k,
-                    moduleName,
-                    moduleFn,
-                    tempRunBlocks = [];
-                for (k = registerModules.length - 1; k >= 0; k--) {
-                    moduleName = registerModules[k];
-                    if (!angular.isString(moduleName)) {
-                        moduleName = getModuleName(moduleName);
-                    }
-                    if (!moduleName || justLoaded.indexOf(moduleName) !== -1 || modules[moduleName] && realModules.indexOf(moduleName) === -1) {
-                        continue;
-                    }
-                    // new if not registered
-                    var newModule = regModules.indexOf(moduleName) === -1;
-                    moduleFn = ngModuleFct(moduleName);
-                    if (newModule) {
-                        regModules.push(moduleName);
-                        _register(providers, moduleFn.requires, params);
-                    }
-                    if (moduleFn._runBlocks.length > 0) {
-                        // new run blocks detected! Replace the old ones (if existing)
-                        runBlocks[moduleName] = [];
-                        while (moduleFn._runBlocks.length > 0) {
-                            runBlocks[moduleName].push(moduleFn._runBlocks.shift());
-                        }
-                    }
-                    if (angular.isDefined(runBlocks[moduleName]) && (newModule || params.rerun)) {
-                        tempRunBlocks = tempRunBlocks.concat(runBlocks[moduleName]);
-                    }
-                    _invokeQueue(providers, moduleFn._invokeQueue, moduleName, params.reconfig);
-                    _invokeQueue(providers, moduleFn._configBlocks, moduleName, params.reconfig); // angular 1.3+
-                    broadcast(newModule ? 'ocLazyLoad.moduleLoaded' : 'ocLazyLoad.moduleReloaded', moduleName);
-                    registerModules.pop();
-                    justLoaded.push(moduleName);
-                }
-                // execute the run blocks at the end
-                var instanceInjector = providers.getInstanceInjector();
-                angular.forEach(tempRunBlocks, function (fn) {
-                    instanceInjector.invoke(fn);
-                });
-            }
-        }
-
-        function _registerInvokeList(args, moduleName) {
-            var invokeList = args[2][0],
-                type = args[1],
-                newInvoke = false;
-            if (angular.isUndefined(regInvokes[moduleName])) {
-                regInvokes[moduleName] = {};
-            }
-            if (angular.isUndefined(regInvokes[moduleName][type])) {
-                regInvokes[moduleName][type] = {};
-            }
-            var onInvoke = function onInvoke(invokeName, invoke) {
-                if (!regInvokes[moduleName][type].hasOwnProperty(invokeName)) {
-                    regInvokes[moduleName][type][invokeName] = [];
-                }
-                if (checkHashes(invoke, regInvokes[moduleName][type][invokeName])) {
-                    newInvoke = true;
-                    regInvokes[moduleName][type][invokeName].push(invoke);
-                    broadcast('ocLazyLoad.componentLoaded', [moduleName, type, invokeName]);
-                }
-            };
-
-            function checkHashes(potentialNew, invokes) {
-                var isNew = true,
-                    newHash;
-                if (invokes.length) {
-                    newHash = signature(potentialNew);
-                    angular.forEach(invokes, function (invoke) {
-                        isNew = isNew && signature(invoke) !== newHash;
-                    });
-                }
-                return isNew;
-            }
-
-            function signature(data) {
-                if (angular.isArray(data)) {
-                    // arrays are objects, we need to test for it first
-                    return hashCode(data.toString());
-                } else if (angular.isObject(data)) {
-                    // constants & values for example
-                    return hashCode(stringify(data));
-                } else {
-                    if (angular.isDefined(data) && data !== null) {
-                        return hashCode(data.toString());
-                    } else {
-                        // null & undefined constants
-                        return data;
-                    }
-                }
-            }
-
-            if (angular.isString(invokeList)) {
-                onInvoke(invokeList, args[2][1]);
-            } else if (angular.isObject(invokeList)) {
-                angular.forEach(invokeList, function (invoke, key) {
-                    if (angular.isString(invoke)) {
-                        // decorators for example
-                        onInvoke(invoke, invokeList[1]);
-                    } else {
-                        // components registered as object lists {"componentName": function() {}}
-                        onInvoke(key, invoke);
-                    }
-                });
-            } else {
-                return false;
-            }
-            return newInvoke;
-        }
-
-        function _invokeQueue(providers, queue, moduleName, reconfig) {
-            if (!queue) {
-                return;
-            }
-
-            var i, len, args, provider;
-            for (i = 0, len = queue.length; i < len; i++) {
-                args = queue[i];
-                if (angular.isArray(args)) {
-                    if (providers !== null) {
-                        if (providers.hasOwnProperty(args[0])) {
-                            provider = providers[args[0]];
-                        } else {
-                            throw new Error('unsupported provider ' + args[0]);
-                        }
-                    }
-                    var isNew = _registerInvokeList(args, moduleName);
-                    if (args[1] !== 'invoke') {
-                        if (isNew && angular.isDefined(provider)) {
-                            provider[args[1]].apply(provider, args[2]);
-                        }
-                    } else {
-                        // config block
-                        var callInvoke = function callInvoke(fct) {
-                            var invoked = regConfigs.indexOf(moduleName + '-' + fct);
-                            if (invoked === -1 || reconfig) {
-                                if (invoked === -1) {
-                                    regConfigs.push(moduleName + '-' + fct);
-                                }
-                                if (angular.isDefined(provider)) {
-                                    provider[args[1]].apply(provider, args[2]);
-                                }
-                            }
-                        };
-                        if (angular.isFunction(args[2][0])) {
-                            callInvoke(args[2][0]);
-                        } else if (angular.isArray(args[2][0])) {
-                            for (var j = 0, jlen = args[2][0].length; j < jlen; j++) {
-                                if (angular.isFunction(args[2][0][j])) {
-                                    callInvoke(args[2][0][j]);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        function getModuleName(module) {
-            var moduleName = null;
-            if (angular.isString(module)) {
-                moduleName = module;
-            } else if (angular.isObject(module) && module.hasOwnProperty('name') && angular.isString(module.name)) {
-                moduleName = module.name;
-            }
-            return moduleName;
-        }
-
-        function moduleExists(moduleName) {
-            if (!angular.isString(moduleName)) {
-                return false;
-            }
-            try {
-                return ngModuleFct(moduleName);
-            } catch (e) {
-                if (/No module/.test(e) || e.message.indexOf('$injector:nomod') > -1) {
-                    return false;
-                }
-            }
-        }
-
-        this.$get = ["$log", "$rootElement", "$rootScope", "$cacheFactory", "$q", function ($log, $rootElement, $rootScope, $cacheFactory, $q) {
-            var instanceInjector,
-                filesCache = $cacheFactory('ocLazyLoad');
-
-            if (!debug) {
-                $log = {};
-                $log['error'] = angular.noop;
-                $log['warn'] = angular.noop;
-                $log['info'] = angular.noop;
-            }
-
-            // Make this lazy because when $get() is called the instance injector hasn't been assigned to the rootElement yet
-            providers.getInstanceInjector = function () {
-                return instanceInjector ? instanceInjector : instanceInjector = $rootElement.data('$injector') || angular.injector();
-            };
-
-            broadcast = function broadcast(eventName, params) {
-                if (events) {
-                    $rootScope.$broadcast(eventName, params);
-                }
-                if (debug) {
-                    $log.info(eventName, params);
-                }
-            };
-
-            function reject(e) {
-                var deferred = $q.defer();
-                $log.error(e.message);
-                deferred.reject(e);
-                return deferred.promise;
-            }
-
-            return {
-                _broadcast: broadcast,
-
-                _$log: $log,
-
-                /**
-                 * Returns the files cache used by the loaders to store the files currently loading
-                 * @returns {*}
-                 */
-                _getFilesCache: function getFilesCache() {
-                    return filesCache;
-                },
-
-                /**
-                 * Let the service know that it should monitor angular.module because files are loading
-                 * @param watch boolean
-                 */
-                toggleWatch: function toggleWatch(watch) {
-                    if (watch) {
-                        recordDeclarations.push(true);
-                    } else {
-                        recordDeclarations.pop();
-                    }
-                },
-
-                /**
-                 * Let you get a module config object
-                 * @param moduleName String the name of the module
-                 * @returns {*}
-                 */
-                getModuleConfig: function getModuleConfig(moduleName) {
-                    if (!angular.isString(moduleName)) {
-                        throw new Error('You need to give the name of the module to get');
-                    }
-                    if (!modules[moduleName]) {
-                        return null;
-                    }
-                    return angular.copy(modules[moduleName]);
-                },
-
-                /**
-                 * Let you define a module config object
-                 * @param moduleConfig Object the module config object
-                 * @returns {*}
-                 */
-                setModuleConfig: function setModuleConfig(moduleConfig) {
-                    if (!angular.isObject(moduleConfig)) {
-                        throw new Error('You need to give the module config object to set');
-                    }
-                    modules[moduleConfig.name] = moduleConfig;
-                    return moduleConfig;
-                },
-
-                /**
-                 * Returns the list of loaded modules
-                 * @returns {string[]}
-                 */
-                getModules: function getModules() {
-                    return regModules;
-                },
-
-                /**
-                 * Let you check if a module has been loaded into Angular or not
-                 * @param modulesNames String/Object a module name, or a list of module names
-                 * @returns {boolean}
-                 */
-                isLoaded: function isLoaded(modulesNames) {
-                    var moduleLoaded = function moduleLoaded(module) {
-                        var isLoaded = regModules.indexOf(module) > -1;
-                        if (!isLoaded) {
-                            isLoaded = !!moduleExists(module);
-                        }
-                        return isLoaded;
-                    };
-                    if (angular.isString(modulesNames)) {
-                        modulesNames = [modulesNames];
-                    }
-                    if (angular.isArray(modulesNames)) {
-                        var i, len;
-                        for (i = 0, len = modulesNames.length; i < len; i++) {
-                            if (!moduleLoaded(modulesNames[i])) {
-                                return false;
-                            }
-                        }
-                        return true;
-                    } else {
-                        throw new Error('You need to define the module(s) name(s)');
-                    }
-                },
-
-                /**
-                 * Given a module, return its name
-                 * @param module
-                 * @returns {String}
-                 */
-                _getModuleName: getModuleName,
-
-                /**
-                 * Returns a module if it exists
-                 * @param moduleName
-                 * @returns {module}
-                 */
-                _getModule: function getModule(moduleName) {
-                    try {
-                        return ngModuleFct(moduleName);
-                    } catch (e) {
-                        // this error message really suxx
-                        if (/No module/.test(e) || e.message.indexOf('$injector:nomod') > -1) {
-                            e.message = 'The module "' + stringify(moduleName) + '" that you are trying to load does not exist. ' + e.message;
-                        }
-                        throw e;
-                    }
-                },
-
-                /**
-                 * Check if a module exists and returns it if it does
-                 * @param moduleName
-                 * @returns {boolean}
-                 */
-                moduleExists: moduleExists,
-
-                /**
-                 * Load the dependencies, and might try to load new files depending on the config
-                 * @param moduleName (String or Array of Strings)
-                 * @param localParams
-                 * @returns {*}
-                 * @private
-                 */
-                _loadDependencies: function _loadDependencies(moduleName, localParams) {
-                    var loadedModule,
-                        requires,
-                        diff,
-                        promisesList = [],
-                        self = this;
-
-                    moduleName = self._getModuleName(moduleName);
-
-                    if (moduleName === null) {
-                        return $q.when();
-                    } else {
-                        try {
-                            loadedModule = self._getModule(moduleName);
-                        } catch (e) {
-                            return reject(e);
-                        }
-                        // get unloaded requires
-                        requires = self.getRequires(loadedModule);
-                    }
-
-                    angular.forEach(requires, function (requireEntry) {
-                        // If no configuration is provided, try and find one from a previous load.
-                        // If there isn't one, bail and let the normal flow run
-                        if (angular.isString(requireEntry)) {
-                            var config = self.getModuleConfig(requireEntry);
-                            if (config === null) {
-                                moduleCache.push(requireEntry); // We don't know about this module, but something else might, so push it anyway.
-                                return;
-                            }
-                            requireEntry = config;
-                            // ignore the name because it's probably not a real module name
-                            config.name = undefined;
-                        }
-
-                        // Check if this dependency has been loaded previously
-                        if (self.moduleExists(requireEntry.name)) {
-                            // compare against the already loaded module to see if the new definition adds any new files
-                            diff = requireEntry.files.filter(function (n) {
-                                return self.getModuleConfig(requireEntry.name).files.indexOf(n) < 0;
-                            });
-
-                            // If the module was redefined, advise via the console
-                            if (diff.length !== 0) {
-                                self._$log.warn('Module "', moduleName, '" attempted to redefine configuration for dependency. "', requireEntry.name, '"\n Additional Files Loaded:', diff);
-                            }
-
-                            // Push everything to the file loader, it will weed out the duplicates.
-                            if (angular.isDefined(self.filesLoader)) {
-                                // if a files loader is defined
-                                promisesList.push(self.filesLoader(requireEntry, localParams).then(function () {
-                                    return self._loadDependencies(requireEntry);
-                                }));
-                            } else {
-                                return reject(new Error('Error: New dependencies need to be loaded from external files (' + requireEntry.files + '), but no loader has been defined.'));
-                            }
-                            return;
-                        } else if (angular.isArray(requireEntry)) {
-                            var files = [];
-                            angular.forEach(requireEntry, function (entry) {
-                                // let's check if the entry is a file name or a config name
-                                var config = self.getModuleConfig(entry);
-                                if (config === null) {
-                                    files.push(entry);
-                                } else if (config.files) {
-                                    files = files.concat(config.files);
-                                }
-                            });
-                            if (files.length > 0) {
-                                requireEntry = {
-                                    files: files
-                                };
-                            }
-                        } else if (angular.isObject(requireEntry)) {
-                            if (requireEntry.hasOwnProperty('name') && requireEntry['name']) {
-                                // The dependency doesn't exist in the module cache and is a new configuration, so store and push it.
-                                self.setModuleConfig(requireEntry);
-                                moduleCache.push(requireEntry['name']);
-                            }
-                        }
-
-                        // Check if the dependency has any files that need to be loaded. If there are, push a new promise to the promise list.
-                        if (angular.isDefined(requireEntry.files) && requireEntry.files.length !== 0) {
-                            if (angular.isDefined(self.filesLoader)) {
-                                // if a files loader is defined
-                                promisesList.push(self.filesLoader(requireEntry, localParams).then(function () {
-                                    return self._loadDependencies(requireEntry);
-                                }));
-                            } else {
-                                return reject(new Error('Error: the module "' + requireEntry.name + '" is defined in external files (' + requireEntry.files + '), but no loader has been defined.'));
-                            }
-                        }
-                    });
-
-                    // Create a wrapper promise to watch the promise list and resolve it once everything is done.
-                    return $q.all(promisesList);
-                },
-
-                /**
-                 * Inject new modules into Angular
-                 * @param moduleName
-                 * @param localParams
-                 * @param real
-                 */
-                inject: function inject(moduleName) {
-                    var localParams = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-                    var real = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
-
-                    var self = this,
-                        deferred = $q.defer();
-                    if (angular.isDefined(moduleName) && moduleName !== null) {
-                        if (angular.isArray(moduleName)) {
-                            var promisesList = [];
-                            angular.forEach(moduleName, function (module) {
-                                promisesList.push(self.inject(module, localParams, real));
-                            });
-                            return $q.all(promisesList);
-                        } else {
-                            self._addToLoadList(self._getModuleName(moduleName), true, real);
-                        }
-                    }
-                    if (modulesToLoad.length > 0) {
-                        var res = modulesToLoad.slice(); // clean copy
-                        var loadNext = function loadNext(moduleName) {
-                            moduleCache.push(moduleName);
-                            modulePromises[moduleName] = deferred.promise;
-                            self._loadDependencies(moduleName, localParams).then(function success() {
-                                try {
-                                    justLoaded = [];
-                                    _register(providers, moduleCache, localParams);
-                                } catch (e) {
-                                    self._$log.error(e.message);
-                                    deferred.reject(e);
-                                    return;
-                                }
-
-                                if (modulesToLoad.length > 0) {
-                                    loadNext(modulesToLoad.shift()); // load the next in list
-                                } else {
-                                        deferred.resolve(res); // everything has been loaded, resolve
-                                    }
-                            }, function error(err) {
-                                deferred.reject(err);
-                            });
-                        };
-
-                        // load the first in list
-                        loadNext(modulesToLoad.shift());
-                    } else if (localParams && localParams.name && modulePromises[localParams.name]) {
-                        return modulePromises[localParams.name];
-                    } else {
-                        deferred.resolve();
-                    }
-                    return deferred.promise;
-                },
-
-                /**
-                 * Get the list of required modules/services/... for this module
-                 * @param module
-                 * @returns {Array}
-                 */
-                getRequires: function getRequires(module) {
-                    var requires = [];
-                    angular.forEach(module.requires, function (requireModule) {
-                        if (regModules.indexOf(requireModule) === -1) {
-                            requires.push(requireModule);
-                        }
-                    });
-                    return requires;
-                },
-
-                /**
-                 * Invoke the new modules & component by their providers
-                 * @param providers
-                 * @param queue
-                 * @param moduleName
-                 * @param reconfig
-                 * @private
-                 */
-                _invokeQueue: _invokeQueue,
-
-                /**
-                 * Check if a module has been invoked and registers it if not
-                 * @param args
-                 * @param moduleName
-                 * @returns {boolean} is new
-                 */
-                _registerInvokeList: _registerInvokeList,
-
-                /**
-                 * Register a new module and loads it, executing the run/config blocks if needed
-                 * @param providers
-                 * @param registerModules
-                 * @param params
-                 * @private
-                 */
-                _register: _register,
-
-                /**
-                 * Add a module name to the list of modules that will be loaded in the next inject
-                 * @param name
-                 * @param force
-                 * @private
-                 */
-                _addToLoadList: _addToLoadList,
-
-                /**
-                 * Unregister modules (you shouldn't have to use this)
-                 * @param modules
-                 */
-                _unregister: function _unregister(modules) {
-                    if (angular.isDefined(modules)) {
-                        if (angular.isArray(modules)) {
-                            angular.forEach(modules, function (module) {
-                                regInvokes[module] = undefined;
-                            });
-                        }
-                    }
-                }
-            };
-        }];
-
-        // Let's get the list of loaded modules & components
-        this._init(angular.element(window.document));
-    }]);
-
-    var bootstrapFct = angular.bootstrap;
-    angular.bootstrap = function (element, modules, config) {
-        // we use slice to make a clean copy
-        angular.forEach(modules.slice(), function (module) {
-            _addToLoadList(module, true, true);
-        });
-        return bootstrapFct(element, modules, config);
-    };
-
-    var _addToLoadList = function _addToLoadList(name, force, real) {
-        if ((recordDeclarations.length > 0 || force) && angular.isString(name) && modulesToLoad.indexOf(name) === -1) {
-            modulesToLoad.push(name);
-            if (real) {
-                realModules.push(name);
-            }
-        }
-    };
-
-    var ngModuleFct = angular.module;
-    angular.module = function (name, requires, configFn) {
-        _addToLoadList(name, false, true);
-        return ngModuleFct(name, requires, configFn);
-    };
-
-    // CommonJS package manager support:
-    if (typeof module !== 'undefined' && typeof exports !== 'undefined' && module.exports === exports) {
-        module.exports = 'oc.lazyLoad';
-    }
-})(angular, window);
-(function (angular) {
-    'use strict';
-
-    angular.module('oc.lazyLoad').directive('ocLazyLoad', ["$ocLazyLoad", "$compile", "$animate", "$parse", "$timeout", function ($ocLazyLoad, $compile, $animate, $parse, $timeout) {
-        return {
-            restrict: 'A',
-            terminal: true,
-            priority: 1000,
-            compile: function compile(element, attrs) {
-                // we store the content and remove it before compilation
-                var content = element[0].innerHTML;
-                element.html('');
-
-                return function ($scope, $element, $attr) {
-                    var model = $parse($attr.ocLazyLoad);
-                    $scope.$watch(function () {
-                        return model($scope) || $attr.ocLazyLoad; // it can be a module name (string), an object, an array, or a scope reference to any of this
-                    }, function (moduleName) {
-                        if (angular.isDefined(moduleName)) {
-                            $ocLazyLoad.load(moduleName).then(function () {
-                                // Attach element contents to DOM and then compile them.
-                                // This prevents an issue where IE invalidates saved element objects (HTMLCollections)
-                                // of the compiled contents when attaching to the parent DOM.
-                                $animate.enter(content, $element);
-                                // get the new content & compile it
-                                $compile($element.contents())($scope);
-                            });
-                        }
-                    }, true);
-                };
-            }
-        };
-    }]);
-})(angular);
-(function (angular) {
-    'use strict';
-
-    angular.module('oc.lazyLoad').config(["$provide", function ($provide) {
-        $provide.decorator('$ocLazyLoad', ["$delegate", "$q", "$window", "$interval", function ($delegate, $q, $window, $interval) {
-            var uaCssChecked = false,
-                useCssLoadPatch = false,
-                anchor = $window.document.getElementsByTagName('head')[0] || $window.document.getElementsByTagName('body')[0];
-
-            /**
-             * Load a js/css file
-             * @param type
-             * @param path
-             * @param params
-             * @returns promise
-             */
-            $delegate.buildElement = function buildElement(type, path, params) {
-                var deferred = $q.defer(),
-                    el,
-                    loaded,
-                    filesCache = $delegate._getFilesCache(),
-                    cacheBuster = function cacheBuster(url) {
-                    var dc = new Date().getTime();
-                    if (url.indexOf('?') >= 0) {
-                        if (url.substring(0, url.length - 1) === '&') {
-                            return url + '_dc=' + dc;
-                        }
-                        return url + '&_dc=' + dc;
-                    } else {
-                        return url + '?_dc=' + dc;
-                    }
-                };
-
-                // Store the promise early so the file load can be detected by other parallel lazy loads
-                // (ie: multiple routes on one page) a 'true' value isn't sufficient
-                // as it causes false positive load results.
-                if (angular.isUndefined(filesCache.get(path))) {
-                    filesCache.put(path, deferred.promise);
-                }
-
-                // Switch in case more content types are added later
-                switch (type) {
-                    case 'css':
-                        el = $window.document.createElement('link');
-                        el.type = 'text/css';
-                        el.rel = 'stylesheet';
-                        el.href = params.cache === false ? cacheBuster(path) : path;
-                        break;
-                    case 'js':
-                        el = $window.document.createElement('script');
-                        el.src = params.cache === false ? cacheBuster(path) : path;
-                        break;
-                    default:
-                        filesCache.remove(path);
-                        deferred.reject(new Error('Requested type "' + type + '" is not known. Could not inject "' + path + '"'));
-                        break;
-                }
-                el.onload = el['onreadystatechange'] = function (e) {
-                    if (el['readyState'] && !/^c|loade/.test(el['readyState']) || loaded) return;
-                    el.onload = el['onreadystatechange'] = null;
-                    loaded = 1;
-                    $delegate._broadcast('ocLazyLoad.fileLoaded', path);
-                    deferred.resolve();
-                };
-                el.onerror = function () {
-                    filesCache.remove(path);
-                    deferred.reject(new Error('Unable to load ' + path));
-                };
-                el.async = params.serie ? 0 : 1;
-
-                var insertBeforeElem = anchor.lastChild;
-                if (params.insertBefore) {
-                    var element = angular.element(angular.isDefined(window.jQuery) ? params.insertBefore : document.querySelector(params.insertBefore));
-                    if (element && element.length > 0) {
-                        insertBeforeElem = element[0];
-                    }
-                }
-                insertBeforeElem.parentNode.insertBefore(el, insertBeforeElem);
-
-                /*
-                 The event load or readystatechange doesn't fire in:
-                 - iOS < 6       (default mobile browser)
-                 - Android < 4.4 (default mobile browser)
-                 - Safari < 6    (desktop browser)
-                 */
-                if (type == 'css') {
-                    if (!uaCssChecked) {
-                        var ua = $window.navigator.userAgent.toLowerCase();
-
-                        // iOS < 6
-                        if (/iP(hone|od|ad)/.test($window.navigator.platform)) {
-                            var v = $window.navigator.appVersion.match(/OS (\d+)_(\d+)_?(\d+)?/);
-                            var iOSVersion = parseFloat([parseInt(v[1], 10), parseInt(v[2], 10), parseInt(v[3] || 0, 10)].join('.'));
-                            useCssLoadPatch = iOSVersion < 6;
-                        } else if (ua.indexOf("android") > -1) {
-                            // Android < 4.4
-                            var androidVersion = parseFloat(ua.slice(ua.indexOf("android") + 8));
-                            useCssLoadPatch = androidVersion < 4.4;
-                        } else if (ua.indexOf('safari') > -1) {
-                            var versionMatch = ua.match(/version\/([\.\d]+)/i);
-                            useCssLoadPatch = versionMatch && versionMatch[1] && parseFloat(versionMatch[1]) < 6;
-                        }
-                    }
-
-                    if (useCssLoadPatch) {
-                        var tries = 1000; // * 20 = 20000 miliseconds
-                        var interval = $interval(function () {
-                            try {
-                                el.sheet.cssRules;
-                                $interval.cancel(interval);
-                                el.onload();
-                            } catch (e) {
-                                if (--tries <= 0) {
-                                    el.onerror();
-                                }
-                            }
-                        }, 20);
-                    }
-                }
-
-                return deferred.promise;
-            };
-
-            return $delegate;
-        }]);
-    }]);
-})(angular);
-(function (angular) {
-    'use strict';
-
-    angular.module('oc.lazyLoad').config(["$provide", function ($provide) {
-        $provide.decorator('$ocLazyLoad', ["$delegate", "$q", function ($delegate, $q) {
-            /**
-             * The function that loads new files
-             * @param config
-             * @param params
-             * @returns {*}
-             */
-            $delegate.filesLoader = function filesLoader(config) {
-                var params = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-                var cssFiles = [],
-                    templatesFiles = [],
-                    jsFiles = [],
-                    promises = [],
-                    cachePromise = null,
-                    filesCache = $delegate._getFilesCache();
-
-                $delegate.toggleWatch(true); // start watching angular.module calls
-
-                angular.extend(params, config);
-
-                var pushFile = function pushFile(path) {
-                    var file_type = null,
-                        m;
-                    if (angular.isObject(path)) {
-                        file_type = path.type;
-                        path = path.path;
-                    }
-                    cachePromise = filesCache.get(path);
-                    if (angular.isUndefined(cachePromise) || params.cache === false) {
-
-                        // always check for requirejs syntax just in case
-                        if ((m = /^(css|less|html|htm|js)?(?=!)/.exec(path)) !== null) {
-                            // Detect file type using preceding type declaration (ala requireJS)
-                            file_type = m[1];
-                            path = path.substr(m[1].length + 1, path.length); // Strip the type from the path
-                        }
-
-                        if (!file_type) {
-                            if ((m = /[.](css|less|html|htm|js)?((\?|#).*)?$/.exec(path)) !== null) {
-                                // Detect file type via file extension
-                                file_type = m[1];
-                            } else if (!$delegate.jsLoader.hasOwnProperty('ocLazyLoadLoader') && $delegate.jsLoader.hasOwnProperty('requirejs')) {
-                                // requirejs
-                                file_type = 'js';
-                            } else {
-                                $delegate._$log.error('File type could not be determined. ' + path);
-                                return;
-                            }
-                        }
-
-                        if ((file_type === 'css' || file_type === 'less') && cssFiles.indexOf(path) === -1) {
-                            cssFiles.push(path);
-                        } else if ((file_type === 'html' || file_type === 'htm') && templatesFiles.indexOf(path) === -1) {
-                            templatesFiles.push(path);
-                        } else if (file_type === 'js' || jsFiles.indexOf(path) === -1) {
-                            jsFiles.push(path);
-                        } else {
-                            $delegate._$log.error('File type is not valid. ' + path);
-                        }
-                    } else if (cachePromise) {
-                        promises.push(cachePromise);
-                    }
-                };
-
-                if (params.serie) {
-                    pushFile(params.files.shift());
-                } else {
-                    angular.forEach(params.files, function (path) {
-                        pushFile(path);
-                    });
-                }
-
-                if (cssFiles.length > 0) {
-                    var cssDeferred = $q.defer();
-                    $delegate.cssLoader(cssFiles, function (err) {
-                        if (angular.isDefined(err) && $delegate.cssLoader.hasOwnProperty('ocLazyLoadLoader')) {
-                            $delegate._$log.error(err);
-                            cssDeferred.reject(err);
-                        } else {
-                            cssDeferred.resolve();
-                        }
-                    }, params);
-                    promises.push(cssDeferred.promise);
-                }
-
-                if (templatesFiles.length > 0) {
-                    var templatesDeferred = $q.defer();
-                    $delegate.templatesLoader(templatesFiles, function (err) {
-                        if (angular.isDefined(err) && $delegate.templatesLoader.hasOwnProperty('ocLazyLoadLoader')) {
-                            $delegate._$log.error(err);
-                            templatesDeferred.reject(err);
-                        } else {
-                            templatesDeferred.resolve();
-                        }
-                    }, params);
-                    promises.push(templatesDeferred.promise);
-                }
-
-                if (jsFiles.length > 0) {
-                    var jsDeferred = $q.defer();
-                    $delegate.jsLoader(jsFiles, function (err) {
-                        if (angular.isDefined(err) && ($delegate.jsLoader.hasOwnProperty("ocLazyLoadLoader") || $delegate.jsLoader.hasOwnProperty("requirejs"))) {
-                            $delegate._$log.error(err);
-                            jsDeferred.reject(err);
-                        } else {
-                            jsDeferred.resolve();
-                        }
-                    }, params);
-                    promises.push(jsDeferred.promise);
-                }
-
-                if (promises.length === 0) {
-                    var deferred = $q.defer(),
-                        err = "Error: no file to load has been found, if you're trying to load an existing module you should use the 'inject' method instead of 'load'.";
-                    $delegate._$log.error(err);
-                    deferred.reject(err);
-                    return deferred.promise;
-                } else if (params.serie && params.files.length > 0) {
-                    return $q.all(promises).then(function () {
-                        return $delegate.filesLoader(config, params);
-                    });
-                } else {
-                    return $q.all(promises)['finally'](function (res) {
-                        $delegate.toggleWatch(false); // stop watching angular.module calls
-                        return res;
-                    });
-                }
-            };
-
-            /**
-             * Load a module or a list of modules into Angular
-             * @param module Mixed the name of a predefined module config object, or a module config object, or an array of either
-             * @param params Object optional parameters
-             * @returns promise
-             */
-            $delegate.load = function (originalModule) {
-                var originalParams = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-                var self = this,
-                    config = null,
-                    deferredList = [],
-                    deferred = $q.defer(),
-                    errText;
-
-                // clean copy
-                var module = angular.copy(originalModule);
-                var params = angular.copy(originalParams);
-
-                // If module is an array, break it down
-                if (angular.isArray(module)) {
-                    // Resubmit each entry as a single module
-                    angular.forEach(module, function (m) {
-                        deferredList.push(self.load(m, params));
-                    });
-
-                    // Resolve the promise once everything has loaded
-                    $q.all(deferredList).then(function (res) {
-                        deferred.resolve(res);
-                    }, function (err) {
-                        deferred.reject(err);
-                    });
-
-                    return deferred.promise;
-                }
-
-                // Get or Set a configuration depending on what was passed in
-                if (angular.isString(module)) {
-                    config = self.getModuleConfig(module);
-                    if (!config) {
-                        config = {
-                            files: [module]
-                        };
-                    }
-                } else if (angular.isObject(module)) {
-                    // case {type: 'js', path: lazyLoadUrl + 'testModule.fakejs'}
-                    if (angular.isDefined(module.path) && angular.isDefined(module.type)) {
-                        config = {
-                            files: [module]
-                        };
-                    } else {
-                        config = self.setModuleConfig(module);
-                    }
-                }
-
-                if (config === null) {
-                    var moduleName = self._getModuleName(module);
-                    errText = 'Module "' + (moduleName || 'unknown') + '" is not configured, cannot load.';
-                    $delegate._$log.error(errText);
-                    deferred.reject(new Error(errText));
-                    return deferred.promise;
-                } else {
-                    // deprecated
-                    if (angular.isDefined(config.template)) {
-                        if (angular.isUndefined(config.files)) {
-                            config.files = [];
-                        }
-                        if (angular.isString(config.template)) {
-                            config.files.push(config.template);
-                        } else if (angular.isArray(config.template)) {
-                            config.files.concat(config.template);
-                        }
-                    }
-                }
-
-                var localParams = angular.extend({}, params, config);
-
-                // if someone used an external loader and called the load function with just the module name
-                if (angular.isUndefined(config.files) && angular.isDefined(config.name) && $delegate.moduleExists(config.name)) {
-                    return $delegate.inject(config.name, localParams, true);
-                }
-
-                $delegate.filesLoader(config, localParams).then(function () {
-                    $delegate.inject(null, localParams).then(function (res) {
-                        deferred.resolve(res);
-                    }, function (err) {
-                        deferred.reject(err);
-                    });
-                }, function (err) {
-                    deferred.reject(err);
-                });
-
-                return deferred.promise;
-            };
-
-            // return the patched service
-            return $delegate;
-        }]);
-    }]);
-})(angular);
-(function (angular) {
-    'use strict';
-
-    angular.module('oc.lazyLoad').config(["$provide", function ($provide) {
-        $provide.decorator('$ocLazyLoad', ["$delegate", "$q", function ($delegate, $q) {
-            /**
-             * cssLoader function
-             * @type Function
-             * @param paths array list of css files to load
-             * @param callback to call when everything is loaded. We use a callback and not a promise
-             * @param params object config parameters
-             * because the user can overwrite cssLoader and it will probably not use promises :(
-             */
-            $delegate.cssLoader = function (paths, callback, params) {
-                var promises = [];
-                angular.forEach(paths, function (path) {
-                    promises.push($delegate.buildElement('css', path, params));
-                });
-                $q.all(promises).then(function () {
-                    callback();
-                }, function (err) {
-                    callback(err);
-                });
-            };
-            $delegate.cssLoader.ocLazyLoadLoader = true;
-
-            return $delegate;
-        }]);
-    }]);
-})(angular);
-(function (angular) {
-    'use strict';
-
-    angular.module('oc.lazyLoad').config(["$provide", function ($provide) {
-        $provide.decorator('$ocLazyLoad', ["$delegate", "$q", function ($delegate, $q) {
-            /**
-             * jsLoader function
-             * @type Function
-             * @param paths array list of js files to load
-             * @param callback to call when everything is loaded. We use a callback and not a promise
-             * @param params object config parameters
-             * because the user can overwrite jsLoader and it will probably not use promises :(
-             */
-            $delegate.jsLoader = function (paths, callback, params) {
-                var promises = [];
-                angular.forEach(paths, function (path) {
-                    promises.push($delegate.buildElement('js', path, params));
-                });
-                $q.all(promises).then(function () {
-                    callback();
-                }, function (err) {
-                    callback(err);
-                });
-            };
-            $delegate.jsLoader.ocLazyLoadLoader = true;
-
-            return $delegate;
-        }]);
-    }]);
-})(angular);
-(function (angular) {
-    'use strict';
-
-    angular.module('oc.lazyLoad').config(["$provide", function ($provide) {
-        $provide.decorator('$ocLazyLoad', ["$delegate", "$templateCache", "$q", "$http", function ($delegate, $templateCache, $q, $http) {
-            /**
-             * templatesLoader function
-             * @type Function
-             * @param paths array list of css files to load
-             * @param callback to call when everything is loaded. We use a callback and not a promise
-             * @param params object config parameters for $http
-             * because the user can overwrite templatesLoader and it will probably not use promises :(
-             */
-            $delegate.templatesLoader = function (paths, callback, params) {
-                var promises = [],
-                    filesCache = $delegate._getFilesCache();
-
-                angular.forEach(paths, function (url) {
-                    var deferred = $q.defer();
-                    promises.push(deferred.promise);
-                    $http.get(url, params).success(function (data) {
-                        if (angular.isString(data) && data.length > 0) {
-                            angular.forEach(angular.element(data), function (node) {
-                                if (node.nodeName === 'SCRIPT' && node.type === 'text/ng-template') {
-                                    $templateCache.put(node.id, node.innerHTML);
-                                }
-                            });
-                        }
-                        if (angular.isUndefined(filesCache.get(url))) {
-                            filesCache.put(url, true);
-                        }
-                        deferred.resolve();
-                    }).error(function (err) {
-                        deferred.reject(new Error('Unable to load template file "' + url + '": ' + err));
-                    });
-                });
-                return $q.all(promises).then(function () {
-                    callback();
-                }, function (err) {
-                    callback(err);
-                });
-            };
-            $delegate.templatesLoader.ocLazyLoadLoader = true;
-
-            return $delegate;
-        }]);
-    }]);
-})(angular);
-// Array.indexOf polyfill for IE8
-if (!Array.prototype.indexOf) {
-    Array.prototype.indexOf = function (searchElement, fromIndex) {
-        var k;
-
-        // 1. Let O be the result of calling ToObject passing
-        //    the this value as the argument.
-        if (this == null) {
-            throw new TypeError('"this" is null or not defined');
-        }
-
-        var O = Object(this);
-
-        // 2. Let lenValue be the result of calling the Get
-        //    internal method of O with the argument "length".
-        // 3. Let len be ToUint32(lenValue).
-        var len = O.length >>> 0;
-
-        // 4. If len is 0, return -1.
-        if (len === 0) {
-            return -1;
-        }
-
-        // 5. If argument fromIndex was passed let n be
-        //    ToInteger(fromIndex); else let n be 0.
-        var n = +fromIndex || 0;
-
-        if (Math.abs(n) === Infinity) {
-            n = 0;
-        }
-
-        // 6. If n >= len, return -1.
-        if (n >= len) {
-            return -1;
-        }
-
-        // 7. If n >= 0, then Let k be n.
-        // 8. Else, n<0, Let k be len - abs(n).
-        //    If k is less than 0, then let k be 0.
-        k = Math.max(n >= 0 ? n : len - Math.abs(n), 0);
-
-        // 9. Repeat, while k < len
-        while (k < len) {
-            // a. Let Pk be ToString(k).
-            //   This is implicit for LHS operands of the in operator
-            // b. Let kPresent be the result of calling the
-            //    HasProperty internal method of O with argument Pk.
-            //   This step can be combined with c
-            // c. If kPresent is true, then
-            //    i.  Let elementK be the result of calling the Get
-            //        internal method of O with the argument ToString(k).
-            //   ii.  Let same be the result of applying the
-            //        Strict Equality Comparison Algorithm to
-            //        searchElement and elementK.
-            //  iii.  If same is true, return k.
-            if (k in O && O[k] === searchElement) {
-                return k;
-            }
-            k++;
-        }
-        return -1;
-    };
-}
 angular.module('oneSearch.templates', ['bento/bento.tpl.html', 'common/directives/suggest/suggest.tpl.html', 'common/engines/acumen/acumen.tpl.html', 'common/engines/catalog/catalog.tpl.html', 'common/engines/databases/databases.tpl.html', 'common/engines/ejournals/ejournals.tpl.html', 'common/engines/google-cs/google-cs.tpl.html', 'common/engines/recommend/recommend.tpl.html', 'common/engines/scout/scout.tpl.html']);
 
 angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -24101,2733 +18522,6 @@ angular.module('common.oneSearch', [])
     w.attachEvent("onresize", callMedia);
   }
 })(this);
-/**
- * @license AngularJS v1.4.8
- * (c) 2010-2015 Google, Inc. http://angularjs.org
- * License: MIT
- */
-(function(window, angular, undefined) {'use strict';
-
-/**
- * @ngdoc module
- * @name ngTouch
- * @description
- *
- * # ngTouch
- *
- * The `ngTouch` module provides touch events and other helpers for touch-enabled devices.
- * The implementation is based on jQuery Mobile touch event handling
- * ([jquerymobile.com](http://jquerymobile.com/)).
- *
- *
- * See {@link ngTouch.$swipe `$swipe`} for usage.
- *
- * <div doc-module-components="ngTouch"></div>
- *
- */
-
-// define ngTouch module
-/* global -ngTouch */
-var ngTouch = angular.module('ngTouch', []);
-
-function nodeName_(element) {
-  return angular.lowercase(element.nodeName || (element[0] && element[0].nodeName));
-}
-
-/* global ngTouch: false */
-
-    /**
-     * @ngdoc service
-     * @name $swipe
-     *
-     * @description
-     * The `$swipe` service is a service that abstracts the messier details of hold-and-drag swipe
-     * behavior, to make implementing swipe-related directives more convenient.
-     *
-     * Requires the {@link ngTouch `ngTouch`} module to be installed.
-     *
-     * `$swipe` is used by the `ngSwipeLeft` and `ngSwipeRight` directives in `ngTouch`, and by
-     * `ngCarousel` in a separate component.
-     *
-     * # Usage
-     * The `$swipe` service is an object with a single method: `bind`. `bind` takes an element
-     * which is to be watched for swipes, and an object with four handler functions. See the
-     * documentation for `bind` below.
-     */
-
-ngTouch.factory('$swipe', [function() {
-  // The total distance in any direction before we make the call on swipe vs. scroll.
-  var MOVE_BUFFER_RADIUS = 10;
-
-  var POINTER_EVENTS = {
-    'mouse': {
-      start: 'mousedown',
-      move: 'mousemove',
-      end: 'mouseup'
-    },
-    'touch': {
-      start: 'touchstart',
-      move: 'touchmove',
-      end: 'touchend',
-      cancel: 'touchcancel'
-    }
-  };
-
-  function getCoordinates(event) {
-    var originalEvent = event.originalEvent || event;
-    var touches = originalEvent.touches && originalEvent.touches.length ? originalEvent.touches : [originalEvent];
-    var e = (originalEvent.changedTouches && originalEvent.changedTouches[0]) || touches[0];
-
-    return {
-      x: e.clientX,
-      y: e.clientY
-    };
-  }
-
-  function getEvents(pointerTypes, eventType) {
-    var res = [];
-    angular.forEach(pointerTypes, function(pointerType) {
-      var eventName = POINTER_EVENTS[pointerType][eventType];
-      if (eventName) {
-        res.push(eventName);
-      }
-    });
-    return res.join(' ');
-  }
-
-  return {
-    /**
-     * @ngdoc method
-     * @name $swipe#bind
-     *
-     * @description
-     * The main method of `$swipe`. It takes an element to be watched for swipe motions, and an
-     * object containing event handlers.
-     * The pointer types that should be used can be specified via the optional
-     * third argument, which is an array of strings `'mouse'` and `'touch'`. By default,
-     * `$swipe` will listen for `mouse` and `touch` events.
-     *
-     * The four events are `start`, `move`, `end`, and `cancel`. `start`, `move`, and `end`
-     * receive as a parameter a coordinates object of the form `{ x: 150, y: 310 }` and the raw
-     * `event`. `cancel` receives the raw `event` as its single parameter.
-     *
-     * `start` is called on either `mousedown` or `touchstart`. After this event, `$swipe` is
-     * watching for `touchmove` or `mousemove` events. These events are ignored until the total
-     * distance moved in either dimension exceeds a small threshold.
-     *
-     * Once this threshold is exceeded, either the horizontal or vertical delta is greater.
-     * - If the horizontal distance is greater, this is a swipe and `move` and `end` events follow.
-     * - If the vertical distance is greater, this is a scroll, and we let the browser take over.
-     *   A `cancel` event is sent.
-     *
-     * `move` is called on `mousemove` and `touchmove` after the above logic has determined that
-     * a swipe is in progress.
-     *
-     * `end` is called when a swipe is successfully completed with a `touchend` or `mouseup`.
-     *
-     * `cancel` is called either on a `touchcancel` from the browser, or when we begin scrolling
-     * as described above.
-     *
-     */
-    bind: function(element, eventHandlers, pointerTypes) {
-      // Absolute total movement, used to control swipe vs. scroll.
-      var totalX, totalY;
-      // Coordinates of the start position.
-      var startCoords;
-      // Last event's position.
-      var lastPos;
-      // Whether a swipe is active.
-      var active = false;
-
-      pointerTypes = pointerTypes || ['mouse', 'touch'];
-      element.on(getEvents(pointerTypes, 'start'), function(event) {
-        startCoords = getCoordinates(event);
-        active = true;
-        totalX = 0;
-        totalY = 0;
-        lastPos = startCoords;
-        eventHandlers['start'] && eventHandlers['start'](startCoords, event);
-      });
-      var events = getEvents(pointerTypes, 'cancel');
-      if (events) {
-        element.on(events, function(event) {
-          active = false;
-          eventHandlers['cancel'] && eventHandlers['cancel'](event);
-        });
-      }
-
-      element.on(getEvents(pointerTypes, 'move'), function(event) {
-        if (!active) return;
-
-        // Android will send a touchcancel if it thinks we're starting to scroll.
-        // So when the total distance (+ or - or both) exceeds 10px in either direction,
-        // we either:
-        // - On totalX > totalY, we send preventDefault() and treat this as a swipe.
-        // - On totalY > totalX, we let the browser handle it as a scroll.
-
-        if (!startCoords) return;
-        var coords = getCoordinates(event);
-
-        totalX += Math.abs(coords.x - lastPos.x);
-        totalY += Math.abs(coords.y - lastPos.y);
-
-        lastPos = coords;
-
-        if (totalX < MOVE_BUFFER_RADIUS && totalY < MOVE_BUFFER_RADIUS) {
-          return;
-        }
-
-        // One of totalX or totalY has exceeded the buffer, so decide on swipe vs. scroll.
-        if (totalY > totalX) {
-          // Allow native scrolling to take over.
-          active = false;
-          eventHandlers['cancel'] && eventHandlers['cancel'](event);
-          return;
-        } else {
-          // Prevent the browser from scrolling.
-          event.preventDefault();
-          eventHandlers['move'] && eventHandlers['move'](coords, event);
-        }
-      });
-
-      element.on(getEvents(pointerTypes, 'end'), function(event) {
-        if (!active) return;
-        active = false;
-        eventHandlers['end'] && eventHandlers['end'](getCoordinates(event), event);
-      });
-    }
-  };
-}]);
-
-/* global ngTouch: false,
-  nodeName_: false
-*/
-
-/**
- * @ngdoc directive
- * @name ngClick
- *
- * @description
- * A more powerful replacement for the default ngClick designed to be used on touchscreen
- * devices. Most mobile browsers wait about 300ms after a tap-and-release before sending
- * the click event. This version handles them immediately, and then prevents the
- * following click event from propagating.
- *
- * Requires the {@link ngTouch `ngTouch`} module to be installed.
- *
- * This directive can fall back to using an ordinary click event, and so works on desktop
- * browsers as well as mobile.
- *
- * This directive also sets the CSS class `ng-click-active` while the element is being held
- * down (by a mouse click or touch) so you can restyle the depressed element if you wish.
- *
- * @element ANY
- * @param {expression} ngClick {@link guide/expression Expression} to evaluate
- * upon tap. (Event object is available as `$event`)
- *
- * @example
-    <example module="ngClickExample" deps="angular-touch.js">
-      <file name="index.html">
-        <button ng-click="count = count + 1" ng-init="count=0">
-          Increment
-        </button>
-        count: {{ count }}
-      </file>
-      <file name="script.js">
-        angular.module('ngClickExample', ['ngTouch']);
-      </file>
-    </example>
- */
-
-ngTouch.config(['$provide', function($provide) {
-  $provide.decorator('ngClickDirective', ['$delegate', function($delegate) {
-    // drop the default ngClick directive
-    $delegate.shift();
-    return $delegate;
-  }]);
-}]);
-
-ngTouch.directive('ngClick', ['$parse', '$timeout', '$rootElement',
-    function($parse, $timeout, $rootElement) {
-  var TAP_DURATION = 750; // Shorter than 750ms is a tap, longer is a taphold or drag.
-  var MOVE_TOLERANCE = 12; // 12px seems to work in most mobile browsers.
-  var PREVENT_DURATION = 2500; // 2.5 seconds maximum from preventGhostClick call to click
-  var CLICKBUSTER_THRESHOLD = 25; // 25 pixels in any dimension is the limit for busting clicks.
-
-  var ACTIVE_CLASS_NAME = 'ng-click-active';
-  var lastPreventedTime;
-  var touchCoordinates;
-  var lastLabelClickCoordinates;
-
-
-  // TAP EVENTS AND GHOST CLICKS
-  //
-  // Why tap events?
-  // Mobile browsers detect a tap, then wait a moment (usually ~300ms) to see if you're
-  // double-tapping, and then fire a click event.
-  //
-  // This delay sucks and makes mobile apps feel unresponsive.
-  // So we detect touchstart, touchcancel and touchend ourselves and determine when
-  // the user has tapped on something.
-  //
-  // What happens when the browser then generates a click event?
-  // The browser, of course, also detects the tap and fires a click after a delay. This results in
-  // tapping/clicking twice. We do "clickbusting" to prevent it.
-  //
-  // How does it work?
-  // We attach global touchstart and click handlers, that run during the capture (early) phase.
-  // So the sequence for a tap is:
-  // - global touchstart: Sets an "allowable region" at the point touched.
-  // - element's touchstart: Starts a touch
-  // (- touchcancel ends the touch, no click follows)
-  // - element's touchend: Determines if the tap is valid (didn't move too far away, didn't hold
-  //   too long) and fires the user's tap handler. The touchend also calls preventGhostClick().
-  // - preventGhostClick() removes the allowable region the global touchstart created.
-  // - The browser generates a click event.
-  // - The global click handler catches the click, and checks whether it was in an allowable region.
-  //     - If preventGhostClick was called, the region will have been removed, the click is busted.
-  //     - If the region is still there, the click proceeds normally. Therefore clicks on links and
-  //       other elements without ngTap on them work normally.
-  //
-  // This is an ugly, terrible hack!
-  // Yeah, tell me about it. The alternatives are using the slow click events, or making our users
-  // deal with the ghost clicks, so I consider this the least of evils. Fortunately Angular
-  // encapsulates this ugly logic away from the user.
-  //
-  // Why not just put click handlers on the element?
-  // We do that too, just to be sure. If the tap event caused the DOM to change,
-  // it is possible another element is now in that position. To take account for these possibly
-  // distinct elements, the handlers are global and care only about coordinates.
-
-  // Checks if the coordinates are close enough to be within the region.
-  function hit(x1, y1, x2, y2) {
-    return Math.abs(x1 - x2) < CLICKBUSTER_THRESHOLD && Math.abs(y1 - y2) < CLICKBUSTER_THRESHOLD;
-  }
-
-  // Checks a list of allowable regions against a click location.
-  // Returns true if the click should be allowed.
-  // Splices out the allowable region from the list after it has been used.
-  function checkAllowableRegions(touchCoordinates, x, y) {
-    for (var i = 0; i < touchCoordinates.length; i += 2) {
-      if (hit(touchCoordinates[i], touchCoordinates[i + 1], x, y)) {
-        touchCoordinates.splice(i, i + 2);
-        return true; // allowable region
-      }
-    }
-    return false; // No allowable region; bust it.
-  }
-
-  // Global click handler that prevents the click if it's in a bustable zone and preventGhostClick
-  // was called recently.
-  function onClick(event) {
-    if (Date.now() - lastPreventedTime > PREVENT_DURATION) {
-      return; // Too old.
-    }
-
-    var touches = event.touches && event.touches.length ? event.touches : [event];
-    var x = touches[0].clientX;
-    var y = touches[0].clientY;
-    // Work around desktop Webkit quirk where clicking a label will fire two clicks (on the label
-    // and on the input element). Depending on the exact browser, this second click we don't want
-    // to bust has either (0,0), negative coordinates, or coordinates equal to triggering label
-    // click event
-    if (x < 1 && y < 1) {
-      return; // offscreen
-    }
-    if (lastLabelClickCoordinates &&
-        lastLabelClickCoordinates[0] === x && lastLabelClickCoordinates[1] === y) {
-      return; // input click triggered by label click
-    }
-    // reset label click coordinates on first subsequent click
-    if (lastLabelClickCoordinates) {
-      lastLabelClickCoordinates = null;
-    }
-    // remember label click coordinates to prevent click busting of trigger click event on input
-    if (nodeName_(event.target) === 'label') {
-      lastLabelClickCoordinates = [x, y];
-    }
-
-    // Look for an allowable region containing this click.
-    // If we find one, that means it was created by touchstart and not removed by
-    // preventGhostClick, so we don't bust it.
-    if (checkAllowableRegions(touchCoordinates, x, y)) {
-      return;
-    }
-
-    // If we didn't find an allowable region, bust the click.
-    event.stopPropagation();
-    event.preventDefault();
-
-    // Blur focused form elements
-    event.target && event.target.blur && event.target.blur();
-  }
-
-
-  // Global touchstart handler that creates an allowable region for a click event.
-  // This allowable region can be removed by preventGhostClick if we want to bust it.
-  function onTouchStart(event) {
-    var touches = event.touches && event.touches.length ? event.touches : [event];
-    var x = touches[0].clientX;
-    var y = touches[0].clientY;
-    touchCoordinates.push(x, y);
-
-    $timeout(function() {
-      // Remove the allowable region.
-      for (var i = 0; i < touchCoordinates.length; i += 2) {
-        if (touchCoordinates[i] == x && touchCoordinates[i + 1] == y) {
-          touchCoordinates.splice(i, i + 2);
-          return;
-        }
-      }
-    }, PREVENT_DURATION, false);
-  }
-
-  // On the first call, attaches some event handlers. Then whenever it gets called, it creates a
-  // zone around the touchstart where clicks will get busted.
-  function preventGhostClick(x, y) {
-    if (!touchCoordinates) {
-      $rootElement[0].addEventListener('click', onClick, true);
-      $rootElement[0].addEventListener('touchstart', onTouchStart, true);
-      touchCoordinates = [];
-    }
-
-    lastPreventedTime = Date.now();
-
-    checkAllowableRegions(touchCoordinates, x, y);
-  }
-
-  // Actual linking function.
-  return function(scope, element, attr) {
-    var clickHandler = $parse(attr.ngClick),
-        tapping = false,
-        tapElement,  // Used to blur the element after a tap.
-        startTime,   // Used to check if the tap was held too long.
-        touchStartX,
-        touchStartY;
-
-    function resetState() {
-      tapping = false;
-      element.removeClass(ACTIVE_CLASS_NAME);
-    }
-
-    element.on('touchstart', function(event) {
-      tapping = true;
-      tapElement = event.target ? event.target : event.srcElement; // IE uses srcElement.
-      // Hack for Safari, which can target text nodes instead of containers.
-      if (tapElement.nodeType == 3) {
-        tapElement = tapElement.parentNode;
-      }
-
-      element.addClass(ACTIVE_CLASS_NAME);
-
-      startTime = Date.now();
-
-      // Use jQuery originalEvent
-      var originalEvent = event.originalEvent || event;
-      var touches = originalEvent.touches && originalEvent.touches.length ? originalEvent.touches : [originalEvent];
-      var e = touches[0];
-      touchStartX = e.clientX;
-      touchStartY = e.clientY;
-    });
-
-    element.on('touchcancel', function(event) {
-      resetState();
-    });
-
-    element.on('touchend', function(event) {
-      var diff = Date.now() - startTime;
-
-      // Use jQuery originalEvent
-      var originalEvent = event.originalEvent || event;
-      var touches = (originalEvent.changedTouches && originalEvent.changedTouches.length) ?
-          originalEvent.changedTouches :
-          ((originalEvent.touches && originalEvent.touches.length) ? originalEvent.touches : [originalEvent]);
-      var e = touches[0];
-      var x = e.clientX;
-      var y = e.clientY;
-      var dist = Math.sqrt(Math.pow(x - touchStartX, 2) + Math.pow(y - touchStartY, 2));
-
-      if (tapping && diff < TAP_DURATION && dist < MOVE_TOLERANCE) {
-        // Call preventGhostClick so the clickbuster will catch the corresponding click.
-        preventGhostClick(x, y);
-
-        // Blur the focused element (the button, probably) before firing the callback.
-        // This doesn't work perfectly on Android Chrome, but seems to work elsewhere.
-        // I couldn't get anything to work reliably on Android Chrome.
-        if (tapElement) {
-          tapElement.blur();
-        }
-
-        if (!angular.isDefined(attr.disabled) || attr.disabled === false) {
-          element.triggerHandler('click', [event]);
-        }
-      }
-
-      resetState();
-    });
-
-    // Hack for iOS Safari's benefit. It goes searching for onclick handlers and is liable to click
-    // something else nearby.
-    element.onclick = function(event) { };
-
-    // Actual click handler.
-    // There are three different kinds of clicks, only two of which reach this point.
-    // - On desktop browsers without touch events, their clicks will always come here.
-    // - On mobile browsers, the simulated "fast" click will call this.
-    // - But the browser's follow-up slow click will be "busted" before it reaches this handler.
-    // Therefore it's safe to use this directive on both mobile and desktop.
-    element.on('click', function(event, touchend) {
-      scope.$apply(function() {
-        clickHandler(scope, {$event: (touchend || event)});
-      });
-    });
-
-    element.on('mousedown', function(event) {
-      element.addClass(ACTIVE_CLASS_NAME);
-    });
-
-    element.on('mousemove mouseup', function(event) {
-      element.removeClass(ACTIVE_CLASS_NAME);
-    });
-
-  };
-}]);
-
-/* global ngTouch: false */
-
-/**
- * @ngdoc directive
- * @name ngSwipeLeft
- *
- * @description
- * Specify custom behavior when an element is swiped to the left on a touchscreen device.
- * A leftward swipe is a quick, right-to-left slide of the finger.
- * Though ngSwipeLeft is designed for touch-based devices, it will work with a mouse click and drag
- * too.
- *
- * To disable the mouse click and drag functionality, add `ng-swipe-disable-mouse` to
- * the `ng-swipe-left` or `ng-swipe-right` DOM Element.
- *
- * Requires the {@link ngTouch `ngTouch`} module to be installed.
- *
- * @element ANY
- * @param {expression} ngSwipeLeft {@link guide/expression Expression} to evaluate
- * upon left swipe. (Event object is available as `$event`)
- *
- * @example
-    <example module="ngSwipeLeftExample" deps="angular-touch.js">
-      <file name="index.html">
-        <div ng-show="!showActions" ng-swipe-left="showActions = true">
-          Some list content, like an email in the inbox
-        </div>
-        <div ng-show="showActions" ng-swipe-right="showActions = false">
-          <button ng-click="reply()">Reply</button>
-          <button ng-click="delete()">Delete</button>
-        </div>
-      </file>
-      <file name="script.js">
-        angular.module('ngSwipeLeftExample', ['ngTouch']);
-      </file>
-    </example>
- */
-
-/**
- * @ngdoc directive
- * @name ngSwipeRight
- *
- * @description
- * Specify custom behavior when an element is swiped to the right on a touchscreen device.
- * A rightward swipe is a quick, left-to-right slide of the finger.
- * Though ngSwipeRight is designed for touch-based devices, it will work with a mouse click and drag
- * too.
- *
- * Requires the {@link ngTouch `ngTouch`} module to be installed.
- *
- * @element ANY
- * @param {expression} ngSwipeRight {@link guide/expression Expression} to evaluate
- * upon right swipe. (Event object is available as `$event`)
- *
- * @example
-    <example module="ngSwipeRightExample" deps="angular-touch.js">
-      <file name="index.html">
-        <div ng-show="!showActions" ng-swipe-left="showActions = true">
-          Some list content, like an email in the inbox
-        </div>
-        <div ng-show="showActions" ng-swipe-right="showActions = false">
-          <button ng-click="reply()">Reply</button>
-          <button ng-click="delete()">Delete</button>
-        </div>
-      </file>
-      <file name="script.js">
-        angular.module('ngSwipeRightExample', ['ngTouch']);
-      </file>
-    </example>
- */
-
-function makeSwipeDirective(directiveName, direction, eventName) {
-  ngTouch.directive(directiveName, ['$parse', '$swipe', function($parse, $swipe) {
-    // The maximum vertical delta for a swipe should be less than 75px.
-    var MAX_VERTICAL_DISTANCE = 75;
-    // Vertical distance should not be more than a fraction of the horizontal distance.
-    var MAX_VERTICAL_RATIO = 0.3;
-    // At least a 30px lateral motion is necessary for a swipe.
-    var MIN_HORIZONTAL_DISTANCE = 30;
-
-    return function(scope, element, attr) {
-      var swipeHandler = $parse(attr[directiveName]);
-
-      var startCoords, valid;
-
-      function validSwipe(coords) {
-        // Check that it's within the coordinates.
-        // Absolute vertical distance must be within tolerances.
-        // Horizontal distance, we take the current X - the starting X.
-        // This is negative for leftward swipes and positive for rightward swipes.
-        // After multiplying by the direction (-1 for left, +1 for right), legal swipes
-        // (ie. same direction as the directive wants) will have a positive delta and
-        // illegal ones a negative delta.
-        // Therefore this delta must be positive, and larger than the minimum.
-        if (!startCoords) return false;
-        var deltaY = Math.abs(coords.y - startCoords.y);
-        var deltaX = (coords.x - startCoords.x) * direction;
-        return valid && // Short circuit for already-invalidated swipes.
-            deltaY < MAX_VERTICAL_DISTANCE &&
-            deltaX > 0 &&
-            deltaX > MIN_HORIZONTAL_DISTANCE &&
-            deltaY / deltaX < MAX_VERTICAL_RATIO;
-      }
-
-      var pointerTypes = ['touch'];
-      if (!angular.isDefined(attr['ngSwipeDisableMouse'])) {
-        pointerTypes.push('mouse');
-      }
-      $swipe.bind(element, {
-        'start': function(coords, event) {
-          startCoords = coords;
-          valid = true;
-        },
-        'cancel': function(event) {
-          valid = false;
-        },
-        'end': function(coords, event) {
-          if (validSwipe(coords)) {
-            scope.$apply(function() {
-              element.triggerHandler(eventName);
-              swipeHandler(scope, {$event: event});
-            });
-          }
-        }
-      }, pointerTypes);
-    };
-  }]);
-}
-
-// Left is negative X-coordinate, right is positive.
-makeSwipeDirective('ngSwipeLeft', -1, 'swipeleft');
-makeSwipeDirective('ngSwipeRight', 1, 'swiperight');
-
-
-
-})(window, window.angular);
-
-/**
- * Angular Carousel - Mobile friendly touch carousel for AngularJS
- * @version v0.3.12 - 2015-06-11
- * @link http://revolunet.github.com/angular-carousel
- * @author Julien Bouquillon <julien@revolunet.com>
- * @license MIT License, http://www.opensource.org/licenses/MIT
- */
-/*global angular */
-
-/*
-Angular touch carousel with CSS GPU accel and slide buffering
-http://github.com/revolunet/angular-carousel
-
-*/
-
-angular.module('angular-carousel', [
-    'ngTouch',
-    'angular-carousel.shifty'
-]);
-
-angular.module('angular-carousel')
-
-.directive('rnCarouselAutoSlide', ['$interval', function($interval) {
-  return {
-    restrict: 'A',
-    link: function (scope, element, attrs) {
-        var stopAutoPlay = function() {
-            if (scope.autoSlider) {
-                $interval.cancel(scope.autoSlider);
-                scope.autoSlider = null;
-            }
-        };
-        var restartTimer = function() {
-            scope.autoSlide();
-        };
-
-        scope.$watch('carouselIndex', restartTimer);
-
-        if (attrs.hasOwnProperty('rnCarouselPauseOnHover') && attrs.rnCarouselPauseOnHover !== 'false'){
-            element.on('mouseenter', stopAutoPlay);
-            element.on('mouseleave', restartTimer);
-        }
-
-        scope.$on('$destroy', function(){
-            stopAutoPlay();
-            element.off('mouseenter', stopAutoPlay);
-            element.off('mouseleave', restartTimer);
-        });
-    }
-  };
-}]);
-
-angular.module('angular-carousel')
-
-.directive('rnCarouselIndicators', ['$parse', function($parse) {
-  return {
-    restrict: 'A',
-    scope: {
-      slides: '=',
-      index: '=rnCarouselIndex'
-    },
-    templateUrl: 'carousel-indicators.html',
-    link: function(scope, iElement, iAttributes) {
-      var indexModel = $parse(iAttributes.rnCarouselIndex);
-      scope.goToSlide = function(index) {
-        indexModel.assign(scope.$parent.$parent, index);
-      };
-    }
-  };
-}]);
-
-angular.module('angular-carousel').run(['$templateCache', function($templateCache) {
-  $templateCache.put('carousel-indicators.html',
-      '<div class="rn-carousel-indicator">\n' +
-        '<span ng-repeat="slide in slides" ng-class="{active: $index==index}" ng-click="goToSlide($index)">●</span>' +
-      '</div>'
-  );
-}]);
-
-(function() {
-    "use strict";
-
-    angular.module('angular-carousel')
-
-    .service('DeviceCapabilities', function() {
-
-        // TODO: merge in a single function
-
-        // detect supported CSS property
-        function detectTransformProperty() {
-            var transformProperty = 'transform',
-                safariPropertyHack = 'webkitTransform';
-            if (typeof document.body.style[transformProperty] !== 'undefined') {
-
-                ['webkit', 'moz', 'o', 'ms'].every(function (prefix) {
-                    var e = '-' + prefix + '-transform';
-                    if (typeof document.body.style[e] !== 'undefined') {
-                        transformProperty = e;
-                        return false;
-                    }
-                    return true;
-                });
-            } else if (typeof document.body.style[safariPropertyHack] !== 'undefined') {
-                transformProperty = '-webkit-transform';
-            } else {
-                transformProperty = undefined;
-            }
-            return transformProperty;
-        }
-
-        //Detect support of translate3d
-        function detect3dSupport() {
-            var el = document.createElement('p'),
-                has3d,
-                transforms = {
-                    'webkitTransform': '-webkit-transform',
-                    'msTransform': '-ms-transform',
-                    'transform': 'transform'
-                };
-            // Add it to the body to get the computed style
-            document.body.insertBefore(el, null);
-            for (var t in transforms) {
-                if (el.style[t] !== undefined) {
-                    el.style[t] = 'translate3d(1px,1px,1px)';
-                    has3d = window.getComputedStyle(el).getPropertyValue(transforms[t]);
-                }
-            }
-            document.body.removeChild(el);
-            return (has3d !== undefined && has3d.length > 0 && has3d !== "none");
-        }
-
-        return {
-            has3d: detect3dSupport(),
-            transformProperty: detectTransformProperty()
-        };
-
-    })
-
-    .service('computeCarouselSlideStyle', ["DeviceCapabilities", function(DeviceCapabilities) {
-        // compute transition transform properties for a given slide and global offset
-        return function(slideIndex, offset, transitionType) {
-            var style = {
-                    display: 'inline-block'
-                },
-                opacity,
-                absoluteLeft = (slideIndex * 100) + offset,
-                slideTransformValue = DeviceCapabilities.has3d ? 'translate3d(' + absoluteLeft + '%, 0, 0)' : 'translate3d(' + absoluteLeft + '%, 0)',
-                distance = ((100 - Math.abs(absoluteLeft)) / 100);
-
-            if (!DeviceCapabilities.transformProperty) {
-                // fallback to default slide if transformProperty is not available
-                style['margin-left'] = absoluteLeft + '%';
-            } else {
-                if (transitionType == 'fadeAndSlide') {
-                    style[DeviceCapabilities.transformProperty] = slideTransformValue;
-                    opacity = 0;
-                    if (Math.abs(absoluteLeft) < 100) {
-                        opacity = 0.3 + distance * 0.7;
-                    }
-                    style.opacity = opacity;
-                } else if (transitionType == 'hexagon') {
-                    var transformFrom = 100,
-                        degrees = 0,
-                        maxDegrees = 60 * (distance - 1);
-
-                    transformFrom = offset < (slideIndex * -100) ? 100 : 0;
-                    degrees = offset < (slideIndex * -100) ? maxDegrees : -maxDegrees;
-                    style[DeviceCapabilities.transformProperty] = slideTransformValue + ' ' + 'rotateY(' + degrees + 'deg)';
-                    style[DeviceCapabilities.transformProperty + '-origin'] = transformFrom + '% 50%';
-                } else if (transitionType == 'zoom') {
-                    style[DeviceCapabilities.transformProperty] = slideTransformValue;
-                    var scale = 1;
-                    if (Math.abs(absoluteLeft) < 100) {
-                        scale = 1 + ((1 - distance) * 2);
-                    }
-                    style[DeviceCapabilities.transformProperty] += ' scale(' + scale + ')';
-                    style[DeviceCapabilities.transformProperty + '-origin'] = '50% 50%';
-                    opacity = 0;
-                    if (Math.abs(absoluteLeft) < 100) {
-                        opacity = 0.3 + distance * 0.7;
-                    }
-                    style.opacity = opacity;
-                } else {
-                    style[DeviceCapabilities.transformProperty] = slideTransformValue;
-                }
-            }
-            return style;
-        };
-    }])
-
-    .service('createStyleString', function() {
-        return function(object) {
-            var styles = [];
-            angular.forEach(object, function(value, key) {
-                styles.push(key + ':' + value);
-            });
-            return styles.join(';');
-        };
-    })
-
-    .directive('rnCarousel', ['$swipe', '$window', '$document', '$parse', '$compile', '$timeout', '$interval', 'computeCarouselSlideStyle', 'createStyleString', 'Tweenable',
-        function($swipe, $window, $document, $parse, $compile, $timeout, $interval, computeCarouselSlideStyle, createStyleString, Tweenable) {
-            // internal ids to allow multiple instances
-            var carouselId = 0,
-                // in absolute pixels, at which distance the slide stick to the edge on release
-                rubberTreshold = 3;
-
-            var requestAnimationFrame = $window.requestAnimationFrame || $window.webkitRequestAnimationFrame || $window.mozRequestAnimationFrame;
-
-            function getItemIndex(collection, target, defaultIndex) {
-                var result = defaultIndex;
-                collection.every(function(item, index) {
-                    if (angular.equals(item, target)) {
-                        result = index;
-                        return false;
-                    }
-                    return true;
-                });
-                return result;
-            }
-
-            return {
-                restrict: 'A',
-                scope: true,
-                compile: function(tElement, tAttributes) {
-                    // use the compile phase to customize the DOM
-                    var firstChild = tElement[0].querySelector('li'),
-                        firstChildAttributes = (firstChild) ? firstChild.attributes : [],
-                        isRepeatBased = false,
-                        isBuffered = false,
-                        repeatItem,
-                        repeatCollection;
-
-                    // try to find an ngRepeat expression
-                    // at this point, the attributes are not yet normalized so we need to try various syntax
-                    ['ng-repeat', 'data-ng-repeat', 'ng:repeat', 'x-ng-repeat'].every(function(attr) {
-                        var repeatAttribute = firstChildAttributes[attr];
-                        if (angular.isDefined(repeatAttribute)) {
-                            // ngRepeat regexp extracted from angular 1.2.7 src
-                            var exprMatch = repeatAttribute.value.match(/^\s*([\s\S]+?)\s+in\s+([\s\S]+?)(?:\s+track\s+by\s+([\s\S]+?))?\s*$/),
-                                trackProperty = exprMatch[3];
-
-                            repeatItem = exprMatch[1];
-                            repeatCollection = exprMatch[2];
-
-                            if (repeatItem) {
-                                if (angular.isDefined(tAttributes['rnCarouselBuffered'])) {
-                                    // update the current ngRepeat expression and add a slice operator if buffered
-                                    isBuffered = true;
-                                    repeatAttribute.value = repeatItem + ' in ' + repeatCollection + '|carouselSlice:carouselBufferIndex:carouselBufferSize';
-                                    if (trackProperty) {
-                                        repeatAttribute.value += ' track by ' + trackProperty;
-                                    }
-                                }
-                                isRepeatBased = true;
-                                return false;
-                            }
-                        }
-                        return true;
-                    });
-
-                    return function(scope, iElement, iAttributes, containerCtrl) {
-
-                        carouselId++;
-
-                        var defaultOptions = {
-                            transitionType: iAttributes.rnCarouselTransition || 'slide',
-                            transitionEasing: iAttributes.rnCarouselEasing || 'easeTo',
-                            transitionDuration: parseInt(iAttributes.rnCarouselDuration, 10) || 300,
-                            isSequential: true,
-                            autoSlideDuration: 3,
-                            bufferSize: 5,
-                            /* in container % how much we need to drag to trigger the slide change */
-                            moveTreshold: 0.1,
-                            defaultIndex: 0
-                        };
-
-                        // TODO
-                        var options = angular.extend({}, defaultOptions);
-
-                        var pressed,
-                            startX,
-                            isIndexBound = false,
-                            offset = 0,
-                            destination,
-                            swipeMoved = false,
-                            //animOnIndexChange = true,
-                            currentSlides = [],
-                            elWidth = null,
-                            elX = null,
-                            animateTransitions = true,
-                            intialState = true,
-                            animating = false,
-                            mouseUpBound = false,
-                            locked = false;
-
-                        //rn-swipe-disabled =true will only disable swipe events
-                        if(iAttributes.rnSwipeDisabled !== "true") {
-                            $swipe.bind(iElement, {
-                                start: swipeStart,
-                                move: swipeMove,
-                                end: swipeEnd,
-                                cancel: function(event) {
-                                    swipeEnd({}, event);
-                                }
-                            });
-                        }
-
-                        function getSlidesDOM() {
-                            return iElement[0].querySelectorAll('ul[rn-carousel] > li');
-                        }
-
-                        function documentMouseUpEvent(event) {
-                            // in case we click outside the carousel, trigger a fake swipeEnd
-                            swipeMoved = true;
-                            swipeEnd({
-                                x: event.clientX,
-                                y: event.clientY
-                            }, event);
-                        }
-
-                        function updateSlidesPosition(offset) {
-                            // manually apply transformation to carousel childrens
-                            // todo : optim : apply only to visible items
-                            var x = scope.carouselBufferIndex * 100 + offset;
-                            angular.forEach(getSlidesDOM(), function(child, index) {
-                                child.style.cssText = createStyleString(computeCarouselSlideStyle(index, x, options.transitionType));
-                            });
-                        }
-
-                        scope.nextSlide = function(slideOptions) {
-                            var index = scope.carouselIndex + 1;
-                            if (index > currentSlides.length - 1) {
-                                index = 0;
-                            }
-                            if (!locked) {
-                                goToSlide(index, slideOptions);
-                            }
-                        };
-
-                        scope.prevSlide = function(slideOptions) {
-                            var index = scope.carouselIndex - 1;
-                            if (index < 0) {
-                                index = currentSlides.length - 1;
-                            }
-                            goToSlide(index, slideOptions);
-                        };
-
-                        function goToSlide(index, slideOptions) {
-                            //console.log('goToSlide', arguments);
-                            // move a to the given slide index
-                            if (index === undefined) {
-                                index = scope.carouselIndex;
-                            }
-
-                            slideOptions = slideOptions || {};
-                            if (slideOptions.animate === false || options.transitionType === 'none') {
-                                locked = false;
-                                offset = index * -100;
-                                scope.carouselIndex = index;
-                                updateBufferIndex();
-                                return;
-                            }
-
-                            locked = true;
-                            var tweenable = new Tweenable();
-                            tweenable.tween({
-                                from: {
-                                    'x': offset
-                                },
-                                to: {
-                                    'x': index * -100
-                                },
-                                duration: options.transitionDuration,
-                                easing: options.transitionEasing,
-                                step: function(state) {
-                                    updateSlidesPosition(state.x);
-                                },
-                                finish: function() {
-                                    scope.$apply(function() {
-                                        scope.carouselIndex = index;
-                                        offset = index * -100;
-                                        updateBufferIndex();
-                                        $timeout(function () {
-                                          locked = false;
-                                        }, 0, false);
-                                    });
-                                }
-                            });
-                        }
-
-                        function getContainerWidth() {
-                            var rect = iElement[0].getBoundingClientRect();
-                            return rect.width ? rect.width : rect.right - rect.left;
-                        }
-
-                        function updateContainerWidth() {
-                            elWidth = getContainerWidth();
-                        }
-
-                        function bindMouseUpEvent() {
-                            if (!mouseUpBound) {
-                              mouseUpBound = true;
-                              $document.bind('mouseup', documentMouseUpEvent);
-                            }
-                        }
-
-                        function unbindMouseUpEvent() {
-                            if (mouseUpBound) {
-                              mouseUpBound = false;
-                              $document.unbind('mouseup', documentMouseUpEvent);
-                            }
-                        }
-
-                        function swipeStart(coords, event) {
-                            // console.log('swipeStart', coords, event);
-                            if (locked || currentSlides.length <= 1) {
-                                return;
-                            }
-                            updateContainerWidth();
-                            elX = iElement[0].querySelector('li').getBoundingClientRect().left;
-                            pressed = true;
-                            startX = coords.x;
-                            return false;
-                        }
-
-                        function swipeMove(coords, event) {
-                            //console.log('swipeMove', coords, event);
-                            var x, delta;
-                            bindMouseUpEvent();
-                            if (pressed) {
-                                x = coords.x;
-                                delta = startX - x;
-                                if (delta > 2 || delta < -2) {
-                                    swipeMoved = true;
-                                    var moveOffset = offset + (-delta * 100 / elWidth);
-                                    updateSlidesPosition(moveOffset);
-                                }
-                            }
-                            return false;
-                        }
-
-                        var init = true;
-                        scope.carouselIndex = 0;
-
-                        if (!isRepeatBased) {
-                            // fake array when no ng-repeat
-                            currentSlides = [];
-                            angular.forEach(getSlidesDOM(), function(node, index) {
-                                currentSlides.push({id: index});
-                            });
-                        }
-
-                        if (iAttributes.rnCarouselControls!==undefined) {
-                            // dont use a directive for this
-                            var nextSlideIndexCompareValue = isRepeatBased ? repeatCollection.replace('::', '') + '.length - 1' : currentSlides.length - 1;
-                            var tpl = '<div class="rn-carousel-controls">\n' +
-                                '  <span class="rn-carousel-control rn-carousel-control-prev" ng-click="prevSlide()" ng-if="carouselIndex > 0"></span>\n' +
-                                '  <span class="rn-carousel-control rn-carousel-control-next" ng-click="nextSlide()" ng-if="carouselIndex < ' + nextSlideIndexCompareValue + '"></span>\n' +
-                                '</div>';
-                            iElement.parent().append($compile(angular.element(tpl))(scope));
-                        }
-
-                        if (iAttributes.rnCarouselAutoSlide!==undefined) {
-                            var duration = parseInt(iAttributes.rnCarouselAutoSlide, 10) || options.autoSlideDuration;
-                            scope.autoSlide = function() {
-                                if (scope.autoSlider) {
-                                    $interval.cancel(scope.autoSlider);
-                                    scope.autoSlider = null;
-                                }
-                                scope.autoSlider = $interval(function() {
-                                    if (!locked && !pressed) {
-                                        scope.nextSlide();
-                                    }
-                                }, duration * 1000);
-                            };
-                        }
-
-                        if (iAttributes.rnCarouselDefaultIndex) {
-                            var defaultIndexModel = $parse(iAttributes.rnCarouselDefaultIndex);
-                            options.defaultIndex = defaultIndexModel(scope.$parent) || 0;
-                        }
-
-                        if (iAttributes.rnCarouselIndex) {
-                            var updateParentIndex = function(value) {
-                                indexModel.assign(scope.$parent, value);
-                            };
-                            var indexModel = $parse(iAttributes.rnCarouselIndex);
-                            if (angular.isFunction(indexModel.assign)) {
-                                /* check if this property is assignable then watch it */
-                                scope.$watch('carouselIndex', function(newValue) {
-                                    updateParentIndex(newValue);
-                                });
-                                scope.$parent.$watch(indexModel, function(newValue, oldValue) {
-
-                                    if (newValue !== undefined && newValue !== null) {
-                                        if (currentSlides && currentSlides.length > 0 && newValue >= currentSlides.length) {
-                                            newValue = currentSlides.length - 1;
-                                            updateParentIndex(newValue);
-                                        } else if (currentSlides && newValue < 0) {
-                                            newValue = 0;
-                                            updateParentIndex(newValue);
-                                        }
-                                        if (!locked) {
-                                            goToSlide(newValue, {
-                                                animate: !init
-                                            });
-                                        }
-                                        init = false;
-                                    }
-                                });
-                                isIndexBound = true;
-
-                                if (options.defaultIndex) {
-                                    goToSlide(options.defaultIndex, {
-                                        animate: !init
-                                    });
-                                }
-                            } else if (!isNaN(iAttributes.rnCarouselIndex)) {
-                                /* if user just set an initial number, set it */
-                                goToSlide(parseInt(iAttributes.rnCarouselIndex, 10), {
-                                    animate: false
-                                });
-                            }
-                        } else {
-                            goToSlide(options.defaultIndex, {
-                                animate: !init
-                            });
-                            init = false;
-                        }
-
-                        if (iAttributes.rnCarouselLocked) {
-                            scope.$watch(iAttributes.rnCarouselLocked, function(newValue, oldValue) {
-                                // only bind swipe when it's not switched off
-                                if(newValue === true) {
-                                    locked = true;
-                                } else {
-                                    locked = false;
-                                }
-                            });
-                        }
-
-                        if (isRepeatBased) {
-                            // use rn-carousel-deep-watch to fight the Angular $watchCollection weakness : https://github.com/angular/angular.js/issues/2621
-                            // optional because it have some performance impacts (deep watch)
-                            var deepWatch = (iAttributes.rnCarouselDeepWatch!==undefined);
-
-                            scope[deepWatch?'$watch':'$watchCollection'](repeatCollection, function(newValue, oldValue) {
-                                //console.log('repeatCollection', currentSlides);
-                                currentSlides = newValue;
-                                // if deepWatch ON ,manually compare objects to guess the new position
-                                if (deepWatch && angular.isArray(newValue)) {
-                                    var activeElement = oldValue[scope.carouselIndex];
-                                    var newIndex = getItemIndex(newValue, activeElement, scope.carouselIndex);
-                                    goToSlide(newIndex, {animate: false});
-                                } else {
-                                    goToSlide(scope.carouselIndex, {animate: false});
-                                }
-                            }, true);
-                        }
-
-                        function swipeEnd(coords, event, forceAnimation) {
-                            //  console.log('swipeEnd', 'scope.carouselIndex', scope.carouselIndex);
-                            // Prevent clicks on buttons inside slider to trigger "swipeEnd" event on touchend/mouseup
-                            // console.log(iAttributes.rnCarouselOnInfiniteScroll);
-                            if (event && !swipeMoved) {
-                                return;
-                            }
-                            unbindMouseUpEvent();
-                            pressed = false;
-                            swipeMoved = false;
-                            destination = startX - coords.x;
-                            if (destination===0) {
-                                return;
-                            }
-                            if (locked) {
-                                return;
-                            }
-                            offset += (-destination * 100 / elWidth);
-                            if (options.isSequential) {
-                                var minMove = options.moveTreshold * elWidth,
-                                    absMove = -destination,
-                                    slidesMove = -Math[absMove >= 0 ? 'ceil' : 'floor'](absMove / elWidth),
-                                    shouldMove = Math.abs(absMove) > minMove;
-
-                                if (currentSlides && (slidesMove + scope.carouselIndex) >= currentSlides.length) {
-                                    slidesMove = currentSlides.length - 1 - scope.carouselIndex;
-                                }
-                                if ((slidesMove + scope.carouselIndex) < 0) {
-                                    slidesMove = -scope.carouselIndex;
-                                }
-                                var moveOffset = shouldMove ? slidesMove : 0;
-
-                                destination = (scope.carouselIndex + moveOffset);
-
-                                goToSlide(destination);
-                                if(iAttributes.rnCarouselOnInfiniteScrollRight!==undefined && slidesMove === 0 && scope.carouselIndex !== 0) {
-                                    $parse(iAttributes.rnCarouselOnInfiniteScrollRight)(scope)
-                                    goToSlide(0);
-                                }
-                                if(iAttributes.rnCarouselOnInfiniteScrollLeft!==undefined && slidesMove === 0 && scope.carouselIndex === 0 && moveOffset === 0) {
-                                    $parse(iAttributes.rnCarouselOnInfiniteScrollLeft)(scope)
-                                    goToSlide(currentSlides.length);
-                                }
-
-                            } else {
-                                scope.$apply(function() {
-                                    scope.carouselIndex = parseInt(-offset / 100, 10);
-                                    updateBufferIndex();
-                                });
-
-                            }
-
-                        }
-
-                        scope.$on('$destroy', function() {
-                            unbindMouseUpEvent();
-                        });
-
-                        scope.carouselBufferIndex = 0;
-                        scope.carouselBufferSize = options.bufferSize;
-
-                        function updateBufferIndex() {
-                            // update and cap te buffer index
-                            var bufferIndex = 0;
-                            var bufferEdgeSize = (scope.carouselBufferSize - 1) / 2;
-                            if (isBuffered) {
-                                if (scope.carouselIndex <= bufferEdgeSize) {
-                                    // first buffer part
-                                    bufferIndex = 0;
-                                } else if (currentSlides && currentSlides.length < scope.carouselBufferSize) {
-                                    // smaller than buffer
-                                    bufferIndex = 0;
-                                } else if (currentSlides && scope.carouselIndex > currentSlides.length - scope.carouselBufferSize) {
-                                    // last buffer part
-                                    bufferIndex = currentSlides.length - scope.carouselBufferSize;
-                                } else {
-                                    // compute buffer start
-                                    bufferIndex = scope.carouselIndex - bufferEdgeSize;
-                                }
-
-                                scope.carouselBufferIndex = bufferIndex;
-                                $timeout(function() {
-                                    updateSlidesPosition(offset);
-                                }, 0, false);
-                            } else {
-                                $timeout(function() {
-                                    updateSlidesPosition(offset);
-                                }, 0, false);
-                            }
-                        }
-
-                        function onOrientationChange() {
-                            updateContainerWidth();
-                            goToSlide();
-                        }
-
-                        // handle orientation change
-                        var winEl = angular.element($window);
-                        winEl.bind('orientationchange', onOrientationChange);
-                        winEl.bind('resize', onOrientationChange);
-
-                        scope.$on('$destroy', function() {
-                            unbindMouseUpEvent();
-                            winEl.unbind('orientationchange', onOrientationChange);
-                            winEl.unbind('resize', onOrientationChange);
-                        });
-                    };
-                }
-            };
-        }
-    ]);
-})();
-
-
-
-angular.module('angular-carousel.shifty', [])
-
-.factory('Tweenable', function() {
-
-    /*! shifty - v1.3.4 - 2014-10-29 - http://jeremyckahn.github.io/shifty */
-  ;(function (root) {
-
-  /*!
-   * Shifty Core
-   * By Jeremy Kahn - jeremyckahn@gmail.com
-   */
-
-  var Tweenable = (function () {
-
-    'use strict';
-
-    // Aliases that get defined later in this function
-    var formula;
-
-    // CONSTANTS
-    var DEFAULT_SCHEDULE_FUNCTION;
-    var DEFAULT_EASING = 'linear';
-    var DEFAULT_DURATION = 500;
-    var UPDATE_TIME = 1000 / 60;
-
-    var _now = Date.now
-         ? Date.now
-         : function () {return +new Date();};
-
-    var now = typeof SHIFTY_DEBUG_NOW !== 'undefined' ? SHIFTY_DEBUG_NOW : _now;
-
-    if (typeof window !== 'undefined') {
-      // requestAnimationFrame() shim by Paul Irish (modified for Shifty)
-      // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
-      DEFAULT_SCHEDULE_FUNCTION = window.requestAnimationFrame
-         || window.webkitRequestAnimationFrame
-         || window.oRequestAnimationFrame
-         || window.msRequestAnimationFrame
-         || (window.mozCancelRequestAnimationFrame
-         && window.mozRequestAnimationFrame)
-         || setTimeout;
-    } else {
-      DEFAULT_SCHEDULE_FUNCTION = setTimeout;
-    }
-
-    function noop () {
-      // NOOP!
-    }
-
-    /*!
-     * Handy shortcut for doing a for-in loop. This is not a "normal" each
-     * function, it is optimized for Shifty.  The iterator function only receives
-     * the property name, not the value.
-     * @param {Object} obj
-     * @param {Function(string)} fn
-     */
-    function each (obj, fn) {
-      var key;
-      for (key in obj) {
-        if (Object.hasOwnProperty.call(obj, key)) {
-          fn(key);
-        }
-      }
-    }
-
-    /*!
-     * Perform a shallow copy of Object properties.
-     * @param {Object} targetObject The object to copy into
-     * @param {Object} srcObject The object to copy from
-     * @return {Object} A reference to the augmented `targetObj` Object
-     */
-    function shallowCopy (targetObj, srcObj) {
-      each(srcObj, function (prop) {
-        targetObj[prop] = srcObj[prop];
-      });
-
-      return targetObj;
-    }
-
-    /*!
-     * Copies each property from src onto target, but only if the property to
-     * copy to target is undefined.
-     * @param {Object} target Missing properties in this Object are filled in
-     * @param {Object} src
-     */
-    function defaults (target, src) {
-      each(src, function (prop) {
-        if (typeof target[prop] === 'undefined') {
-          target[prop] = src[prop];
-        }
-      });
-    }
-
-    /*!
-     * Calculates the interpolated tween values of an Object for a given
-     * timestamp.
-     * @param {Number} forPosition The position to compute the state for.
-     * @param {Object} currentState Current state properties.
-     * @param {Object} originalState: The original state properties the Object is
-     * tweening from.
-     * @param {Object} targetState: The destination state properties the Object
-     * is tweening to.
-     * @param {number} duration: The length of the tween in milliseconds.
-     * @param {number} timestamp: The UNIX epoch time at which the tween began.
-     * @param {Object} easing: This Object's keys must correspond to the keys in
-     * targetState.
-     */
-    function tweenProps (forPosition, currentState, originalState, targetState,
-      duration, timestamp, easing) {
-      var normalizedPosition = (forPosition - timestamp) / duration;
-
-      var prop;
-      for (prop in currentState) {
-        if (currentState.hasOwnProperty(prop)) {
-          currentState[prop] = tweenProp(originalState[prop],
-            targetState[prop], formula[easing[prop]], normalizedPosition);
-        }
-      }
-
-      return currentState;
-    }
-
-    /*!
-     * Tweens a single property.
-     * @param {number} start The value that the tween started from.
-     * @param {number} end The value that the tween should end at.
-     * @param {Function} easingFunc The easing curve to apply to the tween.
-     * @param {number} position The normalized position (between 0.0 and 1.0) to
-     * calculate the midpoint of 'start' and 'end' against.
-     * @return {number} The tweened value.
-     */
-    function tweenProp (start, end, easingFunc, position) {
-      return start + (end - start) * easingFunc(position);
-    }
-
-    /*!
-     * Applies a filter to Tweenable instance.
-     * @param {Tweenable} tweenable The `Tweenable` instance to call the filter
-     * upon.
-     * @param {String} filterName The name of the filter to apply.
-     */
-    function applyFilter (tweenable, filterName) {
-      var filters = Tweenable.prototype.filter;
-      var args = tweenable._filterArgs;
-
-      each(filters, function (name) {
-        if (typeof filters[name][filterName] !== 'undefined') {
-          filters[name][filterName].apply(tweenable, args);
-        }
-      });
-    }
-
-    var timeoutHandler_endTime;
-    var timeoutHandler_currentTime;
-    var timeoutHandler_isEnded;
-    var timeoutHandler_offset;
-    /*!
-     * Handles the update logic for one step of a tween.
-     * @param {Tweenable} tweenable
-     * @param {number} timestamp
-     * @param {number} duration
-     * @param {Object} currentState
-     * @param {Object} originalState
-     * @param {Object} targetState
-     * @param {Object} easing
-     * @param {Function(Object, *, number)} step
-     * @param {Function(Function,number)}} schedule
-     */
-    function timeoutHandler (tweenable, timestamp, duration, currentState,
-      originalState, targetState, easing, step, schedule) {
-      timeoutHandler_endTime = timestamp + duration;
-      timeoutHandler_currentTime = Math.min(now(), timeoutHandler_endTime);
-      timeoutHandler_isEnded =
-        timeoutHandler_currentTime >= timeoutHandler_endTime;
-
-      timeoutHandler_offset = duration - (
-          timeoutHandler_endTime - timeoutHandler_currentTime);
-
-      if (tweenable.isPlaying() && !timeoutHandler_isEnded) {
-        tweenable._scheduleId = schedule(tweenable._timeoutHandler, UPDATE_TIME);
-
-        applyFilter(tweenable, 'beforeTween');
-        tweenProps(timeoutHandler_currentTime, currentState, originalState,
-          targetState, duration, timestamp, easing);
-        applyFilter(tweenable, 'afterTween');
-
-        step(currentState, tweenable._attachment, timeoutHandler_offset);
-      } else if (timeoutHandler_isEnded) {
-        step(targetState, tweenable._attachment, timeoutHandler_offset);
-        tweenable.stop(true);
-      }
-    }
-
-
-    /*!
-     * Creates a usable easing Object from either a string or another easing
-     * Object.  If `easing` is an Object, then this function clones it and fills
-     * in the missing properties with "linear".
-     * @param {Object} fromTweenParams
-     * @param {Object|string} easing
-     */
-    function composeEasingObject (fromTweenParams, easing) {
-      var composedEasing = {};
-
-      if (typeof easing === 'string') {
-        each(fromTweenParams, function (prop) {
-          composedEasing[prop] = easing;
-        });
-      } else {
-        each(fromTweenParams, function (prop) {
-          if (!composedEasing[prop]) {
-            composedEasing[prop] = easing[prop] || DEFAULT_EASING;
-          }
-        });
-      }
-
-      return composedEasing;
-    }
-
-    /**
-     * Tweenable constructor.
-     * @param {Object=} opt_initialState The values that the initial tween should start at if a "from" object is not provided to Tweenable#tween.
-     * @param {Object=} opt_config See Tweenable.prototype.setConfig()
-     * @constructor
-     */
-    function Tweenable (opt_initialState, opt_config) {
-      this._currentState = opt_initialState || {};
-      this._configured = false;
-      this._scheduleFunction = DEFAULT_SCHEDULE_FUNCTION;
-
-      // To prevent unnecessary calls to setConfig do not set default configuration here.
-      // Only set default configuration immediately before tweening if none has been set.
-      if (typeof opt_config !== 'undefined') {
-        this.setConfig(opt_config);
-      }
-    }
-
-    /**
-     * Configure and start a tween.
-     * @param {Object=} opt_config See Tweenable.prototype.setConfig()
-     * @return {Tweenable}
-     */
-    Tweenable.prototype.tween = function (opt_config) {
-      if (this._isTweening) {
-        return this;
-      }
-
-      // Only set default config if no configuration has been set previously and none is provided now.
-      if (opt_config !== undefined || !this._configured) {
-        this.setConfig(opt_config);
-      }
-
-      this._timestamp = now();
-      this._start(this.get(), this._attachment);
-      return this.resume();
-    };
-
-    /**
-     * Sets the tween configuration. `config` may have the following options:
-     *
-     * - __from__ (_Object=_): Starting position.  If omitted, the current state is used.
-     * - __to__ (_Object=_): Ending position.
-     * - __duration__ (_number=_): How many milliseconds to animate for.
-     * - __start__ (_Function(Object)_): Function to execute when the tween begins.  Receives the state of the tween as the first parameter. Attachment is the second parameter.
-     * - __step__ (_Function(Object, *, number)_): Function to execute on every tick.  Receives the state of the tween as the first parameter. Attachment is the second parameter, and the time elapsed since the start of the tween is the third parameter. This function is not called on the final step of the animation, but `finish` is.
-     * - __finish__ (_Function(Object, *)_): Function to execute upon tween completion.  Receives the state of the tween as the first parameter. Attachment is the second parameter.
-     * - __easing__ (_Object|string=_): Easing curve name(s) to use for the tween.
-     * - __attachment__ (_Object|string|any=_): Value that is attached to this instance and passed on to the step/start/finish methods.
-     * @param {Object} config
-     * @return {Tweenable}
-     */
-    Tweenable.prototype.setConfig = function (config) {
-      config = config || {};
-      this._configured = true;
-
-      // Attach something to this Tweenable instance (e.g.: a DOM element, an object, a string, etc.);
-      this._attachment = config.attachment;
-
-      // Init the internal state
-      this._pausedAtTime = null;
-      this._scheduleId = null;
-      this._start = config.start || noop;
-      this._step = config.step || noop;
-      this._finish = config.finish || noop;
-      this._duration = config.duration || DEFAULT_DURATION;
-      this._currentState = config.from || this.get();
-      this._originalState = this.get();
-      this._targetState = config.to || this.get();
-
-      // Aliases used below
-      var currentState = this._currentState;
-      var targetState = this._targetState;
-
-      // Ensure that there is always something to tween to.
-      defaults(targetState, currentState);
-
-      this._easing = composeEasingObject(
-        currentState, config.easing || DEFAULT_EASING);
-
-      this._filterArgs =
-        [currentState, this._originalState, targetState, this._easing];
-
-      applyFilter(this, 'tweenCreated');
-      return this;
-    };
-
-    /**
-     * Gets the current state.
-     * @return {Object}
-     */
-    Tweenable.prototype.get = function () {
-      return shallowCopy({}, this._currentState);
-    };
-
-    /**
-     * Sets the current state.
-     * @param {Object} state
-     */
-    Tweenable.prototype.set = function (state) {
-      this._currentState = state;
-    };
-
-    /**
-     * Pauses a tween.  Paused tweens can be resumed from the point at which they were paused.  This is different than [`stop()`](#stop), as that method causes a tween to start over when it is resumed.
-     * @return {Tweenable}
-     */
-    Tweenable.prototype.pause = function () {
-      this._pausedAtTime = now();
-      this._isPaused = true;
-      return this;
-    };
-
-    /**
-     * Resumes a paused tween.
-     * @return {Tweenable}
-     */
-    Tweenable.prototype.resume = function () {
-      if (this._isPaused) {
-        this._timestamp += now() - this._pausedAtTime;
-      }
-
-      this._isPaused = false;
-      this._isTweening = true;
-
-      var self = this;
-      this._timeoutHandler = function () {
-        timeoutHandler(self, self._timestamp, self._duration, self._currentState,
-          self._originalState, self._targetState, self._easing, self._step,
-          self._scheduleFunction);
-      };
-
-      this._timeoutHandler();
-
-      return this;
-    };
-
-    /**
-     * Move the state of the animation to a specific point in the tween's timeline.
-     * If the animation is not running, this will cause the `step` handlers to be
-     * called.
-     * @param {millisecond} millisecond The millisecond of the animation to seek to.
-     * @return {Tweenable}
-     */
-    Tweenable.prototype.seek = function (millisecond) {
-      this._timestamp = now() - millisecond;
-
-      if (!this.isPlaying()) {
-        this._isTweening = true;
-        this._isPaused = false;
-
-        // If the animation is not running, call timeoutHandler to make sure that
-        // any step handlers are run.
-        timeoutHandler(this, this._timestamp, this._duration, this._currentState,
-          this._originalState, this._targetState, this._easing, this._step,
-          this._scheduleFunction);
-
-        this._timeoutHandler();
-        this.pause();
-      }
-
-      return this;
-    };
-
-    /**
-     * Stops and cancels a tween.
-     * @param {boolean=} gotoEnd If false or omitted, the tween just stops at its current state, and the "finish" handler is not invoked.  If true, the tweened object's values are instantly set to the target values, and "finish" is invoked.
-     * @return {Tweenable}
-     */
-    Tweenable.prototype.stop = function (gotoEnd) {
-      this._isTweening = false;
-      this._isPaused = false;
-      this._timeoutHandler = noop;
-
-      (root.cancelAnimationFrame            ||
-        root.webkitCancelAnimationFrame     ||
-        root.oCancelAnimationFrame          ||
-        root.msCancelAnimationFrame         ||
-        root.mozCancelRequestAnimationFrame ||
-        root.clearTimeout)(this._scheduleId);
-
-      if (gotoEnd) {
-        shallowCopy(this._currentState, this._targetState);
-        applyFilter(this, 'afterTweenEnd');
-        this._finish.call(this, this._currentState, this._attachment);
-      }
-
-      return this;
-    };
-
-    /**
-     * Returns whether or not a tween is running.
-     * @return {boolean}
-     */
-    Tweenable.prototype.isPlaying = function () {
-      return this._isTweening && !this._isPaused;
-    };
-
-    /**
-     * Sets a custom schedule function.
-     *
-     * If a custom function is not set the default one is used [`requestAnimationFrame`](https://developer.mozilla.org/en-US/docs/Web/API/window.requestAnimationFrame) if available, otherwise [`setTimeout`](https://developer.mozilla.org/en-US/docs/Web/API/Window.setTimeout)).
-     *
-     * @param {Function(Function,number)} scheduleFunction The function to be called to schedule the next frame to be rendered
-     */
-    Tweenable.prototype.setScheduleFunction = function (scheduleFunction) {
-      this._scheduleFunction = scheduleFunction;
-    };
-
-    /**
-     * `delete`s all "own" properties.  Call this when the `Tweenable` instance is no longer needed to free memory.
-     */
-    Tweenable.prototype.dispose = function () {
-      var prop;
-      for (prop in this) {
-        if (this.hasOwnProperty(prop)) {
-          delete this[prop];
-        }
-      }
-    };
-
-    /*!
-     * Filters are used for transforming the properties of a tween at various
-     * points in a Tweenable's life cycle.  See the README for more info on this.
-     */
-    Tweenable.prototype.filter = {};
-
-    /*!
-     * This object contains all of the tweens available to Shifty.  It is extendible - simply attach properties to the Tweenable.prototype.formula Object following the same format at linear.
-     *
-     * `pos` should be a normalized `number` (between 0 and 1).
-     */
-    Tweenable.prototype.formula = {
-      linear: function (pos) {
-        return pos;
-      }
-    };
-
-    formula = Tweenable.prototype.formula;
-
-    shallowCopy(Tweenable, {
-      'now': now
-      ,'each': each
-      ,'tweenProps': tweenProps
-      ,'tweenProp': tweenProp
-      ,'applyFilter': applyFilter
-      ,'shallowCopy': shallowCopy
-      ,'defaults': defaults
-      ,'composeEasingObject': composeEasingObject
-    });
-
-    root.Tweenable = Tweenable;
-    return Tweenable;
-
-  } ());
-
-  /*!
-   * All equations are adapted from Thomas Fuchs' [Scripty2](https://github.com/madrobby/scripty2/blob/master/src/effects/transitions/penner.js).
-   *
-   * Based on Easing Equations (c) 2003 [Robert Penner](http://www.robertpenner.com/), all rights reserved. This work is [subject to terms](http://www.robertpenner.com/easing_terms_of_use.html).
-   */
-
-  /*!
-   *  TERMS OF USE - EASING EQUATIONS
-   *  Open source under the BSD License.
-   *  Easing Equations (c) 2003 Robert Penner, all rights reserved.
-   */
-
-  ;(function () {
-
-    Tweenable.shallowCopy(Tweenable.prototype.formula, {
-      easeInQuad: function (pos) {
-        return Math.pow(pos, 2);
-      },
-
-      easeOutQuad: function (pos) {
-        return -(Math.pow((pos - 1), 2) - 1);
-      },
-
-      easeInOutQuad: function (pos) {
-        if ((pos /= 0.5) < 1) {return 0.5 * Math.pow(pos,2);}
-        return -0.5 * ((pos -= 2) * pos - 2);
-      },
-
-      easeInCubic: function (pos) {
-        return Math.pow(pos, 3);
-      },
-
-      easeOutCubic: function (pos) {
-        return (Math.pow((pos - 1), 3) + 1);
-      },
-
-      easeInOutCubic: function (pos) {
-        if ((pos /= 0.5) < 1) {return 0.5 * Math.pow(pos,3);}
-        return 0.5 * (Math.pow((pos - 2),3) + 2);
-      },
-
-      easeInQuart: function (pos) {
-        return Math.pow(pos, 4);
-      },
-
-      easeOutQuart: function (pos) {
-        return -(Math.pow((pos - 1), 4) - 1);
-      },
-
-      easeInOutQuart: function (pos) {
-        if ((pos /= 0.5) < 1) {return 0.5 * Math.pow(pos,4);}
-        return -0.5 * ((pos -= 2) * Math.pow(pos,3) - 2);
-      },
-
-      easeInQuint: function (pos) {
-        return Math.pow(pos, 5);
-      },
-
-      easeOutQuint: function (pos) {
-        return (Math.pow((pos - 1), 5) + 1);
-      },
-
-      easeInOutQuint: function (pos) {
-        if ((pos /= 0.5) < 1) {return 0.5 * Math.pow(pos,5);}
-        return 0.5 * (Math.pow((pos - 2),5) + 2);
-      },
-
-      easeInSine: function (pos) {
-        return -Math.cos(pos * (Math.PI / 2)) + 1;
-      },
-
-      easeOutSine: function (pos) {
-        return Math.sin(pos * (Math.PI / 2));
-      },
-
-      easeInOutSine: function (pos) {
-        return (-0.5 * (Math.cos(Math.PI * pos) - 1));
-      },
-
-      easeInExpo: function (pos) {
-        return (pos === 0) ? 0 : Math.pow(2, 10 * (pos - 1));
-      },
-
-      easeOutExpo: function (pos) {
-        return (pos === 1) ? 1 : -Math.pow(2, -10 * pos) + 1;
-      },
-
-      easeInOutExpo: function (pos) {
-        if (pos === 0) {return 0;}
-        if (pos === 1) {return 1;}
-        if ((pos /= 0.5) < 1) {return 0.5 * Math.pow(2,10 * (pos - 1));}
-        return 0.5 * (-Math.pow(2, -10 * --pos) + 2);
-      },
-
-      easeInCirc: function (pos) {
-        return -(Math.sqrt(1 - (pos * pos)) - 1);
-      },
-
-      easeOutCirc: function (pos) {
-        return Math.sqrt(1 - Math.pow((pos - 1), 2));
-      },
-
-      easeInOutCirc: function (pos) {
-        if ((pos /= 0.5) < 1) {return -0.5 * (Math.sqrt(1 - pos * pos) - 1);}
-        return 0.5 * (Math.sqrt(1 - (pos -= 2) * pos) + 1);
-      },
-
-      easeOutBounce: function (pos) {
-        if ((pos) < (1 / 2.75)) {
-          return (7.5625 * pos * pos);
-        } else if (pos < (2 / 2.75)) {
-          return (7.5625 * (pos -= (1.5 / 2.75)) * pos + 0.75);
-        } else if (pos < (2.5 / 2.75)) {
-          return (7.5625 * (pos -= (2.25 / 2.75)) * pos + 0.9375);
-        } else {
-          return (7.5625 * (pos -= (2.625 / 2.75)) * pos + 0.984375);
-        }
-      },
-
-      easeInBack: function (pos) {
-        var s = 1.70158;
-        return (pos) * pos * ((s + 1) * pos - s);
-      },
-
-      easeOutBack: function (pos) {
-        var s = 1.70158;
-        return (pos = pos - 1) * pos * ((s + 1) * pos + s) + 1;
-      },
-
-      easeInOutBack: function (pos) {
-        var s = 1.70158;
-        if ((pos /= 0.5) < 1) {return 0.5 * (pos * pos * (((s *= (1.525)) + 1) * pos - s));}
-        return 0.5 * ((pos -= 2) * pos * (((s *= (1.525)) + 1) * pos + s) + 2);
-      },
-
-      elastic: function (pos) {
-        return -1 * Math.pow(4,-8 * pos) * Math.sin((pos * 6 - 1) * (2 * Math.PI) / 2) + 1;
-      },
-
-      swingFromTo: function (pos) {
-        var s = 1.70158;
-        return ((pos /= 0.5) < 1) ? 0.5 * (pos * pos * (((s *= (1.525)) + 1) * pos - s)) :
-            0.5 * ((pos -= 2) * pos * (((s *= (1.525)) + 1) * pos + s) + 2);
-      },
-
-      swingFrom: function (pos) {
-        var s = 1.70158;
-        return pos * pos * ((s + 1) * pos - s);
-      },
-
-      swingTo: function (pos) {
-        var s = 1.70158;
-        return (pos -= 1) * pos * ((s + 1) * pos + s) + 1;
-      },
-
-      bounce: function (pos) {
-        if (pos < (1 / 2.75)) {
-          return (7.5625 * pos * pos);
-        } else if (pos < (2 / 2.75)) {
-          return (7.5625 * (pos -= (1.5 / 2.75)) * pos + 0.75);
-        } else if (pos < (2.5 / 2.75)) {
-          return (7.5625 * (pos -= (2.25 / 2.75)) * pos + 0.9375);
-        } else {
-          return (7.5625 * (pos -= (2.625 / 2.75)) * pos + 0.984375);
-        }
-      },
-
-      bouncePast: function (pos) {
-        if (pos < (1 / 2.75)) {
-          return (7.5625 * pos * pos);
-        } else if (pos < (2 / 2.75)) {
-          return 2 - (7.5625 * (pos -= (1.5 / 2.75)) * pos + 0.75);
-        } else if (pos < (2.5 / 2.75)) {
-          return 2 - (7.5625 * (pos -= (2.25 / 2.75)) * pos + 0.9375);
-        } else {
-          return 2 - (7.5625 * (pos -= (2.625 / 2.75)) * pos + 0.984375);
-        }
-      },
-
-      easeFromTo: function (pos) {
-        if ((pos /= 0.5) < 1) {return 0.5 * Math.pow(pos,4);}
-        return -0.5 * ((pos -= 2) * Math.pow(pos,3) - 2);
-      },
-
-      easeFrom: function (pos) {
-        return Math.pow(pos,4);
-      },
-
-      easeTo: function (pos) {
-        return Math.pow(pos,0.25);
-      }
-    });
-
-  }());
-
-  /*!
-   * The Bezier magic in this file is adapted/copied almost wholesale from
-   * [Scripty2](https://github.com/madrobby/scripty2/blob/master/src/effects/transitions/cubic-bezier.js),
-   * which was adapted from Apple code (which probably came from
-   * [here](http://opensource.apple.com/source/WebCore/WebCore-955.66/platform/graphics/UnitBezier.h)).
-   * Special thanks to Apple and Thomas Fuchs for much of this code.
-   */
-
-  /*!
-   *  Copyright (c) 2006 Apple Computer, Inc. All rights reserved.
-   *
-   *  Redistribution and use in source and binary forms, with or without
-   *  modification, are permitted provided that the following conditions are met:
-   *
-   *  1. Redistributions of source code must retain the above copyright notice,
-   *  this list of conditions and the following disclaimer.
-   *
-   *  2. Redistributions in binary form must reproduce the above copyright notice,
-   *  this list of conditions and the following disclaimer in the documentation
-   *  and/or other materials provided with the distribution.
-   *
-   *  3. Neither the name of the copyright holder(s) nor the names of any
-   *  contributors may be used to endorse or promote products derived from
-   *  this software without specific prior written permission.
-   *
-   *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-   *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-   *  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-   *  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
-   *  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-   *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-   *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-   *  ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-   *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-   */
-  ;(function () {
-    // port of webkit cubic bezier handling by http://www.netzgesta.de/dev/
-    function cubicBezierAtTime(t,p1x,p1y,p2x,p2y,duration) {
-      var ax = 0,bx = 0,cx = 0,ay = 0,by = 0,cy = 0;
-      function sampleCurveX(t) {return ((ax * t + bx) * t + cx) * t;}
-      function sampleCurveY(t) {return ((ay * t + by) * t + cy) * t;}
-      function sampleCurveDerivativeX(t) {return (3.0 * ax * t + 2.0 * bx) * t + cx;}
-      function solveEpsilon(duration) {return 1.0 / (200.0 * duration);}
-      function solve(x,epsilon) {return sampleCurveY(solveCurveX(x,epsilon));}
-      function fabs(n) {if (n >= 0) {return n;}else {return 0 - n;}}
-      function solveCurveX(x,epsilon) {
-        var t0,t1,t2,x2,d2,i;
-        for (t2 = x, i = 0; i < 8; i++) {x2 = sampleCurveX(t2) - x; if (fabs(x2) < epsilon) {return t2;} d2 = sampleCurveDerivativeX(t2); if (fabs(d2) < 1e-6) {break;} t2 = t2 - x2 / d2;}
-        t0 = 0.0; t1 = 1.0; t2 = x; if (t2 < t0) {return t0;} if (t2 > t1) {return t1;}
-        while (t0 < t1) {x2 = sampleCurveX(t2); if (fabs(x2 - x) < epsilon) {return t2;} if (x > x2) {t0 = t2;}else {t1 = t2;} t2 = (t1 - t0) * 0.5 + t0;}
-        return t2; // Failure.
-      }
-      cx = 3.0 * p1x; bx = 3.0 * (p2x - p1x) - cx; ax = 1.0 - cx - bx; cy = 3.0 * p1y; by = 3.0 * (p2y - p1y) - cy; ay = 1.0 - cy - by;
-      return solve(t, solveEpsilon(duration));
-    }
-    /*!
-     *  getCubicBezierTransition(x1, y1, x2, y2) -> Function
-     *
-     *  Generates a transition easing function that is compatible
-     *  with WebKit's CSS transitions `-webkit-transition-timing-function`
-     *  CSS property.
-     *
-     *  The W3C has more information about
-     *  <a href="http://www.w3.org/TR/css3-transitions/#transition-timing-function_tag">
-     *  CSS3 transition timing functions</a>.
-     *
-     *  @param {number} x1
-     *  @param {number} y1
-     *  @param {number} x2
-     *  @param {number} y2
-     *  @return {function}
-     */
-    function getCubicBezierTransition (x1, y1, x2, y2) {
-      return function (pos) {
-        return cubicBezierAtTime(pos,x1,y1,x2,y2,1);
-      };
-    }
-    // End ported code
-
-    /**
-     * Creates a Bezier easing function and attaches it to `Tweenable.prototype.formula`.  This function gives you total control over the easing curve.  Matthew Lein's [Ceaser](http://matthewlein.com/ceaser/) is a useful tool for visualizing the curves you can make with this function.
-     *
-     * @param {string} name The name of the easing curve.  Overwrites the old easing function on Tweenable.prototype.formula if it exists.
-     * @param {number} x1
-     * @param {number} y1
-     * @param {number} x2
-     * @param {number} y2
-     * @return {function} The easing function that was attached to Tweenable.prototype.formula.
-     */
-    Tweenable.setBezierFunction = function (name, x1, y1, x2, y2) {
-      var cubicBezierTransition = getCubicBezierTransition(x1, y1, x2, y2);
-      cubicBezierTransition.x1 = x1;
-      cubicBezierTransition.y1 = y1;
-      cubicBezierTransition.x2 = x2;
-      cubicBezierTransition.y2 = y2;
-
-      return Tweenable.prototype.formula[name] = cubicBezierTransition;
-    };
-
-
-    /**
-     * `delete`s an easing function from `Tweenable.prototype.formula`.  Be careful with this method, as it `delete`s whatever easing formula matches `name` (which means you can delete default Shifty easing functions).
-     *
-     * @param {string} name The name of the easing function to delete.
-     * @return {function}
-     */
-    Tweenable.unsetBezierFunction = function (name) {
-      delete Tweenable.prototype.formula[name];
-    };
-
-  })();
-
-  ;(function () {
-
-    function getInterpolatedValues (
-      from, current, targetState, position, easing) {
-      return Tweenable.tweenProps(
-        position, current, from, targetState, 1, 0, easing);
-    }
-
-    // Fake a Tweenable and patch some internals.  This approach allows us to
-    // skip uneccessary processing and object recreation, cutting down on garbage
-    // collection pauses.
-    var mockTweenable = new Tweenable();
-    mockTweenable._filterArgs = [];
-
-    /**
-     * Compute the midpoint of two Objects.  This method effectively calculates a specific frame of animation that [Tweenable#tween](shifty.core.js.html#tween) does many times over the course of a tween.
-     *
-     * Example:
-     *
-     *     var interpolatedValues = Tweenable.interpolate({
-     *       width: '100px',
-     *       opacity: 0,
-     *       color: '#fff'
-     *     }, {
-     *       width: '200px',
-     *       opacity: 1,
-     *       color: '#000'
-     *     }, 0.5);
-     *
-     *     console.log(interpolatedValues);
-     *     // {opacity: 0.5, width: "150px", color: "rgb(127,127,127)"}
-     *
-     * @param {Object} from The starting values to tween from.
-     * @param {Object} targetState The ending values to tween to.
-     * @param {number} position The normalized position value (between 0.0 and 1.0) to interpolate the values between `from` and `to` for.  `from` represents 0 and `to` represents `1`.
-     * @param {string|Object} easing The easing curve(s) to calculate the midpoint against.  You can reference any easing function attached to `Tweenable.prototype.formula`.  If omitted, this defaults to "linear".
-     * @return {Object}
-     */
-    Tweenable.interpolate = function (from, targetState, position, easing) {
-      var current = Tweenable.shallowCopy({}, from);
-      var easingObject = Tweenable.composeEasingObject(
-        from, easing || 'linear');
-
-      mockTweenable.set({});
-
-      // Alias and reuse the _filterArgs array instead of recreating it.
-      var filterArgs = mockTweenable._filterArgs;
-      filterArgs.length = 0;
-      filterArgs[0] = current;
-      filterArgs[1] = from;
-      filterArgs[2] = targetState;
-      filterArgs[3] = easingObject;
-
-      // Any defined value transformation must be applied
-      Tweenable.applyFilter(mockTweenable, 'tweenCreated');
-      Tweenable.applyFilter(mockTweenable, 'beforeTween');
-
-      var interpolatedValues = getInterpolatedValues(
-        from, current, targetState, position, easingObject);
-
-      // Transform values back into their original format
-      Tweenable.applyFilter(mockTweenable, 'afterTween');
-
-      return interpolatedValues;
-    };
-
-  }());
-
-  /**
-   * Adds string interpolation support to Shifty.
-   *
-   * The Token extension allows Shifty to tween numbers inside of strings.  Among
-   * other things, this allows you to animate CSS properties.  For example, you
-   * can do this:
-   *
-   *     var tweenable = new Tweenable();
-   *     tweenable.tween({
-   *       from: { transform: 'translateX(45px)'},
-   *       to: { transform: 'translateX(90xp)'}
-   *     });
-   *
-   * ` `
-   * `translateX(45)` will be tweened to `translateX(90)`.  To demonstrate:
-   *
-   *     var tweenable = new Tweenable();
-   *     tweenable.tween({
-   *       from: { transform: 'translateX(45px)'},
-   *       to: { transform: 'translateX(90px)'},
-   *       step: function (state) {
-   *         console.log(state.transform);
-   *       }
-   *     });
-   *
-   * ` `
-   * The above snippet will log something like this in the console:
-   *
-   *     translateX(60.3px)
-   *     ...
-   *     translateX(76.05px)
-   *     ...
-   *     translateX(90px)
-   *
-   * ` `
-   * Another use for this is animating colors:
-   *
-   *     var tweenable = new Tweenable();
-   *     tweenable.tween({
-   *       from: { color: 'rgb(0,255,0)'},
-   *       to: { color: 'rgb(255,0,255)'},
-   *       step: function (state) {
-   *         console.log(state.color);
-   *       }
-   *     });
-   *
-   * ` `
-   * The above snippet will log something like this:
-   *
-   *     rgb(84,170,84)
-   *     ...
-   *     rgb(170,84,170)
-   *     ...
-   *     rgb(255,0,255)
-   *
-   * ` `
-   * This extension also supports hexadecimal colors, in both long (`#ff00ff`)
-   * and short (`#f0f`) forms.  Be aware that hexadecimal input values will be
-   * converted into the equivalent RGB output values.  This is done to optimize
-   * for performance.
-   *
-   *     var tweenable = new Tweenable();
-   *     tweenable.tween({
-   *       from: { color: '#0f0'},
-   *       to: { color: '#f0f'},
-   *       step: function (state) {
-   *         console.log(state.color);
-   *       }
-   *     });
-   *
-   * ` `
-   * This snippet will generate the same output as the one before it because
-   * equivalent values were supplied (just in hexadecimal form rather than RGB):
-   *
-   *     rgb(84,170,84)
-   *     ...
-   *     rgb(170,84,170)
-   *     ...
-   *     rgb(255,0,255)
-   *
-   * ` `
-   * ` `
-   * ## Easing support
-   *
-   * Easing works somewhat differently in the Token extension.  This is because
-   * some CSS properties have multiple values in them, and you might need to
-   * tween each value along its own easing curve.  A basic example:
-   *
-   *     var tweenable = new Tweenable();
-   *     tweenable.tween({
-   *       from: { transform: 'translateX(0px) translateY(0px)'},
-   *       to: { transform:   'translateX(100px) translateY(100px)'},
-   *       easing: { transform: 'easeInQuad' },
-   *       step: function (state) {
-   *         console.log(state.transform);
-   *       }
-   *     });
-   *
-   * ` `
-   * The above snippet create values like this:
-   *
-   *     translateX(11.560000000000002px) translateY(11.560000000000002px)
-   *     ...
-   *     translateX(46.24000000000001px) translateY(46.24000000000001px)
-   *     ...
-   *     translateX(100px) translateY(100px)
-   *
-   * ` `
-   * In this case, the values for `translateX` and `translateY` are always the
-   * same for each step of the tween, because they have the same start and end
-   * points and both use the same easing curve.  We can also tween `translateX`
-   * and `translateY` along independent curves:
-   *
-   *     var tweenable = new Tweenable();
-   *     tweenable.tween({
-   *       from: { transform: 'translateX(0px) translateY(0px)'},
-   *       to: { transform:   'translateX(100px) translateY(100px)'},
-   *       easing: { transform: 'easeInQuad bounce' },
-   *       step: function (state) {
-   *         console.log(state.transform);
-   *       }
-   *     });
-   *
-   * ` `
-   * The above snippet create values like this:
-   *
-   *     translateX(10.89px) translateY(82.355625px)
-   *     ...
-   *     translateX(44.89000000000001px) translateY(86.73062500000002px)
-   *     ...
-   *     translateX(100px) translateY(100px)
-   *
-   * ` `
-   * `translateX` and `translateY` are not in sync anymore, because `easeInQuad`
-   * was specified for `translateX` and `bounce` for `translateY`.  Mixing and
-   * matching easing curves can make for some interesting motion in your
-   * animations.
-   *
-   * The order of the space-separated easing curves correspond the token values
-   * they apply to.  If there are more token values than easing curves listed,
-   * the last easing curve listed is used.
-   */
-  function token () {
-    // Functionality for this extension runs implicitly if it is loaded.
-  } /*!*/
-
-  // token function is defined above only so that dox-foundation sees it as
-  // documentation and renders it.  It is never used, and is optimized away at
-  // build time.
-
-  ;(function (Tweenable) {
-
-    /*!
-     * @typedef {{
-     *   formatString: string
-     *   chunkNames: Array.<string>
-     * }}
-     */
-    var formatManifest;
-
-    // CONSTANTS
-
-    var R_NUMBER_COMPONENT = /(\d|\-|\.)/;
-    var R_FORMAT_CHUNKS = /([^\-0-9\.]+)/g;
-    var R_UNFORMATTED_VALUES = /[0-9.\-]+/g;
-    var R_RGB = new RegExp(
-      'rgb\\(' + R_UNFORMATTED_VALUES.source +
-      (/,\s*/.source) + R_UNFORMATTED_VALUES.source +
-      (/,\s*/.source) + R_UNFORMATTED_VALUES.source + '\\)', 'g');
-    var R_RGB_PREFIX = /^.*\(/;
-    var R_HEX = /#([0-9]|[a-f]){3,6}/gi;
-    var VALUE_PLACEHOLDER = 'VAL';
-
-    // HELPERS
-
-    var getFormatChunksFrom_accumulator = [];
-    /*!
-     * @param {Array.number} rawValues
-     * @param {string} prefix
-     *
-     * @return {Array.<string>}
-     */
-    function getFormatChunksFrom (rawValues, prefix) {
-      getFormatChunksFrom_accumulator.length = 0;
-
-      var rawValuesLength = rawValues.length;
-      var i;
-
-      for (i = 0; i < rawValuesLength; i++) {
-        getFormatChunksFrom_accumulator.push('_' + prefix + '_' + i);
-      }
-
-      return getFormatChunksFrom_accumulator;
-    }
-
-    /*!
-     * @param {string} formattedString
-     *
-     * @return {string}
-     */
-    function getFormatStringFrom (formattedString) {
-      var chunks = formattedString.match(R_FORMAT_CHUNKS);
-
-      if (!chunks) {
-        // chunks will be null if there were no tokens to parse in
-        // formattedString (for example, if formattedString is '2').  Coerce
-        // chunks to be useful here.
-        chunks = ['', ''];
-
-        // If there is only one chunk, assume that the string is a number
-        // followed by a token...
-        // NOTE: This may be an unwise assumption.
-      } else if (chunks.length === 1 ||
-          // ...or if the string starts with a number component (".", "-", or a
-          // digit)...
-          formattedString[0].match(R_NUMBER_COMPONENT)) {
-        // ...prepend an empty string here to make sure that the formatted number
-        // is properly replaced by VALUE_PLACEHOLDER
-        chunks.unshift('');
-      }
-
-      return chunks.join(VALUE_PLACEHOLDER);
-    }
-
-    /*!
-     * Convert all hex color values within a string to an rgb string.
-     *
-     * @param {Object} stateObject
-     *
-     * @return {Object} The modified obj
-     */
-    function sanitizeObjectForHexProps (stateObject) {
-      Tweenable.each(stateObject, function (prop) {
-        var currentProp = stateObject[prop];
-
-        if (typeof currentProp === 'string' && currentProp.match(R_HEX)) {
-          stateObject[prop] = sanitizeHexChunksToRGB(currentProp);
-        }
-      });
-    }
-
-    /*!
-     * @param {string} str
-     *
-     * @return {string}
-     */
-    function  sanitizeHexChunksToRGB (str) {
-      return filterStringChunks(R_HEX, str, convertHexToRGB);
-    }
-
-    /*!
-     * @param {string} hexString
-     *
-     * @return {string}
-     */
-    function convertHexToRGB (hexString) {
-      var rgbArr = hexToRGBArray(hexString);
-      return 'rgb(' + rgbArr[0] + ',' + rgbArr[1] + ',' + rgbArr[2] + ')';
-    }
-
-    var hexToRGBArray_returnArray = [];
-    /*!
-     * Convert a hexadecimal string to an array with three items, one each for
-     * the red, blue, and green decimal values.
-     *
-     * @param {string} hex A hexadecimal string.
-     *
-     * @returns {Array.<number>} The converted Array of RGB values if `hex` is a
-     * valid string, or an Array of three 0's.
-     */
-    function hexToRGBArray (hex) {
-
-      hex = hex.replace(/#/, '');
-
-      // If the string is a shorthand three digit hex notation, normalize it to
-      // the standard six digit notation
-      if (hex.length === 3) {
-        hex = hex.split('');
-        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-      }
-
-      hexToRGBArray_returnArray[0] = hexToDec(hex.substr(0, 2));
-      hexToRGBArray_returnArray[1] = hexToDec(hex.substr(2, 2));
-      hexToRGBArray_returnArray[2] = hexToDec(hex.substr(4, 2));
-
-      return hexToRGBArray_returnArray;
-    }
-
-    /*!
-     * Convert a base-16 number to base-10.
-     *
-     * @param {Number|String} hex The value to convert
-     *
-     * @returns {Number} The base-10 equivalent of `hex`.
-     */
-    function hexToDec (hex) {
-      return parseInt(hex, 16);
-    }
-
-    /*!
-     * Runs a filter operation on all chunks of a string that match a RegExp
-     *
-     * @param {RegExp} pattern
-     * @param {string} unfilteredString
-     * @param {function(string)} filter
-     *
-     * @return {string}
-     */
-    function filterStringChunks (pattern, unfilteredString, filter) {
-      var pattenMatches = unfilteredString.match(pattern);
-      var filteredString = unfilteredString.replace(pattern, VALUE_PLACEHOLDER);
-
-      if (pattenMatches) {
-        var pattenMatchesLength = pattenMatches.length;
-        var currentChunk;
-
-        for (var i = 0; i < pattenMatchesLength; i++) {
-          currentChunk = pattenMatches.shift();
-          filteredString = filteredString.replace(
-            VALUE_PLACEHOLDER, filter(currentChunk));
-        }
-      }
-
-      return filteredString;
-    }
-
-    /*!
-     * Check for floating point values within rgb strings and rounds them.
-     *
-     * @param {string} formattedString
-     *
-     * @return {string}
-     */
-    function sanitizeRGBChunks (formattedString) {
-      return filterStringChunks(R_RGB, formattedString, sanitizeRGBChunk);
-    }
-
-    /*!
-     * @param {string} rgbChunk
-     *
-     * @return {string}
-     */
-    function sanitizeRGBChunk (rgbChunk) {
-      var numbers = rgbChunk.match(R_UNFORMATTED_VALUES);
-      var numbersLength = numbers.length;
-      var sanitizedString = rgbChunk.match(R_RGB_PREFIX)[0];
-
-      for (var i = 0; i < numbersLength; i++) {
-        sanitizedString += parseInt(numbers[i], 10) + ',';
-      }
-
-      sanitizedString = sanitizedString.slice(0, -1) + ')';
-
-      return sanitizedString;
-    }
-
-    /*!
-     * @param {Object} stateObject
-     *
-     * @return {Object} An Object of formatManifests that correspond to
-     * the string properties of stateObject
-     */
-    function getFormatManifests (stateObject) {
-      var manifestAccumulator = {};
-
-      Tweenable.each(stateObject, function (prop) {
-        var currentProp = stateObject[prop];
-
-        if (typeof currentProp === 'string') {
-          var rawValues = getValuesFrom(currentProp);
-
-          manifestAccumulator[prop] = {
-            'formatString': getFormatStringFrom(currentProp)
-            ,'chunkNames': getFormatChunksFrom(rawValues, prop)
-          };
-        }
-      });
-
-      return manifestAccumulator;
-    }
-
-    /*!
-     * @param {Object} stateObject
-     * @param {Object} formatManifests
-     */
-    function expandFormattedProperties (stateObject, formatManifests) {
-      Tweenable.each(formatManifests, function (prop) {
-        var currentProp = stateObject[prop];
-        var rawValues = getValuesFrom(currentProp);
-        var rawValuesLength = rawValues.length;
-
-        for (var i = 0; i < rawValuesLength; i++) {
-          stateObject[formatManifests[prop].chunkNames[i]] = +rawValues[i];
-        }
-
-        delete stateObject[prop];
-      });
-    }
-
-    /*!
-     * @param {Object} stateObject
-     * @param {Object} formatManifests
-     */
-    function collapseFormattedProperties (stateObject, formatManifests) {
-      Tweenable.each(formatManifests, function (prop) {
-        var currentProp = stateObject[prop];
-        var formatChunks = extractPropertyChunks(
-          stateObject, formatManifests[prop].chunkNames);
-        var valuesList = getValuesList(
-          formatChunks, formatManifests[prop].chunkNames);
-        currentProp = getFormattedValues(
-          formatManifests[prop].formatString, valuesList);
-        stateObject[prop] = sanitizeRGBChunks(currentProp);
-      });
-    }
-
-    /*!
-     * @param {Object} stateObject
-     * @param {Array.<string>} chunkNames
-     *
-     * @return {Object} The extracted value chunks.
-     */
-    function extractPropertyChunks (stateObject, chunkNames) {
-      var extractedValues = {};
-      var currentChunkName, chunkNamesLength = chunkNames.length;
-
-      for (var i = 0; i < chunkNamesLength; i++) {
-        currentChunkName = chunkNames[i];
-        extractedValues[currentChunkName] = stateObject[currentChunkName];
-        delete stateObject[currentChunkName];
-      }
-
-      return extractedValues;
-    }
-
-    var getValuesList_accumulator = [];
-    /*!
-     * @param {Object} stateObject
-     * @param {Array.<string>} chunkNames
-     *
-     * @return {Array.<number>}
-     */
-    function getValuesList (stateObject, chunkNames) {
-      getValuesList_accumulator.length = 0;
-      var chunkNamesLength = chunkNames.length;
-
-      for (var i = 0; i < chunkNamesLength; i++) {
-        getValuesList_accumulator.push(stateObject[chunkNames[i]]);
-      }
-
-      return getValuesList_accumulator;
-    }
-
-    /*!
-     * @param {string} formatString
-     * @param {Array.<number>} rawValues
-     *
-     * @return {string}
-     */
-    function getFormattedValues (formatString, rawValues) {
-      var formattedValueString = formatString;
-      var rawValuesLength = rawValues.length;
-
-      for (var i = 0; i < rawValuesLength; i++) {
-        formattedValueString = formattedValueString.replace(
-          VALUE_PLACEHOLDER, +rawValues[i].toFixed(4));
-      }
-
-      return formattedValueString;
-    }
-
-    /*!
-     * Note: It's the duty of the caller to convert the Array elements of the
-     * return value into numbers.  This is a performance optimization.
-     *
-     * @param {string} formattedString
-     *
-     * @return {Array.<string>|null}
-     */
-    function getValuesFrom (formattedString) {
-      return formattedString.match(R_UNFORMATTED_VALUES);
-    }
-
-    /*!
-     * @param {Object} easingObject
-     * @param {Object} tokenData
-     */
-    function expandEasingObject (easingObject, tokenData) {
-      Tweenable.each(tokenData, function (prop) {
-        var currentProp = tokenData[prop];
-        var chunkNames = currentProp.chunkNames;
-        var chunkLength = chunkNames.length;
-        var easingChunks = easingObject[prop].split(' ');
-        var lastEasingChunk = easingChunks[easingChunks.length - 1];
-
-        for (var i = 0; i < chunkLength; i++) {
-          easingObject[chunkNames[i]] = easingChunks[i] || lastEasingChunk;
-        }
-
-        delete easingObject[prop];
-      });
-    }
-
-    /*!
-     * @param {Object} easingObject
-     * @param {Object} tokenData
-     */
-    function collapseEasingObject (easingObject, tokenData) {
-      Tweenable.each(tokenData, function (prop) {
-        var currentProp = tokenData[prop];
-        var chunkNames = currentProp.chunkNames;
-        var chunkLength = chunkNames.length;
-        var composedEasingString = '';
-
-        for (var i = 0; i < chunkLength; i++) {
-          composedEasingString += ' ' + easingObject[chunkNames[i]];
-          delete easingObject[chunkNames[i]];
-        }
-
-        easingObject[prop] = composedEasingString.substr(1);
-      });
-    }
-
-    Tweenable.prototype.filter.token = {
-      'tweenCreated': function (currentState, fromState, toState, easingObject) {
-        sanitizeObjectForHexProps(currentState);
-        sanitizeObjectForHexProps(fromState);
-        sanitizeObjectForHexProps(toState);
-        this._tokenData = getFormatManifests(currentState);
-      },
-
-      'beforeTween': function (currentState, fromState, toState, easingObject) {
-        expandEasingObject(easingObject, this._tokenData);
-        expandFormattedProperties(currentState, this._tokenData);
-        expandFormattedProperties(fromState, this._tokenData);
-        expandFormattedProperties(toState, this._tokenData);
-      },
-
-      'afterTween': function (currentState, fromState, toState, easingObject) {
-        collapseFormattedProperties(currentState, this._tokenData);
-        collapseFormattedProperties(fromState, this._tokenData);
-        collapseFormattedProperties(toState, this._tokenData);
-        collapseEasingObject(easingObject, this._tokenData);
-      }
-    };
-
-  } (Tweenable));
-
-  }(window));
-
-  return window.Tweenable;
-});
-
-(function() {
-    "use strict";
-
-    angular.module('angular-carousel')
-
-    .filter('carouselSlice', function() {
-        return function(collection, start, size) {
-            if (angular.isArray(collection)) {
-                return collection.slice(start, start + size);
-            } else if (angular.isObject(collection)) {
-                // dont try to slice collections :)
-                return collection;
-            }
-        };
-    });
-
-})();
-
 /**
  * @license
  * lodash 4.0.0 (Custom Build) <https://lodash.com/>
@@ -57437,6 +49131,2733 @@ angular.module('hours.list', [])
             controller: 'ListCtrl'
         }
     }]);
+/**
+ * @license AngularJS v1.4.8
+ * (c) 2010-2015 Google, Inc. http://angularjs.org
+ * License: MIT
+ */
+(function(window, angular, undefined) {'use strict';
+
+/**
+ * @ngdoc module
+ * @name ngTouch
+ * @description
+ *
+ * # ngTouch
+ *
+ * The `ngTouch` module provides touch events and other helpers for touch-enabled devices.
+ * The implementation is based on jQuery Mobile touch event handling
+ * ([jquerymobile.com](http://jquerymobile.com/)).
+ *
+ *
+ * See {@link ngTouch.$swipe `$swipe`} for usage.
+ *
+ * <div doc-module-components="ngTouch"></div>
+ *
+ */
+
+// define ngTouch module
+/* global -ngTouch */
+var ngTouch = angular.module('ngTouch', []);
+
+function nodeName_(element) {
+  return angular.lowercase(element.nodeName || (element[0] && element[0].nodeName));
+}
+
+/* global ngTouch: false */
+
+    /**
+     * @ngdoc service
+     * @name $swipe
+     *
+     * @description
+     * The `$swipe` service is a service that abstracts the messier details of hold-and-drag swipe
+     * behavior, to make implementing swipe-related directives more convenient.
+     *
+     * Requires the {@link ngTouch `ngTouch`} module to be installed.
+     *
+     * `$swipe` is used by the `ngSwipeLeft` and `ngSwipeRight` directives in `ngTouch`, and by
+     * `ngCarousel` in a separate component.
+     *
+     * # Usage
+     * The `$swipe` service is an object with a single method: `bind`. `bind` takes an element
+     * which is to be watched for swipes, and an object with four handler functions. See the
+     * documentation for `bind` below.
+     */
+
+ngTouch.factory('$swipe', [function() {
+  // The total distance in any direction before we make the call on swipe vs. scroll.
+  var MOVE_BUFFER_RADIUS = 10;
+
+  var POINTER_EVENTS = {
+    'mouse': {
+      start: 'mousedown',
+      move: 'mousemove',
+      end: 'mouseup'
+    },
+    'touch': {
+      start: 'touchstart',
+      move: 'touchmove',
+      end: 'touchend',
+      cancel: 'touchcancel'
+    }
+  };
+
+  function getCoordinates(event) {
+    var originalEvent = event.originalEvent || event;
+    var touches = originalEvent.touches && originalEvent.touches.length ? originalEvent.touches : [originalEvent];
+    var e = (originalEvent.changedTouches && originalEvent.changedTouches[0]) || touches[0];
+
+    return {
+      x: e.clientX,
+      y: e.clientY
+    };
+  }
+
+  function getEvents(pointerTypes, eventType) {
+    var res = [];
+    angular.forEach(pointerTypes, function(pointerType) {
+      var eventName = POINTER_EVENTS[pointerType][eventType];
+      if (eventName) {
+        res.push(eventName);
+      }
+    });
+    return res.join(' ');
+  }
+
+  return {
+    /**
+     * @ngdoc method
+     * @name $swipe#bind
+     *
+     * @description
+     * The main method of `$swipe`. It takes an element to be watched for swipe motions, and an
+     * object containing event handlers.
+     * The pointer types that should be used can be specified via the optional
+     * third argument, which is an array of strings `'mouse'` and `'touch'`. By default,
+     * `$swipe` will listen for `mouse` and `touch` events.
+     *
+     * The four events are `start`, `move`, `end`, and `cancel`. `start`, `move`, and `end`
+     * receive as a parameter a coordinates object of the form `{ x: 150, y: 310 }` and the raw
+     * `event`. `cancel` receives the raw `event` as its single parameter.
+     *
+     * `start` is called on either `mousedown` or `touchstart`. After this event, `$swipe` is
+     * watching for `touchmove` or `mousemove` events. These events are ignored until the total
+     * distance moved in either dimension exceeds a small threshold.
+     *
+     * Once this threshold is exceeded, either the horizontal or vertical delta is greater.
+     * - If the horizontal distance is greater, this is a swipe and `move` and `end` events follow.
+     * - If the vertical distance is greater, this is a scroll, and we let the browser take over.
+     *   A `cancel` event is sent.
+     *
+     * `move` is called on `mousemove` and `touchmove` after the above logic has determined that
+     * a swipe is in progress.
+     *
+     * `end` is called when a swipe is successfully completed with a `touchend` or `mouseup`.
+     *
+     * `cancel` is called either on a `touchcancel` from the browser, or when we begin scrolling
+     * as described above.
+     *
+     */
+    bind: function(element, eventHandlers, pointerTypes) {
+      // Absolute total movement, used to control swipe vs. scroll.
+      var totalX, totalY;
+      // Coordinates of the start position.
+      var startCoords;
+      // Last event's position.
+      var lastPos;
+      // Whether a swipe is active.
+      var active = false;
+
+      pointerTypes = pointerTypes || ['mouse', 'touch'];
+      element.on(getEvents(pointerTypes, 'start'), function(event) {
+        startCoords = getCoordinates(event);
+        active = true;
+        totalX = 0;
+        totalY = 0;
+        lastPos = startCoords;
+        eventHandlers['start'] && eventHandlers['start'](startCoords, event);
+      });
+      var events = getEvents(pointerTypes, 'cancel');
+      if (events) {
+        element.on(events, function(event) {
+          active = false;
+          eventHandlers['cancel'] && eventHandlers['cancel'](event);
+        });
+      }
+
+      element.on(getEvents(pointerTypes, 'move'), function(event) {
+        if (!active) return;
+
+        // Android will send a touchcancel if it thinks we're starting to scroll.
+        // So when the total distance (+ or - or both) exceeds 10px in either direction,
+        // we either:
+        // - On totalX > totalY, we send preventDefault() and treat this as a swipe.
+        // - On totalY > totalX, we let the browser handle it as a scroll.
+
+        if (!startCoords) return;
+        var coords = getCoordinates(event);
+
+        totalX += Math.abs(coords.x - lastPos.x);
+        totalY += Math.abs(coords.y - lastPos.y);
+
+        lastPos = coords;
+
+        if (totalX < MOVE_BUFFER_RADIUS && totalY < MOVE_BUFFER_RADIUS) {
+          return;
+        }
+
+        // One of totalX or totalY has exceeded the buffer, so decide on swipe vs. scroll.
+        if (totalY > totalX) {
+          // Allow native scrolling to take over.
+          active = false;
+          eventHandlers['cancel'] && eventHandlers['cancel'](event);
+          return;
+        } else {
+          // Prevent the browser from scrolling.
+          event.preventDefault();
+          eventHandlers['move'] && eventHandlers['move'](coords, event);
+        }
+      });
+
+      element.on(getEvents(pointerTypes, 'end'), function(event) {
+        if (!active) return;
+        active = false;
+        eventHandlers['end'] && eventHandlers['end'](getCoordinates(event), event);
+      });
+    }
+  };
+}]);
+
+/* global ngTouch: false,
+  nodeName_: false
+*/
+
+/**
+ * @ngdoc directive
+ * @name ngClick
+ *
+ * @description
+ * A more powerful replacement for the default ngClick designed to be used on touchscreen
+ * devices. Most mobile browsers wait about 300ms after a tap-and-release before sending
+ * the click event. This version handles them immediately, and then prevents the
+ * following click event from propagating.
+ *
+ * Requires the {@link ngTouch `ngTouch`} module to be installed.
+ *
+ * This directive can fall back to using an ordinary click event, and so works on desktop
+ * browsers as well as mobile.
+ *
+ * This directive also sets the CSS class `ng-click-active` while the element is being held
+ * down (by a mouse click or touch) so you can restyle the depressed element if you wish.
+ *
+ * @element ANY
+ * @param {expression} ngClick {@link guide/expression Expression} to evaluate
+ * upon tap. (Event object is available as `$event`)
+ *
+ * @example
+    <example module="ngClickExample" deps="angular-touch.js">
+      <file name="index.html">
+        <button ng-click="count = count + 1" ng-init="count=0">
+          Increment
+        </button>
+        count: {{ count }}
+      </file>
+      <file name="script.js">
+        angular.module('ngClickExample', ['ngTouch']);
+      </file>
+    </example>
+ */
+
+ngTouch.config(['$provide', function($provide) {
+  $provide.decorator('ngClickDirective', ['$delegate', function($delegate) {
+    // drop the default ngClick directive
+    $delegate.shift();
+    return $delegate;
+  }]);
+}]);
+
+ngTouch.directive('ngClick', ['$parse', '$timeout', '$rootElement',
+    function($parse, $timeout, $rootElement) {
+  var TAP_DURATION = 750; // Shorter than 750ms is a tap, longer is a taphold or drag.
+  var MOVE_TOLERANCE = 12; // 12px seems to work in most mobile browsers.
+  var PREVENT_DURATION = 2500; // 2.5 seconds maximum from preventGhostClick call to click
+  var CLICKBUSTER_THRESHOLD = 25; // 25 pixels in any dimension is the limit for busting clicks.
+
+  var ACTIVE_CLASS_NAME = 'ng-click-active';
+  var lastPreventedTime;
+  var touchCoordinates;
+  var lastLabelClickCoordinates;
+
+
+  // TAP EVENTS AND GHOST CLICKS
+  //
+  // Why tap events?
+  // Mobile browsers detect a tap, then wait a moment (usually ~300ms) to see if you're
+  // double-tapping, and then fire a click event.
+  //
+  // This delay sucks and makes mobile apps feel unresponsive.
+  // So we detect touchstart, touchcancel and touchend ourselves and determine when
+  // the user has tapped on something.
+  //
+  // What happens when the browser then generates a click event?
+  // The browser, of course, also detects the tap and fires a click after a delay. This results in
+  // tapping/clicking twice. We do "clickbusting" to prevent it.
+  //
+  // How does it work?
+  // We attach global touchstart and click handlers, that run during the capture (early) phase.
+  // So the sequence for a tap is:
+  // - global touchstart: Sets an "allowable region" at the point touched.
+  // - element's touchstart: Starts a touch
+  // (- touchcancel ends the touch, no click follows)
+  // - element's touchend: Determines if the tap is valid (didn't move too far away, didn't hold
+  //   too long) and fires the user's tap handler. The touchend also calls preventGhostClick().
+  // - preventGhostClick() removes the allowable region the global touchstart created.
+  // - The browser generates a click event.
+  // - The global click handler catches the click, and checks whether it was in an allowable region.
+  //     - If preventGhostClick was called, the region will have been removed, the click is busted.
+  //     - If the region is still there, the click proceeds normally. Therefore clicks on links and
+  //       other elements without ngTap on them work normally.
+  //
+  // This is an ugly, terrible hack!
+  // Yeah, tell me about it. The alternatives are using the slow click events, or making our users
+  // deal with the ghost clicks, so I consider this the least of evils. Fortunately Angular
+  // encapsulates this ugly logic away from the user.
+  //
+  // Why not just put click handlers on the element?
+  // We do that too, just to be sure. If the tap event caused the DOM to change,
+  // it is possible another element is now in that position. To take account for these possibly
+  // distinct elements, the handlers are global and care only about coordinates.
+
+  // Checks if the coordinates are close enough to be within the region.
+  function hit(x1, y1, x2, y2) {
+    return Math.abs(x1 - x2) < CLICKBUSTER_THRESHOLD && Math.abs(y1 - y2) < CLICKBUSTER_THRESHOLD;
+  }
+
+  // Checks a list of allowable regions against a click location.
+  // Returns true if the click should be allowed.
+  // Splices out the allowable region from the list after it has been used.
+  function checkAllowableRegions(touchCoordinates, x, y) {
+    for (var i = 0; i < touchCoordinates.length; i += 2) {
+      if (hit(touchCoordinates[i], touchCoordinates[i + 1], x, y)) {
+        touchCoordinates.splice(i, i + 2);
+        return true; // allowable region
+      }
+    }
+    return false; // No allowable region; bust it.
+  }
+
+  // Global click handler that prevents the click if it's in a bustable zone and preventGhostClick
+  // was called recently.
+  function onClick(event) {
+    if (Date.now() - lastPreventedTime > PREVENT_DURATION) {
+      return; // Too old.
+    }
+
+    var touches = event.touches && event.touches.length ? event.touches : [event];
+    var x = touches[0].clientX;
+    var y = touches[0].clientY;
+    // Work around desktop Webkit quirk where clicking a label will fire two clicks (on the label
+    // and on the input element). Depending on the exact browser, this second click we don't want
+    // to bust has either (0,0), negative coordinates, or coordinates equal to triggering label
+    // click event
+    if (x < 1 && y < 1) {
+      return; // offscreen
+    }
+    if (lastLabelClickCoordinates &&
+        lastLabelClickCoordinates[0] === x && lastLabelClickCoordinates[1] === y) {
+      return; // input click triggered by label click
+    }
+    // reset label click coordinates on first subsequent click
+    if (lastLabelClickCoordinates) {
+      lastLabelClickCoordinates = null;
+    }
+    // remember label click coordinates to prevent click busting of trigger click event on input
+    if (nodeName_(event.target) === 'label') {
+      lastLabelClickCoordinates = [x, y];
+    }
+
+    // Look for an allowable region containing this click.
+    // If we find one, that means it was created by touchstart and not removed by
+    // preventGhostClick, so we don't bust it.
+    if (checkAllowableRegions(touchCoordinates, x, y)) {
+      return;
+    }
+
+    // If we didn't find an allowable region, bust the click.
+    event.stopPropagation();
+    event.preventDefault();
+
+    // Blur focused form elements
+    event.target && event.target.blur && event.target.blur();
+  }
+
+
+  // Global touchstart handler that creates an allowable region for a click event.
+  // This allowable region can be removed by preventGhostClick if we want to bust it.
+  function onTouchStart(event) {
+    var touches = event.touches && event.touches.length ? event.touches : [event];
+    var x = touches[0].clientX;
+    var y = touches[0].clientY;
+    touchCoordinates.push(x, y);
+
+    $timeout(function() {
+      // Remove the allowable region.
+      for (var i = 0; i < touchCoordinates.length; i += 2) {
+        if (touchCoordinates[i] == x && touchCoordinates[i + 1] == y) {
+          touchCoordinates.splice(i, i + 2);
+          return;
+        }
+      }
+    }, PREVENT_DURATION, false);
+  }
+
+  // On the first call, attaches some event handlers. Then whenever it gets called, it creates a
+  // zone around the touchstart where clicks will get busted.
+  function preventGhostClick(x, y) {
+    if (!touchCoordinates) {
+      $rootElement[0].addEventListener('click', onClick, true);
+      $rootElement[0].addEventListener('touchstart', onTouchStart, true);
+      touchCoordinates = [];
+    }
+
+    lastPreventedTime = Date.now();
+
+    checkAllowableRegions(touchCoordinates, x, y);
+  }
+
+  // Actual linking function.
+  return function(scope, element, attr) {
+    var clickHandler = $parse(attr.ngClick),
+        tapping = false,
+        tapElement,  // Used to blur the element after a tap.
+        startTime,   // Used to check if the tap was held too long.
+        touchStartX,
+        touchStartY;
+
+    function resetState() {
+      tapping = false;
+      element.removeClass(ACTIVE_CLASS_NAME);
+    }
+
+    element.on('touchstart', function(event) {
+      tapping = true;
+      tapElement = event.target ? event.target : event.srcElement; // IE uses srcElement.
+      // Hack for Safari, which can target text nodes instead of containers.
+      if (tapElement.nodeType == 3) {
+        tapElement = tapElement.parentNode;
+      }
+
+      element.addClass(ACTIVE_CLASS_NAME);
+
+      startTime = Date.now();
+
+      // Use jQuery originalEvent
+      var originalEvent = event.originalEvent || event;
+      var touches = originalEvent.touches && originalEvent.touches.length ? originalEvent.touches : [originalEvent];
+      var e = touches[0];
+      touchStartX = e.clientX;
+      touchStartY = e.clientY;
+    });
+
+    element.on('touchcancel', function(event) {
+      resetState();
+    });
+
+    element.on('touchend', function(event) {
+      var diff = Date.now() - startTime;
+
+      // Use jQuery originalEvent
+      var originalEvent = event.originalEvent || event;
+      var touches = (originalEvent.changedTouches && originalEvent.changedTouches.length) ?
+          originalEvent.changedTouches :
+          ((originalEvent.touches && originalEvent.touches.length) ? originalEvent.touches : [originalEvent]);
+      var e = touches[0];
+      var x = e.clientX;
+      var y = e.clientY;
+      var dist = Math.sqrt(Math.pow(x - touchStartX, 2) + Math.pow(y - touchStartY, 2));
+
+      if (tapping && diff < TAP_DURATION && dist < MOVE_TOLERANCE) {
+        // Call preventGhostClick so the clickbuster will catch the corresponding click.
+        preventGhostClick(x, y);
+
+        // Blur the focused element (the button, probably) before firing the callback.
+        // This doesn't work perfectly on Android Chrome, but seems to work elsewhere.
+        // I couldn't get anything to work reliably on Android Chrome.
+        if (tapElement) {
+          tapElement.blur();
+        }
+
+        if (!angular.isDefined(attr.disabled) || attr.disabled === false) {
+          element.triggerHandler('click', [event]);
+        }
+      }
+
+      resetState();
+    });
+
+    // Hack for iOS Safari's benefit. It goes searching for onclick handlers and is liable to click
+    // something else nearby.
+    element.onclick = function(event) { };
+
+    // Actual click handler.
+    // There are three different kinds of clicks, only two of which reach this point.
+    // - On desktop browsers without touch events, their clicks will always come here.
+    // - On mobile browsers, the simulated "fast" click will call this.
+    // - But the browser's follow-up slow click will be "busted" before it reaches this handler.
+    // Therefore it's safe to use this directive on both mobile and desktop.
+    element.on('click', function(event, touchend) {
+      scope.$apply(function() {
+        clickHandler(scope, {$event: (touchend || event)});
+      });
+    });
+
+    element.on('mousedown', function(event) {
+      element.addClass(ACTIVE_CLASS_NAME);
+    });
+
+    element.on('mousemove mouseup', function(event) {
+      element.removeClass(ACTIVE_CLASS_NAME);
+    });
+
+  };
+}]);
+
+/* global ngTouch: false */
+
+/**
+ * @ngdoc directive
+ * @name ngSwipeLeft
+ *
+ * @description
+ * Specify custom behavior when an element is swiped to the left on a touchscreen device.
+ * A leftward swipe is a quick, right-to-left slide of the finger.
+ * Though ngSwipeLeft is designed for touch-based devices, it will work with a mouse click and drag
+ * too.
+ *
+ * To disable the mouse click and drag functionality, add `ng-swipe-disable-mouse` to
+ * the `ng-swipe-left` or `ng-swipe-right` DOM Element.
+ *
+ * Requires the {@link ngTouch `ngTouch`} module to be installed.
+ *
+ * @element ANY
+ * @param {expression} ngSwipeLeft {@link guide/expression Expression} to evaluate
+ * upon left swipe. (Event object is available as `$event`)
+ *
+ * @example
+    <example module="ngSwipeLeftExample" deps="angular-touch.js">
+      <file name="index.html">
+        <div ng-show="!showActions" ng-swipe-left="showActions = true">
+          Some list content, like an email in the inbox
+        </div>
+        <div ng-show="showActions" ng-swipe-right="showActions = false">
+          <button ng-click="reply()">Reply</button>
+          <button ng-click="delete()">Delete</button>
+        </div>
+      </file>
+      <file name="script.js">
+        angular.module('ngSwipeLeftExample', ['ngTouch']);
+      </file>
+    </example>
+ */
+
+/**
+ * @ngdoc directive
+ * @name ngSwipeRight
+ *
+ * @description
+ * Specify custom behavior when an element is swiped to the right on a touchscreen device.
+ * A rightward swipe is a quick, left-to-right slide of the finger.
+ * Though ngSwipeRight is designed for touch-based devices, it will work with a mouse click and drag
+ * too.
+ *
+ * Requires the {@link ngTouch `ngTouch`} module to be installed.
+ *
+ * @element ANY
+ * @param {expression} ngSwipeRight {@link guide/expression Expression} to evaluate
+ * upon right swipe. (Event object is available as `$event`)
+ *
+ * @example
+    <example module="ngSwipeRightExample" deps="angular-touch.js">
+      <file name="index.html">
+        <div ng-show="!showActions" ng-swipe-left="showActions = true">
+          Some list content, like an email in the inbox
+        </div>
+        <div ng-show="showActions" ng-swipe-right="showActions = false">
+          <button ng-click="reply()">Reply</button>
+          <button ng-click="delete()">Delete</button>
+        </div>
+      </file>
+      <file name="script.js">
+        angular.module('ngSwipeRightExample', ['ngTouch']);
+      </file>
+    </example>
+ */
+
+function makeSwipeDirective(directiveName, direction, eventName) {
+  ngTouch.directive(directiveName, ['$parse', '$swipe', function($parse, $swipe) {
+    // The maximum vertical delta for a swipe should be less than 75px.
+    var MAX_VERTICAL_DISTANCE = 75;
+    // Vertical distance should not be more than a fraction of the horizontal distance.
+    var MAX_VERTICAL_RATIO = 0.3;
+    // At least a 30px lateral motion is necessary for a swipe.
+    var MIN_HORIZONTAL_DISTANCE = 30;
+
+    return function(scope, element, attr) {
+      var swipeHandler = $parse(attr[directiveName]);
+
+      var startCoords, valid;
+
+      function validSwipe(coords) {
+        // Check that it's within the coordinates.
+        // Absolute vertical distance must be within tolerances.
+        // Horizontal distance, we take the current X - the starting X.
+        // This is negative for leftward swipes and positive for rightward swipes.
+        // After multiplying by the direction (-1 for left, +1 for right), legal swipes
+        // (ie. same direction as the directive wants) will have a positive delta and
+        // illegal ones a negative delta.
+        // Therefore this delta must be positive, and larger than the minimum.
+        if (!startCoords) return false;
+        var deltaY = Math.abs(coords.y - startCoords.y);
+        var deltaX = (coords.x - startCoords.x) * direction;
+        return valid && // Short circuit for already-invalidated swipes.
+            deltaY < MAX_VERTICAL_DISTANCE &&
+            deltaX > 0 &&
+            deltaX > MIN_HORIZONTAL_DISTANCE &&
+            deltaY / deltaX < MAX_VERTICAL_RATIO;
+      }
+
+      var pointerTypes = ['touch'];
+      if (!angular.isDefined(attr['ngSwipeDisableMouse'])) {
+        pointerTypes.push('mouse');
+      }
+      $swipe.bind(element, {
+        'start': function(coords, event) {
+          startCoords = coords;
+          valid = true;
+        },
+        'cancel': function(event) {
+          valid = false;
+        },
+        'end': function(coords, event) {
+          if (validSwipe(coords)) {
+            scope.$apply(function() {
+              element.triggerHandler(eventName);
+              swipeHandler(scope, {$event: event});
+            });
+          }
+        }
+      }, pointerTypes);
+    };
+  }]);
+}
+
+// Left is negative X-coordinate, right is positive.
+makeSwipeDirective('ngSwipeLeft', -1, 'swipeleft');
+makeSwipeDirective('ngSwipeRight', 1, 'swiperight');
+
+
+
+})(window, window.angular);
+
+/**
+ * Angular Carousel - Mobile friendly touch carousel for AngularJS
+ * @version v0.3.12 - 2015-06-11
+ * @link http://revolunet.github.com/angular-carousel
+ * @author Julien Bouquillon <julien@revolunet.com>
+ * @license MIT License, http://www.opensource.org/licenses/MIT
+ */
+/*global angular */
+
+/*
+Angular touch carousel with CSS GPU accel and slide buffering
+http://github.com/revolunet/angular-carousel
+
+*/
+
+angular.module('angular-carousel', [
+    'ngTouch',
+    'angular-carousel.shifty'
+]);
+
+angular.module('angular-carousel')
+
+.directive('rnCarouselAutoSlide', ['$interval', function($interval) {
+  return {
+    restrict: 'A',
+    link: function (scope, element, attrs) {
+        var stopAutoPlay = function() {
+            if (scope.autoSlider) {
+                $interval.cancel(scope.autoSlider);
+                scope.autoSlider = null;
+            }
+        };
+        var restartTimer = function() {
+            scope.autoSlide();
+        };
+
+        scope.$watch('carouselIndex', restartTimer);
+
+        if (attrs.hasOwnProperty('rnCarouselPauseOnHover') && attrs.rnCarouselPauseOnHover !== 'false'){
+            element.on('mouseenter', stopAutoPlay);
+            element.on('mouseleave', restartTimer);
+        }
+
+        scope.$on('$destroy', function(){
+            stopAutoPlay();
+            element.off('mouseenter', stopAutoPlay);
+            element.off('mouseleave', restartTimer);
+        });
+    }
+  };
+}]);
+
+angular.module('angular-carousel')
+
+.directive('rnCarouselIndicators', ['$parse', function($parse) {
+  return {
+    restrict: 'A',
+    scope: {
+      slides: '=',
+      index: '=rnCarouselIndex'
+    },
+    templateUrl: 'carousel-indicators.html',
+    link: function(scope, iElement, iAttributes) {
+      var indexModel = $parse(iAttributes.rnCarouselIndex);
+      scope.goToSlide = function(index) {
+        indexModel.assign(scope.$parent.$parent, index);
+      };
+    }
+  };
+}]);
+
+angular.module('angular-carousel').run(['$templateCache', function($templateCache) {
+  $templateCache.put('carousel-indicators.html',
+      '<div class="rn-carousel-indicator">\n' +
+        '<span ng-repeat="slide in slides" ng-class="{active: $index==index}" ng-click="goToSlide($index)">●</span>' +
+      '</div>'
+  );
+}]);
+
+(function() {
+    "use strict";
+
+    angular.module('angular-carousel')
+
+    .service('DeviceCapabilities', function() {
+
+        // TODO: merge in a single function
+
+        // detect supported CSS property
+        function detectTransformProperty() {
+            var transformProperty = 'transform',
+                safariPropertyHack = 'webkitTransform';
+            if (typeof document.body.style[transformProperty] !== 'undefined') {
+
+                ['webkit', 'moz', 'o', 'ms'].every(function (prefix) {
+                    var e = '-' + prefix + '-transform';
+                    if (typeof document.body.style[e] !== 'undefined') {
+                        transformProperty = e;
+                        return false;
+                    }
+                    return true;
+                });
+            } else if (typeof document.body.style[safariPropertyHack] !== 'undefined') {
+                transformProperty = '-webkit-transform';
+            } else {
+                transformProperty = undefined;
+            }
+            return transformProperty;
+        }
+
+        //Detect support of translate3d
+        function detect3dSupport() {
+            var el = document.createElement('p'),
+                has3d,
+                transforms = {
+                    'webkitTransform': '-webkit-transform',
+                    'msTransform': '-ms-transform',
+                    'transform': 'transform'
+                };
+            // Add it to the body to get the computed style
+            document.body.insertBefore(el, null);
+            for (var t in transforms) {
+                if (el.style[t] !== undefined) {
+                    el.style[t] = 'translate3d(1px,1px,1px)';
+                    has3d = window.getComputedStyle(el).getPropertyValue(transforms[t]);
+                }
+            }
+            document.body.removeChild(el);
+            return (has3d !== undefined && has3d.length > 0 && has3d !== "none");
+        }
+
+        return {
+            has3d: detect3dSupport(),
+            transformProperty: detectTransformProperty()
+        };
+
+    })
+
+    .service('computeCarouselSlideStyle', ["DeviceCapabilities", function(DeviceCapabilities) {
+        // compute transition transform properties for a given slide and global offset
+        return function(slideIndex, offset, transitionType) {
+            var style = {
+                    display: 'inline-block'
+                },
+                opacity,
+                absoluteLeft = (slideIndex * 100) + offset,
+                slideTransformValue = DeviceCapabilities.has3d ? 'translate3d(' + absoluteLeft + '%, 0, 0)' : 'translate3d(' + absoluteLeft + '%, 0)',
+                distance = ((100 - Math.abs(absoluteLeft)) / 100);
+
+            if (!DeviceCapabilities.transformProperty) {
+                // fallback to default slide if transformProperty is not available
+                style['margin-left'] = absoluteLeft + '%';
+            } else {
+                if (transitionType == 'fadeAndSlide') {
+                    style[DeviceCapabilities.transformProperty] = slideTransformValue;
+                    opacity = 0;
+                    if (Math.abs(absoluteLeft) < 100) {
+                        opacity = 0.3 + distance * 0.7;
+                    }
+                    style.opacity = opacity;
+                } else if (transitionType == 'hexagon') {
+                    var transformFrom = 100,
+                        degrees = 0,
+                        maxDegrees = 60 * (distance - 1);
+
+                    transformFrom = offset < (slideIndex * -100) ? 100 : 0;
+                    degrees = offset < (slideIndex * -100) ? maxDegrees : -maxDegrees;
+                    style[DeviceCapabilities.transformProperty] = slideTransformValue + ' ' + 'rotateY(' + degrees + 'deg)';
+                    style[DeviceCapabilities.transformProperty + '-origin'] = transformFrom + '% 50%';
+                } else if (transitionType == 'zoom') {
+                    style[DeviceCapabilities.transformProperty] = slideTransformValue;
+                    var scale = 1;
+                    if (Math.abs(absoluteLeft) < 100) {
+                        scale = 1 + ((1 - distance) * 2);
+                    }
+                    style[DeviceCapabilities.transformProperty] += ' scale(' + scale + ')';
+                    style[DeviceCapabilities.transformProperty + '-origin'] = '50% 50%';
+                    opacity = 0;
+                    if (Math.abs(absoluteLeft) < 100) {
+                        opacity = 0.3 + distance * 0.7;
+                    }
+                    style.opacity = opacity;
+                } else {
+                    style[DeviceCapabilities.transformProperty] = slideTransformValue;
+                }
+            }
+            return style;
+        };
+    }])
+
+    .service('createStyleString', function() {
+        return function(object) {
+            var styles = [];
+            angular.forEach(object, function(value, key) {
+                styles.push(key + ':' + value);
+            });
+            return styles.join(';');
+        };
+    })
+
+    .directive('rnCarousel', ['$swipe', '$window', '$document', '$parse', '$compile', '$timeout', '$interval', 'computeCarouselSlideStyle', 'createStyleString', 'Tweenable',
+        function($swipe, $window, $document, $parse, $compile, $timeout, $interval, computeCarouselSlideStyle, createStyleString, Tweenable) {
+            // internal ids to allow multiple instances
+            var carouselId = 0,
+                // in absolute pixels, at which distance the slide stick to the edge on release
+                rubberTreshold = 3;
+
+            var requestAnimationFrame = $window.requestAnimationFrame || $window.webkitRequestAnimationFrame || $window.mozRequestAnimationFrame;
+
+            function getItemIndex(collection, target, defaultIndex) {
+                var result = defaultIndex;
+                collection.every(function(item, index) {
+                    if (angular.equals(item, target)) {
+                        result = index;
+                        return false;
+                    }
+                    return true;
+                });
+                return result;
+            }
+
+            return {
+                restrict: 'A',
+                scope: true,
+                compile: function(tElement, tAttributes) {
+                    // use the compile phase to customize the DOM
+                    var firstChild = tElement[0].querySelector('li'),
+                        firstChildAttributes = (firstChild) ? firstChild.attributes : [],
+                        isRepeatBased = false,
+                        isBuffered = false,
+                        repeatItem,
+                        repeatCollection;
+
+                    // try to find an ngRepeat expression
+                    // at this point, the attributes are not yet normalized so we need to try various syntax
+                    ['ng-repeat', 'data-ng-repeat', 'ng:repeat', 'x-ng-repeat'].every(function(attr) {
+                        var repeatAttribute = firstChildAttributes[attr];
+                        if (angular.isDefined(repeatAttribute)) {
+                            // ngRepeat regexp extracted from angular 1.2.7 src
+                            var exprMatch = repeatAttribute.value.match(/^\s*([\s\S]+?)\s+in\s+([\s\S]+?)(?:\s+track\s+by\s+([\s\S]+?))?\s*$/),
+                                trackProperty = exprMatch[3];
+
+                            repeatItem = exprMatch[1];
+                            repeatCollection = exprMatch[2];
+
+                            if (repeatItem) {
+                                if (angular.isDefined(tAttributes['rnCarouselBuffered'])) {
+                                    // update the current ngRepeat expression and add a slice operator if buffered
+                                    isBuffered = true;
+                                    repeatAttribute.value = repeatItem + ' in ' + repeatCollection + '|carouselSlice:carouselBufferIndex:carouselBufferSize';
+                                    if (trackProperty) {
+                                        repeatAttribute.value += ' track by ' + trackProperty;
+                                    }
+                                }
+                                isRepeatBased = true;
+                                return false;
+                            }
+                        }
+                        return true;
+                    });
+
+                    return function(scope, iElement, iAttributes, containerCtrl) {
+
+                        carouselId++;
+
+                        var defaultOptions = {
+                            transitionType: iAttributes.rnCarouselTransition || 'slide',
+                            transitionEasing: iAttributes.rnCarouselEasing || 'easeTo',
+                            transitionDuration: parseInt(iAttributes.rnCarouselDuration, 10) || 300,
+                            isSequential: true,
+                            autoSlideDuration: 3,
+                            bufferSize: 5,
+                            /* in container % how much we need to drag to trigger the slide change */
+                            moveTreshold: 0.1,
+                            defaultIndex: 0
+                        };
+
+                        // TODO
+                        var options = angular.extend({}, defaultOptions);
+
+                        var pressed,
+                            startX,
+                            isIndexBound = false,
+                            offset = 0,
+                            destination,
+                            swipeMoved = false,
+                            //animOnIndexChange = true,
+                            currentSlides = [],
+                            elWidth = null,
+                            elX = null,
+                            animateTransitions = true,
+                            intialState = true,
+                            animating = false,
+                            mouseUpBound = false,
+                            locked = false;
+
+                        //rn-swipe-disabled =true will only disable swipe events
+                        if(iAttributes.rnSwipeDisabled !== "true") {
+                            $swipe.bind(iElement, {
+                                start: swipeStart,
+                                move: swipeMove,
+                                end: swipeEnd,
+                                cancel: function(event) {
+                                    swipeEnd({}, event);
+                                }
+                            });
+                        }
+
+                        function getSlidesDOM() {
+                            return iElement[0].querySelectorAll('ul[rn-carousel] > li');
+                        }
+
+                        function documentMouseUpEvent(event) {
+                            // in case we click outside the carousel, trigger a fake swipeEnd
+                            swipeMoved = true;
+                            swipeEnd({
+                                x: event.clientX,
+                                y: event.clientY
+                            }, event);
+                        }
+
+                        function updateSlidesPosition(offset) {
+                            // manually apply transformation to carousel childrens
+                            // todo : optim : apply only to visible items
+                            var x = scope.carouselBufferIndex * 100 + offset;
+                            angular.forEach(getSlidesDOM(), function(child, index) {
+                                child.style.cssText = createStyleString(computeCarouselSlideStyle(index, x, options.transitionType));
+                            });
+                        }
+
+                        scope.nextSlide = function(slideOptions) {
+                            var index = scope.carouselIndex + 1;
+                            if (index > currentSlides.length - 1) {
+                                index = 0;
+                            }
+                            if (!locked) {
+                                goToSlide(index, slideOptions);
+                            }
+                        };
+
+                        scope.prevSlide = function(slideOptions) {
+                            var index = scope.carouselIndex - 1;
+                            if (index < 0) {
+                                index = currentSlides.length - 1;
+                            }
+                            goToSlide(index, slideOptions);
+                        };
+
+                        function goToSlide(index, slideOptions) {
+                            //console.log('goToSlide', arguments);
+                            // move a to the given slide index
+                            if (index === undefined) {
+                                index = scope.carouselIndex;
+                            }
+
+                            slideOptions = slideOptions || {};
+                            if (slideOptions.animate === false || options.transitionType === 'none') {
+                                locked = false;
+                                offset = index * -100;
+                                scope.carouselIndex = index;
+                                updateBufferIndex();
+                                return;
+                            }
+
+                            locked = true;
+                            var tweenable = new Tweenable();
+                            tweenable.tween({
+                                from: {
+                                    'x': offset
+                                },
+                                to: {
+                                    'x': index * -100
+                                },
+                                duration: options.transitionDuration,
+                                easing: options.transitionEasing,
+                                step: function(state) {
+                                    updateSlidesPosition(state.x);
+                                },
+                                finish: function() {
+                                    scope.$apply(function() {
+                                        scope.carouselIndex = index;
+                                        offset = index * -100;
+                                        updateBufferIndex();
+                                        $timeout(function () {
+                                          locked = false;
+                                        }, 0, false);
+                                    });
+                                }
+                            });
+                        }
+
+                        function getContainerWidth() {
+                            var rect = iElement[0].getBoundingClientRect();
+                            return rect.width ? rect.width : rect.right - rect.left;
+                        }
+
+                        function updateContainerWidth() {
+                            elWidth = getContainerWidth();
+                        }
+
+                        function bindMouseUpEvent() {
+                            if (!mouseUpBound) {
+                              mouseUpBound = true;
+                              $document.bind('mouseup', documentMouseUpEvent);
+                            }
+                        }
+
+                        function unbindMouseUpEvent() {
+                            if (mouseUpBound) {
+                              mouseUpBound = false;
+                              $document.unbind('mouseup', documentMouseUpEvent);
+                            }
+                        }
+
+                        function swipeStart(coords, event) {
+                            // console.log('swipeStart', coords, event);
+                            if (locked || currentSlides.length <= 1) {
+                                return;
+                            }
+                            updateContainerWidth();
+                            elX = iElement[0].querySelector('li').getBoundingClientRect().left;
+                            pressed = true;
+                            startX = coords.x;
+                            return false;
+                        }
+
+                        function swipeMove(coords, event) {
+                            //console.log('swipeMove', coords, event);
+                            var x, delta;
+                            bindMouseUpEvent();
+                            if (pressed) {
+                                x = coords.x;
+                                delta = startX - x;
+                                if (delta > 2 || delta < -2) {
+                                    swipeMoved = true;
+                                    var moveOffset = offset + (-delta * 100 / elWidth);
+                                    updateSlidesPosition(moveOffset);
+                                }
+                            }
+                            return false;
+                        }
+
+                        var init = true;
+                        scope.carouselIndex = 0;
+
+                        if (!isRepeatBased) {
+                            // fake array when no ng-repeat
+                            currentSlides = [];
+                            angular.forEach(getSlidesDOM(), function(node, index) {
+                                currentSlides.push({id: index});
+                            });
+                        }
+
+                        if (iAttributes.rnCarouselControls!==undefined) {
+                            // dont use a directive for this
+                            var nextSlideIndexCompareValue = isRepeatBased ? repeatCollection.replace('::', '') + '.length - 1' : currentSlides.length - 1;
+                            var tpl = '<div class="rn-carousel-controls">\n' +
+                                '  <span class="rn-carousel-control rn-carousel-control-prev" ng-click="prevSlide()" ng-if="carouselIndex > 0"></span>\n' +
+                                '  <span class="rn-carousel-control rn-carousel-control-next" ng-click="nextSlide()" ng-if="carouselIndex < ' + nextSlideIndexCompareValue + '"></span>\n' +
+                                '</div>';
+                            iElement.parent().append($compile(angular.element(tpl))(scope));
+                        }
+
+                        if (iAttributes.rnCarouselAutoSlide!==undefined) {
+                            var duration = parseInt(iAttributes.rnCarouselAutoSlide, 10) || options.autoSlideDuration;
+                            scope.autoSlide = function() {
+                                if (scope.autoSlider) {
+                                    $interval.cancel(scope.autoSlider);
+                                    scope.autoSlider = null;
+                                }
+                                scope.autoSlider = $interval(function() {
+                                    if (!locked && !pressed) {
+                                        scope.nextSlide();
+                                    }
+                                }, duration * 1000);
+                            };
+                        }
+
+                        if (iAttributes.rnCarouselDefaultIndex) {
+                            var defaultIndexModel = $parse(iAttributes.rnCarouselDefaultIndex);
+                            options.defaultIndex = defaultIndexModel(scope.$parent) || 0;
+                        }
+
+                        if (iAttributes.rnCarouselIndex) {
+                            var updateParentIndex = function(value) {
+                                indexModel.assign(scope.$parent, value);
+                            };
+                            var indexModel = $parse(iAttributes.rnCarouselIndex);
+                            if (angular.isFunction(indexModel.assign)) {
+                                /* check if this property is assignable then watch it */
+                                scope.$watch('carouselIndex', function(newValue) {
+                                    updateParentIndex(newValue);
+                                });
+                                scope.$parent.$watch(indexModel, function(newValue, oldValue) {
+
+                                    if (newValue !== undefined && newValue !== null) {
+                                        if (currentSlides && currentSlides.length > 0 && newValue >= currentSlides.length) {
+                                            newValue = currentSlides.length - 1;
+                                            updateParentIndex(newValue);
+                                        } else if (currentSlides && newValue < 0) {
+                                            newValue = 0;
+                                            updateParentIndex(newValue);
+                                        }
+                                        if (!locked) {
+                                            goToSlide(newValue, {
+                                                animate: !init
+                                            });
+                                        }
+                                        init = false;
+                                    }
+                                });
+                                isIndexBound = true;
+
+                                if (options.defaultIndex) {
+                                    goToSlide(options.defaultIndex, {
+                                        animate: !init
+                                    });
+                                }
+                            } else if (!isNaN(iAttributes.rnCarouselIndex)) {
+                                /* if user just set an initial number, set it */
+                                goToSlide(parseInt(iAttributes.rnCarouselIndex, 10), {
+                                    animate: false
+                                });
+                            }
+                        } else {
+                            goToSlide(options.defaultIndex, {
+                                animate: !init
+                            });
+                            init = false;
+                        }
+
+                        if (iAttributes.rnCarouselLocked) {
+                            scope.$watch(iAttributes.rnCarouselLocked, function(newValue, oldValue) {
+                                // only bind swipe when it's not switched off
+                                if(newValue === true) {
+                                    locked = true;
+                                } else {
+                                    locked = false;
+                                }
+                            });
+                        }
+
+                        if (isRepeatBased) {
+                            // use rn-carousel-deep-watch to fight the Angular $watchCollection weakness : https://github.com/angular/angular.js/issues/2621
+                            // optional because it have some performance impacts (deep watch)
+                            var deepWatch = (iAttributes.rnCarouselDeepWatch!==undefined);
+
+                            scope[deepWatch?'$watch':'$watchCollection'](repeatCollection, function(newValue, oldValue) {
+                                //console.log('repeatCollection', currentSlides);
+                                currentSlides = newValue;
+                                // if deepWatch ON ,manually compare objects to guess the new position
+                                if (deepWatch && angular.isArray(newValue)) {
+                                    var activeElement = oldValue[scope.carouselIndex];
+                                    var newIndex = getItemIndex(newValue, activeElement, scope.carouselIndex);
+                                    goToSlide(newIndex, {animate: false});
+                                } else {
+                                    goToSlide(scope.carouselIndex, {animate: false});
+                                }
+                            }, true);
+                        }
+
+                        function swipeEnd(coords, event, forceAnimation) {
+                            //  console.log('swipeEnd', 'scope.carouselIndex', scope.carouselIndex);
+                            // Prevent clicks on buttons inside slider to trigger "swipeEnd" event on touchend/mouseup
+                            // console.log(iAttributes.rnCarouselOnInfiniteScroll);
+                            if (event && !swipeMoved) {
+                                return;
+                            }
+                            unbindMouseUpEvent();
+                            pressed = false;
+                            swipeMoved = false;
+                            destination = startX - coords.x;
+                            if (destination===0) {
+                                return;
+                            }
+                            if (locked) {
+                                return;
+                            }
+                            offset += (-destination * 100 / elWidth);
+                            if (options.isSequential) {
+                                var minMove = options.moveTreshold * elWidth,
+                                    absMove = -destination,
+                                    slidesMove = -Math[absMove >= 0 ? 'ceil' : 'floor'](absMove / elWidth),
+                                    shouldMove = Math.abs(absMove) > minMove;
+
+                                if (currentSlides && (slidesMove + scope.carouselIndex) >= currentSlides.length) {
+                                    slidesMove = currentSlides.length - 1 - scope.carouselIndex;
+                                }
+                                if ((slidesMove + scope.carouselIndex) < 0) {
+                                    slidesMove = -scope.carouselIndex;
+                                }
+                                var moveOffset = shouldMove ? slidesMove : 0;
+
+                                destination = (scope.carouselIndex + moveOffset);
+
+                                goToSlide(destination);
+                                if(iAttributes.rnCarouselOnInfiniteScrollRight!==undefined && slidesMove === 0 && scope.carouselIndex !== 0) {
+                                    $parse(iAttributes.rnCarouselOnInfiniteScrollRight)(scope)
+                                    goToSlide(0);
+                                }
+                                if(iAttributes.rnCarouselOnInfiniteScrollLeft!==undefined && slidesMove === 0 && scope.carouselIndex === 0 && moveOffset === 0) {
+                                    $parse(iAttributes.rnCarouselOnInfiniteScrollLeft)(scope)
+                                    goToSlide(currentSlides.length);
+                                }
+
+                            } else {
+                                scope.$apply(function() {
+                                    scope.carouselIndex = parseInt(-offset / 100, 10);
+                                    updateBufferIndex();
+                                });
+
+                            }
+
+                        }
+
+                        scope.$on('$destroy', function() {
+                            unbindMouseUpEvent();
+                        });
+
+                        scope.carouselBufferIndex = 0;
+                        scope.carouselBufferSize = options.bufferSize;
+
+                        function updateBufferIndex() {
+                            // update and cap te buffer index
+                            var bufferIndex = 0;
+                            var bufferEdgeSize = (scope.carouselBufferSize - 1) / 2;
+                            if (isBuffered) {
+                                if (scope.carouselIndex <= bufferEdgeSize) {
+                                    // first buffer part
+                                    bufferIndex = 0;
+                                } else if (currentSlides && currentSlides.length < scope.carouselBufferSize) {
+                                    // smaller than buffer
+                                    bufferIndex = 0;
+                                } else if (currentSlides && scope.carouselIndex > currentSlides.length - scope.carouselBufferSize) {
+                                    // last buffer part
+                                    bufferIndex = currentSlides.length - scope.carouselBufferSize;
+                                } else {
+                                    // compute buffer start
+                                    bufferIndex = scope.carouselIndex - bufferEdgeSize;
+                                }
+
+                                scope.carouselBufferIndex = bufferIndex;
+                                $timeout(function() {
+                                    updateSlidesPosition(offset);
+                                }, 0, false);
+                            } else {
+                                $timeout(function() {
+                                    updateSlidesPosition(offset);
+                                }, 0, false);
+                            }
+                        }
+
+                        function onOrientationChange() {
+                            updateContainerWidth();
+                            goToSlide();
+                        }
+
+                        // handle orientation change
+                        var winEl = angular.element($window);
+                        winEl.bind('orientationchange', onOrientationChange);
+                        winEl.bind('resize', onOrientationChange);
+
+                        scope.$on('$destroy', function() {
+                            unbindMouseUpEvent();
+                            winEl.unbind('orientationchange', onOrientationChange);
+                            winEl.unbind('resize', onOrientationChange);
+                        });
+                    };
+                }
+            };
+        }
+    ]);
+})();
+
+
+
+angular.module('angular-carousel.shifty', [])
+
+.factory('Tweenable', function() {
+
+    /*! shifty - v1.3.4 - 2014-10-29 - http://jeremyckahn.github.io/shifty */
+  ;(function (root) {
+
+  /*!
+   * Shifty Core
+   * By Jeremy Kahn - jeremyckahn@gmail.com
+   */
+
+  var Tweenable = (function () {
+
+    'use strict';
+
+    // Aliases that get defined later in this function
+    var formula;
+
+    // CONSTANTS
+    var DEFAULT_SCHEDULE_FUNCTION;
+    var DEFAULT_EASING = 'linear';
+    var DEFAULT_DURATION = 500;
+    var UPDATE_TIME = 1000 / 60;
+
+    var _now = Date.now
+         ? Date.now
+         : function () {return +new Date();};
+
+    var now = typeof SHIFTY_DEBUG_NOW !== 'undefined' ? SHIFTY_DEBUG_NOW : _now;
+
+    if (typeof window !== 'undefined') {
+      // requestAnimationFrame() shim by Paul Irish (modified for Shifty)
+      // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+      DEFAULT_SCHEDULE_FUNCTION = window.requestAnimationFrame
+         || window.webkitRequestAnimationFrame
+         || window.oRequestAnimationFrame
+         || window.msRequestAnimationFrame
+         || (window.mozCancelRequestAnimationFrame
+         && window.mozRequestAnimationFrame)
+         || setTimeout;
+    } else {
+      DEFAULT_SCHEDULE_FUNCTION = setTimeout;
+    }
+
+    function noop () {
+      // NOOP!
+    }
+
+    /*!
+     * Handy shortcut for doing a for-in loop. This is not a "normal" each
+     * function, it is optimized for Shifty.  The iterator function only receives
+     * the property name, not the value.
+     * @param {Object} obj
+     * @param {Function(string)} fn
+     */
+    function each (obj, fn) {
+      var key;
+      for (key in obj) {
+        if (Object.hasOwnProperty.call(obj, key)) {
+          fn(key);
+        }
+      }
+    }
+
+    /*!
+     * Perform a shallow copy of Object properties.
+     * @param {Object} targetObject The object to copy into
+     * @param {Object} srcObject The object to copy from
+     * @return {Object} A reference to the augmented `targetObj` Object
+     */
+    function shallowCopy (targetObj, srcObj) {
+      each(srcObj, function (prop) {
+        targetObj[prop] = srcObj[prop];
+      });
+
+      return targetObj;
+    }
+
+    /*!
+     * Copies each property from src onto target, but only if the property to
+     * copy to target is undefined.
+     * @param {Object} target Missing properties in this Object are filled in
+     * @param {Object} src
+     */
+    function defaults (target, src) {
+      each(src, function (prop) {
+        if (typeof target[prop] === 'undefined') {
+          target[prop] = src[prop];
+        }
+      });
+    }
+
+    /*!
+     * Calculates the interpolated tween values of an Object for a given
+     * timestamp.
+     * @param {Number} forPosition The position to compute the state for.
+     * @param {Object} currentState Current state properties.
+     * @param {Object} originalState: The original state properties the Object is
+     * tweening from.
+     * @param {Object} targetState: The destination state properties the Object
+     * is tweening to.
+     * @param {number} duration: The length of the tween in milliseconds.
+     * @param {number} timestamp: The UNIX epoch time at which the tween began.
+     * @param {Object} easing: This Object's keys must correspond to the keys in
+     * targetState.
+     */
+    function tweenProps (forPosition, currentState, originalState, targetState,
+      duration, timestamp, easing) {
+      var normalizedPosition = (forPosition - timestamp) / duration;
+
+      var prop;
+      for (prop in currentState) {
+        if (currentState.hasOwnProperty(prop)) {
+          currentState[prop] = tweenProp(originalState[prop],
+            targetState[prop], formula[easing[prop]], normalizedPosition);
+        }
+      }
+
+      return currentState;
+    }
+
+    /*!
+     * Tweens a single property.
+     * @param {number} start The value that the tween started from.
+     * @param {number} end The value that the tween should end at.
+     * @param {Function} easingFunc The easing curve to apply to the tween.
+     * @param {number} position The normalized position (between 0.0 and 1.0) to
+     * calculate the midpoint of 'start' and 'end' against.
+     * @return {number} The tweened value.
+     */
+    function tweenProp (start, end, easingFunc, position) {
+      return start + (end - start) * easingFunc(position);
+    }
+
+    /*!
+     * Applies a filter to Tweenable instance.
+     * @param {Tweenable} tweenable The `Tweenable` instance to call the filter
+     * upon.
+     * @param {String} filterName The name of the filter to apply.
+     */
+    function applyFilter (tweenable, filterName) {
+      var filters = Tweenable.prototype.filter;
+      var args = tweenable._filterArgs;
+
+      each(filters, function (name) {
+        if (typeof filters[name][filterName] !== 'undefined') {
+          filters[name][filterName].apply(tweenable, args);
+        }
+      });
+    }
+
+    var timeoutHandler_endTime;
+    var timeoutHandler_currentTime;
+    var timeoutHandler_isEnded;
+    var timeoutHandler_offset;
+    /*!
+     * Handles the update logic for one step of a tween.
+     * @param {Tweenable} tweenable
+     * @param {number} timestamp
+     * @param {number} duration
+     * @param {Object} currentState
+     * @param {Object} originalState
+     * @param {Object} targetState
+     * @param {Object} easing
+     * @param {Function(Object, *, number)} step
+     * @param {Function(Function,number)}} schedule
+     */
+    function timeoutHandler (tweenable, timestamp, duration, currentState,
+      originalState, targetState, easing, step, schedule) {
+      timeoutHandler_endTime = timestamp + duration;
+      timeoutHandler_currentTime = Math.min(now(), timeoutHandler_endTime);
+      timeoutHandler_isEnded =
+        timeoutHandler_currentTime >= timeoutHandler_endTime;
+
+      timeoutHandler_offset = duration - (
+          timeoutHandler_endTime - timeoutHandler_currentTime);
+
+      if (tweenable.isPlaying() && !timeoutHandler_isEnded) {
+        tweenable._scheduleId = schedule(tweenable._timeoutHandler, UPDATE_TIME);
+
+        applyFilter(tweenable, 'beforeTween');
+        tweenProps(timeoutHandler_currentTime, currentState, originalState,
+          targetState, duration, timestamp, easing);
+        applyFilter(tweenable, 'afterTween');
+
+        step(currentState, tweenable._attachment, timeoutHandler_offset);
+      } else if (timeoutHandler_isEnded) {
+        step(targetState, tweenable._attachment, timeoutHandler_offset);
+        tweenable.stop(true);
+      }
+    }
+
+
+    /*!
+     * Creates a usable easing Object from either a string or another easing
+     * Object.  If `easing` is an Object, then this function clones it and fills
+     * in the missing properties with "linear".
+     * @param {Object} fromTweenParams
+     * @param {Object|string} easing
+     */
+    function composeEasingObject (fromTweenParams, easing) {
+      var composedEasing = {};
+
+      if (typeof easing === 'string') {
+        each(fromTweenParams, function (prop) {
+          composedEasing[prop] = easing;
+        });
+      } else {
+        each(fromTweenParams, function (prop) {
+          if (!composedEasing[prop]) {
+            composedEasing[prop] = easing[prop] || DEFAULT_EASING;
+          }
+        });
+      }
+
+      return composedEasing;
+    }
+
+    /**
+     * Tweenable constructor.
+     * @param {Object=} opt_initialState The values that the initial tween should start at if a "from" object is not provided to Tweenable#tween.
+     * @param {Object=} opt_config See Tweenable.prototype.setConfig()
+     * @constructor
+     */
+    function Tweenable (opt_initialState, opt_config) {
+      this._currentState = opt_initialState || {};
+      this._configured = false;
+      this._scheduleFunction = DEFAULT_SCHEDULE_FUNCTION;
+
+      // To prevent unnecessary calls to setConfig do not set default configuration here.
+      // Only set default configuration immediately before tweening if none has been set.
+      if (typeof opt_config !== 'undefined') {
+        this.setConfig(opt_config);
+      }
+    }
+
+    /**
+     * Configure and start a tween.
+     * @param {Object=} opt_config See Tweenable.prototype.setConfig()
+     * @return {Tweenable}
+     */
+    Tweenable.prototype.tween = function (opt_config) {
+      if (this._isTweening) {
+        return this;
+      }
+
+      // Only set default config if no configuration has been set previously and none is provided now.
+      if (opt_config !== undefined || !this._configured) {
+        this.setConfig(opt_config);
+      }
+
+      this._timestamp = now();
+      this._start(this.get(), this._attachment);
+      return this.resume();
+    };
+
+    /**
+     * Sets the tween configuration. `config` may have the following options:
+     *
+     * - __from__ (_Object=_): Starting position.  If omitted, the current state is used.
+     * - __to__ (_Object=_): Ending position.
+     * - __duration__ (_number=_): How many milliseconds to animate for.
+     * - __start__ (_Function(Object)_): Function to execute when the tween begins.  Receives the state of the tween as the first parameter. Attachment is the second parameter.
+     * - __step__ (_Function(Object, *, number)_): Function to execute on every tick.  Receives the state of the tween as the first parameter. Attachment is the second parameter, and the time elapsed since the start of the tween is the third parameter. This function is not called on the final step of the animation, but `finish` is.
+     * - __finish__ (_Function(Object, *)_): Function to execute upon tween completion.  Receives the state of the tween as the first parameter. Attachment is the second parameter.
+     * - __easing__ (_Object|string=_): Easing curve name(s) to use for the tween.
+     * - __attachment__ (_Object|string|any=_): Value that is attached to this instance and passed on to the step/start/finish methods.
+     * @param {Object} config
+     * @return {Tweenable}
+     */
+    Tweenable.prototype.setConfig = function (config) {
+      config = config || {};
+      this._configured = true;
+
+      // Attach something to this Tweenable instance (e.g.: a DOM element, an object, a string, etc.);
+      this._attachment = config.attachment;
+
+      // Init the internal state
+      this._pausedAtTime = null;
+      this._scheduleId = null;
+      this._start = config.start || noop;
+      this._step = config.step || noop;
+      this._finish = config.finish || noop;
+      this._duration = config.duration || DEFAULT_DURATION;
+      this._currentState = config.from || this.get();
+      this._originalState = this.get();
+      this._targetState = config.to || this.get();
+
+      // Aliases used below
+      var currentState = this._currentState;
+      var targetState = this._targetState;
+
+      // Ensure that there is always something to tween to.
+      defaults(targetState, currentState);
+
+      this._easing = composeEasingObject(
+        currentState, config.easing || DEFAULT_EASING);
+
+      this._filterArgs =
+        [currentState, this._originalState, targetState, this._easing];
+
+      applyFilter(this, 'tweenCreated');
+      return this;
+    };
+
+    /**
+     * Gets the current state.
+     * @return {Object}
+     */
+    Tweenable.prototype.get = function () {
+      return shallowCopy({}, this._currentState);
+    };
+
+    /**
+     * Sets the current state.
+     * @param {Object} state
+     */
+    Tweenable.prototype.set = function (state) {
+      this._currentState = state;
+    };
+
+    /**
+     * Pauses a tween.  Paused tweens can be resumed from the point at which they were paused.  This is different than [`stop()`](#stop), as that method causes a tween to start over when it is resumed.
+     * @return {Tweenable}
+     */
+    Tweenable.prototype.pause = function () {
+      this._pausedAtTime = now();
+      this._isPaused = true;
+      return this;
+    };
+
+    /**
+     * Resumes a paused tween.
+     * @return {Tweenable}
+     */
+    Tweenable.prototype.resume = function () {
+      if (this._isPaused) {
+        this._timestamp += now() - this._pausedAtTime;
+      }
+
+      this._isPaused = false;
+      this._isTweening = true;
+
+      var self = this;
+      this._timeoutHandler = function () {
+        timeoutHandler(self, self._timestamp, self._duration, self._currentState,
+          self._originalState, self._targetState, self._easing, self._step,
+          self._scheduleFunction);
+      };
+
+      this._timeoutHandler();
+
+      return this;
+    };
+
+    /**
+     * Move the state of the animation to a specific point in the tween's timeline.
+     * If the animation is not running, this will cause the `step` handlers to be
+     * called.
+     * @param {millisecond} millisecond The millisecond of the animation to seek to.
+     * @return {Tweenable}
+     */
+    Tweenable.prototype.seek = function (millisecond) {
+      this._timestamp = now() - millisecond;
+
+      if (!this.isPlaying()) {
+        this._isTweening = true;
+        this._isPaused = false;
+
+        // If the animation is not running, call timeoutHandler to make sure that
+        // any step handlers are run.
+        timeoutHandler(this, this._timestamp, this._duration, this._currentState,
+          this._originalState, this._targetState, this._easing, this._step,
+          this._scheduleFunction);
+
+        this._timeoutHandler();
+        this.pause();
+      }
+
+      return this;
+    };
+
+    /**
+     * Stops and cancels a tween.
+     * @param {boolean=} gotoEnd If false or omitted, the tween just stops at its current state, and the "finish" handler is not invoked.  If true, the tweened object's values are instantly set to the target values, and "finish" is invoked.
+     * @return {Tweenable}
+     */
+    Tweenable.prototype.stop = function (gotoEnd) {
+      this._isTweening = false;
+      this._isPaused = false;
+      this._timeoutHandler = noop;
+
+      (root.cancelAnimationFrame            ||
+        root.webkitCancelAnimationFrame     ||
+        root.oCancelAnimationFrame          ||
+        root.msCancelAnimationFrame         ||
+        root.mozCancelRequestAnimationFrame ||
+        root.clearTimeout)(this._scheduleId);
+
+      if (gotoEnd) {
+        shallowCopy(this._currentState, this._targetState);
+        applyFilter(this, 'afterTweenEnd');
+        this._finish.call(this, this._currentState, this._attachment);
+      }
+
+      return this;
+    };
+
+    /**
+     * Returns whether or not a tween is running.
+     * @return {boolean}
+     */
+    Tweenable.prototype.isPlaying = function () {
+      return this._isTweening && !this._isPaused;
+    };
+
+    /**
+     * Sets a custom schedule function.
+     *
+     * If a custom function is not set the default one is used [`requestAnimationFrame`](https://developer.mozilla.org/en-US/docs/Web/API/window.requestAnimationFrame) if available, otherwise [`setTimeout`](https://developer.mozilla.org/en-US/docs/Web/API/Window.setTimeout)).
+     *
+     * @param {Function(Function,number)} scheduleFunction The function to be called to schedule the next frame to be rendered
+     */
+    Tweenable.prototype.setScheduleFunction = function (scheduleFunction) {
+      this._scheduleFunction = scheduleFunction;
+    };
+
+    /**
+     * `delete`s all "own" properties.  Call this when the `Tweenable` instance is no longer needed to free memory.
+     */
+    Tweenable.prototype.dispose = function () {
+      var prop;
+      for (prop in this) {
+        if (this.hasOwnProperty(prop)) {
+          delete this[prop];
+        }
+      }
+    };
+
+    /*!
+     * Filters are used for transforming the properties of a tween at various
+     * points in a Tweenable's life cycle.  See the README for more info on this.
+     */
+    Tweenable.prototype.filter = {};
+
+    /*!
+     * This object contains all of the tweens available to Shifty.  It is extendible - simply attach properties to the Tweenable.prototype.formula Object following the same format at linear.
+     *
+     * `pos` should be a normalized `number` (between 0 and 1).
+     */
+    Tweenable.prototype.formula = {
+      linear: function (pos) {
+        return pos;
+      }
+    };
+
+    formula = Tweenable.prototype.formula;
+
+    shallowCopy(Tweenable, {
+      'now': now
+      ,'each': each
+      ,'tweenProps': tweenProps
+      ,'tweenProp': tweenProp
+      ,'applyFilter': applyFilter
+      ,'shallowCopy': shallowCopy
+      ,'defaults': defaults
+      ,'composeEasingObject': composeEasingObject
+    });
+
+    root.Tweenable = Tweenable;
+    return Tweenable;
+
+  } ());
+
+  /*!
+   * All equations are adapted from Thomas Fuchs' [Scripty2](https://github.com/madrobby/scripty2/blob/master/src/effects/transitions/penner.js).
+   *
+   * Based on Easing Equations (c) 2003 [Robert Penner](http://www.robertpenner.com/), all rights reserved. This work is [subject to terms](http://www.robertpenner.com/easing_terms_of_use.html).
+   */
+
+  /*!
+   *  TERMS OF USE - EASING EQUATIONS
+   *  Open source under the BSD License.
+   *  Easing Equations (c) 2003 Robert Penner, all rights reserved.
+   */
+
+  ;(function () {
+
+    Tweenable.shallowCopy(Tweenable.prototype.formula, {
+      easeInQuad: function (pos) {
+        return Math.pow(pos, 2);
+      },
+
+      easeOutQuad: function (pos) {
+        return -(Math.pow((pos - 1), 2) - 1);
+      },
+
+      easeInOutQuad: function (pos) {
+        if ((pos /= 0.5) < 1) {return 0.5 * Math.pow(pos,2);}
+        return -0.5 * ((pos -= 2) * pos - 2);
+      },
+
+      easeInCubic: function (pos) {
+        return Math.pow(pos, 3);
+      },
+
+      easeOutCubic: function (pos) {
+        return (Math.pow((pos - 1), 3) + 1);
+      },
+
+      easeInOutCubic: function (pos) {
+        if ((pos /= 0.5) < 1) {return 0.5 * Math.pow(pos,3);}
+        return 0.5 * (Math.pow((pos - 2),3) + 2);
+      },
+
+      easeInQuart: function (pos) {
+        return Math.pow(pos, 4);
+      },
+
+      easeOutQuart: function (pos) {
+        return -(Math.pow((pos - 1), 4) - 1);
+      },
+
+      easeInOutQuart: function (pos) {
+        if ((pos /= 0.5) < 1) {return 0.5 * Math.pow(pos,4);}
+        return -0.5 * ((pos -= 2) * Math.pow(pos,3) - 2);
+      },
+
+      easeInQuint: function (pos) {
+        return Math.pow(pos, 5);
+      },
+
+      easeOutQuint: function (pos) {
+        return (Math.pow((pos - 1), 5) + 1);
+      },
+
+      easeInOutQuint: function (pos) {
+        if ((pos /= 0.5) < 1) {return 0.5 * Math.pow(pos,5);}
+        return 0.5 * (Math.pow((pos - 2),5) + 2);
+      },
+
+      easeInSine: function (pos) {
+        return -Math.cos(pos * (Math.PI / 2)) + 1;
+      },
+
+      easeOutSine: function (pos) {
+        return Math.sin(pos * (Math.PI / 2));
+      },
+
+      easeInOutSine: function (pos) {
+        return (-0.5 * (Math.cos(Math.PI * pos) - 1));
+      },
+
+      easeInExpo: function (pos) {
+        return (pos === 0) ? 0 : Math.pow(2, 10 * (pos - 1));
+      },
+
+      easeOutExpo: function (pos) {
+        return (pos === 1) ? 1 : -Math.pow(2, -10 * pos) + 1;
+      },
+
+      easeInOutExpo: function (pos) {
+        if (pos === 0) {return 0;}
+        if (pos === 1) {return 1;}
+        if ((pos /= 0.5) < 1) {return 0.5 * Math.pow(2,10 * (pos - 1));}
+        return 0.5 * (-Math.pow(2, -10 * --pos) + 2);
+      },
+
+      easeInCirc: function (pos) {
+        return -(Math.sqrt(1 - (pos * pos)) - 1);
+      },
+
+      easeOutCirc: function (pos) {
+        return Math.sqrt(1 - Math.pow((pos - 1), 2));
+      },
+
+      easeInOutCirc: function (pos) {
+        if ((pos /= 0.5) < 1) {return -0.5 * (Math.sqrt(1 - pos * pos) - 1);}
+        return 0.5 * (Math.sqrt(1 - (pos -= 2) * pos) + 1);
+      },
+
+      easeOutBounce: function (pos) {
+        if ((pos) < (1 / 2.75)) {
+          return (7.5625 * pos * pos);
+        } else if (pos < (2 / 2.75)) {
+          return (7.5625 * (pos -= (1.5 / 2.75)) * pos + 0.75);
+        } else if (pos < (2.5 / 2.75)) {
+          return (7.5625 * (pos -= (2.25 / 2.75)) * pos + 0.9375);
+        } else {
+          return (7.5625 * (pos -= (2.625 / 2.75)) * pos + 0.984375);
+        }
+      },
+
+      easeInBack: function (pos) {
+        var s = 1.70158;
+        return (pos) * pos * ((s + 1) * pos - s);
+      },
+
+      easeOutBack: function (pos) {
+        var s = 1.70158;
+        return (pos = pos - 1) * pos * ((s + 1) * pos + s) + 1;
+      },
+
+      easeInOutBack: function (pos) {
+        var s = 1.70158;
+        if ((pos /= 0.5) < 1) {return 0.5 * (pos * pos * (((s *= (1.525)) + 1) * pos - s));}
+        return 0.5 * ((pos -= 2) * pos * (((s *= (1.525)) + 1) * pos + s) + 2);
+      },
+
+      elastic: function (pos) {
+        return -1 * Math.pow(4,-8 * pos) * Math.sin((pos * 6 - 1) * (2 * Math.PI) / 2) + 1;
+      },
+
+      swingFromTo: function (pos) {
+        var s = 1.70158;
+        return ((pos /= 0.5) < 1) ? 0.5 * (pos * pos * (((s *= (1.525)) + 1) * pos - s)) :
+            0.5 * ((pos -= 2) * pos * (((s *= (1.525)) + 1) * pos + s) + 2);
+      },
+
+      swingFrom: function (pos) {
+        var s = 1.70158;
+        return pos * pos * ((s + 1) * pos - s);
+      },
+
+      swingTo: function (pos) {
+        var s = 1.70158;
+        return (pos -= 1) * pos * ((s + 1) * pos + s) + 1;
+      },
+
+      bounce: function (pos) {
+        if (pos < (1 / 2.75)) {
+          return (7.5625 * pos * pos);
+        } else if (pos < (2 / 2.75)) {
+          return (7.5625 * (pos -= (1.5 / 2.75)) * pos + 0.75);
+        } else if (pos < (2.5 / 2.75)) {
+          return (7.5625 * (pos -= (2.25 / 2.75)) * pos + 0.9375);
+        } else {
+          return (7.5625 * (pos -= (2.625 / 2.75)) * pos + 0.984375);
+        }
+      },
+
+      bouncePast: function (pos) {
+        if (pos < (1 / 2.75)) {
+          return (7.5625 * pos * pos);
+        } else if (pos < (2 / 2.75)) {
+          return 2 - (7.5625 * (pos -= (1.5 / 2.75)) * pos + 0.75);
+        } else if (pos < (2.5 / 2.75)) {
+          return 2 - (7.5625 * (pos -= (2.25 / 2.75)) * pos + 0.9375);
+        } else {
+          return 2 - (7.5625 * (pos -= (2.625 / 2.75)) * pos + 0.984375);
+        }
+      },
+
+      easeFromTo: function (pos) {
+        if ((pos /= 0.5) < 1) {return 0.5 * Math.pow(pos,4);}
+        return -0.5 * ((pos -= 2) * Math.pow(pos,3) - 2);
+      },
+
+      easeFrom: function (pos) {
+        return Math.pow(pos,4);
+      },
+
+      easeTo: function (pos) {
+        return Math.pow(pos,0.25);
+      }
+    });
+
+  }());
+
+  /*!
+   * The Bezier magic in this file is adapted/copied almost wholesale from
+   * [Scripty2](https://github.com/madrobby/scripty2/blob/master/src/effects/transitions/cubic-bezier.js),
+   * which was adapted from Apple code (which probably came from
+   * [here](http://opensource.apple.com/source/WebCore/WebCore-955.66/platform/graphics/UnitBezier.h)).
+   * Special thanks to Apple and Thomas Fuchs for much of this code.
+   */
+
+  /*!
+   *  Copyright (c) 2006 Apple Computer, Inc. All rights reserved.
+   *
+   *  Redistribution and use in source and binary forms, with or without
+   *  modification, are permitted provided that the following conditions are met:
+   *
+   *  1. Redistributions of source code must retain the above copyright notice,
+   *  this list of conditions and the following disclaimer.
+   *
+   *  2. Redistributions in binary form must reproduce the above copyright notice,
+   *  this list of conditions and the following disclaimer in the documentation
+   *  and/or other materials provided with the distribution.
+   *
+   *  3. Neither the name of the copyright holder(s) nor the names of any
+   *  contributors may be used to endorse or promote products derived from
+   *  this software without specific prior written permission.
+   *
+   *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+   *  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+   *  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+   *  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+   *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+   *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+   *  ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+   */
+  ;(function () {
+    // port of webkit cubic bezier handling by http://www.netzgesta.de/dev/
+    function cubicBezierAtTime(t,p1x,p1y,p2x,p2y,duration) {
+      var ax = 0,bx = 0,cx = 0,ay = 0,by = 0,cy = 0;
+      function sampleCurveX(t) {return ((ax * t + bx) * t + cx) * t;}
+      function sampleCurveY(t) {return ((ay * t + by) * t + cy) * t;}
+      function sampleCurveDerivativeX(t) {return (3.0 * ax * t + 2.0 * bx) * t + cx;}
+      function solveEpsilon(duration) {return 1.0 / (200.0 * duration);}
+      function solve(x,epsilon) {return sampleCurveY(solveCurveX(x,epsilon));}
+      function fabs(n) {if (n >= 0) {return n;}else {return 0 - n;}}
+      function solveCurveX(x,epsilon) {
+        var t0,t1,t2,x2,d2,i;
+        for (t2 = x, i = 0; i < 8; i++) {x2 = sampleCurveX(t2) - x; if (fabs(x2) < epsilon) {return t2;} d2 = sampleCurveDerivativeX(t2); if (fabs(d2) < 1e-6) {break;} t2 = t2 - x2 / d2;}
+        t0 = 0.0; t1 = 1.0; t2 = x; if (t2 < t0) {return t0;} if (t2 > t1) {return t1;}
+        while (t0 < t1) {x2 = sampleCurveX(t2); if (fabs(x2 - x) < epsilon) {return t2;} if (x > x2) {t0 = t2;}else {t1 = t2;} t2 = (t1 - t0) * 0.5 + t0;}
+        return t2; // Failure.
+      }
+      cx = 3.0 * p1x; bx = 3.0 * (p2x - p1x) - cx; ax = 1.0 - cx - bx; cy = 3.0 * p1y; by = 3.0 * (p2y - p1y) - cy; ay = 1.0 - cy - by;
+      return solve(t, solveEpsilon(duration));
+    }
+    /*!
+     *  getCubicBezierTransition(x1, y1, x2, y2) -> Function
+     *
+     *  Generates a transition easing function that is compatible
+     *  with WebKit's CSS transitions `-webkit-transition-timing-function`
+     *  CSS property.
+     *
+     *  The W3C has more information about
+     *  <a href="http://www.w3.org/TR/css3-transitions/#transition-timing-function_tag">
+     *  CSS3 transition timing functions</a>.
+     *
+     *  @param {number} x1
+     *  @param {number} y1
+     *  @param {number} x2
+     *  @param {number} y2
+     *  @return {function}
+     */
+    function getCubicBezierTransition (x1, y1, x2, y2) {
+      return function (pos) {
+        return cubicBezierAtTime(pos,x1,y1,x2,y2,1);
+      };
+    }
+    // End ported code
+
+    /**
+     * Creates a Bezier easing function and attaches it to `Tweenable.prototype.formula`.  This function gives you total control over the easing curve.  Matthew Lein's [Ceaser](http://matthewlein.com/ceaser/) is a useful tool for visualizing the curves you can make with this function.
+     *
+     * @param {string} name The name of the easing curve.  Overwrites the old easing function on Tweenable.prototype.formula if it exists.
+     * @param {number} x1
+     * @param {number} y1
+     * @param {number} x2
+     * @param {number} y2
+     * @return {function} The easing function that was attached to Tweenable.prototype.formula.
+     */
+    Tweenable.setBezierFunction = function (name, x1, y1, x2, y2) {
+      var cubicBezierTransition = getCubicBezierTransition(x1, y1, x2, y2);
+      cubicBezierTransition.x1 = x1;
+      cubicBezierTransition.y1 = y1;
+      cubicBezierTransition.x2 = x2;
+      cubicBezierTransition.y2 = y2;
+
+      return Tweenable.prototype.formula[name] = cubicBezierTransition;
+    };
+
+
+    /**
+     * `delete`s an easing function from `Tweenable.prototype.formula`.  Be careful with this method, as it `delete`s whatever easing formula matches `name` (which means you can delete default Shifty easing functions).
+     *
+     * @param {string} name The name of the easing function to delete.
+     * @return {function}
+     */
+    Tweenable.unsetBezierFunction = function (name) {
+      delete Tweenable.prototype.formula[name];
+    };
+
+  })();
+
+  ;(function () {
+
+    function getInterpolatedValues (
+      from, current, targetState, position, easing) {
+      return Tweenable.tweenProps(
+        position, current, from, targetState, 1, 0, easing);
+    }
+
+    // Fake a Tweenable and patch some internals.  This approach allows us to
+    // skip uneccessary processing and object recreation, cutting down on garbage
+    // collection pauses.
+    var mockTweenable = new Tweenable();
+    mockTweenable._filterArgs = [];
+
+    /**
+     * Compute the midpoint of two Objects.  This method effectively calculates a specific frame of animation that [Tweenable#tween](shifty.core.js.html#tween) does many times over the course of a tween.
+     *
+     * Example:
+     *
+     *     var interpolatedValues = Tweenable.interpolate({
+     *       width: '100px',
+     *       opacity: 0,
+     *       color: '#fff'
+     *     }, {
+     *       width: '200px',
+     *       opacity: 1,
+     *       color: '#000'
+     *     }, 0.5);
+     *
+     *     console.log(interpolatedValues);
+     *     // {opacity: 0.5, width: "150px", color: "rgb(127,127,127)"}
+     *
+     * @param {Object} from The starting values to tween from.
+     * @param {Object} targetState The ending values to tween to.
+     * @param {number} position The normalized position value (between 0.0 and 1.0) to interpolate the values between `from` and `to` for.  `from` represents 0 and `to` represents `1`.
+     * @param {string|Object} easing The easing curve(s) to calculate the midpoint against.  You can reference any easing function attached to `Tweenable.prototype.formula`.  If omitted, this defaults to "linear".
+     * @return {Object}
+     */
+    Tweenable.interpolate = function (from, targetState, position, easing) {
+      var current = Tweenable.shallowCopy({}, from);
+      var easingObject = Tweenable.composeEasingObject(
+        from, easing || 'linear');
+
+      mockTweenable.set({});
+
+      // Alias and reuse the _filterArgs array instead of recreating it.
+      var filterArgs = mockTweenable._filterArgs;
+      filterArgs.length = 0;
+      filterArgs[0] = current;
+      filterArgs[1] = from;
+      filterArgs[2] = targetState;
+      filterArgs[3] = easingObject;
+
+      // Any defined value transformation must be applied
+      Tweenable.applyFilter(mockTweenable, 'tweenCreated');
+      Tweenable.applyFilter(mockTweenable, 'beforeTween');
+
+      var interpolatedValues = getInterpolatedValues(
+        from, current, targetState, position, easingObject);
+
+      // Transform values back into their original format
+      Tweenable.applyFilter(mockTweenable, 'afterTween');
+
+      return interpolatedValues;
+    };
+
+  }());
+
+  /**
+   * Adds string interpolation support to Shifty.
+   *
+   * The Token extension allows Shifty to tween numbers inside of strings.  Among
+   * other things, this allows you to animate CSS properties.  For example, you
+   * can do this:
+   *
+   *     var tweenable = new Tweenable();
+   *     tweenable.tween({
+   *       from: { transform: 'translateX(45px)'},
+   *       to: { transform: 'translateX(90xp)'}
+   *     });
+   *
+   * ` `
+   * `translateX(45)` will be tweened to `translateX(90)`.  To demonstrate:
+   *
+   *     var tweenable = new Tweenable();
+   *     tweenable.tween({
+   *       from: { transform: 'translateX(45px)'},
+   *       to: { transform: 'translateX(90px)'},
+   *       step: function (state) {
+   *         console.log(state.transform);
+   *       }
+   *     });
+   *
+   * ` `
+   * The above snippet will log something like this in the console:
+   *
+   *     translateX(60.3px)
+   *     ...
+   *     translateX(76.05px)
+   *     ...
+   *     translateX(90px)
+   *
+   * ` `
+   * Another use for this is animating colors:
+   *
+   *     var tweenable = new Tweenable();
+   *     tweenable.tween({
+   *       from: { color: 'rgb(0,255,0)'},
+   *       to: { color: 'rgb(255,0,255)'},
+   *       step: function (state) {
+   *         console.log(state.color);
+   *       }
+   *     });
+   *
+   * ` `
+   * The above snippet will log something like this:
+   *
+   *     rgb(84,170,84)
+   *     ...
+   *     rgb(170,84,170)
+   *     ...
+   *     rgb(255,0,255)
+   *
+   * ` `
+   * This extension also supports hexadecimal colors, in both long (`#ff00ff`)
+   * and short (`#f0f`) forms.  Be aware that hexadecimal input values will be
+   * converted into the equivalent RGB output values.  This is done to optimize
+   * for performance.
+   *
+   *     var tweenable = new Tweenable();
+   *     tweenable.tween({
+   *       from: { color: '#0f0'},
+   *       to: { color: '#f0f'},
+   *       step: function (state) {
+   *         console.log(state.color);
+   *       }
+   *     });
+   *
+   * ` `
+   * This snippet will generate the same output as the one before it because
+   * equivalent values were supplied (just in hexadecimal form rather than RGB):
+   *
+   *     rgb(84,170,84)
+   *     ...
+   *     rgb(170,84,170)
+   *     ...
+   *     rgb(255,0,255)
+   *
+   * ` `
+   * ` `
+   * ## Easing support
+   *
+   * Easing works somewhat differently in the Token extension.  This is because
+   * some CSS properties have multiple values in them, and you might need to
+   * tween each value along its own easing curve.  A basic example:
+   *
+   *     var tweenable = new Tweenable();
+   *     tweenable.tween({
+   *       from: { transform: 'translateX(0px) translateY(0px)'},
+   *       to: { transform:   'translateX(100px) translateY(100px)'},
+   *       easing: { transform: 'easeInQuad' },
+   *       step: function (state) {
+   *         console.log(state.transform);
+   *       }
+   *     });
+   *
+   * ` `
+   * The above snippet create values like this:
+   *
+   *     translateX(11.560000000000002px) translateY(11.560000000000002px)
+   *     ...
+   *     translateX(46.24000000000001px) translateY(46.24000000000001px)
+   *     ...
+   *     translateX(100px) translateY(100px)
+   *
+   * ` `
+   * In this case, the values for `translateX` and `translateY` are always the
+   * same for each step of the tween, because they have the same start and end
+   * points and both use the same easing curve.  We can also tween `translateX`
+   * and `translateY` along independent curves:
+   *
+   *     var tweenable = new Tweenable();
+   *     tweenable.tween({
+   *       from: { transform: 'translateX(0px) translateY(0px)'},
+   *       to: { transform:   'translateX(100px) translateY(100px)'},
+   *       easing: { transform: 'easeInQuad bounce' },
+   *       step: function (state) {
+   *         console.log(state.transform);
+   *       }
+   *     });
+   *
+   * ` `
+   * The above snippet create values like this:
+   *
+   *     translateX(10.89px) translateY(82.355625px)
+   *     ...
+   *     translateX(44.89000000000001px) translateY(86.73062500000002px)
+   *     ...
+   *     translateX(100px) translateY(100px)
+   *
+   * ` `
+   * `translateX` and `translateY` are not in sync anymore, because `easeInQuad`
+   * was specified for `translateX` and `bounce` for `translateY`.  Mixing and
+   * matching easing curves can make for some interesting motion in your
+   * animations.
+   *
+   * The order of the space-separated easing curves correspond the token values
+   * they apply to.  If there are more token values than easing curves listed,
+   * the last easing curve listed is used.
+   */
+  function token () {
+    // Functionality for this extension runs implicitly if it is loaded.
+  } /*!*/
+
+  // token function is defined above only so that dox-foundation sees it as
+  // documentation and renders it.  It is never used, and is optimized away at
+  // build time.
+
+  ;(function (Tweenable) {
+
+    /*!
+     * @typedef {{
+     *   formatString: string
+     *   chunkNames: Array.<string>
+     * }}
+     */
+    var formatManifest;
+
+    // CONSTANTS
+
+    var R_NUMBER_COMPONENT = /(\d|\-|\.)/;
+    var R_FORMAT_CHUNKS = /([^\-0-9\.]+)/g;
+    var R_UNFORMATTED_VALUES = /[0-9.\-]+/g;
+    var R_RGB = new RegExp(
+      'rgb\\(' + R_UNFORMATTED_VALUES.source +
+      (/,\s*/.source) + R_UNFORMATTED_VALUES.source +
+      (/,\s*/.source) + R_UNFORMATTED_VALUES.source + '\\)', 'g');
+    var R_RGB_PREFIX = /^.*\(/;
+    var R_HEX = /#([0-9]|[a-f]){3,6}/gi;
+    var VALUE_PLACEHOLDER = 'VAL';
+
+    // HELPERS
+
+    var getFormatChunksFrom_accumulator = [];
+    /*!
+     * @param {Array.number} rawValues
+     * @param {string} prefix
+     *
+     * @return {Array.<string>}
+     */
+    function getFormatChunksFrom (rawValues, prefix) {
+      getFormatChunksFrom_accumulator.length = 0;
+
+      var rawValuesLength = rawValues.length;
+      var i;
+
+      for (i = 0; i < rawValuesLength; i++) {
+        getFormatChunksFrom_accumulator.push('_' + prefix + '_' + i);
+      }
+
+      return getFormatChunksFrom_accumulator;
+    }
+
+    /*!
+     * @param {string} formattedString
+     *
+     * @return {string}
+     */
+    function getFormatStringFrom (formattedString) {
+      var chunks = formattedString.match(R_FORMAT_CHUNKS);
+
+      if (!chunks) {
+        // chunks will be null if there were no tokens to parse in
+        // formattedString (for example, if formattedString is '2').  Coerce
+        // chunks to be useful here.
+        chunks = ['', ''];
+
+        // If there is only one chunk, assume that the string is a number
+        // followed by a token...
+        // NOTE: This may be an unwise assumption.
+      } else if (chunks.length === 1 ||
+          // ...or if the string starts with a number component (".", "-", or a
+          // digit)...
+          formattedString[0].match(R_NUMBER_COMPONENT)) {
+        // ...prepend an empty string here to make sure that the formatted number
+        // is properly replaced by VALUE_PLACEHOLDER
+        chunks.unshift('');
+      }
+
+      return chunks.join(VALUE_PLACEHOLDER);
+    }
+
+    /*!
+     * Convert all hex color values within a string to an rgb string.
+     *
+     * @param {Object} stateObject
+     *
+     * @return {Object} The modified obj
+     */
+    function sanitizeObjectForHexProps (stateObject) {
+      Tweenable.each(stateObject, function (prop) {
+        var currentProp = stateObject[prop];
+
+        if (typeof currentProp === 'string' && currentProp.match(R_HEX)) {
+          stateObject[prop] = sanitizeHexChunksToRGB(currentProp);
+        }
+      });
+    }
+
+    /*!
+     * @param {string} str
+     *
+     * @return {string}
+     */
+    function  sanitizeHexChunksToRGB (str) {
+      return filterStringChunks(R_HEX, str, convertHexToRGB);
+    }
+
+    /*!
+     * @param {string} hexString
+     *
+     * @return {string}
+     */
+    function convertHexToRGB (hexString) {
+      var rgbArr = hexToRGBArray(hexString);
+      return 'rgb(' + rgbArr[0] + ',' + rgbArr[1] + ',' + rgbArr[2] + ')';
+    }
+
+    var hexToRGBArray_returnArray = [];
+    /*!
+     * Convert a hexadecimal string to an array with three items, one each for
+     * the red, blue, and green decimal values.
+     *
+     * @param {string} hex A hexadecimal string.
+     *
+     * @returns {Array.<number>} The converted Array of RGB values if `hex` is a
+     * valid string, or an Array of three 0's.
+     */
+    function hexToRGBArray (hex) {
+
+      hex = hex.replace(/#/, '');
+
+      // If the string is a shorthand three digit hex notation, normalize it to
+      // the standard six digit notation
+      if (hex.length === 3) {
+        hex = hex.split('');
+        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+      }
+
+      hexToRGBArray_returnArray[0] = hexToDec(hex.substr(0, 2));
+      hexToRGBArray_returnArray[1] = hexToDec(hex.substr(2, 2));
+      hexToRGBArray_returnArray[2] = hexToDec(hex.substr(4, 2));
+
+      return hexToRGBArray_returnArray;
+    }
+
+    /*!
+     * Convert a base-16 number to base-10.
+     *
+     * @param {Number|String} hex The value to convert
+     *
+     * @returns {Number} The base-10 equivalent of `hex`.
+     */
+    function hexToDec (hex) {
+      return parseInt(hex, 16);
+    }
+
+    /*!
+     * Runs a filter operation on all chunks of a string that match a RegExp
+     *
+     * @param {RegExp} pattern
+     * @param {string} unfilteredString
+     * @param {function(string)} filter
+     *
+     * @return {string}
+     */
+    function filterStringChunks (pattern, unfilteredString, filter) {
+      var pattenMatches = unfilteredString.match(pattern);
+      var filteredString = unfilteredString.replace(pattern, VALUE_PLACEHOLDER);
+
+      if (pattenMatches) {
+        var pattenMatchesLength = pattenMatches.length;
+        var currentChunk;
+
+        for (var i = 0; i < pattenMatchesLength; i++) {
+          currentChunk = pattenMatches.shift();
+          filteredString = filteredString.replace(
+            VALUE_PLACEHOLDER, filter(currentChunk));
+        }
+      }
+
+      return filteredString;
+    }
+
+    /*!
+     * Check for floating point values within rgb strings and rounds them.
+     *
+     * @param {string} formattedString
+     *
+     * @return {string}
+     */
+    function sanitizeRGBChunks (formattedString) {
+      return filterStringChunks(R_RGB, formattedString, sanitizeRGBChunk);
+    }
+
+    /*!
+     * @param {string} rgbChunk
+     *
+     * @return {string}
+     */
+    function sanitizeRGBChunk (rgbChunk) {
+      var numbers = rgbChunk.match(R_UNFORMATTED_VALUES);
+      var numbersLength = numbers.length;
+      var sanitizedString = rgbChunk.match(R_RGB_PREFIX)[0];
+
+      for (var i = 0; i < numbersLength; i++) {
+        sanitizedString += parseInt(numbers[i], 10) + ',';
+      }
+
+      sanitizedString = sanitizedString.slice(0, -1) + ')';
+
+      return sanitizedString;
+    }
+
+    /*!
+     * @param {Object} stateObject
+     *
+     * @return {Object} An Object of formatManifests that correspond to
+     * the string properties of stateObject
+     */
+    function getFormatManifests (stateObject) {
+      var manifestAccumulator = {};
+
+      Tweenable.each(stateObject, function (prop) {
+        var currentProp = stateObject[prop];
+
+        if (typeof currentProp === 'string') {
+          var rawValues = getValuesFrom(currentProp);
+
+          manifestAccumulator[prop] = {
+            'formatString': getFormatStringFrom(currentProp)
+            ,'chunkNames': getFormatChunksFrom(rawValues, prop)
+          };
+        }
+      });
+
+      return manifestAccumulator;
+    }
+
+    /*!
+     * @param {Object} stateObject
+     * @param {Object} formatManifests
+     */
+    function expandFormattedProperties (stateObject, formatManifests) {
+      Tweenable.each(formatManifests, function (prop) {
+        var currentProp = stateObject[prop];
+        var rawValues = getValuesFrom(currentProp);
+        var rawValuesLength = rawValues.length;
+
+        for (var i = 0; i < rawValuesLength; i++) {
+          stateObject[formatManifests[prop].chunkNames[i]] = +rawValues[i];
+        }
+
+        delete stateObject[prop];
+      });
+    }
+
+    /*!
+     * @param {Object} stateObject
+     * @param {Object} formatManifests
+     */
+    function collapseFormattedProperties (stateObject, formatManifests) {
+      Tweenable.each(formatManifests, function (prop) {
+        var currentProp = stateObject[prop];
+        var formatChunks = extractPropertyChunks(
+          stateObject, formatManifests[prop].chunkNames);
+        var valuesList = getValuesList(
+          formatChunks, formatManifests[prop].chunkNames);
+        currentProp = getFormattedValues(
+          formatManifests[prop].formatString, valuesList);
+        stateObject[prop] = sanitizeRGBChunks(currentProp);
+      });
+    }
+
+    /*!
+     * @param {Object} stateObject
+     * @param {Array.<string>} chunkNames
+     *
+     * @return {Object} The extracted value chunks.
+     */
+    function extractPropertyChunks (stateObject, chunkNames) {
+      var extractedValues = {};
+      var currentChunkName, chunkNamesLength = chunkNames.length;
+
+      for (var i = 0; i < chunkNamesLength; i++) {
+        currentChunkName = chunkNames[i];
+        extractedValues[currentChunkName] = stateObject[currentChunkName];
+        delete stateObject[currentChunkName];
+      }
+
+      return extractedValues;
+    }
+
+    var getValuesList_accumulator = [];
+    /*!
+     * @param {Object} stateObject
+     * @param {Array.<string>} chunkNames
+     *
+     * @return {Array.<number>}
+     */
+    function getValuesList (stateObject, chunkNames) {
+      getValuesList_accumulator.length = 0;
+      var chunkNamesLength = chunkNames.length;
+
+      for (var i = 0; i < chunkNamesLength; i++) {
+        getValuesList_accumulator.push(stateObject[chunkNames[i]]);
+      }
+
+      return getValuesList_accumulator;
+    }
+
+    /*!
+     * @param {string} formatString
+     * @param {Array.<number>} rawValues
+     *
+     * @return {string}
+     */
+    function getFormattedValues (formatString, rawValues) {
+      var formattedValueString = formatString;
+      var rawValuesLength = rawValues.length;
+
+      for (var i = 0; i < rawValuesLength; i++) {
+        formattedValueString = formattedValueString.replace(
+          VALUE_PLACEHOLDER, +rawValues[i].toFixed(4));
+      }
+
+      return formattedValueString;
+    }
+
+    /*!
+     * Note: It's the duty of the caller to convert the Array elements of the
+     * return value into numbers.  This is a performance optimization.
+     *
+     * @param {string} formattedString
+     *
+     * @return {Array.<string>|null}
+     */
+    function getValuesFrom (formattedString) {
+      return formattedString.match(R_UNFORMATTED_VALUES);
+    }
+
+    /*!
+     * @param {Object} easingObject
+     * @param {Object} tokenData
+     */
+    function expandEasingObject (easingObject, tokenData) {
+      Tweenable.each(tokenData, function (prop) {
+        var currentProp = tokenData[prop];
+        var chunkNames = currentProp.chunkNames;
+        var chunkLength = chunkNames.length;
+        var easingChunks = easingObject[prop].split(' ');
+        var lastEasingChunk = easingChunks[easingChunks.length - 1];
+
+        for (var i = 0; i < chunkLength; i++) {
+          easingObject[chunkNames[i]] = easingChunks[i] || lastEasingChunk;
+        }
+
+        delete easingObject[prop];
+      });
+    }
+
+    /*!
+     * @param {Object} easingObject
+     * @param {Object} tokenData
+     */
+    function collapseEasingObject (easingObject, tokenData) {
+      Tweenable.each(tokenData, function (prop) {
+        var currentProp = tokenData[prop];
+        var chunkNames = currentProp.chunkNames;
+        var chunkLength = chunkNames.length;
+        var composedEasingString = '';
+
+        for (var i = 0; i < chunkLength; i++) {
+          composedEasingString += ' ' + easingObject[chunkNames[i]];
+          delete easingObject[chunkNames[i]];
+        }
+
+        easingObject[prop] = composedEasingString.substr(1);
+      });
+    }
+
+    Tweenable.prototype.filter.token = {
+      'tweenCreated': function (currentState, fromState, toState, easingObject) {
+        sanitizeObjectForHexProps(currentState);
+        sanitizeObjectForHexProps(fromState);
+        sanitizeObjectForHexProps(toState);
+        this._tokenData = getFormatManifests(currentState);
+      },
+
+      'beforeTween': function (currentState, fromState, toState, easingObject) {
+        expandEasingObject(easingObject, this._tokenData);
+        expandFormattedProperties(currentState, this._tokenData);
+        expandFormattedProperties(fromState, this._tokenData);
+        expandFormattedProperties(toState, this._tokenData);
+      },
+
+      'afterTween': function (currentState, fromState, toState, easingObject) {
+        collapseFormattedProperties(currentState, this._tokenData);
+        collapseFormattedProperties(fromState, this._tokenData);
+        collapseFormattedProperties(toState, this._tokenData);
+        collapseEasingObject(easingObject, this._tokenData);
+      }
+    };
+
+  } (Tweenable));
+
+  }(window));
+
+  return window.Tweenable;
+});
+
+(function() {
+    "use strict";
+
+    angular.module('angular-carousel')
+
+    .filter('carouselSlice', function() {
+        return function(collection, start, size) {
+            if (angular.isArray(collection)) {
+                return collection.slice(start, start + size);
+            } else if (angular.isObject(collection)) {
+                // dont try to slice collections :)
+                return collection;
+            }
+        };
+    });
+
+})();
+
 angular.module('ualib.news.templates', ['news-item/event-card.tpl.html', 'news-item/news-card.tpl.html', 'news-item/news-item.tpl.html', 'news/news-list.tpl.html', 'today/news-today.tpl.html']);
 
 angular.module("news-item/event-card.tpl.html", []).run(["$templateCache", function($templateCache) {
