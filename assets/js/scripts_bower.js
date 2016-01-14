@@ -53493,7 +53493,7 @@ angular.module("staff-profile/staff-profile.tpl.html", []).run(["$templateCache"
     "                <div class=\"page-slice\">\n" +
     "                    <div class=\"col-md-6\">\n" +
     "                        <ul class=\"fa-ul\">\n" +
-    "                            <li ng-if=\"userProfile.person.phone\"><span class=\"fa fa-phone fa-li\"></span><a ng-href=\"tel:+1-205-{{userProfile.person.phone}}\">(205) {{userProfile.person.phone}}</a></li>\n" +
+    "                            <li ng-if=\"userProfile.person.phone\"><span class=\"fa fa-phone fa-li\"></span><a ng-href=\"tel:+1-{{userProfile.person.phone}}\">{{userProfile.person.phone}}</a></li>\n" +
     "                            <li class=\"hidden-xs\" ng-if=\"userProfile.person.fax\"><span class=\"fa fa-fax fa-li\"></span>{{userProfile.person.fax}}</li>\n" +
     "                            <li ng-if=\"userProfile.person.email\"><span class=\"fa fa-envelope fa-li\"></span>\n" +
     "                                <a href=\"mailto:{{userProfile.person.email}}\">{{userProfile.person.email}}</a>\n" +
