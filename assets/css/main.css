@@ -9093,10 +9093,10 @@ figure.alignnone {
   }
 }
 html,
-body {
+body.not-so-smart-board {
   height: 100%;
 }
-body {
+body.not-so-smart-board {
   display: table;
   width: 100%;
 }
