@@ -52171,11 +52171,11 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "                                                                  | filter:newsFilters.search\n" +
     "                                                                  | orderBy:['-sticky','-created']\">\n" +
     "                <div class=\"media-left hidden-sm hidden-xs\">\n" +
-    "                    <a ng-href=\"#/news-exhibits/{{item.link}}\" class=\"news-list-tb\">\n" +
+    "                    <a ng-href=\"#/news-exhibits/{{item.link}}\" class=\"news-list-tb\" ng-class=\"{img: item.tb}\">\n" +
     "                        <img class=\"media-object\" ng-src=\"{{item.tb}}\" ng-if=\"item.tb\" />\n" +
-    "                    <span class=\"media-object\"\n" +
+    "                        <span class=\"media-object\"\n" +
     "                          ng-if=\"item.type == 0 && !item.tb\"><span class=\"fa fa-newspaper-o\"></span></span>\n" +
-    "                    <span class=\"media-object\"\n" +
+    "                        <span class=\"media-object\"\n" +
     "                          ng-if=\"item.type == 1 && !item.tb\"><span class=\"fa fa-calendar\"></span></span>\n" +
     "                    </a>\n" +
     "                </div>\n" +
@@ -52561,23 +52561,6 @@ angular.module('ualib.news', [
         $scope.curImage = 0;
         $scope.curEnlImage = 0;
         var controlElms;
-        var cssRules = [];
-
-        function loadImage(src){
-            var deferred = $q.defer();
-            var image = new Image();
-
-            image.onload = function(){
-                image.styles = 'url('+image.src+')';
-                if (image.width < image.height){
-                    image.styles += ',linear-gradient(to right, rgba(0,0,0,0.4) 0%,rgba(0,0,0,0.4) 100%),url('+image.src+')';
-                }
-                deferred.resolve(image);
-            };
-
-            image.src = src;
-            return deferred.promise;
-        }
 
         function loadImages(item, i, len, deferred){
             i = i ? i :0;
@@ -52593,10 +52576,7 @@ angular.module('ualib.news', [
             image.onload = function(){
                 this.styles = 'url('+this.src+')';
 
-                if (this.width/this.height < 1.35){
-                    var index = document.styleSheets[0].insertRule('.news-carousel-image-small:nth-child('+(i+1)+'):before{ background-image: url('+this.src+'); }');
-                    cssRules.push(index);
-                    //this.styles += ',linear-gradient(to right, rgba(0,0,0,0.65) 0%,rgba(0,0,0,0.65) 100%)';
+                if (this.width/this.height < 1.3){
                     this.isPortrait = true;
                 }
                 item.images[i] = this;
@@ -52679,9 +52659,6 @@ angular.module('ualib.news', [
             if (controlElms){
                 controlElms.unbind('click');
             }
-            cssRules.forEach(function(ruleIndex){
-                document.styleSheets[0].deleteRule(ruleIndex);
-            });
         });
     }])
 
