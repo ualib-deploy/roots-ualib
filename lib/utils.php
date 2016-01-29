@@ -25,6 +25,12 @@ function roots_body_class($classes) {
       $classes[] = basename(get_permalink());
     }
   }
+
+  // Add custom class to style body
+  // SMART Board applications (used in presentation rooms across campus) inject a second body tag into the page
+  // so commonly used <body> styles such as "min-height: 100%" cause a giant empty space above the site content.
+  $classes[] = 'not-so-smart-board';
+
   return $classes;
 }
 add_filter('body_class', 'roots_body_class');
