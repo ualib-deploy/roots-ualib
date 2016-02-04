@@ -1060,8 +1060,6 @@ div.rn-carousel-indicator span.active {
 .pager:after,
 .panel-body:before,
 .panel-body:after,
-.modal-header:before,
-.modal-header:after,
 .modal-footer:before,
 .modal-footer:after {
   content: " ";
@@ -1080,7 +1078,6 @@ div.rn-carousel-indicator span.active {
 .navbar-collapse:after,
 .pager:after,
 .panel-body:after,
-.modal-header:after,
 .modal-footer:after {
   clear: both;
 }
@@ -1090,31 +1087,38 @@ div.rn-carousel-indicator span.active {
 .sorting-by {
   font-weight: bold;
 }
-.staff-directory-listing .alpha-index-header {
-  font-size: 2.5em;
-  line-height: .9;
-}
-@media (max-width: 767px) {
-  .staff-directory-listing .alpha-index-header {
-    font-size: 1.9em;
-    height: 41px;
-    text-align: right;
-    margin-bottom: 5px;
-    line-height: inherit;
-  }
-  .staff-directory-listing .alpha-index-header > div {
-    padding-right: 15px;
-    background-color: #f9f9f9;
-  }
-}
-.staff-directory-listing .alpha-index-header > div {
-  color: #999999;
-  background-color: #ffffff;
-  padding-top: 5px;
-}
-.staff-directory-listing .alpha-index-header > div.ui-scrollfix {
-  top: 0;
-  z-index: 3000;
+.staff-directory-listing {
+  /*.alpha-index-header{
+    font-size: 2.5em;
+    line-height: .9;
+
+    @media (max-width: @screen-xs-max){
+      font-size: 1.9em;
+      height: 41px;
+      text-align: right;
+      margin-bottom: 5px;
+      line-height: inherit;
+
+      > div {
+        padding-right: 15px;
+        background-color: @gray-lighter;
+      }
+
+    }
+
+    > div {
+      color: @gray-light;
+      background-color: @body-bg;
+      padding-top: 5px;
+
+      &.ui-scrollfix {
+        top: 0;
+        z-index: 3000;
+      }
+    }
+
+
+  }*/
 }
 .staff-directory-listing th {
   white-space: nowrap;
