@@ -11,6 +11,20 @@ function roots_ualib_endSession() {
 }
 
 function roots_ualib_scripts() {
+//local script added to allow communication between WP API and JS front end apps
+    wp_enqueue_script(
+        'localScript' ,
+        get_template_directory_uri() . '/assets/js/local.js'
+    );
+    wp_localize_script(
+        'localScript',
+        'myLocalized',
+        array(
+            'partials' => trailingslashit( get_template_directory_uri() ) . 'partials/',
+            'nonce' => wp_create_nonce( 'wp_rest' )
+        )
+    );
+
     if ( is_page('news-and-exhibitions') or is_page('edit-directory-profile') )
         wp_enqueue_script(
             'tinyMCE',
