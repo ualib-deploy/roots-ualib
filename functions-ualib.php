@@ -176,6 +176,10 @@ function bweb_feedzy_readmore( $content, $link, $feedURL ) {
 add_filter( 'feedzy_summary_output', 'bweb_feedzy_readmore', 9, 3 );
 
 
+function bweb_title_html_entity( $content ) {
+    return "<em>Web Services development test</em>";
+}
+add_filter( 'feedzy_title_output', 'bweb_title_html_entity', 9 );
 
 
 add_action('init', 'roots_ualib_startSession', 1);
