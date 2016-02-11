@@ -1,19 +1,4 @@
-Skip to content
-Sign up Sign in
-This repository  
-Search
-Explore
-Features
-Enterprise
-Pricing
- Watch 8  Star 0  Fork 3 ualibweb/roots-ualib
-forked from ualib-deploy/roots-ualib
- Code  Pull requests 0  Wiki  Pulse  Graphs
-Branch: master Find file Copy pathroots-ualib/functions-ualib.php
-822a990  3 days ago
-@bkrylov bkrylov Empty js file and local script added to allow communication between W…
-2 contributors @bkrylov @8bitsquid
-RawBlameHistory     190 lines (170 sloc)  7.18 KB
+
 <?php
 define( 'WEBAPPS_PATH', '/srv/web/www/webapps/' );
 function roots_ualib_startSession() {
@@ -197,5 +182,3 @@ add_action('init', 'roots_ualib_startSession', 1);
 add_action('wp_login', 'roots_ualib_startSession');
 add_action('wp_logout', 'roots_ualib_endSession');
 add_action( 'wp_enqueue_scripts', 'roots_ualib_scripts' );
-Status API Training Shop Blog About Pricing
-© 2016 GitHub, Inc. Terms Privacy Security Contact Help
