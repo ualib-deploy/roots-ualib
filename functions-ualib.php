@@ -171,6 +171,7 @@ add_filter('tiny_mce_before_init', 'myextensionTinyMCE' );
 //Feedzy commands
 function bweb_feedzy_readmore( $content, $link, $feedURL ) {
     $content = str_replace( '[…]', '<a href="' . $link . '" target="_blank">' . __('Read more', 'yourTextDomain') . ' &rarr;</a>', $content );
+    $content = str_replace('Continue reading &rarr', '');
     return $content;
 }
 add_filter( 'feedzy_summary_output', 'bweb_feedzy_readmore', 9, 3 );
