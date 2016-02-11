@@ -1,15 +1,28 @@
+Skip to content
+Sign up Sign in
+This repository  
+Search
+Explore
+Features
+Enterprise
+Pricing
+ Watch 8  Star 0  Fork 3 ualibweb/roots-ualib
+forked from ualib-deploy/roots-ualib
+ Code  Pull requests 0  Wiki  Pulse  Graphs
+Branch: master Find file Copy pathroots-ualib/functions-ualib.php
+822a990  3 days ago
+@bkrylov bkrylov Empty js file and local script added to allow communication between W…
+2 contributors @bkrylov @8bitsquid
+RawBlameHistory     190 lines (170 sloc)  7.18 KB
 <?php
 define( 'WEBAPPS_PATH', '/srv/web/www/webapps/' );
-
 function roots_ualib_startSession() {
   if(!session_id())
     session_start();
 }
-
 function roots_ualib_endSession() {
   session_destroy ();
 }
-
 function roots_ualib_scripts() {
 //local script added to allow communication between WP API and JS front end apps
     wp_enqueue_script(
@@ -24,7 +37,6 @@ function roots_ualib_scripts() {
             'nonce' => wp_create_nonce( 'wp_rest' )
         )
     );
-
     if ( is_page('news-and-exhibitions') or is_page('edit-directory-profile') )
         wp_enqueue_script(
             'tinyMCE',
@@ -36,23 +48,18 @@ function roots_ualib_scripts() {
       '//maps.googleapis.com/maps/api/js?key=AIzaSyDCIMNYW9I2NfZfh83u-NRPUgHlUG51Hfc'
     );
 }
-
 function add_manage_admin_bar_link() {
     global $wp_admin_bar;
-
     @include_once WEBAPPS_PATH . "userGroupsAdmin/constants.php";
     @include_once WEBAPPS_PATH . "userGroupsAdmin/functions.php";
-
     if (!defined('GROUP_ANY_WEBAPP'))
         return;
-
     if (($wpUser = gDoesUserHaveAccessWP( GROUP_ANY_WEBAPP )) !== false) {
         $wp_admin_bar->add_menu(array(
             'id' => 'manage_link',
             'title' => __('<span class="ab-icon dashicons-before dashicons-feedback"></span> UA Lib WebApps'),
             'href' => __(site_url() . "/sample-page/user-groups-admin/")
         ));
-
         $wp_admin_bar->add_menu( array(
             'id' => 'manage_profile_link',
             'title' => __( '<span class="ab-icon dashicons-before dashicons-welcome-write-blog"></span> Edit Profile'),
@@ -148,7 +155,6 @@ function add_manage_admin_bar_link() {
     }
 }
 add_action('admin_bar_menu', 'add_manage_admin_bar_link',999);
-
 // Add css for custom admin_bar_link to style the icon
 // ... This is dumb and hacky. Icons should be configurable in a menu system
 // that uses icons itself. I'm still having trouble warming up to WP, <3 Will Jones
@@ -160,30 +166,36 @@ function custom_menu_css() {
 }
 add_action( 'admin_head', 'custom_menu_css' );
 add_action( 'wp_head', 'custom_menu_css' );
-
 //TinyMCE commands
 remove_filter('the_content', 'wpautop');
 remove_filter('the_excerpt', 'wpautop');
 function myextensionTinyMCE($init) {
     $valid = '*[*]';
     $invalid = 'script';
-
     $init['valid_elements'] = $valid;
     $init['extended_valid_elements'] = $valid;
-
     $init['invalid_elements'] = $invalid;
-
     return $init;
 }
 
-add_filter('tiny_mce_before_init', 'myextensionTinyMCE' );
 
+add_filter('tiny_mce_before_init', 'myextensionTinyMCE' );
 //disable tinyMCE visual editor for all users
 //add_filter('user_can_richedit' , create_function('' , 'return false;') , 50);
+
+//Feedzy commands
+function bweb_feedzy_readmore( $content, $link, $feedURL ) {
+    $content = str_replace( '[…]', '<a href="' . $link . '" target="_blank">' . __('Read more', 'yourTextDomain') . ' &rarr;</a>', $content );
+    return $content;
+}
+add_filter( 'feedzy_summary_output', 'bweb_feedzy_readmore', 9, 3 );
+
+
+
 
 add_action('init', 'roots_ualib_startSession', 1);
 add_action('wp_login', 'roots_ualib_startSession');
 add_action('wp_logout', 'roots_ualib_endSession');
-
 add_action( 'wp_enqueue_scripts', 'roots_ualib_scripts' );
-
+Status API Training Shop Blog About Pricing
+© 2016 GitHub, Inc. Terms Privacy Security Contact Help
