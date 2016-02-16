@@ -146,17 +146,8 @@ add_filter('tiny_mce_before_init', 'myextensionTinyMCE' );
 //Feedzy commands
 function bweb_feedzy_readmore( $content, $link, $feedURL ) {
     $content = str_replace( '[…]', '<a href="' . $link . '" target="_blank">' . __('More', 'yourTextDomain') . ' &rarr;</a>', $content );
-    //$content = str_replace('Continue reading &rarr', '', $content);
+    $content = str_replace('Continue reading &rarr', '', $content);
     return $content;
 }
 add_filter( 'feedzy_summary_output', 'bweb_feedzy_readmore', 9, 3 );
-
-
-/*
-function bweb_title_html_entity( $content ) {
-    return "<em>Web Services development test</em>";
-}
-add_filter( 'feedzy_title_output', 'bweb_title_html_entity', 9 );*/
-
-
 add_action( 'wp_enqueue_scripts', 'roots_ualib_scripts' );
