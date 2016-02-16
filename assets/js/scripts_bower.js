@@ -8178,128 +8178,1471 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
 
 })();
 
-angular.module('manage.templates', ['manageAlerts/manageAlerts.tpl.html', 'manageAlerts/manageAlertsItemFields.tpl.html', 'manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageNews/manageNews.tpl.html', 'manageNews/manageNewsAdmins.tpl.html', 'manageNews/manageNewsItemFields.tpl.html', 'manageNews/manageNewsList.tpl.html', 'manageOneSearch/mainOneSearch.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageOneSearch/oneSearchStat.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareComputerMaps.tpl.html', 'manageSoftware/manageSoftwareItemFields.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'siteFeedback/siteFeedback.tpl.html', 'staffDirectory/staffDirectory.tpl.html', 'staffDirectory/staffDirectoryDepartments.tpl.html', 'staffDirectory/staffDirectoryPeople.tpl.html', 'staffDirectory/staffDirectoryProfile.tpl.html', 'staffDirectory/staffDirectorySubjects.tpl.html', 'submittedForms/submittedForms.tpl.html']);
+/**
+ * oclazyload - Load modules on demand (lazy load) with angularJS
+ * @version v1.0.9
+ * @link https://github.com/ocombe/ocLazyLoad
+ * @license MIT
+ * @author Olivier Combe <olivier.combe@gmail.com>
+ */
+(function (angular, window) {
+    'use strict';
+
+    var regModules = ['ng', 'oc.lazyLoad'],
+        regInvokes = {},
+        regConfigs = [],
+        modulesToLoad = [],
+        // modules to load from angular.module or other sources
+    realModules = [],
+        // real modules called from angular.module
+    recordDeclarations = [],
+        broadcast = angular.noop,
+        runBlocks = {},
+        justLoaded = [];
+
+    var ocLazyLoad = angular.module('oc.lazyLoad', ['ng']);
+
+    ocLazyLoad.provider('$ocLazyLoad', ["$controllerProvider", "$provide", "$compileProvider", "$filterProvider", "$injector", "$animateProvider", function ($controllerProvider, $provide, $compileProvider, $filterProvider, $injector, $animateProvider) {
+        var modules = {},
+            providers = {
+            $controllerProvider: $controllerProvider,
+            $compileProvider: $compileProvider,
+            $filterProvider: $filterProvider,
+            $provide: $provide, // other things (constant, decorator, provider, factory, service)
+            $injector: $injector,
+            $animateProvider: $animateProvider
+        },
+            debug = false,
+            events = false,
+            moduleCache = [],
+            modulePromises = {};
+
+        moduleCache.push = function (value) {
+            if (this.indexOf(value) === -1) {
+                Array.prototype.push.apply(this, arguments);
+            }
+        };
+
+        this.config = function (config) {
+            // If we want to define modules configs
+            if (angular.isDefined(config.modules)) {
+                if (angular.isArray(config.modules)) {
+                    angular.forEach(config.modules, function (moduleConfig) {
+                        modules[moduleConfig.name] = moduleConfig;
+                    });
+                } else {
+                    modules[config.modules.name] = config.modules;
+                }
+            }
+
+            if (angular.isDefined(config.debug)) {
+                debug = config.debug;
+            }
+
+            if (angular.isDefined(config.events)) {
+                events = config.events;
+            }
+        };
+
+        /**
+         * Get the list of existing registered modules
+         * @param element
+         */
+        this._init = function _init(element) {
+            // this is probably useless now because we override angular.bootstrap
+            if (modulesToLoad.length === 0) {
+                var elements = [element],
+                    names = ['ng:app', 'ng-app', 'x-ng-app', 'data-ng-app'],
+                    NG_APP_CLASS_REGEXP = /\sng[:\-]app(:\s*([\w\d_]+);?)?\s/,
+                    append = function append(elm) {
+                    return elm && elements.push(elm);
+                };
+
+                angular.forEach(names, function (name) {
+                    names[name] = true;
+                    append(document.getElementById(name));
+                    name = name.replace(':', '\\:');
+                    if (typeof element[0] !== 'undefined' && element[0].querySelectorAll) {
+                        angular.forEach(element[0].querySelectorAll('.' + name), append);
+                        angular.forEach(element[0].querySelectorAll('.' + name + '\\:'), append);
+                        angular.forEach(element[0].querySelectorAll('[' + name + ']'), append);
+                    }
+                });
+
+                angular.forEach(elements, function (elm) {
+                    if (modulesToLoad.length === 0) {
+                        var className = ' ' + element.className + ' ';
+                        var match = NG_APP_CLASS_REGEXP.exec(className);
+                        if (match) {
+                            modulesToLoad.push((match[2] || '').replace(/\s+/g, ','));
+                        } else {
+                            angular.forEach(elm.attributes, function (attr) {
+                                if (modulesToLoad.length === 0 && names[attr.name]) {
+                                    modulesToLoad.push(attr.value);
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+
+            if (modulesToLoad.length === 0 && !((window.jasmine || window.mocha) && angular.isDefined(angular.mock))) {
+                console.error('No module found during bootstrap, unable to init ocLazyLoad. You should always use the ng-app directive or angular.boostrap when you use ocLazyLoad.');
+            }
+
+            var addReg = function addReg(moduleName) {
+                if (regModules.indexOf(moduleName) === -1) {
+                    // register existing modules
+                    regModules.push(moduleName);
+                    var mainModule = angular.module(moduleName);
+
+                    // register existing components (directives, services, ...)
+                    _invokeQueue(null, mainModule._invokeQueue, moduleName);
+                    _invokeQueue(null, mainModule._configBlocks, moduleName); // angular 1.3+
+
+                    angular.forEach(mainModule.requires, addReg);
+                }
+            };
+
+            angular.forEach(modulesToLoad, function (moduleName) {
+                addReg(moduleName);
+            });
+
+            modulesToLoad = []; // reset for next bootstrap
+            recordDeclarations.pop(); // wait for the next lazy load
+        };
+
+        /**
+         * Like JSON.stringify but that doesn't throw on circular references
+         * @param obj
+         */
+        var stringify = function stringify(obj) {
+            try {
+                return JSON.stringify(obj);
+            } catch (e) {
+                var cache = [];
+                return JSON.stringify(obj, function (key, value) {
+                    if (angular.isObject(value) && value !== null) {
+                        if (cache.indexOf(value) !== -1) {
+                            // Circular reference found, discard key
+                            return;
+                        }
+                        // Store value in our collection
+                        cache.push(value);
+                    }
+                    return value;
+                });
+            }
+        };
+
+        var hashCode = function hashCode(str) {
+            var hash = 0,
+                i,
+                chr,
+                len;
+            if (str.length == 0) {
+                return hash;
+            }
+            for (i = 0, len = str.length; i < len; i++) {
+                chr = str.charCodeAt(i);
+                hash = (hash << 5) - hash + chr;
+                hash |= 0; // Convert to 32bit integer
+            }
+            return hash;
+        };
+
+        function _register(providers, registerModules, params) {
+            if (registerModules) {
+                var k,
+                    moduleName,
+                    moduleFn,
+                    tempRunBlocks = [];
+                for (k = registerModules.length - 1; k >= 0; k--) {
+                    moduleName = registerModules[k];
+                    if (!angular.isString(moduleName)) {
+                        moduleName = getModuleName(moduleName);
+                    }
+                    if (!moduleName || justLoaded.indexOf(moduleName) !== -1 || modules[moduleName] && realModules.indexOf(moduleName) === -1) {
+                        continue;
+                    }
+                    // new if not registered
+                    var newModule = regModules.indexOf(moduleName) === -1;
+                    moduleFn = ngModuleFct(moduleName);
+                    if (newModule) {
+                        regModules.push(moduleName);
+                        _register(providers, moduleFn.requires, params);
+                    }
+                    if (moduleFn._runBlocks.length > 0) {
+                        // new run blocks detected! Replace the old ones (if existing)
+                        runBlocks[moduleName] = [];
+                        while (moduleFn._runBlocks.length > 0) {
+                            runBlocks[moduleName].push(moduleFn._runBlocks.shift());
+                        }
+                    }
+                    if (angular.isDefined(runBlocks[moduleName]) && (newModule || params.rerun)) {
+                        tempRunBlocks = tempRunBlocks.concat(runBlocks[moduleName]);
+                    }
+                    _invokeQueue(providers, moduleFn._invokeQueue, moduleName, params.reconfig);
+                    _invokeQueue(providers, moduleFn._configBlocks, moduleName, params.reconfig); // angular 1.3+
+                    broadcast(newModule ? 'ocLazyLoad.moduleLoaded' : 'ocLazyLoad.moduleReloaded', moduleName);
+                    registerModules.pop();
+                    justLoaded.push(moduleName);
+                }
+                // execute the run blocks at the end
+                var instanceInjector = providers.getInstanceInjector();
+                angular.forEach(tempRunBlocks, function (fn) {
+                    instanceInjector.invoke(fn);
+                });
+            }
+        }
+
+        function _registerInvokeList(args, moduleName) {
+            var invokeList = args[2][0],
+                type = args[1],
+                newInvoke = false;
+            if (angular.isUndefined(regInvokes[moduleName])) {
+                regInvokes[moduleName] = {};
+            }
+            if (angular.isUndefined(regInvokes[moduleName][type])) {
+                regInvokes[moduleName][type] = {};
+            }
+            var onInvoke = function onInvoke(invokeName, invoke) {
+                if (!regInvokes[moduleName][type].hasOwnProperty(invokeName)) {
+                    regInvokes[moduleName][type][invokeName] = [];
+                }
+                if (checkHashes(invoke, regInvokes[moduleName][type][invokeName])) {
+                    newInvoke = true;
+                    regInvokes[moduleName][type][invokeName].push(invoke);
+                    broadcast('ocLazyLoad.componentLoaded', [moduleName, type, invokeName]);
+                }
+            };
+
+            function checkHashes(potentialNew, invokes) {
+                var isNew = true,
+                    newHash;
+                if (invokes.length) {
+                    newHash = signature(potentialNew);
+                    angular.forEach(invokes, function (invoke) {
+                        isNew = isNew && signature(invoke) !== newHash;
+                    });
+                }
+                return isNew;
+            }
+
+            function signature(data) {
+                if (angular.isArray(data)) {
+                    // arrays are objects, we need to test for it first
+                    return hashCode(data.toString());
+                } else if (angular.isObject(data)) {
+                    // constants & values for example
+                    return hashCode(stringify(data));
+                } else {
+                    if (angular.isDefined(data) && data !== null) {
+                        return hashCode(data.toString());
+                    } else {
+                        // null & undefined constants
+                        return data;
+                    }
+                }
+            }
+
+            if (angular.isString(invokeList)) {
+                onInvoke(invokeList, args[2][1]);
+            } else if (angular.isObject(invokeList)) {
+                angular.forEach(invokeList, function (invoke, key) {
+                    if (angular.isString(invoke)) {
+                        // decorators for example
+                        onInvoke(invoke, invokeList[1]);
+                    } else {
+                        // components registered as object lists {"componentName": function() {}}
+                        onInvoke(key, invoke);
+                    }
+                });
+            } else {
+                return false;
+            }
+            return newInvoke;
+        }
+
+        function _invokeQueue(providers, queue, moduleName, reconfig) {
+            if (!queue) {
+                return;
+            }
+
+            var i, len, args, provider;
+            for (i = 0, len = queue.length; i < len; i++) {
+                args = queue[i];
+                if (angular.isArray(args)) {
+                    if (providers !== null) {
+                        if (providers.hasOwnProperty(args[0])) {
+                            provider = providers[args[0]];
+                        } else {
+                            throw new Error('unsupported provider ' + args[0]);
+                        }
+                    }
+                    var isNew = _registerInvokeList(args, moduleName);
+                    if (args[1] !== 'invoke') {
+                        if (isNew && angular.isDefined(provider)) {
+                            provider[args[1]].apply(provider, args[2]);
+                        }
+                    } else {
+                        // config block
+                        var callInvoke = function callInvoke(fct) {
+                            var invoked = regConfigs.indexOf(moduleName + '-' + fct);
+                            if (invoked === -1 || reconfig) {
+                                if (invoked === -1) {
+                                    regConfigs.push(moduleName + '-' + fct);
+                                }
+                                if (angular.isDefined(provider)) {
+                                    provider[args[1]].apply(provider, args[2]);
+                                }
+                            }
+                        };
+                        if (angular.isFunction(args[2][0])) {
+                            callInvoke(args[2][0]);
+                        } else if (angular.isArray(args[2][0])) {
+                            for (var j = 0, jlen = args[2][0].length; j < jlen; j++) {
+                                if (angular.isFunction(args[2][0][j])) {
+                                    callInvoke(args[2][0][j]);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        function getModuleName(module) {
+            var moduleName = null;
+            if (angular.isString(module)) {
+                moduleName = module;
+            } else if (angular.isObject(module) && module.hasOwnProperty('name') && angular.isString(module.name)) {
+                moduleName = module.name;
+            }
+            return moduleName;
+        }
+
+        function moduleExists(moduleName) {
+            if (!angular.isString(moduleName)) {
+                return false;
+            }
+            try {
+                return ngModuleFct(moduleName);
+            } catch (e) {
+                if (/No module/.test(e) || e.message.indexOf('$injector:nomod') > -1) {
+                    return false;
+                }
+            }
+        }
+
+        this.$get = ["$log", "$rootElement", "$rootScope", "$cacheFactory", "$q", function ($log, $rootElement, $rootScope, $cacheFactory, $q) {
+            var instanceInjector,
+                filesCache = $cacheFactory('ocLazyLoad');
+
+            if (!debug) {
+                $log = {};
+                $log['error'] = angular.noop;
+                $log['warn'] = angular.noop;
+                $log['info'] = angular.noop;
+            }
+
+            // Make this lazy because when $get() is called the instance injector hasn't been assigned to the rootElement yet
+            providers.getInstanceInjector = function () {
+                return instanceInjector ? instanceInjector : instanceInjector = $rootElement.data('$injector') || angular.injector();
+            };
+
+            broadcast = function broadcast(eventName, params) {
+                if (events) {
+                    $rootScope.$broadcast(eventName, params);
+                }
+                if (debug) {
+                    $log.info(eventName, params);
+                }
+            };
+
+            function reject(e) {
+                var deferred = $q.defer();
+                $log.error(e.message);
+                deferred.reject(e);
+                return deferred.promise;
+            }
+
+            return {
+                _broadcast: broadcast,
+
+                _$log: $log,
+
+                /**
+                 * Returns the files cache used by the loaders to store the files currently loading
+                 * @returns {*}
+                 */
+                _getFilesCache: function getFilesCache() {
+                    return filesCache;
+                },
+
+                /**
+                 * Let the service know that it should monitor angular.module because files are loading
+                 * @param watch boolean
+                 */
+                toggleWatch: function toggleWatch(watch) {
+                    if (watch) {
+                        recordDeclarations.push(true);
+                    } else {
+                        recordDeclarations.pop();
+                    }
+                },
+
+                /**
+                 * Let you get a module config object
+                 * @param moduleName String the name of the module
+                 * @returns {*}
+                 */
+                getModuleConfig: function getModuleConfig(moduleName) {
+                    if (!angular.isString(moduleName)) {
+                        throw new Error('You need to give the name of the module to get');
+                    }
+                    if (!modules[moduleName]) {
+                        return null;
+                    }
+                    return angular.copy(modules[moduleName]);
+                },
+
+                /**
+                 * Let you define a module config object
+                 * @param moduleConfig Object the module config object
+                 * @returns {*}
+                 */
+                setModuleConfig: function setModuleConfig(moduleConfig) {
+                    if (!angular.isObject(moduleConfig)) {
+                        throw new Error('You need to give the module config object to set');
+                    }
+                    modules[moduleConfig.name] = moduleConfig;
+                    return moduleConfig;
+                },
+
+                /**
+                 * Returns the list of loaded modules
+                 * @returns {string[]}
+                 */
+                getModules: function getModules() {
+                    return regModules;
+                },
+
+                /**
+                 * Let you check if a module has been loaded into Angular or not
+                 * @param modulesNames String/Object a module name, or a list of module names
+                 * @returns {boolean}
+                 */
+                isLoaded: function isLoaded(modulesNames) {
+                    var moduleLoaded = function moduleLoaded(module) {
+                        var isLoaded = regModules.indexOf(module) > -1;
+                        if (!isLoaded) {
+                            isLoaded = !!moduleExists(module);
+                        }
+                        return isLoaded;
+                    };
+                    if (angular.isString(modulesNames)) {
+                        modulesNames = [modulesNames];
+                    }
+                    if (angular.isArray(modulesNames)) {
+                        var i, len;
+                        for (i = 0, len = modulesNames.length; i < len; i++) {
+                            if (!moduleLoaded(modulesNames[i])) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    } else {
+                        throw new Error('You need to define the module(s) name(s)');
+                    }
+                },
+
+                /**
+                 * Given a module, return its name
+                 * @param module
+                 * @returns {String}
+                 */
+                _getModuleName: getModuleName,
+
+                /**
+                 * Returns a module if it exists
+                 * @param moduleName
+                 * @returns {module}
+                 */
+                _getModule: function getModule(moduleName) {
+                    try {
+                        return ngModuleFct(moduleName);
+                    } catch (e) {
+                        // this error message really suxx
+                        if (/No module/.test(e) || e.message.indexOf('$injector:nomod') > -1) {
+                            e.message = 'The module "' + stringify(moduleName) + '" that you are trying to load does not exist. ' + e.message;
+                        }
+                        throw e;
+                    }
+                },
+
+                /**
+                 * Check if a module exists and returns it if it does
+                 * @param moduleName
+                 * @returns {boolean}
+                 */
+                moduleExists: moduleExists,
+
+                /**
+                 * Load the dependencies, and might try to load new files depending on the config
+                 * @param moduleName (String or Array of Strings)
+                 * @param localParams
+                 * @returns {*}
+                 * @private
+                 */
+                _loadDependencies: function _loadDependencies(moduleName, localParams) {
+                    var loadedModule,
+                        requires,
+                        diff,
+                        promisesList = [],
+                        self = this;
+
+                    moduleName = self._getModuleName(moduleName);
+
+                    if (moduleName === null) {
+                        return $q.when();
+                    } else {
+                        try {
+                            loadedModule = self._getModule(moduleName);
+                        } catch (e) {
+                            return reject(e);
+                        }
+                        // get unloaded requires
+                        requires = self.getRequires(loadedModule);
+                    }
+
+                    angular.forEach(requires, function (requireEntry) {
+                        // If no configuration is provided, try and find one from a previous load.
+                        // If there isn't one, bail and let the normal flow run
+                        if (angular.isString(requireEntry)) {
+                            var config = self.getModuleConfig(requireEntry);
+                            if (config === null) {
+                                moduleCache.push(requireEntry); // We don't know about this module, but something else might, so push it anyway.
+                                return;
+                            }
+                            requireEntry = config;
+                            // ignore the name because it's probably not a real module name
+                            config.name = undefined;
+                        }
+
+                        // Check if this dependency has been loaded previously
+                        if (self.moduleExists(requireEntry.name)) {
+                            // compare against the already loaded module to see if the new definition adds any new files
+                            diff = requireEntry.files.filter(function (n) {
+                                return self.getModuleConfig(requireEntry.name).files.indexOf(n) < 0;
+                            });
+
+                            // If the module was redefined, advise via the console
+                            if (diff.length !== 0) {
+                                self._$log.warn('Module "', moduleName, '" attempted to redefine configuration for dependency. "', requireEntry.name, '"\n Additional Files Loaded:', diff);
+                            }
+
+                            // Push everything to the file loader, it will weed out the duplicates.
+                            if (angular.isDefined(self.filesLoader)) {
+                                // if a files loader is defined
+                                promisesList.push(self.filesLoader(requireEntry, localParams).then(function () {
+                                    return self._loadDependencies(requireEntry);
+                                }));
+                            } else {
+                                return reject(new Error('Error: New dependencies need to be loaded from external files (' + requireEntry.files + '), but no loader has been defined.'));
+                            }
+                            return;
+                        } else if (angular.isArray(requireEntry)) {
+                            var files = [];
+                            angular.forEach(requireEntry, function (entry) {
+                                // let's check if the entry is a file name or a config name
+                                var config = self.getModuleConfig(entry);
+                                if (config === null) {
+                                    files.push(entry);
+                                } else if (config.files) {
+                                    files = files.concat(config.files);
+                                }
+                            });
+                            if (files.length > 0) {
+                                requireEntry = {
+                                    files: files
+                                };
+                            }
+                        } else if (angular.isObject(requireEntry)) {
+                            if (requireEntry.hasOwnProperty('name') && requireEntry['name']) {
+                                // The dependency doesn't exist in the module cache and is a new configuration, so store and push it.
+                                self.setModuleConfig(requireEntry);
+                                moduleCache.push(requireEntry['name']);
+                            }
+                        }
+
+                        // Check if the dependency has any files that need to be loaded. If there are, push a new promise to the promise list.
+                        if (angular.isDefined(requireEntry.files) && requireEntry.files.length !== 0) {
+                            if (angular.isDefined(self.filesLoader)) {
+                                // if a files loader is defined
+                                promisesList.push(self.filesLoader(requireEntry, localParams).then(function () {
+                                    return self._loadDependencies(requireEntry);
+                                }));
+                            } else {
+                                return reject(new Error('Error: the module "' + requireEntry.name + '" is defined in external files (' + requireEntry.files + '), but no loader has been defined.'));
+                            }
+                        }
+                    });
+
+                    // Create a wrapper promise to watch the promise list and resolve it once everything is done.
+                    return $q.all(promisesList);
+                },
+
+                /**
+                 * Inject new modules into Angular
+                 * @param moduleName
+                 * @param localParams
+                 * @param real
+                 */
+                inject: function inject(moduleName) {
+                    var localParams = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+                    var real = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
+                    var self = this,
+                        deferred = $q.defer();
+                    if (angular.isDefined(moduleName) && moduleName !== null) {
+                        if (angular.isArray(moduleName)) {
+                            var promisesList = [];
+                            angular.forEach(moduleName, function (module) {
+                                promisesList.push(self.inject(module, localParams, real));
+                            });
+                            return $q.all(promisesList);
+                        } else {
+                            self._addToLoadList(self._getModuleName(moduleName), true, real);
+                        }
+                    }
+                    if (modulesToLoad.length > 0) {
+                        var res = modulesToLoad.slice(); // clean copy
+                        var loadNext = function loadNext(moduleName) {
+                            moduleCache.push(moduleName);
+                            modulePromises[moduleName] = deferred.promise;
+                            self._loadDependencies(moduleName, localParams).then(function success() {
+                                try {
+                                    justLoaded = [];
+                                    _register(providers, moduleCache, localParams);
+                                } catch (e) {
+                                    self._$log.error(e.message);
+                                    deferred.reject(e);
+                                    return;
+                                }
+
+                                if (modulesToLoad.length > 0) {
+                                    loadNext(modulesToLoad.shift()); // load the next in list
+                                } else {
+                                        deferred.resolve(res); // everything has been loaded, resolve
+                                    }
+                            }, function error(err) {
+                                deferred.reject(err);
+                            });
+                        };
+
+                        // load the first in list
+                        loadNext(modulesToLoad.shift());
+                    } else if (localParams && localParams.name && modulePromises[localParams.name]) {
+                        return modulePromises[localParams.name];
+                    } else {
+                        deferred.resolve();
+                    }
+                    return deferred.promise;
+                },
+
+                /**
+                 * Get the list of required modules/services/... for this module
+                 * @param module
+                 * @returns {Array}
+                 */
+                getRequires: function getRequires(module) {
+                    var requires = [];
+                    angular.forEach(module.requires, function (requireModule) {
+                        if (regModules.indexOf(requireModule) === -1) {
+                            requires.push(requireModule);
+                        }
+                    });
+                    return requires;
+                },
+
+                /**
+                 * Invoke the new modules & component by their providers
+                 * @param providers
+                 * @param queue
+                 * @param moduleName
+                 * @param reconfig
+                 * @private
+                 */
+                _invokeQueue: _invokeQueue,
+
+                /**
+                 * Check if a module has been invoked and registers it if not
+                 * @param args
+                 * @param moduleName
+                 * @returns {boolean} is new
+                 */
+                _registerInvokeList: _registerInvokeList,
+
+                /**
+                 * Register a new module and loads it, executing the run/config blocks if needed
+                 * @param providers
+                 * @param registerModules
+                 * @param params
+                 * @private
+                 */
+                _register: _register,
+
+                /**
+                 * Add a module name to the list of modules that will be loaded in the next inject
+                 * @param name
+                 * @param force
+                 * @private
+                 */
+                _addToLoadList: _addToLoadList,
+
+                /**
+                 * Unregister modules (you shouldn't have to use this)
+                 * @param modules
+                 */
+                _unregister: function _unregister(modules) {
+                    if (angular.isDefined(modules)) {
+                        if (angular.isArray(modules)) {
+                            angular.forEach(modules, function (module) {
+                                regInvokes[module] = undefined;
+                            });
+                        }
+                    }
+                }
+            };
+        }];
+
+        // Let's get the list of loaded modules & components
+        this._init(angular.element(window.document));
+    }]);
+
+    var bootstrapFct = angular.bootstrap;
+    angular.bootstrap = function (element, modules, config) {
+        // we use slice to make a clean copy
+        angular.forEach(modules.slice(), function (module) {
+            _addToLoadList(module, true, true);
+        });
+        return bootstrapFct(element, modules, config);
+    };
+
+    var _addToLoadList = function _addToLoadList(name, force, real) {
+        if ((recordDeclarations.length > 0 || force) && angular.isString(name) && modulesToLoad.indexOf(name) === -1) {
+            modulesToLoad.push(name);
+            if (real) {
+                realModules.push(name);
+            }
+        }
+    };
+
+    var ngModuleFct = angular.module;
+    angular.module = function (name, requires, configFn) {
+        _addToLoadList(name, false, true);
+        return ngModuleFct(name, requires, configFn);
+    };
+
+    // CommonJS package manager support:
+    if (typeof module !== 'undefined' && typeof exports !== 'undefined' && module.exports === exports) {
+        module.exports = 'oc.lazyLoad';
+    }
+})(angular, window);
+(function (angular) {
+    'use strict';
+
+    angular.module('oc.lazyLoad').directive('ocLazyLoad', ["$ocLazyLoad", "$compile", "$animate", "$parse", "$timeout", function ($ocLazyLoad, $compile, $animate, $parse, $timeout) {
+        return {
+            restrict: 'A',
+            terminal: true,
+            priority: 1000,
+            compile: function compile(element, attrs) {
+                // we store the content and remove it before compilation
+                var content = element[0].innerHTML;
+                element.html('');
+
+                return function ($scope, $element, $attr) {
+                    var model = $parse($attr.ocLazyLoad);
+                    $scope.$watch(function () {
+                        return model($scope) || $attr.ocLazyLoad; // it can be a module name (string), an object, an array, or a scope reference to any of this
+                    }, function (moduleName) {
+                        if (angular.isDefined(moduleName)) {
+                            $ocLazyLoad.load(moduleName).then(function () {
+                                // Attach element contents to DOM and then compile them.
+                                // This prevents an issue where IE invalidates saved element objects (HTMLCollections)
+                                // of the compiled contents when attaching to the parent DOM.
+                                $animate.enter(content, $element);
+                                // get the new content & compile it
+                                $compile($element.contents())($scope);
+                            });
+                        }
+                    }, true);
+                };
+            }
+        };
+    }]);
+})(angular);
+(function (angular) {
+    'use strict';
+
+    angular.module('oc.lazyLoad').config(["$provide", function ($provide) {
+        $provide.decorator('$ocLazyLoad', ["$delegate", "$q", "$window", "$interval", function ($delegate, $q, $window, $interval) {
+            var uaCssChecked = false,
+                useCssLoadPatch = false,
+                anchor = $window.document.getElementsByTagName('head')[0] || $window.document.getElementsByTagName('body')[0];
+
+            /**
+             * Load a js/css file
+             * @param type
+             * @param path
+             * @param params
+             * @returns promise
+             */
+            $delegate.buildElement = function buildElement(type, path, params) {
+                var deferred = $q.defer(),
+                    el,
+                    loaded,
+                    filesCache = $delegate._getFilesCache(),
+                    cacheBuster = function cacheBuster(url) {
+                    var dc = new Date().getTime();
+                    if (url.indexOf('?') >= 0) {
+                        if (url.substring(0, url.length - 1) === '&') {
+                            return url + '_dc=' + dc;
+                        }
+                        return url + '&_dc=' + dc;
+                    } else {
+                        return url + '?_dc=' + dc;
+                    }
+                };
+
+                // Store the promise early so the file load can be detected by other parallel lazy loads
+                // (ie: multiple routes on one page) a 'true' value isn't sufficient
+                // as it causes false positive load results.
+                if (angular.isUndefined(filesCache.get(path))) {
+                    filesCache.put(path, deferred.promise);
+                }
+
+                // Switch in case more content types are added later
+                switch (type) {
+                    case 'css':
+                        el = $window.document.createElement('link');
+                        el.type = 'text/css';
+                        el.rel = 'stylesheet';
+                        el.href = params.cache === false ? cacheBuster(path) : path;
+                        break;
+                    case 'js':
+                        el = $window.document.createElement('script');
+                        el.src = params.cache === false ? cacheBuster(path) : path;
+                        break;
+                    default:
+                        filesCache.remove(path);
+                        deferred.reject(new Error('Requested type "' + type + '" is not known. Could not inject "' + path + '"'));
+                        break;
+                }
+                el.onload = el['onreadystatechange'] = function (e) {
+                    if (el['readyState'] && !/^c|loade/.test(el['readyState']) || loaded) return;
+                    el.onload = el['onreadystatechange'] = null;
+                    loaded = 1;
+                    $delegate._broadcast('ocLazyLoad.fileLoaded', path);
+                    deferred.resolve();
+                };
+                el.onerror = function () {
+                    filesCache.remove(path);
+                    deferred.reject(new Error('Unable to load ' + path));
+                };
+                el.async = params.serie ? 0 : 1;
+
+                var insertBeforeElem = anchor.lastChild;
+                if (params.insertBefore) {
+                    var element = angular.element(angular.isDefined(window.jQuery) ? params.insertBefore : document.querySelector(params.insertBefore));
+                    if (element && element.length > 0) {
+                        insertBeforeElem = element[0];
+                    }
+                }
+                insertBeforeElem.parentNode.insertBefore(el, insertBeforeElem);
+
+                /*
+                 The event load or readystatechange doesn't fire in:
+                 - iOS < 6       (default mobile browser)
+                 - Android < 4.4 (default mobile browser)
+                 - Safari < 6    (desktop browser)
+                 */
+                if (type == 'css') {
+                    if (!uaCssChecked) {
+                        var ua = $window.navigator.userAgent.toLowerCase();
+
+                        // iOS < 6
+                        if (/iP(hone|od|ad)/.test($window.navigator.platform)) {
+                            var v = $window.navigator.appVersion.match(/OS (\d+)_(\d+)_?(\d+)?/);
+                            var iOSVersion = parseFloat([parseInt(v[1], 10), parseInt(v[2], 10), parseInt(v[3] || 0, 10)].join('.'));
+                            useCssLoadPatch = iOSVersion < 6;
+                        } else if (ua.indexOf("android") > -1) {
+                            // Android < 4.4
+                            var androidVersion = parseFloat(ua.slice(ua.indexOf("android") + 8));
+                            useCssLoadPatch = androidVersion < 4.4;
+                        } else if (ua.indexOf('safari') > -1) {
+                            var versionMatch = ua.match(/version\/([\.\d]+)/i);
+                            useCssLoadPatch = versionMatch && versionMatch[1] && parseFloat(versionMatch[1]) < 6;
+                        }
+                    }
+
+                    if (useCssLoadPatch) {
+                        var tries = 1000; // * 20 = 20000 miliseconds
+                        var interval = $interval(function () {
+                            try {
+                                el.sheet.cssRules;
+                                $interval.cancel(interval);
+                                el.onload();
+                            } catch (e) {
+                                if (--tries <= 0) {
+                                    el.onerror();
+                                }
+                            }
+                        }, 20);
+                    }
+                }
+
+                return deferred.promise;
+            };
+
+            return $delegate;
+        }]);
+    }]);
+})(angular);
+(function (angular) {
+    'use strict';
+
+    angular.module('oc.lazyLoad').config(["$provide", function ($provide) {
+        $provide.decorator('$ocLazyLoad', ["$delegate", "$q", function ($delegate, $q) {
+            /**
+             * The function that loads new files
+             * @param config
+             * @param params
+             * @returns {*}
+             */
+            $delegate.filesLoader = function filesLoader(config) {
+                var params = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+                var cssFiles = [],
+                    templatesFiles = [],
+                    jsFiles = [],
+                    promises = [],
+                    cachePromise = null,
+                    filesCache = $delegate._getFilesCache();
+
+                $delegate.toggleWatch(true); // start watching angular.module calls
+
+                angular.extend(params, config);
+
+                var pushFile = function pushFile(path) {
+                    var file_type = null,
+                        m;
+                    if (angular.isObject(path)) {
+                        file_type = path.type;
+                        path = path.path;
+                    }
+                    cachePromise = filesCache.get(path);
+                    if (angular.isUndefined(cachePromise) || params.cache === false) {
+
+                        // always check for requirejs syntax just in case
+                        if ((m = /^(css|less|html|htm|js)?(?=!)/.exec(path)) !== null) {
+                            // Detect file type using preceding type declaration (ala requireJS)
+                            file_type = m[1];
+                            path = path.substr(m[1].length + 1, path.length); // Strip the type from the path
+                        }
+
+                        if (!file_type) {
+                            if ((m = /[.](css|less|html|htm|js)?((\?|#).*)?$/.exec(path)) !== null) {
+                                // Detect file type via file extension
+                                file_type = m[1];
+                            } else if (!$delegate.jsLoader.hasOwnProperty('ocLazyLoadLoader') && $delegate.jsLoader.hasOwnProperty('requirejs')) {
+                                // requirejs
+                                file_type = 'js';
+                            } else {
+                                $delegate._$log.error('File type could not be determined. ' + path);
+                                return;
+                            }
+                        }
+
+                        if ((file_type === 'css' || file_type === 'less') && cssFiles.indexOf(path) === -1) {
+                            cssFiles.push(path);
+                        } else if ((file_type === 'html' || file_type === 'htm') && templatesFiles.indexOf(path) === -1) {
+                            templatesFiles.push(path);
+                        } else if (file_type === 'js' || jsFiles.indexOf(path) === -1) {
+                            jsFiles.push(path);
+                        } else {
+                            $delegate._$log.error('File type is not valid. ' + path);
+                        }
+                    } else if (cachePromise) {
+                        promises.push(cachePromise);
+                    }
+                };
+
+                if (params.serie) {
+                    pushFile(params.files.shift());
+                } else {
+                    angular.forEach(params.files, function (path) {
+                        pushFile(path);
+                    });
+                }
+
+                if (cssFiles.length > 0) {
+                    var cssDeferred = $q.defer();
+                    $delegate.cssLoader(cssFiles, function (err) {
+                        if (angular.isDefined(err) && $delegate.cssLoader.hasOwnProperty('ocLazyLoadLoader')) {
+                            $delegate._$log.error(err);
+                            cssDeferred.reject(err);
+                        } else {
+                            cssDeferred.resolve();
+                        }
+                    }, params);
+                    promises.push(cssDeferred.promise);
+                }
+
+                if (templatesFiles.length > 0) {
+                    var templatesDeferred = $q.defer();
+                    $delegate.templatesLoader(templatesFiles, function (err) {
+                        if (angular.isDefined(err) && $delegate.templatesLoader.hasOwnProperty('ocLazyLoadLoader')) {
+                            $delegate._$log.error(err);
+                            templatesDeferred.reject(err);
+                        } else {
+                            templatesDeferred.resolve();
+                        }
+                    }, params);
+                    promises.push(templatesDeferred.promise);
+                }
+
+                if (jsFiles.length > 0) {
+                    var jsDeferred = $q.defer();
+                    $delegate.jsLoader(jsFiles, function (err) {
+                        if (angular.isDefined(err) && ($delegate.jsLoader.hasOwnProperty("ocLazyLoadLoader") || $delegate.jsLoader.hasOwnProperty("requirejs"))) {
+                            $delegate._$log.error(err);
+                            jsDeferred.reject(err);
+                        } else {
+                            jsDeferred.resolve();
+                        }
+                    }, params);
+                    promises.push(jsDeferred.promise);
+                }
+
+                if (promises.length === 0) {
+                    var deferred = $q.defer(),
+                        err = "Error: no file to load has been found, if you're trying to load an existing module you should use the 'inject' method instead of 'load'.";
+                    $delegate._$log.error(err);
+                    deferred.reject(err);
+                    return deferred.promise;
+                } else if (params.serie && params.files.length > 0) {
+                    return $q.all(promises).then(function () {
+                        return $delegate.filesLoader(config, params);
+                    });
+                } else {
+                    return $q.all(promises)['finally'](function (res) {
+                        $delegate.toggleWatch(false); // stop watching angular.module calls
+                        return res;
+                    });
+                }
+            };
+
+            /**
+             * Load a module or a list of modules into Angular
+             * @param module Mixed the name of a predefined module config object, or a module config object, or an array of either
+             * @param params Object optional parameters
+             * @returns promise
+             */
+            $delegate.load = function (originalModule) {
+                var originalParams = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+                var self = this,
+                    config = null,
+                    deferredList = [],
+                    deferred = $q.defer(),
+                    errText;
+
+                // clean copy
+                var module = angular.copy(originalModule);
+                var params = angular.copy(originalParams);
+
+                // If module is an array, break it down
+                if (angular.isArray(module)) {
+                    // Resubmit each entry as a single module
+                    angular.forEach(module, function (m) {
+                        deferredList.push(self.load(m, params));
+                    });
+
+                    // Resolve the promise once everything has loaded
+                    $q.all(deferredList).then(function (res) {
+                        deferred.resolve(res);
+                    }, function (err) {
+                        deferred.reject(err);
+                    });
+
+                    return deferred.promise;
+                }
+
+                // Get or Set a configuration depending on what was passed in
+                if (angular.isString(module)) {
+                    config = self.getModuleConfig(module);
+                    if (!config) {
+                        config = {
+                            files: [module]
+                        };
+                    }
+                } else if (angular.isObject(module)) {
+                    // case {type: 'js', path: lazyLoadUrl + 'testModule.fakejs'}
+                    if (angular.isDefined(module.path) && angular.isDefined(module.type)) {
+                        config = {
+                            files: [module]
+                        };
+                    } else {
+                        config = self.setModuleConfig(module);
+                    }
+                }
+
+                if (config === null) {
+                    var moduleName = self._getModuleName(module);
+                    errText = 'Module "' + (moduleName || 'unknown') + '" is not configured, cannot load.';
+                    $delegate._$log.error(errText);
+                    deferred.reject(new Error(errText));
+                    return deferred.promise;
+                } else {
+                    // deprecated
+                    if (angular.isDefined(config.template)) {
+                        if (angular.isUndefined(config.files)) {
+                            config.files = [];
+                        }
+                        if (angular.isString(config.template)) {
+                            config.files.push(config.template);
+                        } else if (angular.isArray(config.template)) {
+                            config.files.concat(config.template);
+                        }
+                    }
+                }
+
+                var localParams = angular.extend({}, params, config);
+
+                // if someone used an external loader and called the load function with just the module name
+                if (angular.isUndefined(config.files) && angular.isDefined(config.name) && $delegate.moduleExists(config.name)) {
+                    return $delegate.inject(config.name, localParams, true);
+                }
+
+                $delegate.filesLoader(config, localParams).then(function () {
+                    $delegate.inject(null, localParams).then(function (res) {
+                        deferred.resolve(res);
+                    }, function (err) {
+                        deferred.reject(err);
+                    });
+                }, function (err) {
+                    deferred.reject(err);
+                });
+
+                return deferred.promise;
+            };
+
+            // return the patched service
+            return $delegate;
+        }]);
+    }]);
+})(angular);
+(function (angular) {
+    'use strict';
+
+    angular.module('oc.lazyLoad').config(["$provide", function ($provide) {
+        $provide.decorator('$ocLazyLoad', ["$delegate", "$q", function ($delegate, $q) {
+            /**
+             * cssLoader function
+             * @type Function
+             * @param paths array list of css files to load
+             * @param callback to call when everything is loaded. We use a callback and not a promise
+             * @param params object config parameters
+             * because the user can overwrite cssLoader and it will probably not use promises :(
+             */
+            $delegate.cssLoader = function (paths, callback, params) {
+                var promises = [];
+                angular.forEach(paths, function (path) {
+                    promises.push($delegate.buildElement('css', path, params));
+                });
+                $q.all(promises).then(function () {
+                    callback();
+                }, function (err) {
+                    callback(err);
+                });
+            };
+            $delegate.cssLoader.ocLazyLoadLoader = true;
+
+            return $delegate;
+        }]);
+    }]);
+})(angular);
+(function (angular) {
+    'use strict';
+
+    angular.module('oc.lazyLoad').config(["$provide", function ($provide) {
+        $provide.decorator('$ocLazyLoad', ["$delegate", "$q", function ($delegate, $q) {
+            /**
+             * jsLoader function
+             * @type Function
+             * @param paths array list of js files to load
+             * @param callback to call when everything is loaded. We use a callback and not a promise
+             * @param params object config parameters
+             * because the user can overwrite jsLoader and it will probably not use promises :(
+             */
+            $delegate.jsLoader = function (paths, callback, params) {
+                var promises = [];
+                angular.forEach(paths, function (path) {
+                    promises.push($delegate.buildElement('js', path, params));
+                });
+                $q.all(promises).then(function () {
+                    callback();
+                }, function (err) {
+                    callback(err);
+                });
+            };
+            $delegate.jsLoader.ocLazyLoadLoader = true;
+
+            return $delegate;
+        }]);
+    }]);
+})(angular);
+(function (angular) {
+    'use strict';
+
+    angular.module('oc.lazyLoad').config(["$provide", function ($provide) {
+        $provide.decorator('$ocLazyLoad', ["$delegate", "$templateCache", "$q", "$http", function ($delegate, $templateCache, $q, $http) {
+            /**
+             * templatesLoader function
+             * @type Function
+             * @param paths array list of css files to load
+             * @param callback to call when everything is loaded. We use a callback and not a promise
+             * @param params object config parameters for $http
+             * because the user can overwrite templatesLoader and it will probably not use promises :(
+             */
+            $delegate.templatesLoader = function (paths, callback, params) {
+                var promises = [],
+                    filesCache = $delegate._getFilesCache();
+
+                angular.forEach(paths, function (url) {
+                    var deferred = $q.defer();
+                    promises.push(deferred.promise);
+                    $http.get(url, params).success(function (data) {
+                        if (angular.isString(data) && data.length > 0) {
+                            angular.forEach(angular.element(data), function (node) {
+                                if (node.nodeName === 'SCRIPT' && node.type === 'text/ng-template') {
+                                    $templateCache.put(node.id, node.innerHTML);
+                                }
+                            });
+                        }
+                        if (angular.isUndefined(filesCache.get(url))) {
+                            filesCache.put(url, true);
+                        }
+                        deferred.resolve();
+                    }).error(function (err) {
+                        deferred.reject(new Error('Unable to load template file "' + url + '": ' + err));
+                    });
+                });
+                return $q.all(promises).then(function () {
+                    callback();
+                }, function (err) {
+                    callback(err);
+                });
+            };
+            $delegate.templatesLoader.ocLazyLoadLoader = true;
+
+            return $delegate;
+        }]);
+    }]);
+})(angular);
+// Array.indexOf polyfill for IE8
+if (!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function (searchElement, fromIndex) {
+        var k;
+
+        // 1. Let O be the result of calling ToObject passing
+        //    the this value as the argument.
+        if (this == null) {
+            throw new TypeError('"this" is null or not defined');
+        }
+
+        var O = Object(this);
+
+        // 2. Let lenValue be the result of calling the Get
+        //    internal method of O with the argument "length".
+        // 3. Let len be ToUint32(lenValue).
+        var len = O.length >>> 0;
+
+        // 4. If len is 0, return -1.
+        if (len === 0) {
+            return -1;
+        }
+
+        // 5. If argument fromIndex was passed let n be
+        //    ToInteger(fromIndex); else let n be 0.
+        var n = +fromIndex || 0;
+
+        if (Math.abs(n) === Infinity) {
+            n = 0;
+        }
+
+        // 6. If n >= len, return -1.
+        if (n >= len) {
+            return -1;
+        }
+
+        // 7. If n >= 0, then Let k be n.
+        // 8. Else, n<0, Let k be len - abs(n).
+        //    If k is less than 0, then let k be 0.
+        k = Math.max(n >= 0 ? n : len - Math.abs(n), 0);
+
+        // 9. Repeat, while k < len
+        while (k < len) {
+            // a. Let Pk be ToString(k).
+            //   This is implicit for LHS operands of the in operator
+            // b. Let kPresent be the result of calling the
+            //    HasProperty internal method of O with argument Pk.
+            //   This step can be combined with c
+            // c. If kPresent is true, then
+            //    i.  Let elementK be the result of calling the Get
+            //        internal method of O with the argument ToString(k).
+            //   ii.  Let same be the result of applying the
+            //        Strict Equality Comparison Algorithm to
+            //        searchElement and elementK.
+            //  iii.  If same is true, return k.
+            if (k in O && O[k] === searchElement) {
+                return k;
+            }
+            k++;
+        }
+        return -1;
+    };
+}
+angular.module('manage.templates', ['manageAlerts/manageAlerts.tpl.html', 'manageAlerts/manageAlertsItemFields.tpl.html', 'manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageHoursUsers.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageNews/manageNews.tpl.html', 'manageNews/manageNewsAdmins.tpl.html', 'manageNews/manageNewsItemFields.tpl.html', 'manageNews/manageNewsList.tpl.html', 'manageOneSearch/mainOneSearch.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageOneSearch/oneSearchStat.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareComputerMaps.tpl.html', 'manageSoftware/manageSoftwareItemFields.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'staffDirectory/staffDirectory.tpl.html', 'staffDirectory/staffDirectoryDepartments.tpl.html', 'staffDirectory/staffDirectoryPeople.tpl.html', 'staffDirectory/staffDirectoryProfile.tpl.html', 'staffDirectory/staffDirectorySubjects.tpl.html', 'submittedForms/submittedForms.tpl.html']);
 
 angular.module("manageAlerts/manageAlerts.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageAlerts/manageAlerts.tpl.html",
-    "<h2>Manage Website Alerts</h2>\n" +
+    "<div class=\"container\">\n" +
+    "    <h2>Manage Website Alerts</h2>\n" +
     "\n" +
-    "<div>\n" +
-    "    <h3>Add New Alert</h3>\n" +
-    "    <form ng-submit=\"createAlert(newAlert)\">\n" +
-    "        <div class=\"sdOpen\">\n" +
-    "            <div alerts-item-fields alertdata=\"newAlert\" list=\"data\"></div>\n" +
-    "            <div class=\"row form-group text-center\">\n" +
-    "                <button type=\"submit\" class=\"btn btn-success\"\n" +
-    "                        ng-disabled=\"uploading ||\n" +
-    "                                     newAlert.message.length < 1 ||\n" +
-    "                                     newAlert.dateStart.length < 1 ||\n" +
-    "                                     newAlert.dateEnd.length < 1\">\n" +
-    "                    Create New Alert\n" +
-    "                </button><br>\n" +
-    "                {{newAlert.formResponse}}\n" +
+    "    <div ng-if=\"hasAccess\">\n" +
+    "        <h3>Add New Alert</h3>\n" +
+    "        <form ng-submit=\"createAlert(newAlert)\">\n" +
+    "            <div class=\"sdOpen\">\n" +
+    "                <div alerts-item-fields alertdata=\"newAlert\" list=\"data\"></div>\n" +
+    "                <div class=\"row form-group text-center\">\n" +
+    "                    <button type=\"submit\" class=\"btn btn-success\"\n" +
+    "                            ng-disabled=\"uploading ||\n" +
+    "                                         newAlert.message.length < 1 ||\n" +
+    "                                         newAlert.dateStart.length < 1 ||\n" +
+    "                                         newAlert.dateEnd.length < 1\">\n" +
+    "                        Create New Alert\n" +
+    "                    </button><br>\n" +
+    "                    {{newAlert.formResponse}}\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </form>\n" +
+    "\n" +
+    "        <h3>Alerts</h3>\n" +
+    "        <div class=\"row form-inline\">\n" +
+    "            <div class=\"form-group col-md-12\">\n" +
+    "                <label for=\"filterBy\">Filter <small>{{filteredList.length}}</small> results by</label>\n" +
+    "                <div id=\"filterBy\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Message contains\" ng-model=\"alertFilter\">\n" +
+    "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
-    "    </form>\n" +
-    "\n" +
-    "    <h3>Alerts</h3>\n" +
-    "    <div class=\"row form-inline\">\n" +
-    "        <div class=\"form-group col-md-12\">\n" +
-    "            <label for=\"filterBy\">Filter <small>{{filteredList.length}}</small> results by</label>\n" +
-    "            <div id=\"filterBy\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Message contains\" ng-model=\"alertFilter\">\n" +
-    "            </div>\n" +
+    "        <div class=\"text-center\">\n" +
+    "            <pagination total-items=\"filteredList.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
+    "                        boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredList.length > perPage\"></pagination>\n" +
     "        </div>\n" +
-    "    </div>\n" +
-    "    <div class=\"text-center\">\n" +
-    "        <pagination total-items=\"filteredList.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
-    "                    boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredList.length > perPage\"></pagination>\n" +
-    "    </div>\n" +
-    "    <div class=\"table-responsive\">\n" +
-    "        <table class=\"table table-condensed table-hover\">\n" +
-    "            <thead>\n" +
-    "            <tr>\n" +
-    "                <th class=\"hidden-xs\">\n" +
-    "                    <a ng-click=\"sortBy(0)\"\n" +
-    "                       ng-class=\"{'sortable': !sortModes[0].reverse && sortMode == 0, 'sortable-reverse': sortModes[0].reverse && sortMode == 0}\">\n" +
-    "                        Message\n" +
-    "                    </a>\n" +
-    "                </th>\n" +
-    "                <th class=\"hidden-xs\">\n" +
-    "                    <a ng-click=\"sortBy(1)\"\n" +
-    "                       ng-class=\"{'sortable': !sortModes[1].reverse && sortMode == 1, 'sortable-reverse': sortModes[1].reverse && sortMode == 1}\">\n" +
-    "                        Type\n" +
-    "                    </a>\n" +
-    "                </th>\n" +
-    "                <th class=\"hidden-xs\">\n" +
-    "                    <a ng-click=\"sortBy(2)\"\n" +
-    "                       ng-class=\"{'sortable': !sortModes[2].reverse && sortMode == 2, 'sortable-reverse': sortModes[2].reverse && sortMode == 2}\">\n" +
-    "                        Start Date\n" +
-    "                    </a>\n" +
-    "                </th>\n" +
-    "                <th class=\"hidden-xs\">\n" +
-    "                    <a ng-click=\"sortBy(3)\"\n" +
-    "                       ng-class=\"{'sortable': !sortModes[3].reverse && sortMode == 3, 'sortable-reverse': sortModes[3].reverse && sortMode == 3}\">\n" +
-    "                        End Date\n" +
-    "                    </a>\n" +
-    "                </th>\n" +
-    "            </tr>\n" +
-    "            </thead>\n" +
-    "            <tbody>\n" +
-    "            <tr ng-repeat=\"alert in filteredList = (data.alerts | filter:{message:alertFilter}\n" +
-    "                                                                | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\n" +
-    "                                                                | startFrom:(currentPage-1)*perPage\n" +
-    "                                                                | limitTo:perPage\">\n" +
-    "                <td>\n" +
-    "                    <h4 ng-click=\"toggleAlerts(alert)\" style=\"cursor: pointer;\">\n" +
-    "                        <a>\n" +
-    "                            <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"alert.show\"></span>\n" +
-    "                            <span class=\"fa fa-fw fa-caret-down\" ng-show=\"alert.show\"></span>\n" +
-    "                            {{alert.message}}\n" +
+    "        <div class=\"table-responsive\">\n" +
+    "            <table class=\"table table-condensed table-hover\">\n" +
+    "                <thead>\n" +
+    "                <tr>\n" +
+    "                    <th class=\"hidden-xs\">\n" +
+    "                        <a ng-click=\"sortBy(0)\"\n" +
+    "                           ng-class=\"{'sortable': !sortModes[0].reverse && sortMode == 0, 'sortable-reverse': sortModes[0].reverse && sortMode == 0}\">\n" +
+    "                            Message\n" +
     "                        </a>\n" +
-    "                    </h4>\n" +
-    "                    <div ng-show=\"alert.show\">\n" +
-    "                        <form ng-submit=\"updateAlert(alert)\">\n" +
-    "                            <div alerts-item-fields alertdata=\"alert\" list=\"data\"></div>\n" +
-    "                            <div class=\"row form-group text-center\">\n" +
-    "                                <button type=\"submit\" class=\"btn btn-success\"\n" +
-    "                                        ng-disabled=\"uploading ||\n" +
-    "                                         alert.message.length < 1 ||\n" +
-    "                                         alert.dateStart.length < 1 ||\n" +
-    "                                         alert.dateEnd.length < 1\">\n" +
-    "                                    Update Alert\n" +
-    "                                </button>\n" +
-    "                                <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteAlert(alert)\"\n" +
-    "                                        ng-disabled=\"uploading\">\n" +
-    "                                    Delete Alert\n" +
-    "                                </button>\n" +
-    "                                <br>\n" +
-    "                                {{alert.formResponse}}\n" +
-    "                            </div>\n" +
-    "                        </form>\n" +
-    "                    </div>\n" +
-    "                </td>\n" +
-    "                <td ng-click=\"toggleAlerts(alert)\" style=\"cursor: pointer;\">\n" +
-    "                    <h4>\n" +
-    "                        <small ng-if=\"alert.selType.value == 0\"><span class=\"label label-success\">success</span></small>\n" +
-    "                        <small ng-if=\"alert.selType.value == 1\"><span class=\"label label-warning\">warning</span></small>\n" +
-    "                        <small ng-if=\"alert.selType.value == 2\"><span class=\"label label-danger\">danger</span></small>\n" +
-    "                    </h4>\n" +
-    "                </td>\n" +
-    "                <td ng-click=\"toggleAlerts(alert)\" style=\"cursor: pointer;\">\n" +
-    "                    {{alert.dateStart | date : 'MMM d, y'}}\n" +
-    "                </td>\n" +
-    "                <td ng-click=\"toggleAlerts(alert)\" style=\"cursor: pointer;\">\n" +
-    "                    {{alert.dateEnd | date : 'MMM d, y'}}\n" +
-    "                </td>\n" +
-    "            </tr>\n" +
-    "            </tbody>\n" +
-    "        </table>\n" +
-    "    </div>\n" +
+    "                    </th>\n" +
+    "                    <th class=\"hidden-xs\">\n" +
+    "                        <a ng-click=\"sortBy(1)\"\n" +
+    "                           ng-class=\"{'sortable': !sortModes[1].reverse && sortMode == 1, 'sortable-reverse': sortModes[1].reverse && sortMode == 1}\">\n" +
+    "                            Type\n" +
+    "                        </a>\n" +
+    "                    </th>\n" +
+    "                    <th class=\"hidden-xs\">\n" +
+    "                        <a ng-click=\"sortBy(2)\"\n" +
+    "                           ng-class=\"{'sortable': !sortModes[2].reverse && sortMode == 2, 'sortable-reverse': sortModes[2].reverse && sortMode == 2}\">\n" +
+    "                            Start Date\n" +
+    "                        </a>\n" +
+    "                    </th>\n" +
+    "                    <th class=\"hidden-xs\">\n" +
+    "                        <a ng-click=\"sortBy(3)\"\n" +
+    "                           ng-class=\"{'sortable': !sortModes[3].reverse && sortMode == 3, 'sortable-reverse': sortModes[3].reverse && sortMode == 3}\">\n" +
+    "                            End Date\n" +
+    "                        </a>\n" +
+    "                    </th>\n" +
+    "                </tr>\n" +
+    "                </thead>\n" +
+    "                <tbody>\n" +
+    "                <tr ng-repeat=\"alert in filteredList = (data.alerts | filter:{message:alertFilter}\n" +
+    "                                                                    | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\n" +
+    "                                                                    | startFrom:(currentPage-1)*perPage\n" +
+    "                                                                    | limitTo:perPage\">\n" +
+    "                    <td>\n" +
+    "                        <h4 ng-click=\"toggleAlerts(alert)\" style=\"cursor: pointer;\">\n" +
+    "                            <a>\n" +
+    "                                <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"alert.show\"></span>\n" +
+    "                                <span class=\"fa fa-fw fa-caret-down\" ng-show=\"alert.show\"></span>\n" +
+    "                                {{alert.message}}\n" +
+    "                            </a>\n" +
+    "                        </h4>\n" +
+    "                        <div ng-show=\"alert.show\">\n" +
+    "                            <form ng-submit=\"updateAlert(alert)\">\n" +
+    "                                <div alerts-item-fields alertdata=\"alert\" list=\"data\"></div>\n" +
+    "                                <div class=\"row form-group text-center\">\n" +
+    "                                    <button type=\"submit\" class=\"btn btn-success\"\n" +
+    "                                            ng-disabled=\"uploading ||\n" +
+    "                                             alert.message.length < 1 ||\n" +
+    "                                             alert.dateStart.length < 1 ||\n" +
+    "                                             alert.dateEnd.length < 1\">\n" +
+    "                                        Update Alert\n" +
+    "                                    </button>\n" +
+    "                                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteAlert(alert)\"\n" +
+    "                                            ng-disabled=\"uploading\">\n" +
+    "                                        Delete Alert\n" +
+    "                                    </button>\n" +
+    "                                    <br>\n" +
+    "                                    {{alert.formResponse}}\n" +
+    "                                </div>\n" +
+    "                            </form>\n" +
+    "                        </div>\n" +
+    "                    </td>\n" +
+    "                    <td ng-click=\"toggleAlerts(alert)\" style=\"cursor: pointer;\">\n" +
+    "                        <h4>\n" +
+    "                            <small ng-if=\"alert.selType.value == 0\"><span class=\"label label-success\">success</span></small>\n" +
+    "                            <small ng-if=\"alert.selType.value == 1\"><span class=\"label label-warning\">warning</span></small>\n" +
+    "                            <small ng-if=\"alert.selType.value == 2\"><span class=\"label label-danger\">danger</span></small>\n" +
+    "                        </h4>\n" +
+    "                    </td>\n" +
+    "                    <td ng-click=\"toggleAlerts(alert)\" style=\"cursor: pointer;\">\n" +
+    "                        {{alert.dateStart | date : 'MMM d, y'}}\n" +
+    "                    </td>\n" +
+    "                    <td ng-click=\"toggleAlerts(alert)\" style=\"cursor: pointer;\">\n" +
+    "                        {{alert.dateEnd | date : 'MMM d, y'}}\n" +
+    "                    </td>\n" +
+    "                </tr>\n" +
+    "                </tbody>\n" +
+    "            </table>\n" +
+    "        </div>\n" +
     "\n" +
-    "    <div class=\"text-center\">\n" +
-    "        <pagination total-items=\"filteredList.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
-    "                    boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredList.length > perPage\"></pagination>\n" +
+    "        <div class=\"text-center\">\n" +
+    "            <pagination total-items=\"filteredList.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
+    "                        boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredList.length > perPage\"></pagination>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "    <div ng-if=\"!hasAccess\">\n" +
+    "        <h3>Sorry, you don't have permissions to edit alerts</h3>\n" +
     "    </div>\n" +
     "</div>");
 }]);
@@ -8342,393 +9685,396 @@ angular.module("manageAlerts/manageAlertsItemFields.tpl.html", []).run(["$templa
 
 angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageDatabases/manageDatabases.tpl.html",
-    "<h2>Manage Databases</h2>\n" +
+    "<div class=\"container\">\n" +
+    "    <h2>Manage Databases</h2>\n" +
     "\n" +
-    "<div>\n" +
-    "    <div class=\"row form-inline\">\n" +
-    "        <div class=\"form-group col-md-12\">\n" +
-    "            <label for=\"filterBy\">Filter <small>{{filteredDB.length}}</small> results by</label>\n" +
-    "            <div id=\"filterBy\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Title starts with\" ng-model=\"titleStartFilter\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"titleFilter\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Description contains\" ng-model=\"descrFilter\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Subjects contain\" ng-model=\"subjectFilter\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Media Types contain\" ng-model=\"typeFilter\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Publisher contains\" ng-model=\"publisherFilter\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Vendor contains\" ng-model=\"vendorFilter\">\n" +
-    "                <select class=\"form-control\" ng-model=\"disFilter\" ng-options=\"val.name for val in disValues\">\n" +
-    "                </select>\n" +
+    "    <div ng-if=\"hasAccess\">\n" +
+    "        <div class=\"row form-inline\">\n" +
+    "            <div class=\"form-group col-md-12\">\n" +
+    "                <label for=\"filterBy\">Filter <small>{{filteredDB.length}}</small> results by</label>\n" +
+    "                <div id=\"filterBy\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Title starts with\" ng-model=\"titleStartFilter\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"titleFilter\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Description contains\" ng-model=\"descrFilter\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Subjects contain\" ng-model=\"subjectFilter\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Media Types contain\" ng-model=\"typeFilter\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Publisher contains\" ng-model=\"publisherFilter\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Vendor contains\" ng-model=\"vendorFilter\">\n" +
+    "                    <select class=\"form-control\" ng-model=\"disFilter\" ng-options=\"val.name for val in disValues\">\n" +
+    "                    </select>\n" +
+    "                </div>\n" +
+    "                <label for=\"sortBy\">Sort by</label>\n" +
+    "                <div id=\"sortBy\">\n" +
+    "                    <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"0\" ng-click=\"sortBy(0)\">\n" +
+    "                        Title\n" +
+    "                        <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[0].reverse\"></span>\n" +
+    "                        <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[0].reverse\"></span>\n" +
+    "                    </button>\n" +
+    "                    <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"1\" ng-click=\"sortBy(1)\">\n" +
+    "                        Creation Date\n" +
+    "                        <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[1].reverse\"></span>\n" +
+    "                        <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[1].reverse\"></span>\n" +
+    "                    </button>\n" +
+    "                    <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"2\" ng-click=\"sortBy(2)\">\n" +
+    "                        Last Modified\n" +
+    "                        <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[2].reverse\"></span>\n" +
+    "                        <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[2].reverse\"></span>\n" +
+    "                    </button>\n" +
+    "                    <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"3\" ng-click=\"sortBy(3)\">\n" +
+    "                        Temporary Disabled\n" +
+    "                        <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[3].reverse\"></span>\n" +
+    "                        <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[3].reverse\"></span>\n" +
+    "                    </button>\n" +
+    "                </div>\n" +
     "            </div>\n" +
-    "            <label for=\"sortBy\">Sort by</label>\n" +
-    "            <div id=\"sortBy\">\n" +
-    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"0\" ng-click=\"sortBy(0)\">\n" +
-    "                    Title\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[0].reverse\"></span>\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[0].reverse\"></span>\n" +
-    "                </button>\n" +
-    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"1\" ng-click=\"sortBy(1)\">\n" +
-    "                    Creation Date\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[1].reverse\"></span>\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[1].reverse\"></span>\n" +
-    "                </button>\n" +
-    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"2\" ng-click=\"sortBy(2)\">\n" +
-    "                    Last Modified\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[2].reverse\"></span>\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[2].reverse\"></span>\n" +
-    "                </button>\n" +
-    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"3\" ng-click=\"sortBy(3)\">\n" +
-    "                    Temporary Disabled\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[3].reverse\"></span>\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[3].reverse\"></span>\n" +
-    "                </button>\n" +
+    "        </div>\n" +
+    "\n" +
+    "        <div class=\"text-center\">\n" +
+    "            <pagination total-items=\"filteredDB.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
+    "                        boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredDB.length > perPage\"></pagination>\n" +
+    "        </div>\n" +
+    "        <div class=\"row row-clickable\"\n" +
+    "             ng-repeat=\"db in filteredDB = (DBList.databases | filter:{title:titleStartFilter}:startTitle\n" +
+    "                                                             | filter:{title:titleFilter}\n" +
+    "                                                             | filter:{description:descrFilter}\n" +
+    "                                                             | filter:{subjects:subjectFilter}\n" +
+    "                                                             | filter:{types:typeFilter}\n" +
+    "                                                             | filter:{publisher:publisherFilter}\n" +
+    "                                                             | filter:{vendor:vendorFilter}\n" +
+    "                                                             | filter:{disabled:disFilter.value}\n" +
+    "                                                             | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\n" +
+    "            | startFrom:(currentPage-1)*perPage | limitTo:perPage\"\n" +
+    "             ng-class=\"{sdOpen: db.show}\">\n" +
+    "            <div class=\"col-md-12\" ng-click=\"toggleDB(db)\" style=\"cursor: pointer;\">\n" +
+    "                <div class=\"col-md-10\">\n" +
+    "                    <h4>\n" +
+    "                        <a>\n" +
+    "                            <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"db.show\"></span>\n" +
+    "                            <span class=\"fa fa-fw fa-caret-down\" ng-show=\"db.show\"></span>\n" +
+    "                        </a>\n" +
+    "                        <a>{{db.title}}</a>\n" +
+    "                        <small>{{db.publisher}} <span ng-show=\"db.vendor.length > 0\">: {{db.vendor}}</span></small>\n" +
+    "                    </h4>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-1 text-right\">\n" +
+    "                    <h4>\n" +
+    "                        <small ng-if=\"db.tmpDisabled == 1\"><span class=\"label label-warning\">Tmp</span></small>\n" +
+    "                        <small ng-if=\"db.changed\"><span class=\"label label-danger\">Unsaved</span></small>\n" +
+    "                    </h4>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-1\">\n" +
+    "                    <h4 ng-show=\"db.disabled == 1 || db.tmpDisabled == 1\"><small><span class=\"label label-danger\">Disabled</span></small></h4>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-12\" ng-show=\"db.show\">\n" +
+    "                <form ng-submit=\"updateDB(db)\">\n" +
+    "                    <div class=\"col-md-6 form-group\">\n" +
+    "                        <label for=\"{{db.id}}_title\">Title</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{db.title}}\" ng-model=\"db.title\"\n" +
+    "                               id=\"{{db.id}}_title\" maxlength=\"200\" required ng-change=\"changed(db)\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-2 form-group\">\n" +
+    "                        <label for=\"{{db.id}}_Publisher\">Publisher</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{db.publisher}}\" ng-model=\"db.publisher\"\n" +
+    "                               id=\"{{db.id}}_Publisher\" maxlength=\"100\" ng-change=\"changed(db)\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-2 form-group\">\n" +
+    "                        <label for=\"{{db.id}}_Vendor\">Vendor</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{db.vendor}}\" ng-model=\"db.vendor\"\n" +
+    "                               id=\"{{db.id}}_Vendor\" maxlength=\"100\" ng-change=\"changed(db)\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-2 form-group\">\n" +
+    "                        <label for=\"{{db.id}}_Format\">Format</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{db.format}}\" ng-model=\"db.format\"\n" +
+    "                               id=\"{{db.id}}_Format\" maxlength=\"50\" ng-change=\"changed(db)\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-6 form-group\">\n" +
+    "                        <label for=\"{{db.id}}_URL\">URL</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{db.url}}\" ng-model=\"db.url\"\n" +
+    "                               id=\"{{db.id}}_URL\" maxlength=\"2000\" required ng-change=\"changed(db)\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-3 form-group\">\n" +
+    "                        <label for=\"{{db.id}}_Location\">Location</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{db.location}}\" ng-model=\"db.location\"\n" +
+    "                               id=\"{{db.id}}_Location\" maxlength=\"50\" ng-change=\"changed(db)\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-1 form-group\">\n" +
+    "                        <label for=\"{{db.id}}_NotInEDS\">In EDS</label>\n" +
+    "                        <select class=\"form-control\" ng-model=\"db.notInEDS\" ng-options=\"val for val in inEDSValues\"\n" +
+    "                                id=\"{{db.id}}_NotInEDS\" ng-change=\"changed(db)\">\n" +
+    "                        </select>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-1 form-group\">\n" +
+    "                        <label for=\"{{db.id}}_Full-text\">Fulltext</label>\n" +
+    "                        <select class=\"form-control\" ng-model=\"db.hasFullText\" ng-options=\"val for val in fullTextValues\"\n" +
+    "                                id=\"{{db.id}}_Full-text\" ng-change=\"changed(db)\">\n" +
+    "                        </select>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-1 form-group\">\n" +
+    "                        <label for=\"{{db.id}}_Authenticate\">Authenticate</label>\n" +
+    "                        <input type=\"checkbox\" class=\"form-control\" ng-model=\"db.auth\" ng-true-value=\"1\" ng-false-value=\"0\"\n" +
+    "                               id=\"{{db.id}}_Authenticate\" ng-change=\"changed(db)\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-6 form-group\">\n" +
+    "                        <label for=\"{{db.id}}_Coverage\">Coverage</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{db.coverage}}\" ng-model=\"db.coverage\"\n" +
+    "                               id=\"{{db.id}}_Coverage\" maxlength=\"256\" ng-change=\"changed(db)\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-3 form-group\">\n" +
+    "                        <label for=\"{{db.id}}_Notes\">Notes</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{db.notes}}\" ng-model=\"db.notes\"\n" +
+    "                               id=\"{{db.id}}_Notes\" maxlength=\"100\" ng-change=\"changed(db)\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-3 form-group\">\n" +
+    "                        <label for=\"{{db.id}}_Status\">Status</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{db.status}}\" ng-model=\"db.status\"\n" +
+    "                               id=\"{{db.id}}_Status\" maxlength=\"100\" ng-change=\"changed(db)\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-12 form-group\">\n" +
+    "                        <label for=\"{{db.id}}_descr\">Database Description</label>\n" +
+    "                        <textarea class=\"form-control\" rows=\"3\" id=\"{{db.id}}_descr\" ng-model=\"db.description\" maxlength=\"4096\"\n" +
+    "                                  required ng-change=\"changed(db)\"></textarea>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-1 form-group\">\n" +
+    "                        <label for=\"{{db.id}}_presented\">PresentedBy</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{db.presentedBy}}\" ng-model=\"db.presentedBy\"\n" +
+    "                               id=\"{{db.id}}_presented\" maxlength=\"50\" ng-change=\"changed(db)\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-1 form-group\">\n" +
+    "                        <label for=\"{{db.id}}_Audience1\">Audience1</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{db.audience1}}\" ng-model=\"db.audience1\"\n" +
+    "                               id=\"{{db.id}}_Audience1\" maxlength=\"30\" ng-change=\"changed(db)\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-2 form-group\">\n" +
+    "                        <label for=\"{{db.id}}_Audience2\">Audience2</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{db.audience2}}\" ng-model=\"db.audience2\"\n" +
+    "                               id=\"{{db.id}}_Audience2\" maxlength=\"30\" ng-change=\"changed(db)\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-2 form-group\">\n" +
+    "                        <label for=\"{{db.id}}_updatedBy\">Updated by</label>\n" +
+    "                        <p id=\"{{db.id}}_updatedBy\">{{db.updatedBy}}</p>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-2 form-group\">\n" +
+    "                        <label for=\"{{db.id}}_dAuthor\">Description Author</label>\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"{{db.descrAuthor}}\" ng-model=\"db.descrAuthor\"\n" +
+    "                               id=\"{{db.id}}_dAuthor\" maxlength=\"50\" required ng-change=\"changed(db)\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-2 form-group\">\n" +
+    "                        <label for=\"{{db.id}}_date1\">Created/Modified</label>\n" +
+    "                        <p id=\"{{db.id}}_date1\">{{db.dateCreated}}<br>{{db.lastModified}}</p>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-1 form-group\">\n" +
+    "                        <label for=\"{{db.id}}_Disable\">Disabled</label>\n" +
+    "                        <input type=\"checkbox\" class=\"form-control\" ng-model=\"db.disabled\" ng-true-value=\"1\" ng-false-value=\"0\"\n" +
+    "                               id=\"{{db.id}}_Disable\" ng-change=\"changed(db)\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-1 form-group\">\n" +
+    "                        <label for=\"{{db.id}}_tmpDisable\">TmpDisable</label>\n" +
+    "                        <input type=\"checkbox\" class=\"form-control\" ng-model=\"db.tmpDisabled\" ng-true-value=\"1\" ng-false-value=\"0\"\n" +
+    "                               id=\"{{db.id}}_tmpDisable\" ng-change=\"changed(db)\">\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-12\">\n" +
+    "                        <div class=\"col-md-6 form-group\">\n" +
+    "                            <label for=\"{{db.id}}_subjects\">Subjects</label>\n" +
+    "                            <ul class=\"list-group\" id=\"{{db.id}}_subjects\">\n" +
+    "                                <li class=\"list-group-item\" ng-repeat=\"subject in db.subjects\">\n" +
+    "                                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteSubject(db,subject)\">Delete</button>\n" +
+    "                                    {{subject.subject}} : {{subject.type}}\n" +
+    "                                </li>\n" +
+    "                                <li class=\"list-group-item col-md-12\">\n" +
+    "                                    <div class=\"col-md-7\">\n" +
+    "                                        <select class=\"form-control\" ng-model=\"db.selSubj\" ng-options=\"sub.subject for sub in DBList.subjects\">\n" +
+    "                                        </select>\n" +
+    "                                    </div>\n" +
+    "                                    <div class=\"col-md-2\">\n" +
+    "                                        <select class=\"form-control\" ng-model=\"db.subjType\" ng-options=\"val for val in subjectValues\">\n" +
+    "                                        </select>\n" +
+    "                                    </div>\n" +
+    "                                    <div class=\"col-md-3\">\n" +
+    "                                        <button type=\"button\" class=\"btn btn-success\" ng-click=\"addSubject(db)\">Add Subject</button>\n" +
+    "                                    </div>\n" +
+    "                                </li>\n" +
+    "                            </ul>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"col-md-6 form-group\">\n" +
+    "                            <label for=\"{{db.id}}_types\">Types</label>\n" +
+    "                            <ul class=\"list-group\" id=\"{{db.id}}_types\">\n" +
+    "                                <li class=\"list-group-item\" ng-repeat=\"type in db.types\">\n" +
+    "                                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteType(db,type)\">Delete</button>\n" +
+    "                                    {{type.type}}\n" +
+    "                                </li>\n" +
+    "                                <li class=\"list-group-item form-inline\">\n" +
+    "                                    <select class=\"form-control\" ng-model=\"db.selType\" ng-options=\"typ.type for typ in DBList.types\">\n" +
+    "                                    </select>\n" +
+    "                                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"addType(db)\">Add Type</button>\n" +
+    "                                </li>\n" +
+    "                            </ul>\n" +
+    "                        </div>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-md-12 text-center\">\n" +
+    "                        <button type=\"submit\" class=\"btn btn-success\">Update information</button>\n" +
+    "                        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteDB(db)\">\n" +
+    "                            Delete {{db[0]}} database\n" +
+    "                        </button>\n" +
+    "                    </div>\n" +
+    "                </form>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
-    "\n" +
     "    <div class=\"text-center\">\n" +
     "        <pagination total-items=\"filteredDB.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
     "                    boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredDB.length > perPage\"></pagination>\n" +
     "    </div>\n" +
-    "    <div class=\"row row-clickable\"\n" +
-    "         ng-repeat=\"db in filteredDB = (DBList.databases | filter:{title:titleStartFilter}:startTitle\n" +
-    "                                                         | filter:{title:titleFilter}\n" +
-    "                                                         | filter:{description:descrFilter}\n" +
-    "                                                         | filter:{subjects:subjectFilter}\n" +
-    "                                                         | filter:{types:typeFilter}\n" +
-    "                                                         | filter:{publisher:publisherFilter}\n" +
-    "                                                         | filter:{vendor:vendorFilter}\n" +
-    "                                                         | filter:{disabled:disFilter.value}\n" +
-    "                                                         | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\n" +
-    "        | startFrom:(currentPage-1)*perPage | limitTo:perPage\"\n" +
-    "         ng-class=\"{sdOpen: db.show}\">\n" +
-    "        <div class=\"col-md-12\" ng-click=\"toggleDB(db)\" style=\"cursor: pointer;\">\n" +
-    "            <div class=\"col-md-10\">\n" +
-    "                <h4>\n" +
-    "                    <a>\n" +
-    "                        <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"db.show\"></span>\n" +
-    "                        <span class=\"fa fa-fw fa-caret-down\" ng-show=\"db.show\"></span>\n" +
-    "                    </a>\n" +
-    "                    <a>{{db.title}}</a>\n" +
-    "                    <small>{{db.publisher}} <span ng-show=\"db.vendor.length > 0\">: {{db.vendor}}</span></small>\n" +
-    "                </h4>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-1 text-right\">\n" +
-    "                <h4>\n" +
-    "                    <small ng-if=\"db.tmpDisabled == 1\"><span class=\"label label-warning\">Tmp</span></small>\n" +
-    "                    <small ng-if=\"db.changed\"><span class=\"label label-danger\">Unsaved</span></small>\n" +
-    "                </h4>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-1\">\n" +
-    "                <h4 ng-show=\"db.disabled == 1 || db.tmpDisabled == 1\"><small><span class=\"label label-danger\">Disabled</span></small></h4>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-12\" ng-show=\"db.show\">\n" +
-    "            <form ng-submit=\"updateDB(db)\">\n" +
+    "\n" +
+    "    <h3>Create new Database</h3>\n" +
+    "    <form ng-submit=\"createDB()\">\n" +
+    "        <div class=\"row sdOpen\">\n" +
+    "            <div class=\"col-md-12\">\n" +
     "                <div class=\"col-md-6 form-group\">\n" +
-    "                    <label for=\"{{db.id}}_title\">Title</label>\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.title}}\" ng-model=\"db.title\"\n" +
-    "                           id=\"{{db.id}}_title\" maxlength=\"200\" required ng-change=\"changed(db)\">\n" +
+    "                    <label for=\"title\">Title</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Database Title\" ng-model=\"newDB.title\"\n" +
+    "                           id=\"title\" maxlength=\"200\" required>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
-    "                    <label for=\"{{db.id}}_Publisher\">Publisher</label>\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.publisher}}\" ng-model=\"db.publisher\"\n" +
-    "                           id=\"{{db.id}}_Publisher\" maxlength=\"100\" ng-change=\"changed(db)\">\n" +
+    "                    <label for=\"Publisher\">Publisher</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Publisher\" ng-model=\"newDB.publisher\"\n" +
+    "                           id=\"Publisher\" maxlength=\"100\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
-    "                    <label for=\"{{db.id}}_Vendor\">Vendor</label>\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.vendor}}\" ng-model=\"db.vendor\"\n" +
-    "                           id=\"{{db.id}}_Vendor\" maxlength=\"100\" ng-change=\"changed(db)\">\n" +
+    "                    <label for=\"Vendor\">Vendor</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Vendor\" ng-model=\"newDB.vendor\"\n" +
+    "                           id=\"Vendor\" maxlength=\"100\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
-    "                    <label for=\"{{db.id}}_Format\">Format</label>\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.format}}\" ng-model=\"db.format\"\n" +
-    "                           id=\"{{db.id}}_Format\" maxlength=\"50\" ng-change=\"changed(db)\">\n" +
+    "                    <label for=\"Format\">Format</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Format\" ng-model=\"newDB.format\"\n" +
+    "                           id=\"Format\" maxlength=\"50\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-6 form-group\">\n" +
-    "                    <label for=\"{{db.id}}_URL\">URL</label>\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.url}}\" ng-model=\"db.url\"\n" +
-    "                           id=\"{{db.id}}_URL\" maxlength=\"2000\" required ng-change=\"changed(db)\">\n" +
+    "                    <label for=\"URL\">URL</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"http://www.example.com/\" ng-model=\"newDB.url\"\n" +
+    "                           id=\"URL\" maxlength=\"2000\" required>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-3 form-group\">\n" +
-    "                    <label for=\"{{db.id}}_Location\">Location</label>\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.location}}\" ng-model=\"db.location\"\n" +
-    "                           id=\"{{db.id}}_Location\" maxlength=\"50\" ng-change=\"changed(db)\">\n" +
+    "                    <label for=\"Location\">Location</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Location\" ng-model=\"newDB.location\"\n" +
+    "                           id=\"Location\" maxlength=\"50\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-1 form-group\">\n" +
-    "                    <label for=\"{{db.id}}_NotInEDS\">In EDS</label>\n" +
-    "                    <select class=\"form-control\" ng-model=\"db.notInEDS\" ng-options=\"val for val in inEDSValues\"\n" +
-    "                            id=\"{{db.id}}_NotInEDS\" ng-change=\"changed(db)\">\n" +
+    "                    <label for=\"NotInEDS\">In EDS</label>\n" +
+    "                    <select class=\"form-control\" ng-model=\"newDB.notInEDS\" ng-options=\"val for val in inEDSValues\"\n" +
+    "                            id=\"NotInEDS\">\n" +
     "                    </select>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-1 form-group\">\n" +
-    "                    <label for=\"{{db.id}}_Full-text\">Fulltext</label>\n" +
-    "                    <select class=\"form-control\" ng-model=\"db.hasFullText\" ng-options=\"val for val in fullTextValues\"\n" +
-    "                            id=\"{{db.id}}_Full-text\" ng-change=\"changed(db)\">\n" +
+    "                    <label for=\"Full-text\">Fulltext</label>\n" +
+    "                    <select class=\"form-control\" ng-model=\"newDB.hasFullText\" ng-options=\"val for val in fullTextValues\"\n" +
+    "                            id=\"Full-text\">\n" +
     "                    </select>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-1 form-group\">\n" +
-    "                    <label for=\"{{db.id}}_Authenticate\">Authenticate</label>\n" +
-    "                    <input type=\"checkbox\" class=\"form-control\" ng-model=\"db.auth\" ng-true-value=\"1\" ng-false-value=\"0\"\n" +
-    "                           id=\"{{db.id}}_Authenticate\" ng-change=\"changed(db)\">\n" +
+    "                    <label for=\"Authenticate\">Authenticate</label>\n" +
+    "                    <input type=\"checkbox\" class=\"form-control\" ng-model=\"newDB.auth\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
+    "                           id=\"Authenticate\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-6 form-group\">\n" +
-    "                    <label for=\"{{db.id}}_Coverage\">Coverage</label>\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.coverage}}\" ng-model=\"db.coverage\"\n" +
-    "                           id=\"{{db.id}}_Coverage\" maxlength=\"256\" ng-change=\"changed(db)\">\n" +
+    "                    <label for=\"Coverage\">Coverage</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Database Coverage\" ng-model=\"newDB.coverage\"\n" +
+    "                           id=\"Coverage\" maxlength=\"256\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-3 form-group\">\n" +
-    "                    <label for=\"{{db.id}}_Notes\">Notes</label>\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.notes}}\" ng-model=\"db.notes\"\n" +
-    "                           id=\"{{db.id}}_Notes\" maxlength=\"100\" ng-change=\"changed(db)\">\n" +
+    "                    <label for=\"dAuthor\">Description Author</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Enter Author Name\" ng-model=\"newDB.descrAuthor\"\n" +
+    "                           id=\"dAuthor\" maxlength=\"50\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-3 form-group\">\n" +
-    "                    <label for=\"{{db.id}}_Status\">Status</label>\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.status}}\" ng-model=\"db.status\"\n" +
-    "                           id=\"{{db.id}}_Status\" maxlength=\"100\" ng-change=\"changed(db)\">\n" +
+    "                    <label for=\"Status\">Status</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Status\" ng-model=\"newDB.status\"\n" +
+    "                           id=\"Status\" maxlength=\"100\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-12 form-group\">\n" +
-    "                    <label for=\"{{db.id}}_descr\">Database Description</label>\n" +
-    "                    <textarea class=\"form-control\" rows=\"3\" id=\"{{db.id}}_descr\" ng-model=\"db.description\" maxlength=\"4096\"\n" +
-    "                              required ng-change=\"changed(db)\"></textarea>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-1 form-group\">\n" +
-    "                    <label for=\"{{db.id}}_presented\">PresentedBy</label>\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.presentedBy}}\" ng-model=\"db.presentedBy\"\n" +
-    "                           id=\"{{db.id}}_presented\" maxlength=\"50\" ng-change=\"changed(db)\">\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-1 form-group\">\n" +
-    "                    <label for=\"{{db.id}}_Audience1\">Audience1</label>\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.audience1}}\" ng-model=\"db.audience1\"\n" +
-    "                           id=\"{{db.id}}_Audience1\" maxlength=\"30\" ng-change=\"changed(db)\">\n" +
+    "                    <label for=\"descr\">Database Description</label>\n" +
+    "                    <textarea class=\"form-control\" rows=\"3\" id=\"descr\" ng-model=\"newDB.description\" maxlength=\"4096\" required></textarea>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
-    "                    <label for=\"{{db.id}}_Audience2\">Audience2</label>\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.audience2}}\" ng-model=\"db.audience2\"\n" +
-    "                           id=\"{{db.id}}_Audience2\" maxlength=\"30\" ng-change=\"changed(db)\">\n" +
+    "                    <label for=\"presented\">Presented by</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Presented By\" ng-model=\"newDB.presentedBy\"\n" +
+    "                           id=\"presented\" maxlength=\"50\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
-    "                    <label for=\"{{db.id}}_updatedBy\">Updated by</label>\n" +
-    "                    <p id=\"{{db.id}}_updatedBy\">{{db.updatedBy}}</p>\n" +
+    "                    <label for=\"Audience1\">Audience One</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Audience One\" ng-model=\"newDB.audience1\"\n" +
+    "                           id=\"Audience1\" maxlength=\"30\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-2 form-group\">\n" +
-    "                    <label for=\"{{db.id}}_dAuthor\">Description Author</label>\n" +
-    "                    <input type=\"text\" class=\"form-control\" placeholder=\"{{db.descrAuthor}}\" ng-model=\"db.descrAuthor\"\n" +
-    "                           id=\"{{db.id}}_dAuthor\" maxlength=\"50\" required ng-change=\"changed(db)\">\n" +
+    "                    <label for=\"Audience2\">Audience Two</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Audience Two\" ng-model=\"newDB.audience2\"\n" +
+    "                           id=\"Audience2\" maxlength=\"30\">\n" +
     "                </div>\n" +
-    "                <div class=\"col-md-2 form-group\">\n" +
-    "                    <label for=\"{{db.id}}_date1\">Created/Modified</label>\n" +
-    "                    <p id=\"{{db.id}}_date1\">{{db.dateCreated}}<br>{{db.lastModified}}</p>\n" +
+    "                <div class=\"col-md-4 form-group\">\n" +
+    "                    <label for=\"Notes\">Notes</label>\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Notes\" ng-model=\"newDB.notes\"\n" +
+    "                           id=\"Notes\" maxlength=\"100\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-1 form-group\">\n" +
-    "                    <label for=\"{{db.id}}_Disable\">Disabled</label>\n" +
-    "                    <input type=\"checkbox\" class=\"form-control\" ng-model=\"db.disabled\" ng-true-value=\"1\" ng-false-value=\"0\"\n" +
-    "                           id=\"{{db.id}}_Disable\" ng-change=\"changed(db)\">\n" +
+    "                    <label for=\"Disable\">Disabled</label>\n" +
+    "                    <input type=\"checkbox\" class=\"form-control\" ng-model=\"newDB.disabled\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
+    "                           id=\"Disable\">\n" +
     "                </div>\n" +
     "                <div class=\"col-md-1 form-group\">\n" +
-    "                    <label for=\"{{db.id}}_tmpDisable\">TmpDisable</label>\n" +
-    "                    <input type=\"checkbox\" class=\"form-control\" ng-model=\"db.tmpDisabled\" ng-true-value=\"1\" ng-false-value=\"0\"\n" +
-    "                           id=\"{{db.id}}_tmpDisable\" ng-change=\"changed(db)\">\n" +
+    "                    <label for=\"tmpDisable\">TmpDisable</label>\n" +
+    "                    <input type=\"checkbox\" class=\"form-control\" ng-model=\"newDB.tmpDisabled\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
+    "                           id=\"tmpDisable\">\n" +
     "                </div>\n" +
-    "                <div class=\"col-md-12\">\n" +
+    "                <div class=\"row\">\n" +
     "                    <div class=\"col-md-6 form-group\">\n" +
-    "                        <label for=\"{{db.id}}_subjects\">Subjects</label>\n" +
-    "                        <ul class=\"list-group\" id=\"{{db.id}}_subjects\">\n" +
-    "                            <li class=\"list-group-item\" ng-repeat=\"subject in db.subjects\">\n" +
-    "                                <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteSubject(db,subject)\">Delete</button>\n" +
+    "                        <label for=\"subjects\">Subjects</label>\n" +
+    "                        <ul class=\"list-group\" id=\"subjects\">\n" +
+    "                            <li class=\"list-group-item\" ng-repeat=\"subject in newDB.subjects\">\n" +
+    "                                <button type=\"button\" class=\"btn btn-danger\" ng-click=\"delSubjNewDB($index)\">Delete</button>\n" +
     "                                {{subject.subject}} : {{subject.type}}\n" +
     "                            </li>\n" +
     "                            <li class=\"list-group-item col-md-12\">\n" +
     "                                <div class=\"col-md-7\">\n" +
-    "                                    <select class=\"form-control\" ng-model=\"db.selSubj\" ng-options=\"sub.subject for sub in DBList.subjects\">\n" +
+    "                                    <select class=\"form-control\" ng-model=\"newDB.selSubj\" ng-options=\"sub.subject for sub in DBList.subjects\">\n" +
     "                                    </select>\n" +
     "                                </div>\n" +
     "                                <div class=\"col-md-2\">\n" +
-    "                                    <select class=\"form-control\" ng-model=\"db.subjType\" ng-options=\"val for val in subjectValues\">\n" +
+    "                                    <select class=\"form-control\" ng-model=\"newDB.subjType\" ng-options=\"val for val in subjectValues\">\n" +
     "                                    </select>\n" +
     "                                </div>\n" +
     "                                <div class=\"col-md-3\">\n" +
-    "                                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"addSubject(db)\">Add Subject</button>\n" +
+    "                                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"addSubjNewDB()\">Add Subject</button>\n" +
     "                                </div>\n" +
     "                            </li>\n" +
     "                        </ul>\n" +
     "                    </div>\n" +
     "                    <div class=\"col-md-6 form-group\">\n" +
-    "                        <label for=\"{{db.id}}_types\">Types</label>\n" +
-    "                        <ul class=\"list-group\" id=\"{{db.id}}_types\">\n" +
-    "                            <li class=\"list-group-item\" ng-repeat=\"type in db.types\">\n" +
-    "                                <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteType(db,type)\">Delete</button>\n" +
+    "                        <label for=\"types\">Types</label>\n" +
+    "                        <ul class=\"list-group\" id=\"types\">\n" +
+    "                            <li class=\"list-group-item\" ng-repeat=\"type in newDB.types\">\n" +
+    "                                <button type=\"button\" class=\"btn btn-danger\" ng-click=\"delTypeNewDB($index)\">Delete</button>\n" +
     "                                {{type.type}}\n" +
     "                            </li>\n" +
     "                            <li class=\"list-group-item form-inline\">\n" +
-    "                                <select class=\"form-control\" ng-model=\"db.selType\" ng-options=\"typ.type for typ in DBList.types\">\n" +
+    "                                <select class=\"form-control\" ng-model=\"newDB.selType\" ng-options=\"typ.type for typ in DBList.types\">\n" +
     "                                </select>\n" +
-    "                                <button type=\"button\" class=\"btn btn-success\" ng-click=\"addType(db)\">Add Type</button>\n" +
+    "                                <button type=\"button\" class=\"btn btn-success\" ng-click=\"addTypeNewDB()\">Add Type</button>\n" +
     "                            </li>\n" +
     "                        </ul>\n" +
     "                    </div>\n" +
     "                </div>\n" +
     "                <div class=\"col-md-12 text-center\">\n" +
-    "                    <button type=\"submit\" class=\"btn btn-success\">Update information</button>\n" +
-    "                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteDB(db)\">\n" +
-    "                        Delete {{db[0]}} database\n" +
-    "                    </button>\n" +
+    "                    <button type=\"submit\" class=\"btn btn-success\">Create Database Record</button><br>\n" +
+    "                    {{formResponse}}\n" +
     "                </div>\n" +
-    "            </form>\n" +
-    "        </div>\n" +
-    "    </div>\n" +
-    "</div>\n" +
-    "<div class=\"text-center\">\n" +
-    "    <pagination total-items=\"filteredDB.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
-    "                boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredDB.length > perPage\"></pagination>\n" +
-    "</div>\n" +
-    "\n" +
-    "<h3>Create new Database</h3>\n" +
-    "<form ng-submit=\"createDB()\">\n" +
-    "    <div class=\"row sdOpen\">\n" +
-    "        <div class=\"col-md-12\">\n" +
-    "            <div class=\"col-md-6 form-group\">\n" +
-    "                <label for=\"title\">Title</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Database Title\" ng-model=\"newDB.title\"\n" +
-    "                       id=\"title\" maxlength=\"200\" required>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
-    "                <label for=\"Publisher\">Publisher</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Publisher\" ng-model=\"newDB.publisher\"\n" +
-    "                       id=\"Publisher\" maxlength=\"100\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
-    "                <label for=\"Vendor\">Vendor</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Vendor\" ng-model=\"newDB.vendor\"\n" +
-    "                       id=\"Vendor\" maxlength=\"100\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
-    "                <label for=\"Format\">Format</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Format\" ng-model=\"newDB.format\"\n" +
-    "                       id=\"Format\" maxlength=\"50\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-6 form-group\">\n" +
-    "                <label for=\"URL\">URL</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"http://www.example.com/\" ng-model=\"newDB.url\"\n" +
-    "                       id=\"URL\" maxlength=\"2000\" required>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"Location\">Location</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Location\" ng-model=\"newDB.location\"\n" +
-    "                       id=\"Location\" maxlength=\"50\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-1 form-group\">\n" +
-    "                <label for=\"NotInEDS\">In EDS</label>\n" +
-    "                <select class=\"form-control\" ng-model=\"newDB.notInEDS\" ng-options=\"val for val in inEDSValues\"\n" +
-    "                        id=\"NotInEDS\">\n" +
-    "                </select>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-1 form-group\">\n" +
-    "                <label for=\"Full-text\">Fulltext</label>\n" +
-    "                <select class=\"form-control\" ng-model=\"newDB.hasFullText\" ng-options=\"val for val in fullTextValues\"\n" +
-    "                        id=\"Full-text\">\n" +
-    "                </select>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-1 form-group\">\n" +
-    "                <label for=\"Authenticate\">Authenticate</label>\n" +
-    "                <input type=\"checkbox\" class=\"form-control\" ng-model=\"newDB.auth\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
-    "                       id=\"Authenticate\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-6 form-group\">\n" +
-    "                <label for=\"Coverage\">Coverage</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Database Coverage\" ng-model=\"newDB.coverage\"\n" +
-    "                       id=\"Coverage\" maxlength=\"256\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"dAuthor\">Description Author</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Enter Author Name\" ng-model=\"newDB.descrAuthor\"\n" +
-    "                       id=\"dAuthor\" maxlength=\"50\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-3 form-group\">\n" +
-    "                <label for=\"Status\">Status</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Status\" ng-model=\"newDB.status\"\n" +
-    "                       id=\"Status\" maxlength=\"100\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-12 form-group\">\n" +
-    "                <label for=\"descr\">Database Description</label>\n" +
-    "                <textarea class=\"form-control\" rows=\"3\" id=\"descr\" ng-model=\"newDB.description\" maxlength=\"4096\" required></textarea>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
-    "                <label for=\"presented\">Presented by</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Presented By\" ng-model=\"newDB.presentedBy\"\n" +
-    "                       id=\"presented\" maxlength=\"50\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
-    "                <label for=\"Audience1\">Audience One</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Audience One\" ng-model=\"newDB.audience1\"\n" +
-    "                       id=\"Audience1\" maxlength=\"30\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-2 form-group\">\n" +
-    "                <label for=\"Audience2\">Audience Two</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Audience Two\" ng-model=\"newDB.audience2\"\n" +
-    "                       id=\"Audience2\" maxlength=\"30\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-4 form-group\">\n" +
-    "                <label for=\"Notes\">Notes</label>\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Notes\" ng-model=\"newDB.notes\"\n" +
-    "                       id=\"Notes\" maxlength=\"100\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-1 form-group\">\n" +
-    "                <label for=\"Disable\">Disabled</label>\n" +
-    "                <input type=\"checkbox\" class=\"form-control\" ng-model=\"newDB.disabled\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
-    "                       id=\"Disable\">\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-1 form-group\">\n" +
-    "                <label for=\"tmpDisable\">TmpDisable</label>\n" +
-    "                <input type=\"checkbox\" class=\"form-control\" ng-model=\"newDB.tmpDisabled\" ng-true-value=\"'1'\" ng-false-value=\"'0'\"\n" +
-    "                       id=\"tmpDisable\">\n" +
-    "            </div>\n" +
-    "            <div class=\"row\">\n" +
-    "                <div class=\"col-md-6 form-group\">\n" +
-    "                    <label for=\"subjects\">Subjects</label>\n" +
-    "                    <ul class=\"list-group\" id=\"subjects\">\n" +
-    "                        <li class=\"list-group-item\" ng-repeat=\"subject in newDB.subjects\">\n" +
-    "                            <button type=\"button\" class=\"btn btn-danger\" ng-click=\"delSubjNewDB($index)\">Delete</button>\n" +
-    "                            {{subject.subject}} : {{subject.type}}\n" +
-    "                        </li>\n" +
-    "                        <li class=\"list-group-item col-md-12\">\n" +
-    "                            <div class=\"col-md-7\">\n" +
-    "                                <select class=\"form-control\" ng-model=\"newDB.selSubj\" ng-options=\"sub.subject for sub in DBList.subjects\">\n" +
-    "                                </select>\n" +
-    "                            </div>\n" +
-    "                            <div class=\"col-md-2\">\n" +
-    "                                <select class=\"form-control\" ng-model=\"newDB.subjType\" ng-options=\"val for val in subjectValues\">\n" +
-    "                                </select>\n" +
-    "                            </div>\n" +
-    "                            <div class=\"col-md-3\">\n" +
-    "                                <button type=\"button\" class=\"btn btn-success\" ng-click=\"addSubjNewDB()\">Add Subject</button>\n" +
-    "                            </div>\n" +
-    "                        </li>\n" +
-    "                    </ul>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-6 form-group\">\n" +
-    "                    <label for=\"types\">Types</label>\n" +
-    "                    <ul class=\"list-group\" id=\"types\">\n" +
-    "                        <li class=\"list-group-item\" ng-repeat=\"type in newDB.types\">\n" +
-    "                            <button type=\"button\" class=\"btn btn-danger\" ng-click=\"delTypeNewDB($index)\">Delete</button>\n" +
-    "                            {{type.type}}\n" +
-    "                        </li>\n" +
-    "                        <li class=\"list-group-item form-inline\">\n" +
-    "                            <select class=\"form-control\" ng-model=\"newDB.selType\" ng-options=\"typ.type for typ in DBList.types\">\n" +
-    "                            </select>\n" +
-    "                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"addTypeNewDB()\">Add Type</button>\n" +
-    "                        </li>\n" +
-    "                    </ul>\n" +
-    "                </div>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-12 text-center\">\n" +
-    "                <button type=\"submit\" class=\"btn btn-success\">Create Database Record</button><br>\n" +
-    "                {{formResponse}}\n" +
     "            </div>\n" +
     "        </div>\n" +
+    "    </form>\n" +
+    "    <div ng-if=\"!hasAccess\">\n" +
+    "        <h3>Sorry, you don't have permissions to edit databases</h3>\n" +
     "    </div>\n" +
-    "</form>\n" +
-    "\n" +
-    "");
+    "</div>");
 }]);
 
 angular.module("manageHours/manageEx.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -8838,39 +10184,69 @@ angular.module("manageHours/manageEx.tpl.html", []).run(["$templateCache", funct
 
 angular.module("manageHours/manageHours.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageHours/manageHours.tpl.html",
-    "<h2>\n" +
-    "    Manage Hours <small>{{selLib.name}}</small>\n" +
-    "</h2>\n" +
+    "<div class=\"container\">\n" +
+    "    <h2>\n" +
+    "        Manage Hours <small>{{selLib.name}}</small>\n" +
+    "    </h2>\n" +
     "\n" +
-    "<div class=\"row\">\n" +
-    "    <div class=\"col-md-4 form-group\">\n" +
-    "        <select class=\"form-control\" ng-model=\"selLib\" ng-options=\"lib.name for lib in allowedLibraries.libraries\">\n" +
-    "        </select>\n" +
+    "    <div ng-if=\"hasAccess\">\n" +
+    "        <div class=\"row\">\n" +
+    "            <div class=\"col-md-4 form-group\">\n" +
+    "                <select class=\"form-control\" ng-model=\"selLib\" ng-options=\"lib.name for lib in allowedLibraries.libraries\">\n" +
+    "                </select>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "        <div class=\"alert alert-warning\" role=\"alert\">\n" +
+    "            <span class=\"fa fa-exclamation-triangle\"></span> Warning: Please use exceptions in order to create periods with the non\n" +
+    "            standard hours (for example, Finals week).\n" +
+    "        </div>\n" +
+    "        <div class=\"alert alert-info\" role=\"alert\">\n" +
+    "            <span class=\"fa fa-info-circle\"></span> Note: set <strong>From</strong> and <strong>To</strong> hours to\n" +
+    "            <strong>Midnight</strong> in order to indicate <strong>Open 24 hours</strong>.\n" +
+    "        </div>\n" +
+    "        <tabset justified=\"true\">\n" +
+    "            <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
+    "                <div ng-if=\"tab.number == 0\">\n" +
+    "                    <div semester-list semesters=\"allowedLibraries.sem\">\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "                <div ng-if=\"tab.number == 1\" >\n" +
+    "                    <div exception-list exceptions=\"allowedLibraries.exc\">\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "            </tab>\n" +
+    "        </tabset>\n" +
     "    </div>\n" +
-    "</div>\n" +
+    "    <div ng-if=\"userInfo.hours.admin\">\n" +
+    "        <h3><a href=\"/#/manage-hours-users\">Manage Users</a></h3>\n" +
+    "    </div>\n" +
+    "    <div ng-if=\"!hasAccess\">\n" +
+    "        <h3>Sorry, you don't have permissions to manage hours</h3>\n" +
+    "    </div>\n" +
+    "</div>");
+}]);
+
+angular.module("manageHours/manageHoursUsers.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("manageHours/manageHoursUsers.tpl.html",
+    "<div class=\"container\">\n" +
+    "    <h2>Manage Hours Users</h2>\n" +
     "\n" +
-    "<div class=\"alert alert-warning\" role=\"alert\">\n" +
-    "    <span class=\"fa fa-exclamation-triangle\"></span> Warning: Please use exceptions in order to create periods with the non\n" +
-    "    standard hours (for example, Finals week).\n" +
-    "</div>\n" +
-    "<div class=\"alert alert-info\" role=\"alert\">\n" +
-    "    <span class=\"fa fa-info-circle\"></span> Note: set <strong>From</strong> and <strong>To</strong> hours to\n" +
-    "    <strong>Midnight</strong> in order to indicate <strong>Open 24 hours</strong>.\n" +
-    "</div>\n" +
-    "\n" +
-    "<tabset justified=\"true\">\n" +
-    "    <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
-    "        <div ng-if=\"tab.number == 0\">\n" +
-    "            <div semester-list>\n" +
+    "    <tabset justified=\"true\" ng-if=\"hasAccess\">\n" +
+    "        <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
+    "            <div ng-show=\"tab.number == 0\">\n" +
+    "                <div hours-user-list>\n" +
+    "                </div>\n" +
     "            </div>\n" +
-    "        </div>\n" +
-    "        <div ng-if=\"tab.number == 1\" >\n" +
-    "            <div exception-list>\n" +
+    "            <div ng-show=\"tab.number == 1\">\n" +
+    "                <div hours-location-list>\n" +
+    "                </div>\n" +
     "            </div>\n" +
-    "        </div>\n" +
-    "    </tab>\n" +
-    "</tabset>\n" +
-    "");
+    "        </tab>\n" +
+    "    </tabset>\n" +
+    "    <div ng-if=\"!hasAccess\">\n" +
+    "        <h3>Sorry, you don't have permissions to manage hours users</h3>\n" +
+    "    </div>\n" +
+    "</div>");
 }]);
 
 angular.module("manageHours/manageLoc.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -9061,7 +10437,7 @@ angular.module("manageHours/manageUsers.tpl.html", []).run(["$templateCache", fu
     "    </tr>\n" +
     "    <tr>\n" +
     "        <th scope=\"row\">\n" +
-    "            <select class=\"form-control\" ng-model=\"newUser\" ng-options=\"user.fullName for user in users | orderBy:'fullName'\">\n" +
+    "            <select class=\"form-control\" ng-model=\"newUser\" ng-options=\"user.fullName for user in wpUsers | orderBy:'fullName'\">\n" +
     "            </select>\n" +
     "        </th>\n" +
     "        <td class=\"text-center\">\n" +
@@ -9092,26 +10468,30 @@ angular.module("manageHours/manageUsers.tpl.html", []).run(["$templateCache", fu
 
 angular.module("manageNews/manageNews.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageNews/manageNews.tpl.html",
-    "<h2>Manage News and Exhibitions</h2>\n" +
+    "<div class=\"container\">\n" +
+    "    <h2>Manage News and Exhibitions</h2>\n" +
     "\n" +
-    "<tabset justified=\"true\">\n" +
-    "    <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
-    "        <div ng-show=\"tab.number == 0\">\n" +
-    "            <div manage-news-list>\n" +
+    "    <tabset justified=\"true\" ng-if=\"hasAccess\">\n" +
+    "        <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
+    "            <div ng-show=\"tab.number == 0\">\n" +
+    "                <div manage-news-list>\n" +
+    "                </div>\n" +
     "            </div>\n" +
-    "        </div>\n" +
-    "        <div ng-show=\"tab.number == 1\" >\n" +
-    "            <div manage-admins-list>\n" +
+    "            <div ng-show=\"tab.number == 1\" >\n" +
+    "                <div manage-admins-list>\n" +
+    "                </div>\n" +
     "            </div>\n" +
-    "        </div>\n" +
-    "    </tab>\n" +
-    "</tabset>\n" +
-    "");
+    "        </tab>\n" +
+    "    </tabset>\n" +
+    "    <div ng-if=\"!hasAccess\">\n" +
+    "        <h3>Sorry, you don't have permissions to edit news</h3>\n" +
+    "    </div>\n" +
+    "</div>");
 }]);
 
 angular.module("manageNews/manageNewsAdmins.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageNews/manageNewsAdmins.tpl.html",
-    "<div class=\"row\" ng-if=\"isAdmin\">\n" +
+    "<div class=\"row\" ng-if=\"userInfo.news.admin\">\n" +
     "    <div class=\"col-md-12\">\n" +
     "        <div class=\"panel panel-default\">\n" +
     "            <div class=\"panel-heading\">\n" +
@@ -9128,7 +10508,7 @@ angular.module("manageNews/manageNewsAdmins.tpl.html", []).run(["$templateCache"
     "    </div>\n" +
     "</div>\n" +
     "\n" +
-    "<div class=\"row\" ng-if=\"!isAdmin\">\n" +
+    "<div class=\"row\" ng-if=\"!userInfo.news.admin\">\n" +
     "    <div class=\"col-md-12\">\n" +
     "        <div class=\"panel panel-default\">\n" +
     "            <div class=\"panel-heading\">\n" +
@@ -9332,10 +10712,10 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
     "                        </div>\n" +
     "                        <div class=\"col-md-2 text-right\">\n" +
     "                            <button type=\"button\" class=\"btn btn-danger\" ng-click=\"approveNews(news)\"\n" +
-    "                                    ng-if=\"news.status == 0 && isAdmin\">\n" +
+    "                                    ng-if=\"news.status == 0 && userInfo.news.admin\">\n" +
     "                                Approve\n" +
     "                            </button>\n" +
-    "                            <span ng-if=\"news.status == 0 && !isAdmin\">Approval Pending</span>\n" +
+    "                            <span ng-if=\"news.status == 0 && !userInfo.news.admin\">Approval Pending</span>\n" +
     "                        </div>\n" +
     "                    </div>\n" +
     "                    <form name=\"editNewsExh{{news.nid}}\" ng-submit=\"updateNews(news)\" ng-if=\"news.show\">\n" +
@@ -9370,20 +10750,25 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
 
 angular.module("manageOneSearch/mainOneSearch.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageOneSearch/mainOneSearch.tpl.html",
-    "<h2>Manage OneSearch</h2>\n" +
+    "<div class=\"container\">\n" +
+    "    <h2>Manage OneSearch</h2>\n" +
     "\n" +
-    "<tabset justified=\"true\">\n" +
-    "    <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
-    "        <div ng-if=\"tab.number == 0\">\n" +
-    "            <div recommended-links-list>\n" +
+    "    <tabset justified=\"true\" ng-if=\"hasAccess\">\n" +
+    "        <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
+    "            <div ng-if=\"tab.number == 0\">\n" +
+    "                <div recommended-links-list>\n" +
+    "                </div>\n" +
     "            </div>\n" +
-    "        </div>\n" +
-    "        <div ng-if=\"tab.number == 1\" >\n" +
-    "            <div search-statistics-list>\n" +
+    "            <div ng-if=\"tab.number == 1\" >\n" +
+    "                <div search-statistics-list>\n" +
+    "                </div>\n" +
     "            </div>\n" +
-    "        </div>\n" +
-    "    </tab>\n" +
-    "</tabset>");
+    "        </tab>\n" +
+    "    </tabset>\n" +
+    "    <div ng-if=\"!hasAccess\">\n" +
+    "        <h3>Sorry, you don't have permissions to manage oneSearch</h3>\n" +
+    "    </div>\n" +
+    "</div>");
 }]);
 
 angular.module("manageOneSearch/manageOneSearch.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -9539,25 +10924,29 @@ angular.module("manageOneSearch/oneSearchStat.tpl.html", []).run(["$templateCach
 
 angular.module("manageSoftware/manageSoftware.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageSoftware/manageSoftware.tpl.html",
-    "<h2>Manage Software</h2>\n" +
+    "<div class=\"container\">\n" +
+    "    <h2>Manage Software</h2>\n" +
     "\n" +
-    "<tabset justified=\"true\">\n" +
-    "    <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
-    "        <div ng-if=\"tab.number == 0\">\n" +
-    "            <div software-manage-list>\n" +
+    "    <tabset justified=\"true\" ng-if=\"hasAccess\">\n" +
+    "        <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
+    "            <div ng-if=\"tab.number == 0\">\n" +
+    "                <div software-manage-list>\n" +
+    "                </div>\n" +
     "            </div>\n" +
-    "        </div>\n" +
-    "        <div ng-if=\"tab.number == 1\" >\n" +
-    "            <div software-manage-loc-cat>\n" +
+    "            <div ng-if=\"tab.number == 1\" >\n" +
+    "                <div software-manage-loc-cat>\n" +
+    "                </div>\n" +
     "            </div>\n" +
-    "        </div>\n" +
-    "        <div ng-if=\"tab.number == 2\" >\n" +
-    "            <div software-manage-computer-maps>\n" +
+    "            <div ng-if=\"tab.number == 2\" >\n" +
+    "                <div software-manage-computer-maps>\n" +
+    "                </div>\n" +
     "            </div>\n" +
-    "        </div>\n" +
-    "    </tab>\n" +
-    "</tabset>\n" +
-    "");
+    "        </tab>\n" +
+    "    </tabset>\n" +
+    "    <div ng-if=\"!hasAccess\">\n" +
+    "        <h3>Sorry, you don't have permissions to edit software</h3>\n" +
+    "    </div>\n" +
+    "</div>");
 }]);
 
 angular.module("manageSoftware/manageSoftwareComputerMaps.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -10301,147 +11690,148 @@ angular.module("manageSoftware/manageSoftwareLocCat.tpl.html", []).run(["$templa
 
 angular.module("manageUserGroups/manageUG.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageUserGroups/manageUG.tpl.html",
-    "<h2>Web Applications Admin Interface</h2>\n" +
+    "<div class=\"container\">\n" +
+    "    <h2>Web Applications Admin Interface</h2>\n" +
     "\n" +
-    "<tabset justified=\"true\">\n" +
-    "    <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
-    "        <div ng-show=\"tab.number == 0\">\n" +
-    "            <table class=\"table table-hover table-condensed\">\n" +
-    "                <thead>\n" +
-    "                <tr>\n" +
-    "                    <th style=\"width:15%;\"><a ng-click=\"sortBy(0)\" style=\"cursor: pointer;\">Login</a></th>\n" +
-    "                    <th style=\"width:15%;\" class=\"text-center\"><a ng-click=\"sortBy(1)\" style=\"cursor: pointer;\">Name</a></th>\n" +
-    "                    <th class=\"text-center\">Access Rights to Web Applications</th>\n" +
-    "                    <th class=\"text-center\" style=\"width:120px;\">Action</th>\n" +
-    "                </tr>\n" +
-    "                </thead>\n" +
-    "                <tr ng-repeat=\"user in users | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse\" ng-click=\"expandUser(user)\">\n" +
-    "                    <th scope=\"row\" class=\"clickable\">\n" +
-    "                        {{user.wpLogin}}\n" +
-    "                    </th>\n" +
-    "                    <td class=\"text-center clickable\">\n" +
-    "                        {{user.name}}\n" +
-    "                    </td>\n" +
-    "                    <td>\n" +
-    "                        <div ng-show=\"isExpUser(user.id)\">\n" +
+    "    <tabset justified=\"true\" ng-if=\"hasAccess\">\n" +
+    "        <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
+    "            <div ng-show=\"tab.number == 0\">\n" +
+    "                <table class=\"table table-hover table-condensed\">\n" +
+    "                    <thead>\n" +
+    "                    <tr>\n" +
+    "                        <th style=\"width:15%;\"><a ng-click=\"sortBy(0)\" style=\"cursor: pointer;\">Login</a></th>\n" +
+    "                        <th style=\"width:15%;\" class=\"text-center\"><a ng-click=\"sortBy(1)\" style=\"cursor: pointer;\">Name</a></th>\n" +
+    "                        <th class=\"text-center\">Access Rights to Web Applications</th>\n" +
+    "                        <th class=\"text-center\" style=\"width:120px;\">Action</th>\n" +
+    "                    </tr>\n" +
+    "                    </thead>\n" +
+    "                    <tr ng-repeat=\"user in users | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse\" ng-click=\"expandUser(user)\">\n" +
+    "                        <th scope=\"row\" class=\"clickable\">\n" +
+    "                            {{user.wpLogin}}\n" +
+    "                        </th>\n" +
+    "                        <td class=\"text-center clickable\">\n" +
+    "                            {{user.name}}\n" +
+    "                        </td>\n" +
+    "                        <td>\n" +
+    "                            <div ng-show=\"isExpUser(user.id)\">\n" +
+    "                                <div class=\"row\" ng-repeat=\"app in apps\">\n" +
+    "                                    <div class=\"col-md-2 text-right\">\n" +
+    "                                        <input type=\"checkbox\" ng-model=\"user.access[$index]\">\n" +
+    "                                    </div>\n" +
+    "                                    <div class=\"col-md-10\">\n" +
+    "                                        <a href=\"{{app.link}}\">{{app.appName}}</a>\n" +
+    "                                    </div>\n" +
+    "                                </div>\n" +
+    "                            </div>\n" +
+    "                            <div ng-hide=\"isExpUser(user.id)\" class=\"row text-center\">\n" +
+    "                                <div class=\"col-md-3\" ng-repeat=\"app in apps\" ng-show=\"user.access[$index]\">\n" +
+    "                                    <a href=\"{{app.link}}\">{{app.appName}}</a>\n" +
+    "                                </div>\n" +
+    "                            </div>\n" +
+    "                        </td>\n" +
+    "                        <td class=\"text-center\">\n" +
+    "                            <div ng-show=\"isExpUser(user.id)\" class=\"form-group\">\n" +
+    "                                <button type=\"button\" class=\"btn btn-success\" ng-click=\"updateUser(user)\" ng-disabled=\"isLoading\">\n" +
+    "                                    <span class=\"fa fa-fw fa-edit\"></span>\n" +
+    "                                </button>\n" +
+    "                                <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteUser(user, $index)\" ng-disabled=\"isLoading\">\n" +
+    "                                    <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                                </button>\n" +
+    "                                <br>\n" +
+    "                                {{result}}\n" +
+    "                            </div>\n" +
+    "                        </td>\n" +
+    "                    </tr>\n" +
+    "                    <tr>\n" +
+    "                        <td colspan=\"2\">\n" +
+    "                            <select class=\"form-control\" ng-model=\"newUser\" ng-options=\"wpUser.fullName for wpUser in wpUsers | orderBy:'last_name'\">\n" +
+    "                            </select>\n" +
+    "                        </td>\n" +
+    "                        <td>\n" +
     "                            <div class=\"row\" ng-repeat=\"app in apps\">\n" +
     "                                <div class=\"col-md-2 text-right\">\n" +
-    "                                    <input type=\"checkbox\" ng-model=\"user.access[$index]\">\n" +
+    "                                    <input type=\"checkbox\" ng-model=\"newUserAccess[$index]\">\n" +
     "                                </div>\n" +
     "                                <div class=\"col-md-10\">\n" +
     "                                    <a href=\"{{app.link}}\">{{app.appName}}</a>\n" +
     "                                </div>\n" +
     "                            </div>\n" +
-    "                        </div>\n" +
-    "                        <div ng-hide=\"isExpUser(user.id)\" class=\"row text-center\">\n" +
-    "                            <div class=\"col-md-3\" ng-repeat=\"app in apps\" ng-show=\"user.access[$index]\">\n" +
-    "                                <a href=\"{{app.link}}\">{{app.appName}}</a>\n" +
+    "                        </td>\n" +
+    "                        <td class=\"text-center\">\n" +
+    "                            <div class=\"form-group\">\n" +
+    "                                <button type=\"button\" class=\"btn btn-success\" ng-click=\"createUser(newUser)\" ng-disabled=\"isLoading || newUser.login.length <= 1\">\n" +
+    "                                    <span class=\"fa fa-fw fa-plus\"></span> Grant Access\n" +
+    "                                </button><br>\n" +
+    "                                {{result2}}\n" +
     "                            </div>\n" +
-    "                        </div>\n" +
-    "                    </td>\n" +
-    "                    <td class=\"text-center\">\n" +
-    "                        <div ng-show=\"isExpUser(user.id)\" class=\"form-group\">\n" +
-    "                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"updateUser(user)\" ng-disabled=\"isLoading\">\n" +
-    "                                <span class=\"fa fa-fw fa-edit\"></span>\n" +
-    "                            </button>\n" +
-    "                            <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteUser(user, $index)\" ng-disabled=\"isLoading\">\n" +
-    "                                <span class=\"fa fa-fw fa-close\"></span>\n" +
-    "                            </button>\n" +
-    "                            <br>\n" +
-    "                            {{result}}\n" +
-    "                        </div>\n" +
-    "                    </td>\n" +
-    "                </tr>\n" +
-    "                <tr>\n" +
-    "                    <td colspan=\"2\">\n" +
-    "                        <select class=\"form-control\" ng-model=\"newUser\" ng-options=\"user.fullName for user in wpUsers | orderBy:'name'\">\n" +
-    "                        </select>\n" +
-    "                    </td>\n" +
-    "                    <td>\n" +
-    "                        <div class=\"row\" ng-repeat=\"app in apps\">\n" +
-    "                            <div class=\"col-md-2 text-right\">\n" +
-    "                                <input type=\"checkbox\" ng-model=\"newUserAccess[$index]\">\n" +
-    "                            </div>\n" +
-    "                            <div class=\"col-md-10\">\n" +
-    "                                <a href=\"{{app.link}}\">{{app.appName}}</a>\n" +
-    "                            </div>\n" +
-    "                        </div>\n" +
-    "                    </td>\n" +
-    "                    <td class=\"text-center\">\n" +
-    "                        <div class=\"form-group\">\n" +
-    "                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"createUser(newUser)\" ng-disabled=\"isLoading || newUser.login.length <= 1\">\n" +
-    "                                <span class=\"fa fa-fw fa-plus\"></span> Grant Access\n" +
-    "                            </button><br>\n" +
-    "                            {{result2}}\n" +
-    "                        </div>\n" +
-    "                    </td>\n" +
-    "                </tr>\n" +
-    "            </table>\n" +
+    "                        </td>\n" +
+    "                    </tr>\n" +
+    "                </table>\n" +
+    "            </div>\n" +
+    "            <div ng-show=\"tab.number == 1\">\n" +
+    "                <h4>Web applications with data manageable by users:</h4>\n" +
+    "                <h4 class=\"text-center\">\n" +
+    "                    <a href=\"/edit-directory-profile/\">Edit my Directory Profile</a>\n" +
+    "                </h4>\n" +
+    "                <h4 class=\"text-center\" ng-repeat=\"app in apps\" ng-show=\"$index > 0\">\n" +
+    "                    <a href=\"{{app.link}}\">{{app.appName}}</a>\n" +
+    "                </h4>\n" +
+    "                <p>When we create new web application it has to be added to the database manually.</p>\n" +
+    "            </div>\n" +
+    "        </tab>\n" +
+    "    </tabset>\n" +
+    "    <div ng-if=\"!hasAccess\">\n" +
+    "        <div view-my-web-apps>\n" +
     "        </div>\n" +
-    "        <div ng-show=\"tab.number == 1\">\n" +
-    "            <h4>Web applications with data manageable by users:</h4>\n" +
-    "            <h4 class=\"text-center\">\n" +
-    "                <a href=\"/edit-directory-profile/\">Edit my Directory Profile</a>\n" +
-    "            </h4>\n" +
-    "            <h4 class=\"text-center\" ng-repeat=\"app in apps\" ng-show=\"$index > 0\">\n" +
-    "                <a href=\"{{app.link}}\">{{app.appName}}</a>\n" +
-    "            </h4>\n" +
-    "            <p>When we create new web application it has to be added to the database manually.</p>\n" +
-    "        </div>\n" +
-    "    </tab>\n" +
-    "</tabset>\n" +
-    "");
+    "    </div>\n" +
+    "</div>");
 }]);
 
 angular.module("manageUserGroups/viewMyWebApps.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageUserGroups/viewMyWebApps.tpl.html",
-    "<h2>My Web Applications</h2>\n" +
+    "<h3>My Web Applications</h3>\n" +
     "\n" +
-    "<div class=\"form-group\">\n" +
+    "<div class=\"form-group\" ng-if=\"appsAccess\">\n" +
     "    <label for=\"webapps\">Web Application Back-End access links</label>\n" +
     "    <ul class=\"list-group\" id=\"webapps\">\n" +
     "        <li class=\"list-group-item\">\n" +
     "            <a href=\"/edit-directory-profile/\">Edit my Directory Profile</a>\n" +
     "        </li>\n" +
-    "        <li class=\"list-group-item\" ng-repeat=\"app in apps\">\n" +
+    "        <li class=\"list-group-item\" ng-repeat=\"app in userInfo.myApps\">\n" +
     "            <a ng-href=\"{{app.link}}\">{{app.appName}}</a>\n" +
     "        </li>\n" +
     "    </ul>\n" +
-    "</div>");
-}]);
-
-angular.module("siteFeedback/siteFeedback.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("siteFeedback/siteFeedback.tpl.html",
-    "<h3>Received Feedback <small>Test</small></h3>\n" +
-    "\n" +
-    "<div>\n" +
-    "    <p ng-if=\"userInfo.id\">Hello! {{userInfo.name}}!</p>\n" +
-    "    <p ng-if=\"userInfo.webapps\">Access to group {{userInfo.webapps}} granted!</p>\n" +
+    "</div>\n" +
+    "<div ng-if=\"!appsAccess\">\n" +
+    "    <h4>Sorry, you have to be logged in to manage applications</h4>\n" +
     "</div>");
 }]);
 
 angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staffDirectory/staffDirectory.tpl.html",
-    "<h2>Library Staff Directory Management</h2>\n" +
+    "<div class=\"container\">\n" +
+    "    <h2>Library Staff Directory Management</h2>\n" +
     "\n" +
-    "<tabset justified=\"true\">\n" +
-    "    <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
-    "        <div ng-if=\"tab.number == 0\">\n" +
-    "            <div manage-sd-people>\n" +
+    "    <tabset justified=\"true\" ng-if=\"hasAccess\">\n" +
+    "        <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
+    "            <div ng-if=\"tab.number == 0\">\n" +
+    "                <div manage-sd-people>\n" +
+    "                </div>\n" +
     "            </div>\n" +
-    "        </div>\n" +
-    "        <div ng-if=\"tab.number == 1\" >\n" +
-    "            <div manage-sd-subjects>\n" +
+    "            <div ng-if=\"tab.number == 1\" >\n" +
+    "                <div manage-sd-subjects>\n" +
+    "                </div>\n" +
     "            </div>\n" +
-    "        </div>\n" +
-    "        <div ng-if=\"tab.number == 2\">\n" +
-    "            <div manage-sd-departments>\n" +
+    "            <div ng-if=\"tab.number == 2\">\n" +
+    "                <div manage-sd-departments>\n" +
+    "                </div>\n" +
     "            </div>\n" +
-    "        </div>\n" +
-    "    </tab>\n" +
-    "</tabset>\n" +
-    "\n" +
-    "");
+    "        </tab>\n" +
+    "    </tabset>\n" +
+    "    <div ng-if=\"!hasAccess\">\n" +
+    "        <h3>Sorry, you don't have permissions to manage staff directory</h3>\n" +
+    "    </div>\n" +
+    "</div>");
 }]);
 
 angular.module("staffDirectory/staffDirectoryDepartments.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -10858,94 +12248,95 @@ angular.module("staffDirectory/staffDirectoryPeople.tpl.html", []).run(["$templa
 
 angular.module("staffDirectory/staffDirectoryProfile.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staffDirectory/staffDirectoryProfile.tpl.html",
-    "<h2>Profile Management</h2>\n" +
+    "<div class=\"container\">\n" +
+    "    <h2>Profile Management</h2>\n" +
     "\n" +
-    "<div ng-if=\"userProfile.person.uid > 0\">\n" +
-    "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-3\">\n" +
-    "            <img class=\"staff-portrait thumbnail\" ng-src=\"{{userProfile.person.photo}}\" ng-if=\"userProfile.person.photo != null\"\n" +
-    "                 width=\"180\" height=\"225\">\n" +
-    "            <img class=\"staff-portrait thumbnail\" ng-src=\"wp-content/themes/roots-ualib/assets/img/user-profile.png\"\n" +
-    "                 ng-if=\"userProfile.person.photo == null\" width=\"180\" height=\"225\">\n" +
+    "    <div ng-if=\"userProfile.person.uid > 0\">\n" +
+    "        <div class=\"row\">\n" +
+    "            <div class=\"col-md-3\">\n" +
+    "                <img class=\"staff-portrait thumbnail\" ng-src=\"{{userProfile.person.photo}}\" ng-if=\"userProfile.person.photo != null\"\n" +
+    "                     width=\"180\" height=\"225\">\n" +
+    "                <img class=\"staff-portrait thumbnail\" ng-src=\"wp-content/themes/roots-ualib/assets/img/user-profile.png\"\n" +
+    "                     ng-if=\"userProfile.person.photo == null\" width=\"180\" height=\"225\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-9\">\n" +
+    "                <h3 class=\"name\">\n" +
+    "                    <small ng-if=\"userProfile.person.rank\">{{userProfile.person.rank}}</small>\n" +
+    "                    <span ng-bind-html=\"userProfile.person.firstname\"></span> <span ng-bind-html=\"userProfile.person.lastname\"></span>\n" +
+    "                </h3>\n" +
+    "                <h4 class=\"title\"><span ng-bind-html=\"userProfile.person.title\"></span></h4>\n" +
+    "                <h5 class=\"hidden-xs\"><span ng-bind-html=\"userProfile.person.department\"></span></h5>\n" +
+    "                <ul class=\"fa-ul\">\n" +
+    "                    <li ng-if=\"userProfile.person.phone\"><span class=\"fa fa-phone fa-li\"></span>{{userProfile.person.phone}}</li>\n" +
+    "                    <li class=\"hidden-xs\" ng-if=\"userProfile.person.fax\"><span class=\"fa fa-fax fa-li\"></span>{{userProfile.person.fax}}</li>\n" +
+    "                    <li ng-if=\"userProfile.person.email\"><span class=\"fa fa-envelope fa-li\"></span>\n" +
+    "                        <a ng-href=\"mailto:{{userProfile.person.email}}\">{{userProfile.person.email}}</a>\n" +
+    "                    </li>\n" +
+    "                </ul>\n" +
+    "            </div>\n" +
     "        </div>\n" +
-    "        <div class=\"col-md-9\">\n" +
-    "            <h3 class=\"name\">\n" +
-    "                <small ng-if=\"userProfile.person.rank\">{{userProfile.person.rank}}</small>\n" +
-    "                <span ng-bind-html=\"userProfile.person.firstname\"></span> <span ng-bind-html=\"userProfile.person.lastname\"></span>\n" +
-    "            </h3>\n" +
-    "            <h4 class=\"title\"><span ng-bind-html=\"userProfile.person.title\"></span></h4>\n" +
-    "            <h5 class=\"hidden-xs\"><span ng-bind-html=\"userProfile.person.department\"></span></h5>\n" +
-    "            <ul class=\"fa-ul\">\n" +
-    "                <li ng-if=\"userProfile.person.phone\"><span class=\"fa fa-phone fa-li\"></span>{{userProfile.person.phone}}</li>\n" +
-    "                <li class=\"hidden-xs\" ng-if=\"userProfile.person.fax\"><span class=\"fa fa-fax fa-li\"></span>{{userProfile.person.fax}}</li>\n" +
-    "                <li ng-if=\"userProfile.person.email\"><span class=\"fa fa-envelope fa-li\"></span>\n" +
-    "                    <a ng-href=\"mailto:{{userProfile.person.email}}\">{{userProfile.person.email}}</a>\n" +
-    "                </li>\n" +
-    "            </ul>\n" +
-    "        </div>\n" +
-    "    </div>\n" +
     "\n" +
-    "    <div class=\"alert alert-info\" role=\"alert\">\n" +
-    "        <span class=\"fa fa-info-circle\"></span> Note: you can edit an optional part of your <a href=\"/#/staffdir\">Library Directory</a>\n" +
-    "        profile here. It is an appropriate place to post the information about your research, interests, publications,\n" +
-    "        photos, personal website, etc. Please try to keep your profile professional oriented.\n" +
-    "    </div>\n" +
+    "        <div class=\"alert alert-info\" role=\"alert\">\n" +
+    "            <span class=\"fa fa-info-circle\"></span> Note: you can edit an optional part of your <a href=\"/#/staffdir\">Library Directory</a>\n" +
+    "            profile here. It is an appropriate place to post the information about your research, interests, publications,\n" +
+    "            photos, personal website, etc. Please try to keep your profile professional oriented.\n" +
+    "        </div>\n" +
     "\n" +
-    "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-6 form-group\">\n" +
-    "            <label for=\"website\">Personal Website</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"http://john-doe.com/\" maxlength=\"100\"\n" +
-    "                   ng-model=\"userProfile.person.website\" id=\"website\">\n" +
+    "        <div class=\"row\">\n" +
+    "            <div class=\"col-md-6 form-group\">\n" +
+    "                <label for=\"website\">Personal Website</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"http://john-doe.com/\" maxlength=\"100\"\n" +
+    "                       ng-model=\"userProfile.person.website\" id=\"website\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-6 form-group\">\n" +
+    "                <label for=\"resume\">External Resume / CV link</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"http://example.com/my_resume.pdf\" maxlength=\"255\"\n" +
+    "                       ng-model=\"userProfile.person.resume\" id=\"resume\">\n" +
+    "            </div>\n" +
     "        </div>\n" +
-    "        <div class=\"col-md-6 form-group\">\n" +
-    "            <label for=\"resume\">External Resume / CV link</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"http://example.com/my_resume.pdf\" maxlength=\"255\"\n" +
-    "                   ng-model=\"userProfile.person.resume\" id=\"resume\">\n" +
+    "        <div class=\"row\">\n" +
+    "            <div class=\"col-md-4 form-group\">\n" +
+    "                <label for=\"sn1\">Social Network 1</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"http://facebook.com/johndoe\" maxlength=\"100\"\n" +
+    "                       ng-model=\"userProfile.person.social1\" id=\"sn1\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-4 form-group\">\n" +
+    "                <label for=\"sn2\">Social Network 2</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"http://twitter.com/johndoe\" maxlength=\"100\"\n" +
+    "                       ng-model=\"userProfile.person.social2\" id=\"sn2\">\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-4 form-group\">\n" +
+    "                <label for=\"sn3\">Social Network 3</label>\n" +
+    "                <input type=\"text\" class=\"form-control\" placeholder=\"http://linkedin.com/johndoe\" maxlength=\"100\"\n" +
+    "                       ng-model=\"userProfile.person.social3\" id=\"sn3\">\n" +
+    "            </div>\n" +
     "        </div>\n" +
-    "    </div>\n" +
-    "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-4 form-group\">\n" +
-    "            <label for=\"sn1\">Social Network 1</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"http://facebook.com/johndoe\" maxlength=\"100\"\n" +
-    "                   ng-model=\"userProfile.person.social1\" id=\"sn1\">\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-4 form-group\">\n" +
-    "            <label for=\"sn2\">Social Network 2</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"http://twitter.com/johndoe\" maxlength=\"100\"\n" +
-    "                   ng-model=\"userProfile.person.social2\" id=\"sn2\">\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-4 form-group\">\n" +
-    "            <label for=\"sn3\">Social Network 3</label>\n" +
-    "            <input type=\"text\" class=\"form-control\" placeholder=\"http://linkedin.com/johndoe\" maxlength=\"100\"\n" +
-    "                   ng-model=\"userProfile.person.social3\" id=\"sn3\">\n" +
-    "        </div>\n" +
-    "    </div>\n" +
-    "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-12 form-group\">\n" +
-    "            <label>Description (allowed tags:\n" +
-    "                <code>\n" +
-    "                    &lt;h3&gt;, &lt;h4&gt;, &lt;a&gt;, &lt;img&gt;, &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;ul&gt;, &lt;ol&gt;, &lt;li&gt;\n" +
-    "                </code>)</label>\n" +
+    "        <div class=\"row\">\n" +
+    "            <div class=\"col-md-12 form-group\">\n" +
+    "                <label>Description (allowed tags:\n" +
+    "                    <code>\n" +
+    "                        &lt;h3&gt;, &lt;h4&gt;, &lt;a&gt;, &lt;img&gt;, &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;ul&gt;, &lt;ol&gt;, &lt;li&gt;\n" +
+    "                    </code>)</label>\n" +
     "                <textarea ui-tinymce=\"tinymceOptions\" ng-model=\"userProfile.person.profile\" rows=\"10\"\n" +
-    "                      maxlength=\"64000\"></textarea>\n" +
+    "                          maxlength=\"64000\"></textarea>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-12 text-center form-group\">\n" +
+    "                <button type=\"submit\" class=\"btn btn-success\" ng-disabled=\"uploading\" ng-click=\"update()\">\n" +
+    "                    Update Profile\n" +
+    "                </button><br>\n" +
+    "                {{userProfile.person.formResponse}}\n" +
+    "            </div>\n" +
     "        </div>\n" +
-    "        <div class=\"col-md-12 text-center form-group\">\n" +
-    "            <button type=\"submit\" class=\"btn btn-success\" ng-disabled=\"uploading\" ng-click=\"update()\">\n" +
-    "                Update Profile\n" +
-    "            </button><br>\n" +
-    "            {{userProfile.person.formResponse}}\n" +
+    "\n" +
+    "        <div class=\"row\">\n" +
+    "            <div class=\"col-md-12\">\n" +
+    "                <span ng-bind-html=\"userProfile.person.profile\"></span>\n" +
+    "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "\n" +
-    "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-12\">\n" +
-    "            <span ng-bind-html=\"userProfile.person.profile\"></span>\n" +
-    "        </div>\n" +
-    "    </div>\n" +
-    "</div>\n" +
-    "\n" +
-    "<h4 ng-hide=\"userProfile.person.uid > 0\">Can not find your profile!</h4>\n" +
-    "");
+    "    <h4 ng-hide=\"userProfile.person.uid > 0\">Can not find your profile!</h4>\n" +
+    "</div>");
 }]);
 
 angular.module("staffDirectory/staffDirectorySubjects.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -11015,87 +12406,91 @@ angular.module("staffDirectory/staffDirectorySubjects.tpl.html", []).run(["$temp
 
 angular.module("submittedForms/submittedForms.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("submittedForms/submittedForms.tpl.html",
-    "<h2>Manage Submitted Forms</h2>\n" +
+    "<div class=\"container\">\n" +
+    "    <h2>Manage Submitted Forms</h2>\n" +
     "\n" +
-    "<div>\n" +
-    "    <div class=\"row form-inline\">\n" +
-    "        <div class=\"form-group col-md-12\">\n" +
-    "            <label for=\"filterBy\">Filter <small>{{filteredForms.length}}</small> results by</label>\n" +
-    "            <div id=\"filterBy\">\n" +
-    "                <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"titleFilter\">\n" +
-    "            </div>\n" +
-    "            <label for=\"sortBy\">Sort by</label>\n" +
-    "            <div id=\"sortBy\">\n" +
-    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"0\" ng-click=\"sortBy(0)\">\n" +
-    "                    Title\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[0].reverse\"></span>\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[0].reverse\"></span>\n" +
-    "                </button>\n" +
-    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"1\" ng-click=\"sortBy(1)\">\n" +
-    "                    Status\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[1].reverse\"></span>\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[1].reverse\"></span>\n" +
-    "                </button>\n" +
-    "                <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"2\" ng-click=\"sortBy(2)\">\n" +
-    "                    Date Submitted\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[2].reverse\"></span>\n" +
-    "                    <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[2].reverse\"></span>\n" +
-    "                </button>\n" +
+    "    <div ng-if=\"hasAccess\">\n" +
+    "        <div class=\"row form-inline\">\n" +
+    "            <div class=\"form-group col-md-12\">\n" +
+    "                <label for=\"filterBy\">Filter <small>{{filteredForms.length}}</small> results by</label>\n" +
+    "                <div id=\"filterBy\">\n" +
+    "                    <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"titleFilter\">\n" +
+    "                </div>\n" +
+    "                <label for=\"sortBy\">Sort by</label>\n" +
+    "                <div id=\"sortBy\">\n" +
+    "                    <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"0\" ng-click=\"sortBy(0)\">\n" +
+    "                        Title\n" +
+    "                        <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[0].reverse\"></span>\n" +
+    "                        <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[0].reverse\"></span>\n" +
+    "                    </button>\n" +
+    "                    <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"1\" ng-click=\"sortBy(1)\">\n" +
+    "                        Status\n" +
+    "                        <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[1].reverse\"></span>\n" +
+    "                        <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[1].reverse\"></span>\n" +
+    "                    </button>\n" +
+    "                    <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"2\" ng-click=\"sortBy(2)\">\n" +
+    "                        Date Submitted\n" +
+    "                        <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[2].reverse\"></span>\n" +
+    "                        <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[2].reverse\"></span>\n" +
+    "                    </button>\n" +
+    "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
-    "    </div>\n" +
     "\n" +
-    "    <div class=\"text-center\">\n" +
-    "        <pagination total-items=\"filteredForms.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
-    "                    boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredForms.length > 0\"></pagination>\n" +
-    "    </div>\n" +
-    "    <div class=\"row row-clickable\"\n" +
-    "         ng-repeat=\"form in filteredForms = (data.forms | filter:{title:titleFilter}\n" +
-    "                                                        | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\n" +
-    "        | startFrom:(currentPage-1)*perPage | limitTo:perPage\"\n" +
-    "         ng-class=\"{sdOpen: form.show}\">\n" +
-    "        <div class=\"col-md-12 clickable\" ng-click=\"toggleForms(form)\">\n" +
-    "            <div class=\"col-md-10\">\n" +
-    "                <h4>\n" +
-    "                    <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"form.show\"></span>\n" +
-    "                    <span class=\"fa fa-fw fa-caret-down\" ng-show=\"form.show\"></span>\n" +
-    "                    {{form.title}}\n" +
-    "                    <small>{{form.fields[0].value}}</small>\n" +
-    "                </h4>\n" +
+    "        <div class=\"text-center\">\n" +
+    "            <pagination total-items=\"filteredForms.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
+    "                        boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredForms.length > 0\"></pagination>\n" +
+    "        </div>\n" +
+    "        <div class=\"row row-clickable\"\n" +
+    "             ng-repeat=\"form in filteredForms = (data.forms | filter:{title:titleFilter}\n" +
+    "                                                            | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\n" +
+    "            | startFrom:(currentPage-1)*perPage | limitTo:perPage\"\n" +
+    "             ng-class=\"{sdOpen: form.show}\">\n" +
+    "            <div class=\"col-md-12 clickable\" ng-click=\"toggleForms(form)\">\n" +
+    "                <div class=\"col-md-10\">\n" +
+    "                    <h4>\n" +
+    "                        <span class=\"fa fa-fw fa-caret-right\" ng-hide=\"form.show\"></span>\n" +
+    "                        <span class=\"fa fa-fw fa-caret-down\" ng-show=\"form.show\"></span>\n" +
+    "                        {{form.title}}\n" +
+    "                        <small>{{form.fields[0].value}}</small>\n" +
+    "                    </h4>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-2\">\n" +
+    "                    <h5>{{form.created}}</h5>\n" +
+    "                </div>\n" +
     "            </div>\n" +
-    "            <div class=\"col-md-2\">\n" +
-    "                <h5>{{form.created}}</h5>\n" +
+    "            <div class=\"col-md-12\" ng-show=\"form.show\">\n" +
+    "                <div class=\"col-md-12 panel panel-default\">\n" +
+    "                    <div class=\"panel-heading\">\n" +
+    "                        <h4 class=\"panel-title\">Form was sent to</h4>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"panel-body\">\n" +
+    "                        {{form.addresseeEmails}}\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-4 panel panel-default\" ng-repeat=\"field in form.fields\"\n" +
+    "                     ng-show=\"field.name.length > 0 && field.value.length > 0\">\n" +
+    "                    <div class=\"panel-heading\">\n" +
+    "                        <h4 class=\"panel-title\">{{field.name}}</h4>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"panel-body\">\n" +
+    "                        {{field.value}}\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
-    "        <div class=\"col-md-12\" ng-show=\"form.show\">\n" +
-    "            <div class=\"col-md-12 panel panel-default\">\n" +
-    "                <div class=\"panel-heading\">\n" +
-    "                    <h4 class=\"panel-title\">Form was sent to</h4>\n" +
-    "                </div>\n" +
-    "                <div class=\"panel-body\">\n" +
-    "                    {{form.addresseeEmails}}\n" +
-    "                </div>\n" +
-    "            </div>\n" +
-    "            <div class=\"col-md-4 panel panel-default\" ng-repeat=\"field in form.fields\"\n" +
-    "                 ng-show=\"field.name.length > 0 && field.value.length > 0\">\n" +
-    "                <div class=\"panel-heading\">\n" +
-    "                    <h4 class=\"panel-title\">{{field.name}}</h4>\n" +
-    "                </div>\n" +
-    "                <div class=\"panel-body\">\n" +
-    "                    {{field.value}}\n" +
-    "                </div>\n" +
-    "            </div>\n" +
+    "        <div class=\"text-center\">\n" +
+    "            <pagination total-items=\"filteredForms.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
+    "                        boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredForms.length > 0\"></pagination>\n" +
+    "        </div>\n" +
+    "        <div class=\"text-center\">\n" +
+    "            <h4 ng-show=\"filteredForms.length == 0\">Nothing found</h4>\n" +
     "        </div>\n" +
     "    </div>\n" +
-    "</div>\n" +
-    "<div class=\"text-center\">\n" +
-    "    <pagination total-items=\"filteredForms.length\" ng-model=\"currentPage\" max-size=\"maxPageSize\" class=\"pagination-sm\"\n" +
-    "                boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredForms.length > 0\"></pagination>\n" +
-    "</div>\n" +
-    "<div class=\"text-center\">\n" +
-    "    <h4 ng-show=\"filteredForms.length == 0\">Nothing found</h4>\n" +
-    "</div>\n" +
-    "");
+    "    <div ng-if=\"!hasAccess\">\n" +
+    "        <h3>Sorry, you don't have permissions to manage submitted forms</h3>\n" +
+    "    </div>\n" +
+    "</div>");
 }]);
 
 angular.module('manage', [
@@ -11106,7 +12501,6 @@ angular.module('manage', [
     'manage.manageHours',
     'manage.manageHoursUsers',
     'manage.manageUserGroups',
-    'manage.siteFeedback',
     'manage.manageOneSearch',
     'manage.staffDirectory',
     'manage.manageDatabases',
@@ -11132,41 +12526,73 @@ angular.module('manage.common', [
 ])
 
 angular.module('common.manage', [])
+    .constant('API', 'https://wwwdev2.lib.ua.edu/wp-json/wp/v2/')
 
-    .config(['$routeProvider', '$locationProvider', '$httpProvider', function($routeProvider, $locationProvider, $httpProvider) {
-        $httpProvider.interceptors.push([function() {
-            return {
-                'request': function(config) {
-                    config.headers = config.headers || {};
-                    //add nonce to avoid CSRF issues
-                    if (typeof myLocalized !== 'undefined') {
-                        config.headers['X-WP-Nonce'] = myLocalized.nonce;
-                    } else {
-                        console.log("myLocalized is not defined.");
-                    }
-                    return config;
-                }
-            };
-        }]);
+    .config(['$httpProvider', function($httpProvider) {
+        $httpProvider.interceptors.push('AuthInterceptor');
     }])
 
-    .factory('tokenFactory', ['$http', function tokenFactory($http){
-        return function(tokenName){
-            var cookies;
-            this.GetCookie = function (name,c,C,i){
-                if(cookies){ return cookies[name]; }
-                c = document.cookie.split('; ');
-                cookies = {};
-                for(i=c.length-1; i>=0; i--){
-                    C = c[i].split('=');
-                    cookies[C[0]] = C[1];
+    .factory('AuthInterceptor', ['AuthService', function (AuthService) {
+        return {
+            // automatically attach Authorization header
+            request: function(config) {
+                config.headers = config.headers || {};
+
+                //interceptor for UALib JWT tokens
+                var token = AuthService.getToken();
+                if(config.url.indexOf("https://wwwdev2.lib.ua.edu/") === 0 && token) {
+                    config.headers.Authorization = "Bearer " + token;
                 }
-                return cookies[name];
-            };
-            var header = {};
-            header["X-" + tokenName] = this.GetCookie(tokenName);
-            $http.defaults.headers.get = header;
-            $http.defaults.headers.post = header;
+
+                //interceptor for WordPress nonce headers
+                if (typeof myLocalized !== 'undefined') {
+                    config.headers['X-WP-Nonce'] = myLocalized.nonce;
+                } else {
+                    console.log("myLocalized is not defined.");
+                }
+                return config;
+            },
+
+            // If a token was sent back, save it
+            response: function(res) {
+                if(res.config.url.indexOf("https://wwwdev2.lib.ua.edu/") === 0 && angular.isDefined(res.data.token)) {
+                    AuthService.saveToken(res.data.token);
+                }
+                return res;
+            }
+        };
+    }])
+
+    .service('AuthService', ['$window', function($window){
+        var self = this;
+
+        self.parseJWT = function(token) {
+            var base64Url = token.split('.')[1];
+            var base64 = base64Url.replace('-', '+').replace('_', '/');
+            return JSON.parse($window.atob(base64));
+        };
+        self.saveToken = function(token) {
+            $window.localStorage['ualibweb.Token'] = token;
+            console.log('Token saved');
+        };
+        self.getToken = function() {
+            return $window.localStorage['ualibweb.Token'];
+        };
+        self.isAuthorized = function() {
+            var token = self.getToken();
+            if (token) {
+                var params = self.parseJWT(token);
+                if (Math.round(new Date().getTime() / 1000) <= params.exp) {
+                    console.log('Authenticated.');
+                    return params.user;
+                }
+            }
+            console.log('Authentication failed.');
+            return false;
+        };
+        self.logout = function() {
+            $window.localStorage.removeItem('ualibweb.Token');
+            console.log('Token deleted');
         };
     }])
 
@@ -11183,6 +12609,9 @@ angular.module('common.manage', [])
     }])
     .factory('ugFactory', ['$http', 'USER_GROUPS_URL', function ugFactory($http, url){
         return {
+            getData: function(){
+                return $http({method: 'GET', url: url + "api/users", params: {}})
+            },
             postData: function(params, data){
                 params = angular.isDefined(params) ? params : {};
                 return $http({method: 'POST', url: url, params: params, data: data})
@@ -11272,17 +12701,39 @@ angular.module('common.manage', [])
             }
         };
     }])
-    .factory('wpTestFactory', ['$http', function wpTestFactory($http){
+    .factory('wpUsersFactory', ['$http', 'API', function wpUsersFactory($http, API){
         return {
-            getCurrentUser : function(){
-                return $http.get('https://wwwdev2.lib.ua.edu/wp-json/wp/v2/users/me');
-            },
-            getUserDetails : function(id, group){
-                return $http.get('https://wwwdev2.lib.ua.edu/wp-json/wp/v2/users/'+ id , {context: 'edit'});
+            getAllUsersWP : function(){
+                return $http.get(API + 'users');
             }
         };
-    }]);
+    }])
 
+    .service('tokenReceiver', ['$http', 'API', function($http, API){
+        this.promise = null;
+        function makeRequest() {
+            return $http.get(API + 'users/me')
+                .then(function(r1){
+                    if (angular.isDefined(r1.data.id)) {
+                        $http.get(API + 'users/' + r1.data.id, {context: 'edit'})
+                            .then(function (r2) {
+                                return r2.data;
+                            });
+                    }
+                });
+        }
+        this.getPromise = function(update){
+            if (update || !this.promise) {
+                this.promise = makeRequest();
+            }
+            return this.promise;
+        };
+    }])
+
+    .run(['$rootScope', 'tokenReceiver', '$location', 'AuthService',
+    function($rootScope, tokenReceiver, $location, AuthService) {
+        $rootScope.userInfo = {};
+    }]);
 
 angular.module('manage.manageAlerts', [])
     .constant('TYPES', [
@@ -11290,9 +12741,23 @@ angular.module('manage.manageAlerts', [])
         {name:'Warning', value:1},
         {name:'Danger', value:2}
     ])
+    .constant('ALERTS_GROUP', 512)
 
-    .controller('manageAlertsCtrl', ['$scope', 'tokenFactory', 'alertFactory', 'TYPES',
-    function manageAlertsCtrl($scope, tokenFactory, alertFactory, TYPES){
+    .config(['$routeProvider', function($routeProvider){
+        $routeProvider.when('/manage-alerts', {
+            controller: 'manageAlertsCtrl',
+            templateUrl: 'manageAlerts/manageAlerts.tpl.html',
+            resolve: {
+                userData: function(tokenReceiver){
+                    return tokenReceiver.getPromise();
+                }
+            }
+        });
+    }])
+
+    .controller('manageAlertsCtrl', ['$scope', 'alertFactory', 'TYPES', 'userData', 'ALERTS_GROUP', 'AuthService',
+    function manageAlertsCtrl($scope, alertFactory, TYPES, userData, ALERTS_GROUP, AuthService){
+        $scope.userInfo = AuthService.isAuthorized();
         $scope.data = {};
         $scope.newAlert = {};
         $scope.newAlert.message = "";
@@ -11325,8 +12790,12 @@ angular.module('manage.manageAlerts', [])
         $scope.maxPageSize = 10;
         $scope.perPage = 20;
 
-        tokenFactory("CSRF-libAlerts");
-
+        $scope.hasAccess = false;
+        if (angular.isDefined($scope.userInfo.group)) {
+            if ($scope.userInfo.group & ALERTS_GROUP === ALERTS_GROUP) {
+                $scope.hasAccess = true;
+            }
+        }
         alertFactory.getData("all")
             .success(function(data) {
                 console.dir(data);
@@ -11438,33 +12907,6 @@ angular.module('manage.manageAlerts', [])
         };
     }])
 
-    .directive('manageAlertsMain', ['$animate', function($animate) {
-        return {
-            restrict: 'AC',
-            scope: {},
-            controller: 'manageAlertsCtrl',
-            link: function(scope, elm, attrs){
-                //Preload the spinner element
-                var spinner = angular.element('<div id="loading-bar-spinner"><div class="spinner-icon"></div></div>');
-                //Preload the location of the boxe's title element (needs to be more dynamic in the future)
-                var titleElm = elm.find('h2');
-                //Enter the spinner animation, appending it to the title element
-                $animate.enter(spinner, titleElm[0]);
-
-                var loadingWatcher = scope.$watch(
-                    'data.totalTime',
-                    function(newVal, oldVal){
-                        if (newVal != oldVal){
-                            $animate.leave(spinner);
-                            console.log("Alerts data loaded");
-                        }
-                    },
-                    true
-                );
-            },
-            templateUrl: 'manageAlerts/manageAlerts.tpl.html'
-        };
-    }])
     .filter('startFrom', [ function() {
         return function(input, start) {
             start = +start; //parse to int
@@ -11519,8 +12961,22 @@ angular.module('manage.manageAlerts', [])
 
 
 angular.module('manage.manageDatabases', [])
-    .controller('manageDBCtrl', ['$scope', '$window', 'tokenFactory', 'mdbFactory',
-        function manageDBCtrl($scope, $window, tokenFactory, mdbFactory){
+    .constant('DATABASES_GROUP', 32)
+
+    .config(['$routeProvider', function($routeProvider){
+        $routeProvider.when('/manage-databases', {
+            controller: 'manageDBCtrl',
+            templateUrl: 'manageDatabases/manageDatabases.tpl.html',
+            resolve: {
+                userData: function(tokenReceiver){
+                    return tokenReceiver.getPromise();
+                }
+            }
+        });
+    }])
+    .controller('manageDBCtrl', ['$scope', 'mdbFactory', 'userData', 'DATABASES_GROUP', 'AuthService',
+        function manageDBCtrl($scope, mdbFactory, userData, DATABASES_GROUP, AuthService){
+            $scope.userInfo = AuthService.isAuthorized();
             $scope.DBList = {};
             $scope.titleFilter = '';
             $scope.titleStartFilter = '';
@@ -11544,7 +13000,6 @@ angular.module('manage.manageDatabases', [])
                 ];
             $scope.sortButton = $scope.sortMode;
             $scope.newDB = {};
-            $scope.newDB.updatedBy = $window.userName;
             $scope.newDB.subjects = [];
             $scope.newDB.types = [];
 
@@ -11557,7 +13012,13 @@ angular.module('manage.manageDatabases', [])
             $scope.fullTextValues = [ "", "A", "N", "P", "S" ];
             $scope.inEDSValues = [ "", "Y", "P" ];
 
-            tokenFactory("CSRF-libDatabases");
+            $scope.hasAccess = false;
+            if (angular.isDefined($scope.userInfo.group)) {
+                if ($scope.userInfo.group & DATABASES_GROUP === DATABASES_GROUP) {
+                    $scope.hasAccess = true;
+                    $scope.newDB.updatedBy = $scope.userInfo.login;
+                }
+            }
 
             mdbFactory.getData()
                 .success(function(data) {
@@ -11811,33 +13272,6 @@ angular.module('manage.manageDatabases', [])
             };
         }])
 
-    .directive('databasesManageList', ['$animate', function($animate) {
-        return {
-            restrict: 'A',
-            scope: {},
-            controller: 'manageDBCtrl',
-            link: function(scope, elm, attrs){
-                //Preload the spinner element
-                var spinner = angular.element('<div id="loading-bar-spinner"><div class="spinner-icon"></div></div>');
-                //Preload the location of the boxe's title element (needs to be more dynamic in the future)
-                var titleElm = elm.find('h2');
-                //Enter the spinner animation, appending it to the title element
-                $animate.enter(spinner, titleElm[0]);
-
-                var loadingWatcher = scope.$watch(
-                    'DBList.totalTime',
-                    function(newVal, oldVal){
-                        if (newVal != oldVal){
-                            $animate.leave(spinner);
-                            console.log("Databases loaded");
-                        }
-                    },
-                    true
-                );
-            },
-            templateUrl: 'manageDatabases/manageDatabases.tpl.html'
-        };
-    }])
     .filter('startFrom', [ function() {
         return function(input, start) {
             start = +start; //parse to int
@@ -11890,16 +13324,34 @@ angular.module('manage.manageHours', [])
         {name:'Midnight', value:'2400'}
     ])
     .constant('DP_FORMAT', 'MM/dd/yyyy')
+    .constant('HOURS_GROUP', 2)
 
-    .controller('manageHrsCtrl', ['$scope', '$animate', 'tokenFactory', 'hmFactory', 'HOURS_FROM', 'HOURS_TO', 'DP_FORMAT',
-        function manageHrsCtrl($scope, $animate, tokenFactory, hmFactory, hoursFrom, hoursTo, dpFormat){
+    .config(['$routeProvider', function($routeProvider){
+        $routeProvider.when('/manage-hours', {
+            controller: 'manageHrsCtrl',
+            templateUrl: 'manageHours/manageHours.tpl.html',
+            resolve: {
+                userData: function(tokenReceiver){
+                    return tokenReceiver.getPromise();
+                }
+            }
+        });
+    }])
+
+    .controller('manageHrsCtrl', ['$scope', '$animate', 'hmFactory', 'HOURS_FROM', 'HOURS_TO', 'DP_FORMAT', 'userData', 'HOURS_GROUP', 'AuthService',
+        function manageHrsCtrl($scope, $animate, hmFactory, hoursFrom, hoursTo, dpFormat, userData, HOURS_GROUP, AuthService){
+            $scope.userInfo = AuthService.isAuthorized();
             $scope.allowedLibraries = [];
             $scope.format = dpFormat;
             $scope.hrsFrom = hoursFrom;
             $scope.hrsTo = hoursTo;
             $scope.selLib = {};
-
-            tokenFactory("CSRF-libHours");
+            $scope.hasAccess = false;
+            if (angular.isDefined($scope.userInfo.group)) {
+                if ($scope.userInfo.group & HOURS_GROUP === HOURS_GROUP) {
+                    $scope.hasAccess = true;
+                }
+            }
 
             $scope.initSemesters = function(semesters){
                 for (var sem = 0; sem < semesters.length; sem++){
@@ -11920,6 +13372,7 @@ angular.module('manage.manageHours', [])
 
             hmFactory.getData("semesters")
                 .success(function(data) {
+                    console.dir(data);
                     $scope.selLib = data.libraries[0];
                     for (var lib = 0; lib < data.libraries.length; lib++){
                         for (var ex = 0; ex < data.exc[lib].length; ex++){
@@ -11928,7 +13381,6 @@ angular.module('manage.manageHours', [])
                         }
                         data.sem[lib] = $scope.initSemesters(data.sem[lib]);
                     }
-                    console.dir(data);
                     $scope.allowedLibraries = data;
                 })
                 .error(function(data, status, headers, config) {
@@ -11944,34 +13396,6 @@ angular.module('manage.manageHours', [])
                     number: 1,
                     active: false
                 }];
-    }])
-
-    .directive('manageHours',['$animate', function($animate) {
-        return {
-            restrict: 'A',
-            scope: {},
-            controller: 'manageHrsCtrl',
-            link: function(scope, elm, attrs){
-                //Preload the spinner element
-                var spinner = angular.element('<div id="loading-bar-spinner"><div class="spinner-icon"></div></div>');
-                //Preload the location of the boxe's title element (needs to be more dynamic in the future)
-                var titleElm = elm.find('h2');
-                //Enter the spinner animation, appending it to the title element
-                $animate.enter(spinner, titleElm[0]);
-
-                var loadingWatcher = scope.$watch(
-                    'allowedLibraries',
-                    function(newVal, oldVal){
-                        if (scope.allowedLibraries.totalTime > 0){
-                            $animate.leave(spinner);
-                            console.log("Hours loaded");
-                        }
-                    },
-                    true
-                );
-            },
-            templateUrl: 'manageHours/manageHours.tpl.html'
-        };
     }])
 
     .controller('semListCtrl', ['$scope', 'hmFactory', function semListCtrl($scope, hmFactory) {
@@ -12087,7 +13511,6 @@ angular.module('manage.manageHours', [])
 
     .directive('semesterList', [ function() {
         return {
-            require: '^manageHours',
             restrict: 'A',
             controller: 'semListCtrl',
             templateUrl: 'manageHours/manageSem.tpl.html'
@@ -12222,7 +13645,6 @@ angular.module('manage.manageHours', [])
     }])
     .directive('exceptionList',[ function() {
         return {
-            require: '^manageHours',
             restrict: 'A',
             controller: 'exListCtrl',
             link: function(scope, elem, attrs) {
@@ -12233,31 +13655,68 @@ angular.module('manage.manageHours', [])
     }])
 
 angular.module('manage.manageHoursUsers', [])
-    .controller('manageHrsUsersCtrl', ['$scope', '$window', '$animate', 'tokenFactory', 'hmFactory',
-        function manageHrsUsersCtrl($scope, $window, $animate, tokenFactory, hmFactory){
+    .constant('HOURS_GROUP', 2)
+
+    .config(['$routeProvider', function($routeProvider){
+        $routeProvider.when('/manage-hours-users', {
+            controller: 'manageHrsUsersCtrl',
+            templateUrl: 'manageHours/manageHoursUsers.tpl.html',
+            resolve: {
+                userData: function(tokenReceiver){
+                    return tokenReceiver.getPromise();
+                }
+            }
+        });
+    }])
+
+    .controller('manageHrsUsersCtrl', ['$scope', '$animate', 'wpUsersFactory', 'hmFactory', 'userData', 'HOURS_GROUP', 'AuthService',
+        function manageHrsUsersCtrl($scope, $animate, wpUsersFactory, hmFactory, userData, HOURS_GROUP, AuthService){
+            $scope.userInfo = AuthService.isAuthorized();
             $scope.isLoading = true;
             $scope.dataUL = {};
             $scope.dataUL.users = [];
             $scope.dataUL.locations = [];
-            $scope.user = {};
-            $scope.user.name = $window.userName;
+            $scope.wpUsers = [];
+            $scope.hasAccess = false;
+            if (angular.isDefined($scope.userInfo.group)) {
+                if ($scope.userInfo.group & HOURS_GROUP === HOURS_GROUP) {
+                    $scope.hasAccess = true;
+                }
+            }
 
-            tokenFactory("CSRF-libHours");
-
-            hmFactory.getData("users")
-                .success(function(data){
-                    for (var i = 0; i < data.users.length; i++)
-                        for (var j = 0; j < $window.users.length; j++)
-                            if (data.users[i].name === $window.users[j].login) {
-                                data.users[i].fullName = $window.users[j].fullName;
-                                break;
-                            }
-                    $scope.dataUL = data;
-                    $scope.isLoading = false;
+            wpUsersFactory.getAllUsersWP()
+                .success(function(data) {
+                    //remove admin accounts
+                    for (var i = 0; i < data.length; i++) {
+                        if (data[i].last_name.length < 1) {
+                            data.splice(i, 1);
+                        }
+                    }
+                    for (i = 0; i < data.length; i++) {
+                        data[i].fullName = data[i].last_name + ", " + data[i].first_name + " (" + data[i].nickname + ")";
+                    }
+                    $scope.wpUsers = data;
+                    $scope.newUser = $scope.wpUsers[0];
                     console.dir(data);
+                    hmFactory.getData("users")
+                        .success(function(data2){
+                            for (i = 0; i < data2.users.length; i++)
+                                for (var j = 0; j < $scope.wpUsers.length; j++)
+                                    if (data2.users[i].name === $scope.wpUsers[j].nickname) {
+                                        data2.users[i].fullName = $scope.wpUsers[j].fullName;
+                                        break;
+                                    }
+                            $scope.dataUL = data2;
+                            $scope.isLoading = false;
+                            console.dir(data2);
+                        })
+                        .error(function(data, status, headers, config) {
+                            $scope.isLoading = false;
+                        });
                 })
                 .error(function(data, status, headers, config) {
                     $scope.isLoading = false;
+                    console.dir(data);
                 });
 
             $scope.tabs = [
@@ -12271,11 +13730,9 @@ angular.module('manage.manageHoursUsers', [])
                 }];
     }])
 
-    .controller('hrsUserListCtrl', ['$scope', '$window', 'hmFactory', function hrsUserListCtrl($scope, $window, hmFactory) {
+    .controller('hrsUserListCtrl', ['$scope', 'hmFactory', function hrsUserListCtrl($scope, hmFactory) {
         $scope.expUser = -1;
         $scope.expUserIndex = -1;
-        $scope.users = $window.users;
-        $scope.newUser = $scope.users[0];
         $scope.newUserAdmin = false;
         $scope.newUserAccess = [false, false, false, false, false, false, false, false, false, false, false, false];
 
@@ -12316,6 +13773,7 @@ angular.module('manage.manageHoursUsers', [])
 
         $scope.createUser = function(user){
             $scope.isLoading = true;
+            $scope.result2 = "";
             user.admin = $scope.newUserAdmin;
             user.access = $scope.newUserAccess;
             user.locations = $scope.dataUL.locations;
@@ -12324,7 +13782,7 @@ angular.module('manage.manageHoursUsers', [])
                     if ((typeof data === 'object') && (data !== null)){
                         $scope.result2 = "Access granted!";
                         var createdUser = {};
-                        createdUser.name = user.login;
+                        createdUser.name = user.nickname;
                         createdUser.fullName = user.fullName;
                         createdUser.uid = data.uid;
                         createdUser.role = user.admin;
@@ -12336,6 +13794,7 @@ angular.module('manage.manageHoursUsers', [])
                                 createdUser.access[i] = false;
                         $scope.dataUL.users.push(createdUser);
                         $scope.expandUser(createdUser);
+                        $scope.result2 = "User has been added!";
                     }else
                         $scope.result2 = "Error! Could not grant access!";
                     $scope.isLoading = false;
@@ -12420,89 +13879,80 @@ angular.module('manage.manageHoursUsers', [])
         };
     }])
 
-angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
-    .controller('manageNewsCtrl', ['$scope', '$window', 'tokenFactory', 'newsFactory',
-        function manageNewsCtrl($scope, $window, tokenFactory, newsFactory){
-            $scope.data = {};
-            $scope.newNews = {};
-            $scope.newNews.creator = $window.author;
-            $scope.newNews.selectedFiles = [];
-            $scope.newNews.picFile = [];
-            $scope.isAdmin = false;
-            if (typeof $window.admin !== 'undefined')
-                if ($window.admin === "1")
-                    $scope.isAdmin = true;
-            $scope.sortModes = [
-                {by:'title', reverse:false},
-                {by:'created', reverse:true}
-            ];
+angular.module('manage.manageNews', ['ngFileUpload', 'oc.lazyLoad', 'ui.tinymce'])
+    .constant('NEWS_GROUP', 256)
 
-            tokenFactory("CSRF-libNews");
-
-            newsFactory.getData("all")
-                .success(function(data) {
-                    console.dir(data);
-                    for (var i = 0; i < data.news.length; i++){
-                        data.news[i].created = new Date(data.news[i].created * 1000);
-                        if (data.news[i].activeFrom !== null)
-                            data.news[i].activeFrom = new Date(data.news[i].activeFrom * 1000);
-                        if (data.news[i].activeUntil !== null)
-                            data.news[i].activeUntil = new Date(data.news[i].activeUntil * 1000);
-                        for (var j = 0; j < data.people.length; j++)
-                            if (data.news[i].contactID.uid === data.people[j].uid){
-                                data.news[i].contactID = data.people[j];
-                                break;
-                            }
-                        data.news[i].show = false;
-                        data.news[i].class = "";
-                        data.news[i].dpFrom = false;
-                        data.news[i].dpUntil = false;
-                        data.news[i].selectedFiles = [];
-                    }
-                    $scope.newNews.contactID = data.people[0];
-                    $scope.data = data;
-                })
-                .error(function(data, status, headers, config) {
-                    console.log(data);
-                });
-
-            $scope.tabs = [
-                { name: 'News and Exhibits',
-                    number: 0,
-                    active: true
-                },
-                { name: 'Admins',
-                    number: 1,
-                    active: false
-                }];
-        }])
-
-    .directive('newsExhibitionsMain', ['$animate', function($animate) {
-        return {
-            restrict: 'A',
-            scope: {},
+    .config(['$routeProvider', function($routeProvider){
+        $routeProvider.when('/manage-news', {
             controller: 'manageNewsCtrl',
-            link: function(scope, elm, attrs){
-                //Preload the spinner element
-                var spinner = angular.element('<div id="loading-bar-spinner"><div class="spinner-icon"></div></div>');
-                //Preload the location of the boxe's title element (needs to be more dynamic in the future)
-                var titleElm = elm.find('h2');
-                //Enter the spinner animation, appending it to the title element
-                $animate.enter(spinner, titleElm[0]);
+            templateUrl: 'manageNews/manageNews.tpl.html',
+            resolve: {
+                userData: function(tokenReceiver){
+                    return tokenReceiver.getPromise();
+                },
+                lazyLoad: ['$ocLazyLoad', function($ocLazyLoad) {
+                    return $ocLazyLoad.load('https://cdn.tinymce.com/4/tinymce.min.js');
+                }]
+            }
+        });
+    }])
 
-                var loadingWatcher = scope.$watch(
-                    'data.totalTime',
-                    function(newVal, oldVal){
-                        if (newVal != oldVal){
-                            $animate.leave(spinner);
-                            console.log("News data loaded");
+    .controller('manageNewsCtrl', ['$scope', 'newsFactory', 'userData', 'NEWS_GROUP', 'lazyLoad', 'AuthService',
+    function manageNewsCtrl($scope, newsFactory, userData, NEWS_GROUP, lazyLoad, AuthService){
+        $scope.userInfo = AuthService.isAuthorized();
+        $scope.data = {};
+        $scope.newNews = {};
+        $scope.newNews.creator = $scope.userInfo.login;
+        $scope.newNews.selectedFiles = [];
+        $scope.newNews.picFile = [];
+        $scope.sortModes = [
+            {by:'title', reverse:false},
+            {by:'created', reverse:true}
+        ];
+
+        $scope.hasAccess = false;
+        if (angular.isDefined($scope.userInfo.group)) {
+            if ($scope.userInfo.group & NEWS_GROUP === NEWS_GROUP) {
+                $scope.hasAccess = true;
+            }
+        }
+
+        newsFactory.getData("all")
+            .success(function(data) {
+                console.dir(data);
+                for (var i = 0; i < data.news.length; i++){
+                    data.news[i].created = new Date(data.news[i].created * 1000);
+                    if (data.news[i].activeFrom !== null)
+                        data.news[i].activeFrom = new Date(data.news[i].activeFrom * 1000);
+                    if (data.news[i].activeUntil !== null)
+                        data.news[i].activeUntil = new Date(data.news[i].activeUntil * 1000);
+                    for (var j = 0; j < data.people.length; j++)
+                        if (data.news[i].contactID.uid === data.people[j].uid){
+                            data.news[i].contactID = data.people[j];
+                            break;
                         }
-                    },
-                    true
-                );
+                    data.news[i].show = false;
+                    data.news[i].class = "";
+                    data.news[i].dpFrom = false;
+                    data.news[i].dpUntil = false;
+                    data.news[i].selectedFiles = [];
+                }
+                $scope.newNews.contactID = data.people[0];
+                $scope.data = data;
+            })
+            .error(function(data, status, headers, config) {
+                console.log(data);
+            });
+
+        $scope.tabs = [
+            { name: 'News and Exhibits',
+                number: 0,
+                active: true
             },
-            templateUrl: 'manageNews/manageNews.tpl.html'
-        };
+            { name: 'Admins',
+                number: 1,
+                active: false
+            }];
     }])
 
     .controller('manageNewsListCtrl', ['$scope', '$timeout', 'Upload', 'newsFactory', 'NEWS_URL',
@@ -12904,34 +14354,43 @@ angular.module('manage.manageNews', ['ngFileUpload', 'ui.tinymce'])
 
 
 angular.module('manage.manageOneSearch', [])
+    .constant('ONESEARCH_GROUP', 4)
 
-    .controller('mainOneSearchCtrl', ['$scope',
-        function mainOneSearchCtrl($scope){
-            $scope.tabs = [
-                { name: 'Recommended Links',
-                    number: 0,
-                    active: true
-                },
-                { name: 'Search Statistics',
-                    number: 1,
-                    active: false
-                }
-            ];
-        }])
-
-    .directive('manageOneSearchMain', ['$animate', function($animate) {
-        return {
-            restrict: 'A',
-            scope: {},
+    .config(['$routeProvider', function($routeProvider){
+        $routeProvider.when('/manage-onesearch', {
             controller: 'mainOneSearchCtrl',
-            link: function(scope, elm, attrs){
-            },
-            templateUrl: 'manageOneSearch/mainOneSearch.tpl.html'
-        };
+            templateUrl: 'manageOneSearch/mainOneSearch.tpl.html',
+            resolve: {
+                userData: function(tokenReceiver){
+                    return tokenReceiver.getPromise();
+                }
+            }
+        });
     }])
 
-    .controller('manageOneSearchCtrl', ['$scope', 'tokenFactory', 'osFactory',
-        function manageOneSearchCtrl($scope, tokenFactory, osFactory){
+    .controller('mainOneSearchCtrl', ['$scope', 'userData', 'ONESEARCH_GROUP', 'AuthService',
+    function mainOneSearchCtrl($scope, userData, ONESEARCH_GROUP, AuthService){
+        $scope.userInfo = AuthService.isAuthorized();
+        $scope.hasAccess = false;
+        if (angular.isDefined($scope.userInfo.group)) {
+            if ($scope.userInfo.group & ONESEARCH_GROUP === ONESEARCH_GROUP) {
+                $scope.hasAccess = true;
+            }
+        }
+        $scope.tabs = [
+            { name: 'Recommended Links',
+                number: 0,
+                active: true
+            },
+            { name: 'Search Statistics',
+                number: 1,
+                active: false
+            }
+        ];
+    }])
+
+    .controller('manageOneSearchCtrl', ['$scope', 'osFactory',
+        function manageOneSearchCtrl($scope, osFactory){
             $scope.recList = [];
             $scope.addRec = {};
             $scope.addRec.keyword = "";
@@ -12948,8 +14407,6 @@ angular.module('manage.manageOneSearch', [])
                 {by:'description', reverse:false},
                 {by:'link', reverse:false}
             ];
-
-            tokenFactory("CSRF-libOneSearch");
 
             osFactory.getData('reclist')
                 .success(function(data) {
@@ -13020,7 +14477,6 @@ angular.module('manage.manageOneSearch', [])
     .directive('recommendedLinksList', [ function() {
         return {
             restrict: 'AC',
-            scope: {},
             controller: 'manageOneSearchCtrl',
             templateUrl: 'manageOneSearch/manageOneSearch.tpl.html'
         };
@@ -13042,7 +14498,6 @@ angular.module('manage.manageOneSearch', [])
     .directive('searchStatisticsList', [ function() {
         return {
             restrict: 'AC',
-            scope: {},
             controller: 'oneSearchStatCtrl',
             templateUrl: 'manageOneSearch/oneSearchStat.tpl.html'
         };
@@ -13052,94 +14507,84 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
         {name:'MS Windows', value:1},
         {name:'Apple Mac', value:2}
     ])
+    .constant('SOFTWARE_GROUP', 64)
 
-    .controller('manageSWCtrl', ['$scope', 'tokenFactory', 'swFactory', 'OS',
-        function manageSWCtrl($scope, tokenFactory, swFactory, OS){
-            $scope.SWList = {};
-            $scope.newSW = {};
-            $scope.newComp = {};
-
-            tokenFactory("CSRF-libSoftware");
-
-            swFactory.getData("all/backend")
-                .success(function(data) {
-                    console.dir(data);
-                    for (var i = 0; i < data.software.length; i++){
-                        data.software[i].show = false;
-                        data.software[i].class = "";
-                        data.software[i].selCat = data.categories[0];
-                        data.software[i].newVer = {};
-                        data.software[i].newVer.version = "";
-                        data.software[i].newVer.selOS = OS[0];
-                        for (var j = 0; j < data.software[i].versions.length; j++){
-                            data.software[i].versions[j].newLoc = {};
-                            data.software[i].versions[j].newLoc.selLoc = data.locations[0];
-                            data.software[i].versions[j].newLoc.devices = [];
-                            for (var k = 0; k < data.devices.length; k++)
-                                data.software[i].versions[j].newLoc.devices[k] = false;
-                        }
-                        for (var j = 0; j < data.licenseModes.length; j++)
-                            if (data.licenseModes[j].lmid === data.software[i].lmid){
-                                data.software[i].selMode = data.licenseModes[j];
-                            }
-                        data.software[i].newLink = {};
-                        data.software[i].newLink.description = "";
-                        data.software[i].newLink.title = "";
-                        data.software[i].newLink.url = "";
-                    }
-                    $scope.newSW.selCat = data.categories[0];
-                    $scope.newSW.selMode = data.licenseModes[0];
-                    $scope.selMap = data.maps[3];
-                    $scope.newComp.selLoc = data.locations[0];
-
-                    $scope.SWList = data;
-                })
-                .error(function(data, status, headers, config) {
-                    console.log(data);
-                });
-
-            $scope.tabs = [
-                { name: 'Software List',
-                    number: 0,
-                    active: true
-                },
-                { name: 'Locations and Categories',
-                    number: 1,
-                    active: false
-                },
-                { name: 'Computer Maps',
-                    number: 2,
-                    active: false
-                }
-            ];
-        }])
-
-    .directive('manageSoftwareMain', ['$animate', function($animate) {
-        return {
-            restrict: 'A',
-            scope: {},
+    .config(['$routeProvider', function($routeProvider){
+        $routeProvider.when('/manage-software', {
             controller: 'manageSWCtrl',
-            link: function(scope, elm, attrs){
-                //Preload the spinner element
-                var spinner = angular.element('<div id="loading-bar-spinner"><div class="spinner-icon"></div></div>');
-                //Preload the location of the boxe's title element (needs to be more dynamic in the future)
-                var titleElm = elm.find('h2');
-                //Enter the spinner animation, appending it to the title element
-                $animate.enter(spinner, titleElm[0]);
+            templateUrl: 'manageSoftware/manageSoftware.tpl.html',
+            resolve: {
+                userData: function(tokenReceiver){
+                    return tokenReceiver.getPromise();
+                }
+            }
+        });
+    }])
 
-                var loadingWatcher = scope.$watch(
-                    'SWList.totalTime',
-                    function(newVal, oldVal){
-                        if (newVal != oldVal){
-                            $animate.leave(spinner);
-                            console.log("Software loaded");
+    .controller('manageSWCtrl', ['$scope', 'swFactory', 'OS', 'userData', 'SOFTWARE_GROUP', 'AuthService',
+    function manageSWCtrl($scope, swFactory, OS, userData, SOFTWARE_GROUP, AuthService){
+        $scope.userInfo = AuthService.isAuthorized();
+        $scope.SWList = {};
+        $scope.newSW = {};
+        $scope.newComp = {};
+        $scope.hasAccess = false;
+        if (angular.isDefined($scope.userInfo.group)) {
+            if ($scope.userInfo.group & SOFTWARE_GROUP === SOFTWARE_GROUP) {
+                $scope.hasAccess = true;
+            }
+        }
+
+        swFactory.getData("all/backend")
+            .success(function(data) {
+                console.dir(data);
+                for (var i = 0; i < data.software.length; i++){
+                    data.software[i].show = false;
+                    data.software[i].class = "";
+                    data.software[i].selCat = data.categories[0];
+                    data.software[i].newVer = {};
+                    data.software[i].newVer.version = "";
+                    data.software[i].newVer.selOS = OS[0];
+                    for (var j = 0; j < data.software[i].versions.length; j++){
+                        data.software[i].versions[j].newLoc = {};
+                        data.software[i].versions[j].newLoc.selLoc = data.locations[0];
+                        data.software[i].versions[j].newLoc.devices = [];
+                        for (var k = 0; k < data.devices.length; k++)
+                            data.software[i].versions[j].newLoc.devices[k] = false;
+                    }
+                    for (var j = 0; j < data.licenseModes.length; j++)
+                        if (data.licenseModes[j].lmid === data.software[i].lmid){
+                            data.software[i].selMode = data.licenseModes[j];
                         }
-                    },
-                    true
-                );
+                    data.software[i].newLink = {};
+                    data.software[i].newLink.description = "";
+                    data.software[i].newLink.title = "";
+                    data.software[i].newLink.url = "";
+                }
+                $scope.newSW.selCat = data.categories[0];
+                $scope.newSW.selMode = data.licenseModes[0];
+                $scope.selMap = data.maps[3];
+                $scope.newComp.selLoc = data.locations[0];
+
+                $scope.SWList = data;
+            })
+            .error(function(data, status, headers, config) {
+                console.log(data);
+            });
+
+        $scope.tabs = [
+            { name: 'Software List',
+                number: 0,
+                active: true
             },
-            templateUrl: 'manageSoftware/manageSoftware.tpl.html'
-        };
+            { name: 'Locations and Categories',
+                number: 1,
+                active: false
+            },
+            { name: 'Computer Maps',
+                number: 2,
+                active: false
+            }
+        ];
     }])
 
     .controller('manageSWListCtrl', ['$scope', '$timeout', 'Upload', 'swFactory', 'SOFTWARE_URL', 'OS',
@@ -14042,16 +15487,73 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
     }]);
 
 angular.module('manage.manageUserGroups', [])
-    .controller('userGroupsCtrl', ['$scope', '$window', 'tokenFactory', 'ugFactory',
-        function userGroupsCtrl($scope, $window, tokenFactory, ugFactory){
+    .constant('USERS_GROUP', 1)
+
+    .config(['$routeProvider', function($routeProvider){
+        $routeProvider.when('/manage-user-groups', {
+            controller: 'userGroupsCtrl',
+            templateUrl: 'manageUserGroups/manageUG.tpl.html',
+            resolve: {
+                userData: function(tokenReceiver){
+                    return tokenReceiver.getPromise();
+                }
+            }
+        });
+    }])
+
+    .controller('userGroupsCtrl', ['$scope', 'wpUsersFactory', 'ugFactory', 'userData', 'USERS_GROUP', 'AuthService',
+    function userGroupsCtrl($scope, wpUsersFactory, ugFactory, userData, USERS_GROUP, AuthService){
+        $scope.userInfo = AuthService.isAuthorized();
+        $scope.isLoading = true;
         $scope.expUser = -1;
-        $scope.users = $window.users;
-        $scope.apps = $window.apps;
-        $scope.wpUsers = $window.wpUsers;
-        $scope.newUser = $scope.wpUsers[0];
+        $scope.wpUsers = [];
+        $scope.users = [];
+        $scope.apps = [];
         $scope.newUserAccess = [];
-        for (var i = 0; i < $scope.apps.length; i++)
-            $scope.newUserAccess[i] = false;
+        $scope.hasAccess = false;
+        if (angular.isDefined($scope.userInfo.group)) {
+            if ($scope.userInfo.group & USERS_GROUP === USERS_GROUP) {
+                $scope.hasAccess = true;
+            }
+        }
+        wpUsersFactory.getAllUsersWP()
+            .success(function(data) {
+                //remove admin accounts
+                for (var i = 0; i < data.length; i++) {
+                    if (data[i].last_name.length < 1) {
+                        data.splice(i, 1);
+                    }
+                }
+
+                for (i = 0; i < data.length; i++) {
+                    data[i].fullName = data[i].last_name + ", " + data[i].first_name + " (" + data[i].nickname + ")";
+                }
+                $scope.wpUsers = data;
+                $scope.newUser = $scope.wpUsers[0];
+                console.log("WP user list received:");
+                ugFactory.getData()
+                    .success(function(data2) {
+                        if (angular.isDefined(data2.users) && angular.isDefined(data2.apps)) {
+                            $scope.users = data2.users;
+                            $scope.apps = data2.apps;
+                            for (i = 0; i < $scope.apps.length; i++)
+                                $scope.newUserAccess[i] = false;
+                            $scope.isLoading = false;
+                            console.log("User groups received.");
+                        } else {
+                            console.dir(data2);
+                        }
+                    })
+                    .error(function(data2, status, headers, config) {
+                        $scope.result = "Error! Could not retrieve user data! " + data2;
+                        $scope.isLoading = false;
+                        console.dir(data2);
+                    });
+            })
+            .error(function(data, status, headers, config) {
+                $scope.isLoading = false;
+                console.dir(data);
+            });
 
         $scope.tabs = [
             { name: 'Users',
@@ -14068,8 +15570,6 @@ angular.module('manage.manageUserGroups', [])
             {by:'wpLogin', reverse:false},
             {by:'name', reverse:false}
         ];
-
-        tokenFactory("CSRF-libAdmin");
 
         $scope.expandUser = function(user){
             $scope.result = "";
@@ -14155,184 +15655,148 @@ angular.module('manage.manageUserGroups', [])
         };
 
     }])
-    .directive('userGroupsList', [ function() {
-        return {
-            restrict: 'A',
-            scope: {},
-            controller: 'userGroupsCtrl',
-            templateUrl: 'manageUserGroups/manageUG.tpl.html'
-        };
-    }])
-    .controller('myWebAppsCtrl', ['$scope', '$window',
-        function myWebAppsCtrl($scope, $window){
-            $scope.apps = $window.apps;
-            $scope.userName = $window.userName;
+
+    .controller('myWebAppsCtrl', ['$scope',
+        function myWebAppsCtrl($scope){
+            $scope.appsAccess = false;
+            if (angular.isDefined($scope.userInfo.group)) {
+                $scope.appsAccess = true;
+            }
         }])
     .directive('viewMyWebApps', [ function() {
         return {
             restrict: 'A',
-            scope: {},
             controller: 'myWebAppsCtrl',
             templateUrl: 'manageUserGroups/viewMyWebApps.tpl.html'
         };
     }])
-angular.module('manage.siteFeedback', [])
-    .controller('siteFeedbackCtrl', ['$scope', 'tokenFactory', 'wpTestFactory',
-        function siteFeedbackCtrl($scope, tokenFactory, wpTestFactory){
-            $scope.responses = [];
-            $scope.userInfo = {};
-
-            console.log("checking current user...");
-            wpTestFactory.getCurrentUser()
-                .success(function(data) {
-                    console.dir(data);
-                    $scope.userInfo = data;
-                    if (angular.isDefined($scope.userInfo.id)) {
-                        console.log("retrieving current user details...");
-                        wpTestFactory.getUserDetails($scope.userInfo.id)
-                            .success(function (data) {
-                                console.dir(data);
-                            })
-                            .error(function (data, status, headers, config) {
-                                console.log(data);
-                            });
-                    }
-                })
-                .error(function(data, status, headers, config) {
-                    console.log(data);
-                });
-
-
-        }])
-    .directive('siteFeedbackList', [ function() {
-        return {
-            restrict: 'AC',
-            scope: {},
-            controller: 'siteFeedbackCtrl',
-            templateUrl: 'siteFeedback/siteFeedback.tpl.html'
-        };
-    }]);
-
-angular.module('manage.staffDirectory', ['ui.tinymce'])
+angular.module('manage.staffDirectory', ['oc.lazyLoad', 'ui.tinymce'])
     .constant('STAFF_DIR_RANKS', [
         "",
         "Prof.",
         "Assoc. Prof.",
         "Asst. Prof."
     ])
+    .constant('STAFFDIR_GROUP', 8)
 
-    .controller('staffDirCtrl', ['$scope', 'tokenFactory', 'sdFactory', 'STAFF_DIR_URL',
-        function staffDirCtrl($scope, tokenFactory, sdFactory, appUrl){
-            $scope.Directory = {};
-            $scope.newPerson = {};
-            $scope.newDept = {};
-
-            $scope.tabs = [
-                { name: 'Directory',
-                    number: 0,
-                    active: true
-                },
-                { name: 'Subjects',
-                    number: 1,
-                    active: false
-                },
-                { name: 'Departments/Locations',
-                    number: 2,
-                    active: false
+    .config(['$routeProvider', function($routeProvider){
+        $routeProvider
+            .when('/manage-staff-directory', {
+                controller: 'staffDirCtrl',
+                templateUrl: 'staffDirectory/staffDirectory.tpl.html',
+                resolve: {
+                    userData: function(tokenReceiver){
+                        return tokenReceiver.getPromise();
+                    }
                 }
-            ];
-            $scope.subjectTypes = [
-                {name: 'Specialist', value: 1},
-                {name: 'Instructor', value: 2},
-                {name: 'Both', value: 3}
-            ];
-            $scope.sortModes = [
-                {by:'lastname', reverse:false},
-                {by:'title', reverse:false},
-                {by:'department', reverse:false}
-            ];
-            $scope.sortMode = $scope.sortModes[0];
-            $scope.sortBy = function(by){
-                if ($scope.sortMode === by)
-                    $scope.sortModes[by].reverse = !$scope.sortModes[by].reverse;
-                else
-                    $scope.sortMode = by;
-            };
-
-            tokenFactory("CSRF-libStaffDir");
-
-            sdFactory.getData()
-                .success(function(data) {
-                    console.dir(data);
-                    $scope.Directory = data;
-                    for (var i = 0; i < $scope.Directory.list.length; i++){
-                        $scope.Directory.list[i].selSubj = $scope.Directory.subjects[0];
-                        $scope.Directory.list[i].selType = $scope.subjectTypes[0];
-                        for (var j = 0; j < $scope.Directory.departments.length; j++)
-                            if ($scope.Directory.departments[j].depid == $scope.Directory.list[i].dept){
-                                $scope.Directory.list[i].selDept = $scope.Directory.departments[j];
-                                break;
-                            }
-                        for (var j = 0; j < $scope.Directory.divisions.length; j++)
-                            if ($scope.Directory.divisions[j].divid == $scope.Directory.list[i].divis){
-                                $scope.Directory.list[i].selDiv = $scope.Directory.divisions[j];
-                                break;
-                            }
-                        $scope.Directory.list[i].class = "";
-                        $scope.Directory.list[i].show = false;
-                        $scope.Directory.list[i].image = appUrl + "staffImages/" + $scope.Directory.list[i].id + ".jpg";
-                    }
-                    $scope.newPerson.selSubj = $scope.Directory.subjects[0];
-                    for (var i = 0; i < $scope.Directory.subjects.length; i++)
-                        $scope.Directory.subjects[i].show = false;
-                    $scope.newPerson.selDept = $scope.Directory.departments[0];
-                    for (var i = 0; i < $scope.Directory.departments.length; i++){
-                        $scope.Directory.departments[i].show = false;
-                        for (var j = 0; j < $scope.Directory.libraries.length; j++)
-                            if ($scope.Directory.libraries[j].lid == $scope.Directory.departments[i].library){
-                                $scope.Directory.departments[i].selLib = $scope.Directory.libraries[j];
-                            }
-                    }
-                    $scope.newPerson.selDiv = $scope.Directory.divisions[0];
-                    for (var i = 0; i < $scope.Directory.libraries.length; i++)
-                        $scope.Directory.libraries[i].show = false;
-                    for (var i = 0; i < $scope.Directory.divisions.length; i++)
-                        $scope.Directory.divisions[i].show = false;
-                    $scope.newDept.selLib = $scope.Directory.libraries[0];
-
-                    $scope.sortBy(0);
-                })
-                .error(function(data, status, headers, config) {
-                    console.log(data);
-                });
-
-        }])
-    .directive('staffDirectoryList', ['$animate', function($animate) {
-        return {
-            restrict: 'AC',
-            scope: {},
-            controller: 'staffDirCtrl',
-            link: function(scope, elm, attrs){
-                //Preload the spinner element
-                var spinner = angular.element('<div id="loading-bar-spinner"><div class="spinner-icon"></div></div>');
-                //Preload the location of the boxe's title element (needs to be more dynamic in the future)
-                var titleElm = elm.find('h2');
-                //Enter the spinner animation, appending it to the title element
-                $animate.enter(spinner, titleElm[0]);
-
-                var loadingWatcher = scope.$watch(
-                    'Directory',
-                    function(newVal, oldVal){
-                        if (scope.Directory.totalTime > 0){
-                            $animate.leave(spinner);
-                            console.log("Staff Directory loaded");
-                        }
-                    }
-                );
-            },
-            templateUrl: 'staffDirectory/staffDirectory.tpl.html'
-        };
+            })
+            .when('/manage-my-profile', {
+                controller: 'staffDirProfileCtrl',
+                templateUrl: 'staffDirectory/staffDirectoryProfile.tpl.html',
+                resolve: {
+                    userData: function(tokenReceiver){
+                        return tokenReceiver.getPromise();
+                    },
+                    lazyLoad: ['$ocLazyLoad', function($ocLazyLoad) {
+                        return $ocLazyLoad.load('https://cdn.tinymce.com/4/tinymce.min.js');
+                    }]
+                }
+            });
     }])
+
+    .controller('staffDirCtrl', ['$scope', 'sdFactory', 'STAFF_DIR_URL', 'userData', 'STAFFDIR_GROUP', 'AuthService',
+    function staffDirCtrl($scope, sdFactory, appUrl, userData, STAFFDIR_GROUP, AuthService){
+        $scope.userInfo = AuthService.isAuthorized();
+        $scope.Directory = {};
+        $scope.newPerson = {};
+        $scope.newDept = {};
+
+        $scope.tabs = [
+            { name: 'Directory',
+                number: 0,
+                active: true
+            },
+            { name: 'Subjects',
+                number: 1,
+                active: false
+            },
+            { name: 'Departments/Locations',
+                number: 2,
+                active: false
+            }
+        ];
+        $scope.subjectTypes = [
+            {name: 'Specialist', value: 1},
+            {name: 'Instructor', value: 2},
+            {name: 'Both', value: 3}
+        ];
+        $scope.sortModes = [
+            {by:'lastname', reverse:false},
+            {by:'title', reverse:false},
+            {by:'department', reverse:false}
+        ];
+        $scope.sortMode = $scope.sortModes[0];
+        $scope.sortBy = function(by){
+            if ($scope.sortMode === by)
+                $scope.sortModes[by].reverse = !$scope.sortModes[by].reverse;
+            else
+                $scope.sortMode = by;
+        };
+
+        $scope.hasAccess = false;
+        if (angular.isDefined($scope.userInfo.group)) {
+            if ($scope.userInfo.group & STAFFDIR_GROUP === STAFFDIR_GROUP) {
+                $scope.hasAccess = true;
+            }
+        }
+
+        sdFactory.getData()
+            .success(function(data) {
+                console.dir(data);
+                $scope.Directory = data;
+                for (var i = 0; i < $scope.Directory.list.length; i++){
+                    $scope.Directory.list[i].selSubj = $scope.Directory.subjects[0];
+                    $scope.Directory.list[i].selType = $scope.subjectTypes[0];
+                    for (var j = 0; j < $scope.Directory.departments.length; j++)
+                        if ($scope.Directory.departments[j].depid == $scope.Directory.list[i].dept){
+                            $scope.Directory.list[i].selDept = $scope.Directory.departments[j];
+                            break;
+                        }
+                    for (var j = 0; j < $scope.Directory.divisions.length; j++)
+                        if ($scope.Directory.divisions[j].divid == $scope.Directory.list[i].divis){
+                            $scope.Directory.list[i].selDiv = $scope.Directory.divisions[j];
+                            break;
+                        }
+                    $scope.Directory.list[i].class = "";
+                    $scope.Directory.list[i].show = false;
+                    $scope.Directory.list[i].image = appUrl + "staffImages/" + $scope.Directory.list[i].id + ".jpg";
+                }
+                $scope.newPerson.selSubj = $scope.Directory.subjects[0];
+                for (var i = 0; i < $scope.Directory.subjects.length; i++)
+                    $scope.Directory.subjects[i].show = false;
+                $scope.newPerson.selDept = $scope.Directory.departments[0];
+                for (var i = 0; i < $scope.Directory.departments.length; i++){
+                    $scope.Directory.departments[i].show = false;
+                    for (var j = 0; j < $scope.Directory.libraries.length; j++)
+                        if ($scope.Directory.libraries[j].lid == $scope.Directory.departments[i].library){
+                            $scope.Directory.departments[i].selLib = $scope.Directory.libraries[j];
+                        }
+                }
+                $scope.newPerson.selDiv = $scope.Directory.divisions[0];
+                for (var i = 0; i < $scope.Directory.libraries.length; i++)
+                    $scope.Directory.libraries[i].show = false;
+                for (var i = 0; i < $scope.Directory.divisions.length; i++)
+                    $scope.Directory.divisions[i].show = false;
+                $scope.newDept.selLib = $scope.Directory.libraries[0];
+
+                $scope.sortBy(0);
+            })
+            .error(function(data, status, headers, config) {
+                console.log(data);
+            });
+
+    }])
+
     .controller('staffDirPeopleCtrl', ['$scope', 'sdFactory', 'STAFF_DIR_RANKS', 'STAFF_DIR_URL',
         function staffDirPeopleCtrl($scope, sdFactory, ranks, appUrl){
             $scope.lastNameFilter = '';
@@ -14738,10 +16202,10 @@ angular.module('manage.staffDirectory', ['ui.tinymce'])
         };
     }])
 
-    .controller('staffDirProfileCtrl', ['$scope', 'tokenFactory', 'sdFactory', '$window',
-    function staffDirProfileCtrl($scope, tokenFactory, sdFactory, $window){
+    .controller('staffDirProfileCtrl', ['$scope', 'sdFactory', 'userData', 'lazyLoad', 'AuthService',
+    function staffDirProfileCtrl($scope, sdFactory, userData, lazyLoad, AuthService){
+        $scope.userInfo = AuthService.isAuthorized();
         $scope.userProfile = {};
-        $scope.login = $window.login;
         $scope.tinymceOptions = {
             onChange: function(e) {
                 // put logic here for keypress and cut/paste changes
@@ -14752,9 +16216,7 @@ angular.module('manage.staffDirectory', ['ui.tinymce'])
             theme : 'modern'
         };
 
-        tokenFactory("CSRF-" + $scope.login);
-
-        sdFactory.getProfile($scope.login)
+        sdFactory.getProfile($scope.userInfo.login)
             .success(function(data) {
                 $scope.userProfile = data;
                 console.dir(data);
@@ -14764,7 +16226,7 @@ angular.module('manage.staffDirectory', ['ui.tinymce'])
             });
 
         $scope.update = function(){
-            $scope.userProfile.person.login = $scope.login;
+            $scope.userProfile.person.login = $scope.userInfo.login;
             $scope.userProfile.person.formResponse = "";
             sdFactory.postData({action : 18}, $scope.userProfile.person)
                 .success(function(data, status, headers, config) {
@@ -14774,91 +16236,71 @@ angular.module('manage.staffDirectory', ['ui.tinymce'])
                     $scope.userProfile.person.formResponse = "Error: Could not update profile! " + data;
                 });
         };
-    }])
-    .directive('editStaffDirectoryProfile', [ function() {
-        return {
-            restrict: 'AC',
-            scope: {},
-            controller: 'staffDirProfileCtrl',
-            link: function(scope, elm, attrs){
-            },
-            templateUrl: 'staffDirectory/staffDirectoryProfile.tpl.html'
-        };
     }]);
 
-
-
 angular.module('manage.submittedForms', ['ngFileUpload'])
-    .controller('manageSubFormsCtrl', ['$scope', '$timeout', 'tokenFactory', 'formFactory',
-        function manageSubFormsCtrl($scope, $timeout, tokenFactory, formFactory){
-            $scope.data = {};
-            $scope.currentPage = 1;
-            $scope.maxPageSize = 10;
-            $scope.perPage = 20;
-            $scope.titleFilter = '';
-            $scope.sortModes = [
-                {by:'title', reverse:false},
-                {by:'status', reverse:false},
-                {by:'created', reverse:true}
-            ];
-            $scope.sortMode = 2;
-            $scope.sortButton = $scope.sortMode;
-            $scope.mOver = 0;
+    .constant('FORMS_GROUP', 128)
 
-            tokenFactory("CSRF-libForms");
-
-            formFactory.getData()
-                .success(function(data) {
-                    console.dir(data);
-                    for (var i = 0; i < data.forms.length; i++){
-                        data.forms[i].show = false;
-                        data.forms[i].class = "";
-                    }
-                    $scope.data = data;
-                })
-                .error(function(data, status, headers, config) {
-                    console.log(data);
-                });
-
-            $scope.toggleForms = function(form){
-                $scope.data.forms[$scope.data.forms.indexOf(form)].show =
-                    !$scope.data.forms[$scope.data.forms.indexOf(form)].show;
-            };
-            $scope.sortBy = function(by){
-                if ($scope.sortMode === by)
-                    $scope.sortModes[by].reverse = !$scope.sortModes[by].reverse;
-                else
-                    $scope.sortMode = by;
-            };
-        }])
-
-    .directive('submittedFormsList', ['$animate', function($animate) {
-        return {
-            restrict: 'AC',
-            scope: {},
+    .config(['$routeProvider', function($routeProvider){
+        $routeProvider.when('/manage-forms', {
             controller: 'manageSubFormsCtrl',
-            link: function(scope, elm, attrs){
-                //Preload the spinner element
-                var spinner = angular.element('<div id="loading-bar-spinner"><div class="spinner-icon"></div></div>');
-                //Preload the location of the boxe's title element (needs to be more dynamic in the future)
-                var titleElm = elm.find('h2');
-                //Enter the spinner animation, appending it to the title element
-                $animate.enter(spinner, titleElm[0]);
+            templateUrl: 'submittedForms/submittedForms.tpl.html',
+            resolve: {
+                userData: function(tokenReceiver){
+                    return tokenReceiver.getPromise();
+                }
+            }
+        });
+    }])
+    .controller('manageSubFormsCtrl', ['$scope', '$timeout', 'formFactory', 'userData', 'FORMS_GROUP', 'AuthService',
+    function manageSubFormsCtrl($scope, $timeout, formFactory, userData, FORMS_GROUP, AuthService){
+        $scope.userInfo = AuthService.isAuthorized();
+        $scope.data = {};
+        $scope.currentPage = 1;
+        $scope.maxPageSize = 10;
+        $scope.perPage = 20;
+        $scope.titleFilter = '';
+        $scope.sortModes = [
+            {by:'title', reverse:false},
+            {by:'status', reverse:false},
+            {by:'created', reverse:true}
+        ];
+        $scope.sortMode = 2;
+        $scope.sortButton = $scope.sortMode;
+        $scope.mOver = 0;
 
-                var loadingWatcher = scope.$watch(
-                    'data.totalTime',
-                    function(newVal, oldVal){
-                        if (newVal != oldVal){
-                            $animate.leave(spinner);
-                            console.log("Forms data loaded");
-                        }
-                    },
-                    true
-                );
-            },
-            templateUrl: 'submittedForms/submittedForms.tpl.html'
+        $scope.hasAccess = false;
+        if (angular.isDefined($scope.userInfo.group)) {
+            if ($scope.userInfo.group & FORMS_GROUP === FORMS_GROUP) {
+                $scope.hasAccess = true;
+            }
+        }
+
+        formFactory.getData()
+            .success(function(data) {
+                console.dir(data);
+                for (var i = 0; i < data.forms.length; i++){
+                    data.forms[i].show = false;
+                    data.forms[i].class = "";
+                }
+                $scope.data = data;
+            })
+            .error(function(data, status, headers, config) {
+                console.log(data);
+            });
+
+        $scope.toggleForms = function(form){
+            $scope.data.forms[$scope.data.forms.indexOf(form)].show =
+                !$scope.data.forms[$scope.data.forms.indexOf(form)].show;
+        };
+        $scope.sortBy = function(by){
+            if ($scope.sortMode === by)
+                $scope.sortModes[by].reverse = !$scope.sortModes[by].reverse;
+            else
+                $scope.sortMode = by;
         };
     }])
+
     .filter('startFrom', [ function() {
         return function(input, start) {
             start = +start; //parse to int
@@ -18536,7 +19978,7 @@ angular.module('common.oneSearch', [])
 })(this);
 /**
  * @license
- * lodash 4.2.1 <https://lodash.com/>
+ * lodash 4.4.0 <https://lodash.com/>
  * Copyright 2012-2016 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
  * Copyright 2009-2016 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -18548,7 +19990,7 @@ angular.module('common.oneSearch', [])
   var undefined;
 
   /** Used as the semantic version number. */
-  var VERSION = '4.2.1';
+  var VERSION = '4.4.0';
 
   /** Used to compose bitmasks for wrapper metadata. */
   var BIND_FLAG = 1,
@@ -18617,7 +20059,8 @@ angular.module('common.oneSearch', [])
       setTag = '[object Set]',
       stringTag = '[object String]',
       symbolTag = '[object Symbol]',
-      weakMapTag = '[object WeakMap]';
+      weakMapTag = '[object WeakMap]',
+      weakSetTag = '[object WeakSet]';
 
   var arrayBufferTag = '[object ArrayBuffer]',
       float32Tag = '[object Float32Array]',
@@ -18766,8 +20209,8 @@ angular.module('common.oneSearch', [])
 
   /** Used to assign default `context` object properties. */
   var contextProps = [
-    'Array', 'Date', 'Error', 'Float32Array', 'Float64Array', 'Function',
-    'Int8Array', 'Int16Array', 'Int32Array', 'Map', 'Math', 'Object',
+    'Array', 'Buffer', 'Date', 'Error', 'Float32Array', 'Float64Array',
+    'Function', 'Int8Array', 'Int16Array', 'Int32Array', 'Map', 'Math', 'Object',
     'Reflect', 'RegExp', 'Set', 'String', 'Symbol', 'TypeError', 'Uint8Array',
     'Uint8ClampedArray', 'Uint16Array', 'Uint32Array', 'WeakMap', '_',
     'clearTimeout', 'isFinite', 'parseInt', 'setTimeout'
@@ -18869,10 +20312,19 @@ angular.module('common.oneSearch', [])
       freeParseInt = parseInt;
 
   /** Detect free variable `exports`. */
-  var freeExports = (objectTypes[typeof exports] && exports && !exports.nodeType) ? exports : null;
+  var freeExports = (objectTypes[typeof exports] && exports && !exports.nodeType)
+    ? exports
+    : undefined;
 
   /** Detect free variable `module`. */
-  var freeModule = (objectTypes[typeof module] && module && !module.nodeType) ? module : null;
+  var freeModule = (objectTypes[typeof module] && module && !module.nodeType)
+    ? module
+    : undefined;
+
+  /** Detect the popular CommonJS extension `module.exports`. */
+  var moduleExports = (freeModule && freeModule.exports === freeExports)
+    ? freeExports
+    : undefined;
 
   /** Detect free variable `global` from Node.js. */
   var freeGlobal = checkGlobal(freeExports && freeModule && typeof global == 'object' && global);
@@ -18883,9 +20335,6 @@ angular.module('common.oneSearch', [])
   /** Detect free variable `window`. */
   var freeWindow = checkGlobal(objectTypes[typeof window] && window);
 
-  /** Detect the popular CommonJS extension `module.exports`. */
-  var moduleExports = (freeModule && freeModule.exports === freeExports) ? freeExports : null;
-
   /** Detect `this` as the global object. */
   var thisGlobal = checkGlobal(objectTypes[typeof this] && this);
 
@@ -18895,7 +20344,9 @@ angular.module('common.oneSearch', [])
    * The `this` value is used if it's the global object to avoid Greasemonkey's
    * restricted `window` object, otherwise the `window` object is used.
    */
-  var root = freeGlobal || ((freeWindow !== (thisGlobal && thisGlobal.window)) && freeWindow) || freeSelf || thisGlobal || Function('return this')();
+  var root = freeGlobal ||
+    ((freeWindow !== (thisGlobal && thisGlobal.window)) && freeWindow) ||
+      freeSelf || thisGlobal || Function('return this')();
 
   /*--------------------------------------------------------------------------*/
 
@@ -19841,7 +21292,8 @@ angular.module('common.oneSearch', [])
     );
 
     /** Built-in value references. */
-    var Reflect = context.Reflect,
+    var Buffer = moduleExports ? context.Buffer : undefined,
+        Reflect = context.Reflect,
         Symbol = context.Symbol,
         Uint8Array = context.Uint8Array,
         clearTimeout = context.clearTimeout,
@@ -19849,6 +21301,7 @@ angular.module('common.oneSearch', [])
         getPrototypeOf = Object.getPrototypeOf,
         getOwnPropertySymbols = Object.getOwnPropertySymbols,
         iteratorSymbol = typeof (iteratorSymbol = Symbol && Symbol.iterator) == 'symbol' ? iteratorSymbol : undefined,
+        objectCreate = Object.create,
         propertyIsEnumerable = objectProto.propertyIsEnumerable,
         setTimeout = context.setTimeout,
         splice = arrayProto.splice;
@@ -19874,9 +21327,10 @@ angular.module('common.oneSearch', [])
     /** Used to store function metadata. */
     var metaMap = WeakMap && new WeakMap;
 
-    /** Used to detect maps and sets. */
+    /** Used to detect maps, sets, and weakmaps. */
     var mapCtorString = Map ? funcToString.call(Map) : '',
-        setCtorString = Set ? funcToString.call(Set) : '';
+        setCtorString = Set ? funcToString.call(Set) : '',
+        weakMapCtorString = WeakMap ? funcToString.call(WeakMap) : '';
 
     /** Used to convert symbols to primitives and strings. */
     var symbolProto = Symbol ? Symbol.prototype : undefined,
@@ -19927,28 +21381,28 @@ angular.module('common.oneSearch', [])
      * `tail`, `take`, `takeRight`, `takeRightWhile`, `takeWhile`, and `toArray`
      *
      * The chainable wrapper methods are:
-     * `after`, `ary`, `assign`, `assignIn`, `assignInWith`, `assignWith`,
-     * `at`, `before`, `bind`, `bindAll`, `bindKey`, `chain`, `chunk`, `commit`,
-     * `compact`, `concat`, `conforms`, `constant`, `countBy`, `create`, `curry`,
-     * `debounce`, `defaults`, `defaultsDeep`, `defer`, `delay`, `difference`,
+     * `after`, `ary`, `assign`, `assignIn`, `assignInWith`, `assignWith`, `at`,
+     * `before`, `bind`, `bindAll`, `bindKey`, `castArray`, `chain`, `chunk`,
+     * `commit`, `compact`, `concat`, `conforms`, `constant`, `countBy`, `create`,
+     * `curry`, `debounce`, `defaults`, `defaultsDeep`, `defer`, `delay`, `difference`,
      * `differenceBy`, `differenceWith`, `drop`, `dropRight`, `dropRightWhile`,
-     * `dropWhile`, `fill`, `filter`, `flatten`, `flattenDeep`, `flip`, `flow`,
-     * `flowRight`, `fromPairs`, `functions`, `functionsIn`, `groupBy`, `initial`,
-     * `intersection`, `intersectionBy`, `intersectionWith`, `invert`, `invertBy`,
-     * `invokeMap`, `iteratee`, `keyBy`, `keys`, `keysIn`, `map`, `mapKeys`,
-     * `mapValues`, `matches`, `matchesProperty`, `memoize`, `merge`, `mergeWith`,
-     * `method`, `methodOf`, `mixin`, `negate`, `nthArg`, `omit`, `omitBy`, `once`,
-     * `orderBy`, `over`, `overArgs`, `overEvery`, `overSome`, `partial`,
-     * `partialRight`, `partition`, `pick`, `pickBy`, `plant`, `property`,
-     * `propertyOf`, `pull`, `pullAll`, `pullAllBy`, `pullAt`, `push`, `range`,
-     * `rangeRight`, `rearg`, `reject`, `remove`, `rest`, `reverse`, `sampleSize`,
-     * `set`, `setWith`, `shuffle`, `slice`, `sort`, `sortBy`, `splice`, `spread`,
-     * `tail`, `take`, `takeRight`, `takeRightWhile`, `takeWhile`, `tap`, `throttle`,
-     * `thru`, `toArray`, `toPairs`, `toPairsIn`, `toPath`, `toPlainObject`,
-     * `transform`, `unary`, `union`, `unionBy`, `unionWith`, `uniq`, `uniqBy`,
-     * `uniqWith`, `unset`, `unshift`, `unzip`, `unzipWith`, `values`, `valuesIn`,
-     * `without`, `wrap`, `xor`, `xorBy`, `xorWith`, `zip`, `zipObject`,
-     * `zipObjectDeep`, and `zipWith`
+     * `dropWhile`, `fill`, `filter`, `flatten`, `flattenDeep`, `flattenDepth`,
+     * `flip`, `flow`, `flowRight`, `fromPairs`, `functions`, `functionsIn`,
+     * `groupBy`, `initial`, `intersection`, `intersectionBy`, `intersectionWith`,
+     * `invert`, `invertBy`, `invokeMap`, `iteratee`, `keyBy`, `keys`, `keysIn`,
+     * `map`, `mapKeys`, `mapValues`, `matches`, `matchesProperty`, `memoize`,
+     * `merge`, `mergeWith`, `method`, `methodOf`, `mixin`, `negate`, `nthArg`,
+     * `omit`, `omitBy`, `once`, `orderBy`, `over`, `overArgs`, `overEvery`,
+     * `overSome`, `partial`, `partialRight`, `partition`, `pick`, `pickBy`, `plant`,
+     * `property`, `propertyOf`, `pull`, `pullAll`, `pullAllBy`, `pullAt`, `push`,
+     * `range`, `rangeRight`, `rearg`, `reject`, `remove`, `rest`, `reverse`,
+     * `sampleSize`, `set`, `setWith`, `shuffle`, `slice`, `sort`, `sortBy`,
+     * `splice`, `spread`, `tail`, `take`, `takeRight`, `takeRightWhile`,
+     * `takeWhile`, `tap`, `throttle`, `thru`, `toArray`, `toPairs`, `toPairsIn`,
+     * `toPath`, `toPlainObject`, `transform`, `unary`, `union`, `unionBy`,
+     * `unionWith`, `uniq`, `uniqBy`, `uniqWith`, `unset`, `unshift`, `unzip`,
+     * `unzipWith`, `values`, `valuesIn`, `without`, `wrap`, `xor`, `xorBy`,
+     * `xorWith`, `zip`, `zipObject`, `zipObjectDeep`, and `zipWith`
      *
      * The wrapper methods that are **not** chainable by default are:
      * `add`, `attempt`, `camelCase`, `capitalize`, `ceil`, `clamp`, `clone`,
@@ -20042,7 +21496,7 @@ angular.module('common.oneSearch', [])
      *
      * @static
      * @memberOf _
-     * @type Object
+     * @type {Object}
      */
     lodash.templateSettings = {
 
@@ -20050,7 +21504,7 @@ angular.module('common.oneSearch', [])
        * Used to detect `data` property values to be HTML-escaped.
        *
        * @memberOf _.templateSettings
-       * @type RegExp
+       * @type {RegExp}
        */
       'escape': reEscape,
 
@@ -20058,7 +21512,7 @@ angular.module('common.oneSearch', [])
        * Used to detect code to be evaluated.
        *
        * @memberOf _.templateSettings
-       * @type RegExp
+       * @type {RegExp}
        */
       'evaluate': reEvaluate,
 
@@ -20066,7 +21520,7 @@ angular.module('common.oneSearch', [])
        * Used to detect `data` property values to inject.
        *
        * @memberOf _.templateSettings
-       * @type RegExp
+       * @type {RegExp}
        */
       'interpolate': reInterpolate,
 
@@ -20074,7 +21528,7 @@ angular.module('common.oneSearch', [])
        * Used to reference the data object in the template text.
        *
        * @memberOf _.templateSettings
-       * @type string
+       * @type {string}
        */
       'variable': '',
 
@@ -20082,7 +21536,7 @@ angular.module('common.oneSearch', [])
        * Used to import variables into the compiled template.
        *
        * @memberOf _.templateSettings
-       * @type Object
+       * @type {Object}
        */
       'imports': {
 
@@ -20090,7 +21544,7 @@ angular.module('common.oneSearch', [])
          * A reference to the `lodash` function.
          *
          * @memberOf _.templateSettings.imports
-         * @type Function
+         * @type {Function}
          */
         '_': lodash
       }
@@ -20102,6 +21556,7 @@ angular.module('common.oneSearch', [])
      * Creates a lazy wrapper object which wraps `value` to enable lazy evaluation.
      *
      * @private
+     * @constructor
      * @param {*} value The value to wrap.
      */
     function LazyWrapper(value) {
@@ -20177,7 +21632,8 @@ angular.module('common.oneSearch', [])
           resIndex = 0,
           takeCount = nativeMin(length, this.__takeCount__);
 
-      if (!isArr || arrLength < LARGE_ARRAY_SIZE || (arrLength == length && takeCount == length)) {
+      if (!isArr || arrLength < LARGE_ARRAY_SIZE ||
+          (arrLength == length && takeCount == length)) {
         return baseWrapperValue(array, this.__actions__);
       }
       var result = [];
@@ -20216,6 +21672,7 @@ angular.module('common.oneSearch', [])
      * Creates an hash object.
      *
      * @private
+     * @constructor
      * @returns {Object} Returns the new hash object.
      */
     function Hash() {}
@@ -20278,6 +21735,7 @@ angular.module('common.oneSearch', [])
      * Creates a map cache object to store key-value pairs.
      *
      * @private
+     * @constructor
      * @param {Array} [values] The values to cache.
      */
     function MapCache(values) {
@@ -20299,7 +21757,11 @@ angular.module('common.oneSearch', [])
      * @memberOf MapCache
      */
     function mapClear() {
-      this.__data__ = { 'hash': new Hash, 'map': Map ? new Map : [], 'string': new Hash };
+      this.__data__ = {
+        'hash': new Hash,
+        'map': Map ? new Map : [],
+        'string': new Hash
+      };
     }
 
     /**
@@ -20382,6 +21844,7 @@ angular.module('common.oneSearch', [])
      * Creates a set cache object to store unique values.
      *
      * @private
+     * @constructor
      * @param {Array} [values] The values to cache.
      */
     function SetCache(values) {
@@ -20440,6 +21903,7 @@ angular.module('common.oneSearch', [])
      * Creates a stack cache object to store key-value pairs.
      *
      * @private
+     * @constructor
      * @param {Array} [values] The values to cache.
      */
     function Stack(values) {
@@ -20732,6 +22196,39 @@ angular.module('common.oneSearch', [])
     }
 
     /**
+     * Casts `value` to an empty array if it's not an array like object.
+     *
+     * @private
+     * @param {*} value The value to inspect.
+     * @returns {Array} Returns the array-like object.
+     */
+    function baseCastArrayLikeObject(value) {
+      return isArrayLikeObject(value) ? value : [];
+    }
+
+    /**
+     * Casts `value` to `identity` if it's not a function.
+     *
+     * @private
+     * @param {*} value The value to inspect.
+     * @returns {Array} Returns the array-like object.
+     */
+    function baseCastFunction(value) {
+      return typeof value == 'function' ? value : identity;
+    }
+
+    /**
+     * Casts `value` to a path array if it's not one.
+     *
+     * @private
+     * @param {*} value The value to inspect.
+     * @returns {Array} Returns the cast property path array.
+     */
+    function baseCastPath(value) {
+      return isArray(value) ? value : stringToPath(value);
+    }
+
+    /**
      * The base implementation of `_.clamp` which doesn't coerce arguments to numbers.
      *
      * @private
@@ -20786,6 +22283,9 @@ angular.module('common.oneSearch', [])
         var tag = getTag(value),
             isFunc = tag == funcTag || tag == genTag;
 
+        if (isBuffer(value)) {
+          return cloneBuffer(value, isDeep);
+        }
         if (tag == objectTag || tag == argsTag || (isFunc && !object)) {
           if (isHostObject(value)) {
             return object ? value : {};
@@ -20852,17 +22352,9 @@ angular.module('common.oneSearch', [])
      * @param {Object} prototype The object to inherit from.
      * @returns {Object} Returns the new object.
      */
-    var baseCreate = (function() {
-      function object() {}
-      return function(prototype) {
-        if (isObject(prototype)) {
-          object.prototype = prototype;
-          var result = new object;
-          object.prototype = undefined;
-        }
-        return result || {};
-      };
-    }());
+    function baseCreate(proto) {
+      return isObject(proto) ? objectCreate(proto) : {};
+    }
 
     /**
      * The base implementation of `_.delay` and `_.defer` which accepts an array
@@ -20871,7 +22363,7 @@ angular.module('common.oneSearch', [])
      * @private
      * @param {Function} func The function to delay.
      * @param {number} wait The number of milliseconds to delay invocation.
-     * @param {Object} args The arguments provide to `func`.
+     * @param {Object} args The arguments to provide to `func`.
      * @returns {number} Returns the timer id.
      */
     function baseDelay(func, wait, args) {
@@ -21024,12 +22516,12 @@ angular.module('common.oneSearch', [])
      *
      * @private
      * @param {Array} array The array to flatten.
-     * @param {boolean} [isDeep] Specify a deep flatten.
+     * @param {number} depth The maximum recursion depth.
      * @param {boolean} [isStrict] Restrict flattening to arrays-like objects.
      * @param {Array} [result=[]] The initial result value.
      * @returns {Array} Returns the new flattened array.
      */
-    function baseFlatten(array, isDeep, isStrict, result) {
+    function baseFlatten(array, depth, isStrict, result) {
       result || (result = []);
 
       var index = -1,
@@ -21037,11 +22529,11 @@ angular.module('common.oneSearch', [])
 
       while (++index < length) {
         var value = array[index];
-        if (isArrayLikeObject(value) &&
+        if (depth > 0 && isArrayLikeObject(value) &&
             (isStrict || isArray(value) || isArguments(value))) {
-          if (isDeep) {
+          if (depth > 1) {
             // Recursively flatten arrays (susceptible to call stack limits).
-            baseFlatten(value, isDeep, isStrict, result);
+            baseFlatten(value, depth - 1, isStrict, result);
           } else {
             arrayPush(result, value);
           }
@@ -21116,7 +22608,7 @@ angular.module('common.oneSearch', [])
 
     /**
      * The base implementation of `_.functions` which creates an array of
-     * `object` function property names filtered from those provided.
+     * `object` function property names filtered from `props`.
      *
      * @private
      * @param {Object} object The object to inspect.
@@ -21138,7 +22630,7 @@ angular.module('common.oneSearch', [])
      * @returns {*} Returns the resolved value.
      */
     function baseGet(object, path) {
-      path = isKey(path, object) ? [path + ''] : baseToPath(path);
+      path = isKey(path, object) ? [path + ''] : baseCastPath(path);
 
       var index = 0,
           length = path.length;
@@ -21227,11 +22719,17 @@ angular.module('common.oneSearch', [])
         var value = array[index],
             computed = iteratee ? iteratee(value) : value;
 
-        if (!(seen ? cacheHas(seen, computed) : includes(result, computed, comparator))) {
+        if (!(seen
+              ? cacheHas(seen, computed)
+              : includes(result, computed, comparator)
+            )) {
           var othIndex = othLength;
           while (--othIndex) {
             var cache = caches[othIndex];
-            if (!(cache ? cacheHas(cache, computed) : includes(arrays[othIndex], computed, comparator))) {
+            if (!(cache
+                  ? cacheHas(cache, computed)
+                  : includes(arrays[othIndex], computed, comparator))
+                ) {
               continue outer;
             }
           }
@@ -21274,7 +22772,7 @@ angular.module('common.oneSearch', [])
      */
     function baseInvoke(object, path, args) {
       if (!isKey(path, object)) {
-        path = baseToPath(path);
+        path = baseCastPath(path);
         object = parent(object, path);
         path = last(path);
       }
@@ -21447,7 +22945,6 @@ angular.module('common.oneSearch', [])
      * property of prototypes or treat sparse arrays as dense.
      *
      * @private
-     * @type Function
      * @param {Object} object The object to query.
      * @returns {Array} Returns the array of property names.
      */
@@ -21555,7 +23052,10 @@ angular.module('common.oneSearch', [])
       if (object === source) {
         return;
       }
-      var props = (isArray(source) || isTypedArray(source)) ? undefined : keysIn(source);
+      var props = (isArray(source) || isTypedArray(source))
+        ? undefined
+        : keysIn(source);
+
       arrayEach(props || source, function(srcValue, key) {
         if (props) {
           key = srcValue;
@@ -21566,7 +23066,10 @@ angular.module('common.oneSearch', [])
           baseMergeDeep(object, source, key, srcIndex, baseMerge, customizer, stack);
         }
         else {
-          var newValue = customizer ? customizer(object[key], srcValue, (key + ''), object, source, stack) : undefined;
+          var newValue = customizer
+            ? customizer(object[key], srcValue, (key + ''), object, source, stack)
+            : undefined;
+
           if (newValue === undefined) {
             newValue = srcValue;
           }
@@ -21598,21 +23101,24 @@ angular.module('common.oneSearch', [])
         assignMergeValue(object, key, stacked);
         return;
       }
-      var newValue = customizer ? customizer(objValue, srcValue, (key + ''), object, source, stack) : undefined,
-          isCommon = newValue === undefined;
+      var newValue = customizer
+        ? customizer(objValue, srcValue, (key + ''), object, source, stack)
+        : undefined;
+
+      var isCommon = newValue === undefined;
 
       if (isCommon) {
         newValue = srcValue;
         if (isArray(srcValue) || isTypedArray(srcValue)) {
           if (isArray(objValue)) {
-            newValue = srcIndex ? copyArray(objValue) : objValue;
+            newValue = objValue;
           }
           else if (isArrayLikeObject(objValue)) {
             newValue = copyArray(objValue);
           }
           else {
             isCommon = false;
-            newValue = baseClone(srcValue);
+            newValue = baseClone(srcValue, true);
           }
         }
         else if (isPlainObject(srcValue) || isArguments(srcValue)) {
@@ -21621,10 +23127,10 @@ angular.module('common.oneSearch', [])
           }
           else if (!isObject(objValue) || (srcIndex && isFunction(objValue))) {
             isCommon = false;
-            newValue = baseClone(srcValue);
+            newValue = baseClone(srcValue, true);
           }
           else {
-            newValue = srcIndex ? baseClone(objValue) : objValue;
+            newValue = objValue;
           }
         }
         else {
@@ -21798,7 +23304,7 @@ angular.module('common.oneSearch', [])
             splice.call(array, index, 1);
           }
           else if (!isKey(index, array)) {
-            var path = baseToPath(index),
+            var path = baseCastPath(index),
                 object = parent(array, path);
 
             if (object != null) {
@@ -21860,7 +23366,7 @@ angular.module('common.oneSearch', [])
      * @returns {Object} Returns `object`.
      */
     function baseSet(object, path, value, customizer) {
-      path = isKey(path, object) ? [path + ''] : baseToPath(path);
+      path = isKey(path, object) ? [path + ''] : baseCastPath(path);
 
       var index = -1,
           length = path.length,
@@ -21875,7 +23381,9 @@ angular.module('common.oneSearch', [])
             var objValue = nested[key];
             newValue = customizer ? customizer(objValue, key, nested) : undefined;
             if (newValue === undefined) {
-              newValue = objValue == null ? (isIndex(path[index + 1]) ? [] : {}) : objValue;
+              newValue = objValue == null
+                ? (isIndex(path[index + 1]) ? [] : {})
+                : objValue;
             }
           }
           assignValue(nested, key, newValue);
@@ -22067,18 +23575,6 @@ angular.module('common.oneSearch', [])
     }
 
     /**
-     * The base implementation of `_.toPath` which only converts `value` to a
-     * path if it's not one.
-     *
-     * @private
-     * @param {*} value The value to process.
-     * @returns {Array} Returns the property path array.
-     */
-    function baseToPath(value) {
-      return isArray(value) ? value : stringToPath(value);
-    }
-
-    /**
      * The base implementation of `_.uniqBy` without support for iteratee shorthands.
      *
      * @private
@@ -22147,7 +23643,7 @@ angular.module('common.oneSearch', [])
      * @returns {boolean} Returns `true` if the property is deleted, else `false`.
      */
     function baseUnset(object, path) {
-      path = isKey(path, object) ? [path + ''] : baseToPath(path);
+      path = isKey(path, object) ? [path + ''] : baseCastPath(path);
       object = parent(object, path);
       var key = last(path);
       return (object != null && has(object, key)) ? delete object[key] : true;
@@ -22243,18 +23739,37 @@ angular.module('common.oneSearch', [])
     }
 
     /**
-     * Creates a clone of `buffer`.
+     * Creates a clone of  `buffer`.
      *
      * @private
-     * @param {ArrayBuffer} buffer The array buffer to clone.
+     * @param {Buffer} buffer The buffer to clone.
+     * @param {boolean} [isDeep] Specify a deep clone.
+     * @returns {Buffer} Returns the cloned buffer.
+     */
+    function cloneBuffer(buffer, isDeep) {
+      if (isDeep) {
+        return buffer.slice();
+      }
+      var Ctor = buffer.constructor,
+          result = new Ctor(buffer.length);
+
+      buffer.copy(result);
+      return result;
+    }
+
+    /**
+     * Creates a clone of `arrayBuffer`.
+     *
+     * @private
+     * @param {ArrayBuffer} arrayBuffer The array buffer to clone.
      * @returns {ArrayBuffer} Returns the cloned array buffer.
      */
-    function cloneBuffer(buffer) {
-      var Ctor = buffer.constructor,
-          result = new Ctor(buffer.byteLength),
+    function cloneArrayBuffer(arrayBuffer) {
+      var Ctor = arrayBuffer.constructor,
+          result = new Ctor(arrayBuffer.byteLength),
           view = new Uint8Array(result);
 
-      view.set(new Uint8Array(buffer));
+      view.set(new Uint8Array(arrayBuffer));
       return result;
     }
 
@@ -22317,10 +23832,11 @@ angular.module('common.oneSearch', [])
      * @returns {Object} Returns the cloned typed array.
      */
     function cloneTypedArray(typedArray, isDeep) {
-      var buffer = typedArray.buffer,
+      var arrayBuffer = typedArray.buffer,
+          buffer = isDeep ? cloneArrayBuffer(arrayBuffer) : arrayBuffer,
           Ctor = typedArray.constructor;
 
-      return new Ctor(isDeep ? cloneBuffer(buffer) : buffer, typedArray.byteOffset, typedArray.length);
+      return new Ctor(buffer, typedArray.byteOffset, typedArray.length);
     }
 
     /**
@@ -22435,8 +23951,11 @@ angular.module('common.oneSearch', [])
           length = props.length;
 
       while (++index < length) {
-        var key = props[index],
-            newValue = customizer ? customizer(object[key], source[key], key, object, source) : source[key];
+        var key = props[index];
+
+        var newValue = customizer
+          ? customizer(object[key], source[key], key, object, source)
+          : source[key];
 
         assignValue(object, key, newValue);
       }
@@ -22486,7 +24005,10 @@ angular.module('common.oneSearch', [])
             customizer = length > 1 ? sources[length - 1] : undefined,
             guard = length > 2 ? sources[2] : undefined;
 
-        customizer = typeof customizer == 'function' ? (length--, customizer) : undefined;
+        customizer = typeof customizer == 'function'
+          ? (length--, customizer)
+          : undefined;
+
         if (guard && isIterateeCall(sources[0], sources[1], guard)) {
           customizer = length < 3 ? undefined : customizer;
           length = 1;
@@ -22587,8 +24109,11 @@ angular.module('common.oneSearch', [])
       return function(string) {
         string = toString(string);
 
-        var strSymbols = reHasComplexSymbol.test(string) ? stringToArray(string) : undefined,
-            chr = strSymbols ? strSymbols[0] : string.charAt(0),
+        var strSymbols = reHasComplexSymbol.test(string)
+          ? stringToArray(string)
+          : undefined;
+
+        var chr = strSymbols ? strSymbols[0] : string.charAt(0),
             trailing = strSymbols ? strSymbols.slice(1).join('') : string.slice(1);
 
         return chr[methodName]() + trailing;
@@ -22684,7 +24209,7 @@ angular.module('common.oneSearch', [])
      */
     function createFlow(fromRight) {
       return rest(function(funcs) {
-        funcs = baseFlatten(funcs);
+        funcs = baseFlatten(funcs, 1);
 
         var length = funcs.length,
             index = length,
@@ -22709,7 +24234,10 @@ angular.module('common.oneSearch', [])
           var funcName = getFuncName(func),
               data = funcName == 'wrapper' ? getData(func) : undefined;
 
-          if (data && isLaziable(data[0]) && data[1] == (ARY_FLAG | CURRY_FLAG | PARTIAL_FLAG | REARG_FLAG) && !data[4].length && data[9] == 1) {
+          if (data && isLaziable(data[0]) &&
+                data[1] == (ARY_FLAG | CURRY_FLAG | PARTIAL_FLAG | REARG_FLAG) &&
+                !data[4].length && data[9] == 1
+              ) {
             wrapper = wrapper[getFuncName(data[0])].apply(wrapper, data[3]);
           } else {
             wrapper = (func.length == 1 && isLaziable(func)) ? wrapper[funcName]() : wrapper.thru(func);
@@ -22719,7 +24247,8 @@ angular.module('common.oneSearch', [])
           var args = arguments,
               value = args[0];
 
-          if (wrapper && args.length == 1 && isArray(value) && value.length >= LARGE_ARRAY_SIZE) {
+          if (wrapper && args.length == 1 &&
+              isArray(value) && value.length >= LARGE_ARRAY_SIZE) {
             return wrapper.plant(value).value();
           }
           var index = 0,
@@ -22779,7 +24308,10 @@ angular.module('common.oneSearch', [])
 
           length -= argsHolders.length;
           if (length < arity) {
-            return createRecurryWrapper(func, bitmask, createHybridWrapper, placeholder, thisArg, args, argsHolders, argPos, ary, arity - length);
+            return createRecurryWrapper(
+              func, bitmask, createHybridWrapper, placeholder, thisArg, args,
+              argsHolders, argPos, ary, arity - length
+            );
           }
         }
         var thisBinding = isBind ? thisArg : this,
@@ -22824,7 +24356,7 @@ angular.module('common.oneSearch', [])
      */
     function createOver(arrayFunc) {
       return rest(function(iteratees) {
-        iteratees = arrayMap(baseFlatten(iteratees), getIteratee());
+        iteratees = arrayMap(baseFlatten(iteratees, 1), getIteratee());
         return rest(function(args) {
           var thisArg = this;
           return arrayFunc(iteratees, function(iteratee) {
@@ -22951,9 +24483,12 @@ angular.module('common.oneSearch', [])
       if (!(bitmask & CURRY_BOUND_FLAG)) {
         bitmask &= ~(BIND_FLAG | BIND_KEY_FLAG);
       }
-      var newData = [func, bitmask, thisArg, newPartials, newsHolders, newPartialsRight, newHoldersRight, newArgPos, ary, arity],
-          result = wrapFunc.apply(undefined, newData);
+      var newData = [
+        func, bitmask, thisArg, newPartials, newsHolders, newPartialsRight,
+        newHoldersRight, newArgPos, ary, arity
+      ];
 
+      var result = wrapFunc.apply(undefined, newData);
       if (isLaziable(func)) {
         setData(result, newData);
       }
@@ -23042,8 +24577,12 @@ angular.module('common.oneSearch', [])
 
         partials = holders = undefined;
       }
-      var data = isBindKey ? undefined : getData(func),
-          newData = [func, bitmask, thisArg, partials, holders, partialsRight, holdersRight, argPos, ary, arity];
+      var data = isBindKey ? undefined : getData(func);
+
+      var newData = [
+        func, bitmask, thisArg, partials, holders, partialsRight, holdersRight,
+        argPos, ary, arity
+      ];
 
       if (data) {
         mergeData(newData, data);
@@ -23388,19 +24927,20 @@ angular.module('common.oneSearch', [])
       return objectToString.call(value);
     }
 
-    // Fallback for IE 11 providing `toStringTag` values for maps and sets.
-    if ((Map && getTag(new Map) != mapTag) || (Set && getTag(new Set) != setTag)) {
+    // Fallback for IE 11 providing `toStringTag` values for maps, sets, and weakmaps.
+    if ((Map && getTag(new Map) != mapTag) ||
+        (Set && getTag(new Set) != setTag) ||
+        (WeakMap && getTag(new WeakMap) != weakMapTag)) {
       getTag = function(value) {
         var result = objectToString.call(value),
             Ctor = result == objectTag ? value.constructor : null,
             ctorString = typeof Ctor == 'function' ? funcToString.call(Ctor) : '';
 
         if (ctorString) {
-          if (ctorString == mapCtorString) {
-            return mapTag;
-          }
-          if (ctorString == setCtorString) {
-            return setTag;
+          switch (ctorString) {
+            case mapCtorString: return mapTag;
+            case setCtorString: return setTag;
+            case weakMapCtorString: return weakMapTag;
           }
         }
         return result;
@@ -23450,7 +24990,7 @@ angular.module('common.oneSearch', [])
       }
       var result = hasFunc(object, path);
       if (!result && !isKey(path)) {
-        path = baseToPath(path);
+        path = baseCastPath(path);
         object = parent(object, path);
         if (object != null) {
           path = last(path);
@@ -23514,7 +25054,7 @@ angular.module('common.oneSearch', [])
       var Ctor = object.constructor;
       switch (tag) {
         case arrayBufferTag:
-          return cloneBuffer(object);
+          return cloneArrayBuffer(object);
 
         case boolTag:
         case dateTag:
@@ -23561,7 +25101,7 @@ angular.module('common.oneSearch', [])
     }
 
     /**
-     * Checks if the provided arguments are from an iteratee call.
+     * Checks if the given arguments are from an iteratee call.
      *
      * @private
      * @param {*} value The potential iteratee value argument.
@@ -23609,7 +25149,7 @@ angular.module('common.oneSearch', [])
     function isKeyable(value) {
       var type = typeof value;
       return type == 'number' || type == 'boolean' ||
-        (type == 'string' && value !== '__proto__') || value == null;
+        (type == 'string' && value != '__proto__') || value == null;
     }
 
     /**
@@ -23832,28 +25372,6 @@ angular.module('common.oneSearch', [])
     }
 
     /**
-     * Converts `value` to an array-like object if it's not one.
-     *
-     * @private
-     * @param {*} value The value to process.
-     * @returns {Array} Returns the array-like object.
-     */
-    function toArrayLikeObject(value) {
-      return isArrayLikeObject(value) ? value : [];
-    }
-
-    /**
-     * Converts `value` to a function if it's not one.
-     *
-     * @private
-     * @param {*} value The value to process.
-     * @returns {Function} Returns the function.
-     */
-    function toFunction(value) {
-      return typeof value == 'function' ? value : identity;
-    }
-
-    /**
      * Creates a clone of `wrapper`.
      *
      * @private
@@ -23963,13 +25481,13 @@ angular.module('common.oneSearch', [])
       if (!isArray(array)) {
         array = array == null ? [] : [Object(array)];
       }
-      values = baseFlatten(values);
+      values = baseFlatten(values, 1);
       return arrayConcat(array, values);
     });
 
     /**
      * Creates an array of unique `array` values not included in the other
-     * provided arrays using [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
+     * given arrays using [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
      * for equality comparisons.
      *
      * @static
@@ -23985,7 +25503,7 @@ angular.module('common.oneSearch', [])
      */
     var difference = rest(function(array, values) {
       return isArrayLikeObject(array)
-        ? baseDifference(array, baseFlatten(values, false, true))
+        ? baseDifference(array, baseFlatten(values, 1, true))
         : [];
     });
 
@@ -24016,7 +25534,7 @@ angular.module('common.oneSearch', [])
         iteratee = undefined;
       }
       return isArrayLikeObject(array)
-        ? baseDifference(array, baseFlatten(values, false, true), getIteratee(iteratee))
+        ? baseDifference(array, baseFlatten(values, 1, true), getIteratee(iteratee))
         : [];
     });
 
@@ -24045,7 +25563,7 @@ angular.module('common.oneSearch', [])
         comparator = undefined;
       }
       return isArrayLikeObject(array)
-        ? baseDifference(array, baseFlatten(values, false, true), undefined, comparator)
+        ? baseDifference(array, baseFlatten(values, 1, true), undefined, comparator)
         : [];
     });
 
@@ -24315,7 +25833,7 @@ angular.module('common.oneSearch', [])
     }
 
     /**
-     * Flattens `array` a single level.
+     * Flattens `array` a single level deep.
      *
      * @static
      * @memberOf _
@@ -24324,30 +25842,58 @@ angular.module('common.oneSearch', [])
      * @returns {Array} Returns the new flattened array.
      * @example
      *
-     * _.flatten([1, [2, 3, [4]]]);
-     * // => [1, 2, 3, [4]]
+     * _.flatten([1, [2, [3, [4]], 5]]);
+     * // => [1, 2, [3, [4]], 5]
      */
     function flatten(array) {
       var length = array ? array.length : 0;
-      return length ? baseFlatten(array) : [];
+      return length ? baseFlatten(array, 1) : [];
     }
 
     /**
-     * This method is like `_.flatten` except that it recursively flattens `array`.
+     * Recursively flattens `array`.
      *
      * @static
      * @memberOf _
      * @category Array
-     * @param {Array} array The array to recursively flatten.
+     * @param {Array} array The array to flatten.
      * @returns {Array} Returns the new flattened array.
      * @example
      *
-     * _.flattenDeep([1, [2, 3, [4]]]);
-     * // => [1, 2, 3, 4]
+     * _.flattenDeep([1, [2, [3, [4]], 5]]);
+     * // => [1, 2, 3, 4, 5]
      */
     function flattenDeep(array) {
       var length = array ? array.length : 0;
-      return length ? baseFlatten(array, true) : [];
+      return length ? baseFlatten(array, INFINITY) : [];
+    }
+
+    /**
+     * Recursively flatten `array` up to `depth` times.
+     *
+     * @static
+     * @memberOf _
+     * @category Array
+     * @param {Array} array The array to flatten.
+     * @param {number} [depth=1] The maximum recursion depth.
+     * @returns {Array} Returns the new flattened array.
+     * @example
+     *
+     * var array = [1, [2, [3, [4]], 5]];
+     *
+     * _.flattenDepth(array, 1);
+     * // => [1, 2, [3, [4]], 5]
+     *
+     * _.flattenDepth(array, 2);
+     * // => [1, 2, 3, [4], 5]
+     */
+    function flattenDepth(array, depth) {
+      var length = array ? array.length : 0;
+      if (!length) {
+        return [];
+      }
+      depth = depth === undefined ? 1 : toInteger(depth);
+      return baseFlatten(array, depth);
     }
 
     /**
@@ -24449,8 +25995,8 @@ angular.module('common.oneSearch', [])
     }
 
     /**
-     * Creates an array of unique values that are included in all of the provided
-     * arrays using [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
+     * Creates an array of unique values that are included in all given arrays
+     * using [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
      * for equality comparisons.
      *
      * @static
@@ -24464,7 +26010,7 @@ angular.module('common.oneSearch', [])
      * // => [2]
      */
     var intersection = rest(function(arrays) {
-      var mapped = arrayMap(arrays, toArrayLikeObject);
+      var mapped = arrayMap(arrays, baseCastArrayLikeObject);
       return (mapped.length && mapped[0] === arrays[0])
         ? baseIntersection(mapped)
         : [];
@@ -24492,7 +26038,7 @@ angular.module('common.oneSearch', [])
      */
     var intersectionBy = rest(function(arrays) {
       var iteratee = last(arrays),
-          mapped = arrayMap(arrays, toArrayLikeObject);
+          mapped = arrayMap(arrays, baseCastArrayLikeObject);
 
       if (iteratee === last(mapped)) {
         iteratee = undefined;
@@ -24525,7 +26071,7 @@ angular.module('common.oneSearch', [])
      */
     var intersectionWith = rest(function(arrays) {
       var comparator = last(arrays),
-          mapped = arrayMap(arrays, toArrayLikeObject);
+          mapped = arrayMap(arrays, baseCastArrayLikeObject);
 
       if (comparator === last(mapped)) {
         comparator = undefined;
@@ -24615,7 +26161,7 @@ angular.module('common.oneSearch', [])
     }
 
     /**
-     * Removes all provided values from `array` using
+     * Removes all given values from `array` using
      * [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
      * for equality comparisons.
      *
@@ -24715,7 +26261,7 @@ angular.module('common.oneSearch', [])
      * // => [10, 20]
      */
     var pullAt = rest(function(array, indexes) {
-      indexes = arrayMap(baseFlatten(indexes), String);
+      indexes = arrayMap(baseFlatten(indexes, 1), String);
 
       var result = baseAt(array, indexes);
       basePullAt(array, indexes.sort(compareAscending));
@@ -25172,8 +26718,8 @@ angular.module('common.oneSearch', [])
     }
 
     /**
-     * Creates an array of unique values, in order, from all of the provided arrays
-     * using [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
+     * Creates an array of unique values, in order, from all given arrays using
+     * [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
      * for equality comparisons.
      *
      * @static
@@ -25187,7 +26733,7 @@ angular.module('common.oneSearch', [])
      * // => [2, 1, 4]
      */
     var union = rest(function(arrays) {
-      return baseUniq(baseFlatten(arrays, false, true));
+      return baseUniq(baseFlatten(arrays, 1, true));
     });
 
     /**
@@ -25215,7 +26761,7 @@ angular.module('common.oneSearch', [])
       if (isArrayLikeObject(iteratee)) {
         iteratee = undefined;
       }
-      return baseUniq(baseFlatten(arrays, false, true), getIteratee(iteratee));
+      return baseUniq(baseFlatten(arrays, 1, true), getIteratee(iteratee));
     });
 
     /**
@@ -25242,7 +26788,7 @@ angular.module('common.oneSearch', [])
       if (isArrayLikeObject(comparator)) {
         comparator = undefined;
       }
-      return baseUniq(baseFlatten(arrays, false, true), undefined, comparator);
+      return baseUniq(baseFlatten(arrays, 1, true), undefined, comparator);
     });
 
     /**
@@ -25384,7 +26930,7 @@ angular.module('common.oneSearch', [])
     }
 
     /**
-     * Creates an array excluding all provided values using
+     * Creates an array excluding all given values using
      * [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
      * for equality comparisons.
      *
@@ -25407,7 +26953,7 @@ angular.module('common.oneSearch', [])
 
     /**
      * Creates an array of unique values that is the [symmetric difference](https://en.wikipedia.org/wiki/Symmetric_difference)
-     * of the provided arrays.
+     * of the given arrays.
      *
      * @static
      * @memberOf _
@@ -25666,17 +27212,22 @@ angular.module('common.oneSearch', [])
      * // => ['a', 'c']
      */
     var wrapperAt = rest(function(paths) {
-      paths = baseFlatten(paths);
+      paths = baseFlatten(paths, 1);
       var length = paths.length,
           start = length ? paths[0] : 0,
           value = this.__wrapped__,
           interceptor = function(object) { return baseAt(object, paths); };
 
-      if (length > 1 || this.__actions__.length || !(value instanceof LazyWrapper) || !isIndex(start)) {
+      if (length > 1 || this.__actions__.length ||
+          !(value instanceof LazyWrapper) || !isIndex(start)) {
         return this.thru(interceptor);
       }
       value = value.slice(start, +start + (length ? 1 : 0));
-      value.__actions__.push({ 'func': thru, 'args': [interceptor], 'thisArg': undefined });
+      value.__actions__.push({
+        'func': thru,
+        'args': [interceptor],
+        'thisArg': undefined
+      });
       return new LodashWrapper(value, this.__chain__).thru(function(array) {
         if (length && !array.length) {
           array.push(undefined);
@@ -25887,7 +27438,11 @@ angular.module('common.oneSearch', [])
           wrapped = new LazyWrapper(this);
         }
         wrapped = wrapped.reverse();
-        wrapped.__actions__.push({ 'func': thru, 'args': [reverse], 'thisArg': undefined });
+        wrapped.__actions__.push({
+          'func': thru,
+          'args': [reverse],
+          'thisArg': undefined
+        });
         return new LodashWrapper(wrapped, this.__chain__);
       }
       return this.thru(reverse);
@@ -26106,7 +27661,7 @@ angular.module('common.oneSearch', [])
      * // => [1, 1, 2, 2]
      */
     function flatMap(collection, iteratee) {
-      return baseFlatten(map(collection, iteratee));
+      return baseFlatten(map(collection, iteratee), 1);
     }
 
     /**
@@ -26140,7 +27695,7 @@ angular.module('common.oneSearch', [])
     function forEach(collection, iteratee) {
       return (typeof iteratee == 'function' && isArray(collection))
         ? arrayEach(collection, iteratee)
-        : baseEach(collection, toFunction(iteratee));
+        : baseEach(collection, baseCastFunction(iteratee));
     }
 
     /**
@@ -26164,7 +27719,7 @@ angular.module('common.oneSearch', [])
     function forEachRight(collection, iteratee) {
       return (typeof iteratee == 'function' && isArray(collection))
         ? arrayEachRight(collection, iteratee)
-        : baseEachRight(collection, toFunction(iteratee));
+        : baseEachRight(collection, baseCastFunction(iteratee));
     }
 
     /**
@@ -26433,7 +27988,7 @@ angular.module('common.oneSearch', [])
      * Reduces `collection` to a value which is the accumulated result of running
      * each element in `collection` through `iteratee`, where each successive
      * invocation is supplied the return value of the previous. If `accumulator`
-     * is not provided the first element of `collection` is used as the initial
+     * is not given the first element of `collection` is used as the initial
      * value. The iteratee is invoked with four arguments:
      * (accumulator, value, index|key, collection).
      *
@@ -26728,7 +28283,7 @@ angular.module('common.oneSearch', [])
       } else if (length > 2 && isIterateeCall(iteratees[0], iteratees[1], iteratees[2])) {
         iteratees.length = 1;
       }
-      return baseOrderBy(collection, baseFlatten(iteratees), []);
+      return baseOrderBy(collection, baseFlatten(iteratees, 1), []);
     });
 
     /*------------------------------------------------------------------------*/
@@ -26739,7 +28294,7 @@ angular.module('common.oneSearch', [])
      *
      * @static
      * @memberOf _
-     * @type Function
+     * @type {Function}
      * @category Date
      * @returns {number} Returns the timestamp.
      * @example
@@ -27162,11 +28717,13 @@ angular.module('common.oneSearch', [])
         if (maxWait === false) {
           var leadingCall = leading && !timeoutId;
         } else {
-          if (!maxTimeoutId && !leading) {
+          if (!lastCalled && !maxTimeoutId && !leading) {
             lastCalled = stamp;
           }
-          var remaining = maxWait - (stamp - lastCalled),
-              isCalled = remaining <= 0 || remaining > maxWait;
+          var remaining = maxWait - (stamp - lastCalled);
+
+          var isCalled = (remaining <= 0 || remaining > maxWait) &&
+            (leading || maxTimeoutId);
 
           if (isCalled) {
             if (maxTimeoutId) {
@@ -27406,7 +28963,7 @@ angular.module('common.oneSearch', [])
      * // => [100, 10]
      */
     var overArgs = rest(function(func, transforms) {
-      transforms = arrayMap(baseFlatten(transforms), getIteratee());
+      transforms = arrayMap(baseFlatten(transforms, 1), getIteratee());
 
       var funcsLength = transforms.length;
       return rest(function(args) {
@@ -27520,7 +29077,7 @@ angular.module('common.oneSearch', [])
      * // => ['a', 'b', 'c']
      */
     var rearg = rest(function(func, indexes) {
-      return createWrapper(func, REARG_FLAG, undefined, undefined, undefined, baseFlatten(indexes));
+      return createWrapper(func, REARG_FLAG, undefined, undefined, undefined, baseFlatten(indexes, 1));
     });
 
     /**
@@ -27672,7 +29229,11 @@ angular.module('common.oneSearch', [])
         leading = 'leading' in options ? !!options.leading : leading;
         trailing = 'trailing' in options ? !!options.trailing : trailing;
       }
-      return debounce(func, wait, { 'leading': leading, 'maxWait': wait, 'trailing': trailing });
+      return debounce(func, wait, {
+        'leading': leading,
+        'maxWait': wait,
+        'trailing': trailing
+      });
     }
 
     /**
@@ -27703,7 +29264,7 @@ angular.module('common.oneSearch', [])
      * @memberOf _
      * @category Function
      * @param {*} value The value to wrap.
-     * @param {Function} wrapper The wrapper function.
+     * @param {Function} [wrapper=identity] The wrapper function.
      * @returns {Function} Returns the new function.
      * @example
      *
@@ -27720,6 +29281,46 @@ angular.module('common.oneSearch', [])
     }
 
     /*------------------------------------------------------------------------*/
+
+    /**
+     * Casts `value` as an array if it's not one.
+     *
+     * @static
+     * @memberOf _
+     * @category Lang
+     * @param {*} value The value to inspect.
+     * @returns {Array} Returns the cast array.
+     * @example
+     *
+     * _.castArray(1);
+     * // => [1]
+     *
+     * _.castArray({ 'a': 1 });
+     * // => [{ 'a': 1 }]
+     *
+     * _.castArray('abc');
+     * // => ['abc']
+     *
+     * _.castArray(null);
+     * // => [null]
+     *
+     * _.castArray(undefined);
+     * // => [undefined]
+     *
+     * _.castArray();
+     * // => []
+     *
+     * var array = [1, 2, 3];
+     * console.log(_.castArray(array) === array);
+     * // => true
+     */
+    function castArray() {
+      if (!arguments.length) {
+        return [];
+      }
+      var value = arguments[0];
+      return isArray(value) ? value : [value];
+    }
 
     /**
      * Creates a shallow clone of `value`.
@@ -27941,7 +29542,7 @@ angular.module('common.oneSearch', [])
      *
      * @static
      * @memberOf _
-     * @type Function
+     * @type {Function}
      * @category Lang
      * @param {*} value The value to check.
      * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
@@ -27962,13 +29563,32 @@ angular.module('common.oneSearch', [])
     var isArray = Array.isArray;
 
     /**
+     * Checks if `value` is classified as an `ArrayBuffer` object.
+     *
+     * @static
+     * @memberOf _
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+     * @example
+     *
+     * _.isArrayBuffer(new ArrayBuffer(2));
+     * // => true
+     *
+     * _.isArrayBuffer(new Array(2));
+     * // => false
+     */
+    function isArrayBuffer(value) {
+      return isObjectLike(value) && objectToString.call(value) == arrayBufferTag;
+    }
+
+    /**
      * Checks if `value` is array-like. A value is considered array-like if it's
      * not a function and has a `value.length` that's an integer greater than or
      * equal to `0` and less than or equal to `Number.MAX_SAFE_INTEGER`.
      *
      * @static
      * @memberOf _
-     * @type Function
      * @category Lang
      * @param {*} value The value to check.
      * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
@@ -27997,7 +29617,6 @@ angular.module('common.oneSearch', [])
      *
      * @static
      * @memberOf _
-     * @type Function
      * @category Lang
      * @param {*} value The value to check.
      * @returns {boolean} Returns `true` if `value` is an array-like object, else `false`.
@@ -28039,6 +29658,26 @@ angular.module('common.oneSearch', [])
       return value === true || value === false ||
         (isObjectLike(value) && objectToString.call(value) == boolTag);
     }
+
+    /**
+     * Checks if `value` is a buffer.
+     *
+     * @static
+     * @memberOf _
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is a buffer, else `false`.
+     * @example
+     *
+     * _.isBuffer(new Buffer(2));
+     * // => true
+     *
+     * _.isBuffer(new Uint8Array(2));
+     * // => false
+     */
+    var isBuffer = !Buffer ? constant(false) : function(value) {
+      return value instanceof Buffer;
+    };
 
     /**
      * Checks if `value` is classified as a `Date` object.
@@ -28109,7 +29748,8 @@ angular.module('common.oneSearch', [])
      */
     function isEmpty(value) {
       if (isArrayLike(value) &&
-          (isArray(value) || isString(value) || isFunction(value.splice) || isArguments(value))) {
+          (isArray(value) || isString(value) ||
+            isFunction(value.splice) || isArguments(value))) {
         return !value.length;
       }
       for (var key in value) {
@@ -28152,10 +29792,10 @@ angular.module('common.oneSearch', [])
     }
 
     /**
-     * This method is like `_.isEqual` except that it accepts `customizer` which is
-     * invoked to compare values. If `customizer` returns `undefined` comparisons are
-     * handled by the method instead. The `customizer` is invoked with up to six arguments:
-     * (objValue, othValue [, index|key, object, other, stack]).
+     * This method is like `_.isEqual` except that it accepts `customizer` which
+     * is invoked to compare values. If `customizer` returns `undefined` comparisons
+     * are handled by the method instead. The `customizer` is invoked with up to
+     * six arguments: (objValue, othValue [, index|key, object, other, stack]).
      *
      * @static
      * @memberOf _
@@ -28206,8 +29846,12 @@ angular.module('common.oneSearch', [])
      * // => false
      */
     function isError(value) {
-      return isObjectLike(value) &&
-        typeof value.message == 'string' && objectToString.call(value) == errorTag;
+      if (!isObjectLike(value)) {
+        return false;
+      }
+      var Ctor = value.constructor;
+      return (objectToString.call(value) == errorTag) ||
+        (typeof Ctor == 'function' && objectToString.call(Ctor.prototype) == errorTag);
     }
 
     /**
@@ -28315,7 +29959,8 @@ angular.module('common.oneSearch', [])
      * // => false
      */
     function isLength(value) {
-      return typeof value == 'number' && value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
+      return typeof value == 'number' &&
+        value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
     }
 
     /**
@@ -28374,8 +30019,29 @@ angular.module('common.oneSearch', [])
     }
 
     /**
-     * Performs a deep comparison between `object` and `source` to determine if
-     * `object` contains equivalent property values.
+     * Checks if `value` is classified as a `Map` object.
+     *
+     * @static
+     * @memberOf _
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+     * @example
+     *
+     * _.isMap(new Map);
+     * // => true
+     *
+     * _.isMap(new WeakMap);
+     * // => false
+     */
+    function isMap(value) {
+      return isObjectLike(value) && getTag(value) == mapTag;
+    }
+
+    /**
+     * Performs a partial deep comparison between `object` and `source` to
+     * determine if `object` contains equivalent property values. This method is
+     * equivalent to a `_.matches` function when `source` is partially applied.
      *
      * **Note:** This method supports comparing the same values as `_.isEqual`.
      *
@@ -28594,7 +30260,8 @@ angular.module('common.oneSearch', [])
      * // => true
      */
     function isPlainObject(value) {
-      if (!isObjectLike(value) || objectToString.call(value) != objectTag || isHostObject(value)) {
+      if (!isObjectLike(value) ||
+          objectToString.call(value) != objectTag || isHostObject(value)) {
         return false;
       }
       var proto = objectProto;
@@ -28659,6 +30326,26 @@ angular.module('common.oneSearch', [])
     }
 
     /**
+     * Checks if `value` is classified as a `Set` object.
+     *
+     * @static
+     * @memberOf _
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+     * @example
+     *
+     * _.isSet(new Set);
+     * // => true
+     *
+     * _.isSet(new WeakSet);
+     * // => false
+     */
+    function isSet(value) {
+      return isObjectLike(value) && getTag(value) == setTag;
+    }
+
+    /**
      * Checks if `value` is classified as a `String` primitive or object.
      *
      * @static
@@ -28717,7 +30404,8 @@ angular.module('common.oneSearch', [])
      * // => false
      */
     function isTypedArray(value) {
-      return isObjectLike(value) && isLength(value.length) && !!typedArrayTags[objectToString.call(value)];
+      return isObjectLike(value) &&
+        isLength(value.length) && !!typedArrayTags[objectToString.call(value)];
     }
 
     /**
@@ -28738,6 +30426,46 @@ angular.module('common.oneSearch', [])
      */
     function isUndefined(value) {
       return value === undefined;
+    }
+
+    /**
+     * Checks if `value` is classified as a `WeakMap` object.
+     *
+     * @static
+     * @memberOf _
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+     * @example
+     *
+     * _.isWeakMap(new WeakMap);
+     * // => true
+     *
+     * _.isWeakMap(new Map);
+     * // => false
+     */
+    function isWeakMap(value) {
+      return isObjectLike(value) && getTag(value) == weakMapTag;
+    }
+
+    /**
+     * Checks if `value` is classified as a `WeakSet` object.
+     *
+     * @static
+     * @memberOf _
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+     * @example
+     *
+     * _.isWeakSet(new WeakSet);
+     * // => true
+     *
+     * _.isWeakSet(new Set);
+     * // => false
+     */
+    function isWeakSet(value) {
+      return isObjectLike(value) && objectToString.call(value) == weakSetTag;
     }
 
     /**
@@ -29169,12 +30897,12 @@ angular.module('common.oneSearch', [])
      * // => ['a', 'c']
      */
     var at = rest(function(object, paths) {
-      return baseAt(object, baseFlatten(paths));
+      return baseAt(object, baseFlatten(paths, 1));
     });
 
     /**
      * Creates an object that inherits from the `prototype` object. If a `properties`
-     * object is provided its own enumerable properties are assigned to the created object.
+     * object is given its own enumerable properties are assigned to the created object.
      *
      * @static
      * @memberOf _
@@ -29357,7 +31085,9 @@ angular.module('common.oneSearch', [])
      * // => logs 'a', 'b', then 'c' (iteration order is not guaranteed)
      */
     function forIn(object, iteratee) {
-      return object == null ? object : baseFor(object, toFunction(iteratee), keysIn);
+      return object == null
+        ? object
+        : baseFor(object, baseCastFunction(iteratee), keysIn);
     }
 
     /**
@@ -29385,7 +31115,9 @@ angular.module('common.oneSearch', [])
      * // => logs 'c', 'b', then 'a' assuming `_.forIn` logs 'a', 'b', then 'c'
      */
     function forInRight(object, iteratee) {
-      return object == null ? object : baseForRight(object, toFunction(iteratee), keysIn);
+      return object == null
+        ? object
+        : baseForRight(object, baseCastFunction(iteratee), keysIn);
     }
 
     /**
@@ -29415,7 +31147,7 @@ angular.module('common.oneSearch', [])
      * // => logs 'a' then 'b' (iteration order is not guaranteed)
      */
     function forOwn(object, iteratee) {
-      return object && baseForOwn(object, toFunction(iteratee));
+      return object && baseForOwn(object, baseCastFunction(iteratee));
     }
 
     /**
@@ -29443,7 +31175,7 @@ angular.module('common.oneSearch', [])
      * // => logs 'b' then 'a' assuming `_.forOwn` logs 'a' then 'b'
      */
     function forOwnRight(object, iteratee) {
-      return object && baseForOwnRight(object, toFunction(iteratee));
+      return object && baseForOwnRight(object, baseCastFunction(iteratee));
     }
 
     /**
@@ -29810,12 +31542,12 @@ angular.module('common.oneSearch', [])
     }
 
     /**
-     * Recursively merges own and inherited enumerable properties of source
-     * objects into the destination object, skipping source properties that resolve
-     * to `undefined`. Array and plain object properties are merged recursively.
-     * Other objects and value types are overridden by assignment. Source objects
-     * are applied from left to right. Subsequent sources overwrite property
-     * assignments of previous sources.
+     * Recursively merges own and inherited enumerable properties of source objects
+     * into the destination object. Source properties that resolve to `undefined`
+     * are skipped if a destination value exists. Array and plain object properties
+     * are merged recursively. Other objects and value types are overridden by
+     * assignment. Source objects are applied from left to right. Subsequent
+     * sources overwrite property assignments of previous sources.
      *
      * **Note:** This method mutates `object`.
      *
@@ -29892,7 +31624,7 @@ angular.module('common.oneSearch', [])
      * @category Object
      * @param {Object} object The source object.
      * @param {...(string|string[])} [props] The property names to omit, specified
-     *  individually or in arrays..
+     *  individually or in arrays.
      * @returns {Object} Returns the new object.
      * @example
      *
@@ -29905,7 +31637,7 @@ angular.module('common.oneSearch', [])
       if (object == null) {
         return {};
       }
-      props = arrayMap(baseFlatten(props), String);
+      props = arrayMap(baseFlatten(props, 1), String);
       return basePick(object, baseDifference(keysIn(object), props));
     });
 
@@ -29952,7 +31684,7 @@ angular.module('common.oneSearch', [])
      * // => { 'a': 1, 'c': 3 }
      */
     var pick = rest(function(object, props) {
-      return object == null ? {} : basePick(object, baseFlatten(props));
+      return object == null ? {} : basePick(object, baseFlatten(props, 1));
     });
 
     /**
@@ -30006,7 +31738,7 @@ angular.module('common.oneSearch', [])
      */
     function result(object, path, defaultValue) {
       if (!isKey(path, object)) {
-        path = baseToPath(path);
+        path = baseCastPath(path);
         var result = get(object, path);
         object = parent(object, path);
       } else {
@@ -30076,7 +31808,8 @@ angular.module('common.oneSearch', [])
     }
 
     /**
-     * Creates an array of own enumerable key-value pairs for `object`.
+     * Creates an array of own enumerable key-value pairs for `object` which
+     * can be consumed by `_.fromPairs`.
      *
      * @static
      * @memberOf _
@@ -30100,7 +31833,8 @@ angular.module('common.oneSearch', [])
     }
 
     /**
-     * Creates an array of own and inherited enumerable key-value pairs for `object`.
+     * Creates an array of own and inherited enumerable key-value pairs for
+     * `object` which can be consumed by `_.fromPairs`.
      *
      * @static
      * @memberOf _
@@ -30255,7 +31989,7 @@ angular.module('common.oneSearch', [])
      * // => [1, 2, 3] (iteration order is not guaranteed)
      */
     function valuesIn(object) {
-      return object == null ? baseValues(object, keysIn(object)) : [];
+      return object == null ? [] : baseValues(object, keysIn(object));
     }
 
     /*------------------------------------------------------------------------*/
@@ -30753,7 +32487,7 @@ angular.module('common.oneSearch', [])
      * @memberOf _
      * @category String
      * @param {string} string The string to convert.
-     * @param {number} [radix] The radix to interpret `value` by.
+     * @param {number} [radix=10] The radix to interpret `value` by.
      * @param- {Object} [guard] Enables use as an iteratee for functions like `_.map`.
      * @returns {number} Returns the converted integer.
      * @example
@@ -30940,7 +32674,7 @@ angular.module('common.oneSearch', [])
      * in "interpolate" delimiters, HTML-escape interpolated data properties in
      * "escape" delimiters, and execute JavaScript in "evaluate" delimiters. Data
      * properties may be accessed as free variables in the template. If a setting
-     * object is provided it takes precedence over `_.templateSettings` values.
+     * object is given it takes precedence over `_.templateSettings` values.
      *
      * **Note:** In the development build `_.template` utilizes
      * [sourceURLs](http://www.html5rocks.com/en/tutorials/developertools/sourcemaps/#toc-sourceurl)
@@ -31125,7 +32859,8 @@ angular.module('common.oneSearch', [])
         'return __p\n}';
 
       var result = attempt(function() {
-        return Function(importsKeys, sourceURL + 'return ' + source).apply(undefined, importsValues);
+        return Function(importsKeys, sourceURL + 'return ' + source)
+          .apply(undefined, importsValues);
       });
 
       // Provide the compiled function's source by its `toString` method or
@@ -31219,7 +32954,9 @@ angular.module('common.oneSearch', [])
       var strSymbols = stringToArray(string),
           chrSymbols = stringToArray(chars);
 
-      return strSymbols.slice(charsStartIndex(strSymbols, chrSymbols), charsEndIndex(strSymbols, chrSymbols) + 1).join('');
+      return strSymbols
+        .slice(charsStartIndex(strSymbols, chrSymbols), charsEndIndex(strSymbols, chrSymbols) + 1)
+        .join('');
     }
 
     /**
@@ -31253,7 +32990,9 @@ angular.module('common.oneSearch', [])
         return string;
       }
       var strSymbols = stringToArray(string);
-      return strSymbols.slice(0, charsEndIndex(strSymbols, stringToArray(chars)) + 1).join('');
+      return strSymbols
+        .slice(0, charsEndIndex(strSymbols, stringToArray(chars)) + 1)
+        .join('');
     }
 
     /**
@@ -31287,7 +33026,9 @@ angular.module('common.oneSearch', [])
         return string;
       }
       var strSymbols = stringToArray(string);
-      return strSymbols.slice(charsStartIndex(strSymbols, stringToArray(chars))).join('');
+      return strSymbols
+        .slice(charsStartIndex(strSymbols, stringToArray(chars)))
+        .join('');
     }
 
     /**
@@ -31299,7 +33040,7 @@ angular.module('common.oneSearch', [])
      * @memberOf _
      * @category String
      * @param {string} [string=''] The string to truncate.
-     * @param {Object} [options] The options object.
+     * @param {Object} [options=({})] The options object.
      * @param {number} [options.length=30] The maximum string length.
      * @param {string} [options.omission='...'] The string to indicate text is omitted.
      * @param {RegExp|string} [options.separator] The separator pattern to truncate to.
@@ -31484,7 +33225,7 @@ angular.module('common.oneSearch', [])
       try {
         return apply(func, undefined, args);
       } catch (e) {
-        return isObject(e) ? e : new Error(e);
+        return isError(e) ? e : new Error(e);
       }
     });
 
@@ -31515,7 +33256,7 @@ angular.module('common.oneSearch', [])
      * // => logs 'clicked docs' when clicked
      */
     var bindAll = rest(function(object, methodNames) {
-      arrayEach(baseFlatten(methodNames), function(key) {
+      arrayEach(baseFlatten(methodNames, 1), function(key) {
         object[key] = bind(object[key], object);
       });
       return object;
@@ -31618,9 +33359,9 @@ angular.module('common.oneSearch', [])
     }
 
     /**
-     * Creates a function that returns the result of invoking the provided
-     * functions with the `this` binding of the created function, where each
-     * successive invocation is supplied the return value of the previous.
+     * Creates a function that returns the result of invoking the given functions
+     * with the `this` binding of the created function, where each successive
+     * invocation is supplied the return value of the previous.
      *
      * @static
      * @memberOf _
@@ -31641,7 +33382,7 @@ angular.module('common.oneSearch', [])
 
     /**
      * This method is like `_.flow` except that it creates a function that
-     * invokes the provided functions from right to left.
+     * invokes the given functions from right to left.
      *
      * @static
      * @memberOf _
@@ -31661,7 +33402,7 @@ angular.module('common.oneSearch', [])
     var flowRight = createFlow(true);
 
     /**
-     * This method returns the first argument provided to it.
+     * This method returns the first argument given to it.
      *
      * @static
      * @memberOf _
@@ -31683,7 +33424,8 @@ angular.module('common.oneSearch', [])
      * Creates a function that invokes `func` with the arguments of the created
      * function. If `func` is a property name the created callback returns the
      * property value for a given element. If `func` is an object the created
-     * callback returns `true` for elements that contain the equivalent object properties, otherwise it returns `false`.
+     * callback returns `true` for elements that contain the equivalent object
+     * properties, otherwise it returns `false`.
      *
      * @static
      * @memberOf _
@@ -31713,9 +33455,10 @@ angular.module('common.oneSearch', [])
     }
 
     /**
-     * Creates a function that performs a deep partial comparison between a given
+     * Creates a function that performs a partial deep comparison between a given
      * object and `source`, returning `true` if the given object has equivalent
-     * property values, else `false`.
+     * property values, else `false`. The created function is equivalent to
+     * `_.isMatch` with a `source` partially applied.
      *
      * **Note:** This method supports comparing the same values as `_.isEqual`.
      *
@@ -31739,7 +33482,7 @@ angular.module('common.oneSearch', [])
     }
 
     /**
-     * Creates a function that performs a deep partial comparison between the
+     * Creates a function that performs a partial deep comparison between the
      * value at `path` of a given object to `srcValue`, returning `true` if the
      * object value is equivalent, else `false`.
      *
@@ -32173,7 +33916,7 @@ angular.module('common.oneSearch', [])
       var index = MAX_ARRAY_LENGTH,
           length = nativeMin(n, MAX_ARRAY_LENGTH);
 
-      iteratee = toFunction(iteratee);
+      iteratee = baseCastFunction(iteratee);
       n -= MAX_ARRAY_LENGTH;
 
       var result = baseTimes(length, iteratee);
@@ -32213,12 +33956,12 @@ angular.module('common.oneSearch', [])
     }
 
     /**
-     * Generates a unique ID. If `prefix` is provided the ID is appended to it.
+     * Generates a unique ID. If `prefix` is given the ID is appended to it.
      *
      * @static
      * @memberOf _
      * @category Util
-     * @param {string} [prefix] The value to prefix the ID with.
+     * @param {string} [prefix=''] The value to prefix the ID with.
      * @returns {string} Returns the unique ID.
      * @example
      *
@@ -32251,6 +33994,9 @@ angular.module('common.oneSearch', [])
      */
     function add(augend, addend) {
       var result;
+      if (augend === undefined && addend === undefined) {
+        return 0;
+      }
       if (augend !== undefined) {
         result = augend;
       }
@@ -32461,6 +34207,9 @@ angular.module('common.oneSearch', [])
      */
     function subtract(minuend, subtrahend) {
       var result;
+      if (minuend === undefined && subtrahend === undefined) {
+        return 0;
+      }
       if (minuend !== undefined) {
         result = minuend;
       }
@@ -32563,6 +34312,7 @@ angular.module('common.oneSearch', [])
     lodash.bind = bind;
     lodash.bindAll = bindAll;
     lodash.bindKey = bindKey;
+    lodash.castArray = castArray;
     lodash.chain = chain;
     lodash.chunk = chunk;
     lodash.compact = compact;
@@ -32591,6 +34341,7 @@ angular.module('common.oneSearch', [])
     lodash.flatMap = flatMap;
     lodash.flatten = flatten;
     lodash.flattenDeep = flattenDeep;
+    lodash.flattenDepth = flattenDepth;
     lodash.flip = flip;
     lodash.flow = flow;
     lodash.flowRight = flowRight;
@@ -32747,9 +34498,11 @@ angular.module('common.oneSearch', [])
     lodash.invoke = invoke;
     lodash.isArguments = isArguments;
     lodash.isArray = isArray;
+    lodash.isArrayBuffer = isArrayBuffer;
     lodash.isArrayLike = isArrayLike;
     lodash.isArrayLikeObject = isArrayLikeObject;
     lodash.isBoolean = isBoolean;
+    lodash.isBuffer = isBuffer;
     lodash.isDate = isDate;
     lodash.isElement = isElement;
     lodash.isEmpty = isEmpty;
@@ -32760,6 +34513,7 @@ angular.module('common.oneSearch', [])
     lodash.isFunction = isFunction;
     lodash.isInteger = isInteger;
     lodash.isLength = isLength;
+    lodash.isMap = isMap;
     lodash.isMatch = isMatch;
     lodash.isMatchWith = isMatchWith;
     lodash.isNaN = isNaN;
@@ -32772,10 +34526,13 @@ angular.module('common.oneSearch', [])
     lodash.isPlainObject = isPlainObject;
     lodash.isRegExp = isRegExp;
     lodash.isSafeInteger = isSafeInteger;
+    lodash.isSet = isSet;
     lodash.isString = isString;
     lodash.isSymbol = isSymbol;
     lodash.isTypedArray = isTypedArray;
     lodash.isUndefined = isUndefined;
+    lodash.isWeakMap = isWeakMap;
+    lodash.isWeakSet = isWeakSet;
     lodash.join = join;
     lodash.kebabCase = kebabCase;
     lodash.last = last;
@@ -32859,7 +34616,7 @@ angular.module('common.oneSearch', [])
      *
      * @static
      * @memberOf _
-     * @type string
+     * @type {string}
      */
     lodash.VERSION = VERSION;
 
@@ -32881,7 +34638,10 @@ angular.module('common.oneSearch', [])
         if (filtered) {
           result.__takeCount__ = nativeMin(n, result.__takeCount__);
         } else {
-          result.__views__.push({ 'size': nativeMin(n, MAX_ARRAY_LENGTH), 'type': methodName + (result.__dir__ < 0 ? 'Right' : '') });
+          result.__views__.push({
+            'size': nativeMin(n, MAX_ARRAY_LENGTH),
+            'type': methodName + (result.__dir__ < 0 ? 'Right' : '')
+          });
         }
         return result;
       };
@@ -32898,7 +34658,10 @@ angular.module('common.oneSearch', [])
 
       LazyWrapper.prototype[methodName] = function(iteratee) {
         var result = this.clone();
-        result.__iteratees__.push({ 'iteratee': getIteratee(iteratee, 3), 'type': type });
+        result.__iteratees__.push({
+          'iteratee': getIteratee(iteratee, 3),
+          'type': type
+        });
         result.__filtered__ = result.__filtered__ || isFilter;
         return result;
       };
@@ -33050,7 +34813,10 @@ angular.module('common.oneSearch', [])
       }
     });
 
-    realNames[createHybridWrapper(undefined, BIND_KEY_FLAG).name] = [{ 'name': 'wrapper', 'func': undefined }];
+    realNames[createHybridWrapper(undefined, BIND_KEY_FLAG).name] = [{
+      'name': 'wrapper',
+      'func': undefined
+    }];
 
     // Add functions to the lazy wrapper.
     LazyWrapper.prototype.clone = lazyClone;
@@ -49214,16 +50980,19 @@ angular.module('ualib.hours')
                 hoursFactory.get({view: 'today'},
                     function(data){
                         var libraries = [];
-                        for (var lib in data.libraries){
-                            libraries.push(data.libraries[lib]);
-                            if (data.libraries[lib].hasOwnProperty('children')){
-                                libraries = libraries.concat(data.libraries[lib]['children']);
+                        if (angular.isDefined(data.today.libraries)) {
+                            for (var lib in data.today.libraries) {
+                                libraries.push(data.today.libraries[lib]);
+                                if (data.today.libraries[lib].hasOwnProperty('children')) {
+                                    libraries = libraries.concat(data.today.libraries[lib]['children']);
+                                }
                             }
+                            var library = $filter('filter')(libraries, {name: $scope.library});
+                            $scope.today = setStatus(library[0]);
+                            $element.addClass('loaded');
+                        } else {
+                            console.log("Error: could not retrieve today hours");
                         }
-                        var library = $filter('filter')(libraries, {name: $scope.library});
-                        $scope.today = setStatus(library[0]);
-                        $element.addClass('loaded');
-
                     },
                     function(msg){
                         console.log(msg);
@@ -49263,7 +51032,7 @@ angular.module('hours.list', [])
 
         hoursFactory.get({view: 'today'},
             function(data){
-                var list = setStatus(data.libraries);
+                var list = setStatus(data.today.libraries);
                 $scope.hoursList = list;
             },
             function(msg){
@@ -49315,11 +51084,14 @@ angular.module('hours.list', [])
         }
     }]);
 /**
- * @license AngularJS v1.4.9
- * (c) 2010-2015 Google, Inc. http://angularjs.org
+ * @license AngularJS v1.5.0
+ * (c) 2010-2016 Google, Inc. http://angularjs.org
  * License: MIT
  */
 (function(window, angular, undefined) {'use strict';
+
+/* global ngTouchClickDirectiveFactory: false,
+ */
 
 /**
  * @ngdoc module
@@ -49343,8 +51115,106 @@ angular.module('hours.list', [])
 /* global -ngTouch */
 var ngTouch = angular.module('ngTouch', []);
 
+ngTouch.provider('$touch', $TouchProvider);
+
 function nodeName_(element) {
   return angular.lowercase(element.nodeName || (element[0] && element[0].nodeName));
+}
+
+/**
+ * @ngdoc provider
+ * @name $touchProvider
+ *
+ * @description
+ * The `$touchProvider` allows enabling / disabling {@link ngTouch.ngClick ngTouch's ngClick directive}.
+ */
+$TouchProvider.$inject = ['$provide', '$compileProvider'];
+function $TouchProvider($provide, $compileProvider) {
+
+  /**
+   * @ngdoc method
+   * @name  $touchProvider#ngClickOverrideEnabled
+   *
+   * @param {boolean=} enabled update the ngClickOverrideEnabled state if provided, otherwise just return the
+   * current ngClickOverrideEnabled state
+   * @returns {*} current value if used as getter or itself (chaining) if used as setter
+   *
+   * @kind function
+   *
+   * @description
+   * Call this method to enable/disable {@link ngTouch.ngClick ngTouch's ngClick directive}. If enabled,
+   * the default ngClick directive will be replaced by a version that eliminates the 300ms delay for
+   * click events on browser for touch-devices.
+   *
+   * The default is `false`.
+   *
+   */
+  var ngClickOverrideEnabled = false;
+  var ngClickDirectiveAdded = false;
+  this.ngClickOverrideEnabled = function(enabled) {
+    if (angular.isDefined(enabled)) {
+
+      if (enabled && !ngClickDirectiveAdded) {
+        ngClickDirectiveAdded = true;
+
+        // Use this to identify the correct directive in the delegate
+        ngTouchClickDirectiveFactory.$$moduleName = 'ngTouch';
+        $compileProvider.directive('ngClick', ngTouchClickDirectiveFactory);
+
+        $provide.decorator('ngClickDirective', ['$delegate', function($delegate) {
+          if (ngClickOverrideEnabled) {
+            // drop the default ngClick directive
+            $delegate.shift();
+          } else {
+            // drop the ngTouch ngClick directive if the override has been re-disabled (because
+            // we cannot de-register added directives)
+            var i = $delegate.length - 1;
+            while (i >= 0) {
+              if ($delegate[i].$$moduleName === 'ngTouch') {
+                $delegate.splice(i, 1);
+                break;
+              }
+              i--;
+            }
+          }
+
+          return $delegate;
+        }]);
+      }
+
+      ngClickOverrideEnabled = enabled;
+      return this;
+    }
+
+    return ngClickOverrideEnabled;
+  };
+
+  /**
+  * @ngdoc service
+  * @name $touch
+  * @kind object
+  *
+  * @description
+  * Provides the {@link ngTouch.$touch#ngClickOverrideEnabled `ngClickOverrideEnabled`} method.
+  *
+  */
+  this.$get = function() {
+    return {
+      /**
+       * @ngdoc method
+       * @name  $touch#ngClickOverrideEnabled
+       *
+       * @returns {*} current value of `ngClickOverrideEnabled` set in the {@link ngTouch.$touchProvider $touchProvider},
+       * i.e. if {@link ngTouch.ngClick ngTouch's ngClick} directive is enabled.
+       *
+       * @kind function
+       */
+      ngClickOverrideEnabled: function() {
+        return ngClickOverrideEnabled;
+      }
+    };
+  };
+
 }
 
 /* global ngTouch: false */
@@ -49518,8 +51388,17 @@ ngTouch.factory('$swipe', [function() {
 /**
  * @ngdoc directive
  * @name ngClick
+ * @deprecated
  *
  * @description
+ * <div class="alert alert-danger">
+ * **DEPRECATION NOTICE**: Beginning with Angular 1.5, this directive is deprecated and by default **disabled**.
+ * The directive will receive no further support and might be removed from future releases.
+ * If you need the directive, you can enable it with the {@link ngTouch.$touchProvider $touchProvider#ngClickOverrideEnabled}
+ * function. We also recommend that you migrate to [FastClick](https://github.com/ftlabs/fastclick).
+ * To learn more about the 300ms delay, this [Telerik article](http://developer.telerik.com/featured/300-ms-click-delay-ios-8/)
+ * gives a good overview.
+ * </div>
  * A more powerful replacement for the default ngClick designed to be used on touchscreen
  * devices. Most mobile browsers wait about 300ms after a tap-and-release before sending
  * the click event. This version handles them immediately, and then prevents the
@@ -49551,15 +51430,7 @@ ngTouch.factory('$swipe', [function() {
     </example>
  */
 
-ngTouch.config(['$provide', function($provide) {
-  $provide.decorator('ngClickDirective', ['$delegate', function($delegate) {
-    // drop the default ngClick directive
-    $delegate.shift();
-    return $delegate;
-  }]);
-}]);
-
-ngTouch.directive('ngClick', ['$parse', '$timeout', '$rootElement',
+var ngTouchClickDirectiveFactory = ['$parse', '$timeout', '$rootElement',
     function($parse, $timeout, $rootElement) {
   var TAP_DURATION = 750; // Shorter than 750ms is a tap, longer is a taphold or drag.
   var MOVE_TOLERANCE = 12; // 12px seems to work in most mobile browsers.
@@ -49803,7 +51674,7 @@ ngTouch.directive('ngClick', ['$parse', '$timeout', '$rootElement',
     });
 
   };
-}]);
+}];
 
 /* global ngTouch: false */
 
