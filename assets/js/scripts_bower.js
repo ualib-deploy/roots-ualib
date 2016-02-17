@@ -12253,7 +12253,7 @@ angular.module("staffDirectory/staffDirectoryProfile.tpl.html", []).run(["$templ
     "<div class=\"container\">\n" +
     "    <h2>Profile Management</h2>\n" +
     "\n" +
-    "    <div ng-if=\"userProfile.person.uid > 0\">\n" +
+    "    <div ng-if=\"userProfile.person.uid > 0 && userInfo.login\">\n" +
     "        <div class=\"row\">\n" +
     "            <div class=\"col-md-3\">\n" +
     "                <img class=\"staff-portrait thumbnail\" ng-src=\"{{userProfile.person.photo}}\" ng-if=\"userProfile.person.photo != null\"\n" +
@@ -12337,8 +12337,12 @@ angular.module("staffDirectory/staffDirectoryProfile.tpl.html", []).run(["$templ
     "        </div>\n" +
     "    </div>\n" +
     "\n" +
-    "    <h4 ng-hide=\"userProfile.person.uid > 0\">Can not find your profile!</h4>\n" +
-    "</div>");
+    "    <h4 ng-if=\"!userProfile.person && userInfo.login\">Can not find your profile!</h4>\n" +
+    "    <div ng-if=\"!userInfo.login\">\n" +
+    "        <h3>Sorry, you don't have permissions to manage staff directory</h3>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "");
 }]);
 
 angular.module("staffDirectory/staffDirectorySubjects.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -16218,14 +16222,16 @@ angular.module('manage.staffDirectory', ['oc.lazyLoad', 'ui.tinymce'])
             theme : 'modern'
         };
 
-        sdFactory.getProfile($scope.userInfo.login)
-            .success(function(data) {
-                $scope.userProfile = data;
-                console.dir(data);
-            })
-            .error(function(data, status, headers, config) {
-                console.log(data);
-            });
+        if (angular.isDefined($scope.userInfo.login)) {
+            sdFactory.getProfile($scope.userInfo.login)
+                .success(function (data) {
+                    $scope.userProfile = data;
+                    console.dir(data);
+                })
+                .error(function (data, status, headers, config) {
+                    console.log(data);
+                });
+        }
 
         $scope.update = function(){
             $scope.userProfile.person.login = $scope.userInfo.login;
