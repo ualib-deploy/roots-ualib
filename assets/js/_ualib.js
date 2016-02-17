@@ -16,7 +16,22 @@ angular.module('ualib', [
 ])
 
 
-    .config(['$routeProvider', '$compileProvider', function($routeProvider, $compileProvider) {
+    .config(['$httpProvider', '$routeProvider', '$compileProvider', function($httpProvider, $routeProvider, $compileProvider) {
+        //HTML tags are stripped after JSON data in all AJAX responses
+        function stripHTMLFromJSON(data) {
+            if (typeof data === 'string'){
+                data = data.trim();
+                if (data[0] === '{' || data[0] === '[' || data[0] === ')'){
+                    console.log("Stripping HTML data from JSON in AJAX response...");
+                    data = angular.fromJson(data.replace(/<\/?[^>]+(>|$)/g, ""));
+                }
+            }
+            return data;
+        }
+        $httpProvider.defaults.transformResponse.push(function(responseData){
+            return stripHTMLFromJSON(responseData);
+        });
+
         /**
          * Register Bento Box display route with ngRoute's $routeProvider
          */
@@ -42,7 +57,8 @@ angular.module('ualib', [
 
 
 
-    .run(['$routeParams', '$location', '$rootScope', '$document', 'duScrollOffset', function($routeParams, $location, $rootScope, $document, duScrollOffset){
+    .run(['$routeParams', '$location', '$rootScope', '$document', 'duScrollOffset',
+    function($routeParams, $location, $rootScope, $document, duScrollOffset){
         $rootScope.appClass = 'page-loaded';
         $rootScope.$on('$routeChangeSuccess', function(e, current, pre) {
             //Send Google Analytics page view when routes are accessed
