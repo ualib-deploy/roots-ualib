@@ -1,4 +1,3 @@
-
 <?php
 define( 'WEBAPPS_PATH', '/srv/web/www/webapps/' );
 function roots_ualib_scripts() {
