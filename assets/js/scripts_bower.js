@@ -16864,20 +16864,10 @@ angular.module('oneSearch.templates', ['bento/bento.tpl.html', 'common/directive
 angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("bento/bento.tpl.html",
     "<div class=\"container bento-box-container\">\n" +
-    "    <div class=\"bento-box-menu-container hidden-sm hidden-xs\">\n" +
-    "        <nav class=\"bento-box-menu\" ui-scrollfix=\"+0\">\n" +
-    "            <ul class=\"nav nav-justified\">\n" +
-    "                <li ng-repeat=\"item in boxMenu\" class=\"{{item.box}}\">\n" +
-    "                    <a href=\"\" du-smooth-scroll=\"{{item.box}}\" ng-click=\"selectBox(item.box)\">{{item.title}}</a>\n" +
-    "                </li>\n" +
-    "            </ul>\n" +
-    "        </nav>\n" +
-    "    </div>\n" +
     "    <div class=\"row\">\n" +
     "        <div class=\"col-md-4\">\n" +
     "            <div class=\"bento-box\" bento-box=\"articles\">\n" +
     "                <h2>Articles</h2>\n" +
-    "\n" +
     "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-4\">\n" +
@@ -16885,35 +16875,12 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "                <h2>Books</h2>\n" +
     "            </div>\n" +
     "        </div>\n" +
-    "\n" +
     "        <div class=\"col-sm-12 col-md-4\">\n" +
     "            <div class=\"bento-box\" bento-box=\"journals\">\n" +
     "                <h2>Journals</h2>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
-    "\n" +
-    "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-4\">\n" +
-    "            <div class=\"bento-box\" bento-box=\"googleCS\">\n" +
-    "                <h2 id=\"site-search\">Libraries' Website</h2>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "\n" +
-    "        <div class=\"col-md-4\">\n" +
-    "            <div class=\"bento-box\" bento-box=\"faq\">\n" +
-    "                <h2>FAQ</h2>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "\n" +
-    "\n" +
-    "        <div class=\"col-md-4\">\n" +
-    "            <div class=\"bento-box\" bento-box=\"libguides\">\n" +
-    "                <h2>Research Guides</h2>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "    </div>\n" +
-    "\n" +
     "    <div class=\"row\">\n" +
     "        <div class=\"col-md-4\">\n" +
     "            <div class=\"bento-box\" bento-box=\"databases\">\n" +
@@ -16921,18 +16888,33 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-4\">\n" +
+    "            <div class=\"bento-box\" bento-box=\"googleCS\">\n" +
+    "                <h2 id=\"site-search\">Libraries' Website</h2>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-4\">\n" +
     "            <div class=\"bento-box\" bento-box=\"acumen\">\n" +
     "                <h2 id=\"acumen\">Acumen</h2>\n" +
     "            </div>\n" +
     "        </div>\n" +
+    "    </div>\n" +
+    "    <div class=\"row\">\n" +
     "        <div class=\"col-md-4\">\n" +
     "            <div class=\"bento-box\" bento-box=\"other\">\n" +
-    "                <h2>Other Items</h2>\n" +
+    "                <h2>Other Items & Media</h2>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-4\">\n" +
+    "            <div class=\"bento-box\" bento-box=\"faq\">\n" +
+    "                <h2>FAQ</h2>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-4\">\n" +
+    "            <div class=\"bento-box\" bento-box=\"libguides\">\n" +
+    "                <h2>Research Guides</h2>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
-    "\n" +
-    "    \n" +
     "    <div class=\"row\">\n" +
     "        <div class=\"col-md-12\">\n" +
     "            <div class=\"bento-box well\" bento-box=\"recommend\" hide-if-empty=\"true\" omit-from-menu=\"true\">\n" +
@@ -17921,7 +17903,7 @@ angular.module('oneSearch.common')
                 model: '=',
                 search: '='
             },
-            controller: ['$scope', '$window', '$timeout', '$document', 'dataFactory', function($scope, $window, $timeout, $document,  dataFactory){
+            controller: function($scope, $window, $timeout, $document,  dataFactory){
                 $scope.items = {};
                 $scope.filteredItems = [];
                 $scope.model = "";
@@ -18037,7 +18019,7 @@ angular.module('oneSearch.common')
                 $scope.gaTypeAhead = function(linkTitle){
                     ga('send', 'event', 'oneSearch', 'type_ahead_click', linkTitle);
                 };
-            }],
+            },
             link: function(scope, elem, attrs) {
                 scope.showSuggestions = false;
                 var suggestWatcher = scope.$watch('items', function(newVal, oldVal){
@@ -18190,7 +18172,7 @@ angular.module('engines.acumen', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('AcumenCtrl', ['$scope', '$filter', function($scope, $filter){
+    .controller('AcumenCtrl', function($scope, $filter){
         var items = $scope.items;
 
         for (var i = 0, len = items.length; i < len; i++) {
@@ -18200,7 +18182,7 @@ angular.module('engines.acumen', [])
                 else items[i].type = items[i].type.sort().shift();
             }
         }
-    }]);
+    });
 angular.module('engines.catalog', [])
 
     /**
@@ -18261,7 +18243,7 @@ angular.module('engines.catalog', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('CatalogCtrl', ['$scope', '$filter', function($scope, $filter){
+    .controller('CatalogCtrl', function($scope, $filter){
         var types = {
             bc: "Archive/Manuscript",
             cm: "Music Score",
@@ -18303,7 +18285,7 @@ angular.module('engines.catalog', [])
         }
 
         $scope.items = items;
-    }]);
+    });
 
 angular.module('engines.databases', [])
 
@@ -18387,7 +18369,7 @@ angular.module('engines.ejournals', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('EjouralsCtrl', ['$scope', function($scope){
+    .controller('EjouralsCtrl', function($scope){
 
         var param;
         switch ($scope.mediaType){
@@ -18404,7 +18386,7 @@ angular.module('engines.ejournals', [])
         if (param){
             $scope.resourceLink = $scope.resourceLink.replace('SS_searchTypeAll=yes&SS_searchTypeBook=yes&SS_searchTypeJournal=yes&SS_searchTypeOther=yes', param);
         }
-    }]);
+    });
 /**
  * @ngdoc overview
  * @name engines
@@ -18752,7 +18734,7 @@ angular.module('engines.scout', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('ScoutCtrl', ['$scope', function($scope){
+    .controller('ScoutCtrl', function($scope){
         var title; // Title variable to bind to $scope. ".BibRelationships.IsPartOfRelationships" title is used if no item title is present.
         var items = $scope.items;
         for (var i = 0; i < items.length; i++){
@@ -18826,7 +18808,7 @@ angular.module('engines.scout', [])
         }
 
         $scope.resourceLink = angular.copy(link);
-    }]);
+    });
 angular.module('filters.nameFilter', [])
 
     .filter('nameFilter', ['$filter', function($filter){
