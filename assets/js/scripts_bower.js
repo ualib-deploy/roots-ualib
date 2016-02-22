@@ -16867,7 +16867,7 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "    <div class=\"row\">\n" +
     "        <div class=\"col-md-4\">\n" +
     "            <div class=\"bento-box\" bento-box=\"articles\">\n" +
-    "                <h2 tooltip=\"Searches scholarly journals in Scout\">Articles</h2>\n" +
+    "                <h2>Articles</h2>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-4\">\n" +
@@ -19968,7 +19968,7 @@ angular.module('common.oneSearch', [])
 })(this);
 /**
  * @license
- * lodash 4.5.0 <https://lodash.com/>
+ * lodash 4.5.1 <https://lodash.com/>
  * Copyright 2012-2016 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
  * Copyright 2009-2016 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -19980,7 +19980,7 @@ angular.module('common.oneSearch', [])
   var undefined;
 
   /** Used as the semantic version number. */
-  var VERSION = '4.5.0';
+  var VERSION = '4.5.1';
 
   /** Used to compose bitmasks for wrapper metadata. */
   var BIND_FLAG = 1,
@@ -21001,6 +21001,26 @@ angular.module('common.oneSearch', [])
   }
 
   /**
+   * Gets the number of `placeholder` occurrences in `array`.
+   *
+   * @private
+   * @param {Array} array The array to inspect.
+   * @param {*} placeholder The placeholder to search for.
+   * @returns {number} Returns the placeholder count.
+   */
+  function countHolders(array, placeholder) {
+    var length = array.length,
+        result = 0;
+
+    while (length--) {
+      if (array[length] === placeholder) {
+        result++;
+      }
+    }
+    return result;
+  }
+
+  /**
    * Used by `_.deburr` to convert latin-1 supplementary letters to basic latin letters.
    *
    * @private
@@ -21138,7 +21158,8 @@ angular.module('common.oneSearch', [])
         result = [];
 
     while (++index < length) {
-      if (array[index] === placeholder) {
+      var value = array[index];
+      if (value === placeholder || value === PLACEHOLDER) {
         array[index] = PLACEHOLDER;
         result[++resIndex] = index;
       }
@@ -22128,8 +22149,7 @@ angular.module('common.oneSearch', [])
      */
     function assignValue(object, key, value) {
       var objValue = object[key];
-      if ((!eq(objValue, value) ||
-            (eq(objValue, objectProto[key]) && !hasOwnProperty.call(object, key))) ||
+      if (!(hasOwnProperty.call(object, key) && eq(objValue, value)) ||
           (value === undefined && !(key in object))) {
         object[key] = value;
       }
@@ -23839,23 +23859,28 @@ angular.module('common.oneSearch', [])
      * @param {Array|Object} args The provided arguments.
      * @param {Array} partials The arguments to prepend to those provided.
      * @param {Array} holders The `partials` placeholder indexes.
+     * @params {boolean} [isCurried] Specify composing for a curried function.
      * @returns {Array} Returns the new array of composed arguments.
      */
-    function composeArgs(args, partials, holders) {
-      var holdersLength = holders.length,
-          argsIndex = -1,
-          argsLength = nativeMax(args.length - holdersLength, 0),
+    function composeArgs(args, partials, holders, isCurried) {
+      var argsIndex = -1,
+          argsLength = args.length,
+          holdersLength = holders.length,
           leftIndex = -1,
           leftLength = partials.length,
-          result = Array(leftLength + argsLength);
+          rangeLength = nativeMax(argsLength - holdersLength, 0),
+          result = Array(leftLength + rangeLength),
+          isUncurried = !isCurried;
 
       while (++leftIndex < leftLength) {
         result[leftIndex] = partials[leftIndex];
       }
       while (++argsIndex < holdersLength) {
-        result[holders[argsIndex]] = args[argsIndex];
+        if (isUncurried || argsIndex < argsLength) {
+          result[holders[argsIndex]] = args[argsIndex];
+        }
       }
-      while (argsLength--) {
+      while (rangeLength--) {
         result[leftIndex++] = args[argsIndex++];
       }
       return result;
@@ -23869,18 +23894,21 @@ angular.module('common.oneSearch', [])
      * @param {Array|Object} args The provided arguments.
      * @param {Array} partials The arguments to append to those provided.
      * @param {Array} holders The `partials` placeholder indexes.
+     * @params {boolean} [isCurried] Specify composing for a curried function.
      * @returns {Array} Returns the new array of composed arguments.
      */
-    function composeArgsRight(args, partials, holders) {
-      var holdersIndex = -1,
+    function composeArgsRight(args, partials, holders, isCurried) {
+      var argsIndex = -1,
+          argsLength = args.length,
+          holdersIndex = -1,
           holdersLength = holders.length,
-          argsIndex = -1,
-          argsLength = nativeMax(args.length - holdersLength, 0),
           rightIndex = -1,
           rightLength = partials.length,
-          result = Array(argsLength + rightLength);
+          rangeLength = nativeMax(argsLength - holdersLength, 0),
+          result = Array(rangeLength + rightLength),
+          isUncurried = !isCurried;
 
-      while (++argsIndex < argsLength) {
+      while (++argsIndex < rangeLength) {
         result[argsIndex] = args[argsIndex];
       }
       var offset = argsIndex;
@@ -23888,7 +23916,9 @@ angular.module('common.oneSearch', [])
         result[offset + rightIndex] = partials[rightIndex];
       }
       while (++holdersIndex < holdersLength) {
-        result[offset + holders[holdersIndex]] = args[argsIndex++];
+        if (isUncurried || argsIndex < argsLength) {
+          result[offset + holders[holdersIndex]] = args[argsIndex++];
+        }
       }
       return result;
     }
@@ -24172,10 +24202,9 @@ angular.module('common.oneSearch', [])
 
       function wrapper() {
         var length = arguments.length,
-            index = length,
             args = Array(length),
-            fn = (this && this !== root && this instanceof wrapper) ? Ctor : func,
-            placeholder = lodash.placeholder || wrapper.placeholder;
+            index = length,
+            placeholder = getPlaceholder(wrapper);
 
         while (index--) {
           args[index] = arguments[index];
@@ -24185,9 +24214,13 @@ angular.module('common.oneSearch', [])
           : replaceHolders(args, placeholder);
 
         length -= holders.length;
-        return length < arity
-          ? createRecurryWrapper(func, bitmask, createHybridWrapper, placeholder, undefined, args, holders, undefined, undefined, arity - length)
-          : apply(fn, this, args);
+        if (length < arity) {
+          return createRecurryWrapper(
+            func, bitmask, createHybridWrapper, wrapper.placeholder, undefined,
+            args, holders, undefined, undefined, arity - length);
+        }
+        var fn = (this && this !== root && this instanceof wrapper) ? Ctor : func;
+        return apply(fn, this, args);
       }
       return wrapper;
     }
@@ -24275,8 +24308,7 @@ angular.module('common.oneSearch', [])
       var isAry = bitmask & ARY_FLAG,
           isBind = bitmask & BIND_FLAG,
           isBindKey = bitmask & BIND_KEY_FLAG,
-          isCurry = bitmask & CURRY_FLAG,
-          isCurryRight = bitmask & CURRY_RIGHT_FLAG,
+          isCurried = bitmask & (CURRY_FLAG | CURRY_RIGHT_FLAG),
           isFlip = bitmask & FLIP_FLAG,
           Ctor = isBindKey ? undefined : createCtorWrapper(func);
 
@@ -24288,33 +24320,34 @@ angular.module('common.oneSearch', [])
         while (index--) {
           args[index] = arguments[index];
         }
+        if (isCurried) {
+          var placeholder = getPlaceholder(wrapper),
+              holdersCount = countHolders(args, placeholder);
+        }
         if (partials) {
-          args = composeArgs(args, partials, holders);
+          args = composeArgs(args, partials, holders, isCurried);
         }
         if (partialsRight) {
-          args = composeArgsRight(args, partialsRight, holdersRight);
+          args = composeArgsRight(args, partialsRight, holdersRight, isCurried);
         }
-        if (isCurry || isCurryRight) {
-          var placeholder = lodash.placeholder || wrapper.placeholder,
-              argsHolders = replaceHolders(args, placeholder);
-
-          length -= argsHolders.length;
-          if (length < arity) {
-            return createRecurryWrapper(
-              func, bitmask, createHybridWrapper, placeholder, thisArg, args,
-              argsHolders, argPos, ary, arity - length
-            );
-          }
+        length -= holdersCount;
+        if (isCurried && length < arity) {
+          var newHolders = replaceHolders(args, placeholder);
+          return createRecurryWrapper(
+            func, bitmask, createHybridWrapper, wrapper.placeholder, thisArg,
+            args, newHolders, argPos, ary, arity - length
+          );
         }
         var thisBinding = isBind ? thisArg : this,
             fn = isBindKey ? thisBinding[func] : func;
 
+        length = args.length;
         if (argPos) {
           args = reorder(args, argPos);
-        } else if (isFlip && args.length > 1) {
+        } else if (isFlip && length > 1) {
           args.reverse();
         }
-        if (isAry && ary < args.length) {
+        if (isAry && ary < length) {
           args.length = ary;
         }
         if (this && this !== root && this instanceof wrapper) {
@@ -24452,7 +24485,7 @@ angular.module('common.oneSearch', [])
      * @param {Function} func The function to wrap.
      * @param {number} bitmask The bitmask of wrapper flags. See `createWrapper` for more details.
      * @param {Function} wrapFunc The function to create the `func` wrapper.
-     * @param {*} placeholder The placeholder to replace.
+     * @param {*} placeholder The placeholder value.
      * @param {*} [thisArg] The `this` binding of `func`.
      * @param {Array} [partials] The arguments to prepend to those provided to the new function.
      * @param {Array} [holders] The `partials` placeholder indexes.
@@ -24464,7 +24497,7 @@ angular.module('common.oneSearch', [])
     function createRecurryWrapper(func, bitmask, wrapFunc, placeholder, thisArg, partials, holders, argPos, ary, arity) {
       var isCurry = bitmask & CURRY_FLAG,
           newArgPos = argPos ? copyArray(argPos) : undefined,
-          newsHolders = isCurry ? holders : undefined,
+          newHolders = isCurry ? holders : undefined,
           newHoldersRight = isCurry ? undefined : holders,
           newPartials = isCurry ? partials : undefined,
           newPartialsRight = isCurry ? undefined : partials;
@@ -24476,7 +24509,7 @@ angular.module('common.oneSearch', [])
         bitmask &= ~(BIND_FLAG | BIND_KEY_FLAG);
       }
       var newData = [
-        func, bitmask, thisArg, newPartials, newsHolders, newPartialsRight,
+        func, bitmask, thisArg, newPartials, newHolders, newPartialsRight,
         newHoldersRight, newArgPos, ary, arity
       ];
 
@@ -24898,6 +24931,18 @@ angular.module('common.oneSearch', [])
     }
 
     /**
+     * Gets the argument placeholder value for `func`.
+     *
+     * @private
+     * @param {Function} func The function to inspect.
+     * @returns {*} Returns the placeholder value.
+     */
+    function getPlaceholder(func) {
+      var object = hasOwnProperty.call(lodash, 'placeholder') ? lodash : func;
+      return object.placeholder;
+    }
+
+    /**
      * Creates an array of the own symbol properties of `object`.
      *
      * @private
@@ -25023,11 +25068,9 @@ angular.module('common.oneSearch', [])
      * @returns {Object} Returns the initialized clone.
      */
     function initCloneObject(object) {
-      if (isPrototype(object)) {
-        return {};
-      }
-      var Ctor = object.constructor;
-      return baseCreate(isFunction(Ctor) ? Ctor.prototype : undefined);
+      return (isFunction(object.constructor) && !isPrototype(object))
+        ? baseCreate(getPrototypeOf(object))
+        : {};
     }
 
     /**
@@ -25174,7 +25217,7 @@ angular.module('common.oneSearch', [])
      */
     function isPrototype(value) {
       var Ctor = value && value.constructor,
-          proto = (typeof Ctor == 'function' && Ctor.prototype) || objectProto;
+          proto = (isFunction(Ctor) && Ctor.prototype) || objectProto;
 
       return value === proto;
     }
@@ -25213,9 +25256,9 @@ angular.module('common.oneSearch', [])
           isCommon = newBitmask < (BIND_FLAG | BIND_KEY_FLAG | ARY_FLAG);
 
       var isCombo =
-        (srcBitmask == ARY_FLAG && (bitmask == CURRY_FLAG)) ||
-        (srcBitmask == ARY_FLAG && (bitmask == REARG_FLAG) && (data[7].length <= source[8])) ||
-        (srcBitmask == (ARY_FLAG | REARG_FLAG) && (source[7].length <= source[8]) && (bitmask == CURRY_FLAG));
+        ((srcBitmask == ARY_FLAG) && (bitmask == CURRY_FLAG)) ||
+        ((srcBitmask == ARY_FLAG) && (bitmask == REARG_FLAG) && (data[7].length <= source[8])) ||
+        ((srcBitmask == (ARY_FLAG | REARG_FLAG)) && (source[7].length <= source[8]) && (bitmask == CURRY_FLAG));
 
       // Exit early if metadata can't be merged.
       if (!(isCommon || isCombo)) {
@@ -25225,7 +25268,7 @@ angular.module('common.oneSearch', [])
       if (srcBitmask & BIND_FLAG) {
         data[2] = source[2];
         // Set when currying a bound function.
-        newBitmask |= (bitmask & BIND_FLAG) ? 0 : CURRY_BOUND_FLAG;
+        newBitmask |= bitmask & BIND_FLAG ? 0 : CURRY_BOUND_FLAG;
       }
       // Compose partial arguments.
       var value = source[3];
@@ -26157,7 +26200,8 @@ angular.module('common.oneSearch', [])
      * [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
      * for equality comparisons.
      *
-     * **Note:** Unlike `_.without`, this method mutates `array`.
+     * **Note:** Unlike `_.without`, this method mutates `array`. Use `_.remove`
+     * to remove elements from an array by predicate.
      *
      * @static
      * @memberOf _
@@ -26262,10 +26306,11 @@ angular.module('common.oneSearch', [])
 
     /**
      * Removes all elements from `array` that `predicate` returns truthy for
-     * and returns an array of the removed elements. The predicate is invoked with
-     * three arguments: (value, index, array).
+     * and returns an array of the removed elements. The predicate is invoked
+     * with three arguments: (value, index, array).
      *
-     * **Note:** Unlike `_.filter`, this method mutates `array`.
+     * **Note:** Unlike `_.filter`, this method mutates `array`. Use `_.pull`
+     * to pull elements from an array by value.
      *
      * @static
      * @memberOf _
@@ -28428,9 +28473,7 @@ angular.module('common.oneSearch', [])
     var bind = rest(function(func, thisArg, partials) {
       var bitmask = BIND_FLAG;
       if (partials.length) {
-        var placeholder = lodash.placeholder || bind.placeholder,
-            holders = replaceHolders(partials, placeholder);
-
+        var holders = replaceHolders(partials, getPlaceholder(bind));
         bitmask |= PARTIAL_FLAG;
       }
       return createWrapper(func, bitmask, thisArg, partials, holders);
@@ -28483,9 +28526,7 @@ angular.module('common.oneSearch', [])
     var bindKey = rest(function(object, key, partials) {
       var bitmask = BIND_FLAG | BIND_KEY_FLAG;
       if (partials.length) {
-        var placeholder = lodash.placeholder || bindKey.placeholder,
-            holders = replaceHolders(partials, placeholder);
-
+        var holders = replaceHolders(partials, getPlaceholder(bindKey));
         bitmask |= PARTIAL_FLAG;
       }
       return createWrapper(key, bitmask, object, partials, holders);
@@ -28534,7 +28575,7 @@ angular.module('common.oneSearch', [])
     function curry(func, arity, guard) {
       arity = guard ? undefined : arity;
       var result = createWrapper(func, CURRY_FLAG, undefined, undefined, undefined, undefined, undefined, arity);
-      result.placeholder = lodash.placeholder || curry.placeholder;
+      result.placeholder = curry.placeholder;
       return result;
     }
 
@@ -28578,7 +28619,7 @@ angular.module('common.oneSearch', [])
     function curryRight(func, arity, guard) {
       arity = guard ? undefined : arity;
       var result = createWrapper(func, CURRY_RIGHT_FLAG, undefined, undefined, undefined, undefined, undefined, arity);
-      result.placeholder = lodash.placeholder || curryRight.placeholder;
+      result.placeholder = curryRight.placeholder;
       return result;
     }
 
@@ -29002,9 +29043,7 @@ angular.module('common.oneSearch', [])
      * // => 'hi fred'
      */
     var partial = rest(function(func, partials) {
-      var placeholder = lodash.placeholder || partial.placeholder,
-          holders = replaceHolders(partials, placeholder);
-
+      var holders = replaceHolders(partials, getPlaceholder(partial));
       return createWrapper(func, PARTIAL_FLAG, undefined, partials, holders);
     });
 
@@ -29040,9 +29079,7 @@ angular.module('common.oneSearch', [])
      * // => 'hello fred'
      */
     var partialRight = rest(function(func, partials) {
-      var placeholder = lodash.placeholder || partialRight.placeholder,
-          holders = replaceHolders(partials, placeholder);
-
+      var holders = replaceHolders(partials, getPlaceholder(partialRight));
       return createWrapper(func, PARTIAL_RIGHT_FLAG, undefined, partials, holders);
     });
 
@@ -29841,9 +29878,8 @@ angular.module('common.oneSearch', [])
       if (!isObjectLike(value)) {
         return false;
       }
-      var Ctor = value.constructor;
       return (objectToString.call(value) == errorTag) ||
-        (typeof Ctor == 'function' && objectToString.call(Ctor.prototype) == errorTag);
+        (typeof value.message == 'string' && typeof value.name == 'string');
     }
 
     /**
@@ -30256,10 +30292,7 @@ angular.module('common.oneSearch', [])
           objectToString.call(value) != objectTag || isHostObject(value)) {
         return false;
       }
-      var proto = objectProto;
-      if (typeof value.constructor == 'function') {
-        proto = getPrototypeOf(value);
-      }
+      var proto = getPrototypeOf(value);
       if (proto === null) {
         return true;
       }
@@ -31473,7 +31506,8 @@ angular.module('common.oneSearch', [])
     /**
      * The opposite of `_.mapValues`; this method creates an object with the
      * same values as `object` and keys generated by running each own enumerable
-     * property of `object` through `iteratee`.
+     * property of `object` through `iteratee`. The iteratee is invoked with
+     * three arguments: (value, key, object).
      *
      * @static
      * @memberOf _
@@ -31501,7 +31535,7 @@ angular.module('common.oneSearch', [])
     /**
      * Creates an object with the same keys as `object` and values generated by
      * running each own enumerable property of `object` through `iteratee`. The
-     * iteratee function is invoked with three arguments: (value, key, object).
+     * iteratee is invoked with three arguments: (value, key, object).
      *
      * @static
      * @memberOf _
@@ -31634,9 +31668,10 @@ angular.module('common.oneSearch', [])
     });
 
     /**
-     * The opposite of `_.pickBy`; this method creates an object composed of the
-     * own and inherited enumerable properties of `object` that `predicate`
-     * doesn't return truthy for.
+     * The opposite of `_.pickBy`; this method creates an object composed of
+     * the own and inherited enumerable properties of `object` that `predicate`
+     * doesn't return truthy for. The predicate is invoked with two arguments:
+     * (value, key).
      *
      * @static
      * @memberOf _
@@ -31652,7 +31687,7 @@ angular.module('common.oneSearch', [])
      * // => { 'b': '2' }
      */
     function omitBy(object, predicate) {
-      predicate = getIteratee(predicate, 2);
+      predicate = getIteratee(predicate);
       return basePickBy(object, function(value, key) {
         return !predicate(value, key);
       });
@@ -31697,7 +31732,7 @@ angular.module('common.oneSearch', [])
      * // => { 'a': 1, 'c': 3 }
      */
     function pickBy(object, predicate) {
-      return object == null ? {} : basePickBy(object, getIteratee(predicate, 2));
+      return object == null ? {} : basePickBy(object, getIteratee(predicate));
     }
 
     /**
@@ -31887,7 +31922,7 @@ angular.module('common.oneSearch', [])
           if (isArr) {
             accumulator = isArray(object) ? new Ctor : [];
           } else {
-            accumulator = baseCreate(isFunction(Ctor) ? Ctor.prototype : undefined);
+            accumulator = isFunction(Ctor) ? baseCreate(getPrototypeOf(object)) : {};
           }
         } else {
           accumulator = {};
@@ -33883,8 +33918,8 @@ angular.module('common.oneSearch', [])
     var rangeRight = createRange(true);
 
     /**
-     * Invokes the iteratee function `n` times, returning an array of the results
-     * of each invocation. The iteratee is invoked with one argument; (index).
+     * Invokes the iteratee `n` times, returning an array of the results of
+     * each invocation. The iteratee is invoked with one argument; (index).
      *
      * @static
      * @memberOf _
