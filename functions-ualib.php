@@ -149,4 +149,11 @@ function bweb_feedzy_readmore( $content, $link, $feedURL ) {
     return $content;
 }
 add_filter( 'feedzy_summary_output', 'bweb_feedzy_readmore', 9, 3 );
+
+function bweb_feedzy_cache_duration( $feedCacheDuration, $feedURL ) {
+    return 60*5; //5 minutes
+}
+add_filter('wp_feed_cache_transient_lifetime', 'bweb_feedzy_cache_duration', 10, 2);
+
+
 add_action( 'wp_enqueue_scripts', 'roots_ualib_scripts' );
