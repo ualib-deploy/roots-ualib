@@ -13322,6 +13322,7 @@ angular.module('manage.manageHours', [])
         {name:'5:00 pm', value:'1700'},
         {name:'5:30 pm', value:'1730'},
         {name:'6:00 pm', value:'1800'},
+        {name:'6:30 pm', value:'1830'},
         {name:'7:00 pm', value:'1900'},
         {name:'8:00 pm', value:'2000'},
         {name:'9:00 pm', value:'2100'},
