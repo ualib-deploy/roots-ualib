@@ -70,18 +70,18 @@
             </a>
 
           <a href="http://www.ua.edu">
-              <img src="http://www.lib.ua.edu/wp-content/themes/roots-ualib/assets/img/ua-official-logo.png" class="img-responsive" style="margin: 15px 0 30px;"/>
+              <img src="//www.lib.ua.edu/wp-content/themes/roots-ualib/assets/img/ua-official-logo.png" class="img-responsive" style="margin: 15px 0 30px;"/>
           </a>
 
           <div class="row">
             <div class="col-xs-6">
               <a href="http://www.fdlp.gov/">
-                <img src="http://www.lib.ua.edu/wp-content/themes/roots-ualib/assets/img/fdlp_logo.png" class="img-responsive"/>
+                <img src="//www.lib.ua.edu/wp-content/themes/roots-ualib/assets/img/fdlp_logo.png" class="img-responsive"/>
               </a>
             </div>
             <div class="col-xs-6">
                 <a href="http://www.hathitrust.org/" target="_hatti" class="text-right">
-                    <img src="http://www.lib.ua.edu/wp-content/themes/roots-ualib/assets/img/HT-logo.png" class="img-responsive" />
+                    <img src="//www.lib.ua.edu/wp-content/themes/roots-ualib/assets/img/HT-logo.png" class="img-responsive" />
                 </a>
             </div>
           </div>
