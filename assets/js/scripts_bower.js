@@ -2286,6 +2286,8225 @@ angular.module('angular.filter', [
 ]);
 })( window, window.angular );
 /**
+ * angular-strap
+ * @version v2.2.4 - 2015-05-28
+ * @link http://mgcrea.github.io/angular-strap
+ * @author Olivier Louvignes <olivier@mg-crea.com> (https://github.com/mgcrea)
+ * @license MIT License, http://www.opensource.org/licenses/MIT
+ */
+(function(window, document, undefined) {
+  'use strict';
+  angular.module('mgcrea.ngStrap', [ 'mgcrea.ngStrap.modal', 'mgcrea.ngStrap.aside', 'mgcrea.ngStrap.alert', 'mgcrea.ngStrap.button', 'mgcrea.ngStrap.select', 'mgcrea.ngStrap.datepicker', 'mgcrea.ngStrap.timepicker', 'mgcrea.ngStrap.navbar', 'mgcrea.ngStrap.tooltip', 'mgcrea.ngStrap.popover', 'mgcrea.ngStrap.dropdown', 'mgcrea.ngStrap.typeahead', 'mgcrea.ngStrap.scrollspy', 'mgcrea.ngStrap.affix', 'mgcrea.ngStrap.tab', 'mgcrea.ngStrap.collapse' ]);
+  angular.module('mgcrea.ngStrap.affix', [ 'mgcrea.ngStrap.helpers.dimensions', 'mgcrea.ngStrap.helpers.debounce' ]).provider('$affix', function() {
+    var defaults = this.defaults = {
+      offsetTop: 'auto',
+      inlineStyles: true
+    };
+    this.$get = [ '$window', 'debounce', 'dimensions', function($window, debounce, dimensions) {
+      var bodyEl = angular.element($window.document.body);
+      var windowEl = angular.element($window);
+      function AffixFactory(element, config) {
+        var $affix = {};
+        var options = angular.extend({}, defaults, config);
+        var targetEl = options.target;
+        var reset = 'affix affix-top affix-bottom', setWidth = false, initialAffixTop = 0, initialOffsetTop = 0, offsetTop = 0, offsetBottom = 0, affixed = null, unpin = null;
+        var parent = element.parent();
+        if (options.offsetParent) {
+          if (options.offsetParent.match(/^\d+$/)) {
+            for (var i = 0; i < options.offsetParent * 1 - 1; i++) {
+              parent = parent.parent();
+            }
+          } else {
+            parent = angular.element(options.offsetParent);
+          }
+        }
+        $affix.init = function() {
+          this.$parseOffsets();
+          initialOffsetTop = dimensions.offset(element[0]).top + initialAffixTop;
+          setWidth = !element[0].style.width;
+          targetEl.on('scroll', this.checkPosition);
+          targetEl.on('click', this.checkPositionWithEventLoop);
+          windowEl.on('resize', this.$debouncedOnResize);
+          this.checkPosition();
+          this.checkPositionWithEventLoop();
+        };
+        $affix.destroy = function() {
+          targetEl.off('scroll', this.checkPosition);
+          targetEl.off('click', this.checkPositionWithEventLoop);
+          windowEl.off('resize', this.$debouncedOnResize);
+        };
+        $affix.checkPositionWithEventLoop = function() {
+          setTimeout($affix.checkPosition, 1);
+        };
+        $affix.checkPosition = function() {
+          var scrollTop = getScrollTop();
+          var position = dimensions.offset(element[0]);
+          var elementHeight = dimensions.height(element[0]);
+          var affix = getRequiredAffixClass(unpin, position, elementHeight);
+          if (affixed === affix) return;
+          affixed = affix;
+          element.removeClass(reset).addClass('affix' + (affix !== 'middle' ? '-' + affix : ''));
+          if (affix === 'top') {
+            unpin = null;
+            if (setWidth) {
+              element.css('width', '');
+            }
+            if (options.inlineStyles) {
+              element.css('position', options.offsetParent ? '' : 'relative');
+              element.css('top', '');
+            }
+          } else if (affix === 'bottom') {
+            if (options.offsetUnpin) {
+              unpin = -(options.offsetUnpin * 1);
+            } else {
+              unpin = position.top - scrollTop;
+            }
+            if (setWidth) {
+              element.css('width', '');
+            }
+            if (options.inlineStyles) {
+              element.css('position', options.offsetParent ? '' : 'relative');
+              element.css('top', options.offsetParent ? '' : bodyEl[0].offsetHeight - offsetBottom - elementHeight - initialOffsetTop + 'px');
+            }
+          } else {
+            unpin = null;
+            if (setWidth) {
+              element.css('width', element[0].offsetWidth + 'px');
+            }
+            if (options.inlineStyles) {
+              element.css('position', 'fixed');
+              element.css('top', initialAffixTop + 'px');
+            }
+          }
+        };
+        $affix.$onResize = function() {
+          $affix.$parseOffsets();
+          $affix.checkPosition();
+        };
+        $affix.$debouncedOnResize = debounce($affix.$onResize, 50);
+        $affix.$parseOffsets = function() {
+          var initialPosition = element.css('position');
+          if (options.inlineStyles) {
+            element.css('position', options.offsetParent ? '' : 'relative');
+          }
+          if (options.offsetTop) {
+            if (options.offsetTop === 'auto') {
+              options.offsetTop = '+0';
+            }
+            if (options.offsetTop.match(/^[-+]\d+$/)) {
+              initialAffixTop = -options.offsetTop * 1;
+              if (options.offsetParent) {
+                offsetTop = dimensions.offset(parent[0]).top + options.offsetTop * 1;
+              } else {
+                offsetTop = dimensions.offset(element[0]).top - dimensions.css(element[0], 'marginTop', true) + options.offsetTop * 1;
+              }
+            } else {
+              offsetTop = options.offsetTop * 1;
+            }
+          }
+          if (options.offsetBottom) {
+            if (options.offsetParent && options.offsetBottom.match(/^[-+]\d+$/)) {
+              offsetBottom = getScrollHeight() - (dimensions.offset(parent[0]).top + dimensions.height(parent[0])) + options.offsetBottom * 1 + 1;
+            } else {
+              offsetBottom = options.offsetBottom * 1;
+            }
+          }
+          if (options.inlineStyles) {
+            element.css('position', initialPosition);
+          }
+        };
+        function getRequiredAffixClass(unpin, position, elementHeight) {
+          var scrollTop = getScrollTop();
+          var scrollHeight = getScrollHeight();
+          if (scrollTop <= offsetTop) {
+            return 'top';
+          } else if (unpin !== null && scrollTop + unpin <= position.top) {
+            return 'middle';
+          } else if (offsetBottom !== null && position.top + elementHeight + initialAffixTop >= scrollHeight - offsetBottom) {
+            return 'bottom';
+          } else {
+            return 'middle';
+          }
+        }
+        function getScrollTop() {
+          return targetEl[0] === $window ? $window.pageYOffset : targetEl[0].scrollTop;
+        }
+        function getScrollHeight() {
+          return targetEl[0] === $window ? $window.document.body.scrollHeight : targetEl[0].scrollHeight;
+        }
+        $affix.init();
+        return $affix;
+      }
+      return AffixFactory;
+    } ];
+  }).directive('bsAffix', [ '$affix', '$window', function($affix, $window) {
+    return {
+      restrict: 'EAC',
+      require: '^?bsAffixTarget',
+      link: function postLink(scope, element, attr, affixTarget) {
+        var options = {
+          scope: scope,
+          target: affixTarget ? affixTarget.$element : angular.element($window)
+        };
+        angular.forEach([ 'offsetTop', 'offsetBottom', 'offsetParent', 'offsetUnpin', 'inlineStyles' ], function(key) {
+          if (angular.isDefined(attr[key])) {
+            var option = attr[key];
+            if (/true/i.test(option)) option = true;
+            if (/false/i.test(option)) option = false;
+            options[key] = option;
+          }
+        });
+        var affix = $affix(element, options);
+        scope.$on('$destroy', function() {
+          affix && affix.destroy();
+          options = null;
+          affix = null;
+        });
+      }
+    };
+  } ]).directive('bsAffixTarget', function() {
+    return {
+      controller: [ '$element', function($element) {
+        this.$element = $element;
+      } ]
+    };
+  });
+  angular.module('mgcrea.ngStrap.alert', [ 'mgcrea.ngStrap.modal' ]).provider('$alert', function() {
+    var defaults = this.defaults = {
+      animation: 'am-fade',
+      prefixClass: 'alert',
+      prefixEvent: 'alert',
+      placement: null,
+      template: 'alert/alert.tpl.html',
+      container: false,
+      element: null,
+      backdrop: false,
+      keyboard: true,
+      show: true,
+      duration: false,
+      type: false,
+      dismissable: true
+    };
+    this.$get = [ '$modal', '$timeout', function($modal, $timeout) {
+      function AlertFactory(config) {
+        var $alert = {};
+        var options = angular.extend({}, defaults, config);
+        $alert = $modal(options);
+        $alert.$scope.dismissable = !!options.dismissable;
+        if (options.type) {
+          $alert.$scope.type = options.type;
+        }
+        var show = $alert.show;
+        if (options.duration) {
+          $alert.show = function() {
+            show();
+            $timeout(function() {
+              $alert.hide();
+            }, options.duration * 1e3);
+          };
+        }
+        return $alert;
+      }
+      return AlertFactory;
+    } ];
+  }).directive('bsAlert', [ '$window', '$sce', '$alert', function($window, $sce, $alert) {
+    var requestAnimationFrame = $window.requestAnimationFrame || $window.setTimeout;
+    return {
+      restrict: 'EAC',
+      scope: true,
+      link: function postLink(scope, element, attr, transclusion) {
+        var options = {
+          scope: scope,
+          element: element,
+          show: false
+        };
+        angular.forEach([ 'template', 'placement', 'keyboard', 'html', 'container', 'animation', 'duration', 'dismissable' ], function(key) {
+          if (angular.isDefined(attr[key])) options[key] = attr[key];
+        });
+        var falseValueRegExp = /^(false|0|)$/i;
+        angular.forEach([ 'keyboard', 'html', 'container', 'dismissable' ], function(key) {
+          if (angular.isDefined(attr[key]) && falseValueRegExp.test(attr[key])) options[key] = false;
+        });
+        if (!scope.hasOwnProperty('title')) {
+          scope.title = '';
+        }
+        angular.forEach([ 'title', 'content', 'type' ], function(key) {
+          attr[key] && attr.$observe(key, function(newValue, oldValue) {
+            scope[key] = $sce.trustAsHtml(newValue);
+          });
+        });
+        attr.bsAlert && scope.$watch(attr.bsAlert, function(newValue, oldValue) {
+          if (angular.isObject(newValue)) {
+            angular.extend(scope, newValue);
+          } else {
+            scope.content = newValue;
+          }
+        }, true);
+        var alert = $alert(options);
+        element.on(attr.trigger || 'click', alert.toggle);
+        scope.$on('$destroy', function() {
+          if (alert) alert.destroy();
+          options = null;
+          alert = null;
+        });
+      }
+    };
+  } ]);
+  angular.module('mgcrea.ngStrap.aside', [ 'mgcrea.ngStrap.modal' ]).provider('$aside', function() {
+    var defaults = this.defaults = {
+      animation: 'am-fade-and-slide-right',
+      prefixClass: 'aside',
+      prefixEvent: 'aside',
+      placement: 'right',
+      template: 'aside/aside.tpl.html',
+      contentTemplate: false,
+      container: false,
+      element: null,
+      backdrop: true,
+      keyboard: true,
+      html: false,
+      show: true
+    };
+    this.$get = [ '$modal', function($modal) {
+      function AsideFactory(config) {
+        var $aside = {};
+        var options = angular.extend({}, defaults, config);
+        $aside = $modal(options);
+        return $aside;
+      }
+      return AsideFactory;
+    } ];
+  }).directive('bsAside', [ '$window', '$sce', '$aside', function($window, $sce, $aside) {
+    var requestAnimationFrame = $window.requestAnimationFrame || $window.setTimeout;
+    return {
+      restrict: 'EAC',
+      scope: true,
+      link: function postLink(scope, element, attr, transclusion) {
+        var options = {
+          scope: scope,
+          element: element,
+          show: false
+        };
+        angular.forEach([ 'template', 'contentTemplate', 'placement', 'backdrop', 'keyboard', 'html', 'container', 'animation' ], function(key) {
+          if (angular.isDefined(attr[key])) options[key] = attr[key];
+        });
+        var falseValueRegExp = /^(false|0|)$/i;
+        angular.forEach([ 'backdrop', 'keyboard', 'html', 'container' ], function(key) {
+          if (angular.isDefined(attr[key]) && falseValueRegExp.test(attr[key])) options[key] = false;
+        });
+        angular.forEach([ 'title', 'content' ], function(key) {
+          attr[key] && attr.$observe(key, function(newValue, oldValue) {
+            scope[key] = $sce.trustAsHtml(newValue);
+          });
+        });
+        attr.bsAside && scope.$watch(attr.bsAside, function(newValue, oldValue) {
+          if (angular.isObject(newValue)) {
+            angular.extend(scope, newValue);
+          } else {
+            scope.content = newValue;
+          }
+        }, true);
+        var aside = $aside(options);
+        element.on(attr.trigger || 'click', aside.toggle);
+        scope.$on('$destroy', function() {
+          if (aside) aside.destroy();
+          options = null;
+          aside = null;
+        });
+      }
+    };
+  } ]);
+  angular.module('mgcrea.ngStrap.collapse', []).provider('$collapse', function() {
+    var defaults = this.defaults = {
+      animation: 'am-collapse',
+      disallowToggle: false,
+      activeClass: 'in',
+      startCollapsed: false,
+      allowMultiple: false
+    };
+    var controller = this.controller = function($scope, $element, $attrs) {
+      var self = this;
+      self.$options = angular.copy(defaults);
+      angular.forEach([ 'animation', 'disallowToggle', 'activeClass', 'startCollapsed', 'allowMultiple' ], function(key) {
+        if (angular.isDefined($attrs[key])) self.$options[key] = $attrs[key];
+      });
+      var falseValueRegExp = /^(false|0|)$/i;
+      angular.forEach([ 'disallowToggle', 'startCollapsed', 'allowMultiple' ], function(key) {
+        if (angular.isDefined($attrs[key]) && falseValueRegExp.test($attrs[key])) self.$options[key] = false;
+      });
+      self.$toggles = [];
+      self.$targets = [];
+      self.$viewChangeListeners = [];
+      self.$registerToggle = function(element) {
+        self.$toggles.push(element);
+      };
+      self.$registerTarget = function(element) {
+        self.$targets.push(element);
+      };
+      self.$unregisterToggle = function(element) {
+        var index = self.$toggles.indexOf(element);
+        self.$toggles.splice(index, 1);
+      };
+      self.$unregisterTarget = function(element) {
+        var index = self.$targets.indexOf(element);
+        self.$targets.splice(index, 1);
+        if (self.$options.allowMultiple) {
+          deactivateItem(element);
+        }
+        fixActiveItemIndexes(index);
+        self.$viewChangeListeners.forEach(function(fn) {
+          fn();
+        });
+      };
+      self.$targets.$active = !self.$options.startCollapsed ? [ 0 ] : [];
+      self.$setActive = $scope.$setActive = function(value) {
+        if (angular.isArray(value)) {
+          self.$targets.$active = value;
+        } else if (!self.$options.disallowToggle) {
+          isActive(value) ? deactivateItem(value) : activateItem(value);
+        } else {
+          activateItem(value);
+        }
+        self.$viewChangeListeners.forEach(function(fn) {
+          fn();
+        });
+      };
+      self.$activeIndexes = function() {
+        return self.$options.allowMultiple ? self.$targets.$active : self.$targets.$active.length === 1 ? self.$targets.$active[0] : -1;
+      };
+      function fixActiveItemIndexes(index) {
+        var activeIndexes = self.$targets.$active;
+        for (var i = 0; i < activeIndexes.length; i++) {
+          if (index < activeIndexes[i]) {
+            activeIndexes[i] = activeIndexes[i] - 1;
+          }
+          if (activeIndexes[i] === self.$targets.length) {
+            activeIndexes[i] = self.$targets.length - 1;
+          }
+        }
+      }
+      function isActive(value) {
+        var activeItems = self.$targets.$active;
+        return activeItems.indexOf(value) === -1 ? false : true;
+      }
+      function deactivateItem(value) {
+        var index = self.$targets.$active.indexOf(value);
+        if (index !== -1) {
+          self.$targets.$active.splice(index, 1);
+        }
+      }
+      function activateItem(value) {
+        if (!self.$options.allowMultiple) {
+          self.$targets.$active.splice(0, 1);
+        }
+        if (self.$targets.$active.indexOf(value) === -1) {
+          self.$targets.$active.push(value);
+        }
+      }
+    };
+    this.$get = function() {
+      var $collapse = {};
+      $collapse.defaults = defaults;
+      $collapse.controller = controller;
+      return $collapse;
+    };
+  }).directive('bsCollapse', [ '$window', '$animate', '$collapse', function($window, $animate, $collapse) {
+    var defaults = $collapse.defaults;
+    return {
+      require: [ '?ngModel', 'bsCollapse' ],
+      controller: [ '$scope', '$element', '$attrs', $collapse.controller ],
+      link: function postLink(scope, element, attrs, controllers) {
+        var ngModelCtrl = controllers[0];
+        var bsCollapseCtrl = controllers[1];
+        if (ngModelCtrl) {
+          bsCollapseCtrl.$viewChangeListeners.push(function() {
+            ngModelCtrl.$setViewValue(bsCollapseCtrl.$activeIndexes());
+          });
+          ngModelCtrl.$formatters.push(function(modelValue) {
+            if (angular.isArray(modelValue)) {
+              bsCollapseCtrl.$setActive(modelValue);
+            } else {
+              var activeIndexes = bsCollapseCtrl.$activeIndexes();
+              if (angular.isArray(activeIndexes)) {
+                if (activeIndexes.indexOf(modelValue * 1) === -1) {
+                  bsCollapseCtrl.$setActive(modelValue * 1);
+                }
+              } else if (activeIndexes !== modelValue * 1) {
+                bsCollapseCtrl.$setActive(modelValue * 1);
+              }
+            }
+            return modelValue;
+          });
+        }
+      }
+    };
+  } ]).directive('bsCollapseToggle', function() {
+    return {
+      require: [ '^?ngModel', '^bsCollapse' ],
+      link: function postLink(scope, element, attrs, controllers) {
+        var ngModelCtrl = controllers[0];
+        var bsCollapseCtrl = controllers[1];
+        element.attr('data-toggle', 'collapse');
+        bsCollapseCtrl.$registerToggle(element);
+        scope.$on('$destroy', function() {
+          bsCollapseCtrl.$unregisterToggle(element);
+        });
+        element.on('click', function() {
+          var index = attrs.bsCollapseToggle || bsCollapseCtrl.$toggles.indexOf(element);
+          bsCollapseCtrl.$setActive(index * 1);
+          scope.$apply();
+        });
+      }
+    };
+  }).directive('bsCollapseTarget', [ '$animate', function($animate) {
+    return {
+      require: [ '^?ngModel', '^bsCollapse' ],
+      link: function postLink(scope, element, attrs, controllers) {
+        var ngModelCtrl = controllers[0];
+        var bsCollapseCtrl = controllers[1];
+        element.addClass('collapse');
+        if (bsCollapseCtrl.$options.animation) {
+          element.addClass(bsCollapseCtrl.$options.animation);
+        }
+        bsCollapseCtrl.$registerTarget(element);
+        scope.$on('$destroy', function() {
+          bsCollapseCtrl.$unregisterTarget(element);
+        });
+        function render() {
+          var index = bsCollapseCtrl.$targets.indexOf(element);
+          var active = bsCollapseCtrl.$activeIndexes();
+          var action = 'removeClass';
+          if (angular.isArray(active)) {
+            if (active.indexOf(index) !== -1) {
+              action = 'addClass';
+            }
+          } else if (index === active) {
+            action = 'addClass';
+          }
+          $animate[action](element, bsCollapseCtrl.$options.activeClass);
+        }
+        bsCollapseCtrl.$viewChangeListeners.push(function() {
+          render();
+        });
+        render();
+      }
+    };
+  } ]);
+  angular.module('mgcrea.ngStrap.datepicker', [ 'mgcrea.ngStrap.helpers.dateParser', 'mgcrea.ngStrap.helpers.dateFormatter', 'mgcrea.ngStrap.tooltip' ]).provider('$datepicker', function() {
+    var defaults = this.defaults = {
+      animation: 'am-fade',
+      prefixClass: 'datepicker',
+      placement: 'bottom-left',
+      template: 'datepicker/datepicker.tpl.html',
+      trigger: 'focus',
+      container: false,
+      keyboard: true,
+      html: false,
+      delay: 0,
+      useNative: false,
+      dateType: 'date',
+      dateFormat: 'shortDate',
+      timezone: null,
+      modelDateFormat: null,
+      dayFormat: 'dd',
+      monthFormat: 'MMM',
+      yearFormat: 'yyyy',
+      monthTitleFormat: 'MMMM yyyy',
+      yearTitleFormat: 'yyyy',
+      strictFormat: false,
+      autoclose: false,
+      minDate: -Infinity,
+      maxDate: +Infinity,
+      startView: 0,
+      minView: 0,
+      startWeek: 0,
+      daysOfWeekDisabled: '',
+      iconLeft: 'glyphicon glyphicon-chevron-left',
+      iconRight: 'glyphicon glyphicon-chevron-right'
+    };
+    this.$get = [ '$window', '$document', '$rootScope', '$sce', '$dateFormatter', 'datepickerViews', '$tooltip', '$timeout', function($window, $document, $rootScope, $sce, $dateFormatter, datepickerViews, $tooltip, $timeout) {
+      var bodyEl = angular.element($window.document.body);
+      var isNative = /(ip(a|o)d|iphone|android)/gi.test($window.navigator.userAgent);
+      var isTouch = 'createTouch' in $window.document && isNative;
+      if (!defaults.lang) defaults.lang = $dateFormatter.getDefaultLocale();
+      function DatepickerFactory(element, controller, config) {
+        var $datepicker = $tooltip(element, angular.extend({}, defaults, config));
+        var parentScope = config.scope;
+        var options = $datepicker.$options;
+        var scope = $datepicker.$scope;
+        if (options.startView) options.startView -= options.minView;
+        var pickerViews = datepickerViews($datepicker);
+        $datepicker.$views = pickerViews.views;
+        var viewDate = pickerViews.viewDate;
+        scope.$mode = options.startView;
+        scope.$iconLeft = options.iconLeft;
+        scope.$iconRight = options.iconRight;
+        var $picker = $datepicker.$views[scope.$mode];
+        scope.$select = function(date) {
+          $datepicker.select(date);
+        };
+        scope.$selectPane = function(value) {
+          $datepicker.$selectPane(value);
+        };
+        scope.$toggleMode = function() {
+          $datepicker.setMode((scope.$mode + 1) % $datepicker.$views.length);
+        };
+        $datepicker.update = function(date) {
+          if (angular.isDate(date) && !isNaN(date.getTime())) {
+            $datepicker.$date = date;
+            $picker.update.call($picker, date);
+          }
+          $datepicker.$build(true);
+        };
+        $datepicker.updateDisabledDates = function(dateRanges) {
+          options.disabledDateRanges = dateRanges;
+          for (var i = 0, l = scope.rows.length; i < l; i++) {
+            angular.forEach(scope.rows[i], $datepicker.$setDisabledEl);
+          }
+        };
+        $datepicker.select = function(date, keep) {
+          if (!angular.isDate(controller.$dateValue)) controller.$dateValue = new Date(date);
+          if (!scope.$mode || keep) {
+            controller.$setViewValue(angular.copy(date));
+            controller.$render();
+            if (options.autoclose && !keep) {
+              $timeout(function() {
+                $datepicker.hide(true);
+              });
+            }
+          } else {
+            angular.extend(viewDate, {
+              year: date.getFullYear(),
+              month: date.getMonth(),
+              date: date.getDate()
+            });
+            $datepicker.setMode(scope.$mode - 1);
+            $datepicker.$build();
+          }
+        };
+        $datepicker.setMode = function(mode) {
+          scope.$mode = mode;
+          $picker = $datepicker.$views[scope.$mode];
+          $datepicker.$build();
+        };
+        $datepicker.$build = function(pristine) {
+          if (pristine === true && $picker.built) return;
+          if (pristine === false && !$picker.built) return;
+          $picker.build.call($picker);
+        };
+        $datepicker.$updateSelected = function() {
+          for (var i = 0, l = scope.rows.length; i < l; i++) {
+            angular.forEach(scope.rows[i], updateSelected);
+          }
+        };
+        $datepicker.$isSelected = function(date) {
+          return $picker.isSelected(date);
+        };
+        $datepicker.$setDisabledEl = function(el) {
+          el.disabled = $picker.isDisabled(el.date);
+        };
+        $datepicker.$selectPane = function(value) {
+          var steps = $picker.steps;
+          var targetDate = new Date(Date.UTC(viewDate.year + (steps.year || 0) * value, viewDate.month + (steps.month || 0) * value, 1));
+          angular.extend(viewDate, {
+            year: targetDate.getUTCFullYear(),
+            month: targetDate.getUTCMonth(),
+            date: targetDate.getUTCDate()
+          });
+          $datepicker.$build();
+        };
+        $datepicker.$onMouseDown = function(evt) {
+          evt.preventDefault();
+          evt.stopPropagation();
+          if (isTouch) {
+            var targetEl = angular.element(evt.target);
+            if (targetEl[0].nodeName.toLowerCase() !== 'button') {
+              targetEl = targetEl.parent();
+            }
+            targetEl.triggerHandler('click');
+          }
+        };
+        $datepicker.$onKeyDown = function(evt) {
+          if (!/(38|37|39|40|13)/.test(evt.keyCode) || evt.shiftKey || evt.altKey) return;
+          evt.preventDefault();
+          evt.stopPropagation();
+          if (evt.keyCode === 13) {
+            if (!scope.$mode) {
+              return $datepicker.hide(true);
+            } else {
+              return scope.$apply(function() {
+                $datepicker.setMode(scope.$mode - 1);
+              });
+            }
+          }
+          $picker.onKeyDown(evt);
+          parentScope.$digest();
+        };
+        function updateSelected(el) {
+          el.selected = $datepicker.$isSelected(el.date);
+        }
+        function focusElement() {
+          element[0].focus();
+        }
+        var _init = $datepicker.init;
+        $datepicker.init = function() {
+          if (isNative && options.useNative) {
+            element.prop('type', 'date');
+            element.css('-webkit-appearance', 'textfield');
+            return;
+          } else if (isTouch) {
+            element.prop('type', 'text');
+            element.attr('readonly', 'true');
+            element.on('click', focusElement);
+          }
+          _init();
+        };
+        var _destroy = $datepicker.destroy;
+        $datepicker.destroy = function() {
+          if (isNative && options.useNative) {
+            element.off('click', focusElement);
+          }
+          _destroy();
+        };
+        var _show = $datepicker.show;
+        $datepicker.show = function() {
+          _show();
+          $timeout(function() {
+            if (!$datepicker.$isShown) return;
+            $datepicker.$element.on(isTouch ? 'touchstart' : 'mousedown', $datepicker.$onMouseDown);
+            if (options.keyboard) {
+              element.on('keydown', $datepicker.$onKeyDown);
+            }
+          }, 0, false);
+        };
+        var _hide = $datepicker.hide;
+        $datepicker.hide = function(blur) {
+          if (!$datepicker.$isShown) return;
+          $datepicker.$element.off(isTouch ? 'touchstart' : 'mousedown', $datepicker.$onMouseDown);
+          if (options.keyboard) {
+            element.off('keydown', $datepicker.$onKeyDown);
+          }
+          _hide(blur);
+        };
+        return $datepicker;
+      }
+      DatepickerFactory.defaults = defaults;
+      return DatepickerFactory;
+    } ];
+  }).directive('bsDatepicker', [ '$window', '$parse', '$q', '$dateFormatter', '$dateParser', '$datepicker', function($window, $parse, $q, $dateFormatter, $dateParser, $datepicker) {
+    var defaults = $datepicker.defaults;
+    var isNative = /(ip(a|o)d|iphone|android)/gi.test($window.navigator.userAgent);
+    return {
+      restrict: 'EAC',
+      require: 'ngModel',
+      link: function postLink(scope, element, attr, controller) {
+        var options = {
+          scope: scope,
+          controller: controller
+        };
+        angular.forEach([ 'placement', 'container', 'delay', 'trigger', 'html', 'animation', 'template', 'autoclose', 'dateType', 'dateFormat', 'timezone', 'modelDateFormat', 'dayFormat', 'strictFormat', 'startWeek', 'startDate', 'useNative', 'lang', 'startView', 'minView', 'iconLeft', 'iconRight', 'daysOfWeekDisabled', 'id', 'prefixClass', 'prefixEvent' ], function(key) {
+          if (angular.isDefined(attr[key])) options[key] = attr[key];
+        });
+        var falseValueRegExp = /^(false|0|)$/i;
+        angular.forEach([ 'html', 'container', 'autoclose', 'useNative' ], function(key) {
+          if (angular.isDefined(attr[key]) && falseValueRegExp.test(attr[key])) options[key] = false;
+        });
+        attr.bsShow && scope.$watch(attr.bsShow, function(newValue, oldValue) {
+          if (!datepicker || !angular.isDefined(newValue)) return;
+          if (angular.isString(newValue)) newValue = !!newValue.match(/true|,?(datepicker),?/i);
+          newValue === true ? datepicker.show() : datepicker.hide();
+        });
+        var datepicker = $datepicker(element, controller, options);
+        options = datepicker.$options;
+        if (isNative && options.useNative) options.dateFormat = 'yyyy-MM-dd';
+        var lang = options.lang;
+        var formatDate = function(date, format) {
+          return $dateFormatter.formatDate(date, format, lang);
+        };
+        var dateParser = $dateParser({
+          format: options.dateFormat,
+          lang: lang,
+          strict: options.strictFormat
+        });
+        angular.forEach([ 'minDate', 'maxDate' ], function(key) {
+          angular.isDefined(attr[key]) && attr.$observe(key, function(newValue) {
+            datepicker.$options[key] = dateParser.getDateForAttribute(key, newValue);
+            !isNaN(datepicker.$options[key]) && datepicker.$build(false);
+            validateAgainstMinMaxDate(controller.$dateValue);
+          });
+        });
+        scope.$watch(attr.ngModel, function(newValue, oldValue) {
+          datepicker.update(controller.$dateValue);
+        }, true);
+        function normalizeDateRanges(ranges) {
+          if (!ranges || !ranges.length) return null;
+          return ranges;
+        }
+        if (angular.isDefined(attr.disabledDates)) {
+          scope.$watch(attr.disabledDates, function(disabledRanges, previousValue) {
+            disabledRanges = normalizeDateRanges(disabledRanges);
+            previousValue = normalizeDateRanges(previousValue);
+            if (disabledRanges) {
+              datepicker.updateDisabledDates(disabledRanges);
+            }
+          });
+        }
+        function validateAgainstMinMaxDate(parsedDate) {
+          if (!angular.isDate(parsedDate)) return;
+          var isMinValid = isNaN(datepicker.$options.minDate) || parsedDate.getTime() >= datepicker.$options.minDate;
+          var isMaxValid = isNaN(datepicker.$options.maxDate) || parsedDate.getTime() <= datepicker.$options.maxDate;
+          var isValid = isMinValid && isMaxValid;
+          controller.$setValidity('date', isValid);
+          controller.$setValidity('min', isMinValid);
+          controller.$setValidity('max', isMaxValid);
+          if (isValid) controller.$dateValue = parsedDate;
+        }
+        controller.$parsers.unshift(function(viewValue) {
+          var date;
+          if (!viewValue) {
+            controller.$setValidity('date', true);
+            return null;
+          }
+          var parsedDate = dateParser.parse(viewValue, controller.$dateValue);
+          if (!parsedDate || isNaN(parsedDate.getTime())) {
+            controller.$setValidity('date', false);
+            return;
+          } else {
+            validateAgainstMinMaxDate(parsedDate);
+          }
+          if (options.dateType === 'string') {
+            date = dateParser.timezoneOffsetAdjust(parsedDate, options.timezone, true);
+            return formatDate(date, options.modelDateFormat || options.dateFormat);
+          }
+          date = dateParser.timezoneOffsetAdjust(controller.$dateValue, options.timezone, true);
+          if (options.dateType === 'number') {
+            return date.getTime();
+          } else if (options.dateType === 'unix') {
+            return date.getTime() / 1e3;
+          } else if (options.dateType === 'iso') {
+            return date.toISOString();
+          } else {
+            return new Date(date);
+          }
+        });
+        controller.$formatters.push(function(modelValue) {
+          var date;
+          if (angular.isUndefined(modelValue) || modelValue === null) {
+            date = NaN;
+          } else if (angular.isDate(modelValue)) {
+            date = modelValue;
+          } else if (options.dateType === 'string') {
+            date = dateParser.parse(modelValue, null, options.modelDateFormat);
+          } else if (options.dateType === 'unix') {
+            date = new Date(modelValue * 1e3);
+          } else {
+            date = new Date(modelValue);
+          }
+          controller.$dateValue = dateParser.timezoneOffsetAdjust(date, options.timezone);
+          return getDateFormattedString();
+        });
+        controller.$render = function() {
+          element.val(getDateFormattedString());
+        };
+        function getDateFormattedString() {
+          return !controller.$dateValue || isNaN(controller.$dateValue.getTime()) ? '' : formatDate(controller.$dateValue, options.dateFormat);
+        }
+        scope.$on('$destroy', function() {
+          if (datepicker) datepicker.destroy();
+          options = null;
+          datepicker = null;
+        });
+      }
+    };
+  } ]).provider('datepickerViews', function() {
+    var defaults = this.defaults = {
+      dayFormat: 'dd',
+      daySplit: 7
+    };
+    function split(arr, size) {
+      var arrays = [];
+      while (arr.length > 0) {
+        arrays.push(arr.splice(0, size));
+      }
+      return arrays;
+    }
+    function mod(n, m) {
+      return (n % m + m) % m;
+    }
+    this.$get = [ '$dateFormatter', '$dateParser', '$sce', function($dateFormatter, $dateParser, $sce) {
+      return function(picker) {
+        var scope = picker.$scope;
+        var options = picker.$options;
+        var lang = options.lang;
+        var formatDate = function(date, format) {
+          return $dateFormatter.formatDate(date, format, lang);
+        };
+        var dateParser = $dateParser({
+          format: options.dateFormat,
+          lang: lang,
+          strict: options.strictFormat
+        });
+        var weekDaysMin = $dateFormatter.weekdaysShort(lang);
+        var weekDaysLabels = weekDaysMin.slice(options.startWeek).concat(weekDaysMin.slice(0, options.startWeek));
+        var weekDaysLabelsHtml = $sce.trustAsHtml('<th class="dow text-center">' + weekDaysLabels.join('</th><th class="dow text-center">') + '</th>');
+        var startDate = picker.$date || (options.startDate ? dateParser.getDateForAttribute('startDate', options.startDate) : new Date());
+        var viewDate = {
+          year: startDate.getFullYear(),
+          month: startDate.getMonth(),
+          date: startDate.getDate()
+        };
+        var views = [ {
+          format: options.dayFormat,
+          split: 7,
+          steps: {
+            month: 1
+          },
+          update: function(date, force) {
+            if (!this.built || force || date.getFullYear() !== viewDate.year || date.getMonth() !== viewDate.month) {
+              angular.extend(viewDate, {
+                year: picker.$date.getFullYear(),
+                month: picker.$date.getMonth(),
+                date: picker.$date.getDate()
+              });
+              picker.$build();
+            } else if (date.getDate() !== viewDate.date || date.getDate() === 1) {
+              viewDate.date = picker.$date.getDate();
+              picker.$updateSelected();
+            }
+          },
+          build: function() {
+            var firstDayOfMonth = new Date(viewDate.year, viewDate.month, 1), firstDayOfMonthOffset = firstDayOfMonth.getTimezoneOffset();
+            var firstDate = new Date(+firstDayOfMonth - mod(firstDayOfMonth.getDay() - options.startWeek, 7) * 864e5), firstDateOffset = firstDate.getTimezoneOffset();
+            var today = dateParser.timezoneOffsetAdjust(new Date(), options.timezone).toDateString();
+            if (firstDateOffset !== firstDayOfMonthOffset) firstDate = new Date(+firstDate + (firstDateOffset - firstDayOfMonthOffset) * 6e4);
+            var days = [], day;
+            for (var i = 0; i < 42; i++) {
+              day = dateParser.daylightSavingAdjust(new Date(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate() + i));
+              days.push({
+                date: day,
+                isToday: day.toDateString() === today,
+                label: formatDate(day, this.format),
+                selected: picker.$date && this.isSelected(day),
+                muted: day.getMonth() !== viewDate.month,
+                disabled: this.isDisabled(day)
+              });
+            }
+            scope.title = formatDate(firstDayOfMonth, options.monthTitleFormat);
+            scope.showLabels = true;
+            scope.labels = weekDaysLabelsHtml;
+            scope.rows = split(days, this.split);
+            this.built = true;
+          },
+          isSelected: function(date) {
+            return picker.$date && date.getFullYear() === picker.$date.getFullYear() && date.getMonth() === picker.$date.getMonth() && date.getDate() === picker.$date.getDate();
+          },
+          isDisabled: function(date) {
+            var time = date.getTime();
+            if (time < options.minDate || time > options.maxDate) return true;
+            if (options.daysOfWeekDisabled.indexOf(date.getDay()) !== -1) return true;
+            if (options.disabledDateRanges) {
+              for (var i = 0; i < options.disabledDateRanges.length; i++) {
+                if (time >= options.disabledDateRanges[i].start && time <= options.disabledDateRanges[i].end) {
+                  return true;
+                }
+              }
+            }
+            return false;
+          },
+          onKeyDown: function(evt) {
+            if (!picker.$date) {
+              return;
+            }
+            var actualTime = picker.$date.getTime();
+            var newDate;
+            if (evt.keyCode === 37) newDate = new Date(actualTime - 1 * 864e5); else if (evt.keyCode === 38) newDate = new Date(actualTime - 7 * 864e5); else if (evt.keyCode === 39) newDate = new Date(actualTime + 1 * 864e5); else if (evt.keyCode === 40) newDate = new Date(actualTime + 7 * 864e5);
+            if (!this.isDisabled(newDate)) picker.select(newDate, true);
+          }
+        }, {
+          name: 'month',
+          format: options.monthFormat,
+          split: 4,
+          steps: {
+            year: 1
+          },
+          update: function(date, force) {
+            if (!this.built || date.getFullYear() !== viewDate.year) {
+              angular.extend(viewDate, {
+                year: picker.$date.getFullYear(),
+                month: picker.$date.getMonth(),
+                date: picker.$date.getDate()
+              });
+              picker.$build();
+            } else if (date.getMonth() !== viewDate.month) {
+              angular.extend(viewDate, {
+                month: picker.$date.getMonth(),
+                date: picker.$date.getDate()
+              });
+              picker.$updateSelected();
+            }
+          },
+          build: function() {
+            var firstMonth = new Date(viewDate.year, 0, 1);
+            var months = [], month;
+            for (var i = 0; i < 12; i++) {
+              month = new Date(viewDate.year, i, 1);
+              months.push({
+                date: month,
+                label: formatDate(month, this.format),
+                selected: picker.$isSelected(month),
+                disabled: this.isDisabled(month)
+              });
+            }
+            scope.title = formatDate(month, options.yearTitleFormat);
+            scope.showLabels = false;
+            scope.rows = split(months, this.split);
+            this.built = true;
+          },
+          isSelected: function(date) {
+            return picker.$date && date.getFullYear() === picker.$date.getFullYear() && date.getMonth() === picker.$date.getMonth();
+          },
+          isDisabled: function(date) {
+            var lastDate = +new Date(date.getFullYear(), date.getMonth() + 1, 0);
+            return lastDate < options.minDate || date.getTime() > options.maxDate;
+          },
+          onKeyDown: function(evt) {
+            if (!picker.$date) {
+              return;
+            }
+            var actualMonth = picker.$date.getMonth();
+            var newDate = new Date(picker.$date);
+            if (evt.keyCode === 37) newDate.setMonth(actualMonth - 1); else if (evt.keyCode === 38) newDate.setMonth(actualMonth - 4); else if (evt.keyCode === 39) newDate.setMonth(actualMonth + 1); else if (evt.keyCode === 40) newDate.setMonth(actualMonth + 4);
+            if (!this.isDisabled(newDate)) picker.select(newDate, true);
+          }
+        }, {
+          name: 'year',
+          format: options.yearFormat,
+          split: 4,
+          steps: {
+            year: 12
+          },
+          update: function(date, force) {
+            if (!this.built || force || parseInt(date.getFullYear() / 20, 10) !== parseInt(viewDate.year / 20, 10)) {
+              angular.extend(viewDate, {
+                year: picker.$date.getFullYear(),
+                month: picker.$date.getMonth(),
+                date: picker.$date.getDate()
+              });
+              picker.$build();
+            } else if (date.getFullYear() !== viewDate.year) {
+              angular.extend(viewDate, {
+                year: picker.$date.getFullYear(),
+                month: picker.$date.getMonth(),
+                date: picker.$date.getDate()
+              });
+              picker.$updateSelected();
+            }
+          },
+          build: function() {
+            var firstYear = viewDate.year - viewDate.year % (this.split * 3);
+            var years = [], year;
+            for (var i = 0; i < 12; i++) {
+              year = new Date(firstYear + i, 0, 1);
+              years.push({
+                date: year,
+                label: formatDate(year, this.format),
+                selected: picker.$isSelected(year),
+                disabled: this.isDisabled(year)
+              });
+            }
+            scope.title = years[0].label + '-' + years[years.length - 1].label;
+            scope.showLabels = false;
+            scope.rows = split(years, this.split);
+            this.built = true;
+          },
+          isSelected: function(date) {
+            return picker.$date && date.getFullYear() === picker.$date.getFullYear();
+          },
+          isDisabled: function(date) {
+            var lastDate = +new Date(date.getFullYear() + 1, 0, 0);
+            return lastDate < options.minDate || date.getTime() > options.maxDate;
+          },
+          onKeyDown: function(evt) {
+            if (!picker.$date) {
+              return;
+            }
+            var actualYear = picker.$date.getFullYear(), newDate = new Date(picker.$date);
+            if (evt.keyCode === 37) newDate.setYear(actualYear - 1); else if (evt.keyCode === 38) newDate.setYear(actualYear - 4); else if (evt.keyCode === 39) newDate.setYear(actualYear + 1); else if (evt.keyCode === 40) newDate.setYear(actualYear + 4);
+            if (!this.isDisabled(newDate)) picker.select(newDate, true);
+          }
+        } ];
+        return {
+          views: options.minView ? Array.prototype.slice.call(views, options.minView) : views,
+          viewDate: viewDate
+        };
+      };
+    } ];
+  });
+  angular.module('mgcrea.ngStrap.dropdown', [ 'mgcrea.ngStrap.tooltip' ]).provider('$dropdown', function() {
+    var defaults = this.defaults = {
+      animation: 'am-fade',
+      prefixClass: 'dropdown',
+      prefixEvent: 'dropdown',
+      placement: 'bottom-left',
+      template: 'dropdown/dropdown.tpl.html',
+      trigger: 'click',
+      container: false,
+      keyboard: true,
+      html: false,
+      delay: 0
+    };
+    this.$get = [ '$window', '$rootScope', '$tooltip', '$timeout', function($window, $rootScope, $tooltip, $timeout) {
+      var bodyEl = angular.element($window.document.body);
+      var matchesSelector = Element.prototype.matchesSelector || Element.prototype.webkitMatchesSelector || Element.prototype.mozMatchesSelector || Element.prototype.msMatchesSelector || Element.prototype.oMatchesSelector;
+      function DropdownFactory(element, config) {
+        var $dropdown = {};
+        var options = angular.extend({}, defaults, config);
+        var scope = $dropdown.$scope = options.scope && options.scope.$new() || $rootScope.$new();
+        $dropdown = $tooltip(element, options);
+        var parentEl = element.parent();
+        $dropdown.$onKeyDown = function(evt) {
+          if (!/(38|40)/.test(evt.keyCode)) return;
+          evt.preventDefault();
+          evt.stopPropagation();
+          var items = angular.element($dropdown.$element[0].querySelectorAll('li:not(.divider) a'));
+          if (!items.length) return;
+          var index;
+          angular.forEach(items, function(el, i) {
+            if (matchesSelector && matchesSelector.call(el, ':focus')) index = i;
+          });
+          if (evt.keyCode === 38 && index > 0) index--; else if (evt.keyCode === 40 && index < items.length - 1) index++; else if (angular.isUndefined(index)) index = 0;
+          items.eq(index)[0].focus();
+        };
+        var show = $dropdown.show;
+        $dropdown.show = function() {
+          show();
+          $timeout(function() {
+            options.keyboard && $dropdown.$element && $dropdown.$element.on('keydown', $dropdown.$onKeyDown);
+            bodyEl.on('click', onBodyClick);
+          }, 0, false);
+          parentEl.hasClass('dropdown') && parentEl.addClass('open');
+        };
+        var hide = $dropdown.hide;
+        $dropdown.hide = function() {
+          if (!$dropdown.$isShown) return;
+          options.keyboard && $dropdown.$element && $dropdown.$element.off('keydown', $dropdown.$onKeyDown);
+          bodyEl.off('click', onBodyClick);
+          parentEl.hasClass('dropdown') && parentEl.removeClass('open');
+          hide();
+        };
+        var destroy = $dropdown.destroy;
+        $dropdown.destroy = function() {
+          bodyEl.off('click', onBodyClick);
+          destroy();
+        };
+        function onBodyClick(evt) {
+          if (evt.target === element[0]) return;
+          return evt.target !== element[0] && $dropdown.hide();
+        }
+        return $dropdown;
+      }
+      return DropdownFactory;
+    } ];
+  }).directive('bsDropdown', [ '$window', '$sce', '$dropdown', function($window, $sce, $dropdown) {
+    return {
+      restrict: 'EAC',
+      scope: true,
+      link: function postLink(scope, element, attr, transclusion) {
+        var options = {
+          scope: scope
+        };
+        angular.forEach([ 'placement', 'container', 'delay', 'trigger', 'keyboard', 'html', 'animation', 'template', 'id' ], function(key) {
+          if (angular.isDefined(attr[key])) options[key] = attr[key];
+        });
+        var falseValueRegExp = /^(false|0|)$/i;
+        angular.forEach([ 'html', 'container' ], function(key) {
+          if (angular.isDefined(attr[key]) && falseValueRegExp.test(attr[key])) options[key] = false;
+        });
+        attr.bsDropdown && scope.$watch(attr.bsDropdown, function(newValue, oldValue) {
+          scope.content = newValue;
+        }, true);
+        attr.bsShow && scope.$watch(attr.bsShow, function(newValue, oldValue) {
+          if (!dropdown || !angular.isDefined(newValue)) return;
+          if (angular.isString(newValue)) newValue = !!newValue.match(/true|,?(dropdown),?/i);
+          newValue === true ? dropdown.show() : dropdown.hide();
+        });
+        var dropdown = $dropdown(element, options);
+        scope.$on('$destroy', function() {
+          if (dropdown) dropdown.destroy();
+          options = null;
+          dropdown = null;
+        });
+      }
+    };
+  } ]);
+  angular.module('mgcrea.ngStrap.button', []).provider('$button', function() {
+    var defaults = this.defaults = {
+      activeClass: 'active',
+      toggleEvent: 'click'
+    };
+    this.$get = function() {
+      return {
+        defaults: defaults
+      };
+    };
+  }).directive('bsCheckboxGroup', function() {
+    return {
+      restrict: 'A',
+      require: 'ngModel',
+      compile: function postLink(element, attr) {
+        element.attr('data-toggle', 'buttons');
+        element.removeAttr('ng-model');
+        var children = element[0].querySelectorAll('input[type="checkbox"]');
+        angular.forEach(children, function(child) {
+          var childEl = angular.element(child);
+          childEl.attr('bs-checkbox', '');
+          childEl.attr('ng-model', attr.ngModel + '.' + childEl.attr('value'));
+        });
+      }
+    };
+  }).directive('bsCheckbox', [ '$button', '$$rAF', function($button, $$rAF) {
+    var defaults = $button.defaults;
+    var constantValueRegExp = /^(true|false|\d+)$/;
+    return {
+      restrict: 'A',
+      require: 'ngModel',
+      link: function postLink(scope, element, attr, controller) {
+        var options = defaults;
+        var isInput = element[0].nodeName === 'INPUT';
+        var activeElement = isInput ? element.parent() : element;
+        var trueValue = angular.isDefined(attr.trueValue) ? attr.trueValue : true;
+        if (constantValueRegExp.test(attr.trueValue)) {
+          trueValue = scope.$eval(attr.trueValue);
+        }
+        var falseValue = angular.isDefined(attr.falseValue) ? attr.falseValue : false;
+        if (constantValueRegExp.test(attr.falseValue)) {
+          falseValue = scope.$eval(attr.falseValue);
+        }
+        var hasExoticValues = typeof trueValue !== 'boolean' || typeof falseValue !== 'boolean';
+        if (hasExoticValues) {
+          controller.$parsers.push(function(viewValue) {
+            return viewValue ? trueValue : falseValue;
+          });
+          controller.$formatters.push(function(modelValue) {
+            return angular.equals(modelValue, trueValue);
+          });
+          scope.$watch(attr.ngModel, function(newValue, oldValue) {
+            controller.$render();
+          });
+        }
+        controller.$render = function() {
+          var isActive = angular.equals(controller.$modelValue, trueValue);
+          $$rAF(function() {
+            if (isInput) element[0].checked = isActive;
+            activeElement.toggleClass(options.activeClass, isActive);
+          });
+        };
+        element.bind(options.toggleEvent, function() {
+          scope.$apply(function() {
+            if (!isInput) {
+              controller.$setViewValue(!activeElement.hasClass('active'));
+            }
+            if (!hasExoticValues) {
+              controller.$render();
+            }
+          });
+        });
+      }
+    };
+  } ]).directive('bsRadioGroup', function() {
+    return {
+      restrict: 'A',
+      require: 'ngModel',
+      compile: function postLink(element, attr) {
+        element.attr('data-toggle', 'buttons');
+        element.removeAttr('ng-model');
+        var children = element[0].querySelectorAll('input[type="radio"]');
+        angular.forEach(children, function(child) {
+          angular.element(child).attr('bs-radio', '');
+          angular.element(child).attr('ng-model', attr.ngModel);
+        });
+      }
+    };
+  }).directive('bsRadio', [ '$button', '$$rAF', function($button, $$rAF) {
+    var defaults = $button.defaults;
+    var constantValueRegExp = /^(true|false|\d+)$/;
+    return {
+      restrict: 'A',
+      require: 'ngModel',
+      link: function postLink(scope, element, attr, controller) {
+        var options = defaults;
+        var isInput = element[0].nodeName === 'INPUT';
+        var activeElement = isInput ? element.parent() : element;
+        var value;
+        attr.$observe('value', function(v) {
+          value = constantValueRegExp.test(v) ? scope.$eval(v) : v;
+          controller.$render();
+        });
+        controller.$render = function() {
+          var isActive = angular.equals(controller.$modelValue, value);
+          $$rAF(function() {
+            if (isInput) element[0].checked = isActive;
+            activeElement.toggleClass(options.activeClass, isActive);
+          });
+        };
+        element.bind(options.toggleEvent, function() {
+          scope.$apply(function() {
+            controller.$setViewValue(value);
+            controller.$render();
+          });
+        });
+      }
+    };
+  } ]);
+  angular.module('mgcrea.ngStrap.helpers.dateFormatter', []).service('$dateFormatter', [ '$locale', 'dateFilter', function($locale, dateFilter) {
+    this.getDefaultLocale = function() {
+      return $locale.id;
+    };
+    this.getDatetimeFormat = function(format, lang) {
+      return $locale.DATETIME_FORMATS[format] || format;
+    };
+    this.weekdaysShort = function(lang) {
+      return $locale.DATETIME_FORMATS.SHORTDAY;
+    };
+    function splitTimeFormat(format) {
+      return /(h+)([:\.])?(m+)([:\.])?(s*)[ ]?(a?)/i.exec(format).slice(1);
+    }
+    this.hoursFormat = function(timeFormat) {
+      return splitTimeFormat(timeFormat)[0];
+    };
+    this.minutesFormat = function(timeFormat) {
+      return splitTimeFormat(timeFormat)[2];
+    };
+    this.secondsFormat = function(timeFormat) {
+      return splitTimeFormat(timeFormat)[4];
+    };
+    this.timeSeparator = function(timeFormat) {
+      return splitTimeFormat(timeFormat)[1];
+    };
+    this.showSeconds = function(timeFormat) {
+      return !!splitTimeFormat(timeFormat)[4];
+    };
+    this.showAM = function(timeFormat) {
+      return !!splitTimeFormat(timeFormat)[5];
+    };
+    this.formatDate = function(date, format, lang, timezone) {
+      return dateFilter(date, format, timezone);
+    };
+  } ]);
+  angular.module('mgcrea.ngStrap.helpers.dateParser', []).provider('$dateParser', [ '$localeProvider', function($localeProvider) {
+    function ParseDate() {
+      this.year = 1970;
+      this.month = 0;
+      this.day = 1;
+      this.hours = 0;
+      this.minutes = 0;
+      this.seconds = 0;
+      this.milliseconds = 0;
+    }
+    ParseDate.prototype.setMilliseconds = function(value) {
+      this.milliseconds = value;
+    };
+    ParseDate.prototype.setSeconds = function(value) {
+      this.seconds = value;
+    };
+    ParseDate.prototype.setMinutes = function(value) {
+      this.minutes = value;
+    };
+    ParseDate.prototype.setHours = function(value) {
+      this.hours = value;
+    };
+    ParseDate.prototype.getHours = function() {
+      return this.hours;
+    };
+    ParseDate.prototype.setDate = function(value) {
+      this.day = value;
+    };
+    ParseDate.prototype.setMonth = function(value) {
+      this.month = value;
+    };
+    ParseDate.prototype.setFullYear = function(value) {
+      this.year = value;
+    };
+    ParseDate.prototype.fromDate = function(value) {
+      this.year = value.getFullYear();
+      this.month = value.getMonth();
+      this.day = value.getDate();
+      this.hours = value.getHours();
+      this.minutes = value.getMinutes();
+      this.seconds = value.getSeconds();
+      this.milliseconds = value.getMilliseconds();
+      return this;
+    };
+    ParseDate.prototype.toDate = function() {
+      return new Date(this.year, this.month, this.day, this.hours, this.minutes, this.seconds, this.milliseconds);
+    };
+    var proto = ParseDate.prototype;
+    function noop() {}
+    function isNumeric(n) {
+      return !isNaN(parseFloat(n)) && isFinite(n);
+    }
+    function indexOfCaseInsensitive(array, value) {
+      var len = array.length, str = value.toString().toLowerCase();
+      for (var i = 0; i < len; i++) {
+        if (array[i].toLowerCase() === str) {
+          return i;
+        }
+      }
+      return -1;
+    }
+    var defaults = this.defaults = {
+      format: 'shortDate',
+      strict: false
+    };
+    this.$get = [ '$locale', 'dateFilter', function($locale, dateFilter) {
+      var DateParserFactory = function(config) {
+        var options = angular.extend({}, defaults, config);
+        var $dateParser = {};
+        var regExpMap = {
+          sss: '[0-9]{3}',
+          ss: '[0-5][0-9]',
+          s: options.strict ? '[1-5]?[0-9]' : '[0-9]|[0-5][0-9]',
+          mm: '[0-5][0-9]',
+          m: options.strict ? '[1-5]?[0-9]' : '[0-9]|[0-5][0-9]',
+          HH: '[01][0-9]|2[0-3]',
+          H: options.strict ? '1?[0-9]|2[0-3]' : '[01]?[0-9]|2[0-3]',
+          hh: '[0][1-9]|[1][012]',
+          h: options.strict ? '[1-9]|1[012]' : '0?[1-9]|1[012]',
+          a: 'AM|PM',
+          EEEE: $locale.DATETIME_FORMATS.DAY.join('|'),
+          EEE: $locale.DATETIME_FORMATS.SHORTDAY.join('|'),
+          dd: '0[1-9]|[12][0-9]|3[01]',
+          d: options.strict ? '[1-9]|[1-2][0-9]|3[01]' : '0?[1-9]|[1-2][0-9]|3[01]',
+          MMMM: $locale.DATETIME_FORMATS.MONTH.join('|'),
+          MMM: $locale.DATETIME_FORMATS.SHORTMONTH.join('|'),
+          MM: '0[1-9]|1[012]',
+          M: options.strict ? '[1-9]|1[012]' : '0?[1-9]|1[012]',
+          yyyy: '[1]{1}[0-9]{3}|[2]{1}[0-9]{3}',
+          yy: '[0-9]{2}',
+          y: options.strict ? '-?(0|[1-9][0-9]{0,3})' : '-?0*[0-9]{1,4}'
+        };
+        var setFnMap = {
+          sss: proto.setMilliseconds,
+          ss: proto.setSeconds,
+          s: proto.setSeconds,
+          mm: proto.setMinutes,
+          m: proto.setMinutes,
+          HH: proto.setHours,
+          H: proto.setHours,
+          hh: proto.setHours,
+          h: proto.setHours,
+          EEEE: noop,
+          EEE: noop,
+          dd: proto.setDate,
+          d: proto.setDate,
+          a: function(value) {
+            var hours = this.getHours() % 12;
+            return this.setHours(value.match(/pm/i) ? hours + 12 : hours);
+          },
+          MMMM: function(value) {
+            return this.setMonth(indexOfCaseInsensitive($locale.DATETIME_FORMATS.MONTH, value));
+          },
+          MMM: function(value) {
+            return this.setMonth(indexOfCaseInsensitive($locale.DATETIME_FORMATS.SHORTMONTH, value));
+          },
+          MM: function(value) {
+            return this.setMonth(1 * value - 1);
+          },
+          M: function(value) {
+            return this.setMonth(1 * value - 1);
+          },
+          yyyy: proto.setFullYear,
+          yy: function(value) {
+            return this.setFullYear(2e3 + 1 * value);
+          },
+          y: proto.setFullYear
+        };
+        var regex, setMap;
+        $dateParser.init = function() {
+          $dateParser.$format = $locale.DATETIME_FORMATS[options.format] || options.format;
+          regex = regExpForFormat($dateParser.$format);
+          setMap = setMapForFormat($dateParser.$format);
+        };
+        $dateParser.isValid = function(date) {
+          if (angular.isDate(date)) return !isNaN(date.getTime());
+          return regex.test(date);
+        };
+        $dateParser.parse = function(value, baseDate, format, timezone) {
+          if (format) format = $locale.DATETIME_FORMATS[format] || format;
+          if (angular.isDate(value)) value = dateFilter(value, format || $dateParser.$format, timezone);
+          var formatRegex = format ? regExpForFormat(format) : regex;
+          var formatSetMap = format ? setMapForFormat(format) : setMap;
+          var matches = formatRegex.exec(value);
+          if (!matches) return false;
+          var date = baseDate && !isNaN(baseDate.getTime()) ? new ParseDate().fromDate(baseDate) : new ParseDate().fromDate(new Date(1970, 0, 1, 0));
+          for (var i = 0; i < matches.length - 1; i++) {
+            formatSetMap[i] && formatSetMap[i].call(date, matches[i + 1]);
+          }
+          var newDate = date.toDate();
+          if (parseInt(date.day, 10) !== newDate.getDate()) {
+            return false;
+          }
+          return newDate;
+        };
+        $dateParser.getDateForAttribute = function(key, value) {
+          var date;
+          if (value === 'today') {
+            var today = new Date();
+            date = new Date(today.getFullYear(), today.getMonth(), today.getDate() + (key === 'maxDate' ? 1 : 0), 0, 0, 0, key === 'minDate' ? 0 : -1);
+          } else if (angular.isString(value) && value.match(/^".+"$/)) {
+            date = new Date(value.substr(1, value.length - 2));
+          } else if (isNumeric(value)) {
+            date = new Date(parseInt(value, 10));
+          } else if (angular.isString(value) && 0 === value.length) {
+            date = key === 'minDate' ? -Infinity : +Infinity;
+          } else {
+            date = new Date(value);
+          }
+          return date;
+        };
+        $dateParser.getTimeForAttribute = function(key, value) {
+          var time;
+          if (value === 'now') {
+            time = new Date().setFullYear(1970, 0, 1);
+          } else if (angular.isString(value) && value.match(/^".+"$/)) {
+            time = new Date(value.substr(1, value.length - 2)).setFullYear(1970, 0, 1);
+          } else if (isNumeric(value)) {
+            time = new Date(parseInt(value, 10)).setFullYear(1970, 0, 1);
+          } else if (angular.isString(value) && 0 === value.length) {
+            time = key === 'minTime' ? -Infinity : +Infinity;
+          } else {
+            time = $dateParser.parse(value, new Date(1970, 0, 1, 0));
+          }
+          return time;
+        };
+        $dateParser.daylightSavingAdjust = function(date) {
+          if (!date) {
+            return null;
+          }
+          date.setHours(date.getHours() > 12 ? date.getHours() + 2 : 0);
+          return date;
+        };
+        $dateParser.timezoneOffsetAdjust = function(date, timezone, undo) {
+          if (!date) {
+            return null;
+          }
+          if (timezone && timezone === 'UTC') {
+            date = new Date(date.getTime());
+            date.setMinutes(date.getMinutes() + (undo ? -1 : 1) * date.getTimezoneOffset());
+          }
+          return date;
+        };
+        function setMapForFormat(format) {
+          var keys = Object.keys(setFnMap), i;
+          var map = [], sortedMap = [];
+          var clonedFormat = format;
+          for (i = 0; i < keys.length; i++) {
+            if (format.split(keys[i]).length > 1) {
+              var index = clonedFormat.search(keys[i]);
+              format = format.split(keys[i]).join('');
+              if (setFnMap[keys[i]]) {
+                map[index] = setFnMap[keys[i]];
+              }
+            }
+          }
+          angular.forEach(map, function(v) {
+            if (v) sortedMap.push(v);
+          });
+          return sortedMap;
+        }
+        function escapeReservedSymbols(text) {
+          return text.replace(/\//g, '[\\/]').replace('/-/g', '[-]').replace(/\./g, '[.]').replace(/\\s/g, '[\\s]');
+        }
+        function regExpForFormat(format) {
+          var keys = Object.keys(regExpMap), i;
+          var re = format;
+          for (i = 0; i < keys.length; i++) {
+            re = re.split(keys[i]).join('${' + i + '}');
+          }
+          for (i = 0; i < keys.length; i++) {
+            re = re.split('${' + i + '}').join('(' + regExpMap[keys[i]] + ')');
+          }
+          format = escapeReservedSymbols(format);
+          return new RegExp('^' + re + '$', [ 'i' ]);
+        }
+        $dateParser.init();
+        return $dateParser;
+      };
+      return DateParserFactory;
+    } ];
+  } ]);
+  angular.module('mgcrea.ngStrap.helpers.debounce', []).factory('debounce', [ '$timeout', function($timeout) {
+    return function(func, wait, immediate) {
+      var timeout = null;
+      return function() {
+        var context = this, args = arguments, callNow = immediate && !timeout;
+        if (timeout) {
+          $timeout.cancel(timeout);
+        }
+        timeout = $timeout(function later() {
+          timeout = null;
+          if (!immediate) {
+            func.apply(context, args);
+          }
+        }, wait, false);
+        if (callNow) {
+          func.apply(context, args);
+        }
+        return timeout;
+      };
+    };
+  } ]).factory('throttle', [ '$timeout', function($timeout) {
+    return function(func, wait, options) {
+      var timeout = null;
+      options || (options = {});
+      return function() {
+        var context = this, args = arguments;
+        if (!timeout) {
+          if (options.leading !== false) {
+            func.apply(context, args);
+          }
+          timeout = $timeout(function later() {
+            timeout = null;
+            if (options.trailing !== false) {
+              func.apply(context, args);
+            }
+          }, wait, false);
+        }
+      };
+    };
+  } ]);
+  angular.module('mgcrea.ngStrap.helpers.dimensions', []).factory('dimensions', [ '$document', '$window', function($document, $window) {
+    var jqLite = angular.element;
+    var fn = {};
+    var nodeName = fn.nodeName = function(element, name) {
+      return element.nodeName && element.nodeName.toLowerCase() === name.toLowerCase();
+    };
+    fn.css = function(element, prop, extra) {
+      var value;
+      if (element.currentStyle) {
+        value = element.currentStyle[prop];
+      } else if (window.getComputedStyle) {
+        value = window.getComputedStyle(element)[prop];
+      } else {
+        value = element.style[prop];
+      }
+      return extra === true ? parseFloat(value) || 0 : value;
+    };
+    fn.offset = function(element) {
+      var boxRect = element.getBoundingClientRect();
+      var docElement = element.ownerDocument;
+      return {
+        width: boxRect.width || element.offsetWidth,
+        height: boxRect.height || element.offsetHeight,
+        top: boxRect.top + (window.pageYOffset || docElement.documentElement.scrollTop) - (docElement.documentElement.clientTop || 0),
+        left: boxRect.left + (window.pageXOffset || docElement.documentElement.scrollLeft) - (docElement.documentElement.clientLeft || 0)
+      };
+    };
+    fn.setOffset = function(element, options, i) {
+      var curPosition, curLeft, curCSSTop, curTop, curOffset, curCSSLeft, calculatePosition, position = fn.css(element, 'position'), curElem = angular.element(element), props = {};
+      if (position === 'static') {
+        element.style.position = 'relative';
+      }
+      curOffset = fn.offset(element);
+      curCSSTop = fn.css(element, 'top');
+      curCSSLeft = fn.css(element, 'left');
+      calculatePosition = (position === 'absolute' || position === 'fixed') && (curCSSTop + curCSSLeft).indexOf('auto') > -1;
+      if (calculatePosition) {
+        curPosition = fn.position(element);
+        curTop = curPosition.top;
+        curLeft = curPosition.left;
+      } else {
+        curTop = parseFloat(curCSSTop) || 0;
+        curLeft = parseFloat(curCSSLeft) || 0;
+      }
+      if (angular.isFunction(options)) {
+        options = options.call(element, i, curOffset);
+      }
+      if (options.top !== null) {
+        props.top = options.top - curOffset.top + curTop;
+      }
+      if (options.left !== null) {
+        props.left = options.left - curOffset.left + curLeft;
+      }
+      if ('using' in options) {
+        options.using.call(curElem, props);
+      } else {
+        curElem.css({
+          top: props.top + 'px',
+          left: props.left + 'px'
+        });
+      }
+    };
+    fn.position = function(element) {
+      var offsetParentRect = {
+        top: 0,
+        left: 0
+      }, offsetParentElement, offset;
+      if (fn.css(element, 'position') === 'fixed') {
+        offset = element.getBoundingClientRect();
+      } else {
+        offsetParentElement = offsetParent(element);
+        offset = fn.offset(element);
+        if (!nodeName(offsetParentElement, 'html')) {
+          offsetParentRect = fn.offset(offsetParentElement);
+        }
+        offsetParentRect.top += fn.css(offsetParentElement, 'borderTopWidth', true);
+        offsetParentRect.left += fn.css(offsetParentElement, 'borderLeftWidth', true);
+      }
+      return {
+        width: element.offsetWidth,
+        height: element.offsetHeight,
+        top: offset.top - offsetParentRect.top - fn.css(element, 'marginTop', true),
+        left: offset.left - offsetParentRect.left - fn.css(element, 'marginLeft', true)
+      };
+    };
+    var offsetParent = function offsetParentElement(element) {
+      var docElement = element.ownerDocument;
+      var offsetParent = element.offsetParent || docElement;
+      if (nodeName(offsetParent, '#document')) return docElement.documentElement;
+      while (offsetParent && !nodeName(offsetParent, 'html') && fn.css(offsetParent, 'position') === 'static') {
+        offsetParent = offsetParent.offsetParent;
+      }
+      return offsetParent || docElement.documentElement;
+    };
+    fn.height = function(element, outer) {
+      var value = element.offsetHeight;
+      if (outer) {
+        value += fn.css(element, 'marginTop', true) + fn.css(element, 'marginBottom', true);
+      } else {
+        value -= fn.css(element, 'paddingTop', true) + fn.css(element, 'paddingBottom', true) + fn.css(element, 'borderTopWidth', true) + fn.css(element, 'borderBottomWidth', true);
+      }
+      return value;
+    };
+    fn.width = function(element, outer) {
+      var value = element.offsetWidth;
+      if (outer) {
+        value += fn.css(element, 'marginLeft', true) + fn.css(element, 'marginRight', true);
+      } else {
+        value -= fn.css(element, 'paddingLeft', true) + fn.css(element, 'paddingRight', true) + fn.css(element, 'borderLeftWidth', true) + fn.css(element, 'borderRightWidth', true);
+      }
+      return value;
+    };
+    return fn;
+  } ]);
+  angular.module('mgcrea.ngStrap.helpers.parseOptions', []).provider('$parseOptions', function() {
+    var defaults = this.defaults = {
+      regexp: /^\s*(.*?)(?:\s+as\s+(.*?))?(?:\s+group\s+by\s+(.*))?\s+for\s+(?:([\$\w][\$\w]*)|(?:\(\s*([\$\w][\$\w]*)\s*,\s*([\$\w][\$\w]*)\s*\)))\s+in\s+(.*?)(?:\s+track\s+by\s+(.*?))?$/
+    };
+    this.$get = [ '$parse', '$q', function($parse, $q) {
+      function ParseOptionsFactory(attr, config) {
+        var $parseOptions = {};
+        var options = angular.extend({}, defaults, config);
+        $parseOptions.$values = [];
+        var match, displayFn, valueName, keyName, groupByFn, valueFn, valuesFn;
+        $parseOptions.init = function() {
+          $parseOptions.$match = match = attr.match(options.regexp);
+          displayFn = $parse(match[2] || match[1]), valueName = match[4] || match[6], keyName = match[5], 
+          groupByFn = $parse(match[3] || ''), valueFn = $parse(match[2] ? match[1] : valueName), 
+          valuesFn = $parse(match[7]);
+        };
+        $parseOptions.valuesFn = function(scope, controller) {
+          return $q.when(valuesFn(scope, controller)).then(function(values) {
+            $parseOptions.$values = values ? parseValues(values, scope) : {};
+            return $parseOptions.$values;
+          });
+        };
+        $parseOptions.displayValue = function(modelValue) {
+          var scope = {};
+          scope[valueName] = modelValue;
+          return displayFn(scope);
+        };
+        function parseValues(values, scope) {
+          return values.map(function(match, index) {
+            var locals = {}, label, value;
+            locals[valueName] = match;
+            label = displayFn(scope, locals);
+            value = valueFn(scope, locals);
+            return {
+              label: label,
+              value: value,
+              index: index
+            };
+          });
+        }
+        $parseOptions.init();
+        return $parseOptions;
+      }
+      return ParseOptionsFactory;
+    } ];
+  });
+  angular.version.minor < 3 && angular.version.dot < 14 && angular.module('ng').factory('$$rAF', [ '$window', '$timeout', function($window, $timeout) {
+    var requestAnimationFrame = $window.requestAnimationFrame || $window.webkitRequestAnimationFrame || $window.mozRequestAnimationFrame;
+    var cancelAnimationFrame = $window.cancelAnimationFrame || $window.webkitCancelAnimationFrame || $window.mozCancelAnimationFrame || $window.webkitCancelRequestAnimationFrame;
+    var rafSupported = !!requestAnimationFrame;
+    var raf = rafSupported ? function(fn) {
+      var id = requestAnimationFrame(fn);
+      return function() {
+        cancelAnimationFrame(id);
+      };
+    } : function(fn) {
+      var timer = $timeout(fn, 16.66, false);
+      return function() {
+        $timeout.cancel(timer);
+      };
+    };
+    raf.supported = rafSupported;
+    return raf;
+  } ]);
+  angular.module('mgcrea.ngStrap.modal', [ 'mgcrea.ngStrap.helpers.dimensions' ]).provider('$modal', function() {
+    var defaults = this.defaults = {
+      animation: 'am-fade',
+      backdropAnimation: 'am-fade',
+      prefixClass: 'modal',
+      prefixEvent: 'modal',
+      placement: 'top',
+      template: 'modal/modal.tpl.html',
+      contentTemplate: false,
+      container: false,
+      element: null,
+      backdrop: true,
+      keyboard: true,
+      html: false,
+      show: true
+    };
+    this.$get = [ '$window', '$rootScope', '$compile', '$q', '$templateCache', '$http', '$animate', '$timeout', '$sce', 'dimensions', function($window, $rootScope, $compile, $q, $templateCache, $http, $animate, $timeout, $sce, dimensions) {
+      var forEach = angular.forEach;
+      var trim = String.prototype.trim;
+      var requestAnimationFrame = $window.requestAnimationFrame || $window.setTimeout;
+      var bodyElement = angular.element($window.document.body);
+      var htmlReplaceRegExp = /ng-bind="/gi;
+      function ModalFactory(config) {
+        var $modal = {};
+        var options = $modal.$options = angular.extend({}, defaults, config);
+        $modal.$promise = fetchTemplate(options.template);
+        var scope = $modal.$scope = options.scope && options.scope.$new() || $rootScope.$new();
+        if (!options.element && !options.container) {
+          options.container = 'body';
+        }
+        $modal.$id = options.id || options.element && options.element.attr('id') || '';
+        forEach([ 'title', 'content' ], function(key) {
+          if (options[key]) scope[key] = $sce.trustAsHtml(options[key]);
+        });
+        scope.$hide = function() {
+          scope.$$postDigest(function() {
+            $modal.hide();
+          });
+        };
+        scope.$show = function() {
+          scope.$$postDigest(function() {
+            $modal.show();
+          });
+        };
+        scope.$toggle = function() {
+          scope.$$postDigest(function() {
+            $modal.toggle();
+          });
+        };
+        $modal.$isShown = scope.$isShown = false;
+        if (options.contentTemplate) {
+          $modal.$promise = $modal.$promise.then(function(template) {
+            var templateEl = angular.element(template);
+            return fetchTemplate(options.contentTemplate).then(function(contentTemplate) {
+              var contentEl = findElement('[ng-bind="content"]', templateEl[0]).removeAttr('ng-bind').html(contentTemplate);
+              if (!config.template) contentEl.next().remove();
+              return templateEl[0].outerHTML;
+            });
+          });
+        }
+        var modalLinker, modalElement;
+        var backdropElement = angular.element('<div class="' + options.prefixClass + '-backdrop"/>');
+        backdropElement.css({
+          position: 'fixed',
+          top: '0px',
+          left: '0px',
+          bottom: '0px',
+          right: '0px',
+          'z-index': 1038
+        });
+        $modal.$promise.then(function(template) {
+          if (angular.isObject(template)) template = template.data;
+          if (options.html) template = template.replace(htmlReplaceRegExp, 'ng-bind-html="');
+          template = trim.apply(template);
+          modalLinker = $compile(template);
+          $modal.init();
+        });
+        $modal.init = function() {
+          if (options.show) {
+            scope.$$postDigest(function() {
+              $modal.show();
+            });
+          }
+        };
+        $modal.destroy = function() {
+          if (modalElement) {
+            modalElement.remove();
+            modalElement = null;
+          }
+          if (backdropElement) {
+            backdropElement.remove();
+            backdropElement = null;
+          }
+          scope.$destroy();
+        };
+        $modal.show = function() {
+          if ($modal.$isShown) return;
+          var parent, after;
+          if (angular.isElement(options.container)) {
+            parent = options.container;
+            after = options.container[0].lastChild ? angular.element(options.container[0].lastChild) : null;
+          } else {
+            if (options.container) {
+              parent = findElement(options.container);
+              after = parent[0] && parent[0].lastChild ? angular.element(parent[0].lastChild) : null;
+            } else {
+              parent = null;
+              after = options.element;
+            }
+          }
+          modalElement = $modal.$element = modalLinker(scope, function(clonedElement, scope) {});
+          if (scope.$emit(options.prefixEvent + '.show.before', $modal).defaultPrevented) {
+            return;
+          }
+          modalElement.css({
+            display: 'block'
+          }).addClass(options.placement);
+          if (options.animation) {
+            if (options.backdrop) {
+              backdropElement.addClass(options.backdropAnimation);
+            }
+            modalElement.addClass(options.animation);
+          }
+          if (options.backdrop) {
+            $animate.enter(backdropElement, bodyElement, null);
+          }
+          if (angular.version.minor <= 2) {
+            $animate.enter(modalElement, parent, after, enterAnimateCallback);
+          } else {
+            $animate.enter(modalElement, parent, after).then(enterAnimateCallback);
+          }
+          $modal.$isShown = scope.$isShown = true;
+          safeDigest(scope);
+          var el = modalElement[0];
+          requestAnimationFrame(function() {
+            el.focus();
+          });
+          bodyElement.addClass(options.prefixClass + '-open');
+          if (options.animation) {
+            bodyElement.addClass(options.prefixClass + '-with-' + options.animation);
+          }
+          if (options.backdrop) {
+            modalElement.on('click', hideOnBackdropClick);
+            backdropElement.on('click', hideOnBackdropClick);
+            backdropElement.on('wheel', preventEventDefault);
+          }
+          if (options.keyboard) {
+            modalElement.on('keyup', $modal.$onKeyUp);
+          }
+        };
+        function enterAnimateCallback() {
+          scope.$emit(options.prefixEvent + '.show', $modal);
+        }
+        $modal.hide = function() {
+          if (!$modal.$isShown) return;
+          if (scope.$emit(options.prefixEvent + '.hide.before', $modal).defaultPrevented) {
+            return;
+          }
+          if (angular.version.minor <= 2) {
+            $animate.leave(modalElement, leaveAnimateCallback);
+          } else {
+            $animate.leave(modalElement).then(leaveAnimateCallback);
+          }
+          if (options.backdrop) {
+            $animate.leave(backdropElement);
+          }
+          $modal.$isShown = scope.$isShown = false;
+          safeDigest(scope);
+          if (options.backdrop) {
+            modalElement.off('click', hideOnBackdropClick);
+            backdropElement.off('click', hideOnBackdropClick);
+            backdropElement.off('wheel', preventEventDefault);
+          }
+          if (options.keyboard) {
+            modalElement.off('keyup', $modal.$onKeyUp);
+          }
+        };
+        function leaveAnimateCallback() {
+          scope.$emit(options.prefixEvent + '.hide', $modal);
+          bodyElement.removeClass(options.prefixClass + '-open');
+          if (options.animation) {
+            bodyElement.removeClass(options.prefixClass + '-with-' + options.animation);
+          }
+        }
+        $modal.toggle = function() {
+          $modal.$isShown ? $modal.hide() : $modal.show();
+        };
+        $modal.focus = function() {
+          modalElement[0].focus();
+        };
+        $modal.$onKeyUp = function(evt) {
+          if (evt.which === 27 && $modal.$isShown) {
+            $modal.hide();
+            evt.stopPropagation();
+          }
+        };
+        function hideOnBackdropClick(evt) {
+          if (evt.target !== evt.currentTarget) return;
+          options.backdrop === 'static' ? $modal.focus() : $modal.hide();
+        }
+        function preventEventDefault(evt) {
+          evt.preventDefault();
+        }
+        return $modal;
+      }
+      function safeDigest(scope) {
+        scope.$$phase || scope.$root && scope.$root.$$phase || scope.$digest();
+      }
+      function findElement(query, element) {
+        return angular.element((element || document).querySelectorAll(query));
+      }
+      var fetchPromises = {};
+      function fetchTemplate(template) {
+        if (fetchPromises[template]) return fetchPromises[template];
+        return fetchPromises[template] = $http.get(template, {
+          cache: $templateCache
+        }).then(function(res) {
+          return res.data;
+        });
+      }
+      return ModalFactory;
+    } ];
+  }).directive('bsModal', [ '$window', '$sce', '$modal', function($window, $sce, $modal) {
+    return {
+      restrict: 'EAC',
+      scope: true,
+      link: function postLink(scope, element, attr, transclusion) {
+        var options = {
+          scope: scope,
+          element: element,
+          show: false
+        };
+        angular.forEach([ 'template', 'contentTemplate', 'placement', 'backdrop', 'keyboard', 'html', 'container', 'animation', 'id', 'prefixEvent', 'prefixClass' ], function(key) {
+          if (angular.isDefined(attr[key])) options[key] = attr[key];
+        });
+        var falseValueRegExp = /^(false|0|)$/i;
+        angular.forEach([ 'backdrop', 'keyboard', 'html', 'container' ], function(key) {
+          if (angular.isDefined(attr[key]) && falseValueRegExp.test(attr[key])) options[key] = false;
+        });
+        angular.forEach([ 'title', 'content' ], function(key) {
+          attr[key] && attr.$observe(key, function(newValue, oldValue) {
+            scope[key] = $sce.trustAsHtml(newValue);
+          });
+        });
+        attr.bsModal && scope.$watch(attr.bsModal, function(newValue, oldValue) {
+          if (angular.isObject(newValue)) {
+            angular.extend(scope, newValue);
+          } else {
+            scope.content = newValue;
+          }
+        }, true);
+        var modal = $modal(options);
+        element.on(attr.trigger || 'click', modal.toggle);
+        scope.$on('$destroy', function() {
+          if (modal) modal.destroy();
+          options = null;
+          modal = null;
+        });
+      }
+    };
+  } ]);
+  angular.module('mgcrea.ngStrap.navbar', []).provider('$navbar', function() {
+    var defaults = this.defaults = {
+      activeClass: 'active',
+      routeAttr: 'data-match-route',
+      strict: false
+    };
+    this.$get = function() {
+      return {
+        defaults: defaults
+      };
+    };
+  }).directive('bsNavbar', [ '$window', '$location', '$navbar', function($window, $location, $navbar) {
+    var defaults = $navbar.defaults;
+    return {
+      restrict: 'A',
+      link: function postLink(scope, element, attr, controller) {
+        var options = angular.copy(defaults);
+        angular.forEach(Object.keys(defaults), function(key) {
+          if (angular.isDefined(attr[key])) options[key] = attr[key];
+        });
+        scope.$watch(function() {
+          return $location.path();
+        }, function(newValue, oldValue) {
+          var liElements = element[0].querySelectorAll('li[' + options.routeAttr + ']');
+          angular.forEach(liElements, function(li) {
+            var liElement = angular.element(li);
+            var pattern = liElement.attr(options.routeAttr).replace('/', '\\/');
+            if (options.strict) {
+              pattern = '^' + pattern + '$';
+            }
+            var regexp = new RegExp(pattern, 'i');
+            if (regexp.test(newValue)) {
+              liElement.addClass(options.activeClass);
+            } else {
+              liElement.removeClass(options.activeClass);
+            }
+          });
+        });
+      }
+    };
+  } ]);
+  angular.module('mgcrea.ngStrap.popover', [ 'mgcrea.ngStrap.tooltip' ]).provider('$popover', function() {
+    var defaults = this.defaults = {
+      animation: 'am-fade',
+      customClass: '',
+      container: false,
+      target: false,
+      placement: 'right',
+      template: 'popover/popover.tpl.html',
+      contentTemplate: false,
+      trigger: 'click',
+      keyboard: true,
+      html: false,
+      title: '',
+      content: '',
+      delay: 0,
+      autoClose: false
+    };
+    this.$get = [ '$tooltip', function($tooltip) {
+      function PopoverFactory(element, config) {
+        var options = angular.extend({}, defaults, config);
+        var $popover = $tooltip(element, options);
+        if (options.content) {
+          $popover.$scope.content = options.content;
+        }
+        return $popover;
+      }
+      return PopoverFactory;
+    } ];
+  }).directive('bsPopover', [ '$window', '$sce', '$popover', function($window, $sce, $popover) {
+    var requestAnimationFrame = $window.requestAnimationFrame || $window.setTimeout;
+    return {
+      restrict: 'EAC',
+      scope: true,
+      link: function postLink(scope, element, attr) {
+        var options = {
+          scope: scope
+        };
+        angular.forEach([ 'template', 'contentTemplate', 'placement', 'container', 'delay', 'trigger', 'html', 'animation', 'customClass', 'autoClose', 'id', 'prefixClass', 'prefixEvent' ], function(key) {
+          if (angular.isDefined(attr[key])) options[key] = attr[key];
+        });
+        var falseValueRegExp = /^(false|0|)$/i;
+        angular.forEach([ 'html', 'container', 'autoClose' ], function(key) {
+          if (angular.isDefined(attr[key]) && falseValueRegExp.test(attr[key])) options[key] = false;
+        });
+        var dataTarget = element.attr('data-target');
+        if (angular.isDefined(dataTarget)) {
+          if (falseValueRegExp.test(dataTarget)) options.target = false; else options.target = dataTarget;
+        }
+        angular.forEach([ 'title', 'content' ], function(key) {
+          attr[key] && attr.$observe(key, function(newValue, oldValue) {
+            scope[key] = $sce.trustAsHtml(newValue);
+            angular.isDefined(oldValue) && requestAnimationFrame(function() {
+              popover && popover.$applyPlacement();
+            });
+          });
+        });
+        attr.bsPopover && scope.$watch(attr.bsPopover, function(newValue, oldValue) {
+          if (angular.isObject(newValue)) {
+            angular.extend(scope, newValue);
+          } else {
+            scope.content = newValue;
+          }
+          angular.isDefined(oldValue) && requestAnimationFrame(function() {
+            popover && popover.$applyPlacement();
+          });
+        }, true);
+        attr.bsShow && scope.$watch(attr.bsShow, function(newValue, oldValue) {
+          if (!popover || !angular.isDefined(newValue)) return;
+          if (angular.isString(newValue)) newValue = !!newValue.match(/true|,?(popover),?/i);
+          newValue === true ? popover.show() : popover.hide();
+        });
+        attr.viewport && scope.$watch(attr.viewport, function(newValue) {
+          if (!popover || !angular.isDefined(newValue)) return;
+          popover.setViewport(newValue);
+        });
+        var popover = $popover(element, options);
+        scope.$on('$destroy', function() {
+          if (popover) popover.destroy();
+          options = null;
+          popover = null;
+        });
+      }
+    };
+  } ]);
+  angular.module('mgcrea.ngStrap.scrollspy', [ 'mgcrea.ngStrap.helpers.debounce', 'mgcrea.ngStrap.helpers.dimensions' ]).provider('$scrollspy', function() {
+    var spies = this.$$spies = {};
+    var defaults = this.defaults = {
+      debounce: 150,
+      throttle: 100,
+      offset: 100
+    };
+    this.$get = [ '$window', '$document', '$rootScope', 'dimensions', 'debounce', 'throttle', function($window, $document, $rootScope, dimensions, debounce, throttle) {
+      var windowEl = angular.element($window);
+      var docEl = angular.element($document.prop('documentElement'));
+      var bodyEl = angular.element($window.document.body);
+      function nodeName(element, name) {
+        return element[0].nodeName && element[0].nodeName.toLowerCase() === name.toLowerCase();
+      }
+      function ScrollSpyFactory(config) {
+        var options = angular.extend({}, defaults, config);
+        if (!options.element) options.element = bodyEl;
+        var isWindowSpy = nodeName(options.element, 'body');
+        var scrollEl = isWindowSpy ? windowEl : options.element;
+        var scrollId = isWindowSpy ? 'window' : options.id;
+        if (spies[scrollId]) {
+          spies[scrollId].$$count++;
+          return spies[scrollId];
+        }
+        var $scrollspy = {};
+        var unbindViewContentLoaded, unbindIncludeContentLoaded;
+        var trackedElements = $scrollspy.$trackedElements = [];
+        var sortedElements = [];
+        var activeTarget;
+        var debouncedCheckPosition;
+        var throttledCheckPosition;
+        var debouncedCheckOffsets;
+        var viewportHeight;
+        var scrollTop;
+        $scrollspy.init = function() {
+          this.$$count = 1;
+          debouncedCheckPosition = debounce(this.checkPosition, options.debounce);
+          throttledCheckPosition = throttle(this.checkPosition, options.throttle);
+          scrollEl.on('click', this.checkPositionWithEventLoop);
+          windowEl.on('resize', debouncedCheckPosition);
+          scrollEl.on('scroll', throttledCheckPosition);
+          debouncedCheckOffsets = debounce(this.checkOffsets, options.debounce);
+          unbindViewContentLoaded = $rootScope.$on('$viewContentLoaded', debouncedCheckOffsets);
+          unbindIncludeContentLoaded = $rootScope.$on('$includeContentLoaded', debouncedCheckOffsets);
+          debouncedCheckOffsets();
+          if (scrollId) {
+            spies[scrollId] = $scrollspy;
+          }
+        };
+        $scrollspy.destroy = function() {
+          this.$$count--;
+          if (this.$$count > 0) {
+            return;
+          }
+          scrollEl.off('click', this.checkPositionWithEventLoop);
+          windowEl.off('resize', debouncedCheckPosition);
+          scrollEl.off('scroll', throttledCheckPosition);
+          unbindViewContentLoaded();
+          unbindIncludeContentLoaded();
+          if (scrollId) {
+            delete spies[scrollId];
+          }
+        };
+        $scrollspy.checkPosition = function() {
+          if (!sortedElements.length) return;
+          scrollTop = (isWindowSpy ? $window.pageYOffset : scrollEl.prop('scrollTop')) || 0;
+          viewportHeight = Math.max($window.innerHeight, docEl.prop('clientHeight'));
+          if (scrollTop < sortedElements[0].offsetTop && activeTarget !== sortedElements[0].target) {
+            return $scrollspy.$activateElement(sortedElements[0]);
+          }
+          for (var i = sortedElements.length; i--; ) {
+            if (angular.isUndefined(sortedElements[i].offsetTop) || sortedElements[i].offsetTop === null) continue;
+            if (activeTarget === sortedElements[i].target) continue;
+            if (scrollTop < sortedElements[i].offsetTop) continue;
+            if (sortedElements[i + 1] && scrollTop > sortedElements[i + 1].offsetTop) continue;
+            return $scrollspy.$activateElement(sortedElements[i]);
+          }
+        };
+        $scrollspy.checkPositionWithEventLoop = function() {
+          setTimeout($scrollspy.checkPosition, 1);
+        };
+        $scrollspy.$activateElement = function(element) {
+          if (activeTarget) {
+            var activeElement = $scrollspy.$getTrackedElement(activeTarget);
+            if (activeElement) {
+              activeElement.source.removeClass('active');
+              if (nodeName(activeElement.source, 'li') && nodeName(activeElement.source.parent().parent(), 'li')) {
+                activeElement.source.parent().parent().removeClass('active');
+              }
+            }
+          }
+          activeTarget = element.target;
+          element.source.addClass('active');
+          if (nodeName(element.source, 'li') && nodeName(element.source.parent().parent(), 'li')) {
+            element.source.parent().parent().addClass('active');
+          }
+        };
+        $scrollspy.$getTrackedElement = function(target) {
+          return trackedElements.filter(function(obj) {
+            return obj.target === target;
+          })[0];
+        };
+        $scrollspy.checkOffsets = function() {
+          angular.forEach(trackedElements, function(trackedElement) {
+            var targetElement = document.querySelector(trackedElement.target);
+            trackedElement.offsetTop = targetElement ? dimensions.offset(targetElement).top : null;
+            if (options.offset && trackedElement.offsetTop !== null) trackedElement.offsetTop -= options.offset * 1;
+          });
+          sortedElements = trackedElements.filter(function(el) {
+            return el.offsetTop !== null;
+          }).sort(function(a, b) {
+            return a.offsetTop - b.offsetTop;
+          });
+          debouncedCheckPosition();
+        };
+        $scrollspy.trackElement = function(target, source) {
+          trackedElements.push({
+            target: target,
+            source: source
+          });
+        };
+        $scrollspy.untrackElement = function(target, source) {
+          var toDelete;
+          for (var i = trackedElements.length; i--; ) {
+            if (trackedElements[i].target === target && trackedElements[i].source === source) {
+              toDelete = i;
+              break;
+            }
+          }
+          trackedElements = trackedElements.splice(toDelete, 1);
+        };
+        $scrollspy.activate = function(i) {
+          trackedElements[i].addClass('active');
+        };
+        $scrollspy.init();
+        return $scrollspy;
+      }
+      return ScrollSpyFactory;
+    } ];
+  }).directive('bsScrollspy', [ '$rootScope', 'debounce', 'dimensions', '$scrollspy', function($rootScope, debounce, dimensions, $scrollspy) {
+    return {
+      restrict: 'EAC',
+      link: function postLink(scope, element, attr) {
+        var options = {
+          scope: scope
+        };
+        angular.forEach([ 'offset', 'target' ], function(key) {
+          if (angular.isDefined(attr[key])) options[key] = attr[key];
+        });
+        var scrollspy = $scrollspy(options);
+        scrollspy.trackElement(options.target, element);
+        scope.$on('$destroy', function() {
+          if (scrollspy) {
+            scrollspy.untrackElement(options.target, element);
+            scrollspy.destroy();
+          }
+          options = null;
+          scrollspy = null;
+        });
+      }
+    };
+  } ]).directive('bsScrollspyList', [ '$rootScope', 'debounce', 'dimensions', '$scrollspy', function($rootScope, debounce, dimensions, $scrollspy) {
+    return {
+      restrict: 'A',
+      compile: function postLink(element, attr) {
+        var children = element[0].querySelectorAll('li > a[href]');
+        angular.forEach(children, function(child) {
+          var childEl = angular.element(child);
+          childEl.parent().attr('bs-scrollspy', '').attr('data-target', childEl.attr('href'));
+        });
+      }
+    };
+  } ]);
+  angular.module('mgcrea.ngStrap.select', [ 'mgcrea.ngStrap.tooltip', 'mgcrea.ngStrap.helpers.parseOptions' ]).provider('$select', function() {
+    var defaults = this.defaults = {
+      animation: 'am-fade',
+      prefixClass: 'select',
+      prefixEvent: '$select',
+      placement: 'bottom-left',
+      template: 'select/select.tpl.html',
+      trigger: 'focus',
+      container: false,
+      keyboard: true,
+      html: false,
+      delay: 0,
+      multiple: false,
+      allNoneButtons: false,
+      sort: true,
+      caretHtml: '&nbsp;<span class="caret"></span>',
+      placeholder: 'Choose among the following...',
+      allText: 'All',
+      noneText: 'None',
+      maxLength: 3,
+      maxLengthHtml: 'selected',
+      iconCheckmark: 'glyphicon glyphicon-ok'
+    };
+    this.$get = [ '$window', '$document', '$rootScope', '$tooltip', '$timeout', function($window, $document, $rootScope, $tooltip, $timeout) {
+      var bodyEl = angular.element($window.document.body);
+      var isNative = /(ip(a|o)d|iphone|android)/gi.test($window.navigator.userAgent);
+      var isTouch = 'createTouch' in $window.document && isNative;
+      function SelectFactory(element, controller, config) {
+        var $select = {};
+        var options = angular.extend({}, defaults, config);
+        $select = $tooltip(element, options);
+        var scope = $select.$scope;
+        scope.$matches = [];
+        if (options.multiple) {
+          scope.$activeIndex = [];
+        } else {
+          scope.$activeIndex = -1;
+        }
+        scope.$isMultiple = options.multiple;
+        scope.$showAllNoneButtons = options.allNoneButtons && options.multiple;
+        scope.$iconCheckmark = options.iconCheckmark;
+        scope.$allText = options.allText;
+        scope.$noneText = options.noneText;
+        scope.$activate = function(index) {
+          scope.$$postDigest(function() {
+            $select.activate(index);
+          });
+        };
+        scope.$select = function(index, evt) {
+          scope.$$postDigest(function() {
+            $select.select(index);
+          });
+        };
+        scope.$isVisible = function() {
+          return $select.$isVisible();
+        };
+        scope.$isActive = function(index) {
+          return $select.$isActive(index);
+        };
+        scope.$selectAll = function() {
+          for (var i = 0; i < scope.$matches.length; i++) {
+            if (!scope.$isActive(i)) {
+              scope.$select(i);
+            }
+          }
+        };
+        scope.$selectNone = function() {
+          for (var i = 0; i < scope.$matches.length; i++) {
+            if (scope.$isActive(i)) {
+              scope.$select(i);
+            }
+          }
+        };
+        $select.update = function(matches) {
+          scope.$matches = matches;
+          $select.$updateActiveIndex();
+        };
+        $select.activate = function(index) {
+          if (options.multiple) {
+            $select.$isActive(index) ? scope.$activeIndex.splice(scope.$activeIndex.indexOf(index), 1) : scope.$activeIndex.push(index);
+            if (options.sort) scope.$activeIndex.sort(function(a, b) {
+              return a - b;
+            });
+          } else {
+            scope.$activeIndex = index;
+          }
+          return scope.$activeIndex;
+        };
+        $select.select = function(index) {
+          var value = scope.$matches[index].value;
+          scope.$apply(function() {
+            $select.activate(index);
+            if (options.multiple) {
+              controller.$setViewValue(scope.$activeIndex.map(function(index) {
+                return scope.$matches[index].value;
+              }));
+            } else {
+              controller.$setViewValue(value);
+              $select.hide();
+            }
+          });
+          scope.$emit(options.prefixEvent + '.select', value, index, $select);
+        };
+        $select.$updateActiveIndex = function() {
+          if (controller.$modelValue && scope.$matches.length) {
+            if (options.multiple && angular.isArray(controller.$modelValue)) {
+              scope.$activeIndex = controller.$modelValue.map(function(value) {
+                return $select.$getIndex(value);
+              });
+            } else {
+              scope.$activeIndex = $select.$getIndex(controller.$modelValue);
+            }
+          } else if (scope.$activeIndex >= scope.$matches.length) {
+            scope.$activeIndex = options.multiple ? [] : 0;
+          }
+        };
+        $select.$isVisible = function() {
+          if (!options.minLength || !controller) {
+            return scope.$matches.length;
+          }
+          return scope.$matches.length && controller.$viewValue.length >= options.minLength;
+        };
+        $select.$isActive = function(index) {
+          if (options.multiple) {
+            return scope.$activeIndex.indexOf(index) !== -1;
+          } else {
+            return scope.$activeIndex === index;
+          }
+        };
+        $select.$getIndex = function(value) {
+          var l = scope.$matches.length, i = l;
+          if (!l) return;
+          for (i = l; i--; ) {
+            if (scope.$matches[i].value === value) break;
+          }
+          if (i < 0) return;
+          return i;
+        };
+        $select.$onMouseDown = function(evt) {
+          evt.preventDefault();
+          evt.stopPropagation();
+          if (isTouch) {
+            var targetEl = angular.element(evt.target);
+            targetEl.triggerHandler('click');
+          }
+        };
+        $select.$onKeyDown = function(evt) {
+          if (!/(9|13|38|40)/.test(evt.keyCode)) return;
+          evt.preventDefault();
+          evt.stopPropagation();
+          if (options.multiple && evt.keyCode === 9) {
+            return $select.hide();
+          }
+          if (!options.multiple && (evt.keyCode === 13 || evt.keyCode === 9)) {
+            return $select.select(scope.$activeIndex);
+          }
+          if (!options.multiple) {
+            if (evt.keyCode === 38 && scope.$activeIndex > 0) scope.$activeIndex--; else if (evt.keyCode === 38 && scope.$activeIndex < 0) scope.$activeIndex = scope.$matches.length - 1; else if (evt.keyCode === 40 && scope.$activeIndex < scope.$matches.length - 1) scope.$activeIndex++; else if (angular.isUndefined(scope.$activeIndex)) scope.$activeIndex = 0;
+            scope.$digest();
+          }
+        };
+        var _show = $select.show;
+        $select.show = function() {
+          _show();
+          if (options.multiple) {
+            $select.$element.addClass('select-multiple');
+          }
+          $timeout(function() {
+            $select.$element.on(isTouch ? 'touchstart' : 'mousedown', $select.$onMouseDown);
+            if (options.keyboard) {
+              element.on('keydown', $select.$onKeyDown);
+            }
+          }, 0, false);
+        };
+        var _hide = $select.hide;
+        $select.hide = function() {
+          if (!options.multiple && !controller.$modelValue) {
+            scope.$activeIndex = -1;
+          }
+          $select.$element.off(isTouch ? 'touchstart' : 'mousedown', $select.$onMouseDown);
+          if (options.keyboard) {
+            element.off('keydown', $select.$onKeyDown);
+          }
+          _hide(true);
+        };
+        return $select;
+      }
+      SelectFactory.defaults = defaults;
+      return SelectFactory;
+    } ];
+  }).directive('bsSelect', [ '$window', '$parse', '$q', '$select', '$parseOptions', function($window, $parse, $q, $select, $parseOptions) {
+    var defaults = $select.defaults;
+    return {
+      restrict: 'EAC',
+      require: 'ngModel',
+      link: function postLink(scope, element, attr, controller) {
+        var options = {
+          scope: scope,
+          placeholder: defaults.placeholder
+        };
+        angular.forEach([ 'placement', 'container', 'delay', 'trigger', 'keyboard', 'html', 'animation', 'template', 'placeholder', 'allNoneButtons', 'maxLength', 'maxLengthHtml', 'allText', 'noneText', 'iconCheckmark', 'autoClose', 'id', 'sort', 'caretHtml', 'prefixClass', 'prefixEvent' ], function(key) {
+          if (angular.isDefined(attr[key])) options[key] = attr[key];
+        });
+        var falseValueRegExp = /^(false|0|)$/i;
+        angular.forEach([ 'html', 'container', 'allNoneButtons', 'sort' ], function(key) {
+          if (angular.isDefined(attr[key]) && falseValueRegExp.test(attr[key])) options[key] = false;
+        });
+        var dataMultiple = element.attr('data-multiple');
+        if (angular.isDefined(dataMultiple)) {
+          if (falseValueRegExp.test(dataMultiple)) options.multiple = false; else options.multiple = dataMultiple;
+        }
+        if (element[0].nodeName.toLowerCase() === 'select') {
+          var inputEl = element;
+          inputEl.css('display', 'none');
+          element = angular.element('<button type="button" class="btn btn-default"></button>');
+          inputEl.after(element);
+        }
+        var parsedOptions = $parseOptions(attr.bsOptions);
+        var select = $select(element, controller, options);
+        var watchedOptions = parsedOptions.$match[7].replace(/\|.+/, '').trim();
+        scope.$watchCollection(watchedOptions, function(newValue, oldValue) {
+          parsedOptions.valuesFn(scope, controller).then(function(values) {
+            select.update(values);
+            controller.$render();
+          });
+        });
+        scope.$watch(attr.ngModel, function(newValue, oldValue) {
+          select.$updateActiveIndex();
+          controller.$render();
+        }, true);
+        controller.$render = function() {
+          var selected, index;
+          if (options.multiple && angular.isArray(controller.$modelValue)) {
+            selected = controller.$modelValue.map(function(value) {
+              index = select.$getIndex(value);
+              return angular.isDefined(index) ? select.$scope.$matches[index].label : false;
+            }).filter(angular.isDefined);
+            if (selected.length > (options.maxLength || defaults.maxLength)) {
+              selected = selected.length + ' ' + (options.maxLengthHtml || defaults.maxLengthHtml);
+            } else {
+              selected = selected.join(', ');
+            }
+          } else {
+            index = select.$getIndex(controller.$modelValue);
+            selected = angular.isDefined(index) ? select.$scope.$matches[index].label : false;
+          }
+          element.html((selected ? selected : options.placeholder) + (options.caretHtml ? options.caretHtml : defaults.caretHtml));
+        };
+        if (options.multiple) {
+          controller.$isEmpty = function(value) {
+            return !value || value.length === 0;
+          };
+        }
+        scope.$on('$destroy', function() {
+          if (select) select.destroy();
+          options = null;
+          select = null;
+        });
+      }
+    };
+  } ]);
+  angular.module('mgcrea.ngStrap.tab', []).provider('$tab', function() {
+    var defaults = this.defaults = {
+      animation: 'am-fade',
+      template: 'tab/tab.tpl.html',
+      navClass: 'nav-tabs',
+      activeClass: 'active'
+    };
+    var controller = this.controller = function($scope, $element, $attrs) {
+      var self = this;
+      self.$options = angular.copy(defaults);
+      angular.forEach([ 'animation', 'navClass', 'activeClass' ], function(key) {
+        if (angular.isDefined($attrs[key])) self.$options[key] = $attrs[key];
+      });
+      $scope.$navClass = self.$options.navClass;
+      $scope.$activeClass = self.$options.activeClass;
+      self.$panes = $scope.$panes = [];
+      self.$activePaneChangeListeners = self.$viewChangeListeners = [];
+      self.$push = function(pane) {
+        if (angular.isUndefined(self.$panes.$active)) {
+          $scope.$setActive(pane.name || 0);
+        }
+        self.$panes.push(pane);
+      };
+      self.$remove = function(pane) {
+        var index = self.$panes.indexOf(pane);
+        var active = self.$panes.$active;
+        var activeIndex;
+        if (angular.isString(active)) {
+          activeIndex = self.$panes.map(function(pane) {
+            return pane.name;
+          }).indexOf(active);
+        } else {
+          activeIndex = self.$panes.$active;
+        }
+        self.$panes.splice(index, 1);
+        if (index < activeIndex) {
+          activeIndex--;
+        } else if (index === activeIndex && activeIndex === self.$panes.length) {
+          activeIndex--;
+        }
+        if (activeIndex >= 0 && activeIndex < self.$panes.length) {
+          self.$setActive(self.$panes[activeIndex].name || activeIndex);
+        } else {
+          self.$setActive();
+        }
+      };
+      self.$setActive = $scope.$setActive = function(value) {
+        self.$panes.$active = value;
+        self.$activePaneChangeListeners.forEach(function(fn) {
+          fn();
+        });
+      };
+      self.$isActive = $scope.$isActive = function($pane, $index) {
+        return self.$panes.$active === $pane.name || self.$panes.$active === $index;
+      };
+    };
+    this.$get = function() {
+      var $tab = {};
+      $tab.defaults = defaults;
+      $tab.controller = controller;
+      return $tab;
+    };
+  }).directive('bsTabs', [ '$window', '$animate', '$tab', '$parse', function($window, $animate, $tab, $parse) {
+    var defaults = $tab.defaults;
+    return {
+      require: [ '?ngModel', 'bsTabs' ],
+      transclude: true,
+      scope: true,
+      controller: [ '$scope', '$element', '$attrs', $tab.controller ],
+      templateUrl: function(element, attr) {
+        return attr.template || defaults.template;
+      },
+      link: function postLink(scope, element, attrs, controllers) {
+        var ngModelCtrl = controllers[0];
+        var bsTabsCtrl = controllers[1];
+        if (ngModelCtrl) {
+          bsTabsCtrl.$activePaneChangeListeners.push(function() {
+            ngModelCtrl.$setViewValue(bsTabsCtrl.$panes.$active);
+          });
+          ngModelCtrl.$formatters.push(function(modelValue) {
+            bsTabsCtrl.$setActive(modelValue);
+            return modelValue;
+          });
+        }
+        if (attrs.bsActivePane) {
+          var parsedBsActivePane = $parse(attrs.bsActivePane);
+          bsTabsCtrl.$activePaneChangeListeners.push(function() {
+            parsedBsActivePane.assign(scope, bsTabsCtrl.$panes.$active);
+          });
+          scope.$watch(attrs.bsActivePane, function(newValue, oldValue) {
+            bsTabsCtrl.$setActive(newValue);
+          }, true);
+        }
+      }
+    };
+  } ]).directive('bsPane', [ '$window', '$animate', '$sce', function($window, $animate, $sce) {
+    return {
+      require: [ '^?ngModel', '^bsTabs' ],
+      scope: true,
+      link: function postLink(scope, element, attrs, controllers) {
+        var ngModelCtrl = controllers[0];
+        var bsTabsCtrl = controllers[1];
+        element.addClass('tab-pane');
+        attrs.$observe('title', function(newValue, oldValue) {
+          scope.title = $sce.trustAsHtml(newValue);
+        });
+        scope.name = attrs.name;
+        if (bsTabsCtrl.$options.animation) {
+          element.addClass(bsTabsCtrl.$options.animation);
+        }
+        attrs.$observe('disabled', function(newValue, oldValue) {
+          scope.disabled = scope.$eval(newValue);
+        });
+        bsTabsCtrl.$push(scope);
+        scope.$on('$destroy', function() {
+          bsTabsCtrl.$remove(scope);
+        });
+        function render() {
+          var index = bsTabsCtrl.$panes.indexOf(scope);
+          $animate[bsTabsCtrl.$isActive(scope, index) ? 'addClass' : 'removeClass'](element, bsTabsCtrl.$options.activeClass);
+        }
+        bsTabsCtrl.$activePaneChangeListeners.push(function() {
+          render();
+        });
+        render();
+      }
+    };
+  } ]);
+  angular.module('mgcrea.ngStrap.timepicker', [ 'mgcrea.ngStrap.helpers.dateParser', 'mgcrea.ngStrap.helpers.dateFormatter', 'mgcrea.ngStrap.tooltip' ]).provider('$timepicker', function() {
+    var defaults = this.defaults = {
+      animation: 'am-fade',
+      prefixClass: 'timepicker',
+      placement: 'bottom-left',
+      template: 'timepicker/timepicker.tpl.html',
+      trigger: 'focus',
+      container: false,
+      keyboard: true,
+      html: false,
+      delay: 0,
+      useNative: true,
+      timeType: 'date',
+      timeFormat: 'shortTime',
+      timezone: null,
+      modelTimeFormat: null,
+      autoclose: false,
+      minTime: -Infinity,
+      maxTime: +Infinity,
+      length: 5,
+      hourStep: 1,
+      minuteStep: 5,
+      secondStep: 5,
+      roundDisplay: false,
+      iconUp: 'glyphicon glyphicon-chevron-up',
+      iconDown: 'glyphicon glyphicon-chevron-down',
+      arrowBehavior: 'pager'
+    };
+    this.$get = [ '$window', '$document', '$rootScope', '$sce', '$dateFormatter', '$tooltip', '$timeout', function($window, $document, $rootScope, $sce, $dateFormatter, $tooltip, $timeout) {
+      var bodyEl = angular.element($window.document.body);
+      var isNative = /(ip(a|o)d|iphone|android)/gi.test($window.navigator.userAgent);
+      var isTouch = 'createTouch' in $window.document && isNative;
+      if (!defaults.lang) defaults.lang = $dateFormatter.getDefaultLocale();
+      function timepickerFactory(element, controller, config) {
+        var $timepicker = $tooltip(element, angular.extend({}, defaults, config));
+        var parentScope = config.scope;
+        var options = $timepicker.$options;
+        var scope = $timepicker.$scope;
+        var lang = options.lang;
+        var formatDate = function(date, format, timezone) {
+          return $dateFormatter.formatDate(date, format, lang, timezone);
+        };
+        function floorMinutes(time) {
+          var coeff = 1e3 * 60 * options.minuteStep;
+          return new Date(Math.floor(time.getTime() / coeff) * coeff);
+        }
+        var selectedIndex = 0;
+        var defaultDate = options.roundDisplay ? floorMinutes(new Date()) : new Date();
+        var startDate = controller.$dateValue || defaultDate;
+        var viewDate = {
+          hour: startDate.getHours(),
+          meridian: startDate.getHours() < 12,
+          minute: startDate.getMinutes(),
+          second: startDate.getSeconds(),
+          millisecond: startDate.getMilliseconds()
+        };
+        var format = $dateFormatter.getDatetimeFormat(options.timeFormat, lang);
+        var hoursFormat = $dateFormatter.hoursFormat(format), timeSeparator = $dateFormatter.timeSeparator(format), minutesFormat = $dateFormatter.minutesFormat(format), secondsFormat = $dateFormatter.secondsFormat(format), showSeconds = $dateFormatter.showSeconds(format), showAM = $dateFormatter.showAM(format);
+        scope.$iconUp = options.iconUp;
+        scope.$iconDown = options.iconDown;
+        scope.$select = function(date, index) {
+          $timepicker.select(date, index);
+        };
+        scope.$moveIndex = function(value, index) {
+          $timepicker.$moveIndex(value, index);
+        };
+        scope.$switchMeridian = function(date) {
+          $timepicker.switchMeridian(date);
+        };
+        $timepicker.update = function(date) {
+          if (angular.isDate(date) && !isNaN(date.getTime())) {
+            $timepicker.$date = date;
+            angular.extend(viewDate, {
+              hour: date.getHours(),
+              minute: date.getMinutes(),
+              second: date.getSeconds(),
+              millisecond: date.getMilliseconds()
+            });
+            $timepicker.$build();
+          } else if (!$timepicker.$isBuilt) {
+            $timepicker.$build();
+          }
+        };
+        $timepicker.select = function(date, index, keep) {
+          if (!controller.$dateValue || isNaN(controller.$dateValue.getTime())) controller.$dateValue = new Date(1970, 0, 1);
+          if (!angular.isDate(date)) date = new Date(date);
+          if (index === 0) controller.$dateValue.setHours(date.getHours()); else if (index === 1) controller.$dateValue.setMinutes(date.getMinutes()); else if (index === 2) controller.$dateValue.setSeconds(date.getSeconds());
+          controller.$setViewValue(angular.copy(controller.$dateValue));
+          controller.$render();
+          if (options.autoclose && !keep) {
+            $timeout(function() {
+              $timepicker.hide(true);
+            });
+          }
+        };
+        $timepicker.switchMeridian = function(date) {
+          if (!controller.$dateValue || isNaN(controller.$dateValue.getTime())) {
+            return;
+          }
+          var hours = (date || controller.$dateValue).getHours();
+          controller.$dateValue.setHours(hours < 12 ? hours + 12 : hours - 12);
+          controller.$setViewValue(angular.copy(controller.$dateValue));
+          controller.$render();
+        };
+        $timepicker.$build = function() {
+          var i, midIndex = scope.midIndex = parseInt(options.length / 2, 10);
+          var hours = [], hour;
+          for (i = 0; i < options.length; i++) {
+            hour = new Date(1970, 0, 1, viewDate.hour - (midIndex - i) * options.hourStep);
+            hours.push({
+              date: hour,
+              label: formatDate(hour, hoursFormat),
+              selected: $timepicker.$date && $timepicker.$isSelected(hour, 0),
+              disabled: $timepicker.$isDisabled(hour, 0)
+            });
+          }
+          var minutes = [], minute;
+          for (i = 0; i < options.length; i++) {
+            minute = new Date(1970, 0, 1, 0, viewDate.minute - (midIndex - i) * options.minuteStep);
+            minutes.push({
+              date: minute,
+              label: formatDate(minute, minutesFormat),
+              selected: $timepicker.$date && $timepicker.$isSelected(minute, 1),
+              disabled: $timepicker.$isDisabled(minute, 1)
+            });
+          }
+          var seconds = [], second;
+          for (i = 0; i < options.length; i++) {
+            second = new Date(1970, 0, 1, 0, 0, viewDate.second - (midIndex - i) * options.secondStep);
+            seconds.push({
+              date: second,
+              label: formatDate(second, secondsFormat),
+              selected: $timepicker.$date && $timepicker.$isSelected(second, 2),
+              disabled: $timepicker.$isDisabled(second, 2)
+            });
+          }
+          var rows = [];
+          for (i = 0; i < options.length; i++) {
+            if (showSeconds) {
+              rows.push([ hours[i], minutes[i], seconds[i] ]);
+            } else {
+              rows.push([ hours[i], minutes[i] ]);
+            }
+          }
+          scope.rows = rows;
+          scope.showSeconds = showSeconds;
+          scope.showAM = showAM;
+          scope.isAM = ($timepicker.$date || hours[midIndex].date).getHours() < 12;
+          scope.timeSeparator = timeSeparator;
+          $timepicker.$isBuilt = true;
+        };
+        $timepicker.$isSelected = function(date, index) {
+          if (!$timepicker.$date) return false; else if (index === 0) {
+            return date.getHours() === $timepicker.$date.getHours();
+          } else if (index === 1) {
+            return date.getMinutes() === $timepicker.$date.getMinutes();
+          } else if (index === 2) {
+            return date.getSeconds() === $timepicker.$date.getSeconds();
+          }
+        };
+        $timepicker.$isDisabled = function(date, index) {
+          var selectedTime;
+          if (index === 0) {
+            selectedTime = date.getTime() + viewDate.minute * 6e4 + viewDate.second * 1e3;
+          } else if (index === 1) {
+            selectedTime = date.getTime() + viewDate.hour * 36e5 + viewDate.second * 1e3;
+          } else if (index === 2) {
+            selectedTime = date.getTime() + viewDate.hour * 36e5 + viewDate.minute * 6e4;
+          }
+          return selectedTime < options.minTime * 1 || selectedTime > options.maxTime * 1;
+        };
+        scope.$arrowAction = function(value, index) {
+          if (options.arrowBehavior === 'picker') {
+            $timepicker.$setTimeByStep(value, index);
+          } else {
+            $timepicker.$moveIndex(value, index);
+          }
+        };
+        $timepicker.$setTimeByStep = function(value, index) {
+          var newDate = new Date($timepicker.$date);
+          var hours = newDate.getHours(), hoursLength = formatDate(newDate, hoursFormat).length;
+          var minutes = newDate.getMinutes(), minutesLength = formatDate(newDate, minutesFormat).length;
+          var seconds = newDate.getSeconds(), secondsLength = formatDate(newDate, secondsFormat).length;
+          if (index === 0) {
+            newDate.setHours(hours - parseInt(options.hourStep, 10) * value);
+          } else if (index === 1) {
+            newDate.setMinutes(minutes - parseInt(options.minuteStep, 10) * value);
+          } else if (index === 2) {
+            newDate.setSeconds(seconds - parseInt(options.secondStep, 10) * value);
+          }
+          $timepicker.select(newDate, index, true);
+        };
+        $timepicker.$moveIndex = function(value, index) {
+          var targetDate;
+          if (index === 0) {
+            targetDate = new Date(1970, 0, 1, viewDate.hour + value * options.length, viewDate.minute, viewDate.second);
+            angular.extend(viewDate, {
+              hour: targetDate.getHours()
+            });
+          } else if (index === 1) {
+            targetDate = new Date(1970, 0, 1, viewDate.hour, viewDate.minute + value * options.length * options.minuteStep, viewDate.second);
+            angular.extend(viewDate, {
+              minute: targetDate.getMinutes()
+            });
+          } else if (index === 2) {
+            targetDate = new Date(1970, 0, 1, viewDate.hour, viewDate.minute, viewDate.second + value * options.length * options.secondStep);
+            angular.extend(viewDate, {
+              second: targetDate.getSeconds()
+            });
+          }
+          $timepicker.$build();
+        };
+        $timepicker.$onMouseDown = function(evt) {
+          if (evt.target.nodeName.toLowerCase() !== 'input') evt.preventDefault();
+          evt.stopPropagation();
+          if (isTouch) {
+            var targetEl = angular.element(evt.target);
+            if (targetEl[0].nodeName.toLowerCase() !== 'button') {
+              targetEl = targetEl.parent();
+            }
+            targetEl.triggerHandler('click');
+          }
+        };
+        $timepicker.$onKeyDown = function(evt) {
+          if (!/(38|37|39|40|13)/.test(evt.keyCode) || evt.shiftKey || evt.altKey) return;
+          evt.preventDefault();
+          evt.stopPropagation();
+          if (evt.keyCode === 13) return $timepicker.hide(true);
+          var newDate = new Date($timepicker.$date);
+          var hours = newDate.getHours(), hoursLength = formatDate(newDate, hoursFormat).length;
+          var minutes = newDate.getMinutes(), minutesLength = formatDate(newDate, minutesFormat).length;
+          var seconds = newDate.getSeconds(), secondsLength = formatDate(newDate, secondsFormat).length;
+          var sepLength = 1;
+          var lateralMove = /(37|39)/.test(evt.keyCode);
+          var count = 2 + showSeconds * 1 + showAM * 1;
+          if (lateralMove) {
+            if (evt.keyCode === 37) selectedIndex = selectedIndex < 1 ? count - 1 : selectedIndex - 1; else if (evt.keyCode === 39) selectedIndex = selectedIndex < count - 1 ? selectedIndex + 1 : 0;
+          }
+          var selectRange = [ 0, hoursLength ];
+          var incr = 0;
+          if (evt.keyCode === 38) incr = -1;
+          if (evt.keyCode === 40) incr = +1;
+          var isSeconds = selectedIndex === 2 && showSeconds;
+          var isMeridian = selectedIndex === 2 && !showSeconds || selectedIndex === 3 && showSeconds;
+          if (selectedIndex === 0) {
+            newDate.setHours(hours + incr * parseInt(options.hourStep, 10));
+            hoursLength = formatDate(newDate, hoursFormat).length;
+            selectRange = [ 0, hoursLength ];
+          } else if (selectedIndex === 1) {
+            newDate.setMinutes(minutes + incr * parseInt(options.minuteStep, 10));
+            minutesLength = formatDate(newDate, minutesFormat).length;
+            selectRange = [ hoursLength + sepLength, minutesLength ];
+          } else if (isSeconds) {
+            newDate.setSeconds(seconds + incr * parseInt(options.secondStep, 10));
+            secondsLength = formatDate(newDate, secondsFormat).length;
+            selectRange = [ hoursLength + sepLength + minutesLength + sepLength, secondsLength ];
+          } else if (isMeridian) {
+            if (!lateralMove) $timepicker.switchMeridian();
+            selectRange = [ hoursLength + sepLength + minutesLength + sepLength + (secondsLength + sepLength) * showSeconds, 2 ];
+          }
+          $timepicker.select(newDate, selectedIndex, true);
+          createSelection(selectRange[0], selectRange[1]);
+          parentScope.$digest();
+        };
+        function createSelection(start, length) {
+          var end = start + length;
+          if (element[0].createTextRange) {
+            var selRange = element[0].createTextRange();
+            selRange.collapse(true);
+            selRange.moveStart('character', start);
+            selRange.moveEnd('character', end);
+            selRange.select();
+          } else if (element[0].setSelectionRange) {
+            element[0].setSelectionRange(start, end);
+          } else if (angular.isUndefined(element[0].selectionStart)) {
+            element[0].selectionStart = start;
+            element[0].selectionEnd = end;
+          }
+        }
+        function focusElement() {
+          element[0].focus();
+        }
+        var _init = $timepicker.init;
+        $timepicker.init = function() {
+          if (isNative && options.useNative) {
+            element.prop('type', 'time');
+            element.css('-webkit-appearance', 'textfield');
+            return;
+          } else if (isTouch) {
+            element.prop('type', 'text');
+            element.attr('readonly', 'true');
+            element.on('click', focusElement);
+          }
+          _init();
+        };
+        var _destroy = $timepicker.destroy;
+        $timepicker.destroy = function() {
+          if (isNative && options.useNative) {
+            element.off('click', focusElement);
+          }
+          _destroy();
+        };
+        var _show = $timepicker.show;
+        $timepicker.show = function() {
+          _show();
+          $timeout(function() {
+            $timepicker.$element && $timepicker.$element.on(isTouch ? 'touchstart' : 'mousedown', $timepicker.$onMouseDown);
+            if (options.keyboard) {
+              element && element.on('keydown', $timepicker.$onKeyDown);
+            }
+          }, 0, false);
+        };
+        var _hide = $timepicker.hide;
+        $timepicker.hide = function(blur) {
+          if (!$timepicker.$isShown) return;
+          $timepicker.$element && $timepicker.$element.off(isTouch ? 'touchstart' : 'mousedown', $timepicker.$onMouseDown);
+          if (options.keyboard) {
+            element && element.off('keydown', $timepicker.$onKeyDown);
+          }
+          _hide(blur);
+        };
+        return $timepicker;
+      }
+      timepickerFactory.defaults = defaults;
+      return timepickerFactory;
+    } ];
+  }).directive('bsTimepicker', [ '$window', '$parse', '$q', '$dateFormatter', '$dateParser', '$timepicker', function($window, $parse, $q, $dateFormatter, $dateParser, $timepicker) {
+    var defaults = $timepicker.defaults;
+    var isNative = /(ip(a|o)d|iphone|android)/gi.test($window.navigator.userAgent);
+    var requestAnimationFrame = $window.requestAnimationFrame || $window.setTimeout;
+    return {
+      restrict: 'EAC',
+      require: 'ngModel',
+      link: function postLink(scope, element, attr, controller) {
+        var options = {
+          scope: scope,
+          controller: controller
+        };
+        angular.forEach([ 'placement', 'container', 'delay', 'trigger', 'keyboard', 'html', 'animation', 'template', 'autoclose', 'timeType', 'timeFormat', 'timezone', 'modelTimeFormat', 'useNative', 'hourStep', 'minuteStep', 'secondStep', 'length', 'arrowBehavior', 'iconUp', 'iconDown', 'roundDisplay', 'id', 'prefixClass', 'prefixEvent' ], function(key) {
+          if (angular.isDefined(attr[key])) options[key] = attr[key];
+        });
+        var falseValueRegExp = /^(false|0|)$/i;
+        angular.forEach([ 'html', 'container', 'autoclose', 'useNative', 'roundDisplay' ], function(key) {
+          if (angular.isDefined(attr[key]) && falseValueRegExp.test(attr[key])) options[key] = false;
+        });
+        attr.bsShow && scope.$watch(attr.bsShow, function(newValue, oldValue) {
+          if (!timepicker || !angular.isDefined(newValue)) return;
+          if (angular.isString(newValue)) newValue = !!newValue.match(/true|,?(timepicker),?/i);
+          newValue === true ? timepicker.show() : timepicker.hide();
+        });
+        if (isNative && (options.useNative || defaults.useNative)) options.timeFormat = 'HH:mm';
+        var timepicker = $timepicker(element, controller, options);
+        options = timepicker.$options;
+        var lang = options.lang;
+        var formatDate = function(date, format, timezone) {
+          return $dateFormatter.formatDate(date, format, lang, timezone);
+        };
+        var dateParser = $dateParser({
+          format: options.timeFormat,
+          lang: lang
+        });
+        angular.forEach([ 'minTime', 'maxTime' ], function(key) {
+          angular.isDefined(attr[key]) && attr.$observe(key, function(newValue) {
+            timepicker.$options[key] = dateParser.getTimeForAttribute(key, newValue);
+            !isNaN(timepicker.$options[key]) && timepicker.$build();
+            validateAgainstMinMaxTime(controller.$dateValue);
+          });
+        });
+        scope.$watch(attr.ngModel, function(newValue, oldValue) {
+          timepicker.update(controller.$dateValue);
+        }, true);
+        function validateAgainstMinMaxTime(parsedTime) {
+          if (!angular.isDate(parsedTime)) return;
+          var isMinValid = isNaN(options.minTime) || new Date(parsedTime.getTime()).setFullYear(1970, 0, 1) >= options.minTime;
+          var isMaxValid = isNaN(options.maxTime) || new Date(parsedTime.getTime()).setFullYear(1970, 0, 1) <= options.maxTime;
+          var isValid = isMinValid && isMaxValid;
+          controller.$setValidity('date', isValid);
+          controller.$setValidity('min', isMinValid);
+          controller.$setValidity('max', isMaxValid);
+          if (!isValid) {
+            return;
+          }
+          controller.$dateValue = parsedTime;
+        }
+        controller.$parsers.unshift(function(viewValue) {
+          var date;
+          if (!viewValue) {
+            controller.$setValidity('date', true);
+            return null;
+          }
+          var parsedTime = angular.isDate(viewValue) ? viewValue : dateParser.parse(viewValue, controller.$dateValue);
+          if (!parsedTime || isNaN(parsedTime.getTime())) {
+            controller.$setValidity('date', false);
+            return;
+          } else {
+            validateAgainstMinMaxTime(parsedTime);
+          }
+          if (options.timeType === 'string') {
+            date = dateParser.timezoneOffsetAdjust(parsedTime, options.timezone, true);
+            return formatDate(date, options.modelTimeFormat || options.timeFormat);
+          }
+          date = dateParser.timezoneOffsetAdjust(controller.$dateValue, options.timezone, true);
+          if (options.timeType === 'number') {
+            return date.getTime();
+          } else if (options.timeType === 'unix') {
+            return date.getTime() / 1e3;
+          } else if (options.timeType === 'iso') {
+            return date.toISOString();
+          } else {
+            return new Date(date);
+          }
+        });
+        controller.$formatters.push(function(modelValue) {
+          var date;
+          if (angular.isUndefined(modelValue) || modelValue === null) {
+            date = NaN;
+          } else if (angular.isDate(modelValue)) {
+            date = modelValue;
+          } else if (options.timeType === 'string') {
+            date = dateParser.parse(modelValue, null, options.modelTimeFormat);
+          } else if (options.timeType === 'unix') {
+            date = new Date(modelValue * 1e3);
+          } else {
+            date = new Date(modelValue);
+          }
+          controller.$dateValue = dateParser.timezoneOffsetAdjust(date, options.timezone);
+          return getTimeFormattedString();
+        });
+        controller.$render = function() {
+          element.val(getTimeFormattedString());
+        };
+        function getTimeFormattedString() {
+          return !controller.$dateValue || isNaN(controller.$dateValue.getTime()) ? '' : formatDate(controller.$dateValue, options.timeFormat);
+        }
+        scope.$on('$destroy', function() {
+          if (timepicker) timepicker.destroy();
+          options = null;
+          timepicker = null;
+        });
+      }
+    };
+  } ]);
+  angular.module('mgcrea.ngStrap.tooltip', [ 'mgcrea.ngStrap.helpers.dimensions' ]).provider('$tooltip', function() {
+    var defaults = this.defaults = {
+      animation: 'am-fade',
+      customClass: '',
+      prefixClass: 'tooltip',
+      prefixEvent: 'tooltip',
+      container: false,
+      target: false,
+      placement: 'top',
+      template: 'tooltip/tooltip.tpl.html',
+      contentTemplate: false,
+      trigger: 'hover focus',
+      keyboard: false,
+      html: false,
+      show: false,
+      title: '',
+      type: '',
+      delay: 0,
+      autoClose: false,
+      bsEnabled: true,
+      viewport: {
+        selector: 'body',
+        padding: 0
+      }
+    };
+    this.$get = [ '$window', '$rootScope', '$compile', '$q', '$templateCache', '$http', '$animate', '$sce', 'dimensions', '$$rAF', '$timeout', function($window, $rootScope, $compile, $q, $templateCache, $http, $animate, $sce, dimensions, $$rAF, $timeout) {
+      var trim = String.prototype.trim;
+      var isTouch = 'createTouch' in $window.document;
+      var htmlReplaceRegExp = /ng-bind="/gi;
+      var $body = angular.element($window.document);
+      function TooltipFactory(element, config) {
+        var $tooltip = {};
+        var nodeName = element[0].nodeName.toLowerCase();
+        var options = $tooltip.$options = angular.extend({}, defaults, config);
+        $tooltip.$promise = fetchTemplate(options.template);
+        var scope = $tooltip.$scope = options.scope && options.scope.$new() || $rootScope.$new();
+        if (options.delay && angular.isString(options.delay)) {
+          var split = options.delay.split(',').map(parseFloat);
+          options.delay = split.length > 1 ? {
+            show: split[0],
+            hide: split[1]
+          } : split[0];
+        }
+        $tooltip.$id = options.id || element.attr('id') || '';
+        if (options.title) {
+          scope.title = $sce.trustAsHtml(options.title);
+        }
+        scope.$setEnabled = function(isEnabled) {
+          scope.$$postDigest(function() {
+            $tooltip.setEnabled(isEnabled);
+          });
+        };
+        scope.$hide = function() {
+          scope.$$postDigest(function() {
+            $tooltip.hide();
+          });
+        };
+        scope.$show = function() {
+          scope.$$postDigest(function() {
+            $tooltip.show();
+          });
+        };
+        scope.$toggle = function() {
+          scope.$$postDigest(function() {
+            $tooltip.toggle();
+          });
+        };
+        $tooltip.$isShown = scope.$isShown = false;
+        var timeout, hoverState;
+        if (options.contentTemplate) {
+          $tooltip.$promise = $tooltip.$promise.then(function(template) {
+            var templateEl = angular.element(template);
+            return fetchTemplate(options.contentTemplate).then(function(contentTemplate) {
+              var contentEl = findElement('[ng-bind="content"]', templateEl[0]);
+              if (!contentEl.length) contentEl = findElement('[ng-bind="title"]', templateEl[0]);
+              contentEl.removeAttr('ng-bind').html(contentTemplate);
+              return templateEl[0].outerHTML;
+            });
+          });
+        }
+        var tipLinker, tipElement, tipTemplate, tipContainer, tipScope;
+        $tooltip.$promise.then(function(template) {
+          if (angular.isObject(template)) template = template.data;
+          if (options.html) template = template.replace(htmlReplaceRegExp, 'ng-bind-html="');
+          template = trim.apply(template);
+          tipTemplate = template;
+          tipLinker = $compile(template);
+          $tooltip.init();
+        });
+        $tooltip.init = function() {
+          if (options.delay && angular.isNumber(options.delay)) {
+            options.delay = {
+              show: options.delay,
+              hide: options.delay
+            };
+          }
+          if (options.container === 'self') {
+            tipContainer = element;
+          } else if (angular.isElement(options.container)) {
+            tipContainer = options.container;
+          } else if (options.container) {
+            tipContainer = findElement(options.container);
+          }
+          bindTriggerEvents();
+          if (options.target) {
+            options.target = angular.isElement(options.target) ? options.target : findElement(options.target);
+          }
+          if (options.show) {
+            scope.$$postDigest(function() {
+              options.trigger === 'focus' ? element[0].focus() : $tooltip.show();
+            });
+          }
+        };
+        $tooltip.destroy = function() {
+          unbindTriggerEvents();
+          destroyTipElement();
+          scope.$destroy();
+        };
+        $tooltip.enter = function() {
+          clearTimeout(timeout);
+          hoverState = 'in';
+          if (!options.delay || !options.delay.show) {
+            return $tooltip.show();
+          }
+          timeout = setTimeout(function() {
+            if (hoverState === 'in') $tooltip.show();
+          }, options.delay.show);
+        };
+        $tooltip.show = function() {
+          if (!options.bsEnabled || $tooltip.$isShown) return;
+          scope.$emit(options.prefixEvent + '.show.before', $tooltip);
+          var parent, after;
+          if (options.container) {
+            parent = tipContainer;
+            if (tipContainer[0].lastChild) {
+              after = angular.element(tipContainer[0].lastChild);
+            } else {
+              after = null;
+            }
+          } else {
+            parent = null;
+            after = element;
+          }
+          if (tipElement) destroyTipElement();
+          tipScope = $tooltip.$scope.$new();
+          tipElement = $tooltip.$element = tipLinker(tipScope, function(clonedElement, scope) {});
+          tipElement.css({
+            top: '-9999px',
+            left: '-9999px',
+            right: 'auto',
+            display: 'block',
+            visibility: 'hidden'
+          });
+          if (options.animation) tipElement.addClass(options.animation);
+          if (options.type) tipElement.addClass(options.prefixClass + '-' + options.type);
+          if (options.customClass) tipElement.addClass(options.customClass);
+          after ? after.after(tipElement) : parent.prepend(tipElement);
+          $tooltip.$isShown = scope.$isShown = true;
+          safeDigest(scope);
+          $tooltip.$applyPlacement();
+          if (angular.version.minor <= 2) {
+            $animate.enter(tipElement, parent, after, enterAnimateCallback);
+          } else {
+            $animate.enter(tipElement, parent, after).then(enterAnimateCallback);
+          }
+          safeDigest(scope);
+          $$rAF(function() {
+            if (tipElement) tipElement.css({
+              visibility: 'visible'
+            });
+          });
+          if (options.keyboard) {
+            if (options.trigger !== 'focus') {
+              $tooltip.focus();
+            }
+            bindKeyboardEvents();
+          }
+          if (options.autoClose) {
+            bindAutoCloseEvents();
+          }
+        };
+        function enterAnimateCallback() {
+          scope.$emit(options.prefixEvent + '.show', $tooltip);
+        }
+        $tooltip.leave = function() {
+          clearTimeout(timeout);
+          hoverState = 'out';
+          if (!options.delay || !options.delay.hide) {
+            return $tooltip.hide();
+          }
+          timeout = setTimeout(function() {
+            if (hoverState === 'out') {
+              $tooltip.hide();
+            }
+          }, options.delay.hide);
+        };
+        var _blur;
+        var _tipToHide;
+        $tooltip.hide = function(blur) {
+          if (!$tooltip.$isShown) return;
+          scope.$emit(options.prefixEvent + '.hide.before', $tooltip);
+          _blur = blur;
+          _tipToHide = tipElement;
+          if (angular.version.minor <= 2) {
+            $animate.leave(tipElement, leaveAnimateCallback);
+          } else {
+            $animate.leave(tipElement).then(leaveAnimateCallback);
+          }
+          $tooltip.$isShown = scope.$isShown = false;
+          safeDigest(scope);
+          if (options.keyboard && tipElement !== null) {
+            unbindKeyboardEvents();
+          }
+          if (options.autoClose && tipElement !== null) {
+            unbindAutoCloseEvents();
+          }
+        };
+        function leaveAnimateCallback() {
+          scope.$emit(options.prefixEvent + '.hide', $tooltip);
+          if (tipElement === _tipToHide) {
+            if (_blur && options.trigger === 'focus') {
+              return element[0].blur();
+            }
+            destroyTipElement();
+          }
+        }
+        $tooltip.toggle = function() {
+          $tooltip.$isShown ? $tooltip.leave() : $tooltip.enter();
+        };
+        $tooltip.focus = function() {
+          tipElement[0].focus();
+        };
+        $tooltip.setEnabled = function(isEnabled) {
+          options.bsEnabled = isEnabled;
+        };
+        $tooltip.setViewport = function(viewport) {
+          options.viewport = viewport;
+        };
+        $tooltip.$applyPlacement = function() {
+          if (!tipElement) return;
+          var placement = options.placement, autoToken = /\s?auto?\s?/i, autoPlace = autoToken.test(placement);
+          if (autoPlace) {
+            placement = placement.replace(autoToken, '') || defaults.placement;
+          }
+          tipElement.addClass(options.placement);
+          var elementPosition = getPosition(), tipWidth = tipElement.prop('offsetWidth'), tipHeight = tipElement.prop('offsetHeight');
+          if (autoPlace) {
+            var originalPlacement = placement;
+            var container = options.container ? findElement(options.container) : element.parent();
+            var containerPosition = getPosition(container);
+            if (originalPlacement.indexOf('bottom') >= 0 && elementPosition.bottom + tipHeight > containerPosition.bottom) {
+              placement = originalPlacement.replace('bottom', 'top');
+            } else if (originalPlacement.indexOf('top') >= 0 && elementPosition.top - tipHeight < containerPosition.top) {
+              placement = originalPlacement.replace('top', 'bottom');
+            }
+            if ((originalPlacement === 'right' || originalPlacement === 'bottom-left' || originalPlacement === 'top-left') && elementPosition.right + tipWidth > containerPosition.width) {
+              placement = originalPlacement === 'right' ? 'left' : placement.replace('left', 'right');
+            } else if ((originalPlacement === 'left' || originalPlacement === 'bottom-right' || originalPlacement === 'top-right') && elementPosition.left - tipWidth < containerPosition.left) {
+              placement = originalPlacement === 'left' ? 'right' : placement.replace('right', 'left');
+            }
+            tipElement.removeClass(originalPlacement).addClass(placement);
+          }
+          var tipPosition = getCalculatedOffset(placement, elementPosition, tipWidth, tipHeight);
+          applyPlacement(tipPosition, placement);
+        };
+        $tooltip.$onKeyUp = function(evt) {
+          if (evt.which === 27 && $tooltip.$isShown) {
+            $tooltip.hide();
+            evt.stopPropagation();
+          }
+        };
+        $tooltip.$onFocusKeyUp = function(evt) {
+          if (evt.which === 27) {
+            element[0].blur();
+            evt.stopPropagation();
+          }
+        };
+        $tooltip.$onFocusElementMouseDown = function(evt) {
+          evt.preventDefault();
+          evt.stopPropagation();
+          $tooltip.$isShown ? element[0].blur() : element[0].focus();
+        };
+        function bindTriggerEvents() {
+          var triggers = options.trigger.split(' ');
+          angular.forEach(triggers, function(trigger) {
+            if (trigger === 'click') {
+              element.on('click', $tooltip.toggle);
+            } else if (trigger !== 'manual') {
+              element.on(trigger === 'hover' ? 'mouseenter' : 'focus', $tooltip.enter);
+              element.on(trigger === 'hover' ? 'mouseleave' : 'blur', $tooltip.leave);
+              nodeName === 'button' && trigger !== 'hover' && element.on(isTouch ? 'touchstart' : 'mousedown', $tooltip.$onFocusElementMouseDown);
+            }
+          });
+        }
+        function unbindTriggerEvents() {
+          var triggers = options.trigger.split(' ');
+          for (var i = triggers.length; i--; ) {
+            var trigger = triggers[i];
+            if (trigger === 'click') {
+              element.off('click', $tooltip.toggle);
+            } else if (trigger !== 'manual') {
+              element.off(trigger === 'hover' ? 'mouseenter' : 'focus', $tooltip.enter);
+              element.off(trigger === 'hover' ? 'mouseleave' : 'blur', $tooltip.leave);
+              nodeName === 'button' && trigger !== 'hover' && element.off(isTouch ? 'touchstart' : 'mousedown', $tooltip.$onFocusElementMouseDown);
+            }
+          }
+        }
+        function bindKeyboardEvents() {
+          if (options.trigger !== 'focus') {
+            tipElement.on('keyup', $tooltip.$onKeyUp);
+          } else {
+            element.on('keyup', $tooltip.$onFocusKeyUp);
+          }
+        }
+        function unbindKeyboardEvents() {
+          if (options.trigger !== 'focus') {
+            tipElement.off('keyup', $tooltip.$onKeyUp);
+          } else {
+            element.off('keyup', $tooltip.$onFocusKeyUp);
+          }
+        }
+        var _autoCloseEventsBinded = false;
+        function bindAutoCloseEvents() {
+          $timeout(function() {
+            tipElement.on('click', stopEventPropagation);
+            $body.on('click', $tooltip.hide);
+            _autoCloseEventsBinded = true;
+          }, 0, false);
+        }
+        function unbindAutoCloseEvents() {
+          if (_autoCloseEventsBinded) {
+            tipElement.off('click', stopEventPropagation);
+            $body.off('click', $tooltip.hide);
+            _autoCloseEventsBinded = false;
+          }
+        }
+        function stopEventPropagation(event) {
+          event.stopPropagation();
+        }
+        function getPosition($element) {
+          $element = $element || (options.target || element);
+          var el = $element[0], isBody = el.tagName === 'BODY';
+          var elRect = el.getBoundingClientRect();
+          var rect = {};
+          for (var p in elRect) {
+            rect[p] = elRect[p];
+          }
+          if (rect.width === null) {
+            rect = angular.extend({}, rect, {
+              width: elRect.right - elRect.left,
+              height: elRect.bottom - elRect.top
+            });
+          }
+          var elOffset = isBody ? {
+            top: 0,
+            left: 0
+          } : dimensions.offset(el), scroll = {
+            scroll: isBody ? document.documentElement.scrollTop || document.body.scrollTop : $element.prop('scrollTop') || 0
+          }, outerDims = isBody ? {
+            width: document.documentElement.clientWidth,
+            height: $window.innerHeight
+          } : null;
+          return angular.extend({}, rect, scroll, outerDims, elOffset);
+        }
+        function getCalculatedOffset(placement, position, actualWidth, actualHeight) {
+          var offset;
+          var split = placement.split('-');
+          switch (split[0]) {
+           case 'right':
+            offset = {
+              top: position.top + position.height / 2 - actualHeight / 2,
+              left: position.left + position.width
+            };
+            break;
+
+           case 'bottom':
+            offset = {
+              top: position.top + position.height,
+              left: position.left + position.width / 2 - actualWidth / 2
+            };
+            break;
+
+           case 'left':
+            offset = {
+              top: position.top + position.height / 2 - actualHeight / 2,
+              left: position.left - actualWidth
+            };
+            break;
+
+           default:
+            offset = {
+              top: position.top - actualHeight,
+              left: position.left + position.width / 2 - actualWidth / 2
+            };
+            break;
+          }
+          if (!split[1]) {
+            return offset;
+          }
+          if (split[0] === 'top' || split[0] === 'bottom') {
+            switch (split[1]) {
+             case 'left':
+              offset.left = position.left;
+              break;
+
+             case 'right':
+              offset.left = position.left + position.width - actualWidth;
+            }
+          } else if (split[0] === 'left' || split[0] === 'right') {
+            switch (split[1]) {
+             case 'top':
+              offset.top = position.top - actualHeight;
+              break;
+
+             case 'bottom':
+              offset.top = position.top + position.height;
+            }
+          }
+          return offset;
+        }
+        function applyPlacement(offset, placement) {
+          var tip = tipElement[0], width = tip.offsetWidth, height = tip.offsetHeight;
+          var marginTop = parseInt(dimensions.css(tip, 'margin-top'), 10), marginLeft = parseInt(dimensions.css(tip, 'margin-left'), 10);
+          if (isNaN(marginTop)) marginTop = 0;
+          if (isNaN(marginLeft)) marginLeft = 0;
+          offset.top = offset.top + marginTop;
+          offset.left = offset.left + marginLeft;
+          dimensions.setOffset(tip, angular.extend({
+            using: function(props) {
+              tipElement.css({
+                top: Math.round(props.top) + 'px',
+                left: Math.round(props.left) + 'px',
+                right: ''
+              });
+            }
+          }, offset), 0);
+          var actualWidth = tip.offsetWidth, actualHeight = tip.offsetHeight;
+          if (placement === 'top' && actualHeight !== height) {
+            offset.top = offset.top + height - actualHeight;
+          }
+          if (/top-left|top-right|bottom-left|bottom-right/.test(placement)) return;
+          var delta = getViewportAdjustedDelta(placement, offset, actualWidth, actualHeight);
+          if (delta.left) {
+            offset.left += delta.left;
+          } else {
+            offset.top += delta.top;
+          }
+          dimensions.setOffset(tip, offset);
+          if (/top|right|bottom|left/.test(placement)) {
+            var isVertical = /top|bottom/.test(placement), arrowDelta = isVertical ? delta.left * 2 - width + actualWidth : delta.top * 2 - height + actualHeight, arrowOffsetPosition = isVertical ? 'offsetWidth' : 'offsetHeight';
+            replaceArrow(arrowDelta, tip[arrowOffsetPosition], isVertical);
+          }
+        }
+        function getViewportAdjustedDelta(placement, position, actualWidth, actualHeight) {
+          var delta = {
+            top: 0,
+            left: 0
+          }, $viewport = options.viewport && findElement(options.viewport.selector || options.viewport);
+          if (!$viewport) {
+            return delta;
+          }
+          var viewportPadding = options.viewport && options.viewport.padding || 0, viewportDimensions = getPosition($viewport);
+          if (/right|left/.test(placement)) {
+            var topEdgeOffset = position.top - viewportPadding - viewportDimensions.scroll, bottomEdgeOffset = position.top + viewportPadding - viewportDimensions.scroll + actualHeight;
+            if (topEdgeOffset < viewportDimensions.top) {
+              delta.top = viewportDimensions.top - topEdgeOffset;
+            } else if (bottomEdgeOffset > viewportDimensions.top + viewportDimensions.height) {
+              delta.top = viewportDimensions.top + viewportDimensions.height - bottomEdgeOffset;
+            }
+          } else {
+            var leftEdgeOffset = position.left - viewportPadding, rightEdgeOffset = position.left + viewportPadding + actualWidth;
+            if (leftEdgeOffset < viewportDimensions.left) {
+              delta.left = viewportDimensions.left - leftEdgeOffset;
+            } else if (rightEdgeOffset > viewportDimensions.width) {
+              delta.left = viewportDimensions.left + viewportDimensions.width - rightEdgeOffset;
+            }
+          }
+          return delta;
+        }
+        function replaceArrow(delta, dimension, isHorizontal) {
+          var $arrow = findElement('.tooltip-arrow, .arrow', tipElement[0]);
+          $arrow.css(isHorizontal ? 'left' : 'top', 50 * (1 - delta / dimension) + '%').css(isHorizontal ? 'top' : 'left', '');
+        }
+        function destroyTipElement() {
+          clearTimeout(timeout);
+          if ($tooltip.$isShown && tipElement !== null) {
+            if (options.autoClose) {
+              unbindAutoCloseEvents();
+            }
+            if (options.keyboard) {
+              unbindKeyboardEvents();
+            }
+          }
+          if (tipScope) {
+            tipScope.$destroy();
+            tipScope = null;
+          }
+          if (tipElement) {
+            tipElement.remove();
+            tipElement = $tooltip.$element = null;
+          }
+        }
+        return $tooltip;
+      }
+      function safeDigest(scope) {
+        scope.$$phase || scope.$root && scope.$root.$$phase || scope.$digest();
+      }
+      function findElement(query, element) {
+        return angular.element((element || document).querySelectorAll(query));
+      }
+      var fetchPromises = {};
+      function fetchTemplate(template) {
+        if (fetchPromises[template]) return fetchPromises[template];
+        return fetchPromises[template] = $http.get(template, {
+          cache: $templateCache
+        }).then(function(res) {
+          return res.data;
+        });
+      }
+      return TooltipFactory;
+    } ];
+  }).directive('bsTooltip', [ '$window', '$location', '$sce', '$tooltip', '$$rAF', function($window, $location, $sce, $tooltip, $$rAF) {
+    return {
+      restrict: 'EAC',
+      scope: true,
+      link: function postLink(scope, element, attr, transclusion) {
+        var options = {
+          scope: scope
+        };
+        angular.forEach([ 'template', 'contentTemplate', 'placement', 'container', 'delay', 'trigger', 'html', 'animation', 'backdropAnimation', 'type', 'customClass', 'id' ], function(key) {
+          if (angular.isDefined(attr[key])) options[key] = attr[key];
+        });
+        var falseValueRegExp = /^(false|0|)$/i;
+        angular.forEach([ 'html', 'container' ], function(key) {
+          if (angular.isDefined(attr[key]) && falseValueRegExp.test(attr[key])) options[key] = false;
+        });
+        var dataTarget = element.attr('data-target');
+        if (angular.isDefined(dataTarget)) {
+          if (falseValueRegExp.test(dataTarget)) options.target = false; else options.target = dataTarget;
+        }
+        if (!scope.hasOwnProperty('title')) {
+          scope.title = '';
+        }
+        attr.$observe('title', function(newValue) {
+          if (angular.isDefined(newValue) || !scope.hasOwnProperty('title')) {
+            var oldValue = scope.title;
+            scope.title = $sce.trustAsHtml(newValue);
+            angular.isDefined(oldValue) && $$rAF(function() {
+              tooltip && tooltip.$applyPlacement();
+            });
+          }
+        });
+        attr.bsTooltip && scope.$watch(attr.bsTooltip, function(newValue, oldValue) {
+          if (angular.isObject(newValue)) {
+            angular.extend(scope, newValue);
+          } else {
+            scope.title = newValue;
+          }
+          angular.isDefined(oldValue) && $$rAF(function() {
+            tooltip && tooltip.$applyPlacement();
+          });
+        }, true);
+        attr.bsShow && scope.$watch(attr.bsShow, function(newValue, oldValue) {
+          if (!tooltip || !angular.isDefined(newValue)) return;
+          if (angular.isString(newValue)) newValue = !!newValue.match(/true|,?(tooltip),?/i);
+          newValue === true ? tooltip.show() : tooltip.hide();
+        });
+        attr.bsEnabled && scope.$watch(attr.bsEnabled, function(newValue, oldValue) {
+          if (!tooltip || !angular.isDefined(newValue)) return;
+          if (angular.isString(newValue)) newValue = !!newValue.match(/true|1|,?(tooltip),?/i);
+          newValue === false ? tooltip.setEnabled(false) : tooltip.setEnabled(true);
+        });
+        attr.viewport && scope.$watch(attr.viewport, function(newValue) {
+          if (!tooltip || !angular.isDefined(newValue)) return;
+          tooltip.setViewport(newValue);
+        });
+        var tooltip = $tooltip(element, options);
+        scope.$on('$destroy', function() {
+          if (tooltip) tooltip.destroy();
+          options = null;
+          tooltip = null;
+        });
+      }
+    };
+  } ]);
+  angular.module('mgcrea.ngStrap.typeahead', [ 'mgcrea.ngStrap.tooltip', 'mgcrea.ngStrap.helpers.parseOptions' ]).provider('$typeahead', function() {
+    var defaults = this.defaults = {
+      animation: 'am-fade',
+      prefixClass: 'typeahead',
+      prefixEvent: '$typeahead',
+      placement: 'bottom-left',
+      template: 'typeahead/typeahead.tpl.html',
+      trigger: 'focus',
+      container: false,
+      keyboard: true,
+      html: false,
+      delay: 0,
+      minLength: 1,
+      filter: 'filter',
+      limit: 6,
+      autoSelect: false,
+      comparator: '',
+      trimValue: true
+    };
+    this.$get = [ '$window', '$rootScope', '$tooltip', '$timeout', function($window, $rootScope, $tooltip, $timeout) {
+      var bodyEl = angular.element($window.document.body);
+      function TypeaheadFactory(element, controller, config) {
+        var $typeahead = {};
+        var options = angular.extend({}, defaults, config);
+        $typeahead = $tooltip(element, options);
+        var parentScope = config.scope;
+        var scope = $typeahead.$scope;
+        scope.$resetMatches = function() {
+          scope.$matches = [];
+          scope.$activeIndex = options.autoSelect ? 0 : -1;
+        };
+        scope.$resetMatches();
+        scope.$activate = function(index) {
+          scope.$$postDigest(function() {
+            $typeahead.activate(index);
+          });
+        };
+        scope.$select = function(index, evt) {
+          scope.$$postDigest(function() {
+            $typeahead.select(index);
+          });
+        };
+        scope.$isVisible = function() {
+          return $typeahead.$isVisible();
+        };
+        $typeahead.update = function(matches) {
+          scope.$matches = matches;
+          if (scope.$activeIndex >= matches.length) {
+            scope.$activeIndex = options.autoSelect ? 0 : -1;
+          }
+          if (/^(bottom|bottom-left|bottom-right)$/.test(options.placement)) return;
+          $timeout($typeahead.$applyPlacement);
+        };
+        $typeahead.activate = function(index) {
+          scope.$activeIndex = index;
+        };
+        $typeahead.select = function(index) {
+          if (index === -1) return;
+          var value = scope.$matches[index].value;
+          controller.$setViewValue(value);
+          controller.$render();
+          scope.$resetMatches();
+          if (parentScope) parentScope.$digest();
+          scope.$emit(options.prefixEvent + '.select', value, index, $typeahead);
+        };
+        $typeahead.$isVisible = function() {
+          if (!options.minLength || !controller) {
+            return !!scope.$matches.length;
+          }
+          return scope.$matches.length && angular.isString(controller.$viewValue) && controller.$viewValue.length >= options.minLength;
+        };
+        $typeahead.$getIndex = function(value) {
+          var l = scope.$matches.length, i = l;
+          if (!l) return;
+          for (i = l; i--; ) {
+            if (scope.$matches[i].value === value) break;
+          }
+          if (i < 0) return;
+          return i;
+        };
+        $typeahead.$onMouseDown = function(evt) {
+          evt.preventDefault();
+          evt.stopPropagation();
+        };
+        $typeahead.$onKeyDown = function(evt) {
+          if (!/(38|40|13)/.test(evt.keyCode)) return;
+          if ($typeahead.$isVisible() && !(evt.keyCode === 13 && scope.$activeIndex === -1)) {
+            evt.preventDefault();
+            evt.stopPropagation();
+          }
+          if (evt.keyCode === 13 && scope.$matches.length) {
+            $typeahead.select(scope.$activeIndex);
+          } else if (evt.keyCode === 38 && scope.$activeIndex > 0) scope.$activeIndex--; else if (evt.keyCode === 40 && scope.$activeIndex < scope.$matches.length - 1) scope.$activeIndex++; else if (angular.isUndefined(scope.$activeIndex)) scope.$activeIndex = 0;
+          scope.$digest();
+        };
+        var show = $typeahead.show;
+        $typeahead.show = function() {
+          show();
+          $timeout(function() {
+            $typeahead.$element && $typeahead.$element.on('mousedown', $typeahead.$onMouseDown);
+            if (options.keyboard) {
+              element && element.on('keydown', $typeahead.$onKeyDown);
+            }
+          }, 0, false);
+        };
+        var hide = $typeahead.hide;
+        $typeahead.hide = function() {
+          $typeahead.$element && $typeahead.$element.off('mousedown', $typeahead.$onMouseDown);
+          if (options.keyboard) {
+            element && element.off('keydown', $typeahead.$onKeyDown);
+          }
+          if (!options.autoSelect) $typeahead.activate(-1);
+          hide();
+        };
+        return $typeahead;
+      }
+      TypeaheadFactory.defaults = defaults;
+      return TypeaheadFactory;
+    } ];
+  }).directive('bsTypeahead', [ '$window', '$parse', '$q', '$typeahead', '$parseOptions', function($window, $parse, $q, $typeahead, $parseOptions) {
+    var defaults = $typeahead.defaults;
+    return {
+      restrict: 'EAC',
+      require: 'ngModel',
+      link: function postLink(scope, element, attr, controller) {
+        var options = {
+          scope: scope
+        };
+        angular.forEach([ 'placement', 'container', 'delay', 'trigger', 'keyboard', 'html', 'animation', 'template', 'filter', 'limit', 'minLength', 'watchOptions', 'selectMode', 'autoSelect', 'comparator', 'id', 'prefixEvent', 'prefixClass' ], function(key) {
+          if (angular.isDefined(attr[key])) options[key] = attr[key];
+        });
+        var falseValueRegExp = /^(false|0|)$/i;
+        angular.forEach([ 'html', 'container', 'trimValue' ], function(key) {
+          if (angular.isDefined(attr[key]) && falseValueRegExp.test(attr[key])) options[key] = false;
+        });
+        element.attr('autocomplete', 'off');
+        var filter = options.filter || defaults.filter;
+        var limit = options.limit || defaults.limit;
+        var comparator = options.comparator || defaults.comparator;
+        var bsOptions = attr.bsOptions;
+        if (filter) bsOptions += ' | ' + filter + ':$viewValue';
+        if (comparator) bsOptions += ':' + comparator;
+        if (limit) bsOptions += ' | limitTo:' + limit;
+        var parsedOptions = $parseOptions(bsOptions);
+        var typeahead = $typeahead(element, controller, options);
+        if (options.watchOptions) {
+          var watchedOptions = parsedOptions.$match[7].replace(/\|.+/, '').replace(/\(.*\)/g, '').trim();
+          scope.$watchCollection(watchedOptions, function(newValue, oldValue) {
+            parsedOptions.valuesFn(scope, controller).then(function(values) {
+              typeahead.update(values);
+              controller.$render();
+            });
+          });
+        }
+        scope.$watch(attr.ngModel, function(newValue, oldValue) {
+          scope.$modelValue = newValue;
+          parsedOptions.valuesFn(scope, controller).then(function(values) {
+            if (options.selectMode && !values.length && newValue.length > 0) {
+              controller.$setViewValue(controller.$viewValue.substring(0, controller.$viewValue.length - 1));
+              return;
+            }
+            if (values.length > limit) values = values.slice(0, limit);
+            var isVisible = typeahead.$isVisible();
+            isVisible && typeahead.update(values);
+            if (values.length === 1 && values[0].value === newValue) return;
+            !isVisible && typeahead.update(values);
+            controller.$render();
+          });
+        });
+        controller.$formatters.push(function(modelValue) {
+          var displayValue = parsedOptions.displayValue(modelValue);
+          if (displayValue) return displayValue;
+          if (modelValue && typeof modelValue !== 'object') {
+            return modelValue;
+          }
+          return '';
+        });
+        controller.$render = function() {
+          if (controller.$isEmpty(controller.$viewValue)) return element.val('');
+          var index = typeahead.$getIndex(controller.$modelValue);
+          var selected = angular.isDefined(index) ? typeahead.$scope.$matches[index].label : controller.$viewValue;
+          selected = angular.isObject(selected) ? parsedOptions.displayValue(selected) : selected;
+          var value = selected ? selected.toString().replace(/<(?:.|\n)*?>/gm, '') : '';
+          element.val(options.trimValue === false ? value : value.trim());
+        };
+        scope.$on('$destroy', function() {
+          if (typeahead) typeahead.destroy();
+          options = null;
+          typeahead = null;
+        });
+      }
+    };
+  } ]);
+})(window, document);
+/**
+ * angular-strap
+ * @version v2.2.4 - 2015-05-28
+ * @link http://mgcrea.github.io/angular-strap
+ * @author Olivier Louvignes <olivier@mg-crea.com> (https://github.com/mgcrea)
+ * @license MIT License, http://www.opensource.org/licenses/MIT
+ */
+(function(window, document, undefined) {
+  'use strict';
+  angular.module('mgcrea.ngStrap.alert').run([ '$templateCache', function($templateCache) {
+    $templateCache.put('alert/alert.tpl.html', '<div class="alert" ng-class="[type ? \'alert-\' + type : null]"><button type="button" class="close" ng-if="dismissable" ng-click="$hide()">&times;</button> <strong ng-bind="title"></strong>&nbsp;<span ng-bind-html="content"></span></div>');
+  } ]);
+  angular.module('mgcrea.ngStrap.aside').run([ '$templateCache', function($templateCache) {
+    $templateCache.put('aside/aside.tpl.html', '<div class="aside" tabindex="-1" role="dialog"><div class="aside-dialog"><div class="aside-content"><div class="aside-header" ng-show="title"><button type="button" class="close" ng-click="$hide()">&times;</button><h4 class="aside-title" ng-bind="title"></h4></div><div class="aside-body" ng-bind="content"></div><div class="aside-footer"><button type="button" class="btn btn-default" ng-click="$hide()">Close</button></div></div></div></div>');
+  } ]);
+  angular.module('mgcrea.ngStrap.datepicker').run([ '$templateCache', function($templateCache) {
+    $templateCache.put('datepicker/datepicker.tpl.html', '<div class="dropdown-menu datepicker" ng-class="\'datepicker-mode-\' + $mode" style="max-width: 320px"><table style="table-layout: fixed; height: 100%; width: 100%"><thead><tr class="text-center"><th><button tabindex="-1" type="button" class="btn btn-default pull-left" ng-click="$selectPane(-1)"><i class="{{$iconLeft}}"></i></button></th><th colspan="{{ rows[0].length - 2 }}"><button tabindex="-1" type="button" class="btn btn-default btn-block text-strong" ng-click="$toggleMode()"><strong style="text-transform: capitalize" ng-bind="title"></strong></button></th><th><button tabindex="-1" type="button" class="btn btn-default pull-right" ng-click="$selectPane(+1)"><i class="{{$iconRight}}"></i></button></th></tr><tr ng-show="showLabels" ng-bind-html="labels"></tr></thead><tbody><tr ng-repeat="(i, row) in rows" height="{{ 100 / rows.length }}%"><td class="text-center" ng-repeat="(j, el) in row"><button tabindex="-1" type="button" class="btn btn-default" style="width: 100%" ng-class="{\'btn-primary\': el.selected, \'btn-info btn-today\': el.isToday && !el.selected}" ng-click="$select(el.date)" ng-disabled="el.disabled"><span ng-class="{\'text-muted\': el.muted}" ng-bind="el.label"></span></button></td></tr></tbody></table></div>');
+  } ]);
+  angular.module('mgcrea.ngStrap.dropdown').run([ '$templateCache', function($templateCache) {
+    $templateCache.put('dropdown/dropdown.tpl.html', '<ul tabindex="-1" class="dropdown-menu" role="menu"><li role="presentation" ng-class="{divider: item.divider}" ng-repeat="item in content"><a role="menuitem" tabindex="-1" ng-href="{{item.href}}" ng-if="!item.divider && item.href" target="{{item.target || \'\'}}" ng-bind="item.text"></a> <a role="menuitem" tabindex="-1" href="javascript:void(0)" ng-if="!item.divider && item.click" ng-click="$eval(item.click);$hide()" ng-bind="item.text"></a></li></ul>');
+  } ]);
+  angular.module('mgcrea.ngStrap.modal').run([ '$templateCache', function($templateCache) {
+    $templateCache.put('modal/modal.tpl.html', '<div class="modal" tabindex="-1" role="dialog" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><div class="modal-header" ng-show="title"><button type="button" class="close" aria-label="Close" ng-click="$hide()"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" ng-bind="title"></h4></div><div class="modal-body" ng-bind="content"></div><div class="modal-footer"><button type="button" class="btn btn-default" ng-click="$hide()">Close</button></div></div></div></div>');
+  } ]);
+  angular.module('mgcrea.ngStrap.popover').run([ '$templateCache', function($templateCache) {
+    $templateCache.put('popover/popover.tpl.html', '<div class="popover"><div class="arrow"></div><h3 class="popover-title" ng-bind="title" ng-show="title"></h3><div class="popover-content" ng-bind="content"></div></div>');
+  } ]);
+  angular.module('mgcrea.ngStrap.select').run([ '$templateCache', function($templateCache) {
+    $templateCache.put('select/select.tpl.html', '<ul tabindex="-1" class="select dropdown-menu" ng-show="$isVisible()" role="select"><li ng-if="$showAllNoneButtons"><div class="btn-group" style="margin-bottom: 5px; margin-left: 5px"><button type="button" class="btn btn-default btn-xs" ng-click="$selectAll()">{{$allText}}</button> <button type="button" class="btn btn-default btn-xs" ng-click="$selectNone()">{{$noneText}}</button></div></li><li role="presentation" ng-repeat="match in $matches" ng-class="{active: $isActive($index)}"><a style="cursor: default" role="menuitem" tabindex="-1" ng-click="$select($index, $event)"><i class="{{$iconCheckmark}} pull-right" ng-if="$isMultiple && $isActive($index)"></i> <span ng-bind="match.label"></span></a></li></ul>');
+  } ]);
+  angular.module('mgcrea.ngStrap.tab').run([ '$templateCache', function($templateCache) {
+    $templateCache.put('tab/tab.tpl.html', '<ul class="nav" ng-class="$navClass" role="tablist"><li role="presentation" ng-repeat="$pane in $panes track by $index" ng-class="[ $isActive($pane, $index) ? $activeClass : \'\', $pane.disabled ? \'disabled\' : \'\' ]"><a role="tab" data-toggle="tab" ng-click="!$pane.disabled && $setActive($pane.name || $index)" data-index="{{ $index }}" ng-bind-html="$pane.title" aria-controls="$pane.title"></a></li></ul><div ng-transclude class="tab-content"></div>');
+  } ]);
+  angular.module('mgcrea.ngStrap.timepicker').run([ '$templateCache', function($templateCache) {
+    $templateCache.put('timepicker/timepicker.tpl.html', '<div class="dropdown-menu timepicker" style="min-width: 0px;width: auto"><table height="100%"><thead><tr class="text-center"><th><button tabindex="-1" type="button" class="btn btn-default pull-left" ng-click="$arrowAction(-1, 0)"><i class="{{ $iconUp }}"></i></button></th><th>&nbsp;</th><th><button tabindex="-1" type="button" class="btn btn-default pull-left" ng-click="$arrowAction(-1, 1)"><i class="{{ $iconUp }}"></i></button></th><th>&nbsp;</th><th><button ng-if="showSeconds" tabindex="-1" type="button" class="btn btn-default pull-left" ng-click="$arrowAction(-1, 2)"><i class="{{ $iconUp }}"></i></button></th></tr></thead><tbody><tr ng-repeat="(i, row) in rows"><td class="text-center"><button tabindex="-1" style="width: 100%" type="button" class="btn btn-default" ng-class="{\'btn-primary\': row[0].selected}" ng-click="$select(row[0].date, 0)" ng-disabled="row[0].disabled"><span ng-class="{\'text-muted\': row[0].muted}" ng-bind="row[0].label"></span></button></td><td><span ng-bind="i == midIndex ? timeSeparator : \' \'"></span></td><td class="text-center"><button tabindex="-1" ng-if="row[1].date" style="width: 100%" type="button" class="btn btn-default" ng-class="{\'btn-primary\': row[1].selected}" ng-click="$select(row[1].date, 1)" ng-disabled="row[1].disabled"><span ng-class="{\'text-muted\': row[1].muted}" ng-bind="row[1].label"></span></button></td><td><span ng-bind="i == midIndex ? timeSeparator : \' \'"></span></td><td class="text-center"><button tabindex="-1" ng-if="showSeconds && row[2].date" style="width: 100%" type="button" class="btn btn-default" ng-class="{\'btn-primary\': row[2].selected}" ng-click="$select(row[2].date, 2)" ng-disabled="row[2].disabled"><span ng-class="{\'text-muted\': row[2].muted}" ng-bind="row[2].label"></span></button></td><td ng-if="showAM">&nbsp;</td><td ng-if="showAM"><button tabindex="-1" ng-show="i == midIndex - !isAM * 1" style="width: 100%" type="button" ng-class="{\'btn-primary\': !!isAM}" class="btn btn-default" ng-click="$switchMeridian()" ng-disabled="el.disabled">AM</button> <button tabindex="-1" ng-show="i == midIndex + 1 - !isAM * 1" style="width: 100%" type="button" ng-class="{\'btn-primary\': !isAM}" class="btn btn-default" ng-click="$switchMeridian()" ng-disabled="el.disabled">PM</button></td></tr></tbody><tfoot><tr class="text-center"><th><button tabindex="-1" type="button" class="btn btn-default pull-left" ng-click="$arrowAction(1, 0)"><i class="{{ $iconDown }}"></i></button></th><th>&nbsp;</th><th><button tabindex="-1" type="button" class="btn btn-default pull-left" ng-click="$arrowAction(1, 1)"><i class="{{ $iconDown }}"></i></button></th><th>&nbsp;</th><th><button ng-if="showSeconds" tabindex="-1" type="button" class="btn btn-default pull-left" ng-click="$arrowAction(1, 2)"><i class="{{ $iconDown }}"></i></button></th></tr></tfoot></table></div>');
+  } ]);
+  angular.module('mgcrea.ngStrap.tooltip').run([ '$templateCache', function($templateCache) {
+    $templateCache.put('tooltip/tooltip.tpl.html', '<div class="tooltip in" ng-show="title"><div class="tooltip-arrow"></div><div class="tooltip-inner" ng-bind="title"></div></div>');
+  } ]);
+  angular.module('mgcrea.ngStrap.typeahead').run([ '$templateCache', function($templateCache) {
+    $templateCache.put('typeahead/typeahead.tpl.html', '<ul tabindex="-1" class="typeahead dropdown-menu" ng-show="$isVisible()" role="select"><li role="presentation" ng-repeat="match in $matches" ng-class="{active: $index == $activeIndex}"><a role="menuitem" tabindex="-1" ng-click="$select($index, $event)" ng-bind="match.label"></a></li></ul>');
+  } ]);
+})(window, document);
+/**
+ * angular-ui-utils - Swiss-Army-Knife of AngularJS tools (with no external dependencies!)
+ * @version v0.2.3 - 2015-03-30
+ * @link http://angular-ui.github.com
+ * @license MIT License, http://www.opensource.org/licenses/MIT
+ */
+angular.module('ui.alias', []).config(['$compileProvider', 'uiAliasConfig', function($compileProvider, uiAliasConfig){
+  'use strict';
+
+  uiAliasConfig = uiAliasConfig || {};
+  angular.forEach(uiAliasConfig, function(config, alias){
+    if (angular.isString(config)) {
+      config = {
+        replace: true,
+        template: config
+      };
+    }
+    $compileProvider.directive(alias, function(){
+      return config;
+    });
+  });
+}]);
+
+/**
+ * General-purpose Event binding. Bind any event not natively supported by Angular
+ * Pass an object with keynames for events to ui-event
+ * Allows $event object and $params object to be passed
+ *
+ * @example <input ui-event="{ focus : 'counter++', blur : 'someCallback()' }">
+ * @example <input ui-event="{ myCustomEvent : 'myEventHandler($event, $params)'}">
+ *
+ * @param ui-event {string|object literal} The event to bind to as a string or a hash of events with their callbacks
+ */
+angular.module('ui.event',[]).directive('uiEvent', ['$parse',
+  function ($parse) {
+    'use strict';
+
+    return function ($scope, elm, attrs) {
+      var events = $scope.$eval(attrs.uiEvent);
+      angular.forEach(events, function (uiEvent, eventName) {
+        var fn = $parse(uiEvent);
+        elm.bind(eventName, function (evt) {
+          var params = Array.prototype.slice.call(arguments);
+          //Take out first paramater (event object);
+          params = params.splice(1);
+          fn($scope, {$event: evt, $params: params});
+          if (!$scope.$$phase) {
+            $scope.$apply();
+          }
+        });
+      });
+    };
+  }]);
+
+/**
+ * A replacement utility for internationalization very similar to sprintf.
+ *
+ * @param replace {mixed} The tokens to replace depends on type
+ *  string: all instances of $0 will be replaced
+ *  array: each instance of $0, $1, $2 etc. will be placed with each array item in corresponding order
+ *  object: all attributes will be iterated through, with :key being replaced with its corresponding value
+ * @return string
+ *
+ * @example: 'Hello :name, how are you :day'.format({ name:'John', day:'Today' })
+ * @example: 'Records $0 to $1 out of $2 total'.format(['10', '20', '3000'])
+ * @example: '$0 agrees to all mentions $0 makes in the event that $0 hits a tree while $0 is driving drunk'.format('Bob')
+ */
+angular.module('ui.format',[]).filter('format', function(){
+  'use strict';
+
+  return function(value, replace) {
+    var target = value;
+    if (angular.isString(target) && replace !== undefined) {
+      if (!angular.isArray(replace) && !angular.isObject(replace)) {
+        replace = [replace];
+      }
+      if (angular.isArray(replace)) {
+        var rlen = replace.length;
+        var rfx = function (str, i) {
+          i = parseInt(i, 10);
+          return (i >= 0 && i < rlen) ? replace[i] : str;
+        };
+        target = target.replace(/\$([0-9]+)/g, rfx);
+      }
+      else {
+        angular.forEach(replace, function(value, key){
+          target = target.split(':' + key).join(value);
+        });
+      }
+    }
+    return target;
+  };
+});
+
+/**
+ * Wraps the
+ * @param text {string} haystack to search through
+ * @param search {string} needle to search for
+ * @param [caseSensitive] {boolean} optional boolean to use case-sensitive searching
+ */
+angular.module('ui.highlight',[]).filter('highlight', function () {
+  'use strict';
+
+  return function (text, search, caseSensitive) {
+    if (text && (search || angular.isNumber(search))) {
+      text = text.toString();
+      search = search.toString();
+      if (caseSensitive) {
+        return text.split(search).join('<span class="ui-match">' + search + '</span>');
+      } else {
+        return text.replace(new RegExp(search, 'gi'), '<span class="ui-match">$&</span>');
+      }
+    } else {
+      return text;
+    }
+  };
+});
+
+// modeled after: angular-1.0.7/src/ng/directive/ngInclude.js
+angular.module('ui.include',[])
+.directive('uiInclude', ['$http', '$templateCache', '$anchorScroll', '$compile',
+                 function($http,   $templateCache,   $anchorScroll,   $compile) {
+  'use strict';
+
+  return {
+    restrict: 'ECA',
+    terminal: true,
+    compile: function(element, attr) {
+      var srcExp = attr.uiInclude || attr.src,
+          fragExp = attr.fragment || '',
+          onloadExp = attr.onload || '',
+          autoScrollExp = attr.autoscroll;
+
+      return function(scope, element) {
+        var changeCounter = 0,
+            childScope;
+
+        var clearContent = function() {
+          if (childScope) {
+            childScope.$destroy();
+            childScope = null;
+          }
+
+          element.html('');
+        };
+
+        function ngIncludeWatchAction() {
+          var thisChangeId = ++changeCounter;
+          var src = scope.$eval(srcExp);
+          var fragment = scope.$eval(fragExp);
+
+          if (src) {
+            $http.get(src, {cache: $templateCache}).success(function(response) {
+              if (thisChangeId !== changeCounter) { return; }
+
+              if (childScope) { childScope.$destroy(); }
+              childScope = scope.$new();
+
+              var contents;
+              if (fragment) {
+                contents = angular.element('<div/>').html(response).find(fragment);
+              }
+              else {
+                contents = angular.element('<div/>').html(response).contents();
+              }
+              element.html(contents);
+              $compile(contents)(childScope);
+
+              if (angular.isDefined(autoScrollExp) && (!autoScrollExp || scope.$eval(autoScrollExp))) {
+                $anchorScroll();
+              }
+
+              childScope.$emit('$includeContentLoaded');
+              scope.$eval(onloadExp);
+            }).error(function() {
+              if (thisChangeId === changeCounter) { clearContent(); }
+            });
+          } else { clearContent(); }
+        }
+
+        scope.$watch(fragExp, ngIncludeWatchAction);
+        scope.$watch(srcExp, ngIncludeWatchAction);
+      };
+    }
+  };
+}]);
+
+/**
+ * Provides an easy way to toggle a checkboxes indeterminate property
+ *
+ * @example <input type="checkbox" ui-indeterminate="isUnkown">
+ */
+angular.module('ui.indeterminate',[]).directive('uiIndeterminate', [
+  function () {
+    'use strict';
+
+    return {
+      compile: function(tElm, tAttrs) {
+        if (!tAttrs.type || tAttrs.type.toLowerCase() !== 'checkbox') {
+          return angular.noop;
+        }
+
+        return function ($scope, elm, attrs) {
+          $scope.$watch(attrs.uiIndeterminate, function(newVal) {
+            elm[0].indeterminate = !!newVal;
+          });
+        };
+      }
+    };
+  }]);
+
+/**
+ * Converts variable-esque naming conventions to something presentational, capitalized words separated by space.
+ * @param {String} value The value to be parsed and prettified.
+ * @param {String} [inflector] The inflector to use. Default: humanize.
+ * @return {String}
+ * @example {{ 'Here Is my_phoneNumber' | inflector:'humanize' }} => Here Is My Phone Number
+ *          {{ 'Here Is my_phoneNumber' | inflector:'underscore' }} => here_is_my_phone_number
+ *          {{ 'Here Is my_phoneNumber' | inflector:'variable' }} => hereIsMyPhoneNumber
+ */
+angular.module('ui.inflector',[]).filter('inflector', function () {
+  'use strict';
+
+  function tokenize(text) {
+    text = text.replace(/([A-Z])|([\-|\_])/g, function(_, $1) { return ' ' + ($1 || ''); });
+    return text.replace(/\s\s+/g, ' ').trim().toLowerCase().split(' ');
+  }
+
+  function capitalizeTokens(tokens) {
+    var result = [];
+    angular.forEach(tokens, function(token) {
+      result.push(token.charAt(0).toUpperCase() + token.substr(1));
+    });
+    return result;
+  }
+
+  var inflectors = {
+    humanize: function (value) {
+      return capitalizeTokens(tokenize(value)).join(' ');
+    },
+    underscore: function (value) {
+      return tokenize(value).join('_');
+    },
+    variable: function (value) {
+      value = tokenize(value);
+      value = value[0] + capitalizeTokens(value.slice(1)).join('');
+      return value;
+    }
+  };
+
+  return function (text, inflector) {
+    if (inflector !== false && angular.isString(text)) {
+      inflector = inflector || 'humanize';
+      return inflectors[inflector](text);
+    } else {
+      return text;
+    }
+  };
+});
+
+/**
+ * General-purpose jQuery wrapper. Simply pass the plugin name as the expression.
+ *
+ * It is possible to specify a default set of parameters for each jQuery plugin.
+ * Under the jq key, namespace each plugin by that which will be passed to ui-jq.
+ * Unfortunately, at this time you can only pre-define the first parameter.
+ * @example { jq : { datepicker : { showOn:'click' } } }
+ *
+ * @param ui-jq {string} The $elm.[pluginName]() to call.
+ * @param [ui-options] {mixed} Expression to be evaluated and passed as options to the function
+ *     Multiple parameters can be separated by commas
+ * @param [ui-refresh] {expression} Watch expression and refire plugin on changes
+ *
+ * @example <input ui-jq="datepicker" ui-options="{showOn:'click'},secondParameter,thirdParameter" ui-refresh="iChange">
+ */
+angular.module('ui.jq',[]).
+  value('uiJqConfig',{}).
+  directive('uiJq', ['uiJqConfig', '$timeout', function uiJqInjectingFunction(uiJqConfig, $timeout) {
+  'use strict';
+
+
+  return {
+    restrict: 'A',
+    compile: function uiJqCompilingFunction(tElm, tAttrs) {
+
+      if (!angular.isFunction(tElm[tAttrs.uiJq])) {
+        throw new Error('ui-jq: The "' + tAttrs.uiJq + '" function does not exist');
+      }
+      var options = uiJqConfig && uiJqConfig[tAttrs.uiJq];
+
+      return function uiJqLinkingFunction(scope, elm, attrs) {
+
+        // If change compatibility is enabled, the form input's "change" event will trigger an "input" event
+        if (attrs.ngModel && elm.is('select,input,textarea')) {
+          elm.bind('change', function() {
+            elm.trigger('input');
+          });
+        }
+
+        function createLinkOptions(){
+          var linkOptions = [];
+
+          // If ui-options are passed, merge (or override) them onto global defaults and pass to the jQuery method
+          if (attrs.uiOptions) {
+            linkOptions = scope.$eval('[' + attrs.uiOptions + ']');
+            if (angular.isObject(options) && angular.isObject(linkOptions[0])) {
+              linkOptions[0] = angular.extend({}, options, linkOptions[0]);
+            }
+          } else if (options) {
+            linkOptions = [options];
+          }
+          return linkOptions;
+        }
+
+        // Call jQuery method and pass relevant options
+        function callPlugin() {
+          $timeout(function() {
+            elm[attrs.uiJq].apply(elm, createLinkOptions());
+          }, 0, false);
+        }
+
+        // If ui-refresh is used, re-fire the the method upon every change
+        if (attrs.uiRefresh) {
+          scope.$watch(attrs.uiRefresh, function() {
+            callPlugin();
+          });
+        }
+        callPlugin();
+      };
+    }
+  };
+}]);
+
+angular.module('ui.keypress',[]).
+factory('keypressHelper', ['$parse', function keypress($parse){
+  'use strict';
+
+  var keysByCode = {
+    8: 'backspace',
+    9: 'tab',
+    13: 'enter',
+    27: 'esc',
+    32: 'space',
+    33: 'pageup',
+    34: 'pagedown',
+    35: 'end',
+    36: 'home',
+    37: 'left',
+    38: 'up',
+    39: 'right',
+    40: 'down',
+    45: 'insert',
+    46: 'delete'
+  };
+
+  var capitaliseFirstLetter = function (string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  };
+
+  return function(mode, scope, elm, attrs) {
+    var params, combinations = [];
+    params = scope.$eval(attrs['ui'+capitaliseFirstLetter(mode)]);
+
+    // Prepare combinations for simple checking
+    angular.forEach(params, function (v, k) {
+      var combination, expression;
+      expression = $parse(v);
+
+      angular.forEach(k.split(' '), function(variation) {
+        combination = {
+          expression: expression,
+          keys: {}
+        };
+        angular.forEach(variation.split('-'), function (value) {
+          combination.keys[value] = true;
+        });
+        combinations.push(combination);
+      });
+    });
+
+    // Check only matching of pressed keys one of the conditions
+    elm.bind(mode, function (event) {
+      // No need to do that inside the cycle
+      var metaPressed = !!(event.metaKey && !event.ctrlKey);
+      var altPressed = !!event.altKey;
+      var ctrlPressed = !!event.ctrlKey;
+      var shiftPressed = !!event.shiftKey;
+      var keyCode = event.keyCode;
+
+      // normalize keycodes
+      if (mode === 'keypress' && !shiftPressed && keyCode >= 97 && keyCode <= 122) {
+        keyCode = keyCode - 32;
+      }
+
+      // Iterate over prepared combinations
+      angular.forEach(combinations, function (combination) {
+
+        var mainKeyPressed = combination.keys[keysByCode[keyCode]] || combination.keys[keyCode.toString()];
+
+        var metaRequired = !!combination.keys.meta;
+        var altRequired = !!combination.keys.alt;
+        var ctrlRequired = !!combination.keys.ctrl;
+        var shiftRequired = !!combination.keys.shift;
+
+        if (
+          mainKeyPressed &&
+          ( metaRequired === metaPressed ) &&
+          ( altRequired === altPressed ) &&
+          ( ctrlRequired === ctrlPressed ) &&
+          ( shiftRequired === shiftPressed )
+        ) {
+          // Run the function
+          scope.$apply(function () {
+            combination.expression(scope, { '$event': event });
+          });
+        }
+      });
+    });
+  };
+}]);
+
+/**
+ * Bind one or more handlers to particular keys or their combination
+ * @param hash {mixed} keyBindings Can be an object or string where keybinding expression of keys or keys combinations and AngularJS Exspressions are set. Object syntax: "{ keys1: expression1 [, keys2: expression2 [ , ... ]]}". String syntax: ""expression1 on keys1 [ and expression2 on keys2 [ and ... ]]"". Expression is an AngularJS Expression, and key(s) are dash-separated combinations of keys and modifiers (one or many, if any. Order does not matter). Supported modifiers are 'ctrl', 'shift', 'alt' and key can be used either via its keyCode (13 for Return) or name. Named keys are 'backspace', 'tab', 'enter', 'esc', 'space', 'pageup', 'pagedown', 'end', 'home', 'left', 'up', 'right', 'down', 'insert', 'delete'.
+ * @example <input ui-keypress="{enter:'x = 1', 'ctrl-shift-space':'foo()', 'shift-13':'bar()'}" /> <input ui-keypress="foo = 2 on ctrl-13 and bar('hello') on shift-esc" />
+ **/
+angular.module('ui.keypress').directive('uiKeydown', ['keypressHelper', function(keypressHelper){
+  'use strict';
+
+  return {
+    link: function (scope, elm, attrs) {
+      keypressHelper('keydown', scope, elm, attrs);
+    }
+  };
+}]);
+
+angular.module('ui.keypress').directive('uiKeypress', ['keypressHelper', function(keypressHelper){
+  'use strict';
+
+  return {
+    link: function (scope, elm, attrs) {
+      keypressHelper('keypress', scope, elm, attrs);
+    }
+  };
+}]);
+
+angular.module('ui.keypress').directive('uiKeyup', ['keypressHelper', function(keypressHelper){
+  'use strict';
+
+  return {
+    link: function (scope, elm, attrs) {
+      keypressHelper('keyup', scope, elm, attrs);
+    }
+  };
+}]);
+
+/*
+ Attaches input mask onto input element
+ */
+angular.module('ui.mask', [])
+  .value('uiMaskConfig', {
+    'maskDefinitions': {
+      '9': /\d/,
+      'A': /[a-zA-Z]/,
+      '*': /[a-zA-Z0-9]/
+    },
+    'clearOnBlur': true
+  })
+  .directive('uiMask', ['uiMaskConfig', '$parse', function (maskConfig, $parse) {
+    'use strict';
+
+    return {
+      priority: 100,
+      require: 'ngModel',
+      restrict: 'A',
+      compile: function uiMaskCompilingFunction(){
+        var options = maskConfig;
+
+        return function uiMaskLinkingFunction(scope, iElement, iAttrs, controller){
+          var maskProcessed = false, eventsBound = false,
+            maskCaretMap, maskPatterns, maskPlaceholder, maskComponents,
+          // Minimum required length of the value to be considered valid
+            minRequiredLength,
+            value, valueMasked, isValid,
+          // Vars for initializing/uninitializing
+            originalPlaceholder = iAttrs.placeholder,
+            originalMaxlength = iAttrs.maxlength,
+          // Vars used exclusively in eventHandler()
+            oldValue, oldValueUnmasked, oldCaretPosition, oldSelectionLength;
+
+          function initialize(maskAttr){
+            if (!angular.isDefined(maskAttr)) {
+              return uninitialize();
+            }
+            processRawMask(maskAttr);
+            if (!maskProcessed) {
+              return uninitialize();
+            }
+            initializeElement();
+            bindEventListeners();
+            return true;
+          }
+
+          function initPlaceholder(placeholderAttr) {
+            if(! angular.isDefined(placeholderAttr)) {
+              return;
+            }
+
+            maskPlaceholder = placeholderAttr;
+
+            // If the mask is processed, then we need to update the value
+            if (maskProcessed) {
+              eventHandler();
+            }
+          }
+
+          function formatter(fromModelValue){
+            if (!maskProcessed) {
+              return fromModelValue;
+            }
+            value = unmaskValue(fromModelValue || '');
+            isValid = validateValue(value);
+            controller.$setValidity('mask', isValid);
+            return isValid && value.length ? maskValue(value) : undefined;
+          }
+
+          function parser(fromViewValue){
+            if (!maskProcessed) {
+              return fromViewValue;
+            }
+            value = unmaskValue(fromViewValue || '');
+            isValid = validateValue(value);
+            // We have to set viewValue manually as the reformatting of the input
+            // value performed by eventHandler() doesn't happen until after
+            // this parser is called, which causes what the user sees in the input
+            // to be out-of-sync with what the controller's $viewValue is set to.
+            controller.$viewValue = value.length ? maskValue(value) : '';
+            controller.$setValidity('mask', isValid);
+            if (value === '' && iAttrs.required) {
+                controller.$setValidity('required', !controller.$error.required);
+            }
+            return isValid ? value : undefined;
+          }
+
+          var linkOptions = {};
+
+          if (iAttrs.uiOptions) {
+            linkOptions = scope.$eval('[' + iAttrs.uiOptions + ']');
+            if (angular.isObject(linkOptions[0])) {
+              // we can't use angular.copy nor angular.extend, they lack the power to do a deep merge
+              linkOptions = (function(original, current){
+                for(var i in original) {
+                  if (Object.prototype.hasOwnProperty.call(original, i)) {
+                    if (current[i] === undefined) {
+                      current[i] = angular.copy(original[i]);
+                    } else {
+                      angular.extend(current[i], original[i]);
+                    }
+                  }
+                }
+                return current;
+              })(options, linkOptions[0]);
+            }
+          } else {
+            linkOptions = options;
+          }
+
+          iAttrs.$observe('uiMask', initialize);
+          iAttrs.$observe('placeholder', initPlaceholder);
+          var modelViewValue = false;
+          iAttrs.$observe('modelViewValue', function(val) {
+            if(val === 'true') {
+              modelViewValue = true;
+            }
+          });
+          scope.$watch(iAttrs.ngModel, function(val) {
+            if(modelViewValue && val) {
+              var model = $parse(iAttrs.ngModel);
+              model.assign(scope, controller.$viewValue);
+            }
+          });
+          controller.$formatters.push(formatter);
+          controller.$parsers.push(parser);
+
+          function uninitialize(){
+            maskProcessed = false;
+            unbindEventListeners();
+
+            if (angular.isDefined(originalPlaceholder)) {
+              iElement.attr('placeholder', originalPlaceholder);
+            } else {
+              iElement.removeAttr('placeholder');
+            }
+
+            if (angular.isDefined(originalMaxlength)) {
+              iElement.attr('maxlength', originalMaxlength);
+            } else {
+              iElement.removeAttr('maxlength');
+            }
+
+            iElement.val(controller.$modelValue);
+            controller.$viewValue = controller.$modelValue;
+            return false;
+          }
+
+          function initializeElement(){
+            value = oldValueUnmasked = unmaskValue(controller.$viewValue || '');
+            valueMasked = oldValue = maskValue(value);
+            isValid = validateValue(value);
+            var viewValue = isValid && value.length ? valueMasked : '';
+            if (iAttrs.maxlength) { // Double maxlength to allow pasting new val at end of mask
+              iElement.attr('maxlength', maskCaretMap[maskCaretMap.length - 1] * 2);
+            }
+            iElement.attr('placeholder', maskPlaceholder);
+            iElement.val(viewValue);
+            controller.$viewValue = viewValue;
+            // Not using $setViewValue so we don't clobber the model value and dirty the form
+            // without any kind of user interaction.
+          }
+
+          function bindEventListeners(){
+            if (eventsBound) {
+              return;
+            }
+            iElement.bind('blur', blurHandler);
+            iElement.bind('mousedown mouseup', mouseDownUpHandler);
+            iElement.bind('input keyup click focus', eventHandler);
+            eventsBound = true;
+          }
+
+          function unbindEventListeners(){
+            if (!eventsBound) {
+              return;
+            }
+            iElement.unbind('blur', blurHandler);
+            iElement.unbind('mousedown', mouseDownUpHandler);
+            iElement.unbind('mouseup', mouseDownUpHandler);
+            iElement.unbind('input', eventHandler);
+            iElement.unbind('keyup', eventHandler);
+            iElement.unbind('click', eventHandler);
+            iElement.unbind('focus', eventHandler);
+            eventsBound = false;
+          }
+
+          function validateValue(value){
+            // Zero-length value validity is ngRequired's determination
+            return value.length ? value.length >= minRequiredLength : true;
+          }
+
+          function unmaskValue(value){
+            var valueUnmasked = '',
+              maskPatternsCopy = maskPatterns.slice();
+            // Preprocess by stripping mask components from value
+            value = value.toString();
+            angular.forEach(maskComponents, function (component){
+              value = value.replace(component, '');
+            });
+            angular.forEach(value.split(''), function (chr){
+              if (maskPatternsCopy.length && maskPatternsCopy[0].test(chr)) {
+                valueUnmasked += chr;
+                maskPatternsCopy.shift();
+              }
+            });
+            return valueUnmasked;
+          }
+
+          function maskValue(unmaskedValue){
+            var valueMasked = '',
+                maskCaretMapCopy = maskCaretMap.slice();
+
+            angular.forEach(maskPlaceholder.split(''), function (chr, i){
+              if (unmaskedValue.length && i === maskCaretMapCopy[0]) {
+                valueMasked  += unmaskedValue.charAt(0) || '_';
+                unmaskedValue = unmaskedValue.substr(1);
+                maskCaretMapCopy.shift();
+              }
+              else {
+                valueMasked += chr;
+              }
+            });
+            return valueMasked;
+          }
+
+          function getPlaceholderChar(i) {
+            var placeholder = iAttrs.placeholder;
+
+            if (typeof placeholder !== 'undefined' && placeholder[i]) {
+              return placeholder[i];
+            } else {
+              return '_';
+            }
+          }
+
+          // Generate array of mask components that will be stripped from a masked value
+          // before processing to prevent mask components from being added to the unmasked value.
+          // E.g., a mask pattern of '+7 9999' won't have the 7 bleed into the unmasked value.
+          // If a maskable char is followed by a mask char and has a mask
+          // char behind it, we'll split it into it's own component so if
+          // a user is aggressively deleting in the input and a char ahead
+          // of the maskable char gets deleted, we'll still be able to strip
+          // it in the unmaskValue() preprocessing.
+          function getMaskComponents() {
+            return maskPlaceholder.replace(/[_]+/g, '_').replace(/([^_]+)([a-zA-Z0-9])([^_])/g, '$1$2_$3').split('_');
+          }
+
+          function processRawMask(mask){
+            var characterCount = 0;
+
+            maskCaretMap    = [];
+            maskPatterns    = [];
+            maskPlaceholder = '';
+
+            if (typeof mask === 'string') {
+              minRequiredLength = 0;
+
+              var isOptional = false,
+                  numberOfOptionalCharacters = 0,
+                  splitMask  = mask.split('');
+
+              angular.forEach(splitMask, function (chr, i){
+                if (linkOptions.maskDefinitions[chr]) {
+
+                  maskCaretMap.push(characterCount);
+
+                  maskPlaceholder += getPlaceholderChar(i - numberOfOptionalCharacters);
+                  maskPatterns.push(linkOptions.maskDefinitions[chr]);
+
+                  characterCount++;
+                  if (!isOptional) {
+                    minRequiredLength++;
+                  }
+                }
+                else if (chr === '?') {
+                  isOptional = true;
+                  numberOfOptionalCharacters++;
+                }
+                else {
+                  maskPlaceholder += chr;
+                  characterCount++;
+                }
+              });
+            }
+            // Caret position immediately following last position is valid.
+            maskCaretMap.push(maskCaretMap.slice().pop() + 1);
+
+            maskComponents = getMaskComponents();
+            maskProcessed  = maskCaretMap.length > 1 ? true : false;
+          }
+
+          function blurHandler(){
+            if (linkOptions.clearOnBlur) {
+              oldCaretPosition = 0;
+              oldSelectionLength = 0;
+              if (!isValid || value.length === 0) {
+                valueMasked = '';
+                iElement.val('');
+                scope.$apply(function () {
+                  controller.$setViewValue('');
+                });
+              }
+            }
+          }
+
+          function mouseDownUpHandler(e){
+            if (e.type === 'mousedown') {
+              iElement.bind('mouseout', mouseoutHandler);
+            } else {
+              iElement.unbind('mouseout', mouseoutHandler);
+            }
+          }
+
+          iElement.bind('mousedown mouseup', mouseDownUpHandler);
+
+          function mouseoutHandler(){
+            /*jshint validthis: true */
+            oldSelectionLength = getSelectionLength(this);
+            iElement.unbind('mouseout', mouseoutHandler);
+          }
+
+          function eventHandler(e){
+            /*jshint validthis: true */
+            e = e || {};
+            // Allows more efficient minification
+            var eventWhich = e.which,
+              eventType = e.type;
+
+            // Prevent shift and ctrl from mucking with old values
+            if (eventWhich === 16 || eventWhich === 91) { return;}
+
+            var val = iElement.val(),
+              valOld = oldValue,
+              valMasked,
+              valUnmasked = unmaskValue(val),
+              valUnmaskedOld = oldValueUnmasked,
+              valAltered = false,
+
+              caretPos = getCaretPosition(this) || 0,
+              caretPosOld = oldCaretPosition || 0,
+              caretPosDelta = caretPos - caretPosOld,
+              caretPosMin = maskCaretMap[0],
+              caretPosMax = maskCaretMap[valUnmasked.length] || maskCaretMap.slice().shift(),
+
+              selectionLenOld = oldSelectionLength || 0,
+              isSelected = getSelectionLength(this) > 0,
+              wasSelected = selectionLenOld > 0,
+
+            // Case: Typing a character to overwrite a selection
+              isAddition = (val.length > valOld.length) || (selectionLenOld && val.length > valOld.length - selectionLenOld),
+            // Case: Delete and backspace behave identically on a selection
+              isDeletion = (val.length < valOld.length) || (selectionLenOld && val.length === valOld.length - selectionLenOld),
+              isSelection = (eventWhich >= 37 && eventWhich <= 40) && e.shiftKey, // Arrow key codes
+
+              isKeyLeftArrow = eventWhich === 37,
+            // Necessary due to "input" event not providing a key code
+              isKeyBackspace = eventWhich === 8 || (eventType !== 'keyup' && isDeletion && (caretPosDelta === -1)),
+              isKeyDelete = eventWhich === 46 || (eventType !== 'keyup' && isDeletion && (caretPosDelta === 0 ) && !wasSelected),
+
+            // Handles cases where caret is moved and placed in front of invalid maskCaretMap position. Logic below
+            // ensures that, on click or leftward caret placement, caret is moved leftward until directly right of
+            // non-mask character. Also applied to click since users are (arguably) more likely to backspace
+            // a character when clicking within a filled input.
+              caretBumpBack = (isKeyLeftArrow || isKeyBackspace || eventType === 'click') && caretPos > caretPosMin;
+
+            oldSelectionLength = getSelectionLength(this);
+
+            // These events don't require any action
+            if (isSelection || (isSelected && (eventType === 'click' || eventType === 'keyup'))) {
+              return;
+            }
+
+            // Value Handling
+            // ==============
+
+            // User attempted to delete but raw value was unaffected--correct this grievous offense
+            if ((eventType === 'input') && isDeletion && !wasSelected && valUnmasked === valUnmaskedOld) {
+              while (isKeyBackspace && caretPos > caretPosMin && !isValidCaretPosition(caretPos)) {
+                caretPos--;
+              }
+              while (isKeyDelete && caretPos < caretPosMax && maskCaretMap.indexOf(caretPos) === -1) {
+                caretPos++;
+              }
+              var charIndex = maskCaretMap.indexOf(caretPos);
+              // Strip out non-mask character that user would have deleted if mask hadn't been in the way.
+              valUnmasked = valUnmasked.substring(0, charIndex) + valUnmasked.substring(charIndex + 1);
+              valAltered = true;
+            }
+
+            // Update values
+            valMasked = maskValue(valUnmasked);
+
+            oldValue = valMasked;
+            oldValueUnmasked = valUnmasked;
+            iElement.val(valMasked);
+            if (valAltered) {
+              // We've altered the raw value after it's been $digest'ed, we need to $apply the new value.
+              scope.$apply(function (){
+                controller.$setViewValue(valUnmasked);
+              });
+            }
+
+            // Caret Repositioning
+            // ===================
+
+            // Ensure that typing always places caret ahead of typed character in cases where the first char of
+            // the input is a mask char and the caret is placed at the 0 position.
+            if (isAddition && (caretPos <= caretPosMin)) {
+              caretPos = caretPosMin + 1;
+            }
+
+            if (caretBumpBack) {
+              caretPos--;
+            }
+
+            // Make sure caret is within min and max position limits
+            caretPos = caretPos > caretPosMax ? caretPosMax : caretPos < caretPosMin ? caretPosMin : caretPos;
+
+            // Scoot the caret back or forth until it's in a non-mask position and within min/max position limits
+            while (!isValidCaretPosition(caretPos) && caretPos > caretPosMin && caretPos < caretPosMax) {
+              caretPos += caretBumpBack ? -1 : 1;
+            }
+
+            if ((caretBumpBack && caretPos < caretPosMax) || (isAddition && !isValidCaretPosition(caretPosOld))) {
+              caretPos++;
+            }
+            oldCaretPosition = caretPos;
+            setCaretPosition(this, caretPos);
+          }
+
+          function isValidCaretPosition(pos){ return maskCaretMap.indexOf(pos) > -1; }
+
+          function getCaretPosition(input){
+            if (!input) return 0;
+            if (input.selectionStart !== undefined) {
+              return input.selectionStart;
+            } else if (document.selection) {
+              // Curse you IE
+              input.focus();
+              var selection = document.selection.createRange();
+              selection.moveStart('character', input.value ? -input.value.length : 0);
+              return selection.text.length;
+            }
+            return 0;
+          }
+
+          function setCaretPosition(input, pos){
+            if (!input) return 0;
+            if (input.offsetWidth === 0 || input.offsetHeight === 0) {
+              return; // Input's hidden
+            }
+            if (input.setSelectionRange) {
+              input.focus();
+              input.setSelectionRange(pos, pos);
+            }
+            else if (input.createTextRange) {
+              // Curse you IE
+              var range = input.createTextRange();
+              range.collapse(true);
+              range.moveEnd('character', pos);
+              range.moveStart('character', pos);
+              range.select();
+            }
+          }
+
+          function getSelectionLength(input){
+            if (!input) return 0;
+            if (input.selectionStart !== undefined) {
+              return (input.selectionEnd - input.selectionStart);
+            }
+            if (document.selection) {
+              return (document.selection.createRange().text.length);
+            }
+            return 0;
+          }
+
+          // https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/indexOf
+          if (!Array.prototype.indexOf) {
+            Array.prototype.indexOf = function (searchElement /*, fromIndex */){
+              if (this === null) {
+                throw new TypeError();
+              }
+              var t = Object(this);
+              var len = t.length >>> 0;
+              if (len === 0) {
+                return -1;
+              }
+              var n = 0;
+              if (arguments.length > 1) {
+                n = Number(arguments[1]);
+                if (n !== n) { // shortcut for verifying if it's NaN
+                  n = 0;
+                } else if (n !== 0 && n !== Infinity && n !== -Infinity) {
+                  n = (n > 0 || -1) * Math.floor(Math.abs(n));
+                }
+              }
+              if (n >= len) {
+                return -1;
+              }
+              var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
+              for (; k < len; k++) {
+                if (k in t && t[k] === searchElement) {
+                  return k;
+                }
+              }
+              return -1;
+            };
+          }
+
+        };
+      }
+    };
+  }
+]);
+
+/**
+ * Add a clear button to form inputs to reset their value
+ */
+angular.module('ui.reset',[]).value('uiResetConfig',null).directive('uiReset', ['uiResetConfig', function (uiResetConfig) {
+  'use strict';
+
+  var resetValue = null;
+  if (uiResetConfig !== undefined){
+      resetValue = uiResetConfig;
+  }
+  return {
+    require: 'ngModel',
+    link: function (scope, elm, attrs, ctrl) {
+      var aElement;
+      aElement = angular.element('<a class="ui-reset" />');
+      elm.wrap('<span class="ui-resetwrap" />').after(aElement);
+      aElement.bind('click', function (e) {
+        e.preventDefault();
+        scope.$apply(function () {
+          if (attrs.uiReset){
+            ctrl.$setViewValue(scope.$eval(attrs.uiReset));
+          }else{
+            ctrl.$setViewValue(resetValue);
+          }
+          ctrl.$render();
+        });
+      });
+    }
+  };
+}]);
+
+/**
+ * Set a $uiRoute boolean to see if the current route matches
+ */
+angular.module('ui.route', []).directive('uiRoute', ['$location', '$parse', function ($location, $parse) {
+  'use strict';
+
+  return {
+    restrict: 'AC',
+    scope: true,
+    compile: function(tElement, tAttrs) {
+      var useProperty;
+      if (tAttrs.uiRoute) {
+        useProperty = 'uiRoute';
+      } else if (tAttrs.ngHref) {
+        useProperty = 'ngHref';
+      } else if (tAttrs.href) {
+        useProperty = 'href';
+      } else {
+        throw new Error('uiRoute missing a route or href property on ' + tElement[0]);
+      }
+      return function ($scope, elm, attrs) {
+        var modelSetter = $parse(attrs.ngModel || attrs.routeModel || '$uiRoute').assign;
+        var watcher = angular.noop;
+
+        // Used by href and ngHref
+        function staticWatcher(newVal) {
+          var hash = newVal.indexOf('#');
+          if (hash > -1){
+            newVal = newVal.substr(hash + 1);
+          }
+          watcher = function watchHref() {
+            modelSetter($scope, ($location.path().indexOf(newVal) > -1));
+          };
+          watcher();
+        }
+        // Used by uiRoute
+        function regexWatcher(newVal) {
+          var hash = newVal.indexOf('#');
+          if (hash > -1){
+            newVal = newVal.substr(hash + 1);
+          }
+          watcher = function watchRegex() {
+            var regexp = new RegExp('^' + newVal + '$', ['i']);
+            modelSetter($scope, regexp.test($location.path()));
+          };
+          watcher();
+        }
+
+        switch (useProperty) {
+          case 'uiRoute':
+            // if uiRoute={{}} this will be undefined, otherwise it will have a value and $observe() never gets triggered
+            if (attrs.uiRoute){
+              regexWatcher(attrs.uiRoute);
+            }else{
+              attrs.$observe('uiRoute', regexWatcher);
+            }
+            break;
+          case 'ngHref':
+            // Setup watcher() every time ngHref changes
+            if (attrs.ngHref){
+              staticWatcher(attrs.ngHref);
+            }else{
+              attrs.$observe('ngHref', staticWatcher);
+            }
+            break;
+          case 'href':
+            // Setup watcher()
+            staticWatcher(attrs.href);
+        }
+
+        $scope.$on('$routeChangeSuccess', function(){
+          watcher();
+        });
+
+        //Added for compatibility with ui-router
+        $scope.$on('$stateChangeSuccess', function(){
+          watcher();
+        });
+      };
+    }
+  };
+}]);
+
+angular.module('ui.scroll.jqlite', ['ui.scroll']).service('jqLiteExtras', [
+  '$log', '$window', function(console, window) {
+    'use strict';
+
+    return {
+      registerFor: function(element) {
+        var convertToPx, css, getMeasurements, getStyle, getWidthHeight, isWindow, scrollTo;
+        css = angular.element.prototype.css;
+        element.prototype.css = function(name, value) {
+          var elem, self;
+          self = this;
+          elem = self[0];
+          if (!(!elem || elem.nodeType === 3 || elem.nodeType === 8 || !elem.style)) {
+            return css.call(self, name, value);
+          }
+        };
+        isWindow = function(obj) {
+          return obj && obj.document && obj.location && obj.alert && obj.setInterval;
+        };
+        scrollTo = function(self, direction, value) {
+          var elem, method, preserve, prop, _ref;
+          elem = self[0];
+          _ref = {
+            top: ['scrollTop', 'pageYOffset', 'scrollLeft'],
+            left: ['scrollLeft', 'pageXOffset', 'scrollTop']
+          }[direction], method = _ref[0], prop = _ref[1], preserve = _ref[2];
+          if (isWindow(elem)) {
+            if (angular.isDefined(value)) {
+              return elem.scrollTo(self[preserve].call(self), value);
+            } else {
+              if (prop in elem) {
+                return elem[prop];
+              } else {
+                return elem.document.documentElement[method];
+              }
+            }
+          } else {
+            if (angular.isDefined(value)) {
+              return elem[method] = value;
+            } else {
+              return elem[method];
+            }
+          }
+        };
+        if (window.getComputedStyle) {
+          getStyle = function(elem) {
+            return window.getComputedStyle(elem, null);
+          };
+          convertToPx = function(elem, value) {
+            return parseFloat(value);
+          };
+        } else {
+          getStyle = function(elem) {
+            return elem.currentStyle;
+          };
+          convertToPx = function(elem, value) {
+            var core_pnum, left, result, rnumnonpx, rs, rsLeft, style;
+            core_pnum = /[+-]?(?:\d*\.|)\d+(?:[eE][+-]?\d+|)/.source;
+            rnumnonpx = new RegExp('^(' + core_pnum + ')(?!px)[a-z%]+$', 'i');
+            if (!rnumnonpx.test(value)) {
+              return parseFloat(value);
+            } else {
+              style = elem.style;
+              left = style.left;
+              rs = elem.runtimeStyle;
+              rsLeft = rs && rs.left;
+              if (rs) {
+                rs.left = style.left;
+              }
+              style.left = value;
+              result = style.pixelLeft;
+              style.left = left;
+              if (rsLeft) {
+                rs.left = rsLeft;
+              }
+              return result;
+            }
+          };
+        }
+        getMeasurements = function(elem, measure) {
+          var base, borderA, borderB, computedMarginA, computedMarginB, computedStyle, dirA, dirB, marginA, marginB, paddingA, paddingB, _ref;
+          if (isWindow(elem)) {
+            base = document.documentElement[{
+              height: 'clientHeight',
+              width: 'clientWidth'
+            }[measure]];
+            return {
+              base: base,
+              padding: 0,
+              border: 0,
+              margin: 0
+            };
+          }
+          _ref = {
+            width: [elem.offsetWidth, 'Left', 'Right'],
+            height: [elem.offsetHeight, 'Top', 'Bottom']
+          }[measure], base = _ref[0], dirA = _ref[1], dirB = _ref[2];
+          computedStyle = getStyle(elem);
+          paddingA = convertToPx(elem, computedStyle['padding' + dirA]) || 0;
+          paddingB = convertToPx(elem, computedStyle['padding' + dirB]) || 0;
+          borderA = convertToPx(elem, computedStyle['border' + dirA + 'Width']) || 0;
+          borderB = convertToPx(elem, computedStyle['border' + dirB + 'Width']) || 0;
+          computedMarginA = computedStyle['margin' + dirA];
+          computedMarginB = computedStyle['margin' + dirB];
+          marginA = convertToPx(elem, computedMarginA) || 0;
+          marginB = convertToPx(elem, computedMarginB) || 0;
+          return {
+            base: base,
+            padding: paddingA + paddingB,
+            border: borderA + borderB,
+            margin: marginA + marginB
+          };
+        };
+        getWidthHeight = function(elem, direction, measure) {
+          var computedStyle, measurements, result;
+          measurements = getMeasurements(elem, direction);
+          if (measurements.base > 0) {
+            return {
+              base: measurements.base - measurements.padding - measurements.border,
+              outer: measurements.base,
+              outerfull: measurements.base + measurements.margin
+            }[measure];
+          } else {
+            computedStyle = getStyle(elem);
+            result = computedStyle[direction];
+            if (result < 0 || result === null) {
+              result = elem.style[direction] || 0;
+            }
+            result = parseFloat(result) || 0;
+            return {
+              base: result - measurements.padding - measurements.border,
+              outer: result,
+              outerfull: result + measurements.padding + measurements.border + measurements.margin
+            }[measure];
+          }
+        };
+        return angular.forEach({
+          before: function(newElem) {
+            var children, elem, i, parent, self, _i, _ref;
+            self = this;
+            elem = self[0];
+            parent = self.parent();
+            children = parent.contents();
+            if (children[0] === elem) {
+              return parent.prepend(newElem);
+            } else {
+              for (i = _i = 1, _ref = children.length - 1; 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
+                if (children[i] === elem) {
+                  angular.element(children[i - 1]).after(newElem);
+                  return;
+                }
+              }
+              throw new Error('invalid DOM structure ' + elem.outerHTML);
+            }
+          },
+          height: function(value) {
+            var self;
+            self = this;
+            if (angular.isDefined(value)) {
+              if (angular.isNumber(value)) {
+                value = value + 'px';
+              }
+              return css.call(self, 'height', value);
+            } else {
+              return getWidthHeight(this[0], 'height', 'base');
+            }
+          },
+          outerHeight: function(option) {
+            return getWidthHeight(this[0], 'height', option ? 'outerfull' : 'outer');
+          },
+          /*
+          UIScroller no longer relies on jQuery method offset. The jQLite implementation of the method
+          is kept here just for the reference. Also the offset setter method was never implemented
+          */
+
+          offset: function(value) {
+            var box, doc, docElem, elem, self, win;
+            self = this;
+            if (arguments.length) {
+              if (value === void 0) {
+                return self;
+              } else {
+                throw new Error('offset setter method is not implemented');
+              }
+            }
+            box = {
+              top: 0,
+              left: 0
+            };
+            elem = self[0];
+            doc = elem && elem.ownerDocument;
+            if (!doc) {
+              return;
+            }
+            docElem = doc.documentElement;
+            if (elem.getBoundingClientRect != null) {
+              box = elem.getBoundingClientRect();
+            }
+            win = doc.defaultView || doc.parentWindow;
+            return {
+              top: box.top + (win.pageYOffset || docElem.scrollTop) - (docElem.clientTop || 0),
+              left: box.left + (win.pageXOffset || docElem.scrollLeft) - (docElem.clientLeft || 0)
+            };
+          },
+          scrollTop: function(value) {
+            return scrollTo(this, 'top', value);
+          },
+          scrollLeft: function(value) {
+            return scrollTo(this, 'left', value);
+          }
+        }, function(value, key) {
+          if (!element.prototype[key]) {
+            return element.prototype[key] = value;
+          }
+        });
+      }
+    };
+  }
+]).run([
+  '$log', '$window', 'jqLiteExtras', function(console, window, jqLiteExtras) {
+    'use strict';
+
+    if (!window.jQuery) {
+      return jqLiteExtras.registerFor(angular.element);
+    }
+  }
+]);
+
+/*
+//# sourceURL=src/scripts/ui-scroll-jqlite.js
+*/
+
+
+/*
+ globals: angular, window
+
+ List of used element methods available in JQuery but not in JQuery Lite
+
+ element.before(elem)
+ element.height()
+ element.outerHeight(true)
+ element.height(value) = only for Top/Bottom padding elements
+ element.scrollTop()
+ element.scrollTop(value)
+ */
+
+angular.module('ui.scroll', []).directive('uiScrollViewport', [
+  '$log', function() {
+    'use strict';
+
+    return {
+      controller: [
+        '$scope', '$element', function(scope, element) {
+          this.viewport = element;
+          return this;
+        }
+      ]
+    };
+  }
+]).directive('uiScroll', [
+  '$log', '$injector', '$rootScope', '$timeout', function(console, $injector, $rootScope, $timeout) {
+    'use strict';
+
+    return {
+      require: ['?^uiScrollViewport'],
+      transclude: 'element',
+      priority: 1000,
+      terminal: true,
+      compile: function(elementTemplate, attr, linker) {
+        return function($scope, element, $attr, controllers) {
+          var adapter, adapterOnScope, adjustBuffer, adjustRowHeight, applyUpdate, bof, bottomVisiblePos, buffer, bufferPadding, bufferSize, builder, clipBottom, clipTop, datasource, datasourceName, doAdjustment, doDelete, doInsert, doUpdate, enqueueFetch, eof, eventListener, fetch, finalize, first, getValueChain, hideElementBeforeAppend, insert, isDatasourceValid, itemName, loading, log, match, next, pending, reload, removeFromBuffer, resizeAndScrollHandler, ridActual, scrollHeight, setValueChain, shouldLoadBottom, shouldLoadTop, showElementAfterRender, topVisible, topVisiblePos, viewport, viewportScope, wheelHandler;
+          log = console.debug || console.log;
+          match = $attr.uiScroll.match(/^\s*(\w+)\s+in\s+([\w\.]+)\s*$/);
+          if (!match) {
+            throw new Error('Expected uiScroll in form of \'_item_ in _datasource_\' but got \'' + $attr.uiScroll + '\'');
+          }
+          itemName = match[1];
+          datasourceName = match[2];
+          getValueChain = function(targetScope, target) {
+            var chain;
+            if (!targetScope) {
+              return;
+            }
+            chain = target.match(/^([\w]+)\.(.+)$/);
+            if (!chain || chain.length !== 3) {
+              return targetScope[target];
+            }
+            return getValueChain(targetScope[chain[1]], chain[2]);
+          };
+          setValueChain = function(targetScope, target, value, doNotSet) {
+            var chain;
+            if (!targetScope || !target) {
+              return;
+            }
+            if (!(chain = target.match(/^([\w]+)\.(.+)$/))) {
+              if (target.indexOf('.') !== -1) {
+                return;
+              }
+            }
+            if (!chain || chain.length !== 3) {
+              if (!angular.isObject(targetScope[target]) && !doNotSet) {
+                return targetScope[target] = value;
+              }
+              return targetScope[target] = value;
+            }
+            if (!angular.isObject(targetScope[chain[1]]) && !doNotSet) {
+              targetScope[chain[1]] = {};
+            }
+            return setValueChain(targetScope[chain[1]], chain[2], value, doNotSet);
+          };
+          datasource = getValueChain($scope, datasourceName);
+          isDatasourceValid = function() {
+            return angular.isObject(datasource) && typeof datasource.get === 'function';
+          };
+          if (!isDatasourceValid()) {
+            datasource = $injector.get(datasourceName);
+            if (!isDatasourceValid()) {
+              throw new Error('' + datasourceName + ' is not a valid datasource');
+            }
+          }
+          bufferSize = Math.max(3, +$attr.bufferSize || 10);
+          bufferPadding = function() {
+            return viewport.outerHeight() * Math.max(0.1, +$attr.padding || 0.1);
+          };
+          scrollHeight = function(elem) {
+            var _ref;
+            return (_ref = elem[0].scrollHeight) != null ? _ref : elem[0].document.documentElement.scrollHeight;
+          };
+          builder = null;
+          linker($scope.$new(), function(template) {
+            var bottomPadding, createPadding, padding, repeaterType, topPadding, viewport;
+            repeaterType = template[0].localName;
+            if (repeaterType === 'dl') {
+              throw new Error('ui-scroll directive does not support <' + template[0].localName + '> as a repeating tag: ' + template[0].outerHTML);
+            }
+            if (repeaterType !== 'li' && repeaterType !== 'tr') {
+              repeaterType = 'div';
+            }
+            viewport = controllers[0] && controllers[0].viewport ? controllers[0].viewport : angular.element(window);
+            viewport.css({
+              'overflow-y': 'auto',
+              'display': 'block'
+            });
+            padding = function(repeaterType) {
+              var div, result, table;
+              switch (repeaterType) {
+                case 'tr':
+                  table = angular.element('<table><tr><td><div></div></td></tr></table>');
+                  div = table.find('div');
+                  result = table.find('tr');
+                  result.paddingHeight = function() {
+                    return div.height.apply(div, arguments);
+                  };
+                  return result;
+                default:
+                  result = angular.element('<' + repeaterType + '></' + repeaterType + '>');
+                  result.paddingHeight = result.height;
+                  return result;
+              }
+            };
+            createPadding = function(padding, element, direction) {
+              element[{
+                top: 'before',
+                bottom: 'after'
+              }[direction]](padding);
+              return {
+                paddingHeight: function() {
+                  return padding.paddingHeight.apply(padding, arguments);
+                },
+                insert: function(element) {
+                  return padding[{
+                    top: 'after',
+                    bottom: 'before'
+                  }[direction]](element);
+                }
+              };
+            };
+            topPadding = createPadding(padding(repeaterType), element, 'top');
+            bottomPadding = createPadding(padding(repeaterType), element, 'bottom');
+            $scope.$on('$destroy', template.remove);
+            return builder = {
+              viewport: viewport,
+              topPadding: topPadding.paddingHeight,
+              bottomPadding: bottomPadding.paddingHeight,
+              append: bottomPadding.insert,
+              prepend: topPadding.insert,
+              bottomDataPos: function() {
+                return scrollHeight(viewport) - bottomPadding.paddingHeight();
+              },
+              topDataPos: function() {
+                return topPadding.paddingHeight();
+              }
+            };
+          });
+          viewport = builder.viewport;
+          viewportScope = viewport.scope() || $rootScope;
+          topVisible = function(item) {
+            adapter.topVisible = item.scope[itemName];
+            adapter.topVisibleElement = item.element;
+            adapter.topVisibleScope = item.scope;
+            if ($attr.topVisible) {
+              setValueChain(viewportScope, $attr.topVisible, adapter.topVisible);
+            }
+            if ($attr.topVisibleElement) {
+              setValueChain(viewportScope, $attr.topVisibleElement, adapter.topVisibleElement);
+            }
+            if ($attr.topVisibleScope) {
+              setValueChain(viewportScope, $attr.topVisibleScope, adapter.topVisibleScope);
+            }
+            if (typeof datasource.topVisible === 'function') {
+              return datasource.topVisible(item);
+            }
+          };
+          loading = function(value) {
+            adapter.isLoading = value;
+            if ($attr.isLoading) {
+              setValueChain($scope, $attr.isLoading, value);
+            }
+            if (typeof datasource.loading === 'function') {
+              return datasource.loading(value);
+            }
+          };
+          ridActual = 0;
+          first = 1;
+          next = 1;
+          buffer = [];
+          pending = [];
+          eof = false;
+          bof = false;
+          removeFromBuffer = function(start, stop) {
+            var i, _i;
+            for (i = _i = start; start <= stop ? _i < stop : _i > stop; i = start <= stop ? ++_i : --_i) {
+              buffer[i].scope.$destroy();
+              buffer[i].element.remove();
+            }
+            return buffer.splice(start, stop - start);
+          };
+          reload = function() {
+            ridActual++;
+            first = 1;
+            next = 1;
+            removeFromBuffer(0, buffer.length);
+            builder.topPadding(0);
+            builder.bottomPadding(0);
+            pending = [];
+            eof = false;
+            bof = false;
+            return adjustBuffer(ridActual);
+          };
+          bottomVisiblePos = function() {
+            return viewport.scrollTop() + viewport.outerHeight();
+          };
+          topVisiblePos = function() {
+            return viewport.scrollTop();
+          };
+          shouldLoadBottom = function() {
+            return !eof && builder.bottomDataPos() < bottomVisiblePos() + bufferPadding();
+          };
+          clipBottom = function() {
+            var bottomHeight, i, item, itemHeight, itemTop, newRow, overage, rowTop, _i, _ref;
+            bottomHeight = 0;
+            overage = 0;
+            for (i = _i = _ref = buffer.length - 1; _ref <= 0 ? _i <= 0 : _i >= 0; i = _ref <= 0 ? ++_i : --_i) {
+              item = buffer[i];
+              itemTop = item.element.offset().top;
+              newRow = rowTop !== itemTop;
+              rowTop = itemTop;
+              if (newRow) {
+                itemHeight = item.element.outerHeight(true);
+              }
+              if (builder.bottomDataPos() - bottomHeight - itemHeight > bottomVisiblePos() + bufferPadding()) {
+                if (newRow) {
+                  bottomHeight += itemHeight;
+                }
+                overage++;
+                eof = false;
+              } else {
+                if (newRow) {
+                  break;
+                }
+                overage++;
+              }
+            }
+            if (overage > 0) {
+              builder.bottomPadding(builder.bottomPadding() + bottomHeight);
+              removeFromBuffer(buffer.length - overage, buffer.length);
+              return next -= overage;
+            }
+          };
+          shouldLoadTop = function() {
+            return !bof && (builder.topDataPos() > topVisiblePos() - bufferPadding());
+          };
+          clipTop = function() {
+            var item, itemHeight, itemTop, newRow, overage, rowTop, topHeight, _i, _len;
+            topHeight = 0;
+            overage = 0;
+            for (_i = 0, _len = buffer.length; _i < _len; _i++) {
+              item = buffer[_i];
+              itemTop = item.element.offset().top;
+              newRow = rowTop !== itemTop;
+              rowTop = itemTop;
+              if (newRow) {
+                itemHeight = item.element.outerHeight(true);
+              }
+              if (builder.topDataPos() + topHeight + itemHeight < topVisiblePos() - bufferPadding()) {
+                if (newRow) {
+                  topHeight += itemHeight;
+                }
+                overage++;
+                bof = false;
+              } else {
+                if (newRow) {
+                  break;
+                }
+                overage++;
+              }
+            }
+            if (overage > 0) {
+              builder.topPadding(builder.topPadding() + topHeight);
+              removeFromBuffer(0, overage);
+              return first += overage;
+            }
+          };
+          enqueueFetch = function(rid, direction) {
+            if (!adapter.isLoading) {
+              loading(true);
+            }
+            if (pending.push(direction) === 1) {
+              return fetch(rid);
+            }
+          };
+          hideElementBeforeAppend = function(element) {
+            element.displayTemp = element.css('display');
+            return element.css('display', 'none');
+          };
+          showElementAfterRender = function(element) {
+            if (element.hasOwnProperty('displayTemp')) {
+              return element.css('display', element.displayTemp);
+            }
+          };
+          insert = function(index, item) {
+            var itemScope, toBeAppended, wrapper;
+            itemScope = $scope.$new();
+            itemScope[itemName] = item;
+            toBeAppended = index > first;
+            itemScope.$index = index;
+            if (toBeAppended) {
+              itemScope.$index--;
+            }
+            wrapper = {
+              scope: itemScope
+            };
+            linker(itemScope, function(clone) {
+              wrapper.element = clone;
+              if (toBeAppended) {
+                if (index === next) {
+                  hideElementBeforeAppend(clone);
+                  builder.append(clone);
+                  return buffer.push(wrapper);
+                } else {
+                  buffer[index - first].element.after(clone);
+                  return buffer.splice(index - first + 1, 0, wrapper);
+                }
+              } else {
+                hideElementBeforeAppend(clone);
+                builder.prepend(clone);
+                return buffer.unshift(wrapper);
+              }
+            });
+            return {
+              appended: toBeAppended,
+              wrapper: wrapper
+            };
+          };
+          adjustRowHeight = function(appended, wrapper) {
+            var newHeight;
+            if (appended) {
+              return builder.bottomPadding(Math.max(0, builder.bottomPadding() - wrapper.element.outerHeight(true)));
+            } else {
+              newHeight = builder.topPadding() - wrapper.element.outerHeight(true);
+              if (newHeight >= 0) {
+                return builder.topPadding(newHeight);
+              } else {
+                return viewport.scrollTop(viewport.scrollTop() + wrapper.element.outerHeight(true));
+              }
+            }
+          };
+          doAdjustment = function(rid, finalize) {
+            var item, itemHeight, itemTop, newRow, rowTop, topHeight, _i, _len, _results;
+            if (shouldLoadBottom()) {
+              enqueueFetch(rid, true);
+            } else {
+              if (shouldLoadTop()) {
+                enqueueFetch(rid, false);
+              }
+            }
+            if (finalize) {
+              finalize(rid);
+            }
+            if (pending.length === 0) {
+              topHeight = 0;
+              _results = [];
+              for (_i = 0, _len = buffer.length; _i < _len; _i++) {
+                item = buffer[_i];
+                itemTop = item.element.offset().top;
+                newRow = rowTop !== itemTop;
+                rowTop = itemTop;
+                if (newRow) {
+                  itemHeight = item.element.outerHeight(true);
+                }
+                if (newRow && (builder.topDataPos() + topHeight + itemHeight < topVisiblePos())) {
+                  _results.push(topHeight += itemHeight);
+                } else {
+                  if (newRow) {
+                    topVisible(item);
+                  }
+                  break;
+                }
+              }
+              return _results;
+            }
+          };
+          adjustBuffer = function(rid, newItems, finalize) {
+            if (newItems && newItems.length) {
+              return $timeout(function() {
+                var elt, itemTop, row, rowTop, rows, _i, _j, _len, _len1;
+                rows = [];
+                for (_i = 0, _len = newItems.length; _i < _len; _i++) {
+                  row = newItems[_i];
+                  elt = row.wrapper.element;
+                  showElementAfterRender(elt);
+                  itemTop = elt.offset().top;
+                  if (rowTop !== itemTop) {
+                    rows.push(row);
+                    rowTop = itemTop;
+                  }
+                }
+                for (_j = 0, _len1 = rows.length; _j < _len1; _j++) {
+                  row = rows[_j];
+                  adjustRowHeight(row.appended, row.wrapper);
+                }
+                return doAdjustment(rid, finalize);
+              });
+            } else {
+              return doAdjustment(rid, finalize);
+            }
+          };
+          finalize = function(rid, newItems) {
+            return adjustBuffer(rid, newItems, function() {
+              pending.shift();
+              if (pending.length === 0) {
+                return loading(false);
+              } else {
+                return fetch(rid);
+              }
+            });
+          };
+          fetch = function(rid) {
+            var direction;
+            direction = pending[0];
+            if (direction) {
+              if (buffer.length && !shouldLoadBottom()) {
+                return finalize(rid);
+              } else {
+                return datasource.get(next, bufferSize, function(result) {
+                  var item, newItems, _i, _len;
+                  if ((rid && rid !== ridActual) || $scope.$$destroyed) {
+                    return;
+                  }
+                  newItems = [];
+                  if (result.length < bufferSize) {
+                    eof = true;
+                    builder.bottomPadding(0);
+                  }
+                  if (result.length > 0) {
+                    clipTop();
+                    for (_i = 0, _len = result.length; _i < _len; _i++) {
+                      item = result[_i];
+                      newItems.push(insert(++next, item));
+                    }
+                  }
+                  return finalize(rid, newItems);
+                });
+              }
+            } else {
+              if (buffer.length && !shouldLoadTop()) {
+                return finalize(rid);
+              } else {
+                return datasource.get(first - bufferSize, bufferSize, function(result) {
+                  var i, newItems, _i, _ref;
+                  if ((rid && rid !== ridActual) || $scope.$$destroyed) {
+                    return;
+                  }
+                  newItems = [];
+                  if (result.length < bufferSize) {
+                    bof = true;
+                    builder.topPadding(0);
+                  }
+                  if (result.length > 0) {
+                    if (buffer.length) {
+                      clipBottom();
+                    }
+                    for (i = _i = _ref = result.length - 1; _ref <= 0 ? _i <= 0 : _i >= 0; i = _ref <= 0 ? ++_i : --_i) {
+                      newItems.unshift(insert(--first, result[i]));
+                    }
+                  }
+                  return finalize(rid, newItems);
+                });
+              }
+            }
+          };
+          resizeAndScrollHandler = function() {
+            if (!$rootScope.$$phase && !adapter.isLoading) {
+              adjustBuffer();
+              return $scope.$apply();
+            }
+          };
+          wheelHandler = function(event) {
+            var scrollTop, yMax;
+            scrollTop = viewport[0].scrollTop;
+            yMax = viewport[0].scrollHeight - viewport[0].clientHeight;
+            if ((scrollTop === 0 && !bof) || (scrollTop === yMax && !eof)) {
+              return event.preventDefault();
+            }
+          };
+          viewport.bind('resize', resizeAndScrollHandler);
+          viewport.bind('scroll', resizeAndScrollHandler);
+          viewport.bind('mousewheel', wheelHandler);
+          $scope.$watch(datasource.revision, reload);
+          if (datasource.scope) {
+            eventListener = datasource.scope.$new();
+          } else {
+            eventListener = $scope.$new();
+          }
+          $scope.$on('$destroy', function() {
+            var item, _i, _len;
+            for (_i = 0, _len = buffer.length; _i < _len; _i++) {
+              item = buffer[_i];
+              item.scope.$destroy();
+              item.element.remove();
+            }
+            viewport.unbind('resize', resizeAndScrollHandler);
+            viewport.unbind('scroll', resizeAndScrollHandler);
+            return viewport.unbind('mousewheel', wheelHandler);
+          });
+          adapter = {};
+          adapter.isLoading = false;
+          applyUpdate = function(wrapper, newItems) {
+            var i, inserted, item, ndx, newItem, oldItemNdx, _i, _j, _k, _len, _len1, _len2;
+            inserted = [];
+            if (angular.isArray(newItems)) {
+              if (newItems.length) {
+                if (newItems.length === 1 && newItems[0] === wrapper.scope[itemName]) {
+                  return inserted;
+                } else {
+                  ndx = wrapper.scope.$index;
+                  if (ndx > first) {
+                    oldItemNdx = ndx - first;
+                  } else {
+                    oldItemNdx = 1;
+                  }
+                  for (i = _i = 0, _len = newItems.length; _i < _len; i = ++_i) {
+                    newItem = newItems[i];
+                    inserted.push(insert(ndx + i, newItem));
+                  }
+                  removeFromBuffer(oldItemNdx, oldItemNdx + 1);
+                  for (i = _j = 0, _len1 = buffer.length; _j < _len1; i = ++_j) {
+                    item = buffer[i];
+                    item.scope.$index = first + i;
+                  }
+                }
+              } else {
+                removeFromBuffer(wrapper.scope.$index - first, wrapper.scope.$index - first + 1);
+                next--;
+                for (i = _k = 0, _len2 = buffer.length; _k < _len2; i = ++_k) {
+                  item = buffer[i];
+                  item.scope.$index = first + i;
+                }
+              }
+            }
+            return inserted;
+          };
+          adapter.applyUpdates = function(arg1, arg2) {
+            var inserted, wrapper, _i, _len, _ref, _ref1;
+            inserted = [];
+            ridActual++;
+            if (angular.isFunction(arg1)) {
+              _ref = buffer.slice(0);
+              for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+                wrapper = _ref[_i];
+                inserted.concat(inserted, applyUpdate(wrapper, arg1(wrapper.scope[itemName], wrapper.scope, wrapper.element)));
+              }
+            } else {
+              if (arg1 % 1 === 0) {
+                if ((0 <= (_ref1 = arg1 - first - 1) && _ref1 < buffer.length)) {
+                  inserted = applyUpdate(buffer[arg1 - first], arg2);
+                }
+              } else {
+                throw new Error('applyUpdates - ' + arg1 + ' is not a valid index or outside of range');
+              }
+            }
+            return adjustBuffer(ridActual, inserted);
+          };
+          if ($attr.adapter) {
+            adapterOnScope = getValueChain($scope, $attr.adapter);
+            if (!adapterOnScope) {
+              setValueChain($scope, $attr.adapter, {});
+              adapterOnScope = getValueChain($scope, $attr.adapter);
+            }
+            angular.extend(adapterOnScope, adapter);
+            adapter = adapterOnScope;
+          }
+          doUpdate = function(locator, newItem) {
+            var wrapper, _fn, _i, _len, _ref;
+            if (angular.isFunction(locator)) {
+              _fn = function(wrapper) {
+                return locator(wrapper.scope);
+              };
+              for (_i = 0, _len = buffer.length; _i < _len; _i++) {
+                wrapper = buffer[_i];
+                _fn(wrapper);
+              }
+            } else {
+              if ((0 <= (_ref = locator - first - 1) && _ref < buffer.length)) {
+                buffer[locator - first - 1].scope[itemName] = newItem;
+              }
+            }
+            return null;
+          };
+          doDelete = function(locator) {
+            var i, item, temp, wrapper, _fn, _i, _j, _k, _len, _len1, _len2, _ref;
+            if (angular.isFunction(locator)) {
+              temp = [];
+              for (_i = 0, _len = buffer.length; _i < _len; _i++) {
+                item = buffer[_i];
+                temp.unshift(item);
+              }
+              _fn = function(wrapper) {
+                if (locator(wrapper.scope)) {
+                  removeFromBuffer(temp.length - 1 - i, temp.length - i);
+                  return next--;
+                }
+              };
+              for (i = _j = 0, _len1 = temp.length; _j < _len1; i = ++_j) {
+                wrapper = temp[i];
+                _fn(wrapper);
+              }
+            } else {
+              if ((0 <= (_ref = locator - first - 1) && _ref < buffer.length)) {
+                removeFromBuffer(locator - first - 1, locator - first);
+                next--;
+              }
+            }
+            for (i = _k = 0, _len2 = buffer.length; _k < _len2; i = ++_k) {
+              item = buffer[i];
+              item.scope.$index = first + i;
+            }
+            return adjustBuffer();
+          };
+          doInsert = function(locator, item) {
+            var i, inserted, _i, _len, _ref;
+            inserted = [];
+            if (angular.isFunction(locator)) {
+              throw new Error('not implemented - Insert with locator function');
+            } else {
+              if ((0 <= (_ref = locator - first - 1) && _ref < buffer.length)) {
+                inserted.push(insert(locator, item));
+                next++;
+              }
+            }
+            for (i = _i = 0, _len = buffer.length; _i < _len; i = ++_i) {
+              item = buffer[i];
+              item.scope.$index = first + i;
+            }
+            return adjustBuffer(null, inserted);
+          };
+          eventListener.$on('insert.item', function(event, locator, item) {
+            return doInsert(locator, item);
+          });
+          eventListener.$on('update.items', function(event, locator, newItem) {
+            return doUpdate(locator, newItem);
+          });
+          return eventListener.$on('delete.items', function(event, locator) {
+            return doDelete(locator);
+          });
+        };
+      }
+    };
+  }
+]);
+
+/*
+//# sourceURL=src/scripts/ui-scroll.js
+*/
+
+
+/**
+ * Adds a 'ui-scrollfix' class to the element when the page scrolls past it's position.
+ * @param [offset] {int} optional Y-offset to override the detected offset.
+ *   Takes 300 (absolute) or -300 or +300 (relative to detected)
+ */
+angular.module('ui.scrollfix',[]).directive('uiScrollfix', ['$window', function ($window) {
+  'use strict';
+
+  function getWindowScrollTop() {
+    if (angular.isDefined($window.pageYOffset)) {
+      return $window.pageYOffset;
+    } else {
+      var iebody = (document.compatMode && document.compatMode !== 'BackCompat') ? document.documentElement : document.body;
+      return iebody.scrollTop;
+    }
+  }
+  return {
+    require: '^?uiScrollfixTarget',
+    link: function (scope, elm, attrs, uiScrollfixTarget) {
+      var absolute = true,
+          shift = 0,
+          fixLimit,
+          $target = uiScrollfixTarget && uiScrollfixTarget.$element || angular.element($window);
+
+      if (!attrs.uiScrollfix) {
+          absolute = false;
+      } else if (typeof(attrs.uiScrollfix) === 'string') {
+        // charAt is generally faster than indexOf: http://jsperf.com/indexof-vs-charat
+        if (attrs.uiScrollfix.charAt(0) === '-') {
+          absolute = false;
+          shift = - parseFloat(attrs.uiScrollfix.substr(1));
+        } else if (attrs.uiScrollfix.charAt(0) === '+') {
+          absolute = false;
+          shift = parseFloat(attrs.uiScrollfix.substr(1));
+        }
+      }
+
+      fixLimit = absolute ? attrs.uiScrollfix : elm[0].offsetTop + shift;
+
+      function onScroll() {
+
+        var limit = absolute ? attrs.uiScrollfix : elm[0].offsetTop + shift;
+
+        // if pageYOffset is defined use it, otherwise use other crap for IE
+        var offset = uiScrollfixTarget ? $target[0].scrollTop : getWindowScrollTop();
+        if (!elm.hasClass('ui-scrollfix') && offset > limit) {
+          elm.addClass('ui-scrollfix');
+          fixLimit = limit;
+        } else if (elm.hasClass('ui-scrollfix') && offset < fixLimit) {
+          elm.removeClass('ui-scrollfix');
+        }
+      }
+
+      $target.on('scroll', onScroll);
+
+      // Unbind scroll event handler when directive is removed
+      scope.$on('$destroy', function() {
+        $target.off('scroll', onScroll);
+      });
+    }
+  };
+}]).directive('uiScrollfixTarget', [function () {
+  'use strict';
+  return {
+    controller: ['$element', function($element) {
+      this.$element = $element;
+    }]
+  };
+}]);
+
+/**
+ * uiShow Directive
+ *
+ * Adds a 'ui-show' class to the element instead of display:block
+ * Created to allow tighter control  of CSS without bulkier directives
+ *
+ * @param expression {boolean} evaluated expression to determine if the class should be added
+ */
+angular.module('ui.showhide',[])
+.directive('uiShow', [function () {
+  'use strict';
+
+  return function (scope, elm, attrs) {
+    scope.$watch(attrs.uiShow, function (newVal) {
+      if (newVal) {
+        elm.addClass('ui-show');
+      } else {
+        elm.removeClass('ui-show');
+      }
+    });
+  };
+}])
+
+/**
+ * uiHide Directive
+ *
+ * Adds a 'ui-hide' class to the element instead of display:block
+ * Created to allow tighter control  of CSS without bulkier directives
+ *
+ * @param expression {boolean} evaluated expression to determine if the class should be added
+ */
+.directive('uiHide', [function () {
+  'use strict';
+
+  return function (scope, elm, attrs) {
+    scope.$watch(attrs.uiHide, function (newVal) {
+      if (newVal) {
+        elm.addClass('ui-hide');
+      } else {
+        elm.removeClass('ui-hide');
+      }
+    });
+  };
+}])
+
+/**
+ * uiToggle Directive
+ *
+ * Adds a class 'ui-show' if true, and a 'ui-hide' if false to the element instead of display:block/display:none
+ * Created to allow tighter control  of CSS without bulkier directives. This also allows you to override the
+ * default visibility of the element using either class.
+ *
+ * @param expression {boolean} evaluated expression to determine if the class should be added
+ */
+.directive('uiToggle', [function () {
+  'use strict';
+
+  return function (scope, elm, attrs) {
+    scope.$watch(attrs.uiToggle, function (newVal) {
+      if (newVal) {
+        elm.removeClass('ui-hide').addClass('ui-show');
+      } else {
+        elm.removeClass('ui-show').addClass('ui-hide');
+      }
+    });
+  };
+}]);
+
+/**
+ * Filters out all duplicate items from an array by checking the specified key
+ * @param [key] {string} the name of the attribute of each object to compare for uniqueness
+ if the key is empty, the entire object will be compared
+ if the key === false then no filtering will be performed
+ * @return {array}
+ */
+angular.module('ui.unique',[]).filter('unique', ['$parse', function ($parse) {
+  'use strict';
+
+  return function (items, filterOn) {
+
+    if (filterOn === false) {
+      return items;
+    }
+
+    if ((filterOn || angular.isUndefined(filterOn)) && angular.isArray(items)) {
+      var newItems = [],
+        get = angular.isString(filterOn) ? $parse(filterOn) : function (item) { return item; };
+
+      var extractValueToCompare = function (item) {
+        return angular.isObject(item) ? get(item) : item;
+      };
+
+      angular.forEach(items, function (item) {
+        var isDuplicate = false;
+
+        for (var i = 0; i < newItems.length; i++) {
+          if (angular.equals(extractValueToCompare(newItems[i]), extractValueToCompare(item))) {
+            isDuplicate = true;
+            break;
+          }
+        }
+        if (!isDuplicate) {
+          newItems.push(item);
+        }
+
+      });
+      items = newItems;
+    }
+    return items;
+  };
+}]);
+
+/*
+ * Author: Remy Alain Ticona Carbajal http://realtica.org
+ * Description: The main objective of ng-uploader is to have a user control,
+ * clean, simple, customizable, and above all very easy to implement.
+ * Licence: MIT
+ */
+
+angular.module('ui.uploader', []).service('uiUploader', uiUploader);
+
+uiUploader.$inject = ['$log'];
+
+function uiUploader($log) {
+    'use strict';
+
+    /*jshint validthis: true */
+    var self = this;
+    self.files = [];
+    self.options = {};
+    self.activeUploads = 0;
+    $log.info('uiUploader loaded');
+    
+    function addFiles(files) {
+        for (var i = 0; i < files.length; i++) {
+            self.files.push(files[i]);
+        }
+    }
+
+    function getFiles() {
+        return self.files;
+    }
+
+    function startUpload(options) {
+        self.options = options;
+        for (var i = 0; i < self.files.length; i++) {
+            if (self.activeUploads == self.options.concurrency) {
+                break;
+            }
+            if (self.files[i].active)
+                continue;
+            ajaxUpload(self.files[i], self.options.url);
+        }
+    }
+    
+    function removeFile(file){
+        self.files.splice(self.files.indexOf(file),1);
+    }
+    
+    function removeAll(){
+        self.files.splice(0,self.files.length);
+    }
+    
+    return {
+        addFiles: addFiles,
+        getFiles: getFiles,
+        files: self.files,
+        startUpload: startUpload,
+        removeFile: removeFile,
+        removeAll:removeAll
+    };
+    
+    function getHumanSize(bytes) {
+        var sizes = ['n/a', 'bytes', 'KiB', 'MiB', 'GiB', 'TB', 'PB', 'EiB', 'ZiB', 'YiB'];
+        var i = +Math.floor(Math.log(bytes) / Math.log(1024));
+        return (bytes / Math.pow(1024, i)).toFixed(i ? 1 : 0) + ' ' + sizes[isNaN(bytes) ? 0 : i + 1];
+    }
+
+    function ajaxUpload(file, url) {
+        var xhr, formData, prop, data = '',
+            key = '' || 'file';
+        self.activeUploads += 1;
+        file.active = true;
+        xhr = new window.XMLHttpRequest();
+        formData = new window.FormData();
+        xhr.open('POST', url);
+
+        // Triggered when upload starts:
+        xhr.upload.onloadstart = function() {};
+
+        // Triggered many times during upload:
+        xhr.upload.onprogress = function(event) {
+            if (!event.lengthComputable) {
+                return;
+            }
+            // Update file size because it might be bigger than reported by
+            // the fileSize:
+            //$log.info("progres..");
+            //console.info(event.loaded);
+            file.loaded = event.loaded;
+            file.humanSize = getHumanSize(event.loaded);
+            self.options.onProgress(file);
+        };
+
+        // Triggered when upload is completed:
+        xhr.onload = function() {
+            self.activeUploads -= 1;
+            startUpload(self.options);
+            self.options.onCompleted(file, xhr.responseText);
+        };
+
+        // Triggered when upload fails:
+        xhr.onerror = function() {};
+
+        // Append additional data if provided:
+        if (data) {
+            for (prop in data) {
+                if (data.hasOwnProperty(prop)) {
+                    formData.append(prop, data[prop]);
+                }
+            }
+        }
+
+        // Append file data:
+        formData.append(key, file, file.name);
+
+        // Initiate upload:
+        xhr.send(formData);
+
+        return xhr;
+    }
+
+}
+
+/**
+ * General-purpose validator for ngModel.
+ * angular.js comes with several built-in validation mechanism for input fields (ngRequired, ngPattern etc.) but using
+ * an arbitrary validation function requires creation of a custom formatters and / or parsers.
+ * The ui-validate directive makes it easy to use any function(s) defined in scope as a validator function(s).
+ * A validator function will trigger validation on both model and input changes.
+ *
+ * @example <input ui-validate=" 'myValidatorFunction($value)' ">
+ * @example <input ui-validate="{ foo : '$value > anotherModel', bar : 'validateFoo($value)' }">
+ * @example <input ui-validate="{ foo : '$value > anotherModel' }" ui-validate-watch=" 'anotherModel' ">
+ * @example <input ui-validate="{ foo : '$value > anotherModel', bar : 'validateFoo($value)' }" ui-validate-watch=" { foo : 'anotherModel' } ">
+ *
+ * @param ui-validate {string|object literal} If strings is passed it should be a scope's function to be used as a validator.
+ * If an object literal is passed a key denotes a validation error key while a value should be a validator function.
+ * In both cases validator function should take a value to validate as its argument and should return true/false indicating a validation result.
+ */
+angular.module('ui.validate',[]).directive('uiValidate', function () {
+  'use strict';
+
+  return {
+    restrict: 'A',
+    require: 'ngModel',
+    link: function (scope, elm, attrs, ctrl) {
+      var validateFn, validators = {},
+          validateExpr = scope.$eval(attrs.uiValidate);
+
+      if (!validateExpr){ return;}
+
+      if (angular.isString(validateExpr)) {
+        validateExpr = { validator: validateExpr };
+      }
+
+      angular.forEach(validateExpr, function (exprssn, key) {
+        validateFn = function (valueToValidate) {
+          var expression = scope.$eval(exprssn, { '$value' : valueToValidate });
+          if (angular.isObject(expression) && angular.isFunction(expression.then)) {
+            // expression is a promise
+            expression.then(function(){
+              ctrl.$setValidity(key, true);
+            }, function(){
+              ctrl.$setValidity(key, false);
+            });
+            return valueToValidate;
+          } else if (expression) {
+            // expression is true
+            ctrl.$setValidity(key, true);
+            return valueToValidate;
+          } else {
+            // expression is false
+            ctrl.$setValidity(key, false);
+            return valueToValidate;
+          }
+        };
+        validators[key] = validateFn;
+        ctrl.$formatters.push(validateFn);
+        ctrl.$parsers.push(validateFn);
+      });
+
+      function apply_watch(watch)
+      {
+          //string - update all validators on expression change
+          if (angular.isString(watch))
+          {
+              scope.$watch(watch, function(){
+                  angular.forEach(validators, function(validatorFn){
+                      validatorFn(ctrl.$modelValue);
+                  });
+              });
+              return;
+          }
+
+          //array - update all validators on change of any expression
+          if (angular.isArray(watch))
+          {
+              angular.forEach(watch, function(expression){
+                  scope.$watch(expression, function()
+                  {
+                      angular.forEach(validators, function(validatorFn){
+                          validatorFn(ctrl.$modelValue);
+                      });
+                  });
+              });
+              return;
+          }
+
+          //object - update appropriate validator
+          if (angular.isObject(watch))
+          {
+              angular.forEach(watch, function(expression, validatorKey)
+              {
+                  //value is string - look after one expression
+                  if (angular.isString(expression))
+                  {
+                      scope.$watch(expression, function(){
+                          validators[validatorKey](ctrl.$modelValue);
+                      });
+                  }
+
+                  //value is array - look after all expressions in array
+                  if (angular.isArray(expression))
+                  {
+                      angular.forEach(expression, function(intExpression)
+                      {
+                          scope.$watch(intExpression, function(){
+                              validators[validatorKey](ctrl.$modelValue);
+                          });
+                      });
+                  }
+              });
+          }
+      }
+      // Support for ui-validate-watch
+      if (attrs.uiValidateWatch){
+          apply_watch( scope.$eval(attrs.uiValidateWatch) );
+      }
+    }
+  };
+});
+
+angular.module('ui.utils',  [
+  'ui.event',
+  'ui.format',
+  'ui.highlight',
+  'ui.include',
+  'ui.indeterminate',
+  'ui.inflector',
+  'ui.jq',
+  'ui.keypress',
+  'ui.mask',
+  'ui.reset',
+  'ui.route',
+  'ui.scrollfix',
+  'ui.scroll',
+  'ui.scroll.jqlite',
+  'ui.showhide',
+  'ui.unique',
+  'ui.validate'
+]);
+
+(function(){
+    var root = this;
+
+    //消息填充位，补足长度。
+    function fillString(str){
+        var blockAmount = ((str.length + 8) >> 6) + 1,
+            blocks = [],
+            i;
+
+        for(i = 0; i < blockAmount * 16; i++){
+            blocks[i] = 0;
+        }
+        for(i = 0; i < str.length; i++){
+            blocks[i >> 2] |= str.charCodeAt(i) << (24 - (i & 3) * 8);
+        }
+        blocks[i >> 2] |= 0x80 << (24 - (i & 3) * 8);
+        blocks[blockAmount * 16 - 1] = str.length * 8;
+
+        return blocks;
+    }
+
+    //将输入的二进制数组转化为十六进制的字符串。
+    function binToHex(binArray){
+        var hexString = "0123456789abcdef",
+            str = "",
+            i;
+
+        for(i = 0; i < binArray.length * 4; i++){
+            str += hexString.charAt((binArray[i >> 2] >> ((3 - i % 4) * 8 + 4)) & 0xF) +
+                    hexString.charAt((binArray[i >> 2] >> ((3 - i % 4) * 8  )) & 0xF);
+        }
+
+        return str;
+    }
+
+    //核心函数，输出为长度为5的number数组，对应160位的消息摘要。
+    function coreFunction(blockArray){
+        var w = [],
+            a = 0x67452301,
+            b = 0xEFCDAB89,
+            c = 0x98BADCFE,
+            d = 0x10325476,
+            e = 0xC3D2E1F0,
+            olda,
+            oldb,
+            oldc,
+            oldd,
+            olde,
+            t,
+            i,
+            j;
+
+        for(i = 0; i < blockArray.length; i += 16){  //每次处理512位 16*32
+            olda = a;
+            oldb = b;
+            oldc = c;
+            oldd = d;
+            olde = e;
+
+            for(j = 0; j < 80; j++){  //对每个512位进行80步操作
+                if(j < 16){
+                    w[j] = blockArray[i + j];
+                }else{
+                    w[j] = cyclicShift(w[j-3] ^ w[j-8] ^ w[j-14] ^ w[j-16], 1);
+                }
+                t = modPlus(modPlus(cyclicShift(a, 5), ft(j, b, c, d)), modPlus(modPlus(e, w[j]), kt(j)));
+                e = d;
+                d = c;
+                c = cyclicShift(b, 30);
+                b = a;
+                a = t;
+            }
+
+            a = modPlus(a, olda);
+            b = modPlus(b, oldb);
+            c = modPlus(c, oldc);
+            d = modPlus(d, oldd);
+            e = modPlus(e, olde);
+        }
+
+        return [a, b, c, d, e];
+    }
+
+    //根据t值返回相应得压缩函数中用到的f函数。
+    function ft(t, b, c, d){
+        if(t < 20){
+            return (b & c) | ((~b) & d);
+        }else if(t < 40){
+            return b ^ c ^ d;
+        }else if(t < 60){
+            return (b & c) | (b & d) | (c & d);
+        }else{
+            return b ^ c ^ d;
+        }
+    }
+
+    //根据t值返回相应得压缩函数中用到的K值。
+    function kt(t){
+        return (t < 20) ?  0x5A827999 :
+                (t < 40) ? 0x6ED9EBA1 :
+                (t < 60) ? 0x8F1BBCDC : 0xCA62C1D6;
+    }
+
+    //模2的32次方加法，因为JavaScript的number是双精度浮点数表示，所以将32位数拆成高16位和低16位分别进行相加
+    function modPlus(x, y){
+        var low = (x & 0xFFFF) + (y & 0xFFFF),
+            high = (x >> 16) + (y >> 16) + (low >> 16);
+
+        return (high << 16) | (low & 0xFFFF);
+    }
+
+    //对输入的32位的num二进制数进行循环左移 ,因为JavaScript的number是双精度浮点数表示，所以移位需需要注意
+    function cyclicShift(num, k){
+        return (num << k) | (num >>> (32 - k));
+    }
+
+    //主函数根据输入的消息字符串计算消息摘要，返回十六进制表示的消息摘要
+    function sha1(s){
+        return binToHex(coreFunction(fillString(s)));
+    }
+
+    // support AMD and Node
+    if(typeof define === "function" && typeof define.amd){
+        define(function(){
+            return sha1;
+        });
+    }else if(typeof exports !== 'undefined') {
+        if(typeof module !== 'undefined' && module.exports) {
+          exports = module.exports = sha1;
+        }
+        exports.sha1 = sha1;
+    } else {
+        root.sha1 = sha1;
+    }
+
+}).call(this);
+// Generated by CoffeeScript 1.6.2
+/*!
+jQuery Waypoints - v2.0.5
+Copyright (c) 2011-2014 Caleb Troughton
+Licensed under the MIT license.
+https://github.com/imakewebthings/jquery-waypoints/blob/master/licenses.txt
+*/
+
+
+(function() {
+  var __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
+    __slice = [].slice;
+
+  (function(root, factory) {
+    if (typeof define === 'function' && define.amd) {
+      return define('waypoints', ['jquery'], function($) {
+        return factory($, root);
+      });
+    } else {
+      return factory(root.jQuery, root);
+    }
+  })(window, function($, window) {
+    var $w, Context, Waypoint, allWaypoints, contextCounter, contextKey, contexts, isTouch, jQMethods, methods, resizeEvent, scrollEvent, waypointCounter, waypointKey, wp, wps;
+
+    $w = $(window);
+    isTouch = __indexOf.call(window, 'ontouchstart') >= 0;
+    allWaypoints = {
+      horizontal: {},
+      vertical: {}
+    };
+    contextCounter = 1;
+    contexts = {};
+    contextKey = 'waypoints-context-id';
+    resizeEvent = 'resize.waypoints';
+    scrollEvent = 'scroll.waypoints';
+    waypointCounter = 1;
+    waypointKey = 'waypoints-waypoint-ids';
+    wp = 'waypoint';
+    wps = 'waypoints';
+    Context = (function() {
+      function Context($element) {
+        var _this = this;
+
+        this.$element = $element;
+        this.element = $element[0];
+        this.didResize = false;
+        this.didScroll = false;
+        this.id = 'context' + contextCounter++;
+        this.oldScroll = {
+          x: $element.scrollLeft(),
+          y: $element.scrollTop()
+        };
+        this.waypoints = {
+          horizontal: {},
+          vertical: {}
+        };
+        this.element[contextKey] = this.id;
+        contexts[this.id] = this;
+        $element.bind(scrollEvent, function() {
+          var scrollHandler;
+
+          if (!(_this.didScroll || isTouch)) {
+            _this.didScroll = true;
+            scrollHandler = function() {
+              _this.doScroll();
+              return _this.didScroll = false;
+            };
+            return window.setTimeout(scrollHandler, $[wps].settings.scrollThrottle);
+          }
+        });
+        $element.bind(resizeEvent, function() {
+          var resizeHandler;
+
+          if (!_this.didResize) {
+            _this.didResize = true;
+            resizeHandler = function() {
+              $[wps]('refresh');
+              return _this.didResize = false;
+            };
+            return window.setTimeout(resizeHandler, $[wps].settings.resizeThrottle);
+          }
+        });
+      }
+
+      Context.prototype.doScroll = function() {
+        var axes,
+          _this = this;
+
+        axes = {
+          horizontal: {
+            newScroll: this.$element.scrollLeft(),
+            oldScroll: this.oldScroll.x,
+            forward: 'right',
+            backward: 'left'
+          },
+          vertical: {
+            newScroll: this.$element.scrollTop(),
+            oldScroll: this.oldScroll.y,
+            forward: 'down',
+            backward: 'up'
+          }
+        };
+        if (isTouch && (!axes.vertical.oldScroll || !axes.vertical.newScroll)) {
+          $[wps]('refresh');
+        }
+        $.each(axes, function(aKey, axis) {
+          var direction, isForward, triggered;
+
+          triggered = [];
+          isForward = axis.newScroll > axis.oldScroll;
+          direction = isForward ? axis.forward : axis.backward;
+          $.each(_this.waypoints[aKey], function(wKey, waypoint) {
+            var _ref, _ref1;
+
+            if ((axis.oldScroll < (_ref = waypoint.offset) && _ref <= axis.newScroll)) {
+              return triggered.push(waypoint);
+            } else if ((axis.newScroll < (_ref1 = waypoint.offset) && _ref1 <= axis.oldScroll)) {
+              return triggered.push(waypoint);
+            }
+          });
+          triggered.sort(function(a, b) {
+            return a.offset - b.offset;
+          });
+          if (!isForward) {
+            triggered.reverse();
+          }
+          return $.each(triggered, function(i, waypoint) {
+            if (waypoint.options.continuous || i === triggered.length - 1) {
+              return waypoint.trigger([direction]);
+            }
+          });
+        });
+        return this.oldScroll = {
+          x: axes.horizontal.newScroll,
+          y: axes.vertical.newScroll
+        };
+      };
+
+      Context.prototype.refresh = function() {
+        var axes, cOffset, isWin,
+          _this = this;
+
+        isWin = $.isWindow(this.element);
+        cOffset = this.$element.offset();
+        this.doScroll();
+        axes = {
+          horizontal: {
+            contextOffset: isWin ? 0 : cOffset.left,
+            contextScroll: isWin ? 0 : this.oldScroll.x,
+            contextDimension: this.$element.width(),
+            oldScroll: this.oldScroll.x,
+            forward: 'right',
+            backward: 'left',
+            offsetProp: 'left'
+          },
+          vertical: {
+            contextOffset: isWin ? 0 : cOffset.top,
+            contextScroll: isWin ? 0 : this.oldScroll.y,
+            contextDimension: isWin ? $[wps]('viewportHeight') : this.$element.height(),
+            oldScroll: this.oldScroll.y,
+            forward: 'down',
+            backward: 'up',
+            offsetProp: 'top'
+          }
+        };
+        return $.each(axes, function(aKey, axis) {
+          return $.each(_this.waypoints[aKey], function(i, waypoint) {
+            var adjustment, elementOffset, oldOffset, _ref, _ref1;
+
+            adjustment = waypoint.options.offset;
+            oldOffset = waypoint.offset;
+            elementOffset = $.isWindow(waypoint.element) ? 0 : waypoint.$element.offset()[axis.offsetProp];
+            if ($.isFunction(adjustment)) {
+              adjustment = adjustment.apply(waypoint.element);
+            } else if (typeof adjustment === 'string') {
+              adjustment = parseFloat(adjustment);
+              if (waypoint.options.offset.indexOf('%') > -1) {
+                adjustment = Math.ceil(axis.contextDimension * adjustment / 100);
+              }
+            }
+            waypoint.offset = elementOffset - axis.contextOffset + axis.contextScroll - adjustment;
+            if ((waypoint.options.onlyOnScroll && (oldOffset != null)) || !waypoint.enabled) {
+              return;
+            }
+            if (oldOffset !== null && (oldOffset < (_ref = axis.oldScroll) && _ref <= waypoint.offset)) {
+              return waypoint.trigger([axis.backward]);
+            } else if (oldOffset !== null && (oldOffset > (_ref1 = axis.oldScroll) && _ref1 >= waypoint.offset)) {
+              return waypoint.trigger([axis.forward]);
+            } else if (oldOffset === null && axis.oldScroll >= waypoint.offset) {
+              return waypoint.trigger([axis.forward]);
+            }
+          });
+        });
+      };
+
+      Context.prototype.checkEmpty = function() {
+        if ($.isEmptyObject(this.waypoints.horizontal) && $.isEmptyObject(this.waypoints.vertical)) {
+          this.$element.unbind([resizeEvent, scrollEvent].join(' '));
+          return delete contexts[this.id];
+        }
+      };
+
+      return Context;
+
+    })();
+    Waypoint = (function() {
+      function Waypoint($element, context, options) {
+        var idList, _ref;
+
+        if (options.offset === 'bottom-in-view') {
+          options.offset = function() {
+            var contextHeight;
+
+            contextHeight = $[wps]('viewportHeight');
+            if (!$.isWindow(context.element)) {
+              contextHeight = context.$element.height();
+            }
+            return contextHeight - $(this).outerHeight();
+          };
+        }
+        this.$element = $element;
+        this.element = $element[0];
+        this.axis = options.horizontal ? 'horizontal' : 'vertical';
+        this.callback = options.handler;
+        this.context = context;
+        this.enabled = options.enabled;
+        this.id = 'waypoints' + waypointCounter++;
+        this.offset = null;
+        this.options = options;
+        context.waypoints[this.axis][this.id] = this;
+        allWaypoints[this.axis][this.id] = this;
+        idList = (_ref = this.element[waypointKey]) != null ? _ref : [];
+        idList.push(this.id);
+        this.element[waypointKey] = idList;
+      }
+
+      Waypoint.prototype.trigger = function(args) {
+        if (!this.enabled) {
+          return;
+        }
+        if (this.callback != null) {
+          this.callback.apply(this.element, args);
+        }
+        if (this.options.triggerOnce) {
+          return this.destroy();
+        }
+      };
+
+      Waypoint.prototype.disable = function() {
+        return this.enabled = false;
+      };
+
+      Waypoint.prototype.enable = function() {
+        this.context.refresh();
+        return this.enabled = true;
+      };
+
+      Waypoint.prototype.destroy = function() {
+        delete allWaypoints[this.axis][this.id];
+        delete this.context.waypoints[this.axis][this.id];
+        return this.context.checkEmpty();
+      };
+
+      Waypoint.getWaypointsByElement = function(element) {
+        var all, ids;
+
+        ids = element[waypointKey];
+        if (!ids) {
+          return [];
+        }
+        all = $.extend({}, allWaypoints.horizontal, allWaypoints.vertical);
+        return $.map(ids, function(id) {
+          return all[id];
+        });
+      };
+
+      return Waypoint;
+
+    })();
+    methods = {
+      init: function(f, options) {
+        var _ref;
+
+        options = $.extend({}, $.fn[wp].defaults, options);
+        if ((_ref = options.handler) == null) {
+          options.handler = f;
+        }
+        this.each(function() {
+          var $this, context, contextElement, _ref1;
+
+          $this = $(this);
+          contextElement = (_ref1 = options.context) != null ? _ref1 : $.fn[wp].defaults.context;
+          if (!$.isWindow(contextElement)) {
+            contextElement = $this.closest(contextElement);
+          }
+          contextElement = $(contextElement);
+          context = contexts[contextElement[0][contextKey]];
+          if (!context) {
+            context = new Context(contextElement);
+          }
+          return new Waypoint($this, context, options);
+        });
+        $[wps]('refresh');
+        return this;
+      },
+      disable: function() {
+        return methods._invoke.call(this, 'disable');
+      },
+      enable: function() {
+        return methods._invoke.call(this, 'enable');
+      },
+      destroy: function() {
+        return methods._invoke.call(this, 'destroy');
+      },
+      prev: function(axis, selector) {
+        return methods._traverse.call(this, axis, selector, function(stack, index, waypoints) {
+          if (index > 0) {
+            return stack.push(waypoints[index - 1]);
+          }
+        });
+      },
+      next: function(axis, selector) {
+        return methods._traverse.call(this, axis, selector, function(stack, index, waypoints) {
+          if (index < waypoints.length - 1) {
+            return stack.push(waypoints[index + 1]);
+          }
+        });
+      },
+      _traverse: function(axis, selector, push) {
+        var stack, waypoints;
+
+        if (axis == null) {
+          axis = 'vertical';
+        }
+        if (selector == null) {
+          selector = window;
+        }
+        waypoints = jQMethods.aggregate(selector);
+        stack = [];
+        this.each(function() {
+          var index;
+
+          index = $.inArray(this, waypoints[axis]);
+          return push(stack, index, waypoints[axis]);
+        });
+        return this.pushStack(stack);
+      },
+      _invoke: function(method) {
+        this.each(function() {
+          var waypoints;
+
+          waypoints = Waypoint.getWaypointsByElement(this);
+          return $.each(waypoints, function(i, waypoint) {
+            waypoint[method]();
+            return true;
+          });
+        });
+        return this;
+      }
+    };
+    $.fn[wp] = function() {
+      var args, method;
+
+      method = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      if (methods[method]) {
+        return methods[method].apply(this, args);
+      } else if ($.isFunction(method)) {
+        return methods.init.apply(this, arguments);
+      } else if ($.isPlainObject(method)) {
+        return methods.init.apply(this, [null, method]);
+      } else if (!method) {
+        return $.error("jQuery Waypoints needs a callback function or handler option.");
+      } else {
+        return $.error("The " + method + " method does not exist in jQuery Waypoints.");
+      }
+    };
+    $.fn[wp].defaults = {
+      context: window,
+      continuous: true,
+      enabled: true,
+      horizontal: false,
+      offset: 0,
+      triggerOnce: false
+    };
+    jQMethods = {
+      refresh: function() {
+        return $.each(contexts, function(i, context) {
+          return context.refresh();
+        });
+      },
+      viewportHeight: function() {
+        var _ref;
+
+        return (_ref = window.innerHeight) != null ? _ref : $w.height();
+      },
+      aggregate: function(contextSelector) {
+        var collection, waypoints, _ref;
+
+        collection = allWaypoints;
+        if (contextSelector) {
+          collection = (_ref = contexts[$(contextSelector)[0][contextKey]]) != null ? _ref.waypoints : void 0;
+        }
+        if (!collection) {
+          return [];
+        }
+        waypoints = {
+          horizontal: [],
+          vertical: []
+        };
+        $.each(waypoints, function(axis, arr) {
+          $.each(collection[axis], function(key, waypoint) {
+            return arr.push(waypoint);
+          });
+          arr.sort(function(a, b) {
+            return a.offset - b.offset;
+          });
+          waypoints[axis] = $.map(arr, function(waypoint) {
+            return waypoint.element;
+          });
+          return waypoints[axis] = $.unique(waypoints[axis]);
+        });
+        return waypoints;
+      },
+      above: function(contextSelector) {
+        if (contextSelector == null) {
+          contextSelector = window;
+        }
+        return jQMethods._filter(contextSelector, 'vertical', function(context, waypoint) {
+          return waypoint.offset <= context.oldScroll.y;
+        });
+      },
+      below: function(contextSelector) {
+        if (contextSelector == null) {
+          contextSelector = window;
+        }
+        return jQMethods._filter(contextSelector, 'vertical', function(context, waypoint) {
+          return waypoint.offset > context.oldScroll.y;
+        });
+      },
+      left: function(contextSelector) {
+        if (contextSelector == null) {
+          contextSelector = window;
+        }
+        return jQMethods._filter(contextSelector, 'horizontal', function(context, waypoint) {
+          return waypoint.offset <= context.oldScroll.x;
+        });
+      },
+      right: function(contextSelector) {
+        if (contextSelector == null) {
+          contextSelector = window;
+        }
+        return jQMethods._filter(contextSelector, 'horizontal', function(context, waypoint) {
+          return waypoint.offset > context.oldScroll.x;
+        });
+      },
+      enable: function() {
+        return jQMethods._invoke('enable');
+      },
+      disable: function() {
+        return jQMethods._invoke('disable');
+      },
+      destroy: function() {
+        return jQMethods._invoke('destroy');
+      },
+      extendFn: function(methodName, f) {
+        return methods[methodName] = f;
+      },
+      _invoke: function(method) {
+        var waypoints;
+
+        waypoints = $.extend({}, allWaypoints.vertical, allWaypoints.horizontal);
+        return $.each(waypoints, function(key, waypoint) {
+          waypoint[method]();
+          return true;
+        });
+      },
+      _filter: function(selector, axis, test) {
+        var context, waypoints;
+
+        context = contexts[$(selector)[0][contextKey]];
+        if (!context) {
+          return [];
+        }
+        waypoints = [];
+        $.each(context.waypoints[axis], function(i, waypoint) {
+          if (test(context, waypoint)) {
+            return waypoints.push(waypoint);
+          }
+        });
+        waypoints.sort(function(a, b) {
+          return a.offset - b.offset;
+        });
+        return $.map(waypoints, function(waypoint) {
+          return waypoint.element;
+        });
+      }
+    };
+    $[wps] = function() {
+      var args, method;
+
+      method = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      if (jQMethods[method]) {
+        return jQMethods[method].apply(null, args);
+      } else {
+        return jQMethods.aggregate.call(null, method);
+      }
+    };
+    $[wps].settings = {
+      resizeThrottle: 100,
+      scrollThrottle: 30
+    };
+    return $w.on('load.waypoints', function() {
+      return $[wps]('refresh');
+    });
+  });
+
+}).call(this);
+
+/**
+ * @license Angulartics v0.17.2
+ * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
+ * License: MIT
+ */
+(function(angular, analytics) {
+'use strict';
+
+var angulartics = window.angulartics || (window.angulartics = {});
+angulartics.waitForVendorCount = 0;
+angulartics.waitForVendorApi = function (objectName, delay, containsField, registerFn, onTimeout) {
+  if (!onTimeout) { angulartics.waitForVendorCount++; }
+  if (!registerFn) { registerFn = containsField; containsField = undefined; }
+  if (!Object.prototype.hasOwnProperty.call(window, objectName) || (containsField !== undefined && window[objectName][containsField] === undefined)) {
+    setTimeout(function () { angulartics.waitForVendorApi(objectName, delay, containsField, registerFn, true); }, delay);
+  }
+  else {
+    angulartics.waitForVendorCount--;
+    registerFn(window[objectName]);
+  }
+};
+
+/**
+ * @ngdoc overview
+ * @name angulartics
+ */
+angular.module('angulartics', [])
+.provider('$analytics', function () {
+  var settings = {
+    pageTracking: {
+      autoTrackFirstPage: true,
+      autoTrackVirtualPages: true,
+      trackRelativePath: false,
+      autoBasePath: false,
+      basePath: ''
+    },
+    eventTracking: {},
+    bufferFlushDelay: 1000, // Support only one configuration for buffer flush delay to simplify buffering
+    developerMode: false // Prevent sending data in local/development environment
+  };
+
+  // List of known handlers that plugins can register themselves for
+  var knownHandlers = [
+    'pageTrack',
+    'eventTrack',
+    'setAlias',
+    'setUsername',
+    'setAlias',
+    'setUserProperties',
+    'setUserPropertiesOnce',
+    'setSuperProperties',
+    'setSuperPropertiesOnce'
+  ];
+  // Cache and handler properties will match values in 'knownHandlers' as the buffering functons are installed.
+  var cache = {};
+  var handlers = {};
+
+  // General buffering handler
+  var bufferedHandler = function(handlerName){
+    return function(){
+      if(angulartics.waitForVendorCount){
+        if(!cache[handlerName]){ cache[handlerName] = []; }
+        cache[handlerName].push(arguments);
+      }
+    };
+  };
+
+  // As handlers are installed by plugins, they get pushed into a list and invoked in order.
+  var updateHandlers = function(handlerName, fn){
+    if(!handlers[handlerName]){
+      handlers[handlerName] = [];
+    }
+    handlers[handlerName].push(fn);
+    return function(){
+      var handlerArgs = arguments;
+      angular.forEach(handlers[handlerName], function(handler){
+        handler.apply(this, handlerArgs);
+      }, this);
+    };
+  };
+
+  // The api (returned by this provider) gets populated with handlers below.
+  var api = {
+    settings: settings
+  };
+
+  // Will run setTimeout if delay is > 0
+  // Runs immediately if no delay to make sure cache/buffer is flushed before anything else.
+  // Plugins should take care to register handlers by order of precedence.
+  var onTimeout = function(fn, delay){
+    if(delay){
+      setTimeout(fn, delay);
+    } else {
+      fn();
+    }
+  };
+
+  var provider = {
+    $get: function() { return api; },
+    api: api,
+    settings: settings,
+    virtualPageviews: function (value) { this.settings.pageTracking.autoTrackVirtualPages = value; },
+    firstPageview: function (value) { this.settings.pageTracking.autoTrackFirstPage = value; },
+    withBase: function (value) { this.settings.pageTracking.basePath = (value) ? angular.element('base').attr('href').slice(0, -1) : ''; },
+    withAutoBase: function (value) { this.settings.pageTracking.autoBasePath = value; },
+    developerMode: function(value) { this.settings.developerMode = value; }
+  };
+
+  // General function to register plugin handlers. Flushes buffers immediately upon registration according to the specified delay.
+  var register = function(handlerName, fn){
+    api[handlerName] = updateHandlers(handlerName, fn);
+    var handlerSettings = settings[handlerName];
+    var handlerDelay = (handlerSettings) ? handlerSettings.bufferFlushDelay : null;
+    var delay = (handlerDelay !== null) ? handlerDelay : settings.bufferFlushDelay;
+    angular.forEach(cache[handlerName], function (args, index) {
+      onTimeout(function () { fn.apply(this, args); }, index * delay);
+    });
+  };
+
+  var capitalize = function (input) {
+      return input.replace(/^./, function (match) {
+          return match.toUpperCase();
+      });
+  };
+
+  // Adds to the provider a 'register#{handlerName}' function that manages multiple plugins and buffer flushing.
+  var installHandlerRegisterFunction = function(handlerName){
+    var registerName = 'register'+capitalize(handlerName);
+    provider[registerName] = function(fn){
+      register(handlerName, fn);
+    };
+    api[handlerName] = updateHandlers(handlerName, bufferedHandler(handlerName));
+  };
+
+  // Set up register functions for each known handler
+  angular.forEach(knownHandlers, installHandlerRegisterFunction);
+  return provider;
+})
+
+.run(['$rootScope', '$window', '$analytics', '$injector', function ($rootScope, $window, $analytics, $injector) {
+  if ($analytics.settings.pageTracking.autoTrackFirstPage) {
+    $injector.invoke(['$location', function ($location) {
+      /* Only track the 'first page' if there are no routes or states on the page */
+      var noRoutesOrStates = true;
+      if ($injector.has('$route')) {
+         var $route = $injector.get('$route');
+         for (var route in $route.routes) {
+           noRoutesOrStates = false;
+           break;
+         }
+      } else if ($injector.has('$state')) {
+        var $state = $injector.get('$state');
+        for (var state in $state.get()) {
+          noRoutesOrStates = false;
+          break;
+        }
+      }
+      if (noRoutesOrStates) {
+        if ($analytics.settings.pageTracking.autoBasePath) {
+          $analytics.settings.pageTracking.basePath = $window.location.pathname;
+        }
+        if ($analytics.settings.pageTracking.trackRelativePath) {
+          var url = $analytics.settings.pageTracking.basePath + $location.url();
+          $analytics.pageTrack(url, $location);
+        } else {
+          $analytics.pageTrack($location.absUrl(), $location);
+        }
+      }
+    }]);
+  }
+
+  if ($analytics.settings.pageTracking.autoTrackVirtualPages) {
+    $injector.invoke(['$location', function ($location) {
+      if ($analytics.settings.pageTracking.autoBasePath) {
+        /* Add the full route to the base. */
+        $analytics.settings.pageTracking.basePath = $window.location.pathname + "#";
+      }
+      if ($injector.has('$route')) {
+        $rootScope.$on('$routeChangeSuccess', function (event, current) {
+          if (current && (current.$$route||current).redirectTo) return;
+          var url = $analytics.settings.pageTracking.basePath + $location.url();
+          $analytics.pageTrack(url, $location);
+        });
+      }
+      if ($injector.has('$state')) {
+        $rootScope.$on('$stateChangeSuccess', function (event, current) {
+          var url = $analytics.settings.pageTracking.basePath + $location.url();
+          $analytics.pageTrack(url, $location);
+        });
+      }
+    }]);
+  }
+  if ($analytics.settings.developerMode) {
+    angular.forEach($analytics, function(attr, name) {
+      if (typeof attr === 'function') {
+        $analytics[name] = function(){};
+      }
+    });
+  }
+}])
+
+.directive('analyticsOn', ['$analytics', function ($analytics) {
+  function isCommand(element) {
+    return ['a:','button:','button:button','button:submit','input:button','input:submit'].indexOf(
+      element.tagName.toLowerCase()+':'+(element.type||'')) >= 0;
+  }
+
+  function inferEventType(element) {
+    if (isCommand(element)) return 'click';
+    return 'click';
+  }
+
+  function inferEventName(element) {
+    if (isCommand(element)) return element.innerText || element.value;
+    return element.id || element.name || element.tagName;
+  }
+
+  function isProperty(name) {
+    return name.substr(0, 9) === 'analytics' && ['On', 'Event', 'If', 'Properties', 'EventType'].indexOf(name.substr(9)) === -1;
+  }
+
+  function propertyName(name) {
+    var s = name.slice(9); // slice off the 'analytics' prefix
+    if (typeof s !== 'undefined' && s!==null && s.length > 0) {
+      return s.substring(0, 1).toLowerCase() + s.substring(1);
+    }
+    else {
+      return s;
+    }
+  }
+
+  return {
+    restrict: 'A',
+    link: function ($scope, $element, $attrs) {
+      var eventType = $attrs.analyticsOn || inferEventType($element[0]);
+      var trackingData = {};
+
+      angular.forEach($attrs.$attr, function(attr, name) {
+        if (isProperty(name)) {
+          trackingData[propertyName(name)] = $attrs[name];
+          $attrs.$observe(name, function(value){
+            trackingData[propertyName(name)] = value;
+          });
+        }
+      });
+
+      angular.element($element[0]).bind(eventType, function ($event) {
+        var eventName = $attrs.analyticsEvent || inferEventName($element[0]);
+        trackingData.eventType = $event.type;
+
+        if($attrs.analyticsIf){
+          if(! $scope.$eval($attrs.analyticsIf)){
+            return; // Cancel this event if we don't pass the analytics-if condition
+          }
+        }
+        // Allow components to pass through an expression that gets merged on to the event properties
+        // eg. analytics-properites='myComponentScope.someConfigExpression.$analyticsProperties'
+        if($attrs.analyticsProperties){
+          angular.extend(trackingData, $scope.$eval($attrs.analyticsProperties));
+        }
+        $analytics.eventTrack(eventName, trackingData);
+      });
+    }
+  };
+}]);
+})(angular);
+
+/**
+ * @license Angulartics v0.17.2
+ * (c) 2014 Luis Farzati http://luisfarzati.github.io/angulartics
+ * Adobe analytics(Omniture) update contributed by http://github.com/ajayk
+ * License: MIT
+ */
+(function(angular) {
+'use strict';
+
+/**
+ * @ngdoc overview
+ * @name angulartics.adobe.analytics
+ * Enables analytics support for Adobe Analytics (http://adobe.com/analytics)
+ */
+angular.module('angulartics.adobe.analytics', ['angulartics'])
+.config(['$analyticsProvider', function ($analyticsProvider) {
+
+  $analyticsProvider.settings.trackRelativePath = true;
+
+  $analyticsProvider.registerPageTrack(function (path) {
+    if (window.s) s.t({pageName:path});
+  });
+
+  /**
+   * Track Event in Adobe Analytics
+   * @name eventTrack
+   *
+   * @param {string} action Required 'action' (string) associated with the event
+   *
+   *
+   */
+  $analyticsProvider.registerEventTrack(function (action) {
+    if (window.s) {
+      if(action) {
+        if(action.toUpperCase() === "DOWNLOAD")
+          s.tl(this,'d',action);
+        else if(action.toUpperCase() === "EXIT")
+          s.tl(this,'e',action);
+        else
+          s.tl(this,'o',action);
+      }
+    }
+  });
+
+}]);
+})(angular);
+
+/**
+ * @license Angulartics v0.17.2
+ * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
+ * Contributed by http://github.com/chechoacosta
+ * License: MIT
+ */
+(function(angular) {
+'use strict';
+
+/**
+ * @ngdoc overview
+ * @name angulartics.chartbeat
+ * Enables analytics support for Chartbeat (http://chartbeat.com)
+ */
+angular.module('angulartics.chartbeat', ['angulartics'])
+.config(['$analyticsProvider', function ($analyticsProvider) {
+
+  angulartics.waitForVendorApi('pSUPERFLY', 500, function (pSUPERFLY) {
+    $analyticsProvider.registerPageTrack(function (path) {
+      pSUPERFLY.virtualPage(path);
+    });
+  });
+
+  $analyticsProvider.registerEventTrack(function () {
+    console.warn('Chartbeat doesn\'t support event tracking -- silently ignored.');
+  });
+
+}]);
+})(angular);
+
+(function(angular) {
+  'use strict';
+
+  /**
+   * @ngdoc overview
+   * @name angulartics.cnzz
+   * Enables analytics support for CNZZ (http://www.cnzz.com)
+   */
+  angular.module('angulartics.cnzz', ['angulartics'])
+    .config(['$analyticsProvider', function ($analyticsProvider) {
+      window._czc = _czc || [];
+      _czc.push(['_setAutoPageview', false]);
+
+      $analyticsProvider.registerPageTrack(function (path) {
+        _czc.push(['_trackPageview', path]);
+      });
+
+      $analyticsProvider.registerEventTrack(function (action, prop) {
+        _czc.push([
+          '_trackEvent',
+          prop.category,
+          action,
+          prop.label,
+          prop.value,
+          prop.nodeid
+        ]);
+      });
+    }]);
+})(angular);
+
+/**
+ * @license Angulartics v0.17.2
+ * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
+ * Contributed by http://github.com/samanbarghi
+ * License: MIT
+ */
+
+(function(angular) {
+'use strict';
+
+/**
+ * @ngdoc overview
+ * @name angulartics.flurry
+ * Enables analytics support for flurry (http://flurry.com)
+ */
+angular.module('angulartics.flurry', ['angulartics'])
+.config(['$analyticsProvider', function ($analyticsProvider) {
+
+
+  $analyticsProvider.registerPageTrack(function (path) {
+    //No separate track page functionality
+  });
+
+  $analyticsProvider.registerEventTrack(function (action, properties) {
+    FlurryAgent.logEvent(action, properties);
+  });
+
+}]);
+})(angular);
+
+/**
+ * @license Angulartics v0.17.2
+ * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
+ * License: MIT
+ */
+(function(angular) {
+'use strict';
+
+/**
+ * @ngdoc overview
+ * @name angulartics.google.analytics
+ * Enables analytics support for Google Analytics (http://google.com/analytics)
+ */
+angular.module('angulartics.google.analytics.cordova', ['angulartics'])
+
+.provider('googleAnalyticsCordova', function () {
+  var GoogleAnalyticsCordova = [
+  '$q', '$log', 'ready', 'debug', 'trackingId', 'period',
+  function ($q, $log, ready, debug, trackingId, period) {
+    var deferred = $q.defer();
+    var deviceReady = false;
+
+    window.addEventListener('deviceReady', function () {
+      deviceReady = true;
+      deferred.resolve();
+    });
+
+    setTimeout(function () {
+      if (!deviceReady) {
+        deferred.resolve();
+      }
+    }, 3000);
+
+    function success() {
+      if (debug) {
+        $log.info(arguments);
+      }
+    }
+
+    function failure(err) {
+      if (debug) {
+        $log.error(err);
+      }
+    }
+
+    this.init = function () {
+      return deferred.promise.then(function () {
+        var analytics = window.plugins && window.plugins.gaPlugin;
+        if (analytics) {
+          analytics.init(function onInit() {
+            ready(analytics, success, failure);
+          }, failure, trackingId, period || 10);
+        } else if (debug) {
+          $log.error('Google Analytics for Cordova is not available');
+        }
+      });
+    };
+  }];
+
+  return {
+    $get: ['$injector', function ($injector) {
+      return $injector.instantiate(GoogleAnalyticsCordova, {
+        ready: this._ready || angular.noop,
+        debug: this.debug,
+        trackingId: this.trackingId,
+        period: this.period
+      });
+    }],
+    ready: function (fn) {
+      this._ready = fn;
+    }
+  };
+})
+
+.config(['$analyticsProvider', 'googleAnalyticsCordovaProvider', function ($analyticsProvider, googleAnalyticsCordovaProvider) {
+  googleAnalyticsCordovaProvider.ready(function (analytics, success, failure) {
+    $analyticsProvider.registerPageTrack(function (path) {
+      analytics.trackPage(success, failure, path);
+    });
+
+    $analyticsProvider.registerEventTrack(function (action, properties) {
+      analytics.trackEvent(success, failure, properties.category, action, properties.label, properties.value);
+    });
+  });
+}])
+
+.run(['googleAnalyticsCordova', function (googleAnalyticsCordova) {
+  googleAnalyticsCordova.init();
+}]);
+
+})(angular);
+
+/**
+ * @license Angulartics v0.17.2
+ * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
+ * Universal Analytics update contributed by http://github.com/willmcclellan
+ * License: MIT
+ */
+(function(angular) {
+'use strict';
+
+/**
+ * @ngdoc overview
+ * @name angulartics.google.analytics
+ * Enables analytics support for Google Analytics (http://google.com/analytics)
+ */
+angular.module('angulartics.google.analytics', ['angulartics'])
+.config(['$analyticsProvider', function ($analyticsProvider) {
+
+  // GA already supports buffered invocations so we don't need
+  // to wrap these inside angulartics.waitForVendorApi
+
+  $analyticsProvider.settings.trackRelativePath = true;
+
+  // Set the default settings for this module
+  $analyticsProvider.settings.ga = {
+    // array of additional account names (only works for analyticsjs)
+    additionalAccountNames: undefined,
+    userId: null
+  };
+
+  $analyticsProvider.registerPageTrack(function (path) {
+    if (window._gaq) _gaq.push(['_trackPageview', path]);
+    if (window.ga) {
+      if ($analyticsProvider.settings.ga.userId) {
+        ga('set', '&uid', $analyticsProvider.settings.ga.userId);
+      }
+      ga('send', 'pageview', path);
+      angular.forEach($analyticsProvider.settings.ga.additionalAccountNames, function (accountName){
+        ga(accountName +'.send', 'pageview', path);
+      });
+    }
+  });
+
+  /**
+   * Track Event in GA
+   * @name eventTrack
+   *
+   * @param {string} action Required 'action' (string) associated with the event
+   * @param {object} properties Comprised of the mandatory field 'category' (string) and optional  fields 'label' (string), 'value' (integer) and 'noninteraction' (boolean)
+   *
+   * @link https://developers.google.com/analytics/devguides/collection/gajs/eventTrackerGuide#SettingUpEventTracking
+   *
+   * @link https://developers.google.com/analytics/devguides/collection/analyticsjs/events
+   */
+  $analyticsProvider.registerEventTrack(function (action, properties) {
+
+    // Google Analytics requires an Event Category
+    if (!properties || !properties.category) {
+    	properties = properties || {};
+		properties.category = 'Event';
+	}
+    // GA requires that eventValue be an integer, see:
+    // https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference#eventValue
+    // https://github.com/luisfarzati/angulartics/issues/81
+    if (properties.value) {
+      var parsed = parseInt(properties.value, 10);
+      properties.value = isNaN(parsed) ? 0 : parsed;
+    }
+
+    if (window.ga) {
+
+      var eventOptions = {
+        eventCategory: properties.category,
+        eventAction: action,
+        eventLabel: properties.label,
+        eventValue: properties.value,
+        nonInteraction: properties.noninteraction,
+        page: properties.page || window.location.hash.substring(1),
+        userId: $analyticsProvider.settings.ga.userId
+      };
+
+      // add custom dimensions and metrics
+      for(var idx = 1; idx<=20;idx++) {
+      if (properties['dimension' +idx.toString()]) {
+        eventOptions['dimension' +idx.toString()] = properties['dimension' +idx.toString()];
+      }
+      if (properties['metric' +idx.toString()]) {
+        eventOptions['metric' +idx.toString()] = properties['metric' +idx.toString()];
+        }
+      }
+      ga('send', 'event', eventOptions);
+      angular.forEach($analyticsProvider.settings.ga.additionalAccountNames, function (accountName){
+        ga(accountName +'.send', 'event', eventOptions);
+      });
+    }
+
+    else if (window._gaq) {
+      _gaq.push(['_trackEvent', properties.category, action, properties.label, properties.value, properties.noninteraction]);
+    }
+
+  });
+
+  $analyticsProvider.registerSetUsername(function (userId) {
+    $analyticsProvider.settings.ga.userId = userId;
+  });
+
+}]);
+})(angular);
+
+/**
+ * @license Angulartics v0.17.2
+ * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
+ * Google Tag Manager Plugin Contributed by http://github.com/danrowe49
+ * License: MIT
+ */
+
+(function(angular){
+'use strict';
+
+
+/**
+ * @ngdoc overview
+ * @name angulartics.google.analytics
+ * Enables analytics support for Google Tag Manager (http://google.com/tagmanager)
+ */
+
+angular.module('angulartics.google.tagmanager', ['angulartics'])
+.config(['$analyticsProvider', function($analyticsProvider){
+
+	/**
+	* Send content views to the dataLayer
+	*
+	* @param {string} path Required 'content name' (string) describes the content loaded
+	*/
+
+	$analyticsProvider.registerPageTrack(function(path){
+		var dataLayer = window.dataLayer = window.dataLayer || [];
+		dataLayer.push({
+			'event': 'content-view',
+			'content-name': path
+		});
+	});
+
+	/**
+   * Send interactions to the dataLayer, i.e. for event tracking in Google Analytics
+   * @name eventTrack
+   *
+   * @param {string} action Required 'action' (string) associated with the event
+   * @param {object} properties Comprised of the mandatory field 'category' (string) and optional  fields 'label' (string), 'value' (integer) and 'noninteraction' (boolean)
+   */
+
+	$analyticsProvider.registerEventTrack(function(action, properties){
+		var dataLayer = window.dataLayer = window.dataLayer || [];
+		dataLayer.push({
+			'event': 'interaction',
+			'target': properties.category,
+			'action': action,
+			'target-properties': properties.label,
+			'value': properties.value,
+			'interaction-type': properties.noninteraction
+		});
+
+	});
+}]);
+
+})(angular);
+
+/**
+ * @license Angulartics v0.17.2
+ * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
+ * License: MIT
+ */
+(function(angular) {
+'use strict';
+
+/**
+ * @ngdoc overview
+ * @name angulartics.kissmetrics
+ * Enables analytics support for KISSmetrics (http://kissmetrics.com)
+ */
+angular.module('angulartics.kissmetrics', ['angulartics'])
+.config(['$analyticsProvider', function ($analyticsProvider) {
+
+  // KM already supports buffered invocations so we don't need
+  // to wrap these inside angulartics.waitForVendorApi
+
+  // Creates the _kqm array if it doesn't exist already
+  // Useful if you want to load angulartics before kissmetrics
+
+  if (typeof(_kmq) == "undefined") {
+    window._kmq = [];
+  } else {
+    window._kmq = _kmq;
+  }
+
+  $analyticsProvider.registerPageTrack(function (path) {
+    window._kmq.push(['record', 'Pageview', { 'Page': path }]);
+  });
+
+  $analyticsProvider.registerEventTrack(function (action, properties) {
+    window._kmq.push(['record', action, properties]);
+  });
+
+  $analyticsProvider.registerSetUsername(function (uuid) {
+    window._kmq.push(['identify', uuid]);
+  });
+
+  $analyticsProvider.registerSetUserProperties(function (properties) {
+    window._kmq.push(['set', properties]);
+  });
+
+}]);
+})(angular);
+
+/**
+ * @license Angulartics v0.17.2
+ * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
+ * Contributed by http://github.com/L42y
+ * License: MIT
+ */
+(function(angular) {
+'use strict';
+
+/**
+ * @ngdoc overview
+ * @name angulartics.mixpanel
+ * Enables analytics support for Mixpanel (http://mixpanel.com)
+ */
+angular.module('angulartics.mixpanel', ['angulartics'])
+.config(['$analyticsProvider', function ($analyticsProvider) {
+
+  angulartics.waitForVendorApi('mixpanel', 500, '__loaded', function (mixpanel) {
+    $analyticsProvider.registerSetUsername(function (userId) {
+      mixpanel.identify(userId);
+    });
+  });
+  
+  angulartics.waitForVendorApi('mixpanel', 500, '__loaded', function (mixpanel) {
+    $analyticsProvider.registerSetAlias(function (userId) {
+      mixpanel.alias(userId);
+    });
+  });
+
+  angulartics.waitForVendorApi('mixpanel', 500, '__loaded', function (mixpanel) {
+    $analyticsProvider.registerSetSuperPropertiesOnce(function (properties) {
+      mixpanel.register_once(properties);
+    });
+  });
+
+  angulartics.waitForVendorApi('mixpanel', 500, '__loaded', function (mixpanel) {
+    $analyticsProvider.registerSetSuperProperties(function (properties) {
+      mixpanel.register(properties);
+    });
+  });
+
+  angulartics.waitForVendorApi('mixpanel', 500, '__loaded', function (mixpanel) {
+    $analyticsProvider.registerSetUserPropertiesOnce(function (properties) {
+      mixpanel.people.set_once(properties);
+    });
+  });
+
+  angulartics.waitForVendorApi('mixpanel', 500, '__loaded', function (mixpanel) {
+    $analyticsProvider.registerSetUserProperties(function (properties) {
+      mixpanel.people.set(properties);
+    });
+  });
+
+  angulartics.waitForVendorApi('mixpanel', 500, '__loaded', function (mixpanel) {
+    $analyticsProvider.registerPageTrack(function (path) {
+      mixpanel.track( "Page Viewed", { "page": path } );
+    });
+  });
+
+  angulartics.waitForVendorApi('mixpanel', 500, '__loaded', function (mixpanel) {
+    $analyticsProvider.registerEventTrack(function (action, properties) {
+      mixpanel.track(action, properties);
+    });
+  });
+
+}]);
+})(angular);
+
+/**
+ * @license Angulartics v0.17.2
+ * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
+ * Piwik 2.1.x update contributed by http://github.com/highskillz
+ * License: MIT
+ */
+(function(angular) {
+    'use strict';
+
+    /**
+     * @ngdoc overview
+     * @name angulartics.piwik
+     * Enables analytics support for Piwik (http://piwik.org/docs/tracking-api/)
+     */
+    angular.module('angulartics.piwik', ['angulartics'])
+        .config(['$analyticsProvider',
+            function($analyticsProvider) {
+
+                // Piwik seems to suppors buffered invocations so we don't need
+                // to wrap these inside angulartics.waitForVendorApi
+
+                $analyticsProvider.settings.trackRelativePath = true;
+
+                $analyticsProvider.registerPageTrack(function(path) {
+                    if (window._paq) {
+                        _paq.push(['setCustomUrl', path]);
+                        _paq.push(['trackPageView']);
+                    }
+                });
+
+                $analyticsProvider.registerEventTrack(function(action, properties) {
+                    // PAQ requires that eventValue be an integer, see:
+                    // http://piwik.org/docs/event-tracking/
+                    if(properties.value) {
+                        var parsed = parseInt(properties.value, 10);
+                        properties.value = isNaN(parsed) ? 0 : parsed;
+                    }
+
+                    if (window._paq) {
+                        _paq.push(['trackEvent', properties.category, action, properties.label, properties.value]);
+                    }
+                });
+
+            }
+        ]);
+})(angular);
+
+/**
+ * @license Angulartics v0.17.2
+ * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
+ * License: MIT
+ */
+(function (angular) {
+'use strict';
+
+/**
+ * @ngdoc overview
+ * @name angulartics.scroll
+ * Provides an implementation of jQuery Waypoints (http://imakewebthings.com/jquery-waypoints/)
+ * for use as a valid DOM event in analytics-on.
+ */
+angular.module('angulartics.scroll', ['angulartics'])
+.directive('analyticsOn', ['$analytics', function ($analytics) {
+  function isProperty(name) {
+    return name.substr(0, 8) === 'scrollby';
+  }
+  function cast(value) {
+    if (['', 'true', 'false'].indexOf(value) > -1) {
+      return value.replace('', 'true') === 'true';
+    }
+    return value;
+  }
+
+  return {
+    restrict: 'A',
+    priority: 5,
+    scope: false,
+    link: function ($scope, $element, $attrs) {
+      if ($attrs.analyticsOn !== 'scrollby') return;
+
+      var properties = { continuous: false, triggerOnce: true };
+      angular.forEach($attrs.$attr, function(attr, name) {
+        if (isProperty(attr)) {
+          properties[name.slice(8,9).toLowerCase()+name.slice(9)] = cast($attrs[name]);
+        }
+      });
+
+      $element.waypoint(function () {
+        $element.triggerHandler('scrollby');
+      }, properties);
+    }
+  };
+}]);
+})(angular);
+
+/**
+ * @license Angulartics v0.17.2
+ * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
+ * License: MIT
+ */
+(function(angular) {
+  'use strict';
+
+  /**
+   * @ngdoc overview
+   * @name angulartics.segment.io
+   * Enables analytics support for Segment.io (http://segment.io)
+   */
+  angular.module('angulartics.segment.io', ['angulartics'])
+    .config(['$analyticsProvider', function ($analyticsProvider) {
+
+      // https://segment.com/docs/libraries/analytics.js/#page
+      // analytics.page([category], [name], [properties], [options], [callback]);
+      // TODO : Support optional parameters where the parameter order and type changes their meaning
+      // e.g.
+      // (string) is (name)
+      // (string, string) is (category, name)
+      // (string, object) is (name, properties)
+      $analyticsProvider.registerPageTrack(function (path) {
+        try {
+          analytics.page(path);
+        } catch (e) {
+          if (!(e instanceof ReferenceError)) {
+            throw e;
+          }
+        }
+      });
+
+      // https://segment.com/docs/libraries/analytics.js/#track
+      // analytics.track(event, [properties], [options], [callback]);
+      $analyticsProvider.registerEventTrack(function (event, properties, options, callback) {
+        try {
+          analytics.track(event, properties, options, callback);
+        } catch (e) {
+          if (!(e instanceof ReferenceError)) {
+            throw e;
+          }
+        }
+      });
+
+      // Segment Identify Method
+      // https://segment.com/docs/libraries/analytics.js/#identify
+      // analytics.identify([userId], [traits], [options], [callback]);
+      $analyticsProvider.registerSetUserProperties(function (userId, traits, options, callback) {
+        try {
+          analytics.identify(userId, traits, options, callback);
+        } catch (e) {
+          if (!(e instanceof ReferenceError)) {
+            throw e;
+          }
+        }
+      });
+
+      // Segment Identify Method
+      // https://segment.com/docs/libraries/analytics.js/#identify
+      // analytics.identify([userId], [traits], [options], [callback]);
+      $analyticsProvider.registerSetUserPropertiesOnce(function (userId, traits, options, callback) {
+        try {
+          analytics.identify(userId, traits, options, callback);
+        } catch (e) {
+          if (!(e instanceof ReferenceError)) {
+            throw e;
+          }
+        }
+      });
+      
+      // Segment Alias Method
+      // https://segment.com/docs/libraries/analytics.js/#alias
+      // analytics.alias(userId, previousId, options, callback);
+      $analyticsProvider.registerSetAlias(function (userId, previousId, options, callback) {
+        try {
+          analytics.alias(userId, previousId, options, callback);
+        } catch (e) {
+          if (!(e instanceof ReferenceError)) {
+            throw e;
+          }
+        }
+      });
+
+    }]);
+})(angular);
+
+/**
+ * @license Angulartics v0.17.2
+ * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
+ * License: MIT
+ */
+(function (angular) {
+  'use strict';
+
+  /**
+   * @ngdoc overview
+   * @name angulartics.splunk
+   * Enables analytics support for with custom collection backend API
+   * using (sp.js as described in http://blogs.splunk.com/2013/10/17/still-using-3rd-party-web-analytics-providers-build-your-own-using-splunk/)
+   */
+  angular.module('angulartics.splunk', ['angulartics'])
+  .config(['$analyticsProvider', function ($analyticsProvider) {
+
+    var errorFunction = function(){
+      throw "Define sp ";
+    };
+
+    var _getSp = function () {
+        return window.sp || { pageview: errorFunction, track: errorFunction };
+    };
+
+    $analyticsProvider.registerPageTrack(function (path) {
+        _getSp().pageview(path);
+    });
+
+    $analyticsProvider.registerEventTrack(function (action, properties) {
+        _getSp().track(action, properties);
+    });
+
+  }]);
+})(angular);
+
+
+/**
+ * @license Angulartics v0.17.2
+ * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
+ * License: MIT
+ */
+(function(angular) {
+'use strict';
+
+/**
+ * @ngdoc overview
+ * @name angulartics.woopra
+ * Enables analytics support for Woopra (http://www.woopra.com)
+ */
+angular.module('angulartics.woopra', ['angulartics'])
+.config(['$analyticsProvider', function ($analyticsProvider) {
+  $analyticsProvider.registerPageTrack(function (path) {
+    woopra.track('pv', {
+      url: path
+    });
+  });
+
+  $analyticsProvider.registerEventTrack(function (action, properties) {
+    woopra.track(action, properties);
+  });
+
+  $analyticsProvider.registerSetUsername(function (email) {
+    woopra
+      .identify('email', email)
+      .push();
+  });
+
+  $analyticsProvider.registerSetUserProperties(function (properties) {
+    if (properties.email) {
+      woopra
+        .identify(properties)
+        .push();
+    }
+  });
+}]);
+})(angular);
+
+/**
+ * @license Angulartics v0.17.2
+ * (c) 2014 Carl Thorner http://luisfarzati.github.io/angulartics
+ * Contributed by http://github.com/L42y
+ * License: MIT
+ */
+(function(angular) {
+'use strict';
+
+/**
+ * @ngdoc overview
+ * @name angulartics.marketo
+ * Enables analytics support for Marketo (http://www.marketo.com)
+ *
+ * Will not be considered loaded until the sKey attribute is set on the Munckin object, like so:
+ *
+ * Munckin.skey = 'my-secret-key';
+ *
+ * for event tracking email is a required attribute
+ */
+angular.module('angulartics.marketo', ['angulartics'])
+.config(['$analyticsProvider', function ($analyticsProvider) {
+  angulartics.waitForVendorApi('Munchkin', 500, 'sKey', function (Munchkin) {
+    $analyticsProvider.registerPageTrack(function (path) {
+      Munchkin.munchkinFunction("visitWebPage", {url: path} );
+    });
+  });
+
+  // If a path is set as a property we do a page tracking event.
+  angulartics.waitForVendorApi('Munchkin', 500, 'sKey', function (Munchkin) {
+   $analyticsProvider.registerEventTrack(function (action, properties) {
+    if(properties.path !== undefined) {
+     var params = [];
+     for(var prop in properties){
+      if(prop !== 'path') {
+       params.push(prop + "=" + properties[prop]);
+      }
+     }
+     if(action.toUpperCase() == 'CLICK'){
+      Munchkin.munchkinFunction('clickLink', {
+       href: properties.path
+      });
+     }
+     Munchkin.munchkinFunction("visitWebPage", {url: properties.path, params: params.join("&")});
+    }
+   });
+  });
+
+  var associateLead = function(properties){
+    if(properties.email !== undefined) {
+      email = properties.email;
+      email_sha = sha1(Munckin.sKey + email);
+      properties.Email = properties.email;
+      Munchkin.munchkinFunction('associateLead', properties, email_sha);
+    }
+  };
+
+  angulartics.waitForVendorApi('Munchkin', 500, function (Munchkin) {
+    $analyticsProvider.registerSetUsername(function (userId) {
+      if(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}/.test(userId)){
+       associateLead({'Email': userId});
+      }
+    });
+  });
+
+  angulartics.waitForVendorApi('Munchkin', 500, function (Munchkin) {
+    $analyticsProvider.registerSetUserProperties(function (properties) {
+     associateLead(properties);
+    });
+  });
+
+  angulartics.waitForVendorApi('Munchkin', 500, function (Munchkin) {
+    $analyticsProvider.registerSetUserPropertiesOnce(function (properties) {
+     associateLead(properties);
+    });
+  });
+}]);
+})(angular);
+
+/**
+ * @license Angulartics v0.15.20
+ * (c) 2013 Luis Farzati http://luisfarzati.github.io/angulartics
+ * Universal Analytics update contributed by http://github.com/willmcclellan
+ * License: MIT
+ */
+(function(angular) {
+'use strict';
+
+/**
+ * @ngdoc overview
+ * @name angulartics.intercom
+ * Enables analytics support for Intercom (https://www.intercom.io/)
+ */
+angular.module('angulartics.intercom', ['angulartics'])
+.config(['$analyticsProvider', function ($analyticsProvider) {
+
+  $analyticsProvider.registerSetUsername(function (userId) {
+    if(window.Intercom) {
+      window.Intercom('update', { user_id: userId });
+    }
+  });
+
+  /**
+   * Track Event in Intercom
+   * @name eventTrack
+   *
+   * @param {string} action Required 'action' (string) associated with the event
+   * @param {object} properties = metadata
+   *
+   * @link http://doc.intercom.io/api/?javascript#submitting-events
+   *
+   * @example
+   *   Intercom('trackEvent', 'invited-friend');
+   */
+  $analyticsProvider.registerEventTrack(function (action, properties) {
+    if(window.Intercom) {
+      window.Intercom('trackEvent', action, properties);
+    }
+  });
+
+}]);
+})(angular);
+
+
+/**
   * x is a value between 0 and 1, indicating where in the animation you are.
   */
 var duScrollDefaultEasing = function (x) {
@@ -19874,6 +28093,2834 @@ angular.module('common.oneSearch', [])
     w.attachEvent("onresize", callMedia);
   }
 })(this);
+/**
+ * @license AngularJS v1.5.0
+ * (c) 2010-2016 Google, Inc. http://angularjs.org
+ * License: MIT
+ */
+(function(window, angular, undefined) {'use strict';
+
+/* global ngTouchClickDirectiveFactory: false,
+ */
+
+/**
+ * @ngdoc module
+ * @name ngTouch
+ * @description
+ *
+ * # ngTouch
+ *
+ * The `ngTouch` module provides touch events and other helpers for touch-enabled devices.
+ * The implementation is based on jQuery Mobile touch event handling
+ * ([jquerymobile.com](http://jquerymobile.com/)).
+ *
+ *
+ * See {@link ngTouch.$swipe `$swipe`} for usage.
+ *
+ * <div doc-module-components="ngTouch"></div>
+ *
+ */
+
+// define ngTouch module
+/* global -ngTouch */
+var ngTouch = angular.module('ngTouch', []);
+
+ngTouch.provider('$touch', $TouchProvider);
+
+function nodeName_(element) {
+  return angular.lowercase(element.nodeName || (element[0] && element[0].nodeName));
+}
+
+/**
+ * @ngdoc provider
+ * @name $touchProvider
+ *
+ * @description
+ * The `$touchProvider` allows enabling / disabling {@link ngTouch.ngClick ngTouch's ngClick directive}.
+ */
+$TouchProvider.$inject = ['$provide', '$compileProvider'];
+function $TouchProvider($provide, $compileProvider) {
+
+  /**
+   * @ngdoc method
+   * @name  $touchProvider#ngClickOverrideEnabled
+   *
+   * @param {boolean=} enabled update the ngClickOverrideEnabled state if provided, otherwise just return the
+   * current ngClickOverrideEnabled state
+   * @returns {*} current value if used as getter or itself (chaining) if used as setter
+   *
+   * @kind function
+   *
+   * @description
+   * Call this method to enable/disable {@link ngTouch.ngClick ngTouch's ngClick directive}. If enabled,
+   * the default ngClick directive will be replaced by a version that eliminates the 300ms delay for
+   * click events on browser for touch-devices.
+   *
+   * The default is `false`.
+   *
+   */
+  var ngClickOverrideEnabled = false;
+  var ngClickDirectiveAdded = false;
+  this.ngClickOverrideEnabled = function(enabled) {
+    if (angular.isDefined(enabled)) {
+
+      if (enabled && !ngClickDirectiveAdded) {
+        ngClickDirectiveAdded = true;
+
+        // Use this to identify the correct directive in the delegate
+        ngTouchClickDirectiveFactory.$$moduleName = 'ngTouch';
+        $compileProvider.directive('ngClick', ngTouchClickDirectiveFactory);
+
+        $provide.decorator('ngClickDirective', ['$delegate', function($delegate) {
+          if (ngClickOverrideEnabled) {
+            // drop the default ngClick directive
+            $delegate.shift();
+          } else {
+            // drop the ngTouch ngClick directive if the override has been re-disabled (because
+            // we cannot de-register added directives)
+            var i = $delegate.length - 1;
+            while (i >= 0) {
+              if ($delegate[i].$$moduleName === 'ngTouch') {
+                $delegate.splice(i, 1);
+                break;
+              }
+              i--;
+            }
+          }
+
+          return $delegate;
+        }]);
+      }
+
+      ngClickOverrideEnabled = enabled;
+      return this;
+    }
+
+    return ngClickOverrideEnabled;
+  };
+
+  /**
+  * @ngdoc service
+  * @name $touch
+  * @kind object
+  *
+  * @description
+  * Provides the {@link ngTouch.$touch#ngClickOverrideEnabled `ngClickOverrideEnabled`} method.
+  *
+  */
+  this.$get = function() {
+    return {
+      /**
+       * @ngdoc method
+       * @name  $touch#ngClickOverrideEnabled
+       *
+       * @returns {*} current value of `ngClickOverrideEnabled` set in the {@link ngTouch.$touchProvider $touchProvider},
+       * i.e. if {@link ngTouch.ngClick ngTouch's ngClick} directive is enabled.
+       *
+       * @kind function
+       */
+      ngClickOverrideEnabled: function() {
+        return ngClickOverrideEnabled;
+      }
+    };
+  };
+
+}
+
+/* global ngTouch: false */
+
+    /**
+     * @ngdoc service
+     * @name $swipe
+     *
+     * @description
+     * The `$swipe` service is a service that abstracts the messier details of hold-and-drag swipe
+     * behavior, to make implementing swipe-related directives more convenient.
+     *
+     * Requires the {@link ngTouch `ngTouch`} module to be installed.
+     *
+     * `$swipe` is used by the `ngSwipeLeft` and `ngSwipeRight` directives in `ngTouch`.
+     *
+     * # Usage
+     * The `$swipe` service is an object with a single method: `bind`. `bind` takes an element
+     * which is to be watched for swipes, and an object with four handler functions. See the
+     * documentation for `bind` below.
+     */
+
+ngTouch.factory('$swipe', [function() {
+  // The total distance in any direction before we make the call on swipe vs. scroll.
+  var MOVE_BUFFER_RADIUS = 10;
+
+  var POINTER_EVENTS = {
+    'mouse': {
+      start: 'mousedown',
+      move: 'mousemove',
+      end: 'mouseup'
+    },
+    'touch': {
+      start: 'touchstart',
+      move: 'touchmove',
+      end: 'touchend',
+      cancel: 'touchcancel'
+    }
+  };
+
+  function getCoordinates(event) {
+    var originalEvent = event.originalEvent || event;
+    var touches = originalEvent.touches && originalEvent.touches.length ? originalEvent.touches : [originalEvent];
+    var e = (originalEvent.changedTouches && originalEvent.changedTouches[0]) || touches[0];
+
+    return {
+      x: e.clientX,
+      y: e.clientY
+    };
+  }
+
+  function getEvents(pointerTypes, eventType) {
+    var res = [];
+    angular.forEach(pointerTypes, function(pointerType) {
+      var eventName = POINTER_EVENTS[pointerType][eventType];
+      if (eventName) {
+        res.push(eventName);
+      }
+    });
+    return res.join(' ');
+  }
+
+  return {
+    /**
+     * @ngdoc method
+     * @name $swipe#bind
+     *
+     * @description
+     * The main method of `$swipe`. It takes an element to be watched for swipe motions, and an
+     * object containing event handlers.
+     * The pointer types that should be used can be specified via the optional
+     * third argument, which is an array of strings `'mouse'` and `'touch'`. By default,
+     * `$swipe` will listen for `mouse` and `touch` events.
+     *
+     * The four events are `start`, `move`, `end`, and `cancel`. `start`, `move`, and `end`
+     * receive as a parameter a coordinates object of the form `{ x: 150, y: 310 }` and the raw
+     * `event`. `cancel` receives the raw `event` as its single parameter.
+     *
+     * `start` is called on either `mousedown` or `touchstart`. After this event, `$swipe` is
+     * watching for `touchmove` or `mousemove` events. These events are ignored until the total
+     * distance moved in either dimension exceeds a small threshold.
+     *
+     * Once this threshold is exceeded, either the horizontal or vertical delta is greater.
+     * - If the horizontal distance is greater, this is a swipe and `move` and `end` events follow.
+     * - If the vertical distance is greater, this is a scroll, and we let the browser take over.
+     *   A `cancel` event is sent.
+     *
+     * `move` is called on `mousemove` and `touchmove` after the above logic has determined that
+     * a swipe is in progress.
+     *
+     * `end` is called when a swipe is successfully completed with a `touchend` or `mouseup`.
+     *
+     * `cancel` is called either on a `touchcancel` from the browser, or when we begin scrolling
+     * as described above.
+     *
+     */
+    bind: function(element, eventHandlers, pointerTypes) {
+      // Absolute total movement, used to control swipe vs. scroll.
+      var totalX, totalY;
+      // Coordinates of the start position.
+      var startCoords;
+      // Last event's position.
+      var lastPos;
+      // Whether a swipe is active.
+      var active = false;
+
+      pointerTypes = pointerTypes || ['mouse', 'touch'];
+      element.on(getEvents(pointerTypes, 'start'), function(event) {
+        startCoords = getCoordinates(event);
+        active = true;
+        totalX = 0;
+        totalY = 0;
+        lastPos = startCoords;
+        eventHandlers['start'] && eventHandlers['start'](startCoords, event);
+      });
+      var events = getEvents(pointerTypes, 'cancel');
+      if (events) {
+        element.on(events, function(event) {
+          active = false;
+          eventHandlers['cancel'] && eventHandlers['cancel'](event);
+        });
+      }
+
+      element.on(getEvents(pointerTypes, 'move'), function(event) {
+        if (!active) return;
+
+        // Android will send a touchcancel if it thinks we're starting to scroll.
+        // So when the total distance (+ or - or both) exceeds 10px in either direction,
+        // we either:
+        // - On totalX > totalY, we send preventDefault() and treat this as a swipe.
+        // - On totalY > totalX, we let the browser handle it as a scroll.
+
+        if (!startCoords) return;
+        var coords = getCoordinates(event);
+
+        totalX += Math.abs(coords.x - lastPos.x);
+        totalY += Math.abs(coords.y - lastPos.y);
+
+        lastPos = coords;
+
+        if (totalX < MOVE_BUFFER_RADIUS && totalY < MOVE_BUFFER_RADIUS) {
+          return;
+        }
+
+        // One of totalX or totalY has exceeded the buffer, so decide on swipe vs. scroll.
+        if (totalY > totalX) {
+          // Allow native scrolling to take over.
+          active = false;
+          eventHandlers['cancel'] && eventHandlers['cancel'](event);
+          return;
+        } else {
+          // Prevent the browser from scrolling.
+          event.preventDefault();
+          eventHandlers['move'] && eventHandlers['move'](coords, event);
+        }
+      });
+
+      element.on(getEvents(pointerTypes, 'end'), function(event) {
+        if (!active) return;
+        active = false;
+        eventHandlers['end'] && eventHandlers['end'](getCoordinates(event), event);
+      });
+    }
+  };
+}]);
+
+/* global ngTouch: false,
+  nodeName_: false
+*/
+
+/**
+ * @ngdoc directive
+ * @name ngClick
+ * @deprecated
+ *
+ * @description
+ * <div class="alert alert-danger">
+ * **DEPRECATION NOTICE**: Beginning with Angular 1.5, this directive is deprecated and by default **disabled**.
+ * The directive will receive no further support and might be removed from future releases.
+ * If you need the directive, you can enable it with the {@link ngTouch.$touchProvider $touchProvider#ngClickOverrideEnabled}
+ * function. We also recommend that you migrate to [FastClick](https://github.com/ftlabs/fastclick).
+ * To learn more about the 300ms delay, this [Telerik article](http://developer.telerik.com/featured/300-ms-click-delay-ios-8/)
+ * gives a good overview.
+ * </div>
+ * A more powerful replacement for the default ngClick designed to be used on touchscreen
+ * devices. Most mobile browsers wait about 300ms after a tap-and-release before sending
+ * the click event. This version handles them immediately, and then prevents the
+ * following click event from propagating.
+ *
+ * Requires the {@link ngTouch `ngTouch`} module to be installed.
+ *
+ * This directive can fall back to using an ordinary click event, and so works on desktop
+ * browsers as well as mobile.
+ *
+ * This directive also sets the CSS class `ng-click-active` while the element is being held
+ * down (by a mouse click or touch) so you can restyle the depressed element if you wish.
+ *
+ * @element ANY
+ * @param {expression} ngClick {@link guide/expression Expression} to evaluate
+ * upon tap. (Event object is available as `$event`)
+ *
+ * @example
+    <example module="ngClickExample" deps="angular-touch.js">
+      <file name="index.html">
+        <button ng-click="count = count + 1" ng-init="count=0">
+          Increment
+        </button>
+        count: {{ count }}
+      </file>
+      <file name="script.js">
+        angular.module('ngClickExample', ['ngTouch']);
+      </file>
+    </example>
+ */
+
+var ngTouchClickDirectiveFactory = ['$parse', '$timeout', '$rootElement',
+    function($parse, $timeout, $rootElement) {
+  var TAP_DURATION = 750; // Shorter than 750ms is a tap, longer is a taphold or drag.
+  var MOVE_TOLERANCE = 12; // 12px seems to work in most mobile browsers.
+  var PREVENT_DURATION = 2500; // 2.5 seconds maximum from preventGhostClick call to click
+  var CLICKBUSTER_THRESHOLD = 25; // 25 pixels in any dimension is the limit for busting clicks.
+
+  var ACTIVE_CLASS_NAME = 'ng-click-active';
+  var lastPreventedTime;
+  var touchCoordinates;
+  var lastLabelClickCoordinates;
+
+
+  // TAP EVENTS AND GHOST CLICKS
+  //
+  // Why tap events?
+  // Mobile browsers detect a tap, then wait a moment (usually ~300ms) to see if you're
+  // double-tapping, and then fire a click event.
+  //
+  // This delay sucks and makes mobile apps feel unresponsive.
+  // So we detect touchstart, touchcancel and touchend ourselves and determine when
+  // the user has tapped on something.
+  //
+  // What happens when the browser then generates a click event?
+  // The browser, of course, also detects the tap and fires a click after a delay. This results in
+  // tapping/clicking twice. We do "clickbusting" to prevent it.
+  //
+  // How does it work?
+  // We attach global touchstart and click handlers, that run during the capture (early) phase.
+  // So the sequence for a tap is:
+  // - global touchstart: Sets an "allowable region" at the point touched.
+  // - element's touchstart: Starts a touch
+  // (- touchcancel ends the touch, no click follows)
+  // - element's touchend: Determines if the tap is valid (didn't move too far away, didn't hold
+  //   too long) and fires the user's tap handler. The touchend also calls preventGhostClick().
+  // - preventGhostClick() removes the allowable region the global touchstart created.
+  // - The browser generates a click event.
+  // - The global click handler catches the click, and checks whether it was in an allowable region.
+  //     - If preventGhostClick was called, the region will have been removed, the click is busted.
+  //     - If the region is still there, the click proceeds normally. Therefore clicks on links and
+  //       other elements without ngTap on them work normally.
+  //
+  // This is an ugly, terrible hack!
+  // Yeah, tell me about it. The alternatives are using the slow click events, or making our users
+  // deal with the ghost clicks, so I consider this the least of evils. Fortunately Angular
+  // encapsulates this ugly logic away from the user.
+  //
+  // Why not just put click handlers on the element?
+  // We do that too, just to be sure. If the tap event caused the DOM to change,
+  // it is possible another element is now in that position. To take account for these possibly
+  // distinct elements, the handlers are global and care only about coordinates.
+
+  // Checks if the coordinates are close enough to be within the region.
+  function hit(x1, y1, x2, y2) {
+    return Math.abs(x1 - x2) < CLICKBUSTER_THRESHOLD && Math.abs(y1 - y2) < CLICKBUSTER_THRESHOLD;
+  }
+
+  // Checks a list of allowable regions against a click location.
+  // Returns true if the click should be allowed.
+  // Splices out the allowable region from the list after it has been used.
+  function checkAllowableRegions(touchCoordinates, x, y) {
+    for (var i = 0; i < touchCoordinates.length; i += 2) {
+      if (hit(touchCoordinates[i], touchCoordinates[i + 1], x, y)) {
+        touchCoordinates.splice(i, i + 2);
+        return true; // allowable region
+      }
+    }
+    return false; // No allowable region; bust it.
+  }
+
+  // Global click handler that prevents the click if it's in a bustable zone and preventGhostClick
+  // was called recently.
+  function onClick(event) {
+    if (Date.now() - lastPreventedTime > PREVENT_DURATION) {
+      return; // Too old.
+    }
+
+    var touches = event.touches && event.touches.length ? event.touches : [event];
+    var x = touches[0].clientX;
+    var y = touches[0].clientY;
+    // Work around desktop Webkit quirk where clicking a label will fire two clicks (on the label
+    // and on the input element). Depending on the exact browser, this second click we don't want
+    // to bust has either (0,0), negative coordinates, or coordinates equal to triggering label
+    // click event
+    if (x < 1 && y < 1) {
+      return; // offscreen
+    }
+    if (lastLabelClickCoordinates &&
+        lastLabelClickCoordinates[0] === x && lastLabelClickCoordinates[1] === y) {
+      return; // input click triggered by label click
+    }
+    // reset label click coordinates on first subsequent click
+    if (lastLabelClickCoordinates) {
+      lastLabelClickCoordinates = null;
+    }
+    // remember label click coordinates to prevent click busting of trigger click event on input
+    if (nodeName_(event.target) === 'label') {
+      lastLabelClickCoordinates = [x, y];
+    }
+
+    // Look for an allowable region containing this click.
+    // If we find one, that means it was created by touchstart and not removed by
+    // preventGhostClick, so we don't bust it.
+    if (checkAllowableRegions(touchCoordinates, x, y)) {
+      return;
+    }
+
+    // If we didn't find an allowable region, bust the click.
+    event.stopPropagation();
+    event.preventDefault();
+
+    // Blur focused form elements
+    event.target && event.target.blur && event.target.blur();
+  }
+
+
+  // Global touchstart handler that creates an allowable region for a click event.
+  // This allowable region can be removed by preventGhostClick if we want to bust it.
+  function onTouchStart(event) {
+    var touches = event.touches && event.touches.length ? event.touches : [event];
+    var x = touches[0].clientX;
+    var y = touches[0].clientY;
+    touchCoordinates.push(x, y);
+
+    $timeout(function() {
+      // Remove the allowable region.
+      for (var i = 0; i < touchCoordinates.length; i += 2) {
+        if (touchCoordinates[i] == x && touchCoordinates[i + 1] == y) {
+          touchCoordinates.splice(i, i + 2);
+          return;
+        }
+      }
+    }, PREVENT_DURATION, false);
+  }
+
+  // On the first call, attaches some event handlers. Then whenever it gets called, it creates a
+  // zone around the touchstart where clicks will get busted.
+  function preventGhostClick(x, y) {
+    if (!touchCoordinates) {
+      $rootElement[0].addEventListener('click', onClick, true);
+      $rootElement[0].addEventListener('touchstart', onTouchStart, true);
+      touchCoordinates = [];
+    }
+
+    lastPreventedTime = Date.now();
+
+    checkAllowableRegions(touchCoordinates, x, y);
+  }
+
+  // Actual linking function.
+  return function(scope, element, attr) {
+    var clickHandler = $parse(attr.ngClick),
+        tapping = false,
+        tapElement,  // Used to blur the element after a tap.
+        startTime,   // Used to check if the tap was held too long.
+        touchStartX,
+        touchStartY;
+
+    function resetState() {
+      tapping = false;
+      element.removeClass(ACTIVE_CLASS_NAME);
+    }
+
+    element.on('touchstart', function(event) {
+      tapping = true;
+      tapElement = event.target ? event.target : event.srcElement; // IE uses srcElement.
+      // Hack for Safari, which can target text nodes instead of containers.
+      if (tapElement.nodeType == 3) {
+        tapElement = tapElement.parentNode;
+      }
+
+      element.addClass(ACTIVE_CLASS_NAME);
+
+      startTime = Date.now();
+
+      // Use jQuery originalEvent
+      var originalEvent = event.originalEvent || event;
+      var touches = originalEvent.touches && originalEvent.touches.length ? originalEvent.touches : [originalEvent];
+      var e = touches[0];
+      touchStartX = e.clientX;
+      touchStartY = e.clientY;
+    });
+
+    element.on('touchcancel', function(event) {
+      resetState();
+    });
+
+    element.on('touchend', function(event) {
+      var diff = Date.now() - startTime;
+
+      // Use jQuery originalEvent
+      var originalEvent = event.originalEvent || event;
+      var touches = (originalEvent.changedTouches && originalEvent.changedTouches.length) ?
+          originalEvent.changedTouches :
+          ((originalEvent.touches && originalEvent.touches.length) ? originalEvent.touches : [originalEvent]);
+      var e = touches[0];
+      var x = e.clientX;
+      var y = e.clientY;
+      var dist = Math.sqrt(Math.pow(x - touchStartX, 2) + Math.pow(y - touchStartY, 2));
+
+      if (tapping && diff < TAP_DURATION && dist < MOVE_TOLERANCE) {
+        // Call preventGhostClick so the clickbuster will catch the corresponding click.
+        preventGhostClick(x, y);
+
+        // Blur the focused element (the button, probably) before firing the callback.
+        // This doesn't work perfectly on Android Chrome, but seems to work elsewhere.
+        // I couldn't get anything to work reliably on Android Chrome.
+        if (tapElement) {
+          tapElement.blur();
+        }
+
+        if (!angular.isDefined(attr.disabled) || attr.disabled === false) {
+          element.triggerHandler('click', [event]);
+        }
+      }
+
+      resetState();
+    });
+
+    // Hack for iOS Safari's benefit. It goes searching for onclick handlers and is liable to click
+    // something else nearby.
+    element.onclick = function(event) { };
+
+    // Actual click handler.
+    // There are three different kinds of clicks, only two of which reach this point.
+    // - On desktop browsers without touch events, their clicks will always come here.
+    // - On mobile browsers, the simulated "fast" click will call this.
+    // - But the browser's follow-up slow click will be "busted" before it reaches this handler.
+    // Therefore it's safe to use this directive on both mobile and desktop.
+    element.on('click', function(event, touchend) {
+      scope.$apply(function() {
+        clickHandler(scope, {$event: (touchend || event)});
+      });
+    });
+
+    element.on('mousedown', function(event) {
+      element.addClass(ACTIVE_CLASS_NAME);
+    });
+
+    element.on('mousemove mouseup', function(event) {
+      element.removeClass(ACTIVE_CLASS_NAME);
+    });
+
+  };
+}];
+
+/* global ngTouch: false */
+
+/**
+ * @ngdoc directive
+ * @name ngSwipeLeft
+ *
+ * @description
+ * Specify custom behavior when an element is swiped to the left on a touchscreen device.
+ * A leftward swipe is a quick, right-to-left slide of the finger.
+ * Though ngSwipeLeft is designed for touch-based devices, it will work with a mouse click and drag
+ * too.
+ *
+ * To disable the mouse click and drag functionality, add `ng-swipe-disable-mouse` to
+ * the `ng-swipe-left` or `ng-swipe-right` DOM Element.
+ *
+ * Requires the {@link ngTouch `ngTouch`} module to be installed.
+ *
+ * @element ANY
+ * @param {expression} ngSwipeLeft {@link guide/expression Expression} to evaluate
+ * upon left swipe. (Event object is available as `$event`)
+ *
+ * @example
+    <example module="ngSwipeLeftExample" deps="angular-touch.js">
+      <file name="index.html">
+        <div ng-show="!showActions" ng-swipe-left="showActions = true">
+          Some list content, like an email in the inbox
+        </div>
+        <div ng-show="showActions" ng-swipe-right="showActions = false">
+          <button ng-click="reply()">Reply</button>
+          <button ng-click="delete()">Delete</button>
+        </div>
+      </file>
+      <file name="script.js">
+        angular.module('ngSwipeLeftExample', ['ngTouch']);
+      </file>
+    </example>
+ */
+
+/**
+ * @ngdoc directive
+ * @name ngSwipeRight
+ *
+ * @description
+ * Specify custom behavior when an element is swiped to the right on a touchscreen device.
+ * A rightward swipe is a quick, left-to-right slide of the finger.
+ * Though ngSwipeRight is designed for touch-based devices, it will work with a mouse click and drag
+ * too.
+ *
+ * Requires the {@link ngTouch `ngTouch`} module to be installed.
+ *
+ * @element ANY
+ * @param {expression} ngSwipeRight {@link guide/expression Expression} to evaluate
+ * upon right swipe. (Event object is available as `$event`)
+ *
+ * @example
+    <example module="ngSwipeRightExample" deps="angular-touch.js">
+      <file name="index.html">
+        <div ng-show="!showActions" ng-swipe-left="showActions = true">
+          Some list content, like an email in the inbox
+        </div>
+        <div ng-show="showActions" ng-swipe-right="showActions = false">
+          <button ng-click="reply()">Reply</button>
+          <button ng-click="delete()">Delete</button>
+        </div>
+      </file>
+      <file name="script.js">
+        angular.module('ngSwipeRightExample', ['ngTouch']);
+      </file>
+    </example>
+ */
+
+function makeSwipeDirective(directiveName, direction, eventName) {
+  ngTouch.directive(directiveName, ['$parse', '$swipe', function($parse, $swipe) {
+    // The maximum vertical delta for a swipe should be less than 75px.
+    var MAX_VERTICAL_DISTANCE = 75;
+    // Vertical distance should not be more than a fraction of the horizontal distance.
+    var MAX_VERTICAL_RATIO = 0.3;
+    // At least a 30px lateral motion is necessary for a swipe.
+    var MIN_HORIZONTAL_DISTANCE = 30;
+
+    return function(scope, element, attr) {
+      var swipeHandler = $parse(attr[directiveName]);
+
+      var startCoords, valid;
+
+      function validSwipe(coords) {
+        // Check that it's within the coordinates.
+        // Absolute vertical distance must be within tolerances.
+        // Horizontal distance, we take the current X - the starting X.
+        // This is negative for leftward swipes and positive for rightward swipes.
+        // After multiplying by the direction (-1 for left, +1 for right), legal swipes
+        // (ie. same direction as the directive wants) will have a positive delta and
+        // illegal ones a negative delta.
+        // Therefore this delta must be positive, and larger than the minimum.
+        if (!startCoords) return false;
+        var deltaY = Math.abs(coords.y - startCoords.y);
+        var deltaX = (coords.x - startCoords.x) * direction;
+        return valid && // Short circuit for already-invalidated swipes.
+            deltaY < MAX_VERTICAL_DISTANCE &&
+            deltaX > 0 &&
+            deltaX > MIN_HORIZONTAL_DISTANCE &&
+            deltaY / deltaX < MAX_VERTICAL_RATIO;
+      }
+
+      var pointerTypes = ['touch'];
+      if (!angular.isDefined(attr['ngSwipeDisableMouse'])) {
+        pointerTypes.push('mouse');
+      }
+      $swipe.bind(element, {
+        'start': function(coords, event) {
+          startCoords = coords;
+          valid = true;
+        },
+        'cancel': function(event) {
+          valid = false;
+        },
+        'end': function(coords, event) {
+          if (validSwipe(coords)) {
+            scope.$apply(function() {
+              element.triggerHandler(eventName);
+              swipeHandler(scope, {$event: event});
+            });
+          }
+        }
+      }, pointerTypes);
+    };
+  }]);
+}
+
+// Left is negative X-coordinate, right is positive.
+makeSwipeDirective('ngSwipeLeft', -1, 'swipeleft');
+makeSwipeDirective('ngSwipeRight', 1, 'swiperight');
+
+
+
+})(window, window.angular);
+
+/**
+ * Angular Carousel - Mobile friendly touch carousel for AngularJS
+ * @version v0.3.12 - 2015-06-11
+ * @link http://revolunet.github.com/angular-carousel
+ * @author Julien Bouquillon <julien@revolunet.com>
+ * @license MIT License, http://www.opensource.org/licenses/MIT
+ */
+/*global angular */
+
+/*
+Angular touch carousel with CSS GPU accel and slide buffering
+http://github.com/revolunet/angular-carousel
+
+*/
+
+angular.module('angular-carousel', [
+    'ngTouch',
+    'angular-carousel.shifty'
+]);
+
+angular.module('angular-carousel')
+
+.directive('rnCarouselAutoSlide', ['$interval', function($interval) {
+  return {
+    restrict: 'A',
+    link: function (scope, element, attrs) {
+        var stopAutoPlay = function() {
+            if (scope.autoSlider) {
+                $interval.cancel(scope.autoSlider);
+                scope.autoSlider = null;
+            }
+        };
+        var restartTimer = function() {
+            scope.autoSlide();
+        };
+
+        scope.$watch('carouselIndex', restartTimer);
+
+        if (attrs.hasOwnProperty('rnCarouselPauseOnHover') && attrs.rnCarouselPauseOnHover !== 'false'){
+            element.on('mouseenter', stopAutoPlay);
+            element.on('mouseleave', restartTimer);
+        }
+
+        scope.$on('$destroy', function(){
+            stopAutoPlay();
+            element.off('mouseenter', stopAutoPlay);
+            element.off('mouseleave', restartTimer);
+        });
+    }
+  };
+}]);
+
+angular.module('angular-carousel')
+
+.directive('rnCarouselIndicators', ['$parse', function($parse) {
+  return {
+    restrict: 'A',
+    scope: {
+      slides: '=',
+      index: '=rnCarouselIndex'
+    },
+    templateUrl: 'carousel-indicators.html',
+    link: function(scope, iElement, iAttributes) {
+      var indexModel = $parse(iAttributes.rnCarouselIndex);
+      scope.goToSlide = function(index) {
+        indexModel.assign(scope.$parent.$parent, index);
+      };
+    }
+  };
+}]);
+
+angular.module('angular-carousel').run(['$templateCache', function($templateCache) {
+  $templateCache.put('carousel-indicators.html',
+      '<div class="rn-carousel-indicator">\n' +
+        '<span ng-repeat="slide in slides" ng-class="{active: $index==index}" ng-click="goToSlide($index)">●</span>' +
+      '</div>'
+  );
+}]);
+
+(function() {
+    "use strict";
+
+    angular.module('angular-carousel')
+
+    .service('DeviceCapabilities', function() {
+
+        // TODO: merge in a single function
+
+        // detect supported CSS property
+        function detectTransformProperty() {
+            var transformProperty = 'transform',
+                safariPropertyHack = 'webkitTransform';
+            if (typeof document.body.style[transformProperty] !== 'undefined') {
+
+                ['webkit', 'moz', 'o', 'ms'].every(function (prefix) {
+                    var e = '-' + prefix + '-transform';
+                    if (typeof document.body.style[e] !== 'undefined') {
+                        transformProperty = e;
+                        return false;
+                    }
+                    return true;
+                });
+            } else if (typeof document.body.style[safariPropertyHack] !== 'undefined') {
+                transformProperty = '-webkit-transform';
+            } else {
+                transformProperty = undefined;
+            }
+            return transformProperty;
+        }
+
+        //Detect support of translate3d
+        function detect3dSupport() {
+            var el = document.createElement('p'),
+                has3d,
+                transforms = {
+                    'webkitTransform': '-webkit-transform',
+                    'msTransform': '-ms-transform',
+                    'transform': 'transform'
+                };
+            // Add it to the body to get the computed style
+            document.body.insertBefore(el, null);
+            for (var t in transforms) {
+                if (el.style[t] !== undefined) {
+                    el.style[t] = 'translate3d(1px,1px,1px)';
+                    has3d = window.getComputedStyle(el).getPropertyValue(transforms[t]);
+                }
+            }
+            document.body.removeChild(el);
+            return (has3d !== undefined && has3d.length > 0 && has3d !== "none");
+        }
+
+        return {
+            has3d: detect3dSupport(),
+            transformProperty: detectTransformProperty()
+        };
+
+    })
+
+    .service('computeCarouselSlideStyle', ["DeviceCapabilities", function(DeviceCapabilities) {
+        // compute transition transform properties for a given slide and global offset
+        return function(slideIndex, offset, transitionType) {
+            var style = {
+                    display: 'inline-block'
+                },
+                opacity,
+                absoluteLeft = (slideIndex * 100) + offset,
+                slideTransformValue = DeviceCapabilities.has3d ? 'translate3d(' + absoluteLeft + '%, 0, 0)' : 'translate3d(' + absoluteLeft + '%, 0)',
+                distance = ((100 - Math.abs(absoluteLeft)) / 100);
+
+            if (!DeviceCapabilities.transformProperty) {
+                // fallback to default slide if transformProperty is not available
+                style['margin-left'] = absoluteLeft + '%';
+            } else {
+                if (transitionType == 'fadeAndSlide') {
+                    style[DeviceCapabilities.transformProperty] = slideTransformValue;
+                    opacity = 0;
+                    if (Math.abs(absoluteLeft) < 100) {
+                        opacity = 0.3 + distance * 0.7;
+                    }
+                    style.opacity = opacity;
+                } else if (transitionType == 'hexagon') {
+                    var transformFrom = 100,
+                        degrees = 0,
+                        maxDegrees = 60 * (distance - 1);
+
+                    transformFrom = offset < (slideIndex * -100) ? 100 : 0;
+                    degrees = offset < (slideIndex * -100) ? maxDegrees : -maxDegrees;
+                    style[DeviceCapabilities.transformProperty] = slideTransformValue + ' ' + 'rotateY(' + degrees + 'deg)';
+                    style[DeviceCapabilities.transformProperty + '-origin'] = transformFrom + '% 50%';
+                } else if (transitionType == 'zoom') {
+                    style[DeviceCapabilities.transformProperty] = slideTransformValue;
+                    var scale = 1;
+                    if (Math.abs(absoluteLeft) < 100) {
+                        scale = 1 + ((1 - distance) * 2);
+                    }
+                    style[DeviceCapabilities.transformProperty] += ' scale(' + scale + ')';
+                    style[DeviceCapabilities.transformProperty + '-origin'] = '50% 50%';
+                    opacity = 0;
+                    if (Math.abs(absoluteLeft) < 100) {
+                        opacity = 0.3 + distance * 0.7;
+                    }
+                    style.opacity = opacity;
+                } else {
+                    style[DeviceCapabilities.transformProperty] = slideTransformValue;
+                }
+            }
+            return style;
+        };
+    }])
+
+    .service('createStyleString', function() {
+        return function(object) {
+            var styles = [];
+            angular.forEach(object, function(value, key) {
+                styles.push(key + ':' + value);
+            });
+            return styles.join(';');
+        };
+    })
+
+    .directive('rnCarousel', ['$swipe', '$window', '$document', '$parse', '$compile', '$timeout', '$interval', 'computeCarouselSlideStyle', 'createStyleString', 'Tweenable',
+        function($swipe, $window, $document, $parse, $compile, $timeout, $interval, computeCarouselSlideStyle, createStyleString, Tweenable) {
+            // internal ids to allow multiple instances
+            var carouselId = 0,
+                // in absolute pixels, at which distance the slide stick to the edge on release
+                rubberTreshold = 3;
+
+            var requestAnimationFrame = $window.requestAnimationFrame || $window.webkitRequestAnimationFrame || $window.mozRequestAnimationFrame;
+
+            function getItemIndex(collection, target, defaultIndex) {
+                var result = defaultIndex;
+                collection.every(function(item, index) {
+                    if (angular.equals(item, target)) {
+                        result = index;
+                        return false;
+                    }
+                    return true;
+                });
+                return result;
+            }
+
+            return {
+                restrict: 'A',
+                scope: true,
+                compile: function(tElement, tAttributes) {
+                    // use the compile phase to customize the DOM
+                    var firstChild = tElement[0].querySelector('li'),
+                        firstChildAttributes = (firstChild) ? firstChild.attributes : [],
+                        isRepeatBased = false,
+                        isBuffered = false,
+                        repeatItem,
+                        repeatCollection;
+
+                    // try to find an ngRepeat expression
+                    // at this point, the attributes are not yet normalized so we need to try various syntax
+                    ['ng-repeat', 'data-ng-repeat', 'ng:repeat', 'x-ng-repeat'].every(function(attr) {
+                        var repeatAttribute = firstChildAttributes[attr];
+                        if (angular.isDefined(repeatAttribute)) {
+                            // ngRepeat regexp extracted from angular 1.2.7 src
+                            var exprMatch = repeatAttribute.value.match(/^\s*([\s\S]+?)\s+in\s+([\s\S]+?)(?:\s+track\s+by\s+([\s\S]+?))?\s*$/),
+                                trackProperty = exprMatch[3];
+
+                            repeatItem = exprMatch[1];
+                            repeatCollection = exprMatch[2];
+
+                            if (repeatItem) {
+                                if (angular.isDefined(tAttributes['rnCarouselBuffered'])) {
+                                    // update the current ngRepeat expression and add a slice operator if buffered
+                                    isBuffered = true;
+                                    repeatAttribute.value = repeatItem + ' in ' + repeatCollection + '|carouselSlice:carouselBufferIndex:carouselBufferSize';
+                                    if (trackProperty) {
+                                        repeatAttribute.value += ' track by ' + trackProperty;
+                                    }
+                                }
+                                isRepeatBased = true;
+                                return false;
+                            }
+                        }
+                        return true;
+                    });
+
+                    return function(scope, iElement, iAttributes, containerCtrl) {
+
+                        carouselId++;
+
+                        var defaultOptions = {
+                            transitionType: iAttributes.rnCarouselTransition || 'slide',
+                            transitionEasing: iAttributes.rnCarouselEasing || 'easeTo',
+                            transitionDuration: parseInt(iAttributes.rnCarouselDuration, 10) || 300,
+                            isSequential: true,
+                            autoSlideDuration: 3,
+                            bufferSize: 5,
+                            /* in container % how much we need to drag to trigger the slide change */
+                            moveTreshold: 0.1,
+                            defaultIndex: 0
+                        };
+
+                        // TODO
+                        var options = angular.extend({}, defaultOptions);
+
+                        var pressed,
+                            startX,
+                            isIndexBound = false,
+                            offset = 0,
+                            destination,
+                            swipeMoved = false,
+                            //animOnIndexChange = true,
+                            currentSlides = [],
+                            elWidth = null,
+                            elX = null,
+                            animateTransitions = true,
+                            intialState = true,
+                            animating = false,
+                            mouseUpBound = false,
+                            locked = false;
+
+                        //rn-swipe-disabled =true will only disable swipe events
+                        if(iAttributes.rnSwipeDisabled !== "true") {
+                            $swipe.bind(iElement, {
+                                start: swipeStart,
+                                move: swipeMove,
+                                end: swipeEnd,
+                                cancel: function(event) {
+                                    swipeEnd({}, event);
+                                }
+                            });
+                        }
+
+                        function getSlidesDOM() {
+                            return iElement[0].querySelectorAll('ul[rn-carousel] > li');
+                        }
+
+                        function documentMouseUpEvent(event) {
+                            // in case we click outside the carousel, trigger a fake swipeEnd
+                            swipeMoved = true;
+                            swipeEnd({
+                                x: event.clientX,
+                                y: event.clientY
+                            }, event);
+                        }
+
+                        function updateSlidesPosition(offset) {
+                            // manually apply transformation to carousel childrens
+                            // todo : optim : apply only to visible items
+                            var x = scope.carouselBufferIndex * 100 + offset;
+                            angular.forEach(getSlidesDOM(), function(child, index) {
+                                child.style.cssText = createStyleString(computeCarouselSlideStyle(index, x, options.transitionType));
+                            });
+                        }
+
+                        scope.nextSlide = function(slideOptions) {
+                            var index = scope.carouselIndex + 1;
+                            if (index > currentSlides.length - 1) {
+                                index = 0;
+                            }
+                            if (!locked) {
+                                goToSlide(index, slideOptions);
+                            }
+                        };
+
+                        scope.prevSlide = function(slideOptions) {
+                            var index = scope.carouselIndex - 1;
+                            if (index < 0) {
+                                index = currentSlides.length - 1;
+                            }
+                            goToSlide(index, slideOptions);
+                        };
+
+                        function goToSlide(index, slideOptions) {
+                            //console.log('goToSlide', arguments);
+                            // move a to the given slide index
+                            if (index === undefined) {
+                                index = scope.carouselIndex;
+                            }
+
+                            slideOptions = slideOptions || {};
+                            if (slideOptions.animate === false || options.transitionType === 'none') {
+                                locked = false;
+                                offset = index * -100;
+                                scope.carouselIndex = index;
+                                updateBufferIndex();
+                                return;
+                            }
+
+                            locked = true;
+                            var tweenable = new Tweenable();
+                            tweenable.tween({
+                                from: {
+                                    'x': offset
+                                },
+                                to: {
+                                    'x': index * -100
+                                },
+                                duration: options.transitionDuration,
+                                easing: options.transitionEasing,
+                                step: function(state) {
+                                    updateSlidesPosition(state.x);
+                                },
+                                finish: function() {
+                                    scope.$apply(function() {
+                                        scope.carouselIndex = index;
+                                        offset = index * -100;
+                                        updateBufferIndex();
+                                        $timeout(function () {
+                                          locked = false;
+                                        }, 0, false);
+                                    });
+                                }
+                            });
+                        }
+
+                        function getContainerWidth() {
+                            var rect = iElement[0].getBoundingClientRect();
+                            return rect.width ? rect.width : rect.right - rect.left;
+                        }
+
+                        function updateContainerWidth() {
+                            elWidth = getContainerWidth();
+                        }
+
+                        function bindMouseUpEvent() {
+                            if (!mouseUpBound) {
+                              mouseUpBound = true;
+                              $document.bind('mouseup', documentMouseUpEvent);
+                            }
+                        }
+
+                        function unbindMouseUpEvent() {
+                            if (mouseUpBound) {
+                              mouseUpBound = false;
+                              $document.unbind('mouseup', documentMouseUpEvent);
+                            }
+                        }
+
+                        function swipeStart(coords, event) {
+                            // console.log('swipeStart', coords, event);
+                            if (locked || currentSlides.length <= 1) {
+                                return;
+                            }
+                            updateContainerWidth();
+                            elX = iElement[0].querySelector('li').getBoundingClientRect().left;
+                            pressed = true;
+                            startX = coords.x;
+                            return false;
+                        }
+
+                        function swipeMove(coords, event) {
+                            //console.log('swipeMove', coords, event);
+                            var x, delta;
+                            bindMouseUpEvent();
+                            if (pressed) {
+                                x = coords.x;
+                                delta = startX - x;
+                                if (delta > 2 || delta < -2) {
+                                    swipeMoved = true;
+                                    var moveOffset = offset + (-delta * 100 / elWidth);
+                                    updateSlidesPosition(moveOffset);
+                                }
+                            }
+                            return false;
+                        }
+
+                        var init = true;
+                        scope.carouselIndex = 0;
+
+                        if (!isRepeatBased) {
+                            // fake array when no ng-repeat
+                            currentSlides = [];
+                            angular.forEach(getSlidesDOM(), function(node, index) {
+                                currentSlides.push({id: index});
+                            });
+                        }
+
+                        if (iAttributes.rnCarouselControls!==undefined) {
+                            // dont use a directive for this
+                            var nextSlideIndexCompareValue = isRepeatBased ? repeatCollection.replace('::', '') + '.length - 1' : currentSlides.length - 1;
+                            var tpl = '<div class="rn-carousel-controls">\n' +
+                                '  <span class="rn-carousel-control rn-carousel-control-prev" ng-click="prevSlide()" ng-if="carouselIndex > 0"></span>\n' +
+                                '  <span class="rn-carousel-control rn-carousel-control-next" ng-click="nextSlide()" ng-if="carouselIndex < ' + nextSlideIndexCompareValue + '"></span>\n' +
+                                '</div>';
+                            iElement.parent().append($compile(angular.element(tpl))(scope));
+                        }
+
+                        if (iAttributes.rnCarouselAutoSlide!==undefined) {
+                            var duration = parseInt(iAttributes.rnCarouselAutoSlide, 10) || options.autoSlideDuration;
+                            scope.autoSlide = function() {
+                                if (scope.autoSlider) {
+                                    $interval.cancel(scope.autoSlider);
+                                    scope.autoSlider = null;
+                                }
+                                scope.autoSlider = $interval(function() {
+                                    if (!locked && !pressed) {
+                                        scope.nextSlide();
+                                    }
+                                }, duration * 1000);
+                            };
+                        }
+
+                        if (iAttributes.rnCarouselDefaultIndex) {
+                            var defaultIndexModel = $parse(iAttributes.rnCarouselDefaultIndex);
+                            options.defaultIndex = defaultIndexModel(scope.$parent) || 0;
+                        }
+
+                        if (iAttributes.rnCarouselIndex) {
+                            var updateParentIndex = function(value) {
+                                indexModel.assign(scope.$parent, value);
+                            };
+                            var indexModel = $parse(iAttributes.rnCarouselIndex);
+                            if (angular.isFunction(indexModel.assign)) {
+                                /* check if this property is assignable then watch it */
+                                scope.$watch('carouselIndex', function(newValue) {
+                                    updateParentIndex(newValue);
+                                });
+                                scope.$parent.$watch(indexModel, function(newValue, oldValue) {
+
+                                    if (newValue !== undefined && newValue !== null) {
+                                        if (currentSlides && currentSlides.length > 0 && newValue >= currentSlides.length) {
+                                            newValue = currentSlides.length - 1;
+                                            updateParentIndex(newValue);
+                                        } else if (currentSlides && newValue < 0) {
+                                            newValue = 0;
+                                            updateParentIndex(newValue);
+                                        }
+                                        if (!locked) {
+                                            goToSlide(newValue, {
+                                                animate: !init
+                                            });
+                                        }
+                                        init = false;
+                                    }
+                                });
+                                isIndexBound = true;
+
+                                if (options.defaultIndex) {
+                                    goToSlide(options.defaultIndex, {
+                                        animate: !init
+                                    });
+                                }
+                            } else if (!isNaN(iAttributes.rnCarouselIndex)) {
+                                /* if user just set an initial number, set it */
+                                goToSlide(parseInt(iAttributes.rnCarouselIndex, 10), {
+                                    animate: false
+                                });
+                            }
+                        } else {
+                            goToSlide(options.defaultIndex, {
+                                animate: !init
+                            });
+                            init = false;
+                        }
+
+                        if (iAttributes.rnCarouselLocked) {
+                            scope.$watch(iAttributes.rnCarouselLocked, function(newValue, oldValue) {
+                                // only bind swipe when it's not switched off
+                                if(newValue === true) {
+                                    locked = true;
+                                } else {
+                                    locked = false;
+                                }
+                            });
+                        }
+
+                        if (isRepeatBased) {
+                            // use rn-carousel-deep-watch to fight the Angular $watchCollection weakness : https://github.com/angular/angular.js/issues/2621
+                            // optional because it have some performance impacts (deep watch)
+                            var deepWatch = (iAttributes.rnCarouselDeepWatch!==undefined);
+
+                            scope[deepWatch?'$watch':'$watchCollection'](repeatCollection, function(newValue, oldValue) {
+                                //console.log('repeatCollection', currentSlides);
+                                currentSlides = newValue;
+                                // if deepWatch ON ,manually compare objects to guess the new position
+                                if (deepWatch && angular.isArray(newValue)) {
+                                    var activeElement = oldValue[scope.carouselIndex];
+                                    var newIndex = getItemIndex(newValue, activeElement, scope.carouselIndex);
+                                    goToSlide(newIndex, {animate: false});
+                                } else {
+                                    goToSlide(scope.carouselIndex, {animate: false});
+                                }
+                            }, true);
+                        }
+
+                        function swipeEnd(coords, event, forceAnimation) {
+                            //  console.log('swipeEnd', 'scope.carouselIndex', scope.carouselIndex);
+                            // Prevent clicks on buttons inside slider to trigger "swipeEnd" event on touchend/mouseup
+                            // console.log(iAttributes.rnCarouselOnInfiniteScroll);
+                            if (event && !swipeMoved) {
+                                return;
+                            }
+                            unbindMouseUpEvent();
+                            pressed = false;
+                            swipeMoved = false;
+                            destination = startX - coords.x;
+                            if (destination===0) {
+                                return;
+                            }
+                            if (locked) {
+                                return;
+                            }
+                            offset += (-destination * 100 / elWidth);
+                            if (options.isSequential) {
+                                var minMove = options.moveTreshold * elWidth,
+                                    absMove = -destination,
+                                    slidesMove = -Math[absMove >= 0 ? 'ceil' : 'floor'](absMove / elWidth),
+                                    shouldMove = Math.abs(absMove) > minMove;
+
+                                if (currentSlides && (slidesMove + scope.carouselIndex) >= currentSlides.length) {
+                                    slidesMove = currentSlides.length - 1 - scope.carouselIndex;
+                                }
+                                if ((slidesMove + scope.carouselIndex) < 0) {
+                                    slidesMove = -scope.carouselIndex;
+                                }
+                                var moveOffset = shouldMove ? slidesMove : 0;
+
+                                destination = (scope.carouselIndex + moveOffset);
+
+                                goToSlide(destination);
+                                if(iAttributes.rnCarouselOnInfiniteScrollRight!==undefined && slidesMove === 0 && scope.carouselIndex !== 0) {
+                                    $parse(iAttributes.rnCarouselOnInfiniteScrollRight)(scope)
+                                    goToSlide(0);
+                                }
+                                if(iAttributes.rnCarouselOnInfiniteScrollLeft!==undefined && slidesMove === 0 && scope.carouselIndex === 0 && moveOffset === 0) {
+                                    $parse(iAttributes.rnCarouselOnInfiniteScrollLeft)(scope)
+                                    goToSlide(currentSlides.length);
+                                }
+
+                            } else {
+                                scope.$apply(function() {
+                                    scope.carouselIndex = parseInt(-offset / 100, 10);
+                                    updateBufferIndex();
+                                });
+
+                            }
+
+                        }
+
+                        scope.$on('$destroy', function() {
+                            unbindMouseUpEvent();
+                        });
+
+                        scope.carouselBufferIndex = 0;
+                        scope.carouselBufferSize = options.bufferSize;
+
+                        function updateBufferIndex() {
+                            // update and cap te buffer index
+                            var bufferIndex = 0;
+                            var bufferEdgeSize = (scope.carouselBufferSize - 1) / 2;
+                            if (isBuffered) {
+                                if (scope.carouselIndex <= bufferEdgeSize) {
+                                    // first buffer part
+                                    bufferIndex = 0;
+                                } else if (currentSlides && currentSlides.length < scope.carouselBufferSize) {
+                                    // smaller than buffer
+                                    bufferIndex = 0;
+                                } else if (currentSlides && scope.carouselIndex > currentSlides.length - scope.carouselBufferSize) {
+                                    // last buffer part
+                                    bufferIndex = currentSlides.length - scope.carouselBufferSize;
+                                } else {
+                                    // compute buffer start
+                                    bufferIndex = scope.carouselIndex - bufferEdgeSize;
+                                }
+
+                                scope.carouselBufferIndex = bufferIndex;
+                                $timeout(function() {
+                                    updateSlidesPosition(offset);
+                                }, 0, false);
+                            } else {
+                                $timeout(function() {
+                                    updateSlidesPosition(offset);
+                                }, 0, false);
+                            }
+                        }
+
+                        function onOrientationChange() {
+                            updateContainerWidth();
+                            goToSlide();
+                        }
+
+                        // handle orientation change
+                        var winEl = angular.element($window);
+                        winEl.bind('orientationchange', onOrientationChange);
+                        winEl.bind('resize', onOrientationChange);
+
+                        scope.$on('$destroy', function() {
+                            unbindMouseUpEvent();
+                            winEl.unbind('orientationchange', onOrientationChange);
+                            winEl.unbind('resize', onOrientationChange);
+                        });
+                    };
+                }
+            };
+        }
+    ]);
+})();
+
+
+
+angular.module('angular-carousel.shifty', [])
+
+.factory('Tweenable', function() {
+
+    /*! shifty - v1.3.4 - 2014-10-29 - http://jeremyckahn.github.io/shifty */
+  ;(function (root) {
+
+  /*!
+   * Shifty Core
+   * By Jeremy Kahn - jeremyckahn@gmail.com
+   */
+
+  var Tweenable = (function () {
+
+    'use strict';
+
+    // Aliases that get defined later in this function
+    var formula;
+
+    // CONSTANTS
+    var DEFAULT_SCHEDULE_FUNCTION;
+    var DEFAULT_EASING = 'linear';
+    var DEFAULT_DURATION = 500;
+    var UPDATE_TIME = 1000 / 60;
+
+    var _now = Date.now
+         ? Date.now
+         : function () {return +new Date();};
+
+    var now = typeof SHIFTY_DEBUG_NOW !== 'undefined' ? SHIFTY_DEBUG_NOW : _now;
+
+    if (typeof window !== 'undefined') {
+      // requestAnimationFrame() shim by Paul Irish (modified for Shifty)
+      // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+      DEFAULT_SCHEDULE_FUNCTION = window.requestAnimationFrame
+         || window.webkitRequestAnimationFrame
+         || window.oRequestAnimationFrame
+         || window.msRequestAnimationFrame
+         || (window.mozCancelRequestAnimationFrame
+         && window.mozRequestAnimationFrame)
+         || setTimeout;
+    } else {
+      DEFAULT_SCHEDULE_FUNCTION = setTimeout;
+    }
+
+    function noop () {
+      // NOOP!
+    }
+
+    /*!
+     * Handy shortcut for doing a for-in loop. This is not a "normal" each
+     * function, it is optimized for Shifty.  The iterator function only receives
+     * the property name, not the value.
+     * @param {Object} obj
+     * @param {Function(string)} fn
+     */
+    function each (obj, fn) {
+      var key;
+      for (key in obj) {
+        if (Object.hasOwnProperty.call(obj, key)) {
+          fn(key);
+        }
+      }
+    }
+
+    /*!
+     * Perform a shallow copy of Object properties.
+     * @param {Object} targetObject The object to copy into
+     * @param {Object} srcObject The object to copy from
+     * @return {Object} A reference to the augmented `targetObj` Object
+     */
+    function shallowCopy (targetObj, srcObj) {
+      each(srcObj, function (prop) {
+        targetObj[prop] = srcObj[prop];
+      });
+
+      return targetObj;
+    }
+
+    /*!
+     * Copies each property from src onto target, but only if the property to
+     * copy to target is undefined.
+     * @param {Object} target Missing properties in this Object are filled in
+     * @param {Object} src
+     */
+    function defaults (target, src) {
+      each(src, function (prop) {
+        if (typeof target[prop] === 'undefined') {
+          target[prop] = src[prop];
+        }
+      });
+    }
+
+    /*!
+     * Calculates the interpolated tween values of an Object for a given
+     * timestamp.
+     * @param {Number} forPosition The position to compute the state for.
+     * @param {Object} currentState Current state properties.
+     * @param {Object} originalState: The original state properties the Object is
+     * tweening from.
+     * @param {Object} targetState: The destination state properties the Object
+     * is tweening to.
+     * @param {number} duration: The length of the tween in milliseconds.
+     * @param {number} timestamp: The UNIX epoch time at which the tween began.
+     * @param {Object} easing: This Object's keys must correspond to the keys in
+     * targetState.
+     */
+    function tweenProps (forPosition, currentState, originalState, targetState,
+      duration, timestamp, easing) {
+      var normalizedPosition = (forPosition - timestamp) / duration;
+
+      var prop;
+      for (prop in currentState) {
+        if (currentState.hasOwnProperty(prop)) {
+          currentState[prop] = tweenProp(originalState[prop],
+            targetState[prop], formula[easing[prop]], normalizedPosition);
+        }
+      }
+
+      return currentState;
+    }
+
+    /*!
+     * Tweens a single property.
+     * @param {number} start The value that the tween started from.
+     * @param {number} end The value that the tween should end at.
+     * @param {Function} easingFunc The easing curve to apply to the tween.
+     * @param {number} position The normalized position (between 0.0 and 1.0) to
+     * calculate the midpoint of 'start' and 'end' against.
+     * @return {number} The tweened value.
+     */
+    function tweenProp (start, end, easingFunc, position) {
+      return start + (end - start) * easingFunc(position);
+    }
+
+    /*!
+     * Applies a filter to Tweenable instance.
+     * @param {Tweenable} tweenable The `Tweenable` instance to call the filter
+     * upon.
+     * @param {String} filterName The name of the filter to apply.
+     */
+    function applyFilter (tweenable, filterName) {
+      var filters = Tweenable.prototype.filter;
+      var args = tweenable._filterArgs;
+
+      each(filters, function (name) {
+        if (typeof filters[name][filterName] !== 'undefined') {
+          filters[name][filterName].apply(tweenable, args);
+        }
+      });
+    }
+
+    var timeoutHandler_endTime;
+    var timeoutHandler_currentTime;
+    var timeoutHandler_isEnded;
+    var timeoutHandler_offset;
+    /*!
+     * Handles the update logic for one step of a tween.
+     * @param {Tweenable} tweenable
+     * @param {number} timestamp
+     * @param {number} duration
+     * @param {Object} currentState
+     * @param {Object} originalState
+     * @param {Object} targetState
+     * @param {Object} easing
+     * @param {Function(Object, *, number)} step
+     * @param {Function(Function,number)}} schedule
+     */
+    function timeoutHandler (tweenable, timestamp, duration, currentState,
+      originalState, targetState, easing, step, schedule) {
+      timeoutHandler_endTime = timestamp + duration;
+      timeoutHandler_currentTime = Math.min(now(), timeoutHandler_endTime);
+      timeoutHandler_isEnded =
+        timeoutHandler_currentTime >= timeoutHandler_endTime;
+
+      timeoutHandler_offset = duration - (
+          timeoutHandler_endTime - timeoutHandler_currentTime);
+
+      if (tweenable.isPlaying() && !timeoutHandler_isEnded) {
+        tweenable._scheduleId = schedule(tweenable._timeoutHandler, UPDATE_TIME);
+
+        applyFilter(tweenable, 'beforeTween');
+        tweenProps(timeoutHandler_currentTime, currentState, originalState,
+          targetState, duration, timestamp, easing);
+        applyFilter(tweenable, 'afterTween');
+
+        step(currentState, tweenable._attachment, timeoutHandler_offset);
+      } else if (timeoutHandler_isEnded) {
+        step(targetState, tweenable._attachment, timeoutHandler_offset);
+        tweenable.stop(true);
+      }
+    }
+
+
+    /*!
+     * Creates a usable easing Object from either a string or another easing
+     * Object.  If `easing` is an Object, then this function clones it and fills
+     * in the missing properties with "linear".
+     * @param {Object} fromTweenParams
+     * @param {Object|string} easing
+     */
+    function composeEasingObject (fromTweenParams, easing) {
+      var composedEasing = {};
+
+      if (typeof easing === 'string') {
+        each(fromTweenParams, function (prop) {
+          composedEasing[prop] = easing;
+        });
+      } else {
+        each(fromTweenParams, function (prop) {
+          if (!composedEasing[prop]) {
+            composedEasing[prop] = easing[prop] || DEFAULT_EASING;
+          }
+        });
+      }
+
+      return composedEasing;
+    }
+
+    /**
+     * Tweenable constructor.
+     * @param {Object=} opt_initialState The values that the initial tween should start at if a "from" object is not provided to Tweenable#tween.
+     * @param {Object=} opt_config See Tweenable.prototype.setConfig()
+     * @constructor
+     */
+    function Tweenable (opt_initialState, opt_config) {
+      this._currentState = opt_initialState || {};
+      this._configured = false;
+      this._scheduleFunction = DEFAULT_SCHEDULE_FUNCTION;
+
+      // To prevent unnecessary calls to setConfig do not set default configuration here.
+      // Only set default configuration immediately before tweening if none has been set.
+      if (typeof opt_config !== 'undefined') {
+        this.setConfig(opt_config);
+      }
+    }
+
+    /**
+     * Configure and start a tween.
+     * @param {Object=} opt_config See Tweenable.prototype.setConfig()
+     * @return {Tweenable}
+     */
+    Tweenable.prototype.tween = function (opt_config) {
+      if (this._isTweening) {
+        return this;
+      }
+
+      // Only set default config if no configuration has been set previously and none is provided now.
+      if (opt_config !== undefined || !this._configured) {
+        this.setConfig(opt_config);
+      }
+
+      this._timestamp = now();
+      this._start(this.get(), this._attachment);
+      return this.resume();
+    };
+
+    /**
+     * Sets the tween configuration. `config` may have the following options:
+     *
+     * - __from__ (_Object=_): Starting position.  If omitted, the current state is used.
+     * - __to__ (_Object=_): Ending position.
+     * - __duration__ (_number=_): How many milliseconds to animate for.
+     * - __start__ (_Function(Object)_): Function to execute when the tween begins.  Receives the state of the tween as the first parameter. Attachment is the second parameter.
+     * - __step__ (_Function(Object, *, number)_): Function to execute on every tick.  Receives the state of the tween as the first parameter. Attachment is the second parameter, and the time elapsed since the start of the tween is the third parameter. This function is not called on the final step of the animation, but `finish` is.
+     * - __finish__ (_Function(Object, *)_): Function to execute upon tween completion.  Receives the state of the tween as the first parameter. Attachment is the second parameter.
+     * - __easing__ (_Object|string=_): Easing curve name(s) to use for the tween.
+     * - __attachment__ (_Object|string|any=_): Value that is attached to this instance and passed on to the step/start/finish methods.
+     * @param {Object} config
+     * @return {Tweenable}
+     */
+    Tweenable.prototype.setConfig = function (config) {
+      config = config || {};
+      this._configured = true;
+
+      // Attach something to this Tweenable instance (e.g.: a DOM element, an object, a string, etc.);
+      this._attachment = config.attachment;
+
+      // Init the internal state
+      this._pausedAtTime = null;
+      this._scheduleId = null;
+      this._start = config.start || noop;
+      this._step = config.step || noop;
+      this._finish = config.finish || noop;
+      this._duration = config.duration || DEFAULT_DURATION;
+      this._currentState = config.from || this.get();
+      this._originalState = this.get();
+      this._targetState = config.to || this.get();
+
+      // Aliases used below
+      var currentState = this._currentState;
+      var targetState = this._targetState;
+
+      // Ensure that there is always something to tween to.
+      defaults(targetState, currentState);
+
+      this._easing = composeEasingObject(
+        currentState, config.easing || DEFAULT_EASING);
+
+      this._filterArgs =
+        [currentState, this._originalState, targetState, this._easing];
+
+      applyFilter(this, 'tweenCreated');
+      return this;
+    };
+
+    /**
+     * Gets the current state.
+     * @return {Object}
+     */
+    Tweenable.prototype.get = function () {
+      return shallowCopy({}, this._currentState);
+    };
+
+    /**
+     * Sets the current state.
+     * @param {Object} state
+     */
+    Tweenable.prototype.set = function (state) {
+      this._currentState = state;
+    };
+
+    /**
+     * Pauses a tween.  Paused tweens can be resumed from the point at which they were paused.  This is different than [`stop()`](#stop), as that method causes a tween to start over when it is resumed.
+     * @return {Tweenable}
+     */
+    Tweenable.prototype.pause = function () {
+      this._pausedAtTime = now();
+      this._isPaused = true;
+      return this;
+    };
+
+    /**
+     * Resumes a paused tween.
+     * @return {Tweenable}
+     */
+    Tweenable.prototype.resume = function () {
+      if (this._isPaused) {
+        this._timestamp += now() - this._pausedAtTime;
+      }
+
+      this._isPaused = false;
+      this._isTweening = true;
+
+      var self = this;
+      this._timeoutHandler = function () {
+        timeoutHandler(self, self._timestamp, self._duration, self._currentState,
+          self._originalState, self._targetState, self._easing, self._step,
+          self._scheduleFunction);
+      };
+
+      this._timeoutHandler();
+
+      return this;
+    };
+
+    /**
+     * Move the state of the animation to a specific point in the tween's timeline.
+     * If the animation is not running, this will cause the `step` handlers to be
+     * called.
+     * @param {millisecond} millisecond The millisecond of the animation to seek to.
+     * @return {Tweenable}
+     */
+    Tweenable.prototype.seek = function (millisecond) {
+      this._timestamp = now() - millisecond;
+
+      if (!this.isPlaying()) {
+        this._isTweening = true;
+        this._isPaused = false;
+
+        // If the animation is not running, call timeoutHandler to make sure that
+        // any step handlers are run.
+        timeoutHandler(this, this._timestamp, this._duration, this._currentState,
+          this._originalState, this._targetState, this._easing, this._step,
+          this._scheduleFunction);
+
+        this._timeoutHandler();
+        this.pause();
+      }
+
+      return this;
+    };
+
+    /**
+     * Stops and cancels a tween.
+     * @param {boolean=} gotoEnd If false or omitted, the tween just stops at its current state, and the "finish" handler is not invoked.  If true, the tweened object's values are instantly set to the target values, and "finish" is invoked.
+     * @return {Tweenable}
+     */
+    Tweenable.prototype.stop = function (gotoEnd) {
+      this._isTweening = false;
+      this._isPaused = false;
+      this._timeoutHandler = noop;
+
+      (root.cancelAnimationFrame            ||
+        root.webkitCancelAnimationFrame     ||
+        root.oCancelAnimationFrame          ||
+        root.msCancelAnimationFrame         ||
+        root.mozCancelRequestAnimationFrame ||
+        root.clearTimeout)(this._scheduleId);
+
+      if (gotoEnd) {
+        shallowCopy(this._currentState, this._targetState);
+        applyFilter(this, 'afterTweenEnd');
+        this._finish.call(this, this._currentState, this._attachment);
+      }
+
+      return this;
+    };
+
+    /**
+     * Returns whether or not a tween is running.
+     * @return {boolean}
+     */
+    Tweenable.prototype.isPlaying = function () {
+      return this._isTweening && !this._isPaused;
+    };
+
+    /**
+     * Sets a custom schedule function.
+     *
+     * If a custom function is not set the default one is used [`requestAnimationFrame`](https://developer.mozilla.org/en-US/docs/Web/API/window.requestAnimationFrame) if available, otherwise [`setTimeout`](https://developer.mozilla.org/en-US/docs/Web/API/Window.setTimeout)).
+     *
+     * @param {Function(Function,number)} scheduleFunction The function to be called to schedule the next frame to be rendered
+     */
+    Tweenable.prototype.setScheduleFunction = function (scheduleFunction) {
+      this._scheduleFunction = scheduleFunction;
+    };
+
+    /**
+     * `delete`s all "own" properties.  Call this when the `Tweenable` instance is no longer needed to free memory.
+     */
+    Tweenable.prototype.dispose = function () {
+      var prop;
+      for (prop in this) {
+        if (this.hasOwnProperty(prop)) {
+          delete this[prop];
+        }
+      }
+    };
+
+    /*!
+     * Filters are used for transforming the properties of a tween at various
+     * points in a Tweenable's life cycle.  See the README for more info on this.
+     */
+    Tweenable.prototype.filter = {};
+
+    /*!
+     * This object contains all of the tweens available to Shifty.  It is extendible - simply attach properties to the Tweenable.prototype.formula Object following the same format at linear.
+     *
+     * `pos` should be a normalized `number` (between 0 and 1).
+     */
+    Tweenable.prototype.formula = {
+      linear: function (pos) {
+        return pos;
+      }
+    };
+
+    formula = Tweenable.prototype.formula;
+
+    shallowCopy(Tweenable, {
+      'now': now
+      ,'each': each
+      ,'tweenProps': tweenProps
+      ,'tweenProp': tweenProp
+      ,'applyFilter': applyFilter
+      ,'shallowCopy': shallowCopy
+      ,'defaults': defaults
+      ,'composeEasingObject': composeEasingObject
+    });
+
+    root.Tweenable = Tweenable;
+    return Tweenable;
+
+  } ());
+
+  /*!
+   * All equations are adapted from Thomas Fuchs' [Scripty2](https://github.com/madrobby/scripty2/blob/master/src/effects/transitions/penner.js).
+   *
+   * Based on Easing Equations (c) 2003 [Robert Penner](http://www.robertpenner.com/), all rights reserved. This work is [subject to terms](http://www.robertpenner.com/easing_terms_of_use.html).
+   */
+
+  /*!
+   *  TERMS OF USE - EASING EQUATIONS
+   *  Open source under the BSD License.
+   *  Easing Equations (c) 2003 Robert Penner, all rights reserved.
+   */
+
+  ;(function () {
+
+    Tweenable.shallowCopy(Tweenable.prototype.formula, {
+      easeInQuad: function (pos) {
+        return Math.pow(pos, 2);
+      },
+
+      easeOutQuad: function (pos) {
+        return -(Math.pow((pos - 1), 2) - 1);
+      },
+
+      easeInOutQuad: function (pos) {
+        if ((pos /= 0.5) < 1) {return 0.5 * Math.pow(pos,2);}
+        return -0.5 * ((pos -= 2) * pos - 2);
+      },
+
+      easeInCubic: function (pos) {
+        return Math.pow(pos, 3);
+      },
+
+      easeOutCubic: function (pos) {
+        return (Math.pow((pos - 1), 3) + 1);
+      },
+
+      easeInOutCubic: function (pos) {
+        if ((pos /= 0.5) < 1) {return 0.5 * Math.pow(pos,3);}
+        return 0.5 * (Math.pow((pos - 2),3) + 2);
+      },
+
+      easeInQuart: function (pos) {
+        return Math.pow(pos, 4);
+      },
+
+      easeOutQuart: function (pos) {
+        return -(Math.pow((pos - 1), 4) - 1);
+      },
+
+      easeInOutQuart: function (pos) {
+        if ((pos /= 0.5) < 1) {return 0.5 * Math.pow(pos,4);}
+        return -0.5 * ((pos -= 2) * Math.pow(pos,3) - 2);
+      },
+
+      easeInQuint: function (pos) {
+        return Math.pow(pos, 5);
+      },
+
+      easeOutQuint: function (pos) {
+        return (Math.pow((pos - 1), 5) + 1);
+      },
+
+      easeInOutQuint: function (pos) {
+        if ((pos /= 0.5) < 1) {return 0.5 * Math.pow(pos,5);}
+        return 0.5 * (Math.pow((pos - 2),5) + 2);
+      },
+
+      easeInSine: function (pos) {
+        return -Math.cos(pos * (Math.PI / 2)) + 1;
+      },
+
+      easeOutSine: function (pos) {
+        return Math.sin(pos * (Math.PI / 2));
+      },
+
+      easeInOutSine: function (pos) {
+        return (-0.5 * (Math.cos(Math.PI * pos) - 1));
+      },
+
+      easeInExpo: function (pos) {
+        return (pos === 0) ? 0 : Math.pow(2, 10 * (pos - 1));
+      },
+
+      easeOutExpo: function (pos) {
+        return (pos === 1) ? 1 : -Math.pow(2, -10 * pos) + 1;
+      },
+
+      easeInOutExpo: function (pos) {
+        if (pos === 0) {return 0;}
+        if (pos === 1) {return 1;}
+        if ((pos /= 0.5) < 1) {return 0.5 * Math.pow(2,10 * (pos - 1));}
+        return 0.5 * (-Math.pow(2, -10 * --pos) + 2);
+      },
+
+      easeInCirc: function (pos) {
+        return -(Math.sqrt(1 - (pos * pos)) - 1);
+      },
+
+      easeOutCirc: function (pos) {
+        return Math.sqrt(1 - Math.pow((pos - 1), 2));
+      },
+
+      easeInOutCirc: function (pos) {
+        if ((pos /= 0.5) < 1) {return -0.5 * (Math.sqrt(1 - pos * pos) - 1);}
+        return 0.5 * (Math.sqrt(1 - (pos -= 2) * pos) + 1);
+      },
+
+      easeOutBounce: function (pos) {
+        if ((pos) < (1 / 2.75)) {
+          return (7.5625 * pos * pos);
+        } else if (pos < (2 / 2.75)) {
+          return (7.5625 * (pos -= (1.5 / 2.75)) * pos + 0.75);
+        } else if (pos < (2.5 / 2.75)) {
+          return (7.5625 * (pos -= (2.25 / 2.75)) * pos + 0.9375);
+        } else {
+          return (7.5625 * (pos -= (2.625 / 2.75)) * pos + 0.984375);
+        }
+      },
+
+      easeInBack: function (pos) {
+        var s = 1.70158;
+        return (pos) * pos * ((s + 1) * pos - s);
+      },
+
+      easeOutBack: function (pos) {
+        var s = 1.70158;
+        return (pos = pos - 1) * pos * ((s + 1) * pos + s) + 1;
+      },
+
+      easeInOutBack: function (pos) {
+        var s = 1.70158;
+        if ((pos /= 0.5) < 1) {return 0.5 * (pos * pos * (((s *= (1.525)) + 1) * pos - s));}
+        return 0.5 * ((pos -= 2) * pos * (((s *= (1.525)) + 1) * pos + s) + 2);
+      },
+
+      elastic: function (pos) {
+        return -1 * Math.pow(4,-8 * pos) * Math.sin((pos * 6 - 1) * (2 * Math.PI) / 2) + 1;
+      },
+
+      swingFromTo: function (pos) {
+        var s = 1.70158;
+        return ((pos /= 0.5) < 1) ? 0.5 * (pos * pos * (((s *= (1.525)) + 1) * pos - s)) :
+            0.5 * ((pos -= 2) * pos * (((s *= (1.525)) + 1) * pos + s) + 2);
+      },
+
+      swingFrom: function (pos) {
+        var s = 1.70158;
+        return pos * pos * ((s + 1) * pos - s);
+      },
+
+      swingTo: function (pos) {
+        var s = 1.70158;
+        return (pos -= 1) * pos * ((s + 1) * pos + s) + 1;
+      },
+
+      bounce: function (pos) {
+        if (pos < (1 / 2.75)) {
+          return (7.5625 * pos * pos);
+        } else if (pos < (2 / 2.75)) {
+          return (7.5625 * (pos -= (1.5 / 2.75)) * pos + 0.75);
+        } else if (pos < (2.5 / 2.75)) {
+          return (7.5625 * (pos -= (2.25 / 2.75)) * pos + 0.9375);
+        } else {
+          return (7.5625 * (pos -= (2.625 / 2.75)) * pos + 0.984375);
+        }
+      },
+
+      bouncePast: function (pos) {
+        if (pos < (1 / 2.75)) {
+          return (7.5625 * pos * pos);
+        } else if (pos < (2 / 2.75)) {
+          return 2 - (7.5625 * (pos -= (1.5 / 2.75)) * pos + 0.75);
+        } else if (pos < (2.5 / 2.75)) {
+          return 2 - (7.5625 * (pos -= (2.25 / 2.75)) * pos + 0.9375);
+        } else {
+          return 2 - (7.5625 * (pos -= (2.625 / 2.75)) * pos + 0.984375);
+        }
+      },
+
+      easeFromTo: function (pos) {
+        if ((pos /= 0.5) < 1) {return 0.5 * Math.pow(pos,4);}
+        return -0.5 * ((pos -= 2) * Math.pow(pos,3) - 2);
+      },
+
+      easeFrom: function (pos) {
+        return Math.pow(pos,4);
+      },
+
+      easeTo: function (pos) {
+        return Math.pow(pos,0.25);
+      }
+    });
+
+  }());
+
+  /*!
+   * The Bezier magic in this file is adapted/copied almost wholesale from
+   * [Scripty2](https://github.com/madrobby/scripty2/blob/master/src/effects/transitions/cubic-bezier.js),
+   * which was adapted from Apple code (which probably came from
+   * [here](http://opensource.apple.com/source/WebCore/WebCore-955.66/platform/graphics/UnitBezier.h)).
+   * Special thanks to Apple and Thomas Fuchs for much of this code.
+   */
+
+  /*!
+   *  Copyright (c) 2006 Apple Computer, Inc. All rights reserved.
+   *
+   *  Redistribution and use in source and binary forms, with or without
+   *  modification, are permitted provided that the following conditions are met:
+   *
+   *  1. Redistributions of source code must retain the above copyright notice,
+   *  this list of conditions and the following disclaimer.
+   *
+   *  2. Redistributions in binary form must reproduce the above copyright notice,
+   *  this list of conditions and the following disclaimer in the documentation
+   *  and/or other materials provided with the distribution.
+   *
+   *  3. Neither the name of the copyright holder(s) nor the names of any
+   *  contributors may be used to endorse or promote products derived from
+   *  this software without specific prior written permission.
+   *
+   *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+   *  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+   *  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+   *  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+   *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+   *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+   *  ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+   */
+  ;(function () {
+    // port of webkit cubic bezier handling by http://www.netzgesta.de/dev/
+    function cubicBezierAtTime(t,p1x,p1y,p2x,p2y,duration) {
+      var ax = 0,bx = 0,cx = 0,ay = 0,by = 0,cy = 0;
+      function sampleCurveX(t) {return ((ax * t + bx) * t + cx) * t;}
+      function sampleCurveY(t) {return ((ay * t + by) * t + cy) * t;}
+      function sampleCurveDerivativeX(t) {return (3.0 * ax * t + 2.0 * bx) * t + cx;}
+      function solveEpsilon(duration) {return 1.0 / (200.0 * duration);}
+      function solve(x,epsilon) {return sampleCurveY(solveCurveX(x,epsilon));}
+      function fabs(n) {if (n >= 0) {return n;}else {return 0 - n;}}
+      function solveCurveX(x,epsilon) {
+        var t0,t1,t2,x2,d2,i;
+        for (t2 = x, i = 0; i < 8; i++) {x2 = sampleCurveX(t2) - x; if (fabs(x2) < epsilon) {return t2;} d2 = sampleCurveDerivativeX(t2); if (fabs(d2) < 1e-6) {break;} t2 = t2 - x2 / d2;}
+        t0 = 0.0; t1 = 1.0; t2 = x; if (t2 < t0) {return t0;} if (t2 > t1) {return t1;}
+        while (t0 < t1) {x2 = sampleCurveX(t2); if (fabs(x2 - x) < epsilon) {return t2;} if (x > x2) {t0 = t2;}else {t1 = t2;} t2 = (t1 - t0) * 0.5 + t0;}
+        return t2; // Failure.
+      }
+      cx = 3.0 * p1x; bx = 3.0 * (p2x - p1x) - cx; ax = 1.0 - cx - bx; cy = 3.0 * p1y; by = 3.0 * (p2y - p1y) - cy; ay = 1.0 - cy - by;
+      return solve(t, solveEpsilon(duration));
+    }
+    /*!
+     *  getCubicBezierTransition(x1, y1, x2, y2) -> Function
+     *
+     *  Generates a transition easing function that is compatible
+     *  with WebKit's CSS transitions `-webkit-transition-timing-function`
+     *  CSS property.
+     *
+     *  The W3C has more information about
+     *  <a href="http://www.w3.org/TR/css3-transitions/#transition-timing-function_tag">
+     *  CSS3 transition timing functions</a>.
+     *
+     *  @param {number} x1
+     *  @param {number} y1
+     *  @param {number} x2
+     *  @param {number} y2
+     *  @return {function}
+     */
+    function getCubicBezierTransition (x1, y1, x2, y2) {
+      return function (pos) {
+        return cubicBezierAtTime(pos,x1,y1,x2,y2,1);
+      };
+    }
+    // End ported code
+
+    /**
+     * Creates a Bezier easing function and attaches it to `Tweenable.prototype.formula`.  This function gives you total control over the easing curve.  Matthew Lein's [Ceaser](http://matthewlein.com/ceaser/) is a useful tool for visualizing the curves you can make with this function.
+     *
+     * @param {string} name The name of the easing curve.  Overwrites the old easing function on Tweenable.prototype.formula if it exists.
+     * @param {number} x1
+     * @param {number} y1
+     * @param {number} x2
+     * @param {number} y2
+     * @return {function} The easing function that was attached to Tweenable.prototype.formula.
+     */
+    Tweenable.setBezierFunction = function (name, x1, y1, x2, y2) {
+      var cubicBezierTransition = getCubicBezierTransition(x1, y1, x2, y2);
+      cubicBezierTransition.x1 = x1;
+      cubicBezierTransition.y1 = y1;
+      cubicBezierTransition.x2 = x2;
+      cubicBezierTransition.y2 = y2;
+
+      return Tweenable.prototype.formula[name] = cubicBezierTransition;
+    };
+
+
+    /**
+     * `delete`s an easing function from `Tweenable.prototype.formula`.  Be careful with this method, as it `delete`s whatever easing formula matches `name` (which means you can delete default Shifty easing functions).
+     *
+     * @param {string} name The name of the easing function to delete.
+     * @return {function}
+     */
+    Tweenable.unsetBezierFunction = function (name) {
+      delete Tweenable.prototype.formula[name];
+    };
+
+  })();
+
+  ;(function () {
+
+    function getInterpolatedValues (
+      from, current, targetState, position, easing) {
+      return Tweenable.tweenProps(
+        position, current, from, targetState, 1, 0, easing);
+    }
+
+    // Fake a Tweenable and patch some internals.  This approach allows us to
+    // skip uneccessary processing and object recreation, cutting down on garbage
+    // collection pauses.
+    var mockTweenable = new Tweenable();
+    mockTweenable._filterArgs = [];
+
+    /**
+     * Compute the midpoint of two Objects.  This method effectively calculates a specific frame of animation that [Tweenable#tween](shifty.core.js.html#tween) does many times over the course of a tween.
+     *
+     * Example:
+     *
+     *     var interpolatedValues = Tweenable.interpolate({
+     *       width: '100px',
+     *       opacity: 0,
+     *       color: '#fff'
+     *     }, {
+     *       width: '200px',
+     *       opacity: 1,
+     *       color: '#000'
+     *     }, 0.5);
+     *
+     *     console.log(interpolatedValues);
+     *     // {opacity: 0.5, width: "150px", color: "rgb(127,127,127)"}
+     *
+     * @param {Object} from The starting values to tween from.
+     * @param {Object} targetState The ending values to tween to.
+     * @param {number} position The normalized position value (between 0.0 and 1.0) to interpolate the values between `from` and `to` for.  `from` represents 0 and `to` represents `1`.
+     * @param {string|Object} easing The easing curve(s) to calculate the midpoint against.  You can reference any easing function attached to `Tweenable.prototype.formula`.  If omitted, this defaults to "linear".
+     * @return {Object}
+     */
+    Tweenable.interpolate = function (from, targetState, position, easing) {
+      var current = Tweenable.shallowCopy({}, from);
+      var easingObject = Tweenable.composeEasingObject(
+        from, easing || 'linear');
+
+      mockTweenable.set({});
+
+      // Alias and reuse the _filterArgs array instead of recreating it.
+      var filterArgs = mockTweenable._filterArgs;
+      filterArgs.length = 0;
+      filterArgs[0] = current;
+      filterArgs[1] = from;
+      filterArgs[2] = targetState;
+      filterArgs[3] = easingObject;
+
+      // Any defined value transformation must be applied
+      Tweenable.applyFilter(mockTweenable, 'tweenCreated');
+      Tweenable.applyFilter(mockTweenable, 'beforeTween');
+
+      var interpolatedValues = getInterpolatedValues(
+        from, current, targetState, position, easingObject);
+
+      // Transform values back into their original format
+      Tweenable.applyFilter(mockTweenable, 'afterTween');
+
+      return interpolatedValues;
+    };
+
+  }());
+
+  /**
+   * Adds string interpolation support to Shifty.
+   *
+   * The Token extension allows Shifty to tween numbers inside of strings.  Among
+   * other things, this allows you to animate CSS properties.  For example, you
+   * can do this:
+   *
+   *     var tweenable = new Tweenable();
+   *     tweenable.tween({
+   *       from: { transform: 'translateX(45px)'},
+   *       to: { transform: 'translateX(90xp)'}
+   *     });
+   *
+   * ` `
+   * `translateX(45)` will be tweened to `translateX(90)`.  To demonstrate:
+   *
+   *     var tweenable = new Tweenable();
+   *     tweenable.tween({
+   *       from: { transform: 'translateX(45px)'},
+   *       to: { transform: 'translateX(90px)'},
+   *       step: function (state) {
+   *         console.log(state.transform);
+   *       }
+   *     });
+   *
+   * ` `
+   * The above snippet will log something like this in the console:
+   *
+   *     translateX(60.3px)
+   *     ...
+   *     translateX(76.05px)
+   *     ...
+   *     translateX(90px)
+   *
+   * ` `
+   * Another use for this is animating colors:
+   *
+   *     var tweenable = new Tweenable();
+   *     tweenable.tween({
+   *       from: { color: 'rgb(0,255,0)'},
+   *       to: { color: 'rgb(255,0,255)'},
+   *       step: function (state) {
+   *         console.log(state.color);
+   *       }
+   *     });
+   *
+   * ` `
+   * The above snippet will log something like this:
+   *
+   *     rgb(84,170,84)
+   *     ...
+   *     rgb(170,84,170)
+   *     ...
+   *     rgb(255,0,255)
+   *
+   * ` `
+   * This extension also supports hexadecimal colors, in both long (`#ff00ff`)
+   * and short (`#f0f`) forms.  Be aware that hexadecimal input values will be
+   * converted into the equivalent RGB output values.  This is done to optimize
+   * for performance.
+   *
+   *     var tweenable = new Tweenable();
+   *     tweenable.tween({
+   *       from: { color: '#0f0'},
+   *       to: { color: '#f0f'},
+   *       step: function (state) {
+   *         console.log(state.color);
+   *       }
+   *     });
+   *
+   * ` `
+   * This snippet will generate the same output as the one before it because
+   * equivalent values were supplied (just in hexadecimal form rather than RGB):
+   *
+   *     rgb(84,170,84)
+   *     ...
+   *     rgb(170,84,170)
+   *     ...
+   *     rgb(255,0,255)
+   *
+   * ` `
+   * ` `
+   * ## Easing support
+   *
+   * Easing works somewhat differently in the Token extension.  This is because
+   * some CSS properties have multiple values in them, and you might need to
+   * tween each value along its own easing curve.  A basic example:
+   *
+   *     var tweenable = new Tweenable();
+   *     tweenable.tween({
+   *       from: { transform: 'translateX(0px) translateY(0px)'},
+   *       to: { transform:   'translateX(100px) translateY(100px)'},
+   *       easing: { transform: 'easeInQuad' },
+   *       step: function (state) {
+   *         console.log(state.transform);
+   *       }
+   *     });
+   *
+   * ` `
+   * The above snippet create values like this:
+   *
+   *     translateX(11.560000000000002px) translateY(11.560000000000002px)
+   *     ...
+   *     translateX(46.24000000000001px) translateY(46.24000000000001px)
+   *     ...
+   *     translateX(100px) translateY(100px)
+   *
+   * ` `
+   * In this case, the values for `translateX` and `translateY` are always the
+   * same for each step of the tween, because they have the same start and end
+   * points and both use the same easing curve.  We can also tween `translateX`
+   * and `translateY` along independent curves:
+   *
+   *     var tweenable = new Tweenable();
+   *     tweenable.tween({
+   *       from: { transform: 'translateX(0px) translateY(0px)'},
+   *       to: { transform:   'translateX(100px) translateY(100px)'},
+   *       easing: { transform: 'easeInQuad bounce' },
+   *       step: function (state) {
+   *         console.log(state.transform);
+   *       }
+   *     });
+   *
+   * ` `
+   * The above snippet create values like this:
+   *
+   *     translateX(10.89px) translateY(82.355625px)
+   *     ...
+   *     translateX(44.89000000000001px) translateY(86.73062500000002px)
+   *     ...
+   *     translateX(100px) translateY(100px)
+   *
+   * ` `
+   * `translateX` and `translateY` are not in sync anymore, because `easeInQuad`
+   * was specified for `translateX` and `bounce` for `translateY`.  Mixing and
+   * matching easing curves can make for some interesting motion in your
+   * animations.
+   *
+   * The order of the space-separated easing curves correspond the token values
+   * they apply to.  If there are more token values than easing curves listed,
+   * the last easing curve listed is used.
+   */
+  function token () {
+    // Functionality for this extension runs implicitly if it is loaded.
+  } /*!*/
+
+  // token function is defined above only so that dox-foundation sees it as
+  // documentation and renders it.  It is never used, and is optimized away at
+  // build time.
+
+  ;(function (Tweenable) {
+
+    /*!
+     * @typedef {{
+     *   formatString: string
+     *   chunkNames: Array.<string>
+     * }}
+     */
+    var formatManifest;
+
+    // CONSTANTS
+
+    var R_NUMBER_COMPONENT = /(\d|\-|\.)/;
+    var R_FORMAT_CHUNKS = /([^\-0-9\.]+)/g;
+    var R_UNFORMATTED_VALUES = /[0-9.\-]+/g;
+    var R_RGB = new RegExp(
+      'rgb\\(' + R_UNFORMATTED_VALUES.source +
+      (/,\s*/.source) + R_UNFORMATTED_VALUES.source +
+      (/,\s*/.source) + R_UNFORMATTED_VALUES.source + '\\)', 'g');
+    var R_RGB_PREFIX = /^.*\(/;
+    var R_HEX = /#([0-9]|[a-f]){3,6}/gi;
+    var VALUE_PLACEHOLDER = 'VAL';
+
+    // HELPERS
+
+    var getFormatChunksFrom_accumulator = [];
+    /*!
+     * @param {Array.number} rawValues
+     * @param {string} prefix
+     *
+     * @return {Array.<string>}
+     */
+    function getFormatChunksFrom (rawValues, prefix) {
+      getFormatChunksFrom_accumulator.length = 0;
+
+      var rawValuesLength = rawValues.length;
+      var i;
+
+      for (i = 0; i < rawValuesLength; i++) {
+        getFormatChunksFrom_accumulator.push('_' + prefix + '_' + i);
+      }
+
+      return getFormatChunksFrom_accumulator;
+    }
+
+    /*!
+     * @param {string} formattedString
+     *
+     * @return {string}
+     */
+    function getFormatStringFrom (formattedString) {
+      var chunks = formattedString.match(R_FORMAT_CHUNKS);
+
+      if (!chunks) {
+        // chunks will be null if there were no tokens to parse in
+        // formattedString (for example, if formattedString is '2').  Coerce
+        // chunks to be useful here.
+        chunks = ['', ''];
+
+        // If there is only one chunk, assume that the string is a number
+        // followed by a token...
+        // NOTE: This may be an unwise assumption.
+      } else if (chunks.length === 1 ||
+          // ...or if the string starts with a number component (".", "-", or a
+          // digit)...
+          formattedString[0].match(R_NUMBER_COMPONENT)) {
+        // ...prepend an empty string here to make sure that the formatted number
+        // is properly replaced by VALUE_PLACEHOLDER
+        chunks.unshift('');
+      }
+
+      return chunks.join(VALUE_PLACEHOLDER);
+    }
+
+    /*!
+     * Convert all hex color values within a string to an rgb string.
+     *
+     * @param {Object} stateObject
+     *
+     * @return {Object} The modified obj
+     */
+    function sanitizeObjectForHexProps (stateObject) {
+      Tweenable.each(stateObject, function (prop) {
+        var currentProp = stateObject[prop];
+
+        if (typeof currentProp === 'string' && currentProp.match(R_HEX)) {
+          stateObject[prop] = sanitizeHexChunksToRGB(currentProp);
+        }
+      });
+    }
+
+    /*!
+     * @param {string} str
+     *
+     * @return {string}
+     */
+    function  sanitizeHexChunksToRGB (str) {
+      return filterStringChunks(R_HEX, str, convertHexToRGB);
+    }
+
+    /*!
+     * @param {string} hexString
+     *
+     * @return {string}
+     */
+    function convertHexToRGB (hexString) {
+      var rgbArr = hexToRGBArray(hexString);
+      return 'rgb(' + rgbArr[0] + ',' + rgbArr[1] + ',' + rgbArr[2] + ')';
+    }
+
+    var hexToRGBArray_returnArray = [];
+    /*!
+     * Convert a hexadecimal string to an array with three items, one each for
+     * the red, blue, and green decimal values.
+     *
+     * @param {string} hex A hexadecimal string.
+     *
+     * @returns {Array.<number>} The converted Array of RGB values if `hex` is a
+     * valid string, or an Array of three 0's.
+     */
+    function hexToRGBArray (hex) {
+
+      hex = hex.replace(/#/, '');
+
+      // If the string is a shorthand three digit hex notation, normalize it to
+      // the standard six digit notation
+      if (hex.length === 3) {
+        hex = hex.split('');
+        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+      }
+
+      hexToRGBArray_returnArray[0] = hexToDec(hex.substr(0, 2));
+      hexToRGBArray_returnArray[1] = hexToDec(hex.substr(2, 2));
+      hexToRGBArray_returnArray[2] = hexToDec(hex.substr(4, 2));
+
+      return hexToRGBArray_returnArray;
+    }
+
+    /*!
+     * Convert a base-16 number to base-10.
+     *
+     * @param {Number|String} hex The value to convert
+     *
+     * @returns {Number} The base-10 equivalent of `hex`.
+     */
+    function hexToDec (hex) {
+      return parseInt(hex, 16);
+    }
+
+    /*!
+     * Runs a filter operation on all chunks of a string that match a RegExp
+     *
+     * @param {RegExp} pattern
+     * @param {string} unfilteredString
+     * @param {function(string)} filter
+     *
+     * @return {string}
+     */
+    function filterStringChunks (pattern, unfilteredString, filter) {
+      var pattenMatches = unfilteredString.match(pattern);
+      var filteredString = unfilteredString.replace(pattern, VALUE_PLACEHOLDER);
+
+      if (pattenMatches) {
+        var pattenMatchesLength = pattenMatches.length;
+        var currentChunk;
+
+        for (var i = 0; i < pattenMatchesLength; i++) {
+          currentChunk = pattenMatches.shift();
+          filteredString = filteredString.replace(
+            VALUE_PLACEHOLDER, filter(currentChunk));
+        }
+      }
+
+      return filteredString;
+    }
+
+    /*!
+     * Check for floating point values within rgb strings and rounds them.
+     *
+     * @param {string} formattedString
+     *
+     * @return {string}
+     */
+    function sanitizeRGBChunks (formattedString) {
+      return filterStringChunks(R_RGB, formattedString, sanitizeRGBChunk);
+    }
+
+    /*!
+     * @param {string} rgbChunk
+     *
+     * @return {string}
+     */
+    function sanitizeRGBChunk (rgbChunk) {
+      var numbers = rgbChunk.match(R_UNFORMATTED_VALUES);
+      var numbersLength = numbers.length;
+      var sanitizedString = rgbChunk.match(R_RGB_PREFIX)[0];
+
+      for (var i = 0; i < numbersLength; i++) {
+        sanitizedString += parseInt(numbers[i], 10) + ',';
+      }
+
+      sanitizedString = sanitizedString.slice(0, -1) + ')';
+
+      return sanitizedString;
+    }
+
+    /*!
+     * @param {Object} stateObject
+     *
+     * @return {Object} An Object of formatManifests that correspond to
+     * the string properties of stateObject
+     */
+    function getFormatManifests (stateObject) {
+      var manifestAccumulator = {};
+
+      Tweenable.each(stateObject, function (prop) {
+        var currentProp = stateObject[prop];
+
+        if (typeof currentProp === 'string') {
+          var rawValues = getValuesFrom(currentProp);
+
+          manifestAccumulator[prop] = {
+            'formatString': getFormatStringFrom(currentProp)
+            ,'chunkNames': getFormatChunksFrom(rawValues, prop)
+          };
+        }
+      });
+
+      return manifestAccumulator;
+    }
+
+    /*!
+     * @param {Object} stateObject
+     * @param {Object} formatManifests
+     */
+    function expandFormattedProperties (stateObject, formatManifests) {
+      Tweenable.each(formatManifests, function (prop) {
+        var currentProp = stateObject[prop];
+        var rawValues = getValuesFrom(currentProp);
+        var rawValuesLength = rawValues.length;
+
+        for (var i = 0; i < rawValuesLength; i++) {
+          stateObject[formatManifests[prop].chunkNames[i]] = +rawValues[i];
+        }
+
+        delete stateObject[prop];
+      });
+    }
+
+    /*!
+     * @param {Object} stateObject
+     * @param {Object} formatManifests
+     */
+    function collapseFormattedProperties (stateObject, formatManifests) {
+      Tweenable.each(formatManifests, function (prop) {
+        var currentProp = stateObject[prop];
+        var formatChunks = extractPropertyChunks(
+          stateObject, formatManifests[prop].chunkNames);
+        var valuesList = getValuesList(
+          formatChunks, formatManifests[prop].chunkNames);
+        currentProp = getFormattedValues(
+          formatManifests[prop].formatString, valuesList);
+        stateObject[prop] = sanitizeRGBChunks(currentProp);
+      });
+    }
+
+    /*!
+     * @param {Object} stateObject
+     * @param {Array.<string>} chunkNames
+     *
+     * @return {Object} The extracted value chunks.
+     */
+    function extractPropertyChunks (stateObject, chunkNames) {
+      var extractedValues = {};
+      var currentChunkName, chunkNamesLength = chunkNames.length;
+
+      for (var i = 0; i < chunkNamesLength; i++) {
+        currentChunkName = chunkNames[i];
+        extractedValues[currentChunkName] = stateObject[currentChunkName];
+        delete stateObject[currentChunkName];
+      }
+
+      return extractedValues;
+    }
+
+    var getValuesList_accumulator = [];
+    /*!
+     * @param {Object} stateObject
+     * @param {Array.<string>} chunkNames
+     *
+     * @return {Array.<number>}
+     */
+    function getValuesList (stateObject, chunkNames) {
+      getValuesList_accumulator.length = 0;
+      var chunkNamesLength = chunkNames.length;
+
+      for (var i = 0; i < chunkNamesLength; i++) {
+        getValuesList_accumulator.push(stateObject[chunkNames[i]]);
+      }
+
+      return getValuesList_accumulator;
+    }
+
+    /*!
+     * @param {string} formatString
+     * @param {Array.<number>} rawValues
+     *
+     * @return {string}
+     */
+    function getFormattedValues (formatString, rawValues) {
+      var formattedValueString = formatString;
+      var rawValuesLength = rawValues.length;
+
+      for (var i = 0; i < rawValuesLength; i++) {
+        formattedValueString = formattedValueString.replace(
+          VALUE_PLACEHOLDER, +rawValues[i].toFixed(4));
+      }
+
+      return formattedValueString;
+    }
+
+    /*!
+     * Note: It's the duty of the caller to convert the Array elements of the
+     * return value into numbers.  This is a performance optimization.
+     *
+     * @param {string} formattedString
+     *
+     * @return {Array.<string>|null}
+     */
+    function getValuesFrom (formattedString) {
+      return formattedString.match(R_UNFORMATTED_VALUES);
+    }
+
+    /*!
+     * @param {Object} easingObject
+     * @param {Object} tokenData
+     */
+    function expandEasingObject (easingObject, tokenData) {
+      Tweenable.each(tokenData, function (prop) {
+        var currentProp = tokenData[prop];
+        var chunkNames = currentProp.chunkNames;
+        var chunkLength = chunkNames.length;
+        var easingChunks = easingObject[prop].split(' ');
+        var lastEasingChunk = easingChunks[easingChunks.length - 1];
+
+        for (var i = 0; i < chunkLength; i++) {
+          easingObject[chunkNames[i]] = easingChunks[i] || lastEasingChunk;
+        }
+
+        delete easingObject[prop];
+      });
+    }
+
+    /*!
+     * @param {Object} easingObject
+     * @param {Object} tokenData
+     */
+    function collapseEasingObject (easingObject, tokenData) {
+      Tweenable.each(tokenData, function (prop) {
+        var currentProp = tokenData[prop];
+        var chunkNames = currentProp.chunkNames;
+        var chunkLength = chunkNames.length;
+        var composedEasingString = '';
+
+        for (var i = 0; i < chunkLength; i++) {
+          composedEasingString += ' ' + easingObject[chunkNames[i]];
+          delete easingObject[chunkNames[i]];
+        }
+
+        easingObject[prop] = composedEasingString.substr(1);
+      });
+    }
+
+    Tweenable.prototype.filter.token = {
+      'tweenCreated': function (currentState, fromState, toState, easingObject) {
+        sanitizeObjectForHexProps(currentState);
+        sanitizeObjectForHexProps(fromState);
+        sanitizeObjectForHexProps(toState);
+        this._tokenData = getFormatManifests(currentState);
+      },
+
+      'beforeTween': function (currentState, fromState, toState, easingObject) {
+        expandEasingObject(easingObject, this._tokenData);
+        expandFormattedProperties(currentState, this._tokenData);
+        expandFormattedProperties(fromState, this._tokenData);
+        expandFormattedProperties(toState, this._tokenData);
+      },
+
+      'afterTween': function (currentState, fromState, toState, easingObject) {
+        collapseFormattedProperties(currentState, this._tokenData);
+        collapseFormattedProperties(fromState, this._tokenData);
+        collapseFormattedProperties(toState, this._tokenData);
+        collapseEasingObject(easingObject, this._tokenData);
+      }
+    };
+
+  } (Tweenable));
+
+  }(window));
+
+  return window.Tweenable;
+});
+
+(function() {
+    "use strict";
+
+    angular.module('angular-carousel')
+
+    .filter('carouselSlice', function() {
+        return function(collection, start, size) {
+            if (angular.isArray(collection)) {
+                return collection.slice(start, start + size);
+            } else if (angular.isObject(collection)) {
+                // dont try to slice collections :)
+                return collection;
+            }
+        };
+    });
+
+})();
+
 /**
  * @license
  * lodash 4.6.1 <https://lodash.com/>
@@ -51158,2834 +62205,6 @@ angular.module('hours.list', [])
             controller: 'ListCtrl'
         }
     }]);
-/**
- * @license AngularJS v1.5.0
- * (c) 2010-2016 Google, Inc. http://angularjs.org
- * License: MIT
- */
-(function(window, angular, undefined) {'use strict';
-
-/* global ngTouchClickDirectiveFactory: false,
- */
-
-/**
- * @ngdoc module
- * @name ngTouch
- * @description
- *
- * # ngTouch
- *
- * The `ngTouch` module provides touch events and other helpers for touch-enabled devices.
- * The implementation is based on jQuery Mobile touch event handling
- * ([jquerymobile.com](http://jquerymobile.com/)).
- *
- *
- * See {@link ngTouch.$swipe `$swipe`} for usage.
- *
- * <div doc-module-components="ngTouch"></div>
- *
- */
-
-// define ngTouch module
-/* global -ngTouch */
-var ngTouch = angular.module('ngTouch', []);
-
-ngTouch.provider('$touch', $TouchProvider);
-
-function nodeName_(element) {
-  return angular.lowercase(element.nodeName || (element[0] && element[0].nodeName));
-}
-
-/**
- * @ngdoc provider
- * @name $touchProvider
- *
- * @description
- * The `$touchProvider` allows enabling / disabling {@link ngTouch.ngClick ngTouch's ngClick directive}.
- */
-$TouchProvider.$inject = ['$provide', '$compileProvider'];
-function $TouchProvider($provide, $compileProvider) {
-
-  /**
-   * @ngdoc method
-   * @name  $touchProvider#ngClickOverrideEnabled
-   *
-   * @param {boolean=} enabled update the ngClickOverrideEnabled state if provided, otherwise just return the
-   * current ngClickOverrideEnabled state
-   * @returns {*} current value if used as getter or itself (chaining) if used as setter
-   *
-   * @kind function
-   *
-   * @description
-   * Call this method to enable/disable {@link ngTouch.ngClick ngTouch's ngClick directive}. If enabled,
-   * the default ngClick directive will be replaced by a version that eliminates the 300ms delay for
-   * click events on browser for touch-devices.
-   *
-   * The default is `false`.
-   *
-   */
-  var ngClickOverrideEnabled = false;
-  var ngClickDirectiveAdded = false;
-  this.ngClickOverrideEnabled = function(enabled) {
-    if (angular.isDefined(enabled)) {
-
-      if (enabled && !ngClickDirectiveAdded) {
-        ngClickDirectiveAdded = true;
-
-        // Use this to identify the correct directive in the delegate
-        ngTouchClickDirectiveFactory.$$moduleName = 'ngTouch';
-        $compileProvider.directive('ngClick', ngTouchClickDirectiveFactory);
-
-        $provide.decorator('ngClickDirective', ['$delegate', function($delegate) {
-          if (ngClickOverrideEnabled) {
-            // drop the default ngClick directive
-            $delegate.shift();
-          } else {
-            // drop the ngTouch ngClick directive if the override has been re-disabled (because
-            // we cannot de-register added directives)
-            var i = $delegate.length - 1;
-            while (i >= 0) {
-              if ($delegate[i].$$moduleName === 'ngTouch') {
-                $delegate.splice(i, 1);
-                break;
-              }
-              i--;
-            }
-          }
-
-          return $delegate;
-        }]);
-      }
-
-      ngClickOverrideEnabled = enabled;
-      return this;
-    }
-
-    return ngClickOverrideEnabled;
-  };
-
-  /**
-  * @ngdoc service
-  * @name $touch
-  * @kind object
-  *
-  * @description
-  * Provides the {@link ngTouch.$touch#ngClickOverrideEnabled `ngClickOverrideEnabled`} method.
-  *
-  */
-  this.$get = function() {
-    return {
-      /**
-       * @ngdoc method
-       * @name  $touch#ngClickOverrideEnabled
-       *
-       * @returns {*} current value of `ngClickOverrideEnabled` set in the {@link ngTouch.$touchProvider $touchProvider},
-       * i.e. if {@link ngTouch.ngClick ngTouch's ngClick} directive is enabled.
-       *
-       * @kind function
-       */
-      ngClickOverrideEnabled: function() {
-        return ngClickOverrideEnabled;
-      }
-    };
-  };
-
-}
-
-/* global ngTouch: false */
-
-    /**
-     * @ngdoc service
-     * @name $swipe
-     *
-     * @description
-     * The `$swipe` service is a service that abstracts the messier details of hold-and-drag swipe
-     * behavior, to make implementing swipe-related directives more convenient.
-     *
-     * Requires the {@link ngTouch `ngTouch`} module to be installed.
-     *
-     * `$swipe` is used by the `ngSwipeLeft` and `ngSwipeRight` directives in `ngTouch`.
-     *
-     * # Usage
-     * The `$swipe` service is an object with a single method: `bind`. `bind` takes an element
-     * which is to be watched for swipes, and an object with four handler functions. See the
-     * documentation for `bind` below.
-     */
-
-ngTouch.factory('$swipe', [function() {
-  // The total distance in any direction before we make the call on swipe vs. scroll.
-  var MOVE_BUFFER_RADIUS = 10;
-
-  var POINTER_EVENTS = {
-    'mouse': {
-      start: 'mousedown',
-      move: 'mousemove',
-      end: 'mouseup'
-    },
-    'touch': {
-      start: 'touchstart',
-      move: 'touchmove',
-      end: 'touchend',
-      cancel: 'touchcancel'
-    }
-  };
-
-  function getCoordinates(event) {
-    var originalEvent = event.originalEvent || event;
-    var touches = originalEvent.touches && originalEvent.touches.length ? originalEvent.touches : [originalEvent];
-    var e = (originalEvent.changedTouches && originalEvent.changedTouches[0]) || touches[0];
-
-    return {
-      x: e.clientX,
-      y: e.clientY
-    };
-  }
-
-  function getEvents(pointerTypes, eventType) {
-    var res = [];
-    angular.forEach(pointerTypes, function(pointerType) {
-      var eventName = POINTER_EVENTS[pointerType][eventType];
-      if (eventName) {
-        res.push(eventName);
-      }
-    });
-    return res.join(' ');
-  }
-
-  return {
-    /**
-     * @ngdoc method
-     * @name $swipe#bind
-     *
-     * @description
-     * The main method of `$swipe`. It takes an element to be watched for swipe motions, and an
-     * object containing event handlers.
-     * The pointer types that should be used can be specified via the optional
-     * third argument, which is an array of strings `'mouse'` and `'touch'`. By default,
-     * `$swipe` will listen for `mouse` and `touch` events.
-     *
-     * The four events are `start`, `move`, `end`, and `cancel`. `start`, `move`, and `end`
-     * receive as a parameter a coordinates object of the form `{ x: 150, y: 310 }` and the raw
-     * `event`. `cancel` receives the raw `event` as its single parameter.
-     *
-     * `start` is called on either `mousedown` or `touchstart`. After this event, `$swipe` is
-     * watching for `touchmove` or `mousemove` events. These events are ignored until the total
-     * distance moved in either dimension exceeds a small threshold.
-     *
-     * Once this threshold is exceeded, either the horizontal or vertical delta is greater.
-     * - If the horizontal distance is greater, this is a swipe and `move` and `end` events follow.
-     * - If the vertical distance is greater, this is a scroll, and we let the browser take over.
-     *   A `cancel` event is sent.
-     *
-     * `move` is called on `mousemove` and `touchmove` after the above logic has determined that
-     * a swipe is in progress.
-     *
-     * `end` is called when a swipe is successfully completed with a `touchend` or `mouseup`.
-     *
-     * `cancel` is called either on a `touchcancel` from the browser, or when we begin scrolling
-     * as described above.
-     *
-     */
-    bind: function(element, eventHandlers, pointerTypes) {
-      // Absolute total movement, used to control swipe vs. scroll.
-      var totalX, totalY;
-      // Coordinates of the start position.
-      var startCoords;
-      // Last event's position.
-      var lastPos;
-      // Whether a swipe is active.
-      var active = false;
-
-      pointerTypes = pointerTypes || ['mouse', 'touch'];
-      element.on(getEvents(pointerTypes, 'start'), function(event) {
-        startCoords = getCoordinates(event);
-        active = true;
-        totalX = 0;
-        totalY = 0;
-        lastPos = startCoords;
-        eventHandlers['start'] && eventHandlers['start'](startCoords, event);
-      });
-      var events = getEvents(pointerTypes, 'cancel');
-      if (events) {
-        element.on(events, function(event) {
-          active = false;
-          eventHandlers['cancel'] && eventHandlers['cancel'](event);
-        });
-      }
-
-      element.on(getEvents(pointerTypes, 'move'), function(event) {
-        if (!active) return;
-
-        // Android will send a touchcancel if it thinks we're starting to scroll.
-        // So when the total distance (+ or - or both) exceeds 10px in either direction,
-        // we either:
-        // - On totalX > totalY, we send preventDefault() and treat this as a swipe.
-        // - On totalY > totalX, we let the browser handle it as a scroll.
-
-        if (!startCoords) return;
-        var coords = getCoordinates(event);
-
-        totalX += Math.abs(coords.x - lastPos.x);
-        totalY += Math.abs(coords.y - lastPos.y);
-
-        lastPos = coords;
-
-        if (totalX < MOVE_BUFFER_RADIUS && totalY < MOVE_BUFFER_RADIUS) {
-          return;
-        }
-
-        // One of totalX or totalY has exceeded the buffer, so decide on swipe vs. scroll.
-        if (totalY > totalX) {
-          // Allow native scrolling to take over.
-          active = false;
-          eventHandlers['cancel'] && eventHandlers['cancel'](event);
-          return;
-        } else {
-          // Prevent the browser from scrolling.
-          event.preventDefault();
-          eventHandlers['move'] && eventHandlers['move'](coords, event);
-        }
-      });
-
-      element.on(getEvents(pointerTypes, 'end'), function(event) {
-        if (!active) return;
-        active = false;
-        eventHandlers['end'] && eventHandlers['end'](getCoordinates(event), event);
-      });
-    }
-  };
-}]);
-
-/* global ngTouch: false,
-  nodeName_: false
-*/
-
-/**
- * @ngdoc directive
- * @name ngClick
- * @deprecated
- *
- * @description
- * <div class="alert alert-danger">
- * **DEPRECATION NOTICE**: Beginning with Angular 1.5, this directive is deprecated and by default **disabled**.
- * The directive will receive no further support and might be removed from future releases.
- * If you need the directive, you can enable it with the {@link ngTouch.$touchProvider $touchProvider#ngClickOverrideEnabled}
- * function. We also recommend that you migrate to [FastClick](https://github.com/ftlabs/fastclick).
- * To learn more about the 300ms delay, this [Telerik article](http://developer.telerik.com/featured/300-ms-click-delay-ios-8/)
- * gives a good overview.
- * </div>
- * A more powerful replacement for the default ngClick designed to be used on touchscreen
- * devices. Most mobile browsers wait about 300ms after a tap-and-release before sending
- * the click event. This version handles them immediately, and then prevents the
- * following click event from propagating.
- *
- * Requires the {@link ngTouch `ngTouch`} module to be installed.
- *
- * This directive can fall back to using an ordinary click event, and so works on desktop
- * browsers as well as mobile.
- *
- * This directive also sets the CSS class `ng-click-active` while the element is being held
- * down (by a mouse click or touch) so you can restyle the depressed element if you wish.
- *
- * @element ANY
- * @param {expression} ngClick {@link guide/expression Expression} to evaluate
- * upon tap. (Event object is available as `$event`)
- *
- * @example
-    <example module="ngClickExample" deps="angular-touch.js">
-      <file name="index.html">
-        <button ng-click="count = count + 1" ng-init="count=0">
-          Increment
-        </button>
-        count: {{ count }}
-      </file>
-      <file name="script.js">
-        angular.module('ngClickExample', ['ngTouch']);
-      </file>
-    </example>
- */
-
-var ngTouchClickDirectiveFactory = ['$parse', '$timeout', '$rootElement',
-    function($parse, $timeout, $rootElement) {
-  var TAP_DURATION = 750; // Shorter than 750ms is a tap, longer is a taphold or drag.
-  var MOVE_TOLERANCE = 12; // 12px seems to work in most mobile browsers.
-  var PREVENT_DURATION = 2500; // 2.5 seconds maximum from preventGhostClick call to click
-  var CLICKBUSTER_THRESHOLD = 25; // 25 pixels in any dimension is the limit for busting clicks.
-
-  var ACTIVE_CLASS_NAME = 'ng-click-active';
-  var lastPreventedTime;
-  var touchCoordinates;
-  var lastLabelClickCoordinates;
-
-
-  // TAP EVENTS AND GHOST CLICKS
-  //
-  // Why tap events?
-  // Mobile browsers detect a tap, then wait a moment (usually ~300ms) to see if you're
-  // double-tapping, and then fire a click event.
-  //
-  // This delay sucks and makes mobile apps feel unresponsive.
-  // So we detect touchstart, touchcancel and touchend ourselves and determine when
-  // the user has tapped on something.
-  //
-  // What happens when the browser then generates a click event?
-  // The browser, of course, also detects the tap and fires a click after a delay. This results in
-  // tapping/clicking twice. We do "clickbusting" to prevent it.
-  //
-  // How does it work?
-  // We attach global touchstart and click handlers, that run during the capture (early) phase.
-  // So the sequence for a tap is:
-  // - global touchstart: Sets an "allowable region" at the point touched.
-  // - element's touchstart: Starts a touch
-  // (- touchcancel ends the touch, no click follows)
-  // - element's touchend: Determines if the tap is valid (didn't move too far away, didn't hold
-  //   too long) and fires the user's tap handler. The touchend also calls preventGhostClick().
-  // - preventGhostClick() removes the allowable region the global touchstart created.
-  // - The browser generates a click event.
-  // - The global click handler catches the click, and checks whether it was in an allowable region.
-  //     - If preventGhostClick was called, the region will have been removed, the click is busted.
-  //     - If the region is still there, the click proceeds normally. Therefore clicks on links and
-  //       other elements without ngTap on them work normally.
-  //
-  // This is an ugly, terrible hack!
-  // Yeah, tell me about it. The alternatives are using the slow click events, or making our users
-  // deal with the ghost clicks, so I consider this the least of evils. Fortunately Angular
-  // encapsulates this ugly logic away from the user.
-  //
-  // Why not just put click handlers on the element?
-  // We do that too, just to be sure. If the tap event caused the DOM to change,
-  // it is possible another element is now in that position. To take account for these possibly
-  // distinct elements, the handlers are global and care only about coordinates.
-
-  // Checks if the coordinates are close enough to be within the region.
-  function hit(x1, y1, x2, y2) {
-    return Math.abs(x1 - x2) < CLICKBUSTER_THRESHOLD && Math.abs(y1 - y2) < CLICKBUSTER_THRESHOLD;
-  }
-
-  // Checks a list of allowable regions against a click location.
-  // Returns true if the click should be allowed.
-  // Splices out the allowable region from the list after it has been used.
-  function checkAllowableRegions(touchCoordinates, x, y) {
-    for (var i = 0; i < touchCoordinates.length; i += 2) {
-      if (hit(touchCoordinates[i], touchCoordinates[i + 1], x, y)) {
-        touchCoordinates.splice(i, i + 2);
-        return true; // allowable region
-      }
-    }
-    return false; // No allowable region; bust it.
-  }
-
-  // Global click handler that prevents the click if it's in a bustable zone and preventGhostClick
-  // was called recently.
-  function onClick(event) {
-    if (Date.now() - lastPreventedTime > PREVENT_DURATION) {
-      return; // Too old.
-    }
-
-    var touches = event.touches && event.touches.length ? event.touches : [event];
-    var x = touches[0].clientX;
-    var y = touches[0].clientY;
-    // Work around desktop Webkit quirk where clicking a label will fire two clicks (on the label
-    // and on the input element). Depending on the exact browser, this second click we don't want
-    // to bust has either (0,0), negative coordinates, or coordinates equal to triggering label
-    // click event
-    if (x < 1 && y < 1) {
-      return; // offscreen
-    }
-    if (lastLabelClickCoordinates &&
-        lastLabelClickCoordinates[0] === x && lastLabelClickCoordinates[1] === y) {
-      return; // input click triggered by label click
-    }
-    // reset label click coordinates on first subsequent click
-    if (lastLabelClickCoordinates) {
-      lastLabelClickCoordinates = null;
-    }
-    // remember label click coordinates to prevent click busting of trigger click event on input
-    if (nodeName_(event.target) === 'label') {
-      lastLabelClickCoordinates = [x, y];
-    }
-
-    // Look for an allowable region containing this click.
-    // If we find one, that means it was created by touchstart and not removed by
-    // preventGhostClick, so we don't bust it.
-    if (checkAllowableRegions(touchCoordinates, x, y)) {
-      return;
-    }
-
-    // If we didn't find an allowable region, bust the click.
-    event.stopPropagation();
-    event.preventDefault();
-
-    // Blur focused form elements
-    event.target && event.target.blur && event.target.blur();
-  }
-
-
-  // Global touchstart handler that creates an allowable region for a click event.
-  // This allowable region can be removed by preventGhostClick if we want to bust it.
-  function onTouchStart(event) {
-    var touches = event.touches && event.touches.length ? event.touches : [event];
-    var x = touches[0].clientX;
-    var y = touches[0].clientY;
-    touchCoordinates.push(x, y);
-
-    $timeout(function() {
-      // Remove the allowable region.
-      for (var i = 0; i < touchCoordinates.length; i += 2) {
-        if (touchCoordinates[i] == x && touchCoordinates[i + 1] == y) {
-          touchCoordinates.splice(i, i + 2);
-          return;
-        }
-      }
-    }, PREVENT_DURATION, false);
-  }
-
-  // On the first call, attaches some event handlers. Then whenever it gets called, it creates a
-  // zone around the touchstart where clicks will get busted.
-  function preventGhostClick(x, y) {
-    if (!touchCoordinates) {
-      $rootElement[0].addEventListener('click', onClick, true);
-      $rootElement[0].addEventListener('touchstart', onTouchStart, true);
-      touchCoordinates = [];
-    }
-
-    lastPreventedTime = Date.now();
-
-    checkAllowableRegions(touchCoordinates, x, y);
-  }
-
-  // Actual linking function.
-  return function(scope, element, attr) {
-    var clickHandler = $parse(attr.ngClick),
-        tapping = false,
-        tapElement,  // Used to blur the element after a tap.
-        startTime,   // Used to check if the tap was held too long.
-        touchStartX,
-        touchStartY;
-
-    function resetState() {
-      tapping = false;
-      element.removeClass(ACTIVE_CLASS_NAME);
-    }
-
-    element.on('touchstart', function(event) {
-      tapping = true;
-      tapElement = event.target ? event.target : event.srcElement; // IE uses srcElement.
-      // Hack for Safari, which can target text nodes instead of containers.
-      if (tapElement.nodeType == 3) {
-        tapElement = tapElement.parentNode;
-      }
-
-      element.addClass(ACTIVE_CLASS_NAME);
-
-      startTime = Date.now();
-
-      // Use jQuery originalEvent
-      var originalEvent = event.originalEvent || event;
-      var touches = originalEvent.touches && originalEvent.touches.length ? originalEvent.touches : [originalEvent];
-      var e = touches[0];
-      touchStartX = e.clientX;
-      touchStartY = e.clientY;
-    });
-
-    element.on('touchcancel', function(event) {
-      resetState();
-    });
-
-    element.on('touchend', function(event) {
-      var diff = Date.now() - startTime;
-
-      // Use jQuery originalEvent
-      var originalEvent = event.originalEvent || event;
-      var touches = (originalEvent.changedTouches && originalEvent.changedTouches.length) ?
-          originalEvent.changedTouches :
-          ((originalEvent.touches && originalEvent.touches.length) ? originalEvent.touches : [originalEvent]);
-      var e = touches[0];
-      var x = e.clientX;
-      var y = e.clientY;
-      var dist = Math.sqrt(Math.pow(x - touchStartX, 2) + Math.pow(y - touchStartY, 2));
-
-      if (tapping && diff < TAP_DURATION && dist < MOVE_TOLERANCE) {
-        // Call preventGhostClick so the clickbuster will catch the corresponding click.
-        preventGhostClick(x, y);
-
-        // Blur the focused element (the button, probably) before firing the callback.
-        // This doesn't work perfectly on Android Chrome, but seems to work elsewhere.
-        // I couldn't get anything to work reliably on Android Chrome.
-        if (tapElement) {
-          tapElement.blur();
-        }
-
-        if (!angular.isDefined(attr.disabled) || attr.disabled === false) {
-          element.triggerHandler('click', [event]);
-        }
-      }
-
-      resetState();
-    });
-
-    // Hack for iOS Safari's benefit. It goes searching for onclick handlers and is liable to click
-    // something else nearby.
-    element.onclick = function(event) { };
-
-    // Actual click handler.
-    // There are three different kinds of clicks, only two of which reach this point.
-    // - On desktop browsers without touch events, their clicks will always come here.
-    // - On mobile browsers, the simulated "fast" click will call this.
-    // - But the browser's follow-up slow click will be "busted" before it reaches this handler.
-    // Therefore it's safe to use this directive on both mobile and desktop.
-    element.on('click', function(event, touchend) {
-      scope.$apply(function() {
-        clickHandler(scope, {$event: (touchend || event)});
-      });
-    });
-
-    element.on('mousedown', function(event) {
-      element.addClass(ACTIVE_CLASS_NAME);
-    });
-
-    element.on('mousemove mouseup', function(event) {
-      element.removeClass(ACTIVE_CLASS_NAME);
-    });
-
-  };
-}];
-
-/* global ngTouch: false */
-
-/**
- * @ngdoc directive
- * @name ngSwipeLeft
- *
- * @description
- * Specify custom behavior when an element is swiped to the left on a touchscreen device.
- * A leftward swipe is a quick, right-to-left slide of the finger.
- * Though ngSwipeLeft is designed for touch-based devices, it will work with a mouse click and drag
- * too.
- *
- * To disable the mouse click and drag functionality, add `ng-swipe-disable-mouse` to
- * the `ng-swipe-left` or `ng-swipe-right` DOM Element.
- *
- * Requires the {@link ngTouch `ngTouch`} module to be installed.
- *
- * @element ANY
- * @param {expression} ngSwipeLeft {@link guide/expression Expression} to evaluate
- * upon left swipe. (Event object is available as `$event`)
- *
- * @example
-    <example module="ngSwipeLeftExample" deps="angular-touch.js">
-      <file name="index.html">
-        <div ng-show="!showActions" ng-swipe-left="showActions = true">
-          Some list content, like an email in the inbox
-        </div>
-        <div ng-show="showActions" ng-swipe-right="showActions = false">
-          <button ng-click="reply()">Reply</button>
-          <button ng-click="delete()">Delete</button>
-        </div>
-      </file>
-      <file name="script.js">
-        angular.module('ngSwipeLeftExample', ['ngTouch']);
-      </file>
-    </example>
- */
-
-/**
- * @ngdoc directive
- * @name ngSwipeRight
- *
- * @description
- * Specify custom behavior when an element is swiped to the right on a touchscreen device.
- * A rightward swipe is a quick, left-to-right slide of the finger.
- * Though ngSwipeRight is designed for touch-based devices, it will work with a mouse click and drag
- * too.
- *
- * Requires the {@link ngTouch `ngTouch`} module to be installed.
- *
- * @element ANY
- * @param {expression} ngSwipeRight {@link guide/expression Expression} to evaluate
- * upon right swipe. (Event object is available as `$event`)
- *
- * @example
-    <example module="ngSwipeRightExample" deps="angular-touch.js">
-      <file name="index.html">
-        <div ng-show="!showActions" ng-swipe-left="showActions = true">
-          Some list content, like an email in the inbox
-        </div>
-        <div ng-show="showActions" ng-swipe-right="showActions = false">
-          <button ng-click="reply()">Reply</button>
-          <button ng-click="delete()">Delete</button>
-        </div>
-      </file>
-      <file name="script.js">
-        angular.module('ngSwipeRightExample', ['ngTouch']);
-      </file>
-    </example>
- */
-
-function makeSwipeDirective(directiveName, direction, eventName) {
-  ngTouch.directive(directiveName, ['$parse', '$swipe', function($parse, $swipe) {
-    // The maximum vertical delta for a swipe should be less than 75px.
-    var MAX_VERTICAL_DISTANCE = 75;
-    // Vertical distance should not be more than a fraction of the horizontal distance.
-    var MAX_VERTICAL_RATIO = 0.3;
-    // At least a 30px lateral motion is necessary for a swipe.
-    var MIN_HORIZONTAL_DISTANCE = 30;
-
-    return function(scope, element, attr) {
-      var swipeHandler = $parse(attr[directiveName]);
-
-      var startCoords, valid;
-
-      function validSwipe(coords) {
-        // Check that it's within the coordinates.
-        // Absolute vertical distance must be within tolerances.
-        // Horizontal distance, we take the current X - the starting X.
-        // This is negative for leftward swipes and positive for rightward swipes.
-        // After multiplying by the direction (-1 for left, +1 for right), legal swipes
-        // (ie. same direction as the directive wants) will have a positive delta and
-        // illegal ones a negative delta.
-        // Therefore this delta must be positive, and larger than the minimum.
-        if (!startCoords) return false;
-        var deltaY = Math.abs(coords.y - startCoords.y);
-        var deltaX = (coords.x - startCoords.x) * direction;
-        return valid && // Short circuit for already-invalidated swipes.
-            deltaY < MAX_VERTICAL_DISTANCE &&
-            deltaX > 0 &&
-            deltaX > MIN_HORIZONTAL_DISTANCE &&
-            deltaY / deltaX < MAX_VERTICAL_RATIO;
-      }
-
-      var pointerTypes = ['touch'];
-      if (!angular.isDefined(attr['ngSwipeDisableMouse'])) {
-        pointerTypes.push('mouse');
-      }
-      $swipe.bind(element, {
-        'start': function(coords, event) {
-          startCoords = coords;
-          valid = true;
-        },
-        'cancel': function(event) {
-          valid = false;
-        },
-        'end': function(coords, event) {
-          if (validSwipe(coords)) {
-            scope.$apply(function() {
-              element.triggerHandler(eventName);
-              swipeHandler(scope, {$event: event});
-            });
-          }
-        }
-      }, pointerTypes);
-    };
-  }]);
-}
-
-// Left is negative X-coordinate, right is positive.
-makeSwipeDirective('ngSwipeLeft', -1, 'swipeleft');
-makeSwipeDirective('ngSwipeRight', 1, 'swiperight');
-
-
-
-})(window, window.angular);
-
-/**
- * Angular Carousel - Mobile friendly touch carousel for AngularJS
- * @version v0.3.12 - 2015-06-11
- * @link http://revolunet.github.com/angular-carousel
- * @author Julien Bouquillon <julien@revolunet.com>
- * @license MIT License, http://www.opensource.org/licenses/MIT
- */
-/*global angular */
-
-/*
-Angular touch carousel with CSS GPU accel and slide buffering
-http://github.com/revolunet/angular-carousel
-
-*/
-
-angular.module('angular-carousel', [
-    'ngTouch',
-    'angular-carousel.shifty'
-]);
-
-angular.module('angular-carousel')
-
-.directive('rnCarouselAutoSlide', ['$interval', function($interval) {
-  return {
-    restrict: 'A',
-    link: function (scope, element, attrs) {
-        var stopAutoPlay = function() {
-            if (scope.autoSlider) {
-                $interval.cancel(scope.autoSlider);
-                scope.autoSlider = null;
-            }
-        };
-        var restartTimer = function() {
-            scope.autoSlide();
-        };
-
-        scope.$watch('carouselIndex', restartTimer);
-
-        if (attrs.hasOwnProperty('rnCarouselPauseOnHover') && attrs.rnCarouselPauseOnHover !== 'false'){
-            element.on('mouseenter', stopAutoPlay);
-            element.on('mouseleave', restartTimer);
-        }
-
-        scope.$on('$destroy', function(){
-            stopAutoPlay();
-            element.off('mouseenter', stopAutoPlay);
-            element.off('mouseleave', restartTimer);
-        });
-    }
-  };
-}]);
-
-angular.module('angular-carousel')
-
-.directive('rnCarouselIndicators', ['$parse', function($parse) {
-  return {
-    restrict: 'A',
-    scope: {
-      slides: '=',
-      index: '=rnCarouselIndex'
-    },
-    templateUrl: 'carousel-indicators.html',
-    link: function(scope, iElement, iAttributes) {
-      var indexModel = $parse(iAttributes.rnCarouselIndex);
-      scope.goToSlide = function(index) {
-        indexModel.assign(scope.$parent.$parent, index);
-      };
-    }
-  };
-}]);
-
-angular.module('angular-carousel').run(['$templateCache', function($templateCache) {
-  $templateCache.put('carousel-indicators.html',
-      '<div class="rn-carousel-indicator">\n' +
-        '<span ng-repeat="slide in slides" ng-class="{active: $index==index}" ng-click="goToSlide($index)">●</span>' +
-      '</div>'
-  );
-}]);
-
-(function() {
-    "use strict";
-
-    angular.module('angular-carousel')
-
-    .service('DeviceCapabilities', function() {
-
-        // TODO: merge in a single function
-
-        // detect supported CSS property
-        function detectTransformProperty() {
-            var transformProperty = 'transform',
-                safariPropertyHack = 'webkitTransform';
-            if (typeof document.body.style[transformProperty] !== 'undefined') {
-
-                ['webkit', 'moz', 'o', 'ms'].every(function (prefix) {
-                    var e = '-' + prefix + '-transform';
-                    if (typeof document.body.style[e] !== 'undefined') {
-                        transformProperty = e;
-                        return false;
-                    }
-                    return true;
-                });
-            } else if (typeof document.body.style[safariPropertyHack] !== 'undefined') {
-                transformProperty = '-webkit-transform';
-            } else {
-                transformProperty = undefined;
-            }
-            return transformProperty;
-        }
-
-        //Detect support of translate3d
-        function detect3dSupport() {
-            var el = document.createElement('p'),
-                has3d,
-                transforms = {
-                    'webkitTransform': '-webkit-transform',
-                    'msTransform': '-ms-transform',
-                    'transform': 'transform'
-                };
-            // Add it to the body to get the computed style
-            document.body.insertBefore(el, null);
-            for (var t in transforms) {
-                if (el.style[t] !== undefined) {
-                    el.style[t] = 'translate3d(1px,1px,1px)';
-                    has3d = window.getComputedStyle(el).getPropertyValue(transforms[t]);
-                }
-            }
-            document.body.removeChild(el);
-            return (has3d !== undefined && has3d.length > 0 && has3d !== "none");
-        }
-
-        return {
-            has3d: detect3dSupport(),
-            transformProperty: detectTransformProperty()
-        };
-
-    })
-
-    .service('computeCarouselSlideStyle', ["DeviceCapabilities", function(DeviceCapabilities) {
-        // compute transition transform properties for a given slide and global offset
-        return function(slideIndex, offset, transitionType) {
-            var style = {
-                    display: 'inline-block'
-                },
-                opacity,
-                absoluteLeft = (slideIndex * 100) + offset,
-                slideTransformValue = DeviceCapabilities.has3d ? 'translate3d(' + absoluteLeft + '%, 0, 0)' : 'translate3d(' + absoluteLeft + '%, 0)',
-                distance = ((100 - Math.abs(absoluteLeft)) / 100);
-
-            if (!DeviceCapabilities.transformProperty) {
-                // fallback to default slide if transformProperty is not available
-                style['margin-left'] = absoluteLeft + '%';
-            } else {
-                if (transitionType == 'fadeAndSlide') {
-                    style[DeviceCapabilities.transformProperty] = slideTransformValue;
-                    opacity = 0;
-                    if (Math.abs(absoluteLeft) < 100) {
-                        opacity = 0.3 + distance * 0.7;
-                    }
-                    style.opacity = opacity;
-                } else if (transitionType == 'hexagon') {
-                    var transformFrom = 100,
-                        degrees = 0,
-                        maxDegrees = 60 * (distance - 1);
-
-                    transformFrom = offset < (slideIndex * -100) ? 100 : 0;
-                    degrees = offset < (slideIndex * -100) ? maxDegrees : -maxDegrees;
-                    style[DeviceCapabilities.transformProperty] = slideTransformValue + ' ' + 'rotateY(' + degrees + 'deg)';
-                    style[DeviceCapabilities.transformProperty + '-origin'] = transformFrom + '% 50%';
-                } else if (transitionType == 'zoom') {
-                    style[DeviceCapabilities.transformProperty] = slideTransformValue;
-                    var scale = 1;
-                    if (Math.abs(absoluteLeft) < 100) {
-                        scale = 1 + ((1 - distance) * 2);
-                    }
-                    style[DeviceCapabilities.transformProperty] += ' scale(' + scale + ')';
-                    style[DeviceCapabilities.transformProperty + '-origin'] = '50% 50%';
-                    opacity = 0;
-                    if (Math.abs(absoluteLeft) < 100) {
-                        opacity = 0.3 + distance * 0.7;
-                    }
-                    style.opacity = opacity;
-                } else {
-                    style[DeviceCapabilities.transformProperty] = slideTransformValue;
-                }
-            }
-            return style;
-        };
-    }])
-
-    .service('createStyleString', function() {
-        return function(object) {
-            var styles = [];
-            angular.forEach(object, function(value, key) {
-                styles.push(key + ':' + value);
-            });
-            return styles.join(';');
-        };
-    })
-
-    .directive('rnCarousel', ['$swipe', '$window', '$document', '$parse', '$compile', '$timeout', '$interval', 'computeCarouselSlideStyle', 'createStyleString', 'Tweenable',
-        function($swipe, $window, $document, $parse, $compile, $timeout, $interval, computeCarouselSlideStyle, createStyleString, Tweenable) {
-            // internal ids to allow multiple instances
-            var carouselId = 0,
-                // in absolute pixels, at which distance the slide stick to the edge on release
-                rubberTreshold = 3;
-
-            var requestAnimationFrame = $window.requestAnimationFrame || $window.webkitRequestAnimationFrame || $window.mozRequestAnimationFrame;
-
-            function getItemIndex(collection, target, defaultIndex) {
-                var result = defaultIndex;
-                collection.every(function(item, index) {
-                    if (angular.equals(item, target)) {
-                        result = index;
-                        return false;
-                    }
-                    return true;
-                });
-                return result;
-            }
-
-            return {
-                restrict: 'A',
-                scope: true,
-                compile: function(tElement, tAttributes) {
-                    // use the compile phase to customize the DOM
-                    var firstChild = tElement[0].querySelector('li'),
-                        firstChildAttributes = (firstChild) ? firstChild.attributes : [],
-                        isRepeatBased = false,
-                        isBuffered = false,
-                        repeatItem,
-                        repeatCollection;
-
-                    // try to find an ngRepeat expression
-                    // at this point, the attributes are not yet normalized so we need to try various syntax
-                    ['ng-repeat', 'data-ng-repeat', 'ng:repeat', 'x-ng-repeat'].every(function(attr) {
-                        var repeatAttribute = firstChildAttributes[attr];
-                        if (angular.isDefined(repeatAttribute)) {
-                            // ngRepeat regexp extracted from angular 1.2.7 src
-                            var exprMatch = repeatAttribute.value.match(/^\s*([\s\S]+?)\s+in\s+([\s\S]+?)(?:\s+track\s+by\s+([\s\S]+?))?\s*$/),
-                                trackProperty = exprMatch[3];
-
-                            repeatItem = exprMatch[1];
-                            repeatCollection = exprMatch[2];
-
-                            if (repeatItem) {
-                                if (angular.isDefined(tAttributes['rnCarouselBuffered'])) {
-                                    // update the current ngRepeat expression and add a slice operator if buffered
-                                    isBuffered = true;
-                                    repeatAttribute.value = repeatItem + ' in ' + repeatCollection + '|carouselSlice:carouselBufferIndex:carouselBufferSize';
-                                    if (trackProperty) {
-                                        repeatAttribute.value += ' track by ' + trackProperty;
-                                    }
-                                }
-                                isRepeatBased = true;
-                                return false;
-                            }
-                        }
-                        return true;
-                    });
-
-                    return function(scope, iElement, iAttributes, containerCtrl) {
-
-                        carouselId++;
-
-                        var defaultOptions = {
-                            transitionType: iAttributes.rnCarouselTransition || 'slide',
-                            transitionEasing: iAttributes.rnCarouselEasing || 'easeTo',
-                            transitionDuration: parseInt(iAttributes.rnCarouselDuration, 10) || 300,
-                            isSequential: true,
-                            autoSlideDuration: 3,
-                            bufferSize: 5,
-                            /* in container % how much we need to drag to trigger the slide change */
-                            moveTreshold: 0.1,
-                            defaultIndex: 0
-                        };
-
-                        // TODO
-                        var options = angular.extend({}, defaultOptions);
-
-                        var pressed,
-                            startX,
-                            isIndexBound = false,
-                            offset = 0,
-                            destination,
-                            swipeMoved = false,
-                            //animOnIndexChange = true,
-                            currentSlides = [],
-                            elWidth = null,
-                            elX = null,
-                            animateTransitions = true,
-                            intialState = true,
-                            animating = false,
-                            mouseUpBound = false,
-                            locked = false;
-
-                        //rn-swipe-disabled =true will only disable swipe events
-                        if(iAttributes.rnSwipeDisabled !== "true") {
-                            $swipe.bind(iElement, {
-                                start: swipeStart,
-                                move: swipeMove,
-                                end: swipeEnd,
-                                cancel: function(event) {
-                                    swipeEnd({}, event);
-                                }
-                            });
-                        }
-
-                        function getSlidesDOM() {
-                            return iElement[0].querySelectorAll('ul[rn-carousel] > li');
-                        }
-
-                        function documentMouseUpEvent(event) {
-                            // in case we click outside the carousel, trigger a fake swipeEnd
-                            swipeMoved = true;
-                            swipeEnd({
-                                x: event.clientX,
-                                y: event.clientY
-                            }, event);
-                        }
-
-                        function updateSlidesPosition(offset) {
-                            // manually apply transformation to carousel childrens
-                            // todo : optim : apply only to visible items
-                            var x = scope.carouselBufferIndex * 100 + offset;
-                            angular.forEach(getSlidesDOM(), function(child, index) {
-                                child.style.cssText = createStyleString(computeCarouselSlideStyle(index, x, options.transitionType));
-                            });
-                        }
-
-                        scope.nextSlide = function(slideOptions) {
-                            var index = scope.carouselIndex + 1;
-                            if (index > currentSlides.length - 1) {
-                                index = 0;
-                            }
-                            if (!locked) {
-                                goToSlide(index, slideOptions);
-                            }
-                        };
-
-                        scope.prevSlide = function(slideOptions) {
-                            var index = scope.carouselIndex - 1;
-                            if (index < 0) {
-                                index = currentSlides.length - 1;
-                            }
-                            goToSlide(index, slideOptions);
-                        };
-
-                        function goToSlide(index, slideOptions) {
-                            //console.log('goToSlide', arguments);
-                            // move a to the given slide index
-                            if (index === undefined) {
-                                index = scope.carouselIndex;
-                            }
-
-                            slideOptions = slideOptions || {};
-                            if (slideOptions.animate === false || options.transitionType === 'none') {
-                                locked = false;
-                                offset = index * -100;
-                                scope.carouselIndex = index;
-                                updateBufferIndex();
-                                return;
-                            }
-
-                            locked = true;
-                            var tweenable = new Tweenable();
-                            tweenable.tween({
-                                from: {
-                                    'x': offset
-                                },
-                                to: {
-                                    'x': index * -100
-                                },
-                                duration: options.transitionDuration,
-                                easing: options.transitionEasing,
-                                step: function(state) {
-                                    updateSlidesPosition(state.x);
-                                },
-                                finish: function() {
-                                    scope.$apply(function() {
-                                        scope.carouselIndex = index;
-                                        offset = index * -100;
-                                        updateBufferIndex();
-                                        $timeout(function () {
-                                          locked = false;
-                                        }, 0, false);
-                                    });
-                                }
-                            });
-                        }
-
-                        function getContainerWidth() {
-                            var rect = iElement[0].getBoundingClientRect();
-                            return rect.width ? rect.width : rect.right - rect.left;
-                        }
-
-                        function updateContainerWidth() {
-                            elWidth = getContainerWidth();
-                        }
-
-                        function bindMouseUpEvent() {
-                            if (!mouseUpBound) {
-                              mouseUpBound = true;
-                              $document.bind('mouseup', documentMouseUpEvent);
-                            }
-                        }
-
-                        function unbindMouseUpEvent() {
-                            if (mouseUpBound) {
-                              mouseUpBound = false;
-                              $document.unbind('mouseup', documentMouseUpEvent);
-                            }
-                        }
-
-                        function swipeStart(coords, event) {
-                            // console.log('swipeStart', coords, event);
-                            if (locked || currentSlides.length <= 1) {
-                                return;
-                            }
-                            updateContainerWidth();
-                            elX = iElement[0].querySelector('li').getBoundingClientRect().left;
-                            pressed = true;
-                            startX = coords.x;
-                            return false;
-                        }
-
-                        function swipeMove(coords, event) {
-                            //console.log('swipeMove', coords, event);
-                            var x, delta;
-                            bindMouseUpEvent();
-                            if (pressed) {
-                                x = coords.x;
-                                delta = startX - x;
-                                if (delta > 2 || delta < -2) {
-                                    swipeMoved = true;
-                                    var moveOffset = offset + (-delta * 100 / elWidth);
-                                    updateSlidesPosition(moveOffset);
-                                }
-                            }
-                            return false;
-                        }
-
-                        var init = true;
-                        scope.carouselIndex = 0;
-
-                        if (!isRepeatBased) {
-                            // fake array when no ng-repeat
-                            currentSlides = [];
-                            angular.forEach(getSlidesDOM(), function(node, index) {
-                                currentSlides.push({id: index});
-                            });
-                        }
-
-                        if (iAttributes.rnCarouselControls!==undefined) {
-                            // dont use a directive for this
-                            var nextSlideIndexCompareValue = isRepeatBased ? repeatCollection.replace('::', '') + '.length - 1' : currentSlides.length - 1;
-                            var tpl = '<div class="rn-carousel-controls">\n' +
-                                '  <span class="rn-carousel-control rn-carousel-control-prev" ng-click="prevSlide()" ng-if="carouselIndex > 0"></span>\n' +
-                                '  <span class="rn-carousel-control rn-carousel-control-next" ng-click="nextSlide()" ng-if="carouselIndex < ' + nextSlideIndexCompareValue + '"></span>\n' +
-                                '</div>';
-                            iElement.parent().append($compile(angular.element(tpl))(scope));
-                        }
-
-                        if (iAttributes.rnCarouselAutoSlide!==undefined) {
-                            var duration = parseInt(iAttributes.rnCarouselAutoSlide, 10) || options.autoSlideDuration;
-                            scope.autoSlide = function() {
-                                if (scope.autoSlider) {
-                                    $interval.cancel(scope.autoSlider);
-                                    scope.autoSlider = null;
-                                }
-                                scope.autoSlider = $interval(function() {
-                                    if (!locked && !pressed) {
-                                        scope.nextSlide();
-                                    }
-                                }, duration * 1000);
-                            };
-                        }
-
-                        if (iAttributes.rnCarouselDefaultIndex) {
-                            var defaultIndexModel = $parse(iAttributes.rnCarouselDefaultIndex);
-                            options.defaultIndex = defaultIndexModel(scope.$parent) || 0;
-                        }
-
-                        if (iAttributes.rnCarouselIndex) {
-                            var updateParentIndex = function(value) {
-                                indexModel.assign(scope.$parent, value);
-                            };
-                            var indexModel = $parse(iAttributes.rnCarouselIndex);
-                            if (angular.isFunction(indexModel.assign)) {
-                                /* check if this property is assignable then watch it */
-                                scope.$watch('carouselIndex', function(newValue) {
-                                    updateParentIndex(newValue);
-                                });
-                                scope.$parent.$watch(indexModel, function(newValue, oldValue) {
-
-                                    if (newValue !== undefined && newValue !== null) {
-                                        if (currentSlides && currentSlides.length > 0 && newValue >= currentSlides.length) {
-                                            newValue = currentSlides.length - 1;
-                                            updateParentIndex(newValue);
-                                        } else if (currentSlides && newValue < 0) {
-                                            newValue = 0;
-                                            updateParentIndex(newValue);
-                                        }
-                                        if (!locked) {
-                                            goToSlide(newValue, {
-                                                animate: !init
-                                            });
-                                        }
-                                        init = false;
-                                    }
-                                });
-                                isIndexBound = true;
-
-                                if (options.defaultIndex) {
-                                    goToSlide(options.defaultIndex, {
-                                        animate: !init
-                                    });
-                                }
-                            } else if (!isNaN(iAttributes.rnCarouselIndex)) {
-                                /* if user just set an initial number, set it */
-                                goToSlide(parseInt(iAttributes.rnCarouselIndex, 10), {
-                                    animate: false
-                                });
-                            }
-                        } else {
-                            goToSlide(options.defaultIndex, {
-                                animate: !init
-                            });
-                            init = false;
-                        }
-
-                        if (iAttributes.rnCarouselLocked) {
-                            scope.$watch(iAttributes.rnCarouselLocked, function(newValue, oldValue) {
-                                // only bind swipe when it's not switched off
-                                if(newValue === true) {
-                                    locked = true;
-                                } else {
-                                    locked = false;
-                                }
-                            });
-                        }
-
-                        if (isRepeatBased) {
-                            // use rn-carousel-deep-watch to fight the Angular $watchCollection weakness : https://github.com/angular/angular.js/issues/2621
-                            // optional because it have some performance impacts (deep watch)
-                            var deepWatch = (iAttributes.rnCarouselDeepWatch!==undefined);
-
-                            scope[deepWatch?'$watch':'$watchCollection'](repeatCollection, function(newValue, oldValue) {
-                                //console.log('repeatCollection', currentSlides);
-                                currentSlides = newValue;
-                                // if deepWatch ON ,manually compare objects to guess the new position
-                                if (deepWatch && angular.isArray(newValue)) {
-                                    var activeElement = oldValue[scope.carouselIndex];
-                                    var newIndex = getItemIndex(newValue, activeElement, scope.carouselIndex);
-                                    goToSlide(newIndex, {animate: false});
-                                } else {
-                                    goToSlide(scope.carouselIndex, {animate: false});
-                                }
-                            }, true);
-                        }
-
-                        function swipeEnd(coords, event, forceAnimation) {
-                            //  console.log('swipeEnd', 'scope.carouselIndex', scope.carouselIndex);
-                            // Prevent clicks on buttons inside slider to trigger "swipeEnd" event on touchend/mouseup
-                            // console.log(iAttributes.rnCarouselOnInfiniteScroll);
-                            if (event && !swipeMoved) {
-                                return;
-                            }
-                            unbindMouseUpEvent();
-                            pressed = false;
-                            swipeMoved = false;
-                            destination = startX - coords.x;
-                            if (destination===0) {
-                                return;
-                            }
-                            if (locked) {
-                                return;
-                            }
-                            offset += (-destination * 100 / elWidth);
-                            if (options.isSequential) {
-                                var minMove = options.moveTreshold * elWidth,
-                                    absMove = -destination,
-                                    slidesMove = -Math[absMove >= 0 ? 'ceil' : 'floor'](absMove / elWidth),
-                                    shouldMove = Math.abs(absMove) > minMove;
-
-                                if (currentSlides && (slidesMove + scope.carouselIndex) >= currentSlides.length) {
-                                    slidesMove = currentSlides.length - 1 - scope.carouselIndex;
-                                }
-                                if ((slidesMove + scope.carouselIndex) < 0) {
-                                    slidesMove = -scope.carouselIndex;
-                                }
-                                var moveOffset = shouldMove ? slidesMove : 0;
-
-                                destination = (scope.carouselIndex + moveOffset);
-
-                                goToSlide(destination);
-                                if(iAttributes.rnCarouselOnInfiniteScrollRight!==undefined && slidesMove === 0 && scope.carouselIndex !== 0) {
-                                    $parse(iAttributes.rnCarouselOnInfiniteScrollRight)(scope)
-                                    goToSlide(0);
-                                }
-                                if(iAttributes.rnCarouselOnInfiniteScrollLeft!==undefined && slidesMove === 0 && scope.carouselIndex === 0 && moveOffset === 0) {
-                                    $parse(iAttributes.rnCarouselOnInfiniteScrollLeft)(scope)
-                                    goToSlide(currentSlides.length);
-                                }
-
-                            } else {
-                                scope.$apply(function() {
-                                    scope.carouselIndex = parseInt(-offset / 100, 10);
-                                    updateBufferIndex();
-                                });
-
-                            }
-
-                        }
-
-                        scope.$on('$destroy', function() {
-                            unbindMouseUpEvent();
-                        });
-
-                        scope.carouselBufferIndex = 0;
-                        scope.carouselBufferSize = options.bufferSize;
-
-                        function updateBufferIndex() {
-                            // update and cap te buffer index
-                            var bufferIndex = 0;
-                            var bufferEdgeSize = (scope.carouselBufferSize - 1) / 2;
-                            if (isBuffered) {
-                                if (scope.carouselIndex <= bufferEdgeSize) {
-                                    // first buffer part
-                                    bufferIndex = 0;
-                                } else if (currentSlides && currentSlides.length < scope.carouselBufferSize) {
-                                    // smaller than buffer
-                                    bufferIndex = 0;
-                                } else if (currentSlides && scope.carouselIndex > currentSlides.length - scope.carouselBufferSize) {
-                                    // last buffer part
-                                    bufferIndex = currentSlides.length - scope.carouselBufferSize;
-                                } else {
-                                    // compute buffer start
-                                    bufferIndex = scope.carouselIndex - bufferEdgeSize;
-                                }
-
-                                scope.carouselBufferIndex = bufferIndex;
-                                $timeout(function() {
-                                    updateSlidesPosition(offset);
-                                }, 0, false);
-                            } else {
-                                $timeout(function() {
-                                    updateSlidesPosition(offset);
-                                }, 0, false);
-                            }
-                        }
-
-                        function onOrientationChange() {
-                            updateContainerWidth();
-                            goToSlide();
-                        }
-
-                        // handle orientation change
-                        var winEl = angular.element($window);
-                        winEl.bind('orientationchange', onOrientationChange);
-                        winEl.bind('resize', onOrientationChange);
-
-                        scope.$on('$destroy', function() {
-                            unbindMouseUpEvent();
-                            winEl.unbind('orientationchange', onOrientationChange);
-                            winEl.unbind('resize', onOrientationChange);
-                        });
-                    };
-                }
-            };
-        }
-    ]);
-})();
-
-
-
-angular.module('angular-carousel.shifty', [])
-
-.factory('Tweenable', function() {
-
-    /*! shifty - v1.3.4 - 2014-10-29 - http://jeremyckahn.github.io/shifty */
-  ;(function (root) {
-
-  /*!
-   * Shifty Core
-   * By Jeremy Kahn - jeremyckahn@gmail.com
-   */
-
-  var Tweenable = (function () {
-
-    'use strict';
-
-    // Aliases that get defined later in this function
-    var formula;
-
-    // CONSTANTS
-    var DEFAULT_SCHEDULE_FUNCTION;
-    var DEFAULT_EASING = 'linear';
-    var DEFAULT_DURATION = 500;
-    var UPDATE_TIME = 1000 / 60;
-
-    var _now = Date.now
-         ? Date.now
-         : function () {return +new Date();};
-
-    var now = typeof SHIFTY_DEBUG_NOW !== 'undefined' ? SHIFTY_DEBUG_NOW : _now;
-
-    if (typeof window !== 'undefined') {
-      // requestAnimationFrame() shim by Paul Irish (modified for Shifty)
-      // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
-      DEFAULT_SCHEDULE_FUNCTION = window.requestAnimationFrame
-         || window.webkitRequestAnimationFrame
-         || window.oRequestAnimationFrame
-         || window.msRequestAnimationFrame
-         || (window.mozCancelRequestAnimationFrame
-         && window.mozRequestAnimationFrame)
-         || setTimeout;
-    } else {
-      DEFAULT_SCHEDULE_FUNCTION = setTimeout;
-    }
-
-    function noop () {
-      // NOOP!
-    }
-
-    /*!
-     * Handy shortcut for doing a for-in loop. This is not a "normal" each
-     * function, it is optimized for Shifty.  The iterator function only receives
-     * the property name, not the value.
-     * @param {Object} obj
-     * @param {Function(string)} fn
-     */
-    function each (obj, fn) {
-      var key;
-      for (key in obj) {
-        if (Object.hasOwnProperty.call(obj, key)) {
-          fn(key);
-        }
-      }
-    }
-
-    /*!
-     * Perform a shallow copy of Object properties.
-     * @param {Object} targetObject The object to copy into
-     * @param {Object} srcObject The object to copy from
-     * @return {Object} A reference to the augmented `targetObj` Object
-     */
-    function shallowCopy (targetObj, srcObj) {
-      each(srcObj, function (prop) {
-        targetObj[prop] = srcObj[prop];
-      });
-
-      return targetObj;
-    }
-
-    /*!
-     * Copies each property from src onto target, but only if the property to
-     * copy to target is undefined.
-     * @param {Object} target Missing properties in this Object are filled in
-     * @param {Object} src
-     */
-    function defaults (target, src) {
-      each(src, function (prop) {
-        if (typeof target[prop] === 'undefined') {
-          target[prop] = src[prop];
-        }
-      });
-    }
-
-    /*!
-     * Calculates the interpolated tween values of an Object for a given
-     * timestamp.
-     * @param {Number} forPosition The position to compute the state for.
-     * @param {Object} currentState Current state properties.
-     * @param {Object} originalState: The original state properties the Object is
-     * tweening from.
-     * @param {Object} targetState: The destination state properties the Object
-     * is tweening to.
-     * @param {number} duration: The length of the tween in milliseconds.
-     * @param {number} timestamp: The UNIX epoch time at which the tween began.
-     * @param {Object} easing: This Object's keys must correspond to the keys in
-     * targetState.
-     */
-    function tweenProps (forPosition, currentState, originalState, targetState,
-      duration, timestamp, easing) {
-      var normalizedPosition = (forPosition - timestamp) / duration;
-
-      var prop;
-      for (prop in currentState) {
-        if (currentState.hasOwnProperty(prop)) {
-          currentState[prop] = tweenProp(originalState[prop],
-            targetState[prop], formula[easing[prop]], normalizedPosition);
-        }
-      }
-
-      return currentState;
-    }
-
-    /*!
-     * Tweens a single property.
-     * @param {number} start The value that the tween started from.
-     * @param {number} end The value that the tween should end at.
-     * @param {Function} easingFunc The easing curve to apply to the tween.
-     * @param {number} position The normalized position (between 0.0 and 1.0) to
-     * calculate the midpoint of 'start' and 'end' against.
-     * @return {number} The tweened value.
-     */
-    function tweenProp (start, end, easingFunc, position) {
-      return start + (end - start) * easingFunc(position);
-    }
-
-    /*!
-     * Applies a filter to Tweenable instance.
-     * @param {Tweenable} tweenable The `Tweenable` instance to call the filter
-     * upon.
-     * @param {String} filterName The name of the filter to apply.
-     */
-    function applyFilter (tweenable, filterName) {
-      var filters = Tweenable.prototype.filter;
-      var args = tweenable._filterArgs;
-
-      each(filters, function (name) {
-        if (typeof filters[name][filterName] !== 'undefined') {
-          filters[name][filterName].apply(tweenable, args);
-        }
-      });
-    }
-
-    var timeoutHandler_endTime;
-    var timeoutHandler_currentTime;
-    var timeoutHandler_isEnded;
-    var timeoutHandler_offset;
-    /*!
-     * Handles the update logic for one step of a tween.
-     * @param {Tweenable} tweenable
-     * @param {number} timestamp
-     * @param {number} duration
-     * @param {Object} currentState
-     * @param {Object} originalState
-     * @param {Object} targetState
-     * @param {Object} easing
-     * @param {Function(Object, *, number)} step
-     * @param {Function(Function,number)}} schedule
-     */
-    function timeoutHandler (tweenable, timestamp, duration, currentState,
-      originalState, targetState, easing, step, schedule) {
-      timeoutHandler_endTime = timestamp + duration;
-      timeoutHandler_currentTime = Math.min(now(), timeoutHandler_endTime);
-      timeoutHandler_isEnded =
-        timeoutHandler_currentTime >= timeoutHandler_endTime;
-
-      timeoutHandler_offset = duration - (
-          timeoutHandler_endTime - timeoutHandler_currentTime);
-
-      if (tweenable.isPlaying() && !timeoutHandler_isEnded) {
-        tweenable._scheduleId = schedule(tweenable._timeoutHandler, UPDATE_TIME);
-
-        applyFilter(tweenable, 'beforeTween');
-        tweenProps(timeoutHandler_currentTime, currentState, originalState,
-          targetState, duration, timestamp, easing);
-        applyFilter(tweenable, 'afterTween');
-
-        step(currentState, tweenable._attachment, timeoutHandler_offset);
-      } else if (timeoutHandler_isEnded) {
-        step(targetState, tweenable._attachment, timeoutHandler_offset);
-        tweenable.stop(true);
-      }
-    }
-
-
-    /*!
-     * Creates a usable easing Object from either a string or another easing
-     * Object.  If `easing` is an Object, then this function clones it and fills
-     * in the missing properties with "linear".
-     * @param {Object} fromTweenParams
-     * @param {Object|string} easing
-     */
-    function composeEasingObject (fromTweenParams, easing) {
-      var composedEasing = {};
-
-      if (typeof easing === 'string') {
-        each(fromTweenParams, function (prop) {
-          composedEasing[prop] = easing;
-        });
-      } else {
-        each(fromTweenParams, function (prop) {
-          if (!composedEasing[prop]) {
-            composedEasing[prop] = easing[prop] || DEFAULT_EASING;
-          }
-        });
-      }
-
-      return composedEasing;
-    }
-
-    /**
-     * Tweenable constructor.
-     * @param {Object=} opt_initialState The values that the initial tween should start at if a "from" object is not provided to Tweenable#tween.
-     * @param {Object=} opt_config See Tweenable.prototype.setConfig()
-     * @constructor
-     */
-    function Tweenable (opt_initialState, opt_config) {
-      this._currentState = opt_initialState || {};
-      this._configured = false;
-      this._scheduleFunction = DEFAULT_SCHEDULE_FUNCTION;
-
-      // To prevent unnecessary calls to setConfig do not set default configuration here.
-      // Only set default configuration immediately before tweening if none has been set.
-      if (typeof opt_config !== 'undefined') {
-        this.setConfig(opt_config);
-      }
-    }
-
-    /**
-     * Configure and start a tween.
-     * @param {Object=} opt_config See Tweenable.prototype.setConfig()
-     * @return {Tweenable}
-     */
-    Tweenable.prototype.tween = function (opt_config) {
-      if (this._isTweening) {
-        return this;
-      }
-
-      // Only set default config if no configuration has been set previously and none is provided now.
-      if (opt_config !== undefined || !this._configured) {
-        this.setConfig(opt_config);
-      }
-
-      this._timestamp = now();
-      this._start(this.get(), this._attachment);
-      return this.resume();
-    };
-
-    /**
-     * Sets the tween configuration. `config` may have the following options:
-     *
-     * - __from__ (_Object=_): Starting position.  If omitted, the current state is used.
-     * - __to__ (_Object=_): Ending position.
-     * - __duration__ (_number=_): How many milliseconds to animate for.
-     * - __start__ (_Function(Object)_): Function to execute when the tween begins.  Receives the state of the tween as the first parameter. Attachment is the second parameter.
-     * - __step__ (_Function(Object, *, number)_): Function to execute on every tick.  Receives the state of the tween as the first parameter. Attachment is the second parameter, and the time elapsed since the start of the tween is the third parameter. This function is not called on the final step of the animation, but `finish` is.
-     * - __finish__ (_Function(Object, *)_): Function to execute upon tween completion.  Receives the state of the tween as the first parameter. Attachment is the second parameter.
-     * - __easing__ (_Object|string=_): Easing curve name(s) to use for the tween.
-     * - __attachment__ (_Object|string|any=_): Value that is attached to this instance and passed on to the step/start/finish methods.
-     * @param {Object} config
-     * @return {Tweenable}
-     */
-    Tweenable.prototype.setConfig = function (config) {
-      config = config || {};
-      this._configured = true;
-
-      // Attach something to this Tweenable instance (e.g.: a DOM element, an object, a string, etc.);
-      this._attachment = config.attachment;
-
-      // Init the internal state
-      this._pausedAtTime = null;
-      this._scheduleId = null;
-      this._start = config.start || noop;
-      this._step = config.step || noop;
-      this._finish = config.finish || noop;
-      this._duration = config.duration || DEFAULT_DURATION;
-      this._currentState = config.from || this.get();
-      this._originalState = this.get();
-      this._targetState = config.to || this.get();
-
-      // Aliases used below
-      var currentState = this._currentState;
-      var targetState = this._targetState;
-
-      // Ensure that there is always something to tween to.
-      defaults(targetState, currentState);
-
-      this._easing = composeEasingObject(
-        currentState, config.easing || DEFAULT_EASING);
-
-      this._filterArgs =
-        [currentState, this._originalState, targetState, this._easing];
-
-      applyFilter(this, 'tweenCreated');
-      return this;
-    };
-
-    /**
-     * Gets the current state.
-     * @return {Object}
-     */
-    Tweenable.prototype.get = function () {
-      return shallowCopy({}, this._currentState);
-    };
-
-    /**
-     * Sets the current state.
-     * @param {Object} state
-     */
-    Tweenable.prototype.set = function (state) {
-      this._currentState = state;
-    };
-
-    /**
-     * Pauses a tween.  Paused tweens can be resumed from the point at which they were paused.  This is different than [`stop()`](#stop), as that method causes a tween to start over when it is resumed.
-     * @return {Tweenable}
-     */
-    Tweenable.prototype.pause = function () {
-      this._pausedAtTime = now();
-      this._isPaused = true;
-      return this;
-    };
-
-    /**
-     * Resumes a paused tween.
-     * @return {Tweenable}
-     */
-    Tweenable.prototype.resume = function () {
-      if (this._isPaused) {
-        this._timestamp += now() - this._pausedAtTime;
-      }
-
-      this._isPaused = false;
-      this._isTweening = true;
-
-      var self = this;
-      this._timeoutHandler = function () {
-        timeoutHandler(self, self._timestamp, self._duration, self._currentState,
-          self._originalState, self._targetState, self._easing, self._step,
-          self._scheduleFunction);
-      };
-
-      this._timeoutHandler();
-
-      return this;
-    };
-
-    /**
-     * Move the state of the animation to a specific point in the tween's timeline.
-     * If the animation is not running, this will cause the `step` handlers to be
-     * called.
-     * @param {millisecond} millisecond The millisecond of the animation to seek to.
-     * @return {Tweenable}
-     */
-    Tweenable.prototype.seek = function (millisecond) {
-      this._timestamp = now() - millisecond;
-
-      if (!this.isPlaying()) {
-        this._isTweening = true;
-        this._isPaused = false;
-
-        // If the animation is not running, call timeoutHandler to make sure that
-        // any step handlers are run.
-        timeoutHandler(this, this._timestamp, this._duration, this._currentState,
-          this._originalState, this._targetState, this._easing, this._step,
-          this._scheduleFunction);
-
-        this._timeoutHandler();
-        this.pause();
-      }
-
-      return this;
-    };
-
-    /**
-     * Stops and cancels a tween.
-     * @param {boolean=} gotoEnd If false or omitted, the tween just stops at its current state, and the "finish" handler is not invoked.  If true, the tweened object's values are instantly set to the target values, and "finish" is invoked.
-     * @return {Tweenable}
-     */
-    Tweenable.prototype.stop = function (gotoEnd) {
-      this._isTweening = false;
-      this._isPaused = false;
-      this._timeoutHandler = noop;
-
-      (root.cancelAnimationFrame            ||
-        root.webkitCancelAnimationFrame     ||
-        root.oCancelAnimationFrame          ||
-        root.msCancelAnimationFrame         ||
-        root.mozCancelRequestAnimationFrame ||
-        root.clearTimeout)(this._scheduleId);
-
-      if (gotoEnd) {
-        shallowCopy(this._currentState, this._targetState);
-        applyFilter(this, 'afterTweenEnd');
-        this._finish.call(this, this._currentState, this._attachment);
-      }
-
-      return this;
-    };
-
-    /**
-     * Returns whether or not a tween is running.
-     * @return {boolean}
-     */
-    Tweenable.prototype.isPlaying = function () {
-      return this._isTweening && !this._isPaused;
-    };
-
-    /**
-     * Sets a custom schedule function.
-     *
-     * If a custom function is not set the default one is used [`requestAnimationFrame`](https://developer.mozilla.org/en-US/docs/Web/API/window.requestAnimationFrame) if available, otherwise [`setTimeout`](https://developer.mozilla.org/en-US/docs/Web/API/Window.setTimeout)).
-     *
-     * @param {Function(Function,number)} scheduleFunction The function to be called to schedule the next frame to be rendered
-     */
-    Tweenable.prototype.setScheduleFunction = function (scheduleFunction) {
-      this._scheduleFunction = scheduleFunction;
-    };
-
-    /**
-     * `delete`s all "own" properties.  Call this when the `Tweenable` instance is no longer needed to free memory.
-     */
-    Tweenable.prototype.dispose = function () {
-      var prop;
-      for (prop in this) {
-        if (this.hasOwnProperty(prop)) {
-          delete this[prop];
-        }
-      }
-    };
-
-    /*!
-     * Filters are used for transforming the properties of a tween at various
-     * points in a Tweenable's life cycle.  See the README for more info on this.
-     */
-    Tweenable.prototype.filter = {};
-
-    /*!
-     * This object contains all of the tweens available to Shifty.  It is extendible - simply attach properties to the Tweenable.prototype.formula Object following the same format at linear.
-     *
-     * `pos` should be a normalized `number` (between 0 and 1).
-     */
-    Tweenable.prototype.formula = {
-      linear: function (pos) {
-        return pos;
-      }
-    };
-
-    formula = Tweenable.prototype.formula;
-
-    shallowCopy(Tweenable, {
-      'now': now
-      ,'each': each
-      ,'tweenProps': tweenProps
-      ,'tweenProp': tweenProp
-      ,'applyFilter': applyFilter
-      ,'shallowCopy': shallowCopy
-      ,'defaults': defaults
-      ,'composeEasingObject': composeEasingObject
-    });
-
-    root.Tweenable = Tweenable;
-    return Tweenable;
-
-  } ());
-
-  /*!
-   * All equations are adapted from Thomas Fuchs' [Scripty2](https://github.com/madrobby/scripty2/blob/master/src/effects/transitions/penner.js).
-   *
-   * Based on Easing Equations (c) 2003 [Robert Penner](http://www.robertpenner.com/), all rights reserved. This work is [subject to terms](http://www.robertpenner.com/easing_terms_of_use.html).
-   */
-
-  /*!
-   *  TERMS OF USE - EASING EQUATIONS
-   *  Open source under the BSD License.
-   *  Easing Equations (c) 2003 Robert Penner, all rights reserved.
-   */
-
-  ;(function () {
-
-    Tweenable.shallowCopy(Tweenable.prototype.formula, {
-      easeInQuad: function (pos) {
-        return Math.pow(pos, 2);
-      },
-
-      easeOutQuad: function (pos) {
-        return -(Math.pow((pos - 1), 2) - 1);
-      },
-
-      easeInOutQuad: function (pos) {
-        if ((pos /= 0.5) < 1) {return 0.5 * Math.pow(pos,2);}
-        return -0.5 * ((pos -= 2) * pos - 2);
-      },
-
-      easeInCubic: function (pos) {
-        return Math.pow(pos, 3);
-      },
-
-      easeOutCubic: function (pos) {
-        return (Math.pow((pos - 1), 3) + 1);
-      },
-
-      easeInOutCubic: function (pos) {
-        if ((pos /= 0.5) < 1) {return 0.5 * Math.pow(pos,3);}
-        return 0.5 * (Math.pow((pos - 2),3) + 2);
-      },
-
-      easeInQuart: function (pos) {
-        return Math.pow(pos, 4);
-      },
-
-      easeOutQuart: function (pos) {
-        return -(Math.pow((pos - 1), 4) - 1);
-      },
-
-      easeInOutQuart: function (pos) {
-        if ((pos /= 0.5) < 1) {return 0.5 * Math.pow(pos,4);}
-        return -0.5 * ((pos -= 2) * Math.pow(pos,3) - 2);
-      },
-
-      easeInQuint: function (pos) {
-        return Math.pow(pos, 5);
-      },
-
-      easeOutQuint: function (pos) {
-        return (Math.pow((pos - 1), 5) + 1);
-      },
-
-      easeInOutQuint: function (pos) {
-        if ((pos /= 0.5) < 1) {return 0.5 * Math.pow(pos,5);}
-        return 0.5 * (Math.pow((pos - 2),5) + 2);
-      },
-
-      easeInSine: function (pos) {
-        return -Math.cos(pos * (Math.PI / 2)) + 1;
-      },
-
-      easeOutSine: function (pos) {
-        return Math.sin(pos * (Math.PI / 2));
-      },
-
-      easeInOutSine: function (pos) {
-        return (-0.5 * (Math.cos(Math.PI * pos) - 1));
-      },
-
-      easeInExpo: function (pos) {
-        return (pos === 0) ? 0 : Math.pow(2, 10 * (pos - 1));
-      },
-
-      easeOutExpo: function (pos) {
-        return (pos === 1) ? 1 : -Math.pow(2, -10 * pos) + 1;
-      },
-
-      easeInOutExpo: function (pos) {
-        if (pos === 0) {return 0;}
-        if (pos === 1) {return 1;}
-        if ((pos /= 0.5) < 1) {return 0.5 * Math.pow(2,10 * (pos - 1));}
-        return 0.5 * (-Math.pow(2, -10 * --pos) + 2);
-      },
-
-      easeInCirc: function (pos) {
-        return -(Math.sqrt(1 - (pos * pos)) - 1);
-      },
-
-      easeOutCirc: function (pos) {
-        return Math.sqrt(1 - Math.pow((pos - 1), 2));
-      },
-
-      easeInOutCirc: function (pos) {
-        if ((pos /= 0.5) < 1) {return -0.5 * (Math.sqrt(1 - pos * pos) - 1);}
-        return 0.5 * (Math.sqrt(1 - (pos -= 2) * pos) + 1);
-      },
-
-      easeOutBounce: function (pos) {
-        if ((pos) < (1 / 2.75)) {
-          return (7.5625 * pos * pos);
-        } else if (pos < (2 / 2.75)) {
-          return (7.5625 * (pos -= (1.5 / 2.75)) * pos + 0.75);
-        } else if (pos < (2.5 / 2.75)) {
-          return (7.5625 * (pos -= (2.25 / 2.75)) * pos + 0.9375);
-        } else {
-          return (7.5625 * (pos -= (2.625 / 2.75)) * pos + 0.984375);
-        }
-      },
-
-      easeInBack: function (pos) {
-        var s = 1.70158;
-        return (pos) * pos * ((s + 1) * pos - s);
-      },
-
-      easeOutBack: function (pos) {
-        var s = 1.70158;
-        return (pos = pos - 1) * pos * ((s + 1) * pos + s) + 1;
-      },
-
-      easeInOutBack: function (pos) {
-        var s = 1.70158;
-        if ((pos /= 0.5) < 1) {return 0.5 * (pos * pos * (((s *= (1.525)) + 1) * pos - s));}
-        return 0.5 * ((pos -= 2) * pos * (((s *= (1.525)) + 1) * pos + s) + 2);
-      },
-
-      elastic: function (pos) {
-        return -1 * Math.pow(4,-8 * pos) * Math.sin((pos * 6 - 1) * (2 * Math.PI) / 2) + 1;
-      },
-
-      swingFromTo: function (pos) {
-        var s = 1.70158;
-        return ((pos /= 0.5) < 1) ? 0.5 * (pos * pos * (((s *= (1.525)) + 1) * pos - s)) :
-            0.5 * ((pos -= 2) * pos * (((s *= (1.525)) + 1) * pos + s) + 2);
-      },
-
-      swingFrom: function (pos) {
-        var s = 1.70158;
-        return pos * pos * ((s + 1) * pos - s);
-      },
-
-      swingTo: function (pos) {
-        var s = 1.70158;
-        return (pos -= 1) * pos * ((s + 1) * pos + s) + 1;
-      },
-
-      bounce: function (pos) {
-        if (pos < (1 / 2.75)) {
-          return (7.5625 * pos * pos);
-        } else if (pos < (2 / 2.75)) {
-          return (7.5625 * (pos -= (1.5 / 2.75)) * pos + 0.75);
-        } else if (pos < (2.5 / 2.75)) {
-          return (7.5625 * (pos -= (2.25 / 2.75)) * pos + 0.9375);
-        } else {
-          return (7.5625 * (pos -= (2.625 / 2.75)) * pos + 0.984375);
-        }
-      },
-
-      bouncePast: function (pos) {
-        if (pos < (1 / 2.75)) {
-          return (7.5625 * pos * pos);
-        } else if (pos < (2 / 2.75)) {
-          return 2 - (7.5625 * (pos -= (1.5 / 2.75)) * pos + 0.75);
-        } else if (pos < (2.5 / 2.75)) {
-          return 2 - (7.5625 * (pos -= (2.25 / 2.75)) * pos + 0.9375);
-        } else {
-          return 2 - (7.5625 * (pos -= (2.625 / 2.75)) * pos + 0.984375);
-        }
-      },
-
-      easeFromTo: function (pos) {
-        if ((pos /= 0.5) < 1) {return 0.5 * Math.pow(pos,4);}
-        return -0.5 * ((pos -= 2) * Math.pow(pos,3) - 2);
-      },
-
-      easeFrom: function (pos) {
-        return Math.pow(pos,4);
-      },
-
-      easeTo: function (pos) {
-        return Math.pow(pos,0.25);
-      }
-    });
-
-  }());
-
-  /*!
-   * The Bezier magic in this file is adapted/copied almost wholesale from
-   * [Scripty2](https://github.com/madrobby/scripty2/blob/master/src/effects/transitions/cubic-bezier.js),
-   * which was adapted from Apple code (which probably came from
-   * [here](http://opensource.apple.com/source/WebCore/WebCore-955.66/platform/graphics/UnitBezier.h)).
-   * Special thanks to Apple and Thomas Fuchs for much of this code.
-   */
-
-  /*!
-   *  Copyright (c) 2006 Apple Computer, Inc. All rights reserved.
-   *
-   *  Redistribution and use in source and binary forms, with or without
-   *  modification, are permitted provided that the following conditions are met:
-   *
-   *  1. Redistributions of source code must retain the above copyright notice,
-   *  this list of conditions and the following disclaimer.
-   *
-   *  2. Redistributions in binary form must reproduce the above copyright notice,
-   *  this list of conditions and the following disclaimer in the documentation
-   *  and/or other materials provided with the distribution.
-   *
-   *  3. Neither the name of the copyright holder(s) nor the names of any
-   *  contributors may be used to endorse or promote products derived from
-   *  this software without specific prior written permission.
-   *
-   *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-   *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-   *  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-   *  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
-   *  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-   *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-   *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-   *  ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-   *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-   */
-  ;(function () {
-    // port of webkit cubic bezier handling by http://www.netzgesta.de/dev/
-    function cubicBezierAtTime(t,p1x,p1y,p2x,p2y,duration) {
-      var ax = 0,bx = 0,cx = 0,ay = 0,by = 0,cy = 0;
-      function sampleCurveX(t) {return ((ax * t + bx) * t + cx) * t;}
-      function sampleCurveY(t) {return ((ay * t + by) * t + cy) * t;}
-      function sampleCurveDerivativeX(t) {return (3.0 * ax * t + 2.0 * bx) * t + cx;}
-      function solveEpsilon(duration) {return 1.0 / (200.0 * duration);}
-      function solve(x,epsilon) {return sampleCurveY(solveCurveX(x,epsilon));}
-      function fabs(n) {if (n >= 0) {return n;}else {return 0 - n;}}
-      function solveCurveX(x,epsilon) {
-        var t0,t1,t2,x2,d2,i;
-        for (t2 = x, i = 0; i < 8; i++) {x2 = sampleCurveX(t2) - x; if (fabs(x2) < epsilon) {return t2;} d2 = sampleCurveDerivativeX(t2); if (fabs(d2) < 1e-6) {break;} t2 = t2 - x2 / d2;}
-        t0 = 0.0; t1 = 1.0; t2 = x; if (t2 < t0) {return t0;} if (t2 > t1) {return t1;}
-        while (t0 < t1) {x2 = sampleCurveX(t2); if (fabs(x2 - x) < epsilon) {return t2;} if (x > x2) {t0 = t2;}else {t1 = t2;} t2 = (t1 - t0) * 0.5 + t0;}
-        return t2; // Failure.
-      }
-      cx = 3.0 * p1x; bx = 3.0 * (p2x - p1x) - cx; ax = 1.0 - cx - bx; cy = 3.0 * p1y; by = 3.0 * (p2y - p1y) - cy; ay = 1.0 - cy - by;
-      return solve(t, solveEpsilon(duration));
-    }
-    /*!
-     *  getCubicBezierTransition(x1, y1, x2, y2) -> Function
-     *
-     *  Generates a transition easing function that is compatible
-     *  with WebKit's CSS transitions `-webkit-transition-timing-function`
-     *  CSS property.
-     *
-     *  The W3C has more information about
-     *  <a href="http://www.w3.org/TR/css3-transitions/#transition-timing-function_tag">
-     *  CSS3 transition timing functions</a>.
-     *
-     *  @param {number} x1
-     *  @param {number} y1
-     *  @param {number} x2
-     *  @param {number} y2
-     *  @return {function}
-     */
-    function getCubicBezierTransition (x1, y1, x2, y2) {
-      return function (pos) {
-        return cubicBezierAtTime(pos,x1,y1,x2,y2,1);
-      };
-    }
-    // End ported code
-
-    /**
-     * Creates a Bezier easing function and attaches it to `Tweenable.prototype.formula`.  This function gives you total control over the easing curve.  Matthew Lein's [Ceaser](http://matthewlein.com/ceaser/) is a useful tool for visualizing the curves you can make with this function.
-     *
-     * @param {string} name The name of the easing curve.  Overwrites the old easing function on Tweenable.prototype.formula if it exists.
-     * @param {number} x1
-     * @param {number} y1
-     * @param {number} x2
-     * @param {number} y2
-     * @return {function} The easing function that was attached to Tweenable.prototype.formula.
-     */
-    Tweenable.setBezierFunction = function (name, x1, y1, x2, y2) {
-      var cubicBezierTransition = getCubicBezierTransition(x1, y1, x2, y2);
-      cubicBezierTransition.x1 = x1;
-      cubicBezierTransition.y1 = y1;
-      cubicBezierTransition.x2 = x2;
-      cubicBezierTransition.y2 = y2;
-
-      return Tweenable.prototype.formula[name] = cubicBezierTransition;
-    };
-
-
-    /**
-     * `delete`s an easing function from `Tweenable.prototype.formula`.  Be careful with this method, as it `delete`s whatever easing formula matches `name` (which means you can delete default Shifty easing functions).
-     *
-     * @param {string} name The name of the easing function to delete.
-     * @return {function}
-     */
-    Tweenable.unsetBezierFunction = function (name) {
-      delete Tweenable.prototype.formula[name];
-    };
-
-  })();
-
-  ;(function () {
-
-    function getInterpolatedValues (
-      from, current, targetState, position, easing) {
-      return Tweenable.tweenProps(
-        position, current, from, targetState, 1, 0, easing);
-    }
-
-    // Fake a Tweenable and patch some internals.  This approach allows us to
-    // skip uneccessary processing and object recreation, cutting down on garbage
-    // collection pauses.
-    var mockTweenable = new Tweenable();
-    mockTweenable._filterArgs = [];
-
-    /**
-     * Compute the midpoint of two Objects.  This method effectively calculates a specific frame of animation that [Tweenable#tween](shifty.core.js.html#tween) does many times over the course of a tween.
-     *
-     * Example:
-     *
-     *     var interpolatedValues = Tweenable.interpolate({
-     *       width: '100px',
-     *       opacity: 0,
-     *       color: '#fff'
-     *     }, {
-     *       width: '200px',
-     *       opacity: 1,
-     *       color: '#000'
-     *     }, 0.5);
-     *
-     *     console.log(interpolatedValues);
-     *     // {opacity: 0.5, width: "150px", color: "rgb(127,127,127)"}
-     *
-     * @param {Object} from The starting values to tween from.
-     * @param {Object} targetState The ending values to tween to.
-     * @param {number} position The normalized position value (between 0.0 and 1.0) to interpolate the values between `from` and `to` for.  `from` represents 0 and `to` represents `1`.
-     * @param {string|Object} easing The easing curve(s) to calculate the midpoint against.  You can reference any easing function attached to `Tweenable.prototype.formula`.  If omitted, this defaults to "linear".
-     * @return {Object}
-     */
-    Tweenable.interpolate = function (from, targetState, position, easing) {
-      var current = Tweenable.shallowCopy({}, from);
-      var easingObject = Tweenable.composeEasingObject(
-        from, easing || 'linear');
-
-      mockTweenable.set({});
-
-      // Alias and reuse the _filterArgs array instead of recreating it.
-      var filterArgs = mockTweenable._filterArgs;
-      filterArgs.length = 0;
-      filterArgs[0] = current;
-      filterArgs[1] = from;
-      filterArgs[2] = targetState;
-      filterArgs[3] = easingObject;
-
-      // Any defined value transformation must be applied
-      Tweenable.applyFilter(mockTweenable, 'tweenCreated');
-      Tweenable.applyFilter(mockTweenable, 'beforeTween');
-
-      var interpolatedValues = getInterpolatedValues(
-        from, current, targetState, position, easingObject);
-
-      // Transform values back into their original format
-      Tweenable.applyFilter(mockTweenable, 'afterTween');
-
-      return interpolatedValues;
-    };
-
-  }());
-
-  /**
-   * Adds string interpolation support to Shifty.
-   *
-   * The Token extension allows Shifty to tween numbers inside of strings.  Among
-   * other things, this allows you to animate CSS properties.  For example, you
-   * can do this:
-   *
-   *     var tweenable = new Tweenable();
-   *     tweenable.tween({
-   *       from: { transform: 'translateX(45px)'},
-   *       to: { transform: 'translateX(90xp)'}
-   *     });
-   *
-   * ` `
-   * `translateX(45)` will be tweened to `translateX(90)`.  To demonstrate:
-   *
-   *     var tweenable = new Tweenable();
-   *     tweenable.tween({
-   *       from: { transform: 'translateX(45px)'},
-   *       to: { transform: 'translateX(90px)'},
-   *       step: function (state) {
-   *         console.log(state.transform);
-   *       }
-   *     });
-   *
-   * ` `
-   * The above snippet will log something like this in the console:
-   *
-   *     translateX(60.3px)
-   *     ...
-   *     translateX(76.05px)
-   *     ...
-   *     translateX(90px)
-   *
-   * ` `
-   * Another use for this is animating colors:
-   *
-   *     var tweenable = new Tweenable();
-   *     tweenable.tween({
-   *       from: { color: 'rgb(0,255,0)'},
-   *       to: { color: 'rgb(255,0,255)'},
-   *       step: function (state) {
-   *         console.log(state.color);
-   *       }
-   *     });
-   *
-   * ` `
-   * The above snippet will log something like this:
-   *
-   *     rgb(84,170,84)
-   *     ...
-   *     rgb(170,84,170)
-   *     ...
-   *     rgb(255,0,255)
-   *
-   * ` `
-   * This extension also supports hexadecimal colors, in both long (`#ff00ff`)
-   * and short (`#f0f`) forms.  Be aware that hexadecimal input values will be
-   * converted into the equivalent RGB output values.  This is done to optimize
-   * for performance.
-   *
-   *     var tweenable = new Tweenable();
-   *     tweenable.tween({
-   *       from: { color: '#0f0'},
-   *       to: { color: '#f0f'},
-   *       step: function (state) {
-   *         console.log(state.color);
-   *       }
-   *     });
-   *
-   * ` `
-   * This snippet will generate the same output as the one before it because
-   * equivalent values were supplied (just in hexadecimal form rather than RGB):
-   *
-   *     rgb(84,170,84)
-   *     ...
-   *     rgb(170,84,170)
-   *     ...
-   *     rgb(255,0,255)
-   *
-   * ` `
-   * ` `
-   * ## Easing support
-   *
-   * Easing works somewhat differently in the Token extension.  This is because
-   * some CSS properties have multiple values in them, and you might need to
-   * tween each value along its own easing curve.  A basic example:
-   *
-   *     var tweenable = new Tweenable();
-   *     tweenable.tween({
-   *       from: { transform: 'translateX(0px) translateY(0px)'},
-   *       to: { transform:   'translateX(100px) translateY(100px)'},
-   *       easing: { transform: 'easeInQuad' },
-   *       step: function (state) {
-   *         console.log(state.transform);
-   *       }
-   *     });
-   *
-   * ` `
-   * The above snippet create values like this:
-   *
-   *     translateX(11.560000000000002px) translateY(11.560000000000002px)
-   *     ...
-   *     translateX(46.24000000000001px) translateY(46.24000000000001px)
-   *     ...
-   *     translateX(100px) translateY(100px)
-   *
-   * ` `
-   * In this case, the values for `translateX` and `translateY` are always the
-   * same for each step of the tween, because they have the same start and end
-   * points and both use the same easing curve.  We can also tween `translateX`
-   * and `translateY` along independent curves:
-   *
-   *     var tweenable = new Tweenable();
-   *     tweenable.tween({
-   *       from: { transform: 'translateX(0px) translateY(0px)'},
-   *       to: { transform:   'translateX(100px) translateY(100px)'},
-   *       easing: { transform: 'easeInQuad bounce' },
-   *       step: function (state) {
-   *         console.log(state.transform);
-   *       }
-   *     });
-   *
-   * ` `
-   * The above snippet create values like this:
-   *
-   *     translateX(10.89px) translateY(82.355625px)
-   *     ...
-   *     translateX(44.89000000000001px) translateY(86.73062500000002px)
-   *     ...
-   *     translateX(100px) translateY(100px)
-   *
-   * ` `
-   * `translateX` and `translateY` are not in sync anymore, because `easeInQuad`
-   * was specified for `translateX` and `bounce` for `translateY`.  Mixing and
-   * matching easing curves can make for some interesting motion in your
-   * animations.
-   *
-   * The order of the space-separated easing curves correspond the token values
-   * they apply to.  If there are more token values than easing curves listed,
-   * the last easing curve listed is used.
-   */
-  function token () {
-    // Functionality for this extension runs implicitly if it is loaded.
-  } /*!*/
-
-  // token function is defined above only so that dox-foundation sees it as
-  // documentation and renders it.  It is never used, and is optimized away at
-  // build time.
-
-  ;(function (Tweenable) {
-
-    /*!
-     * @typedef {{
-     *   formatString: string
-     *   chunkNames: Array.<string>
-     * }}
-     */
-    var formatManifest;
-
-    // CONSTANTS
-
-    var R_NUMBER_COMPONENT = /(\d|\-|\.)/;
-    var R_FORMAT_CHUNKS = /([^\-0-9\.]+)/g;
-    var R_UNFORMATTED_VALUES = /[0-9.\-]+/g;
-    var R_RGB = new RegExp(
-      'rgb\\(' + R_UNFORMATTED_VALUES.source +
-      (/,\s*/.source) + R_UNFORMATTED_VALUES.source +
-      (/,\s*/.source) + R_UNFORMATTED_VALUES.source + '\\)', 'g');
-    var R_RGB_PREFIX = /^.*\(/;
-    var R_HEX = /#([0-9]|[a-f]){3,6}/gi;
-    var VALUE_PLACEHOLDER = 'VAL';
-
-    // HELPERS
-
-    var getFormatChunksFrom_accumulator = [];
-    /*!
-     * @param {Array.number} rawValues
-     * @param {string} prefix
-     *
-     * @return {Array.<string>}
-     */
-    function getFormatChunksFrom (rawValues, prefix) {
-      getFormatChunksFrom_accumulator.length = 0;
-
-      var rawValuesLength = rawValues.length;
-      var i;
-
-      for (i = 0; i < rawValuesLength; i++) {
-        getFormatChunksFrom_accumulator.push('_' + prefix + '_' + i);
-      }
-
-      return getFormatChunksFrom_accumulator;
-    }
-
-    /*!
-     * @param {string} formattedString
-     *
-     * @return {string}
-     */
-    function getFormatStringFrom (formattedString) {
-      var chunks = formattedString.match(R_FORMAT_CHUNKS);
-
-      if (!chunks) {
-        // chunks will be null if there were no tokens to parse in
-        // formattedString (for example, if formattedString is '2').  Coerce
-        // chunks to be useful here.
-        chunks = ['', ''];
-
-        // If there is only one chunk, assume that the string is a number
-        // followed by a token...
-        // NOTE: This may be an unwise assumption.
-      } else if (chunks.length === 1 ||
-          // ...or if the string starts with a number component (".", "-", or a
-          // digit)...
-          formattedString[0].match(R_NUMBER_COMPONENT)) {
-        // ...prepend an empty string here to make sure that the formatted number
-        // is properly replaced by VALUE_PLACEHOLDER
-        chunks.unshift('');
-      }
-
-      return chunks.join(VALUE_PLACEHOLDER);
-    }
-
-    /*!
-     * Convert all hex color values within a string to an rgb string.
-     *
-     * @param {Object} stateObject
-     *
-     * @return {Object} The modified obj
-     */
-    function sanitizeObjectForHexProps (stateObject) {
-      Tweenable.each(stateObject, function (prop) {
-        var currentProp = stateObject[prop];
-
-        if (typeof currentProp === 'string' && currentProp.match(R_HEX)) {
-          stateObject[prop] = sanitizeHexChunksToRGB(currentProp);
-        }
-      });
-    }
-
-    /*!
-     * @param {string} str
-     *
-     * @return {string}
-     */
-    function  sanitizeHexChunksToRGB (str) {
-      return filterStringChunks(R_HEX, str, convertHexToRGB);
-    }
-
-    /*!
-     * @param {string} hexString
-     *
-     * @return {string}
-     */
-    function convertHexToRGB (hexString) {
-      var rgbArr = hexToRGBArray(hexString);
-      return 'rgb(' + rgbArr[0] + ',' + rgbArr[1] + ',' + rgbArr[2] + ')';
-    }
-
-    var hexToRGBArray_returnArray = [];
-    /*!
-     * Convert a hexadecimal string to an array with three items, one each for
-     * the red, blue, and green decimal values.
-     *
-     * @param {string} hex A hexadecimal string.
-     *
-     * @returns {Array.<number>} The converted Array of RGB values if `hex` is a
-     * valid string, or an Array of three 0's.
-     */
-    function hexToRGBArray (hex) {
-
-      hex = hex.replace(/#/, '');
-
-      // If the string is a shorthand three digit hex notation, normalize it to
-      // the standard six digit notation
-      if (hex.length === 3) {
-        hex = hex.split('');
-        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-      }
-
-      hexToRGBArray_returnArray[0] = hexToDec(hex.substr(0, 2));
-      hexToRGBArray_returnArray[1] = hexToDec(hex.substr(2, 2));
-      hexToRGBArray_returnArray[2] = hexToDec(hex.substr(4, 2));
-
-      return hexToRGBArray_returnArray;
-    }
-
-    /*!
-     * Convert a base-16 number to base-10.
-     *
-     * @param {Number|String} hex The value to convert
-     *
-     * @returns {Number} The base-10 equivalent of `hex`.
-     */
-    function hexToDec (hex) {
-      return parseInt(hex, 16);
-    }
-
-    /*!
-     * Runs a filter operation on all chunks of a string that match a RegExp
-     *
-     * @param {RegExp} pattern
-     * @param {string} unfilteredString
-     * @param {function(string)} filter
-     *
-     * @return {string}
-     */
-    function filterStringChunks (pattern, unfilteredString, filter) {
-      var pattenMatches = unfilteredString.match(pattern);
-      var filteredString = unfilteredString.replace(pattern, VALUE_PLACEHOLDER);
-
-      if (pattenMatches) {
-        var pattenMatchesLength = pattenMatches.length;
-        var currentChunk;
-
-        for (var i = 0; i < pattenMatchesLength; i++) {
-          currentChunk = pattenMatches.shift();
-          filteredString = filteredString.replace(
-            VALUE_PLACEHOLDER, filter(currentChunk));
-        }
-      }
-
-      return filteredString;
-    }
-
-    /*!
-     * Check for floating point values within rgb strings and rounds them.
-     *
-     * @param {string} formattedString
-     *
-     * @return {string}
-     */
-    function sanitizeRGBChunks (formattedString) {
-      return filterStringChunks(R_RGB, formattedString, sanitizeRGBChunk);
-    }
-
-    /*!
-     * @param {string} rgbChunk
-     *
-     * @return {string}
-     */
-    function sanitizeRGBChunk (rgbChunk) {
-      var numbers = rgbChunk.match(R_UNFORMATTED_VALUES);
-      var numbersLength = numbers.length;
-      var sanitizedString = rgbChunk.match(R_RGB_PREFIX)[0];
-
-      for (var i = 0; i < numbersLength; i++) {
-        sanitizedString += parseInt(numbers[i], 10) + ',';
-      }
-
-      sanitizedString = sanitizedString.slice(0, -1) + ')';
-
-      return sanitizedString;
-    }
-
-    /*!
-     * @param {Object} stateObject
-     *
-     * @return {Object} An Object of formatManifests that correspond to
-     * the string properties of stateObject
-     */
-    function getFormatManifests (stateObject) {
-      var manifestAccumulator = {};
-
-      Tweenable.each(stateObject, function (prop) {
-        var currentProp = stateObject[prop];
-
-        if (typeof currentProp === 'string') {
-          var rawValues = getValuesFrom(currentProp);
-
-          manifestAccumulator[prop] = {
-            'formatString': getFormatStringFrom(currentProp)
-            ,'chunkNames': getFormatChunksFrom(rawValues, prop)
-          };
-        }
-      });
-
-      return manifestAccumulator;
-    }
-
-    /*!
-     * @param {Object} stateObject
-     * @param {Object} formatManifests
-     */
-    function expandFormattedProperties (stateObject, formatManifests) {
-      Tweenable.each(formatManifests, function (prop) {
-        var currentProp = stateObject[prop];
-        var rawValues = getValuesFrom(currentProp);
-        var rawValuesLength = rawValues.length;
-
-        for (var i = 0; i < rawValuesLength; i++) {
-          stateObject[formatManifests[prop].chunkNames[i]] = +rawValues[i];
-        }
-
-        delete stateObject[prop];
-      });
-    }
-
-    /*!
-     * @param {Object} stateObject
-     * @param {Object} formatManifests
-     */
-    function collapseFormattedProperties (stateObject, formatManifests) {
-      Tweenable.each(formatManifests, function (prop) {
-        var currentProp = stateObject[prop];
-        var formatChunks = extractPropertyChunks(
-          stateObject, formatManifests[prop].chunkNames);
-        var valuesList = getValuesList(
-          formatChunks, formatManifests[prop].chunkNames);
-        currentProp = getFormattedValues(
-          formatManifests[prop].formatString, valuesList);
-        stateObject[prop] = sanitizeRGBChunks(currentProp);
-      });
-    }
-
-    /*!
-     * @param {Object} stateObject
-     * @param {Array.<string>} chunkNames
-     *
-     * @return {Object} The extracted value chunks.
-     */
-    function extractPropertyChunks (stateObject, chunkNames) {
-      var extractedValues = {};
-      var currentChunkName, chunkNamesLength = chunkNames.length;
-
-      for (var i = 0; i < chunkNamesLength; i++) {
-        currentChunkName = chunkNames[i];
-        extractedValues[currentChunkName] = stateObject[currentChunkName];
-        delete stateObject[currentChunkName];
-      }
-
-      return extractedValues;
-    }
-
-    var getValuesList_accumulator = [];
-    /*!
-     * @param {Object} stateObject
-     * @param {Array.<string>} chunkNames
-     *
-     * @return {Array.<number>}
-     */
-    function getValuesList (stateObject, chunkNames) {
-      getValuesList_accumulator.length = 0;
-      var chunkNamesLength = chunkNames.length;
-
-      for (var i = 0; i < chunkNamesLength; i++) {
-        getValuesList_accumulator.push(stateObject[chunkNames[i]]);
-      }
-
-      return getValuesList_accumulator;
-    }
-
-    /*!
-     * @param {string} formatString
-     * @param {Array.<number>} rawValues
-     *
-     * @return {string}
-     */
-    function getFormattedValues (formatString, rawValues) {
-      var formattedValueString = formatString;
-      var rawValuesLength = rawValues.length;
-
-      for (var i = 0; i < rawValuesLength; i++) {
-        formattedValueString = formattedValueString.replace(
-          VALUE_PLACEHOLDER, +rawValues[i].toFixed(4));
-      }
-
-      return formattedValueString;
-    }
-
-    /*!
-     * Note: It's the duty of the caller to convert the Array elements of the
-     * return value into numbers.  This is a performance optimization.
-     *
-     * @param {string} formattedString
-     *
-     * @return {Array.<string>|null}
-     */
-    function getValuesFrom (formattedString) {
-      return formattedString.match(R_UNFORMATTED_VALUES);
-    }
-
-    /*!
-     * @param {Object} easingObject
-     * @param {Object} tokenData
-     */
-    function expandEasingObject (easingObject, tokenData) {
-      Tweenable.each(tokenData, function (prop) {
-        var currentProp = tokenData[prop];
-        var chunkNames = currentProp.chunkNames;
-        var chunkLength = chunkNames.length;
-        var easingChunks = easingObject[prop].split(' ');
-        var lastEasingChunk = easingChunks[easingChunks.length - 1];
-
-        for (var i = 0; i < chunkLength; i++) {
-          easingObject[chunkNames[i]] = easingChunks[i] || lastEasingChunk;
-        }
-
-        delete easingObject[prop];
-      });
-    }
-
-    /*!
-     * @param {Object} easingObject
-     * @param {Object} tokenData
-     */
-    function collapseEasingObject (easingObject, tokenData) {
-      Tweenable.each(tokenData, function (prop) {
-        var currentProp = tokenData[prop];
-        var chunkNames = currentProp.chunkNames;
-        var chunkLength = chunkNames.length;
-        var composedEasingString = '';
-
-        for (var i = 0; i < chunkLength; i++) {
-          composedEasingString += ' ' + easingObject[chunkNames[i]];
-          delete easingObject[chunkNames[i]];
-        }
-
-        easingObject[prop] = composedEasingString.substr(1);
-      });
-    }
-
-    Tweenable.prototype.filter.token = {
-      'tweenCreated': function (currentState, fromState, toState, easingObject) {
-        sanitizeObjectForHexProps(currentState);
-        sanitizeObjectForHexProps(fromState);
-        sanitizeObjectForHexProps(toState);
-        this._tokenData = getFormatManifests(currentState);
-      },
-
-      'beforeTween': function (currentState, fromState, toState, easingObject) {
-        expandEasingObject(easingObject, this._tokenData);
-        expandFormattedProperties(currentState, this._tokenData);
-        expandFormattedProperties(fromState, this._tokenData);
-        expandFormattedProperties(toState, this._tokenData);
-      },
-
-      'afterTween': function (currentState, fromState, toState, easingObject) {
-        collapseFormattedProperties(currentState, this._tokenData);
-        collapseFormattedProperties(fromState, this._tokenData);
-        collapseFormattedProperties(toState, this._tokenData);
-        collapseEasingObject(easingObject, this._tokenData);
-      }
-    };
-
-  } (Tweenable));
-
-  }(window));
-
-  return window.Tweenable;
-});
-
-(function() {
-    "use strict";
-
-    angular.module('angular-carousel')
-
-    .filter('carouselSlice', function() {
-        return function(collection, start, size) {
-            if (angular.isArray(collection)) {
-                return collection.slice(start, start + size);
-            } else if (angular.isObject(collection)) {
-                // dont try to slice collections :)
-                return collection;
-            }
-        };
-    });
-
-})();
-
 angular.module('ualib.news.templates', ['news-item/event-card.tpl.html', 'news-item/news-card.tpl.html', 'news-item/news-item.tpl.html', 'news/news-list.tpl.html', 'today/news-today.tpl.html']);
 
 angular.module("news-item/event-card.tpl.html", []).run(["$templateCache", function($templateCache) {
