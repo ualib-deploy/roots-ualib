@@ -19535,7 +19535,7 @@ angular.module('common.oneSearch', [])
              * The $scope model for the search string, bound to the input text box.
              */
             if ($scope.searchText){
-                $scope.searchText = $scope.searchText.replace(/[&\/\\#+()$~%':*?<>{}]/g, ' ').trim();
+                $scope.searchText = $scope.searchText.replace(/[&\/\\#+()$~%':*?<>{}]/g, ' ').trim().substring(0, 150);
                 var searchText = encodeURIComponent($scope.searchText);
 
                 //Cancel any pending searches - prevents mixed results by canceling the ajax requests
