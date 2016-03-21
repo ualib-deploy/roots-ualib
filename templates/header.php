@@ -39,7 +39,7 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-4">
-                                            <a class="service-card" href="https://www.refworks.com/refworks2/Default.aspx">
+                                            <a class="service-card" href="http://refworks.ua.edu">
                                                 <h4>RefWorks</h4>
                                             </a>
                                         </div>
