@@ -39,7 +39,7 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-4">
-                                            <a class="service-card" href="https://www.refworks.com/refworks2/Default.aspx">
+                                            <a class="service-card" href="http://refworks.ua.edu">
                                                 <h4>RefWorks</h4>
                                             </a>
                                         </div>
@@ -186,8 +186,8 @@
                                                 <h4>Citation Managers</h4>
                                                 <p>Save citations, organize your research, and create bibliographies</p>
                                                 <ul>
-                                                    <li class="menu-refworks"><a href="/research-tools/refworks/">Refworks</a></li>
-                                                    <li class="menu-endnote"><a href="http://oit.ua.edu/oit/services/software-licensing/endnote/">Endnote</a></li>
+                                                    <li class="menu-refworks"><a href="http://refworks.ua.edu/">RefWorks</a></li>
+                                                    <li class="menu-endnote"><a href="http://oit.ua.edu/oit/services/software-licensing/endnote/">EndNote</a></li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -224,7 +224,7 @@
                                             </div>
                                             <div class="service-list">
                                                 <span class="fa fa-book"></span>
-                                                <h4>Borrow, Renew, &amp; Course Reserves</h4>
+                                                <h4>Borrow, Renew &amp; Course Reserves</h4>
                                                 <ul>
                                                     <li class="menu-photocopying"><a href="/using-the-library/course-reserves/">Borrow, Renew, and Course Reserves</a></li>
                                                     <li class="menu-access-reserves"><a href="http://library.ua.edu/vwebv/enterCourseReserve.do">Find and access reserve items</a></li>
@@ -240,7 +240,7 @@
                                                         <h4>Interlibrary Loan</h4>
                                                         <ul>
                                                             <li><a href="https://ua.illiad.oclc.org/illiad/">ILL- Borrow materials owned by other libraries</a></li>
-                                                            <li class="menu-computer-availability"><a href="/using-the-library/interlibrary-loan/">About interlibrary loan - policies & info</a></li>
+                                                            <li class="menu-computer-availability"><a href="/using-the-library/interlibrary-loan/">About Interlibrary Loan - policies & info</a></li>
                                                         </ul>
                                                     </div>
                                                 </div>
@@ -264,7 +264,7 @@
                                                     <a class="service-card" href="/using-the-library/find-a-place-to-study/">
                                                         <span class="fa fa-lightbulb-o"></span>
                                                         <h4>Find a Place to Study</h4>
-                                                        <p>Find the best spaces to study at libraries, listed by noise level </p>
+                                                        <p>Find the best spaces to study at the libraries, listed by noise level </p>
                                                     </a>
                                                 </div>
                                                 <div class="col-sm-12 col-md-4">

@@ -9516,7 +9516,7 @@ if (!Array.prototype.indexOf) {
         return -1;
     };
 }
-angular.module('manage.templates', ['manageAlerts/manageAlerts.tpl.html', 'manageAlerts/manageAlertsItemFields.tpl.html', 'manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageHoursUsers.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageNews/manageNews.tpl.html', 'manageNews/manageNewsAdmins.tpl.html', 'manageNews/manageNewsItemFields.tpl.html', 'manageNews/manageNewsList.tpl.html', 'manageOneSearch/mainOneSearch.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageOneSearch/oneSearchStat.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareComputerMaps.tpl.html', 'manageSoftware/manageSoftwareItemFields.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'staffDirectory/staffDirectory.tpl.html', 'staffDirectory/staffDirectoryDepartments.tpl.html', 'staffDirectory/staffDirectoryPeople.tpl.html', 'staffDirectory/staffDirectoryProfile.tpl.html', 'staffDirectory/staffDirectorySubjects.tpl.html', 'submittedForms/submittedForms.tpl.html']);
+angular.module('manage.templates', ['manageAlerts/manageAlerts.tpl.html', 'manageAlerts/manageAlertsItemFields.tpl.html', 'manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageHoursUsers.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageNews/manageNews.tpl.html', 'manageNews/manageNewsAdmins.tpl.html', 'manageNews/manageNewsItemFields.tpl.html', 'manageNews/manageNewsList.tpl.html', 'manageOneSearch/mainOneSearch.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageOneSearch/oneSearchStat.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareComputerMaps.tpl.html', 'manageSoftware/manageSoftwareItemFields.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'oneSearchErrors/oneSearchErrors.tpl.html', 'staffDirectory/staffDirectory.tpl.html', 'staffDirectory/staffDirectoryDepartments.tpl.html', 'staffDirectory/staffDirectoryPeople.tpl.html', 'staffDirectory/staffDirectoryProfile.tpl.html', 'staffDirectory/staffDirectorySubjects.tpl.html', 'submittedForms/submittedForms.tpl.html']);
 
 angular.module("manageAlerts/manageAlerts.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageAlerts/manageAlerts.tpl.html",
@@ -11809,6 +11809,15 @@ angular.module("manageUserGroups/viewMyWebApps.tpl.html", []).run(["$templateCac
     "</div>");
 }]);
 
+angular.module("oneSearchErrors/oneSearchErrors.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("oneSearchErrors/oneSearchErrors.tpl.html",
+    "<div class=\"container\">\n" +
+    "    <h2>OneSearch Errors</h2>\n" +
+    "\n" +
+    "    <div error-graph errors=\"errors\"></div>\n" +
+    "</div>");
+}]);
+
 angular.module("staffDirectory/staffDirectory.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staffDirectory/staffDirectory.tpl.html",
     "<div class=\"container\">\n" +
@@ -12501,6 +12510,7 @@ angular.module("submittedForms/submittedForms.tpl.html", []).run(["$templateCach
 
 angular.module('manage', [
     'ngAnimate',
+    'ngRoute',
     'ui.bootstrap',
     'manage.common',
     'manage.templates',
@@ -12513,7 +12523,8 @@ angular.module('manage', [
     'manage.manageSoftware',
     'manage.manageNews',
     'manage.submittedForms',
-    'manage.manageAlerts'
+    'manage.manageAlerts',
+    'manage.oneSearchErrors'
 ])
 
     .constant('HOURS_MANAGE_URL', 'https://wwwdev2.lib.ua.edu/libhours2/')
@@ -12525,7 +12536,8 @@ angular.module('manage', [
     .constant('SOFTWARE_URL', 'https://wwwdev2.lib.ua.edu/softwareList/')
     .constant('FORMS_URL', '//wwwdev2.lib.ua.edu/form/')
     .constant('NEWS_URL', 'https://wwwdev2.lib.ua.edu/newsApp/')
-    .constant('ALERTS_URL', 'https://wwwdev2.lib.ua.edu/alerts/');
+    .constant('ALERTS_URL', 'https://wwwdev2.lib.ua.edu/alerts/')
+    .constant('ERRORS_URL', 'https://wwwdev2.lib.ua.edu/errors/');
 
 angular.module('manage.common', [
     'common.manage'
@@ -12707,6 +12719,13 @@ angular.module('common.manage', [])
             }
         };
     }])
+    .factory('errorsFactory', ['$http', 'ERRORS_URL', function errorsFactory($http, url){
+        return {
+            getData: function(){
+                return $http({method: 'GET', url: url + "api/all", params: {}})
+            }
+        };
+    }])
     .factory('wpUsersFactory', ['$http', 'API', function wpUsersFactory($http, API){
         return {
             getAllUsersWP : function(){
@@ -12837,6 +12856,20 @@ angular.module('manage.manageAlerts', [])
                 !$scope.data.alerts[$scope.data.alerts.indexOf(alert)].show;
         };
 
+        $scope.validateAlert = function(alert) {
+            if (!angular.isDefined(alert.dateStart)) {
+                return "Please enter Active From date!";
+            }
+            if (!angular.isDefined(alert.dateEnd)) {
+                return "Please enter Active Until date!";
+            }
+            if (angular.isDefined(alert.message) && alert.message.length > 10) {
+                return "";
+            } else {
+                return "Please enter alert Message, minimum 10 characters!";
+            }
+        };
+
         $scope.deleteAlert = function(alert){
             if (confirm("Delete alert permanently?") == true){
                 $scope.uploading = true;
@@ -12859,57 +12892,62 @@ angular.module('manage.manageAlerts', [])
             }
         };
         $scope.updateAlert = function(alert){
-            $scope.uploading = true;
-            alert.formResponse = "";
-            alert.tsStart = alert.dateStart.valueOf() / 1000;
-            alert.tsEnd = alert.dateEnd.valueOf() / 1000;
-            alertFactory.postData({action : 2}, alert)
-                .success(function(data, status, headers, config) {
-                    if (data == 1){
-                        alert.formResponse = "Alert has been updated!";
-                    } else {
-                        alert.formResponse = "Error: Can not update alert! " + data;
-                    }
-                    $scope.uploading = false;
-                    console.log(data);
-                })
-                .error(function(data, status, headers, config) {
-                    alert.formResponse = "Error: Could not update alert! " + data;
-                    $scope.uploading = false;
-                    console.log(data);
-                });
+            alert.formResponse = $scope.validateAlert(alert);
+            if (alert.formResponse.length < 1) {
+                $scope.uploading = true;
+                alert.tsStart = alert.dateStart.valueOf() / 1000;
+                alert.tsEnd = alert.dateEnd.valueOf() / 1000;
+                alertFactory.postData({action: 2}, alert)
+                    .success(function (data, status, headers, config) {
+                        if (data == 1) {
+                            alert.formResponse = "Alert has been updated!";
+                        } else {
+                            alert.formResponse = "Error: Can not update alert! " + data;
+                        }
+                        $scope.uploading = false;
+                        console.log(data);
+                    })
+                    .error(function (data, status, headers, config) {
+                        alert.formResponse = "Error: Could not update alert! " + data;
+                        $scope.uploading = false;
+                        console.log(data);
+                    });
+            }
         };
         $scope.createAlert = function(alert) {
-            $scope.uploading = true;
             $scope.newAlert.formResponse = "";
-            alert.tsStart = alert.dateStart.valueOf() / 1000;
-            alert.tsEnd = alert.dateEnd.valueOf() / 1000;
-            alertFactory.postData({action : 3}, alert)
-                .success(function(data, status, headers, config) {
-                    if ((typeof data === 'object') && (data !== null)){
-                        var newAlert = {};
-                        newAlert = angular.copy(alert);
-                        newAlert.aid = data.id;
-                        newAlert.show = false;
-                        newAlert.selType = TYPES[0];
-                        for (var j = 1; j < TYPES.length; j++)
-                            if (TYPES[j].value == alert.type){
-                                newAlert.selType = TYPES[j];
-                                break;
-                            }
-                        $scope.data.alerts.push(newAlert);
-                        $scope.newAlert.formResponse = "Alert has been created.";
-                    } else {
-                        $scope.newAlert.formResponse = "Error: Can not create alert! " + data;
-                    }
-                    console.dir(data);
-                    $scope.uploading = false;
-                })
-                .error(function(data, status, headers, config) {
-                    $scope.newAlert.formResponse = "Error: Could not create alert! " + data;
-                    console.log(data);
-                    $scope.uploading = false;
-                });
+            $scope.newAlert.formResponse = $scope.validateAlert(alert);
+            if ($scope.newAlert.formResponse.length < 1) {
+                $scope.uploading = true;
+                alert.tsStart = alert.dateStart.valueOf() / 1000;
+                alert.tsEnd = alert.dateEnd.valueOf() / 1000;
+                alertFactory.postData({action: 3}, alert)
+                    .success(function (data, status, headers, config) {
+                        if ((typeof data === 'object') && (data !== null)) {
+                            var newAlert = {};
+                            newAlert = angular.copy(alert);
+                            newAlert.aid = data.id;
+                            newAlert.show = false;
+                            newAlert.selType = TYPES[0];
+                            for (var j = 1; j < TYPES.length; j++)
+                                if (TYPES[j].value == alert.type) {
+                                    newAlert.selType = TYPES[j];
+                                    break;
+                                }
+                            $scope.data.alerts.push(newAlert);
+                            $scope.newAlert.formResponse = "Alert has been created.";
+                        } else {
+                            $scope.newAlert.formResponse = "Error: Can not create alert! " + data;
+                        }
+                        console.dir(data);
+                        $scope.uploading = false;
+                    })
+                    .error(function (data, status, headers, config) {
+                        $scope.newAlert.formResponse = "Error: Could not create alert! " + data;
+                        console.log(data);
+                        $scope.uploading = false;
+                    });
+            }
         };
     }])
 
@@ -15679,6 +15717,91 @@ angular.module('manage.manageUserGroups', [])
             templateUrl: 'manageUserGroups/viewMyWebApps.tpl.html'
         };
     }])
+angular.module('manage.oneSearchErrors', ['oc.lazyLoad'])
+
+    .config(['$routeProvider', function($routeProvider){
+        $routeProvider.when('/onesearch-errors', {
+            controller: 'oneSearchErrorsCtrl',
+            templateUrl: 'oneSearchErrors/oneSearchErrors.tpl.html',
+            resolve: {
+                lazyLoad: ['$ocLazyLoad', function($ocLazyLoad) {
+                    return $ocLazyLoad.load('https://d3js.org/d3.v3.min.js');
+                }]
+            }
+        });
+    }])
+
+    .controller('oneSearchErrorsCtrl', ['$scope', 'errorsFactory', 'lazyLoad',
+        function oneSearchErrorsCtrl($scope, errorsFactory, lazyLoad){
+            $scope.errors = {};
+
+            errorsFactory.getData()
+                .success(function(data) {
+                    console.dir(data);
+                    var errors = {};
+                    for (var i = 0; i < data.scout.length; i++){
+                        var dt = new Date(data.scout[i]);
+                        if (!angular.isDefined(errors[dt.getFullYear()])){
+                            errors[dt.getFullYear()] = {};
+                        }
+                        if (!angular.isDefined(errors[dt.getFullYear()][dt.getMonth()])){
+                            errors[dt.getFullYear()][dt.getMonth()] = {};
+                        }
+                        if (!angular.isDefined(errors[dt.getFullYear()][dt.getMonth()][dt.getDate()])){
+                            errors[dt.getFullYear()][dt.getMonth()][dt.getDate()] = {counter: 0, errors: []};
+                        }
+                        errors[dt.getFullYear()][dt.getMonth()][dt.getDate()]['counter']++;
+                        errors[dt.getFullYear()][dt.getMonth()][dt.getDate()]['errors'].push(dt);
+                    }
+                    $scope.errors = errors;
+                    console.dir(errors);
+                })
+                .error(function(data, status, headers, config) {
+                    console.log(data);
+                });
+
+        }])
+
+    .controller('errorGraphCtrl', ['$scope', function errorGraphCtrl($scope){
+
+    }])
+
+    .directive('errorGraph', ['$window', function($window) {
+        return {
+            restrict: 'A',
+            scope: {
+                errors: '='
+            },
+            controller: 'errorGraphCtrl',
+            link: function(scope, elm, attrs){
+                var svg = d3.select(elm[0])
+                    .append('svg')
+                    .style('width', '100%');
+                var margin = 20,
+                    barHeight = 20,
+                    barPadding = 5;
+
+                // Browser onresize event
+                window.onresize = function() {
+                    scope.$apply();
+                };
+
+                scope.$watch(function() {
+                    return angular.element($window)[0].innerWidth;
+                }, function() {
+                    scope.render(scope.errors);
+                });
+
+                scope.render = function(data) {
+
+                }
+            },
+            template: '<div></div>'
+        };
+    }]);
+
+
+
 angular.module('manage.staffDirectory', ['oc.lazyLoad', 'ui.tinymce'])
     .constant('STAFF_DIR_RANKS', [
         "",
@@ -51159,7 +51282,7 @@ angular.module('hours.list', [])
         }
     }]);
 /**
- * @license AngularJS v1.5.0
+ * @license AngularJS v1.5.2
  * (c) 2010-2016 Google, Inc. http://angularjs.org
  * License: MIT
  */
