@@ -9516,7 +9516,7 @@ if (!Array.prototype.indexOf) {
         return -1;
     };
 }
-angular.module('manage.templates', ['manageAlerts/manageAlerts.tpl.html', 'manageAlerts/manageAlertsItemFields.tpl.html', 'manageDatabases/manageDatabases.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageHoursUsers.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageNews/manageNews.tpl.html', 'manageNews/manageNewsAdmins.tpl.html', 'manageNews/manageNewsItemFields.tpl.html', 'manageNews/manageNewsList.tpl.html', 'manageOneSearch/mainOneSearch.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageOneSearch/oneSearchStat.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareComputerMaps.tpl.html', 'manageSoftware/manageSoftwareItemFields.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'oneSearchErrors/oneSearchErrors.tpl.html', 'staffDirectory/staffDirectory.tpl.html', 'staffDirectory/staffDirectoryDepartments.tpl.html', 'staffDirectory/staffDirectoryPeople.tpl.html', 'staffDirectory/staffDirectoryProfile.tpl.html', 'staffDirectory/staffDirectorySubjects.tpl.html', 'submittedForms/submittedForms.tpl.html']);
+angular.module('manage.templates', ['manageAlerts/manageAlerts.tpl.html', 'manageAlerts/manageAlertsItemFields.tpl.html', 'manageDatabases/manageDatabases.tpl.html', 'manageERCarousel/manageERCarousel.tpl.html', 'manageERCarousel/manageSlideFields.tpl.html', 'manageERCarousel/manageSlideList.tpl.html', 'manageHours/manageEx.tpl.html', 'manageHours/manageHours.tpl.html', 'manageHours/manageHoursUsers.tpl.html', 'manageHours/manageLoc.tpl.html', 'manageHours/manageSem.tpl.html', 'manageHours/manageUsers.tpl.html', 'manageNews/manageNews.tpl.html', 'manageNews/manageNewsAdmins.tpl.html', 'manageNews/manageNewsItemFields.tpl.html', 'manageNews/manageNewsList.tpl.html', 'manageOneSearch/mainOneSearch.tpl.html', 'manageOneSearch/manageOneSearch.tpl.html', 'manageOneSearch/oneSearchStat.tpl.html', 'manageSoftware/manageSoftware.tpl.html', 'manageSoftware/manageSoftwareComputerMaps.tpl.html', 'manageSoftware/manageSoftwareItemFields.tpl.html', 'manageSoftware/manageSoftwareList.tpl.html', 'manageSoftware/manageSoftwareLocCat.tpl.html', 'manageUserGroups/manageUG.tpl.html', 'manageUserGroups/viewMyWebApps.tpl.html', 'oneSearchErrors/oneSearchErrors.tpl.html', 'staffDirectory/staffDirectory.tpl.html', 'staffDirectory/staffDirectoryDepartments.tpl.html', 'staffDirectory/staffDirectoryPeople.tpl.html', 'staffDirectory/staffDirectoryProfile.tpl.html', 'staffDirectory/staffDirectorySubjects.tpl.html', 'submittedForms/submittedForms.tpl.html']);
 
 angular.module("manageAlerts/manageAlerts.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("manageAlerts/manageAlerts.tpl.html",
@@ -10077,6 +10077,122 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "        <h3>Sorry, you don't have permissions to edit databases</h3>\n" +
     "    </div>\n" +
     "</div>");
+}]);
+
+angular.module("manageERCarousel/manageERCarousel.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("manageERCarousel/manageERCarousel.tpl.html",
+    "<div class=\"container\">\n" +
+    "    <h2>Manage ER Carousel Slides</h2>\n" +
+    "\n" +
+    "    <div manage-slide-list>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div ng-if=\"!hasAccess\">\n" +
+    "        <h3>Sorry, you don't have permissions to edit slides</h3>\n" +
+    "    </div>\n" +
+    "</div>");
+}]);
+
+angular.module("manageERCarousel/manageSlideFields.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("manageERCarousel/manageSlideFields.tpl.html",
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-xs-12 col-sm-6 form-group\">\n" +
+    "        <label for=\"title\">Title</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Slide Title\" ng-model=\"slide.title\"\n" +
+    "               id=\"title\" maxlength=\"150\" required>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-xs-12 col-sm-6 form-group\">\n" +
+    "        <label for=\"url\">URL</label>\n" +
+    "        <input type=\"text\" class=\"form-control\" placeholder=\"Link URL\" ng-model=\"slide.url\"\n" +
+    "               id=\"url\" maxlength=\"1024\" required>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div class=\"row\">\n" +
+    "    <div class=\"col-xs-6 col-sm-3 form-group\">\n" +
+    "        <label for=\"priority\">Priority</label>\n" +
+    "        <input type=\"number\" class=\"form-control\" placeholder=\"13\" ng-model=\"slide.tmpPriority\"\n" +
+    "               id=\"priority\" required>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-xs-6 col-sm-3 form-group\">\n" +
+    "        <label for=\"browse\">Select Image</label>\n" +
+    "        <div id=\"browse\">\n" +
+    "            <button type=\"file\" ngf-select=\"\" ng-model=\"slide.picFile\" accept=\"image/*\" ngf-multiple=\"false\"\n" +
+    "                    ngf-change=\"generateThumb($files, slide)\" class=\"btn btn-primary\">\n" +
+    "                <span class=\"fa fa-fw fa-plus\"></span>Browse\n" +
+    "            </button>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-xs-12 col-sm-6 form-group\">\n" +
+    "        <label for=\"selected\">Selected Image</label>\n" +
+    "        <div id=\"selected\">\n" +
+    "            <div ng-repeat=\"img in slide.selectedFiles\">\n" +
+    "                <img ngf-src=\"img\" width=\"150px\" height=\"100px\">\n" +
+    "                <button type=\"button\" class=\"btn btn-danger\" ng-click=\"slide.selectedFiles.splice($index,1)\">\n" +
+    "                    <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "                </button>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "");
+}]);
+
+angular.module("manageERCarousel/manageSlideList.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("manageERCarousel/manageSlideList.tpl.html",
+    "<div>\n" +
+    "    <form ng-submit=\"createSlide(newSlide)\">\n" +
+    "        <div class=\"sdOpen\">\n" +
+    "            <h3>Add New Slide</h3>\n" +
+    "            <div slide-fields-list slide=\"newSlide\"></div>\n" +
+    "            <div class=\"row text-center form-group\">\n" +
+    "                <button type=\"submit\" class=\"btn btn-success\" ng-disabled=\"uploading\">\n" +
+    "                    <span class=\"fa fa-plus\"></span> Create New Slide\n" +
+    "                </button><br>\n" +
+    "                {{newSlide.formResponse}}\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </form>\n" +
+    "\n" +
+    "    <h3>Slides</h3>\n" +
+    "    <div class=\"row\" ng-repeat=\"slide in slides | orderBy:'priority':true\">\n" +
+    "        <div class=\"col-xs-2 col-sm-1 clickable\">\n" +
+    "            <h2>\n" +
+    "                <span class=\"label label-success\" ng-if=\"$index < numShow\">{{$index + 1}}</span>\n" +
+    "            </h2>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-xs-10 col-sm-4 col-md-3\">\n" +
+    "            <a class=\"thumbnail clickable\" ng-click=\"toggleSlide(slide)\">\n" +
+    "                <img ng-src=\"{{slide.image}}\" alt=\"Click to edit slide\">\n" +
+    "            </a><br>\n" +
+    "            <button type=\"button\" class=\"btn btn-danger\" ng-click=\"approveSlide(slide)\"\n" +
+    "                    ng-if=\"slide.status < 1 && admin\">\n" +
+    "                <span class=\"fa fa-thumbs-o-up\"></span> Approve\n" +
+    "            </button>\n" +
+    "            <span class=\"label label-warning\" ng-if=\"slide.status < 1 && !admin\">Approval Pending</span>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-xs-12 col-sm-7 col-md-8 clickable\" ng-hide=\"slide.show\" ng-click=\"toggleSlide(slide)\">\n" +
+    "            <h4><a>{{slide.title}}</a></h4>\n" +
+    "            <h5><a>{{slide.url}}</a></h5>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-xs-12 col-sm-7 col-md-8\" ng-show=\"slide.show\">\n" +
+    "            <form ng-submit=\"updateSlide(slide)\">\n" +
+    "                <div slide-fields-list slide=\"slide\"></div>\n" +
+    "                <div class=\"row text-center\">\n" +
+    "                    <button type=\"submit\" class=\"btn btn-success\" ng-disabled=\"uploading\">\n" +
+    "                        <span class=\"fa fa-save\"></span> Update Slide\n" +
+    "                    </button>\n" +
+    "                    <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteSlide(slide)\">\n" +
+    "                        <span class=\"fa fa-trash-o\"></span> Delete Slide\n" +
+    "                    </button><br>\n" +
+    "                    {{slide.formResponse}}\n" +
+    "                </div>\n" +
+    "            </form>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "\n" +
+    "</div>\n" +
+    "\n" +
+    "");
 }]);
 
 angular.module("manageHours/manageEx.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -12509,6 +12625,7 @@ angular.module("submittedForms/submittedForms.tpl.html", []).run(["$templateCach
 }]);
 
 angular.module('manage', [
+    'ngResource',
     'ngAnimate',
     'ngRoute',
     'ui.bootstrap',
@@ -12524,7 +12641,8 @@ angular.module('manage', [
     'manage.manageNews',
     'manage.submittedForms',
     'manage.manageAlerts',
-    'manage.oneSearchErrors'
+    'manage.oneSearchErrors',
+    'manage.manageERCarousel'
 ])
 
     .constant('HOURS_MANAGE_URL', 'https://wwwdev2.lib.ua.edu/libhours2/')
@@ -12537,7 +12655,8 @@ angular.module('manage', [
     .constant('FORMS_URL', '//wwwdev2.lib.ua.edu/form/')
     .constant('NEWS_URL', 'https://wwwdev2.lib.ua.edu/newsApp/')
     .constant('ALERTS_URL', 'https://wwwdev2.lib.ua.edu/alerts/')
-    .constant('ERRORS_URL', 'https://wwwdev2.lib.ua.edu/errors/');
+    .constant('ERRORS_URL', 'https://wwwdev2.lib.ua.edu/errors/')
+    .constant('ERCAROUSEL_URL', 'https://wwwdev2.lib.ua.edu/erCarousel/api/');
 
 angular.module('manage.common', [
     'common.manage'
@@ -12611,6 +12730,18 @@ angular.module('common.manage', [])
         self.logout = function() {
             $window.localStorage.removeItem('ualibweb.Token');
             console.log('Token deleted');
+        };
+    }])
+
+    .factory('ercFactory', ['$resource', 'ERCAROUSEL_URL', function($resource, API){
+        return {
+            slides: function(){
+                console.log("ercFactory.Slides");
+                return $resource(
+                    API + '/slides/:slideID',
+                    {slideID:'@slideID'}
+                );
+            }
         };
     }])
 
@@ -13324,6 +13455,276 @@ angular.module('manage.manageDatabases', [])
             return input.slice(start);
         }
     }])
+
+angular.module('manage.manageERCarousel', ['ngFileUpload'])
+    .constant('ERC_GROUP', 1024)
+
+    .config(['$routeProvider', function($routeProvider){
+        $routeProvider.when('/manage-erc', {
+            controller: 'manageErcCtrl',
+            templateUrl: 'manageERCarousel/manageERCarousel.tpl.html',
+            resolve: {
+                userData: function(tokenReceiver){
+                    return tokenReceiver.getPromise();
+                }
+            }
+        });
+    }])
+
+    .controller('manageErcCtrl', ['$scope', 'ercFactory', 'userData', 'ERC_GROUP', 'AuthService',
+    function manageErcCtrl($scope, ercFactory, userData, ERC_GROUP, AuthService){
+        $scope.userInfo = AuthService.isAuthorized();
+        $scope.slides = {};
+        $scope.numShow = 0;
+        $scope.admin = false;
+        $scope.newSlide = {};
+        $scope.newSlide.selectedFiles = [];
+        $scope.newSlide.picFile = [];
+        $scope.updating = true;
+
+        $scope.hasAccess = false;
+        if (angular.isDefined($scope.userInfo.group)) {
+            if ((parseInt($scope.userInfo.group) & ERC_GROUP) === ERC_GROUP) {
+                $scope.hasAccess = true;
+            }
+        }
+
+        ercFactory.slides().get()
+            .$promise.then(function(data){
+                $scope.updating = false;
+                console.dir(data.slides);
+                for (var i = 0; i < data.slides.length; i++) {
+                    data.slides[i].priority = parseInt(data.slides[i].priority);
+                    data.slides[i].show = false;
+                    data.slides[i].selectedFiles = [];
+                    data.slides[i].tmpPriority = data.slides[i].priority;
+                }
+                $scope.slides = data.slides;
+                $scope.numShow = data.numShow;
+                $scope.admin = data.admin;
+            }, function(data, status){
+                $scope.updating = false;
+                console.dir(data);
+            });
+    }])
+
+    .controller('manageSlideListCtrl', ['$scope', '$timeout', 'Upload', 'ercFactory', 'ERCAROUSEL_URL',
+        function manageSlideListCtrl($scope, $timeout, Upload, ercFactory, appURL){
+            $scope.appURL = appURL;
+            $scope.uploading = false;
+
+            $scope.newSlide.title = '';
+            $scope.newSlide.tmpPriority = 0;
+            $scope.newSlide.url = '';
+
+            $scope.toggleSlide = function(slide){
+                $scope.slides[$scope.slides.indexOf(slide)].show =
+                    !$scope.slides[$scope.slides.indexOf(slide)].show;
+            };
+
+            $scope.validateSlide = function(slide){
+                if (slide.title.length < 1)
+                    return "Form error: Please fill out Title!";
+
+                return "";
+            };
+            $scope.approveSlide = function(slide){
+                if (confirm("Are you sure you want to approve " + slide.title  + "?") == true){
+                    $scope.uploading = true;
+                    slide.approve = true;
+                    ercFactory.slides().save({slideID: slide.sid}, slide)
+                        .$promise.then(function(data){
+                            $scope.uploading = false;
+                            $scope.slides[$scope.slides.indexOf(slide)].status = data.status;
+                        }, function(data, status){
+                            $scope.uploading = false;
+                            $scope.slides[$scope.slides.indexOf(slide)].formResponse = data.message;
+                            console.dir(data);
+                        });
+                }
+            };
+            $scope.deleteSlide = function(slide){
+                if (confirm("Delete " + slide.title  + " permanently?") == true){
+                    $scope.uploading = true;
+                    slide.approve = true;
+                    ercFactory.slides().delete({slideID: slide.sid})
+                        .$promise.then(function(data){
+                            $scope.uploading = false;
+                            $scope.slides.splice($scope.slides.indexOf(slide), 1);
+                        }, function(data, status){
+                            $scope.uploading = false;
+                            $scope.formResponse = "Error: Could not delete slide! " + data;
+                            console.dir(data);
+                        });
+                }
+            };
+            $scope.updateSlide = function(slide){
+                console.dir(slide);
+                $scope.slides[$scope.slides.indexOf(slide)].formResponse = $scope.validateSlide(slide);
+                if ($scope.slides[$scope.slides.indexOf(slide)].formResponse.length > 0)
+                    return false;
+                $scope.uploading = true;
+                slide.title = slide.title.replace(/\//g, ' ');
+                slide.priority = slide.tmpPriority;
+                if (slide.selectedFiles.length < 1){
+                    ercFactory.slides().save({slideID: slide.sid}, slide)
+                        .$promise.then(function(data){
+                            $scope.uploading = false;
+                            $scope.slides[$scope.slides.indexOf(slide)].formResponse = data.message;
+                        }, function(data, status){
+                            $scope.uploading = false;
+                            $scope.slides[$scope.slides.indexOf(slide)].formResponse = data.message;
+                            console.dir(data);
+                        });
+                } else {
+                    var names = [];
+                    for (var i = 0; i < slide.selectedFiles.length; i++)
+                        names.push(slide.selectedFiles[i].name);
+                    slide.selectedFiles.upload = Upload.upload({
+                        url: appURL + 'slides/' + slide.sid,
+                        method: 'POST',
+                        fields: {
+                            erCarousel: slide
+                        },
+                        file: slide.selectedFiles,
+                        fileFormDataName: names
+                    });
+                    slide.selectedFiles.upload.then(function(response) {
+                        $timeout(function() {
+                            slide.selectedFiles.length = 0;
+                            slide.picFile.length = 0;
+                            $scope.slides[$scope.slides.indexOf(slide)].formResponse = response.data.message;
+                            $scope.uploading = false;
+                        });
+                    }, function(response) {
+                        if (response.status > 0) {
+                            $scope.slides[$scope.slides.indexOf(slide)].formResponse = response.status + ': ' + response.data;
+                        }
+                        $scope.uploading = false;
+                    });
+                    slide.selectedFiles.upload.progress(function(evt) {
+                        // Math.min is to fix IE which reports 200% sometimes
+                        slide.selectedFiles.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+                    });
+                }
+            };
+            $scope.createSlide = function(slide){
+                slide.formResponse = $scope.validateSlide(slide);
+                if (slide.formResponse.length > 0)
+                    return false;
+                $scope.uploading = true;
+                slide.title = slide.title.replace(/\//g, ' ');
+                slide.priority = slide.tmpPriority;
+                if (slide.selectedFiles.length < 1){
+                    ercFactory.slides().save({}, slide)
+                        .$promise.then(function(data){
+                            $scope.uploading = false;
+                            if (angular.isDefined(data.sid) && angular.isDefined(data.status) && angular.isDefined(data.image)) {
+                                var newSlide = {};
+                                newSlide.sid = data.sid;
+                                newSlide.status = data.status;
+                                newSlide.image = data.image;
+                                newSlide.title = slide.title;
+                                newSlide.priority = slide.priority;
+                                newSlide.url = slide.url;
+                                newSlide.show = false;
+                                newSlide.selectedFiles = [];
+                                $scope.slides.push(newSlide);
+                            }
+                            slide.formResponse = data.message;
+                        }, function(data, status){
+                            $scope.uploading = false;
+                            slide.formResponse = data.message;
+                            console.dir(data);
+                        });
+                } else {
+                    var names = [];
+                    for (var i = 0; i < slide.selectedFiles.length; i++)
+                        names.push(slide.selectedFiles[i].name);
+                    slide.selectedFiles.upload = Upload.upload({
+                        url: appURL + 'slides/',
+                        method: 'POST',
+                        fields: {
+                            erCarousel: slide
+                        },
+                        file: slide.selectedFiles,
+                        fileFormDataName: names
+                    });
+                    slide.selectedFiles.upload.then(function(res) {
+                        $timeout(function() {
+                            $scope.uploading = false;
+                            if (angular.isDefined(res.data.sid) && angular.isDefined(res.data.status) && angular.isDefined(res.data.image)) {
+                                var newSlide = {};
+                                newSlide.sid = res.data.sid;
+                                newSlide.status = res.data.status;
+                                newSlide.image = res.data.image;
+                                newSlide.title = slide.title;
+                                newSlide.priority = slide.priority;
+                                newSlide.url = slide.url;
+                                newSlide.show = false;
+                                newSlide.selectedFiles = [];
+                                $scope.slides.push(newSlide);
+                            }
+                            slide.formResponse = res.data.message;
+                        });
+                    }, function(response) {
+                        $scope.uploading = false;
+                        if (response.status > 0)
+                            slide.formResponse = response.status + ': ' + response.data;
+                    });
+                    slide.selectedFiles.upload.progress(function(evt) {
+                        // Math.min is to fix IE which reports 200% sometimes
+                        slide.selectedFiles.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+                    });
+                }
+            };
+        }])
+
+    .directive('manageSlideList', [ function() {
+        return {
+            restrict: 'A',
+            controller: 'manageSlideListCtrl',
+            link: function(scope, elm, attrs){
+
+            },
+            templateUrl: 'manageERCarousel/manageSlideList.tpl.html'
+        };
+    }])
+
+    .controller('slideFieldsCtrl', ['$scope', '$timeout', 'Upload',
+        function slideFieldsCtrl($scope, $timeout, Upload){
+            $scope.generateThumb = function(files, slide) {
+                if (files.length > 0 && files !== null) {
+                    for (var i = 0; i < files.length; i++){
+                        $scope.slide.selectedFiles.push(files[i]);
+                        if ($scope.fileReaderSupported && files[i].type.indexOf('image') > -1) {
+                            $timeout(function() {
+                                var fileReader = new FileReader();
+                                fileReader.readAsDataURL(files[i]);
+                                fileReader.onload = function(e) {
+                                    $timeout(function() {
+                                        files[i].dataUrl = e.target.result;
+                                    });
+                                }
+                            });
+                        }
+                    }
+                }
+            };
+        }])
+
+    .directive('slideFieldsList', ['$timeout', function($timeout) {
+        return {
+            restrict: 'AC',
+            scope: {
+                slide: '='
+            },
+            controller: 'slideFieldsCtrl',
+            link: function(scope, elm, attrs){
+            },
+            templateUrl: 'manageERCarousel/manageSlideFields.tpl.html'
+        };
+    }]);
 
 angular.module('manage.manageHours', [])
     .constant('HOURS_FROM', [
@@ -17169,7 +17570,7 @@ angular.module("common/engines/databases/databases.tpl.html", []).run(["$templat
     "        </div>\n" +
     "        <div class=\"databases-details\" ng-if=\"(item.subjects | where:{type:1}).length > 0\">\n" +
     "            <strong>Primary subjects: </strong>\n" +
-    "            <span ng-repeat=\"subj in item.subjects | where:{type:1}\"></span>\n" +
+    "            <span ng-repeat=\"subj in item.subjects | where:{type:1}\" ng-bind-html=\"subj.subject\"></span>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>");
@@ -17933,7 +18334,7 @@ angular.module('oneSearch.common')
                 model: '=',
                 search: '='
             },
-            controller: function($scope, $window, $timeout, $document,  dataFactory){
+            controller: ['$scope', '$window', '$timeout', '$document', 'dataFactory', function($scope, $window, $timeout, $document,  dataFactory){
                 $scope.items = {};
                 $scope.filteredItems = [];
                 $scope.model = "";
@@ -18050,7 +18451,7 @@ angular.module('oneSearch.common')
                 $scope.gaTypeAhead = function(linkTitle){
                     ga('send', 'event', 'oneSearch', 'type_ahead_click', linkTitle);
                 };
-            },
+            }],
             link: function(scope, elem, attrs) {
                 scope.showSuggestions = false;
                 var suggestWatcher = scope.$watch('items', function(newVal, oldVal){
@@ -18203,7 +18604,7 @@ angular.module('engines.acumen', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('AcumenCtrl', function($scope, $filter){
+    .controller('AcumenCtrl', ['$scope', '$filter', function($scope, $filter){
         var items = $scope.items;
 
         for (var i = 0, len = items.length; i < len; i++) {
@@ -18213,7 +18614,7 @@ angular.module('engines.acumen', [])
                 else items[i].type = items[i].type.sort().shift();
             }
         }
-    });
+    }]);
 angular.module('engines.catalog', [])
 
     /**
@@ -18274,7 +18675,7 @@ angular.module('engines.catalog', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('CatalogCtrl', function($scope, $filter){
+    .controller('CatalogCtrl', ['$scope', '$filter', function($scope, $filter){
         var types = {
             bc: "Archive/Manuscript",
             cm: "Music Score",
@@ -18316,7 +18717,7 @@ angular.module('engines.catalog', [])
         }
 
         $scope.items = items;
-    });
+    }]);
 
 angular.module('engines.databases', [])
 
@@ -18400,7 +18801,7 @@ angular.module('engines.ejournals', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('EjouralsCtrl', function($scope){
+    .controller('EjouralsCtrl', ['$scope', function($scope){
 
         var param;
         switch ($scope.mediaType){
@@ -18417,7 +18818,7 @@ angular.module('engines.ejournals', [])
         if (param){
             $scope.resourceLink = $scope.resourceLink.replace('SS_searchTypeAll=yes&SS_searchTypeBook=yes&SS_searchTypeJournal=yes&SS_searchTypeOther=yes', param);
         }
-    });
+    }]);
 /**
  * @ngdoc overview
  * @name engines
@@ -18765,7 +19166,7 @@ angular.module('engines.scout', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('ScoutCtrl', function($scope){
+    .controller('ScoutCtrl', ['$scope', function($scope){
         var title; // Title variable to bind to $scope. ".BibRelationships.IsPartOfRelationships" title is used if no item title is present.
         var items = $scope.items;
         for (var i = 0; i < items.length; i++){
@@ -18839,7 +19240,7 @@ angular.module('engines.scout', [])
         }
 
         $scope.resourceLink = angular.copy(link);
-    });
+    }]);
 angular.module('filters.nameFilter', [])
 
     .filter('nameFilter', ['$filter', function($filter){
