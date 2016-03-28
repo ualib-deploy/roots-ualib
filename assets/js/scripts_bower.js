@@ -17568,9 +17568,9 @@ angular.module("common/engines/databases/databases.tpl.html", []).run(["$templat
     "        <div class=\"details-context\">\n" +
     "            <span ng-if=\"item.coverage\" ng-bind-html=\"item.coverage\"></span>\n" +
     "        </div>\n" +
-    "        <div class=\"databases-details\" ng-if=\"(item.subjects | where:{type:1}).length > 0\">\n" +
+    "        <div class=\"databases-details\" ng-if=\"item.subjects\">\n" +
     "            <strong>Primary subjects: </strong>\n" +
-    "            <span ng-repeat=\"subj in item.subjects | where:{type:1}\" ng-bind-html=\"subj.subject\"></span>\n" +
+    "            <span ng-repeat=\"subj in item.subjects\" ng-bind-html=\"subj.subject\"></span>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>");
