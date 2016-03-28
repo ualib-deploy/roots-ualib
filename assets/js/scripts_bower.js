@@ -13616,29 +13616,7 @@ angular.module('manage.manageERCarousel', ['ngFileUpload'])
                 $scope.uploading = true;
                 slide.title = slide.title.replace(/\//g, ' ');
                 slide.priority = slide.tmpPriority;
-                if (slide.selectedFiles.length < 1){
-                    ercFactory.slides().save({}, slide)
-                        .$promise.then(function(data){
-                            $scope.uploading = false;
-                            if (angular.isDefined(data.sid) && angular.isDefined(data.status) && angular.isDefined(data.image)) {
-                                var newSlide = {};
-                                newSlide.sid = data.sid;
-                                newSlide.status = data.status;
-                                newSlide.image = data.image;
-                                newSlide.title = slide.title;
-                                newSlide.priority = slide.priority;
-                                newSlide.url = slide.url;
-                                newSlide.show = false;
-                                newSlide.selectedFiles = [];
-                                $scope.slides.push(newSlide);
-                            }
-                            slide.formResponse = data.message;
-                        }, function(data, status){
-                            $scope.uploading = false;
-                            slide.formResponse = data.message;
-                            console.dir(data);
-                        });
-                } else {
+                if (slide.selectedFiles.length > 0){
                     var names = [];
                     for (var i = 0; i < slide.selectedFiles.length; i++)
                         names.push(slide.selectedFiles[i].name);
@@ -13677,6 +13655,8 @@ angular.module('manage.manageERCarousel', ['ngFileUpload'])
                         // Math.min is to fix IE which reports 200% sometimes
                         slide.selectedFiles.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
                     });
+                } else {
+                    slide.formResponse = "Please select an image with at least 750 pixels wide and aspect ratio 3:2.";
                 }
             };
         }])
