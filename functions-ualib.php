@@ -105,6 +105,14 @@ function add_manage_admin_bar_link() {
                 'parent' => 'manage_link',
             ));
         }
+        if (($userGroup & GROUP_ERCAROUSEL) === GROUP_ERCAROUSEL) {
+            $wp_admin_bar->add_menu(array(
+                'id' => 'manage_alerts_link',
+                'title' => __('<span class="ab-icon dashicons-before dashicons-images-alt2"></span> ER Carousel'),
+                'href' => __(site_url() . "/#/manage-erc"),
+                'parent' => 'manage_link',
+            ));
+        }
     } else {
         $wp_admin_bar->add_menu(array(
             'id' => 'manage_profile_link',
