@@ -17901,6 +17901,7 @@ angular.module('oneSearch.bento', [])
         function initResultLimit(box){
             var numEngines = self.boxes[box]['engines'].length;
             var limit = numEngines > 1 ? 1 : (numEngines < 2 ? 3 : 2);
+            console.log(self.boxes);
             self.boxes[box].resultLimit = limit;
         }
 
@@ -56049,7 +56050,7 @@ angular.module("staff-card/staff-card-md.tpl.html", []).run(["$templateCache", f
     "                <div class=\"staff-card-detail\">\n" +
     "                    <h6>Contact</h6>\n" +
     "                    <ul class=\"fa-ul\">\n" +
-    "                        <li ng-if=\"staffPerson.phone\"><span class=\"fa fa-phone fa-li\"></span><a ng-href=\"tel:+1-205-{{staffPerson.phone}}\">(205)-{{staffPerson.phone}}</a></li>\n" +
+    "                        <li ng-if=\"staffPerson.phone\"><span class=\"fa fa-phone fa-li\"></span><a ng-href=\"tel:+1-{{staffPerson.phone}}\">{{staffPerson.phone}}</a></li>\n" +
     "                        <li ng-if=\"staffPerson.fax\"><span class=\"fa fa-fax fa-li\"></span>{{staffPerson.fax}}</li>\n" +
     "                        <li ng-if=\"staffPerson.email\"><span class=\"fa fa-envelope fa-li\"></span><a href=\"mailto:{{staffPerson.email}}\">{{staffPerson.email}}</a></li>\n" +
     "                    </ul>\n" +
@@ -56708,7 +56709,7 @@ angular.module('staffdir', ['ualib.staffdir']);
         return {
             restrict: 'AC',
             templateUrl: 'staff-card/staff-card-list.tpl.html',
-            controller: function($scope){
+            controller: ['$scope', function($scope){
                 $scope.staffdir = {};
 
                 StaffFactory.directory().get()
@@ -56719,7 +56720,7 @@ angular.module('staffdir', ['ualib.staffdir']);
                     }, function(){
                         console.log('Staffdir Error -- Come on, put in proper error handling already');
                     });
-            }
+            }]
         };
     }])
 
@@ -56929,7 +56930,7 @@ angular.module('staffdir', ['ualib.staffdir']);
                 login: '@email'
             },
             templateUrl: 'staff-profile/staff-profile.tpl.html',
-            controller: function($scope){
+            controller: ['$scope', function($scope){
                 $scope.userProfile = {};
 
                 //console.log("Login: " + $scope.login);
@@ -56975,7 +56976,7 @@ angular.module('staffdir', ['ualib.staffdir']);
                     }, function(data){
                         console.log('Error: cold not get profile! ' + data);
                     });
-            }
+            }]
         };
     }]);
 
