@@ -13656,7 +13656,7 @@ angular.module('manage.manageERCarousel', ['ngFileUpload'])
                         slide.selectedFiles.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
                     });
                 } else {
-                    slide.formResponse = "Please select an image with at least 750 pixels wide and aspect ratio 3:2.";
+                    slide.formResponse = "Please select a slide image.";
                 }
             };
         }])
