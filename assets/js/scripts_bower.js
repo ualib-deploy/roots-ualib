@@ -17551,7 +17551,7 @@ angular.module("common/engines/databases/databases.tpl.html", []).run(["$templat
     "        </div>\n" +
     "        <div class=\"details-container\" ng-if=\"item.subjects\">\n" +
     "            <span class=\"text-muted\">Subjects: </span>\n" +
-    "            <span class=\"detail\" ng-repeat=\"subj in item.subjects\" ng-bind-html=\"subj.subject\"></span>\n" +
+    "            <span class=\"detail\" ng-repeat=\"subj in item.subjects\">{{subj.subject}}{{$last ? '' : ', '}}</span>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>");
