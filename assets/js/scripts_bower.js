@@ -17913,11 +17913,13 @@ angular.module('oneSearch.bento', [])
                     var numEngines = self.boxes[box]['engines'].length;
                     var expecting = numResults + numEngines;
 
-                    firstRow = ['articles', 'books', 'journals'];
-                    console.log('box is');
-                    console.log(box.toLowerCase());
-
-                    if (firstRow.indexOf(box.toLowerCase()) > -1) {
+                    if (box == 'articles'){
+                        self.boxes[box].resultLimit = 6;
+                    }
+                    else if (box == 'journals'){
+                        self.boxes[box].resultLimit = 3;
+                    }
+                    else if (box == 'books'){
                         self.boxes[box].resultLimit = 2;
                     }
 
