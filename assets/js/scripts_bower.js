@@ -17901,16 +17901,25 @@ angular.module('oneSearch.bento', [])
         function initResultLimit(box){
             var numEngines = self.boxes[box]['engines'].length;
             var limit = numEngines > 1 ? 1 : (numEngines < 2 ? 3 : 2);
-            console.log(self.boxes);
             self.boxes[box].resultLimit = limit;
         }
 
         function setResultLimit(box){
+
             $q.when(self.boxes[box].results)
                 .then(function(results){
+
                     var numResults = Object.keys(results).length;
                     var numEngines = self.boxes[box]['engines'].length;
                     var expecting = numResults + numEngines;
+
+                    firstRow = ['articles', 'books', 'journals'];
+                    console.log('box is');
+                    console.log(box.toLowerCase());
+
+                    if (firstRow.indexOf(box.toLowerCase()) > -1) {
+                        self.boxes[box].resultLimit = 2;
+                    }
 
                     if ((expecting < 2 && self.boxes[box].resultLimit < 3) || (expecting < 3 && self.boxes[box].resultLimit < 2)){
                         self.boxes[box].resultLimit++;
