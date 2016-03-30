@@ -1,7 +1,8 @@
 <div class="breadcrumbs" typeof="BreadcrumbList" vocab="http://schema.org/">
     <?php if(function_exists('bcn_display'))
     {
-        bcn_display();
+        $display = bcn_display(true);
+        var_dump($display);  
     }?>
 </div>
 <?php the_content(); ?>
