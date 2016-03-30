@@ -168,6 +168,9 @@ add_filter('bcn_after_fill', 'remove_mm_pages');
 function remove_mm_pages($trail) {
   
   $actualTrail = $trail->trail;
+  
+  var_dump($actualTrail);
+  
   if ($result = array_search('Research Tools', $actualTrail)){
     unset($trail->trail[$result]);
   }
