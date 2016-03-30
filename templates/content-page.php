@@ -2,7 +2,11 @@
     <?php if(function_exists('bcn_display'))
     {
         $display = bcn_display(true);
-        var_dump($display);  
+        $display = str_replace('> Using the Library', '', $display);
+        $display = str_replace('> Research Tools', '', $display);
+        $display = str_replace('> About', '', $display);
+        $display = str_replace('> Library Help', '', $display);
+        echo $display;  
     }?>
 </div>
 <?php the_content(); ?>
