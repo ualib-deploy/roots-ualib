@@ -166,11 +166,17 @@ add_filter('wp_feed_cache_transient_lifetime', 'bweb_feedzy_cache_duration', 10,
 add_filter('bcn_after_fill', 'remove_mm_pages');
 
 function remove_mm_pages($trail) {
-  $filterArray = array("Research Tools", "Using the Library", "About", "Library Help");  
-  foreach($filterArray as &$tobeFiltered){
-    if(is_page($tobeFiltered)){
-      array_pop($trail->trail);
-    }
+  if ($result = array_search('Research Tools')){
+    unset($trail[$result]);
+  }
+  elseif ($result = array_search('Using the Library')){
+    unset($trail[$result]);
+  }
+  elseif ($result = array_search('About')){
+    unset($trail[$result]);
+  }
+  elseif ($result = array_search('Library Help')){
+    unset($trail[$result]);
   }
 }
 
