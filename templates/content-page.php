@@ -7,7 +7,7 @@
         $display = str_replace('> About', '', $display);
         $display = str_replace('> Library Help', '', $display);
         var_dump($display);
-        echo("HELLO");
+        echo "HELLO";
     }?>
 </div>
 <?php the_content(); ?>
