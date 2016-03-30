@@ -163,7 +163,7 @@ function bweb_feedzy_cache_duration( $feedCacheDuration, $feedURL ) {
 }
 add_filter('wp_feed_cache_transient_lifetime', 'bweb_feedzy_cache_duration', 10, 2);
 
-add_filter('bcn_after_fill', 'remove_mm_pages');
+//add_filter('bcn_after_fill', 'remove_mm_pages');
 
 function remove_mm_pages($trail) {
   
