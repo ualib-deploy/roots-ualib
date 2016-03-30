@@ -6,7 +6,8 @@
         $display = str_replace('> Research Tools', '', $display);
         $display = str_replace('> About', '', $display);
         $display = str_replace('> Library Help', '', $display);
-        echo $display;  
+        var_dump($display);
+        echo("HELLO");
     }?>
 </div>
 <?php the_content(); ?>
