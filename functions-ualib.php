@@ -169,23 +169,19 @@ function remove_mm_pages($trail) {
   
   $actualTrail = $trail->trail;
   
-  var_dump($actualTrail[0]);
-  $title = $actualTrail[0]->title;
+  $titleArray = array('Research Tools', 'Using the Library', 'About', 'Library Help');
   
-  echo "TITLE IS";
-  echo $title;
+  $counter = 0;
   
-  if ($result = array_search('Research Tools', $actualTrail)){
-    unset($trail->trail[$result]);
-  }
-  elseif ($result = array_search('Using the Library', $actualTrail)){
-    unset($trail->trail[$result]);
-  }
-  elseif ($result = array_search('About', $actualTrail)){
-    unset($trail->trail[$result]);
-  }
-  elseif ($result = array_search('Library Help', $actualTrail)){
-    unset($trail->trail[$result]);
+  foreach($actualTrail as $breadcrumb){
+    
+    $crumbTitle = $breadcrumb->get_title();
+    echo "crumbTitle is $crumbTitle";
+    if (in_array($crumbTitle, $titleArray)){
+      echo "IT'S IN ARRAY";
+      unset($trail->trail[$counter]);
+    }
+    $counter++; 
   }
 }
 
