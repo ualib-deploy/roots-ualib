@@ -169,8 +169,8 @@ function remove_mm_pages($trail) {
   
   $actualTrail = $trail->trail;
   
-  //var_dump($actualTrail);
-  $title = $actualTtrail[0]->title;
+  var_dump($actualTrail[0]);
+  $title = $actualTrail[0]->title;
   
   echo "TITLE IS";
   echo $title;
