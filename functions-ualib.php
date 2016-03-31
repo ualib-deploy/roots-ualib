@@ -176,9 +176,8 @@ function remove_mm_pages($trail) {
   foreach($actualTrail as $breadcrumb){
     
     $crumbTitle = $breadcrumb->get_title();
-    echo "crumbTitle is $crumbTitle";
+
     if (in_array($crumbTitle, $titleArray)){
-      echo "IT'S IN ARRAY";
       unset($trail->trail[$counter]);
     }
     $counter++; 
