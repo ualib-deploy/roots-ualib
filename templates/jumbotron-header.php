@@ -3,6 +3,12 @@
 <div class="jumbotron-header" <?php if ($jumboHeadBg !== false) print 'style="background-image: url('.$jumboHeadBg.');"'; ?>>
     <div class="jumbotron">
         <div class="container">
+            <div class="breadcrumbs" typeof="BreadcrumbList" vocab="http://schema.org/">
+              <?php if(function_exists('bcn_display'))
+              {
+                  bcn_display();
+              }?>
+            </div>
             <?php print $fields['header_content']; ?>
         </div>
     </div>
