@@ -8,6 +8,7 @@
               {
                   bcn_display();
               }?>
+              <?php echo "test:1234321"; ?>
             </div>
             <?php print $fields['header_content']; ?>
         </div>
