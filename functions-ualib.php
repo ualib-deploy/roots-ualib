@@ -170,6 +170,10 @@ function remove_mm_pages($trail) {
   $actualTrail = $trail->trail;
   
   //var_dump($actualTrail);
+  $title = $actualTtrail[0]->title;
+  
+  echo "TITLE IS";
+  echo $title;
   
   if ($result = array_search('Research Tools', $actualTrail)){
     unset($trail->trail[$result]);
