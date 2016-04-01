@@ -16139,8 +16139,9 @@ angular.module('manage.oneSearchErrors', ['oc.lazyLoad'])
         errorsFactory.getData()
             .success(function(data) {
                 var today = new Date();
+                var tree = [];
                 for (var j = 0; j < 3; j++) {
-                    var tree = {};
+                    tree[j] = {};
                     $scope.errors.mapped.today[j] = [];
                     $scope.errors.mapped.month[j] = [];
                     $scope.errors.mapped.year[j] = [];
@@ -16167,17 +16168,17 @@ angular.module('manage.oneSearchErrors', ['oc.lazyLoad'])
                     }
                     for (i = 0; i < curData.length; i++) {
                         var dt = new Date(curData[i]);
-                        if (!angular.isDefined(tree[dt.getFullYear()])) {
-                            tree[dt.getFullYear()] = {};
+                        if (!angular.isDefined(tree[j][dt.getFullYear()])) {
+                            tree[j][dt.getFullYear()] = {};
                         }
-                        if (!angular.isDefined(tree[dt.getFullYear()][dt.getMonth()])) {
-                            tree[dt.getFullYear()][dt.getMonth()] = {};
+                        if (!angular.isDefined(tree[j][dt.getFullYear()][dt.getMonth()])) {
+                            tree[j][dt.getFullYear()][dt.getMonth()] = {};
                         }
-                        if (!angular.isDefined(tree[dt.getFullYear()][dt.getMonth()][dt.getDate()])) {
-                            tree[dt.getFullYear()][dt.getMonth()][dt.getDate()] = {counter: 0, errors: []};
+                        if (!angular.isDefined(tree[j][dt.getFullYear()][dt.getMonth()][dt.getDate()])) {
+                            tree[j][dt.getFullYear()][dt.getMonth()][dt.getDate()] = {counter: 0, errors: []};
                         }
-                        tree[dt.getFullYear()][dt.getMonth()][dt.getDate()]['counter']++;
-                        tree[dt.getFullYear()][dt.getMonth()][dt.getDate()]['errors'].push(dt);
+                        tree[j][dt.getFullYear()][dt.getMonth()][dt.getDate()]['counter']++;
+                        tree[j][dt.getFullYear()][dt.getMonth()][dt.getDate()]['errors'].push(dt);
 
                         if (dt.getFullYear() === today.getFullYear()) {
                             $scope.errors.mapped.year[j][dt.getMonth()].y++;
@@ -16192,8 +16193,8 @@ angular.module('manage.oneSearchErrors', ['oc.lazyLoad'])
                         }
                     }
                     $scope.errors.list[j] = curData;
-                    $scope.errors.tree[j] = tree;
                 }
+                $scope.errors.tree = tree;
                 $scope.dataProcessed = true;
                 console.dir($scope.errors);
             })
