@@ -154,7 +154,7 @@ angular.module("../assets/js/_ualib-image-carousel.tpl.html", []).run(["$templat
     'ualib.ui',
     'hours',
     'oneSearch',
-    //'manage',
+    'manage',
     'ualib.databases',
     'musicSearch',
     'ualib.staffdir',
