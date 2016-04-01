@@ -16133,35 +16133,26 @@ angular.module('manage.oneSearchErrors', ['oc.lazyLoad'])
         $scope.errors.list = [];
         $scope.errors.mapped = [];
         $scope.errors.mapped.today = [];
-        $scope.errors.mapped.today[0] = []; //scout
-        $scope.errors.mapped.today[1] = []; //catalog
-        $scope.errors.mapped.today[2] = []; //ejournals
         $scope.errors.mapped.month = [];
-        $scope.errors.mapped.month[0] = []; //scout
-        $scope.errors.mapped.month[1] = []; //catalog
-        $scope.errors.mapped.month[2] = []; //ejournals
         $scope.errors.mapped.year = [];
-        $scope.errors.mapped.year[0] = []; //scout
-        $scope.errors.mapped.year[1] = []; //catalog
-        $scope.errors.mapped.year[2] = []; //ejournals
-        for (var j = 0; j < 3; j++) {
-            for (var i = 0; i < 24; i++) {
-                $scope.errors.mapped.today[j].push({"x": i, "y": 0});
-            }
-            for (i = 0; i < 31; i++) {
-                $scope.errors.mapped.month[j].push({"x": i, "y": 0});
-            }
-            for (i = 0; i < 12; i++) {
-                $scope.errors.mapped.year[j].push({"x": i, "y": 0});
-            }
-        }
 
         errorsFactory.getData()
             .success(function(data) {
                 var today = new Date();
-                var tree = [];
                 for (var j = 0; j < 3; j++) {
-                    tree = {};
+                    var tree = {};
+                    $scope.errors.mapped.today[j] = [];
+                    $scope.errors.mapped.month[j] = [];
+                    $scope.errors.mapped.year[j] = [];
+                    for (var i = 0; i < 24; i++) {
+                        $scope.errors.mapped.today[j].push({"x": i, "y": 0});
+                    }
+                    for (i = 0; i < 31; i++) {
+                        $scope.errors.mapped.month[j].push({"x": i, "y": 0});
+                    }
+                    for (i = 0; i < 12; i++) {
+                        $scope.errors.mapped.year[j].push({"x": i, "y": 0});
+                    }
                     var curData = {};
                     switch (j) {
                         case 0:
