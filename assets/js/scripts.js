@@ -154,7 +154,7 @@ angular.module("../assets/js/_ualib-image-carousel.tpl.html", []).run(["$templat
     'ualib.ui',
     'hours',
     'oneSearch',
-    'manage',
+    //'manage',
     'ualib.databases',
     'musicSearch',
     'ualib.staffdir',
@@ -214,7 +214,7 @@ angular.module("../assets/js/_ualib-image-carousel.tpl.html", []).run(["$templat
             // Check if changing from another angular route, and if the previous route is different.
             // We should only force page views in GA when navigating from one app to another.
             // Otherwise the page view will have already be sent to GA via the WP base.php template
-            if (pre && pre.$$route.hasOwnProperty('originalPath') && current.$$route.originalPath !== pre.$$route.originalPath){
+            if (pre && pre.hasOwnProperty('$$route') && pre.$$route.hasOwnProperty('originalPath') && current.$$route.originalPath !== pre.$$route.originalPath){
                 // Send Google Analytics page view when routes are accessed
                 ga('require', 'linkid');
                 ga('send', 'pageview', $location.url());
