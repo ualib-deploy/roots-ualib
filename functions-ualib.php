@@ -105,6 +105,14 @@ function add_manage_admin_bar_link() {
                 'parent' => 'manage_link',
             ));
         }
+        if (($userGroup & GROUP_ERCAROUSEL) === GROUP_ERCAROUSEL) {
+            $wp_admin_bar->add_menu(array(
+                'id' => 'manage_erCarousel_link',
+                'title' => __('<span class="ab-icon dashicons-before dashicons-images-alt2"></span> ER Carousel'),
+                'href' => __(site_url() . "/#/manage-erc"),
+                'parent' => 'manage_link',
+            ));
+        }
     } else {
         $wp_admin_bar->add_menu(array(
             'id' => 'manage_profile_link',
@@ -154,6 +162,27 @@ function bweb_feedzy_cache_duration( $feedCacheDuration, $feedURL ) {
     return 60*5; //5 minutes
 }
 add_filter('wp_feed_cache_transient_lifetime', 'bweb_feedzy_cache_duration', 10, 2);
+
+add_filter('bcn_after_fill', 'remove_mm_pages');
+
+function remove_mm_pages($trail) {
+  
+  $actualTrail = $trail->trail;
+  
+  $titleArray = array('Research Tools', 'Using the Library', 'About', 'Library Help');
+  
+  $counter = 0;
+  
+  foreach($actualTrail as $breadcrumb){
+    
+    $crumbTitle = $breadcrumb->get_title();
+
+    if (in_array($crumbTitle, $titleArray)){
+      unset($trail->trail[$counter]);
+    }
+    $counter++; 
+  }
+}
 
 
 add_action( 'wp_enqueue_scripts', 'roots_ualib_scripts' );
