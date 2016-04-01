@@ -89,6 +89,13 @@
     cursor: pointer;
 }
 
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
 .comps-map{
     margin: 0 auto;
     position: relative;
@@ -1000,6 +1007,8 @@ div.rn-carousel-indicator span.active {
 .pager:after,
 .panel-body:before,
 .panel-body:after,
+.modal-header:before,
+.modal-header:after,
 .modal-footer:before,
 .modal-footer:after {
   content: " ";
@@ -1018,6 +1027,7 @@ div.rn-carousel-indicator span.active {
 .navbar-collapse:after,
 .pager:after,
 .panel-body:after,
+.modal-header:after,
 .modal-footer:after {
   clear: both;
 }
