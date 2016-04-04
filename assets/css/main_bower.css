@@ -96,6 +96,22 @@
     shape-rendering: crispEdges;
 }
 
+.table-ebsco {
+    width: 30px;
+    background-color: rgb(170, 170, 221);
+}
+.table-catalog {
+    width: 30px;
+    background-color: rgb(128, 128, 162);
+}
+.table-eJournals {
+    width: 30px;
+    background-color: rgb(85, 85, 102);
+}
+.table-colors td {
+    border: 0px none;
+}
+
 .comps-map{
     margin: 0 auto;
     position: relative;
