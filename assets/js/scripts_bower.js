@@ -11943,6 +11943,52 @@ angular.module("oneSearchErrors/oneSearchErrors.tpl.html", []).run(["$templateCa
     "            </div>\n" +
     "        </tab>\n" +
     "    </tabset>\n" +
+    "    <table class=\"table-colors\">\n" +
+    "        <tr>\n" +
+    "            <td class=\"table-ebsco\"></td>\n" +
+    "            <td>EBSCO API errors</td>\n" +
+    "        </tr>\n" +
+    "        <tr>\n" +
+    "            <td class=\"table-catalog\"></td>\n" +
+    "            <td>Catalog API errors</td>\n" +
+    "        </tr>\n" +
+    "        <tr>\n" +
+    "            <td class=\"table-eJournals\"></td>\n" +
+    "            <td>Serial Solutions eJournals errors</td>\n" +
+    "        </tr>\n" +
+    "    </table>\n" +
+    "\n" +
+    "    <div class=\"row\">\n" +
+    "        <h3>Detailed Error List</h3>\n" +
+    "        <div class=\"btn-group\">\n" +
+    "            <label class=\"btn btn-primary\" ng-model=\"eEngine.engine\" btn-radio=\"0\">EBSCO</label>\n" +
+    "            <label class=\"btn btn-primary\" ng-model=\"eEngine.engine\" btn-radio=\"1\">Catalog</label>\n" +
+    "            <label class=\"btn btn-primary\" ng-model=\"eEngine.engine\" btn-radio=\"2\">eJournals</label>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-xs-12\" ng-repeat=\"year in errors.tree[eEngine.engine].years\">\n" +
+    "            <h4 class=\"clickable\" ng-click=\"year.open = !year.open\">\n" +
+    "                <a>{{year.name}}</a>\n" +
+    "                <span class=\"label label-warning\">{{year.counter}}</span>\n" +
+    "            </h4>\n" +
+    "            <div class=\"col-xs-12\" ng-repeat=\"month in year.months\" ng-if=\"year.open\">\n" +
+    "                <h5 class=\"clickable\" ng-click=\"month.open = !month.open\">\n" +
+    "                    <a>{{month.name}}</a>\n" +
+    "                    <span class=\"label label-warning\">{{month.counter}}</span>\n" +
+    "                </h5>\n" +
+    "                <div class=\"col-xs-12\" ng-repeat=\"day in month.days\" ng-if=\"month.open\">\n" +
+    "                    <h6 class=\"clickable\"  ng-click=\"day.open = !day.open\">\n" +
+    "                        <a>{{day.day}}</a>\n" +
+    "                        <span class=\"label label-warning\">{{day.counter}}</span>\n" +
+    "                    </h6>\n" +
+    "                    <p ng-repeat=\"error in day.errors\" ng-if=\"day.open\">\n" +
+    "                        <span class=\"label label-info\">\n" +
+    "                            {{error}}\n" +
+    "                        </span>\n" +
+    "                    </p>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
     "</div>");
 }]);
 
@@ -16135,13 +16181,17 @@ angular.module('manage.oneSearchErrors', ['oc.lazyLoad'])
         $scope.errors.mapped.today = [];
         $scope.errors.mapped.month = [];
         $scope.errors.mapped.year = [];
+        $scope.eEngine = {};
+        $scope.eEngine.engine = 0;
 
         errorsFactory.getData()
             .success(function(data) {
+                var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
                 var today = new Date();
                 var tree = [];
                 for (var j = 0; j < 3; j++) {
-                    tree[j] = [];
+                    tree[j] = {};
+                    tree[j].years = [];
                     $scope.errors.mapped.today[j] = [];
                     $scope.errors.mapped.month[j] = [];
                     $scope.errors.mapped.year[j] = [];
@@ -16149,7 +16199,7 @@ angular.module('manage.oneSearchErrors', ['oc.lazyLoad'])
                         $scope.errors.mapped.today[j].push({"x": i, "y": 0});
                     }
                     for (i = 0; i < 31; i++) {
-                        $scope.errors.mapped.month[j].push({"x": i, "y": 0});
+                        $scope.errors.mapped.month[j].push({"x": i + 1, "y": 0});
                     }
                     for (i = 0; i < 12; i++) {
                         $scope.errors.mapped.year[j].push({"x": i, "y": 0});
@@ -16169,17 +16219,60 @@ angular.module('manage.oneSearchErrors', ['oc.lazyLoad'])
                     for (i = 0; i < curData.length; i++) {
                         curData[i] = curData[i].replace(/-/g,'/');
                         var dt = new Date(curData[i]);
-                        if (!angular.isDefined(tree[j][dt.getFullYear()])) {
-                            tree[j][dt.getFullYear()] = {};
+                        var isPresent = false;
+                        var y = 0, m = 0, d = 0;
+                        for (y = 0; y < tree[j].years.length; y++) {
+                            if (tree[j].years[y].name === dt.getFullYear()) {
+                                isPresent = true;
+                                break;
+                            }
                         }
-                        if (!angular.isDefined(tree[j][dt.getFullYear()][dt.getMonth()])) {
-                            tree[j][dt.getFullYear()][dt.getMonth()] = {};
+                        if (!isPresent) {
+                            var year = {};
+                            year.open = false;
+                            year.counter = 0;
+                            year.name = dt.getFullYear();
+                            year.months = [];
+                            tree[j].years.push(year);
+                            y = tree[j].years.length - 1;
                         }
-                        if (!angular.isDefined(tree[j][dt.getFullYear()][dt.getMonth()][dt.getDate()])) {
-                            tree[j][dt.getFullYear()][dt.getMonth()][dt.getDate()] = {counter: 0, errors: []};
+                        isPresent = false;
+                        for (m = 0; m < tree[j].years[y].months.length; m++) {
+                            if (tree[j].years[y].months[m].mm === dt.getMonth()) {
+                                isPresent = true;
+                                break;
+                            }
                         }
-                        tree[j][dt.getFullYear()][dt.getMonth()][dt.getDate()]['counter']++;
-                        tree[j][dt.getFullYear()][dt.getMonth()][dt.getDate()]['errors'].push(dt);
+                        if (!isPresent) {
+                            var month = {};
+                            month.open = false;
+                            month.counter = 0;
+                            month.mm = dt.getMonth();
+                            month.name = months[month.mm];
+                            month.days = [];
+                            tree[j].years[y].months.push(month);
+                            m = tree[j].years[y].months.length - 1;
+                        }
+                        isPresent = false;
+                        for (d = 0; d < tree[j].years[y].months[m].days.length; d++) {
+                            if (tree[j].years[y].months[m].days[d].day === dt.getDate()) {
+                                isPresent = true;
+                                break;
+                            }
+                        }
+                        if (!isPresent) {
+                            var day = {};
+                            day.open = false;
+                            day.day = dt.getDate();
+                            day.counter = 0;
+                            day.errors = [];
+                            tree[j].years[y].months[m].days.push(day);
+                            d = tree[j].years[y].months[m].days.length - 1;
+                        }
+                        tree[j].years[y].counter++;
+                        tree[j].years[y].months[m].counter++;
+                        tree[j].years[y].months[m].days[d].counter++;
+                        tree[j].years[y].months[m].days[d].errors.push(dt);
 
                         if (dt.getFullYear() === today.getFullYear()) {
                             $scope.errors.mapped.year[j][dt.getMonth()].y++;
@@ -16295,9 +16388,14 @@ angular.module('manage.oneSearchErrors', ['oc.lazyLoad'])
                     .domain([0, yStackMax])
                     .range([height, 0]);
 
+                var yTicks = 20;
+                if (yTicks > yGroupMax) {
+                    yTicks = yGroupMax;
+                }
+
                 var yAxis = d3.svg.axis()
                     .scale(y)
-                    .ticks(yGroupMax)
+                    .ticks(yTicks)
                     .orient("right");
 
                 var color = d3.scale.linear()
@@ -16319,7 +16417,9 @@ angular.module('manage.oneSearchErrors', ['oc.lazyLoad'])
                 var rect = layer.selectAll("rect")
                     .data(function(d) { return d; })
                     .enter().append("rect")
-                    .attr("x", function(d) { return x(d.x); })
+                    .attr("x", function(d) {
+                        return x(d.x);
+                    })
                     .attr("y", height)
                     .attr("width", x.rangeBand())
                     .attr("height", 0);
@@ -20601,7 +20701,7 @@ angular.module('common.oneSearch', [])
 })(this);
 /**
  * @license
- * lodash 4.8.0 <https://lodash.com/>
+ * lodash 4.8.2 <https://lodash.com/>
  * Copyright jQuery Foundation and other contributors <https://jquery.org/>
  * Released under MIT license <https://lodash.com/license>
  * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
@@ -20613,7 +20713,7 @@ angular.module('common.oneSearch', [])
   var undefined;
 
   /** Used as the semantic version number. */
-  var VERSION = '4.8.0';
+  var VERSION = '4.8.2';
 
   /** Used as the size to enable large array optimizations. */
   var LARGE_ARRAY_SIZE = 200;
@@ -25209,7 +25309,7 @@ angular.module('common.oneSearch', [])
      */
     function createOver(arrayFunc) {
       return rest(function(iteratees) {
-        iteratees = arrayMap(iteratees, getIteratee());
+        iteratees = arrayMap(baseFlatten(iteratees, 1), getIteratee());
         return rest(function(args) {
           var thisArg = this;
           return arrayFunc(iteratees, function(iteratee) {
@@ -30193,7 +30293,7 @@ angular.module('common.oneSearch', [])
      * @memberOf _
      * @category Function
      * @param {Function} func The function to wrap.
-     * @param {...Function} [transforms] The functions to transform
+     * @param {...(Function|Function[])} [transforms] The functions to transform.
      * arguments, specified individually or in arrays.
      * @returns {Function} Returns the new function.
      * @example
@@ -30217,7 +30317,7 @@ angular.module('common.oneSearch', [])
      * // => [100, 10]
      */
     var overArgs = rest(function(func, transforms) {
-      transforms = arrayMap(transforms, getIteratee());
+      transforms = arrayMap(baseFlatten(transforms, 1), getIteratee());
 
       var funcsLength = transforms.length;
       return rest(function(args) {
@@ -35292,7 +35392,7 @@ angular.module('common.oneSearch', [])
      * @memberOf _
      * @since 4.0.0
      * @category Util
-     * @param {...Function} iteratees The iteratees to invoke.
+     * @param {...(Function|Function[])} iteratees The iteratees to invoke.
      * @returns {Function} Returns the new function.
      * @example
      *
@@ -35311,7 +35411,7 @@ angular.module('common.oneSearch', [])
      * @memberOf _
      * @since 4.0.0
      * @category Util
-     * @param {...Function} predicates The predicates to check.
+     * @param {...(Function|Function[])} iteratees The iteratees to invoke.
      * @returns {Function} Returns the new function.
      * @example
      *
@@ -35336,7 +35436,7 @@ angular.module('common.oneSearch', [])
      * @memberOf _
      * @since 4.0.0
      * @category Util
-     * @param {...Function} predicates The predicates to check.
+     * @param {...(Function|Function[])} iteratees The iteratees to invoke.
      * @returns {Function} Returns the new function.
      * @example
      *
