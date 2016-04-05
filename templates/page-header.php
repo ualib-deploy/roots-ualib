@@ -7,8 +7,8 @@
         {
             bcn_display();
             $display = bcn_display(true);
-            $display = '<ol class="breadcrumb">' . $display . '</ol>';
-            print($display);
+            //$display = '<ol class="breadcrumb">' . $display . '</ol>';
+            var_dump($display);
         }?>
     </div>
     <h1>
