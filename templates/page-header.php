@@ -7,7 +7,7 @@
         {
             bcn_display();
             $display = bcn_display(true);
-            $display = htmlspecialchars($display);
+            $display = '<ol class="breadcrumb">' + $display + '</ol>';
             print($display);
         }?>
     </div>
