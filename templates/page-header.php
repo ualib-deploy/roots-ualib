@@ -5,7 +5,9 @@
     <div class="breadcrumbs" typeof="BreadcrumbList" vocab="http://schema.org/">
         <?php if(function_exists('bcn_display'))
         {
-            print_r("Testing...")
+            bcn_display();
++           $display = bcn_display(true);
++           print_r($display); 
         }?>
     </div>
     <h1>
