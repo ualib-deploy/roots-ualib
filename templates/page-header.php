@@ -6,8 +6,9 @@
         <?php if(function_exists('bcn_display'))
         {
             bcn_display();
-+           $display = bcn_display(true);
-+           print_r($display); 
+            $display = bcn_display(true);
+            $display = htmlspecialchars($display);
+            print($display);
         }?>
     </div>
     <h1>
