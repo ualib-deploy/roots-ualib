@@ -10155,20 +10155,20 @@ angular.module("manageERCarousel/manageSlideList.tpl.html", []).run(["$templateC
     "\n" +
     "    <h3>Slides (only top <span class=\"label label-info\">{{numShow}}</span> slides will be shown)</h3>\n" +
     "    <div class=\"row\" ng-repeat=\"slide in slides | orderBy:'priority':true\">\n" +
-    "        <div class=\"col-xs-2 col-sm-1 clickable\" ng-click=\"toggleSlide(slide)\">\n" +
-    "            <h2>\n" +
+    "        <div class=\"col-xs-2 col-sm-1\">\n" +
+    "            <h2 class=\"clickable\" ng-click=\"toggleSlide(slide)\">\n" +
     "                <span class=\"label label-success\" ng-if=\"$index < numShow\">{{$index + 1}}</span>\n" +
     "            </h2>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-xs-10 col-sm-4 col-md-3\">\n" +
-    "            <a class=\"thumbnail clickable\" ng-click=\"toggleSlide(slide)\">\n" +
-    "                <img ng-src=\"{{slide.image}}\" alt=\"Click to edit slide\">\n" +
-    "            </a><br>\n" +
     "            <button type=\"button\" class=\"btn btn-danger\" ng-click=\"approveSlide(slide)\"\n" +
     "                    ng-if=\"slide.status < 1 && admin\">\n" +
     "                <span class=\"fa fa-thumbs-o-up\"></span> Approve\n" +
     "            </button>\n" +
     "            <span class=\"label label-warning\" ng-if=\"slide.status < 1 && !admin\">Approval Pending</span>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-xs-10 col-sm-4 col-md-3\">\n" +
+    "            <a class=\"thumbnail clickable\" ng-click=\"toggleSlide(slide)\">\n" +
+    "                <img ng-src=\"{{slide.image}}\" alt=\"Click to edit slide\">\n" +
+    "            </a>\n" +
     "        </div>\n" +
     "        <div class=\"col-xs-12 col-sm-7 col-md-8 clickable\" ng-hide=\"slide.show\" ng-click=\"toggleSlide(slide)\">\n" +
     "            <h4><a>{{slide.title}}</a></h4>\n" +
