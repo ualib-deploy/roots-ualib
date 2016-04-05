@@ -11982,8 +11982,9 @@ angular.module("oneSearchErrors/oneSearchErrors.tpl.html", []).run(["$templateCa
     "                    </h6>\n" +
     "                    <p ng-repeat=\"error in day.errors\" ng-if=\"day.open\">\n" +
     "                        <span class=\"label label-info\">\n" +
-    "                            {{error}}\n" +
+    "                            {{error.recorded | date : 'hh:mm a'}}\n" +
     "                        </span>\n" +
+    "                        {{error.description}}\n" +
     "                    </p>\n" +
     "                </div>\n" +
     "            </div>\n" +
@@ -12944,8 +12945,7 @@ angular.module('common.manage', [])
         };
     }])
 
-    .run(['$rootScope', 'tokenReceiver', '$location', 'AuthService',
-    function($rootScope, tokenReceiver, $location, AuthService) {
+    .run(['$rootScope', function($rootScope) {
         $rootScope.userInfo = {};
     }]);
 
@@ -16217,8 +16217,8 @@ angular.module('manage.oneSearchErrors', ['oc.lazyLoad'])
                             break;
                     }
                     for (i = 0; i < curData.length; i++) {
-                        curData[i] = curData[i].replace(/-/g,'/');
-                        var dt = new Date(curData[i]);
+                        curData[i].recorded = curData[i].recorded.replace(/-/g,'/');
+                        var dt = new Date(curData[i].recorded);
                         var isPresent = false;
                         var y = 0, m = 0, d = 0;
                         for (y = 0; y < tree[j].years.length; y++) {
@@ -16272,7 +16272,7 @@ angular.module('manage.oneSearchErrors', ['oc.lazyLoad'])
                         tree[j].years[y].counter++;
                         tree[j].years[y].months[m].counter++;
                         tree[j].years[y].months[m].days[d].counter++;
-                        tree[j].years[y].months[m].days[d].errors.push(dt);
+                        tree[j].years[y].months[m].days[d].errors.push({recorded: dt, description: curData[i].description});
 
                         if (dt.getFullYear() === today.getFullYear()) {
                             $scope.errors.mapped.year[j][dt.getMonth()].y++;
