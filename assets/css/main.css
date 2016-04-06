@@ -6840,6 +6840,13 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
 .breadcrumb > .active {
   color: #999999;
 }
+.breadcrumb {
+  padding-left: 0px;
+  padding-right: 0px;
+  background: none;
+  margin-top: 30px;
+  margin-bottom: -20px;
+}
 .pagination {
   display: inline-block;
   padding-left: 0;
@@ -9388,6 +9395,13 @@ div[role="document"] {
 .jumbotron-header > .jumbotron .well {
   background-color: rgba(25, 20, 20, 0.75);
   border-color: #0D0A0A;
+}
+.jumbotron-header > .jumbotron .breadcrumb {
+  padding: 8px 15px;
+  margin-top: 0px;
+  margin-left: -10px;
+  margin-bottom: 21px;
+  background-color: rgba(245, 245, 245, 0.3);
 }
 /**
  * Your styles here
