@@ -4,7 +4,7 @@
 <div class="jumbotron-header" <?php if ($jumboHeadBg !== false) print 'style="background-image: url('.$jumboHeadBg.');"'; ?>>
     <div class="jumbotron drewtest">
         <div class="container">
-              <ol class="breadcrumbs" typeof="BreadcrumbList" vocab="http://schema.org/">
+              <ol class="breadcrumb" typeof="BreadcrumbList" vocab="http://schema.org/">
                   <?php if(function_exists('bcn_display'))
                   {
                     $display = bcn_display(true);
