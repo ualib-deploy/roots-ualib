@@ -10155,20 +10155,20 @@ angular.module("manageERCarousel/manageSlideList.tpl.html", []).run(["$templateC
     "\n" +
     "    <h3>Slides (only top <span class=\"label label-info\">{{numShow}}</span> slides will be shown)</h3>\n" +
     "    <div class=\"row\" ng-repeat=\"slide in slides | orderBy:'priority':true\">\n" +
-    "        <div class=\"col-xs-2 col-sm-1\">\n" +
-    "            <h2 class=\"clickable\" ng-click=\"toggleSlide(slide)\">\n" +
+    "        <div class=\"col-xs-2 col-sm-1 clickable\" ng-click=\"toggleSlide(slide)\">\n" +
+    "            <h2>\n" +
     "                <span class=\"label label-success\" ng-if=\"$index < numShow\">{{$index + 1}}</span>\n" +
     "            </h2>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-xs-10 col-sm-4 col-md-3\">\n" +
+    "            <a class=\"thumbnail clickable\" ng-click=\"toggleSlide(slide)\">\n" +
+    "                <img ng-src=\"{{slide.image}}\" alt=\"Click to edit slide\">\n" +
+    "            </a><br>\n" +
     "            <button type=\"button\" class=\"btn btn-danger\" ng-click=\"approveSlide(slide)\"\n" +
     "                    ng-if=\"slide.status < 1 && admin\">\n" +
     "                <span class=\"fa fa-thumbs-o-up\"></span> Approve\n" +
     "            </button>\n" +
     "            <span class=\"label label-warning\" ng-if=\"slide.status < 1 && !admin\">Approval Pending</span>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-xs-10 col-sm-4 col-md-3\">\n" +
-    "            <a class=\"thumbnail clickable\" ng-click=\"toggleSlide(slide)\">\n" +
-    "                <img ng-src=\"{{slide.image}}\" alt=\"Click to edit slide\">\n" +
-    "            </a>\n" +
     "        </div>\n" +
     "        <div class=\"col-xs-12 col-sm-7 col-md-8 clickable\" ng-hide=\"slide.show\" ng-click=\"toggleSlide(slide)\">\n" +
     "            <h4><a>{{slide.title}}</a></h4>\n" +
@@ -11943,53 +11943,6 @@ angular.module("oneSearchErrors/oneSearchErrors.tpl.html", []).run(["$templateCa
     "            </div>\n" +
     "        </tab>\n" +
     "    </tabset>\n" +
-    "    <table class=\"table-colors\">\n" +
-    "        <tr>\n" +
-    "            <td class=\"table-ebsco\"></td>\n" +
-    "            <td>EBSCO API errors</td>\n" +
-    "        </tr>\n" +
-    "        <tr>\n" +
-    "            <td class=\"table-catalog\"></td>\n" +
-    "            <td>Catalog API errors</td>\n" +
-    "        </tr>\n" +
-    "        <tr>\n" +
-    "            <td class=\"table-eJournals\"></td>\n" +
-    "            <td>Serial Solutions eJournals errors</td>\n" +
-    "        </tr>\n" +
-    "    </table>\n" +
-    "\n" +
-    "    <div class=\"row\">\n" +
-    "        <h3>Detailed Error List</h3>\n" +
-    "        <div class=\"btn-group\">\n" +
-    "            <label class=\"btn btn-primary\" ng-model=\"eEngine.engine\" btn-radio=\"0\">EBSCO</label>\n" +
-    "            <label class=\"btn btn-primary\" ng-model=\"eEngine.engine\" btn-radio=\"1\">Catalog</label>\n" +
-    "            <label class=\"btn btn-primary\" ng-model=\"eEngine.engine\" btn-radio=\"2\">eJournals</label>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-xs-12\" ng-repeat=\"year in errors.tree[eEngine.engine].years\">\n" +
-    "            <h4 class=\"clickable\" ng-click=\"year.open = !year.open\">\n" +
-    "                <a>{{year.name}}</a>\n" +
-    "                <span class=\"label label-warning\">{{year.counter}}</span>\n" +
-    "            </h4>\n" +
-    "            <div class=\"col-xs-12\" ng-repeat=\"month in year.months\" ng-if=\"year.open\">\n" +
-    "                <h5 class=\"clickable\" ng-click=\"month.open = !month.open\">\n" +
-    "                    <a>{{month.name}}</a>\n" +
-    "                    <span class=\"label label-warning\">{{month.counter}}</span>\n" +
-    "                </h5>\n" +
-    "                <div class=\"col-xs-12\" ng-repeat=\"day in month.days\" ng-if=\"month.open\">\n" +
-    "                    <h6 class=\"clickable\"  ng-click=\"day.open = !day.open\">\n" +
-    "                        <a>{{day.day}}</a>\n" +
-    "                        <span class=\"label label-warning\">{{day.counter}}</span>\n" +
-    "                    </h6>\n" +
-    "                    <p ng-repeat=\"error in day.errors\" ng-if=\"day.open\">\n" +
-    "                        <span class=\"label label-info\">\n" +
-    "                            {{error.recorded | date : 'hh:mm a'}}\n" +
-    "                        </span>\n" +
-    "                        {{error.description}}\n" +
-    "                    </p>\n" +
-    "                </div>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "    </div>\n" +
     "</div>");
 }]);
 
@@ -12945,7 +12898,8 @@ angular.module('common.manage', [])
         };
     }])
 
-    .run(['$rootScope', function($rootScope) {
+    .run(['$rootScope', 'tokenReceiver', '$location', 'AuthService',
+    function($rootScope, tokenReceiver, $location, AuthService) {
         $rootScope.userInfo = {};
     }]);
 
@@ -16181,17 +16135,13 @@ angular.module('manage.oneSearchErrors', ['oc.lazyLoad'])
         $scope.errors.mapped.today = [];
         $scope.errors.mapped.month = [];
         $scope.errors.mapped.year = [];
-        $scope.eEngine = {};
-        $scope.eEngine.engine = 0;
 
         errorsFactory.getData()
             .success(function(data) {
-                var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
                 var today = new Date();
                 var tree = [];
                 for (var j = 0; j < 3; j++) {
-                    tree[j] = {};
-                    tree[j].years = [];
+                    tree[j] = [];
                     $scope.errors.mapped.today[j] = [];
                     $scope.errors.mapped.month[j] = [];
                     $scope.errors.mapped.year[j] = [];
@@ -16199,7 +16149,7 @@ angular.module('manage.oneSearchErrors', ['oc.lazyLoad'])
                         $scope.errors.mapped.today[j].push({"x": i, "y": 0});
                     }
                     for (i = 0; i < 31; i++) {
-                        $scope.errors.mapped.month[j].push({"x": i + 1, "y": 0});
+                        $scope.errors.mapped.month[j].push({"x": i, "y": 0});
                     }
                     for (i = 0; i < 12; i++) {
                         $scope.errors.mapped.year[j].push({"x": i, "y": 0});
@@ -16217,62 +16167,19 @@ angular.module('manage.oneSearchErrors', ['oc.lazyLoad'])
                             break;
                     }
                     for (i = 0; i < curData.length; i++) {
-                        curData[i].recorded = curData[i].recorded.replace(/-/g,'/');
-                        var dt = new Date(curData[i].recorded);
-                        var isPresent = false;
-                        var y = 0, m = 0, d = 0;
-                        for (y = 0; y < tree[j].years.length; y++) {
-                            if (tree[j].years[y].name === dt.getFullYear()) {
-                                isPresent = true;
-                                break;
-                            }
+                        curData[i] = curData[i].replace(/-/g,'/');
+                        var dt = new Date(curData[i]);
+                        if (!angular.isDefined(tree[j][dt.getFullYear()])) {
+                            tree[j][dt.getFullYear()] = {};
                         }
-                        if (!isPresent) {
-                            var year = {};
-                            year.open = false;
-                            year.counter = 0;
-                            year.name = dt.getFullYear();
-                            year.months = [];
-                            tree[j].years.push(year);
-                            y = tree[j].years.length - 1;
+                        if (!angular.isDefined(tree[j][dt.getFullYear()][dt.getMonth()])) {
+                            tree[j][dt.getFullYear()][dt.getMonth()] = {};
                         }
-                        isPresent = false;
-                        for (m = 0; m < tree[j].years[y].months.length; m++) {
-                            if (tree[j].years[y].months[m].mm === dt.getMonth()) {
-                                isPresent = true;
-                                break;
-                            }
+                        if (!angular.isDefined(tree[j][dt.getFullYear()][dt.getMonth()][dt.getDate()])) {
+                            tree[j][dt.getFullYear()][dt.getMonth()][dt.getDate()] = {counter: 0, errors: []};
                         }
-                        if (!isPresent) {
-                            var month = {};
-                            month.open = false;
-                            month.counter = 0;
-                            month.mm = dt.getMonth();
-                            month.name = months[month.mm];
-                            month.days = [];
-                            tree[j].years[y].months.push(month);
-                            m = tree[j].years[y].months.length - 1;
-                        }
-                        isPresent = false;
-                        for (d = 0; d < tree[j].years[y].months[m].days.length; d++) {
-                            if (tree[j].years[y].months[m].days[d].day === dt.getDate()) {
-                                isPresent = true;
-                                break;
-                            }
-                        }
-                        if (!isPresent) {
-                            var day = {};
-                            day.open = false;
-                            day.day = dt.getDate();
-                            day.counter = 0;
-                            day.errors = [];
-                            tree[j].years[y].months[m].days.push(day);
-                            d = tree[j].years[y].months[m].days.length - 1;
-                        }
-                        tree[j].years[y].counter++;
-                        tree[j].years[y].months[m].counter++;
-                        tree[j].years[y].months[m].days[d].counter++;
-                        tree[j].years[y].months[m].days[d].errors.push({recorded: dt, description: curData[i].description});
+                        tree[j][dt.getFullYear()][dt.getMonth()][dt.getDate()]['counter']++;
+                        tree[j][dt.getFullYear()][dt.getMonth()][dt.getDate()]['errors'].push(dt);
 
                         if (dt.getFullYear() === today.getFullYear()) {
                             $scope.errors.mapped.year[j][dt.getMonth()].y++;
@@ -16388,14 +16295,9 @@ angular.module('manage.oneSearchErrors', ['oc.lazyLoad'])
                     .domain([0, yStackMax])
                     .range([height, 0]);
 
-                var yTicks = 20;
-                if (yTicks > yGroupMax) {
-                    yTicks = yGroupMax;
-                }
-
                 var yAxis = d3.svg.axis()
                     .scale(y)
-                    .ticks(yTicks)
+                    .ticks(yGroupMax)
                     .orient("right");
 
                 var color = d3.scale.linear()
@@ -16417,9 +16319,7 @@ angular.module('manage.oneSearchErrors', ['oc.lazyLoad'])
                 var rect = layer.selectAll("rect")
                     .data(function(d) { return d; })
                     .enter().append("rect")
-                    .attr("x", function(d) {
-                        return x(d.x);
-                    })
+                    .attr("x", function(d) { return x(d.x); })
                     .attr("y", height)
                     .attr("width", x.rangeBand())
                     .attr("height", 0);
@@ -20701,7 +20601,7 @@ angular.module('common.oneSearch', [])
 })(this);
 /**
  * @license
- * lodash 4.8.2 <https://lodash.com/>
+ * lodash 4.7.0 <https://lodash.com/>
  * Copyright jQuery Foundation and other contributors <https://jquery.org/>
  * Released under MIT license <https://lodash.com/license>
  * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
@@ -20713,7 +20613,7 @@ angular.module('common.oneSearch', [])
   var undefined;
 
   /** Used as the semantic version number. */
-  var VERSION = '4.8.2';
+  var VERSION = '4.7.0';
 
   /** Used as the size to enable large array optimizations. */
   var LARGE_ARRAY_SIZE = 200;
@@ -20819,10 +20719,7 @@ angular.module('common.oneSearch', [])
       reIsPlainProp = /^\w*$/,
       rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]/g;
 
-  /**
-   * Used to match `RegExp`
-   * [syntax characters](http://ecma-international.org/ecma-262/6.0/#sec-patterns).
-   */
+  /** Used to match `RegExp` [syntax characters](http://ecma-international.org/ecma-262/6.0/#sec-patterns). */
   var reRegExpChar = /[\\^$.*+?()[\]{}|]/g,
       reHasRegExpChar = RegExp(reRegExpChar.source);
 
@@ -20834,10 +20731,7 @@ angular.module('common.oneSearch', [])
   /** Used to match backslashes in property paths. */
   var reEscapeChar = /\\(\\)?/g;
 
-  /**
-   * Used to match
-   * [ES template delimiters](http://ecma-international.org/ecma-262/6.0/#sec-template-literal-lexical-components).
-   */
+  /** Used to match [ES template delimiters](http://ecma-international.org/ecma-262/6.0/#sec-template-literal-lexical-components). */
   var reEsTemplate = /\$\{([^\\}]*(?:\\.[^\\}]*)*)\}/g;
 
   /** Used to match `RegExp` flags from their coerced string values. */
@@ -21116,7 +21010,7 @@ angular.module('common.oneSearch', [])
    * @private
    * @param {Function} func The function to invoke.
    * @param {*} thisArg The `this` binding of `func`.
-   * @param {Array} args The arguments to invoke `func` with.
+   * @param {...*} args The arguments to invoke `func` with.
    * @returns {*} Returns the result of `func`.
    */
   function apply(func, thisArg, args) {
@@ -22097,8 +21991,7 @@ angular.module('common.oneSearch', [])
     var objectCtorString = funcToString.call(Object);
 
     /**
-     * Used to resolve the
-     * [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
+     * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
      * of values.
      */
     var objectToString = objectProto.toString;
@@ -22157,11 +22050,11 @@ angular.module('common.oneSearch', [])
     var realNames = {};
 
     /** Used to detect maps, sets, and weakmaps. */
-    var dataViewCtorString = toSource(DataView),
-        mapCtorString = toSource(Map),
-        promiseCtorString = toSource(Promise),
-        setCtorString = toSource(Set),
-        weakMapCtorString = toSource(WeakMap);
+    var dataViewCtorString = DataView ? (DataView + '') : '',
+        mapCtorString = Map ? funcToString.call(Map) : '',
+        promiseCtorString = Promise ? funcToString.call(Promise) : '',
+        setCtorString = Set ? funcToString.call(Set) : '',
+        weakMapCtorString = WeakMap ? funcToString.call(WeakMap) : '';
 
     /** Used to convert symbols to primitives and strings. */
     var symbolProto = Symbol ? Symbol.prototype : undefined,
@@ -23897,7 +23790,16 @@ angular.module('common.oneSearch', [])
     function baseMatches(source) {
       var matchData = getMatchData(source);
       if (matchData.length == 1 && matchData[0][2]) {
-        return matchesStrictComparable(matchData[0][0], matchData[0][1]);
+        var key = matchData[0][0],
+            value = matchData[0][1];
+
+        return function(object) {
+          if (object == null) {
+            return false;
+          }
+          return object[key] === value &&
+            (value !== undefined || (key in Object(object)));
+        };
       }
       return function(object) {
         return object === source || baseIsMatch(object, source, matchData);
@@ -23913,9 +23815,6 @@ angular.module('common.oneSearch', [])
      * @returns {Function} Returns the new function.
      */
     function baseMatchesProperty(path, srcValue) {
-      if (isKey(path) && isStrictComparable(srcValue)) {
-        return matchesStrictComparable(path, srcValue);
-      }
       return function(object) {
         var objValue = get(object, path);
         return (objValue === undefined && objValue === srcValue)
@@ -25087,8 +24986,8 @@ angular.module('common.oneSearch', [])
      */
     function createCtorWrapper(Ctor) {
       return function() {
-        // Use a `switch` statement to work with class constructors. See
-        // http://ecma-international.org/ecma-262/6.0/#sec-ecmascript-function-objects-call-thisargument-argumentslist
+        // Use a `switch` statement to work with class constructors.
+        // See http://ecma-international.org/ecma-262/6.0/#sec-ecmascript-function-objects-call-thisargument-argumentslist
         // for more details.
         var args = arguments;
         switch (args.length) {
@@ -25342,8 +25241,9 @@ angular.module('common.oneSearch', [])
     }
 
     /**
-     * Creates a function that wraps `func` to invoke it with the `this` binding
-     * of `thisArg` and `partials` prepended to the arguments it receives.
+     * Creates a function that wraps `func` to invoke it with the optional `this`
+     * binding of `thisArg` and the `partials` prepended to those provided to
+     * the wrapper.
      *
      * @private
      * @param {Function} func The function to wrap.
@@ -25686,8 +25586,7 @@ angular.module('common.oneSearch', [])
         case regexpTag:
         case stringTag:
           // Coerce regexes to strings and treat strings, primitives and objects,
-          // as equal. See http://www.ecma-international.org/ecma-262/6.0/#sec-regexp.prototype.tostring
-          // for more details.
+          // as equal. See https://es5.github.io/#x15.10.6.4 for more details.
           return object == (other + '');
 
         case mapTag:
@@ -25854,7 +25753,7 @@ angular.module('common.oneSearch', [])
     /**
      * Gets the appropriate "iteratee" function. If the `_.iteratee` method is
      * customized this function returns the custom method, otherwise it returns
-     * `baseIteratee`. If arguments are provided, the chosen function is invoked
+     * `baseIteratee`. If arguments are provided the chosen function is invoked
      * with them and its result is returned.
      *
      * @private
@@ -25992,7 +25891,7 @@ angular.module('common.oneSearch', [])
       getTag = function(value) {
         var result = objectToString.call(value),
             Ctor = result == objectTag ? value.constructor : null,
-            ctorString = toSource(Ctor);
+            ctorString = typeof Ctor == 'function' ? funcToString.call(Ctor) : '';
 
         if (ctorString) {
           switch (ctorString) {
@@ -26045,25 +25944,29 @@ angular.module('common.oneSearch', [])
      * @returns {boolean} Returns `true` if `path` exists, else `false`.
      */
     function hasPath(object, path, hasFunc) {
-      path = isKey(path, object) ? [path] : baseCastPath(path);
+      if (object == null) {
+        return false;
+      }
+      var result = hasFunc(object, path);
+      if (!result && !isKey(path)) {
+        path = baseCastPath(path);
 
-      var result,
-          index = -1,
-          length = path.length;
+        var index = -1,
+            length = path.length;
 
-      while (++index < length) {
-        var key = path[index];
-        if (!(result = object != null && hasFunc(object, key))) {
-          break;
+        while (object != null && ++index < length) {
+          var key = path[index];
+          if (!(result = hasFunc(object, key))) {
+            break;
+          }
+          object = object[key];
         }
-        object = object[key];
       }
-      if (result) {
-        return result;
-      }
-      var length = object ? object.length : 0;
-      return !!length && isLength(length) && isIndex(key, length) &&
-        (isArray(object) || isString(object) || isArguments(object));
+      var length = object ? object.length : undefined;
+      return result || (
+        !!length && isLength(length) && isIndex(path, length) &&
+        (isArray(object) || isString(object) || isArguments(object))
+      );
     }
 
     /**
@@ -26268,25 +26171,6 @@ angular.module('common.oneSearch', [])
     }
 
     /**
-     * A specialized version of `matchesProperty` for source values suitable
-     * for strict equality comparisons, i.e. `===`.
-     *
-     * @private
-     * @param {string} key The key of the property to get.
-     * @param {*} srcValue The value to match.
-     * @returns {Function} Returns the new function.
-     */
-    function matchesStrictComparable(key, srcValue) {
-      return function(object) {
-        if (object == null) {
-          return false;
-        }
-        return object[key] === srcValue &&
-          (srcValue !== undefined || (key in Object(object)));
-      };
-    }
-
-    /**
      * Merges the function metadata of `source` into `data`.
      *
      * Merging metadata reduces the number of wrappers used to invoke a function.
@@ -26461,22 +26345,6 @@ angular.module('common.oneSearch', [])
     });
 
     /**
-     * Converts `func` to its source code.
-     *
-     * @private
-     * @param {Function} func The function to process.
-     * @returns {string} Returns the source code.
-     */
-    function toSource(func) {
-      if (isFunction(func)) {
-        try {
-          return funcToString.call(func);
-        } catch (e) {}
-      }
-      return toString(func);
-    }
-
-    /**
      * Creates a clone of `wrapper`.
      *
      * @private
@@ -26506,8 +26374,7 @@ angular.module('common.oneSearch', [])
      * @since 3.0.0
      * @category Array
      * @param {Array} array The array to process.
-     * @param {number} [size=1] The length of each chunk
-     * @param- {Object} [guard] Enables use as an iteratee for methods like `_.map`.
+     * @param {number} [size=0] The length of each chunk.
      * @returns {Array} Returns the new array containing chunks.
      * @example
      *
@@ -26517,12 +26384,9 @@ angular.module('common.oneSearch', [])
      * _.chunk(['a', 'b', 'c', 'd'], 3);
      * // => [['a', 'b', 'c'], ['d']]
      */
-    function chunk(array, size, guard) {
-      if ((guard ? isIterateeCall(array, size, guard) : size === undefined)) {
-        size = 1;
-      } else {
-        size = nativeMax(toInteger(size), 0);
-      }
+    function chunk(array, size) {
+      size = nativeMax(toInteger(size), 0);
+
       var length = array ? array.length : 0;
       if (!length || size < 1) {
         return [];
@@ -28704,9 +28568,9 @@ angular.module('common.oneSearch', [])
 
     /**
      * Creates an object composed of keys generated from the results of running
-     * each element of `collection` thru `iteratee`. The corresponding value of
-     * each key is the number of times the key was returned by `iteratee`. The
-     * iteratee is invoked with one argument: (value).
+     * each element of `collection` through `iteratee`. The corresponding value
+     * of each key is the number of times the key was returned by `iteratee`.
+     * The iteratee is invoked with one argument: (value).
      *
      * @static
      * @memberOf _
@@ -28888,8 +28752,8 @@ angular.module('common.oneSearch', [])
 
     /**
      * Creates a flattened array of values by running each element in `collection`
-     * thru `iteratee` and flattening the mapped results. The iteratee is invoked
-     * with three arguments: (value, index|key, collection).
+     * through `iteratee` and flattening the mapped results. The iteratee is
+     * invoked with three arguments: (value, index|key, collection).
      *
      * @static
      * @memberOf _
@@ -29026,9 +28890,9 @@ angular.module('common.oneSearch', [])
 
     /**
      * Creates an object composed of keys generated from the results of running
-     * each element of `collection` thru `iteratee`. The corresponding value of
-     * each key is an array of elements responsible for generating the key. The
-     * iteratee is invoked with one argument: (value).
+     * each element of `collection` through `iteratee`. The corresponding value
+     * of each key is an array of elements responsible for generating the key.
+     * The iteratee is invoked with one argument: (value).
      *
      * @static
      * @memberOf _
@@ -29136,8 +29000,8 @@ angular.module('common.oneSearch', [])
 
     /**
      * Creates an object composed of keys generated from the results of running
-     * each element of `collection` thru `iteratee`. The corresponding value of
-     * each key is the last element responsible for generating the key. The
+     * each element of `collection` through `iteratee`. The corresponding value
+     * of each key is the last element responsible for generating the key. The
      * iteratee is invoked with one argument: (value).
      *
      * @static
@@ -29168,7 +29032,7 @@ angular.module('common.oneSearch', [])
     });
 
     /**
-     * Creates an array of values by running each element in `collection` thru
+     * Creates an array of values by running each element in `collection` through
      * `iteratee`. The iteratee is invoked with three arguments:
      * (value, index|key, collection).
      *
@@ -29176,10 +29040,10 @@ angular.module('common.oneSearch', [])
      * `_.every`, `_.filter`, `_.map`, `_.mapValues`, `_.reject`, and `_.some`.
      *
      * The guarded methods are:
-     * `ary`, `chunk`, `curry`, `curryRight`, `drop`, `dropRight`, `every`,
-     * `fill`, `invert`, `parseInt`, `random`, `range`, `rangeRight`, `repeat`,
-     * `sampleSize`, `slice`, `some`, `sortBy`, `take`, `takeRight`, `template`,
-     * `trim`, `trimEnd`, `trimStart`, and `words`
+     * `ary`, `curry`, `curryRight`, `drop`, `dropRight`, `every`, `fill`,
+     * `invert`, `parseInt`, `random`, `range`, `rangeRight`, `slice`, `some`,
+     * `sortBy`, `take`, `takeRight`, `template`, `trim`, `trimEnd`, `trimStart`,
+     * and `words`
      *
      * @static
      * @memberOf _
@@ -29301,7 +29165,7 @@ angular.module('common.oneSearch', [])
 
     /**
      * Reduces `collection` to a value which is the accumulated result of running
-     * each element in `collection` thru `iteratee`, where each successive
+     * each element in `collection` through `iteratee`, where each successive
      * invocation is supplied the return value of the previous. If `accumulator`
      * is not given the first element of `collection` is used as the initial
      * value. The iteratee is invoked with four arguments:
@@ -29442,8 +29306,7 @@ angular.module('common.oneSearch', [])
      * @since 4.0.0
      * @category Collection
      * @param {Array|Object} collection The collection to sample.
-     * @param {number} [n=1] The number of elements to sample.
-     * @param- {Object} [guard] Enables use as an iteratee for methods like `_.map`.
+     * @param {number} [n=0] The number of elements to sample.
      * @returns {Array} Returns the random elements.
      * @example
      *
@@ -29453,17 +29316,13 @@ angular.module('common.oneSearch', [])
      * _.sampleSize([1, 2, 3], 4);
      * // => [2, 3, 1]
      */
-    function sampleSize(collection, n, guard) {
+    function sampleSize(collection, n) {
       var index = -1,
           result = toArray(collection),
           length = result.length,
           lastIndex = length - 1;
 
-      if ((guard ? isIterateeCall(collection, n, guard) : n === undefined)) {
-        n = 1;
-      } else {
-        n = baseClamp(toInteger(n), 0, length);
-      }
+      n = baseClamp(toInteger(n), 0, length);
       while (++index < n) {
         var rand = baseRandom(index, lastIndex),
             value = result[rand];
@@ -29579,7 +29438,7 @@ angular.module('common.oneSearch', [])
 
     /**
      * Creates an array of elements, sorted in ascending order by the results of
-     * running each element in a collection thru each iteratee. This method
+     * running each element in a collection through each iteratee. This method
      * performs a stable sort, that is, it preserves the original sort order of
      * equal elements. The iteratees are invoked with one argument: (value).
      *
@@ -29685,8 +29544,8 @@ angular.module('common.oneSearch', [])
     }
 
     /**
-     * Creates a function that invokes `func`, with up to `n` arguments,
-     * ignoring any additional arguments.
+     * Creates a function that accepts up to `n` arguments, ignoring any
+     * additional arguments.
      *
      * @static
      * @memberOf _
@@ -29743,7 +29602,8 @@ angular.module('common.oneSearch', [])
 
     /**
      * Creates a function that invokes `func` with the `this` binding of `thisArg`
-     * and `partials` prepended to the arguments it receives.
+     * and prepends any additional `_.bind` arguments to those provided to the
+     * bound function.
      *
      * The `_.bind.placeholder` value, which defaults to `_` in monolithic builds,
      * may be used as a placeholder for partially applied arguments.
@@ -29786,8 +29646,8 @@ angular.module('common.oneSearch', [])
     });
 
     /**
-     * Creates a function that invokes the method at `object[key]` with `partials`
-     * prepended to the arguments it receives.
+     * Creates a function that invokes the method at `object[key]` and prepends
+     * any additional `_.bindKey` arguments to those provided to the bound function.
      *
      * This method differs from `_.bind` by allowing bound functions to reference
      * methods that may be redefined or don't yet exist. See
@@ -30293,7 +30153,7 @@ angular.module('common.oneSearch', [])
      * @memberOf _
      * @category Function
      * @param {Function} func The function to wrap.
-     * @param {...(Function|Function[])} [transforms] The functions to transform.
+     * @param {...(Function|Function[])} [transforms] The functions to transform
      * arguments, specified individually or in arrays.
      * @returns {Function} Returns the new function.
      * @example
@@ -30332,9 +30192,9 @@ angular.module('common.oneSearch', [])
     });
 
     /**
-     * Creates a function that invokes `func` with `partials` prepended to the
-     * arguments it receives. This method is like `_.bind` except it does **not**
-     * alter the `this` binding.
+     * Creates a function that invokes `func` with `partial` arguments prepended
+     * to those provided to the new function. This method is like `_.bind` except
+     * it does **not** alter the `this` binding.
      *
      * The `_.partial.placeholder` value, which defaults to `_` in monolithic
      * builds, may be used as a placeholder for partially applied arguments.
@@ -30371,7 +30231,7 @@ angular.module('common.oneSearch', [])
 
     /**
      * This method is like `_.partial` except that partially applied arguments
-     * are appended to the arguments it receives.
+     * are appended to those provided to the new function.
      *
      * The `_.partialRight.placeholder` value, which defaults to `_` in monolithic
      * builds, may be used as a placeholder for partially applied arguments.
@@ -30408,7 +30268,7 @@ angular.module('common.oneSearch', [])
 
     /**
      * Creates a function that invokes `func` with arguments arranged according
-     * to the specified `indexes` where the argument value at the first index is
+     * to the specified indexes where the argument value at the first index is
      * provided as the first argument, the argument value at the second index is
      * provided as the second argument, and so on.
      *
@@ -30490,7 +30350,7 @@ angular.module('common.oneSearch', [])
     /**
      * Creates a function that invokes `func` with the `this` binding of the
      * create function and an array of arguments much like
-     * [`Function#apply`](http://www.ecma-international.org/ecma-262/6.0/#sec-function.prototype.apply).
+     * [`Function#apply`](https://es5.github.io/#x15.3.4.3).
      *
      * **Note:** This method is based on the
      * [spread operator](https://mdn.io/spread_operator).
@@ -31379,9 +31239,8 @@ angular.module('common.oneSearch', [])
     }
 
     /**
-     * Checks if `value` is the
-     * [language type](http://www.ecma-international.org/ecma-262/6.0/#sec-ecmascript-language-types)
-     * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+     * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
+     * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
      *
      * @static
      * @memberOf _
@@ -31526,10 +31385,9 @@ angular.module('common.oneSearch', [])
     /**
      * Checks if `value` is `NaN`.
      *
-     * **Note:** This method is based on
-     * [`Number.isNaN`](https://mdn.io/Number/isNaN) and is not the same as
-     * global [`isNaN`](https://mdn.io/isNaN) which returns `true` for
-     * `undefined` and other non-number values.
+     * **Note:** This method is not the same as
+     * [`isNaN`](https://es5.github.io/#x15.1.2.4) which returns `true` for
+     * `undefined` and other non-numeric values.
      *
      * @static
      * @memberOf _
@@ -31577,11 +31435,14 @@ angular.module('common.oneSearch', [])
      * // => false
      */
     function isNative(value) {
-      if (!isObject(value)) {
+      if (value == null) {
         return false;
       }
-      var pattern = (isFunction(value) || isHostObject(value)) ? reIsNative : reIsHostCtor;
-      return pattern.test(toSource(value));
+      if (isFunction(value)) {
+        return reIsNative.test(funcToString.call(value));
+      }
+      return isObjectLike(value) &&
+        (isHostObject(value) ? reIsNative : reIsHostCtor).test(value);
     }
 
     /**
@@ -32110,7 +31971,7 @@ angular.module('common.oneSearch', [])
         value = isObject(other) ? (other + '') : other;
       }
       if (typeof value != 'string') {
-        return value === 0 ? value : +value;
+        return value === 0 ?  value : +value;
       }
       value = value.replace(reTrim, '');
       var isBinary = reIsBinary.test(value);
@@ -32786,7 +32647,7 @@ angular.module('common.oneSearch', [])
      * // => false
      */
     function has(object, path) {
-      return object != null && hasPath(object, path, baseHas);
+      return hasPath(object, path, baseHas);
     }
 
     /**
@@ -32816,7 +32677,7 @@ angular.module('common.oneSearch', [])
      * // => false
      */
     function hasIn(object, path) {
-      return object != null && hasPath(object, path, baseHasIn);
+      return hasPath(object, path, baseHasIn);
     }
 
     /**
@@ -32843,8 +32704,8 @@ angular.module('common.oneSearch', [])
 
     /**
      * This method is like `_.invert` except that the inverted object is generated
-     * from the results of running each element of `object` thru `iteratee`. The
-     * corresponding inverted value of each inverted key is an array of keys
+     * from the results of running each element of `object` through `iteratee`.
+     * The corresponding inverted value of each inverted key is an array of keys
      * responsible for generating the inverted value. The iteratee is invoked
      * with one argument: (value).
      *
@@ -32990,8 +32851,8 @@ angular.module('common.oneSearch', [])
     /**
      * The opposite of `_.mapValues`; this method creates an object with the
      * same values as `object` and keys generated by running each own enumerable
-     * string keyed property of `object` thru `iteratee`. The iteratee is invoked
-     * with three arguments: (value, key, object).
+     * string keyed property of `object` through `iteratee`. The iteratee is
+     * invoked with three arguments: (value, key, object).
      *
      * @static
      * @memberOf _
@@ -33019,8 +32880,8 @@ angular.module('common.oneSearch', [])
     }
 
     /**
-     * Creates an object with the same keys as `object` and values generated
-     * by running each own enumerable string keyed property of `object` thru
+     * Creates an object with the same keys as `object` and values generated by
+     * running each own enumerable string keyed property of `object` through
      * `iteratee`. The iteratee is invoked with three arguments:
      * (value, key, object).
      *
@@ -33309,7 +33170,7 @@ angular.module('common.oneSearch', [])
      * console.log(object.a[0].b.c);
      * // => 4
      *
-     * _.set(object, ['x', '0', 'y', 'z'], 5);
+     * _.set(object, 'x[0].y.z', 5);
      * console.log(object.x[0].y.z);
      * // => 5
      */
@@ -33402,11 +33263,11 @@ angular.module('common.oneSearch', [])
 
     /**
      * An alternative to `_.reduce`; this method transforms `object` to a new
-     * `accumulator` object which is the result of running each of its own
-     * enumerable string keyed properties thru `iteratee`, with each invocation
-     * potentially mutating the `accumulator` object. The iteratee is invoked
-     * with four arguments: (accumulator, value, key, object). Iteratee functions
-     * may exit iteration early by explicitly returning `false`.
+     * `accumulator` object which is the result of running each of its own enumerable
+     * string keyed properties through `iteratee`, with each invocation potentially
+     * mutating the `accumulator` object. The iteratee is invoked with four arguments:
+     * (accumulator, value, key, object). Iteratee functions may exit iteration
+     * early by explicitly returning `false`.
      *
      * @static
      * @memberOf _
@@ -33472,7 +33333,7 @@ angular.module('common.oneSearch', [])
      * console.log(object);
      * // => { 'a': [{ 'b': {} }] };
      *
-     * _.unset(object, ['a', '0', 'b', 'c']);
+     * _.unset(object, 'a[0].b.c');
      * // => true
      *
      * console.log(object);
@@ -34140,8 +34001,7 @@ angular.module('common.oneSearch', [])
      * @since 3.0.0
      * @category String
      * @param {string} [string=''] The string to repeat.
-     * @param {number} [n=1] The number of times to repeat the string.
-     * @param- {Object} [guard] Enables use as an iteratee for methods like `_.map`.
+     * @param {number} [n=0] The number of times to repeat the string.
      * @returns {string} Returns the repeated string.
      * @example
      *
@@ -34154,13 +34014,8 @@ angular.module('common.oneSearch', [])
      * _.repeat('abc', 0);
      * // => ''
      */
-    function repeat(string, n, guard) {
-      if ((guard ? isIterateeCall(string, n, guard) : n === undefined)) {
-        n = 1;
-      } else {
-        n = toInteger(n);
-      }
-      return baseRepeat(toString(string), n);
+    function repeat(string, n) {
+      return baseRepeat(toString(string), toInteger(n));
     }
 
     /**
@@ -35385,8 +35240,8 @@ angular.module('common.oneSearch', [])
     }
 
     /**
-     * Creates a function that invokes `iteratees` with the arguments it receives
-     * and returns their results.
+     * Creates a function that invokes `iteratees` with the arguments provided
+     * to the created function and returns their results.
      *
      * @static
      * @memberOf _
@@ -35405,7 +35260,7 @@ angular.module('common.oneSearch', [])
 
     /**
      * Creates a function that checks if **all** of the `predicates` return
-     * truthy when invoked with the arguments it receives.
+     * truthy when invoked with the arguments provided to the created function.
      *
      * @static
      * @memberOf _
@@ -35430,7 +35285,7 @@ angular.module('common.oneSearch', [])
 
     /**
      * Creates a function that checks if **any** of the `predicates` return
-     * truthy when invoked with the arguments it receives.
+     * truthy when invoked with the arguments provided to the created function.
      *
      * @static
      * @memberOf _
