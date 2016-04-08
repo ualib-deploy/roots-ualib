@@ -2118,12 +2118,12 @@ textarea {
   line-height: inherit;
 }
 a {
-  color: #428bca;
+  color: #326999;
   text-decoration: none;
 }
 a:hover,
 a:focus {
-  color: #2a6496;
+  color: #1f415f;
   text-decoration: underline;
 }
 a:focus {
@@ -4631,7 +4631,7 @@ fieldset[disabled] .btn-danger.active {
   background-color: #ffffff;
 }
 .btn-link {
-  color: #428bca;
+  color: #326999;
   font-weight: normal;
   border-radius: 0;
 }
@@ -4652,7 +4652,7 @@ fieldset[disabled] .btn-link {
 }
 .btn-link:hover,
 .btn-link:focus {
-  color: #2a6496;
+  color: #1f415f;
   text-decoration: underline;
   background-color: transparent;
 }
@@ -5511,7 +5511,7 @@ select[multiple].input-group-sm > .input-group-btn > .comment-form input[type="s
 .nav .open > a:hover,
 .nav .open > a:focus {
   background-color: #f9f9f9;
-  border-color: #428bca;
+  border-color: #326999;
 }
 .nav .nav-divider {
   height: 1px;
@@ -6863,7 +6863,7 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
   padding: 6px 12px;
   line-height: 1.42857143;
   text-decoration: none;
-  color: #428bca;
+  color: #326999;
   background-color: #ffffff;
   border: 1px solid #dddddd;
   margin-left: -1px;
@@ -6883,7 +6883,7 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
 .pagination > li > span:hover,
 .pagination > li > a:focus,
 .pagination > li > span:focus {
-  color: #2a6496;
+  color: #1f415f;
   background-color: #f9f9f9;
   border-color: #dddddd;
 }
@@ -7089,7 +7089,7 @@ a.badge:focus {
 }
 .list-group-item.active > .badge,
 .nav-pills > .active > a > .badge {
-  color: #428bca;
+  color: #326999;
   background-color: #ffffff;
 }
 .list-group-item > .badge {
@@ -7166,7 +7166,7 @@ a.thumbnail.active,
 a.wp-caption:hover,
 a.wp-caption:focus,
 a.wp-caption.active {
-  border-color: #428bca;
+  border-color: #326999;
 }
 .thumbnail .caption,
 .wp-caption .caption,
@@ -8980,7 +8980,7 @@ a.service-card:focus {
 .multipage-menu ul .open > a:hover,
 .multipage-menu ul .open > a:focus {
   background-color: #f9f9f9;
-  border-color: #428bca;
+  border-color: #326999;
 }
 .multipage-menu ul .nav-divider {
   height: 1px;
@@ -9199,7 +9199,7 @@ footer a > .social-icons {
   color: #666666;
 }
 footer a:hover .social-icons {
-  color: #428bca;
+  color: #326999;
 }
 footer a:hover {
   text-decoration: underline;
@@ -9409,6 +9409,24 @@ div[role="document"] {
  */
 main > p {
   text-align: justify;
+}
+.facetcrumb {
+  padding: 8px 15px;
+  margin-bottom: 21px;
+  list-style: none;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+.facetcrumb > li {
+  display: inline-block;
+}
+.facetcrumb > li + li:before {
+  content: "/\00a0";
+  padding: 0 5px;
+  color: #cccccc;
+}
+.facetcrumb > .active {
+  color: #999999;
 }
 /*.home-slice-main {
   width: 100%;

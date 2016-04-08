@@ -305,6 +305,24 @@ module.exports = function(grunt) {
                 regExp: false
             }
         },
+        dev_prod_switch: {
+            dev: {
+                options: {
+                    environment: 'dev',
+                },
+                files: {
+                    'assets/js/scripts.js': 'assets/js/scripts.js'
+                }
+            },
+            live: {
+                options: {
+                    environment: 'prod',
+                },
+                files: {
+                    'assets/js/scripts.js': 'assets/js/scripts.js'
+                }
+            }
+        },
         watch: {
             less: {
                 files: [
@@ -416,7 +434,8 @@ module.exports = function(grunt) {
         'less:dev',
         'autoprefixer:dev',
         'concat:dist',
-        'bower_concat:dev'
+        'bower_concat:dev',
+        'dev_prod_switch:dev'
     ]);
     grunt.registerTask('live-build', [
         'html2js',
@@ -431,7 +450,8 @@ module.exports = function(grunt) {
         'bower_concat:build',
         'uglify:dist',
         'headerFooterExport',
-        'replace'
+        'replace',
+        'dev_prod_switch:live'
     ]);
     grunt.registerTask('lessVarsToSass', ['lessToSass:lessVars']);
     grunt.registerTask('headerFooterExport', [
