@@ -342,7 +342,7 @@ module.exports = function(grunt) {
                 // Browser live reloading
                 // https://github.com/gruntjs/grunt-contrib-watch#live-reloading
                 options: {
-                    livereload: false
+                    livereload: 35729
                 },
                 files: [
                     'assets/css/main.css',
@@ -352,83 +352,17 @@ module.exports = function(grunt) {
                 ]
             }
         },
-        lessToSass: {
-            lessVars: {
-                files: [{
-                    expand: true,
-                    cwd: 'assets/less',
-                    src: ['_variables.less'],
-                    ext: '.scss',
-                    dest: 'assets/sass'
-                }]
-            }
-        },
-        htmlSnapshot: {
-            all: {
-                options: {
-                    //that's the path where the snapshots should be placed
-                    //it's empty by default which means they will go into the directory
-                    //where your Gruntfile.js is placed
-                    removeScripts: true,
-                    snapshotPath: 'assets/snapshots/',
-                    //This should be either the base path to your index.html file
-                    //or your base URL. Currently the task does not use it's own
-                    //webserver. So if your site needs a webserver to be fully
-                    //functional configure it here.
-                    sitePath: 'https://www.lib.ua.edu/',
-                    //by default the task waits 500ms before fetching the html.
-                    //this is to give the page enough time to to assemble itself.
-                    //if your page needs more time, tweak here.
-                    msWaitForPages: 1000,
-                    //sanitize function to be used for filenames. Converts '#!/' to '_' as default
-                    //has a filename argument, must have a return that is a sanitized string
-                    sanitize: function (requestUri) {
-                        //returns 'index.html' if the url is '/', otherwise a prefix
-                        return requestUri.replace(/[\?=&]/g, '_');
-                    },
-                    //here goes the list of all urls that should be fetched
-                    urls: [
-                        '',
-                        '#/hours',
-                        '#/hours?library=gorgas',
-                        '#/hours?library=music',
-                        '#/hours?library=media',
-                        '#/hours?library=williams',
-                        '#/hours?library=rodgers',
-                        '#/hours?library=mclure',
-                        '#/hours?library=hoole',
-                        '#/hours?library=bruno',
-                        '#/databases',
-                        '#/news-exhibits',
-                        '#/staffdir',
-                        '#/videos',
-                        '#/hours?library=gorgas',
-                        '#/hours?library=music',
-                        '#/hours?library=media',
-                        '#/hours?library=williams',
-                        '#/hours?library=rodgers',
-                        '#/hours?library=mclure',
-                        '#/hours?library=hoole',
-                        '#/hours?library=bruno'
-                    ],
-                    // options for phantomJs' page object
-                    // see http://phantomjs.org/api/webpage/ for available options
-                    pageOptions: {
-                        viewportSize : {
-                            width: 1200,
-                            height: 800
-                        }
-                    }
-                }
-            }
+        auto_install: {
+            local: {}
         }
     });
 
     // Register tasks
     grunt.registerTask('default', [
-        'dev'
+        'dev', 'watch'
     ]);
     grunt.registerTask('dev', [
+        'auto_install',
         'html2js:dev',
         'jshint',
         'less:dev',
@@ -438,6 +372,7 @@ module.exports = function(grunt) {
         'dev_prod_switch:dev'
     ]);
     grunt.registerTask('live-build', [
+        'auto_install',
         'html2js',
         'jshint',
         'copy',
@@ -453,7 +388,7 @@ module.exports = function(grunt) {
         'replace',
         'dev_prod_switch:live'
     ]);
-    grunt.registerTask('lessVarsToSass', ['lessToSass:lessVars']);
+
     grunt.registerTask('headerFooterExport', [
         'less:header_footer_export',
         'bower_concat:header_footer_export',
