@@ -35,7 +35,7 @@ function roots_scripts() {
       'css'       => '/assets/css/main.css',
       'CDN'       => '//fonts.googleapis.com/css?family=Roboto:300,400,500,700|Open+Sans:300,400,600,700|EB+Garamond',
       'js_bower'        => '/assets/js/scripts_bower.js',
-      'js'        => '/assets/js/_scripts-local.js',
+      'js'        => $scripts_js,
       'modernizr' => '/assets/vendor/modernizr/modernizr.js',
       'jquery'    => '//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.js'
     );
