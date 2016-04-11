@@ -6844,7 +6844,7 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
   padding-left: 0px;
   padding-right: 0px;
   background: none;
-  margin-top: 30px;
+  margin-top: 5px;
   margin-bottom: -20px;
 }
 .pagination {
@@ -9377,6 +9377,7 @@ div[role="document"] {
 }
 .jumbotron-header > .jumbotron {
   color: #f9f9f9;
+  padding-top: 0px;
   background-color: rgba(38, 30, 30, 0.75);
 }
 .jumbotron-header > .jumbotron a {
@@ -9398,10 +9399,8 @@ div[role="document"] {
 }
 .jumbotron-header > .jumbotron .breadcrumb {
   padding: 8px 15px;
-  margin-top: 0px;
   margin-left: -10px;
-  margin-bottom: 21px;
-  background-color: rgba(245, 245, 245, 0.3);
+  margin-bottom: 64px;
 }
 /**
  * Your styles here
