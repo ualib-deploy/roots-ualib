@@ -17678,7 +17678,7 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "                    Articles\n" +
     "                    <small>\n" +
     "                        <span class=\"fa fa-info-circle\"\n" +
-    "                              tooltip-placement=\"bottom\"\n" +
+    "                              tooltip-placement=\"right\"\n" +
     "                              tooltip=\"Keyword search in journal titles, and full text article content in Scout.\"></span>\n" +
     "                    </small>\n" +
     "                </h2>\n" +
@@ -17690,7 +17690,7 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "                    Books\n" +
     "                    <small>\n" +
     "                        <span class=\"fa fa-info-circle\"\n" +
-    "                              tooltip-placement=\"bottom\"\n" +
+    "                              tooltip-placement=\"right\"\n" +
     "                              tooltip=\"Keyword search in book titles using both the Libraries' Catalog and Scout.\"></span>\n" +
     "                    </small>\n" +
     "                </h2>\n" +
@@ -17702,7 +17702,7 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "                    Journals\n" +
     "                    <small>\n" +
     "                        <span class=\"fa fa-info-circle\"\n" +
-    "                              tooltip-placement=\"bottom\"\n" +
+    "                              tooltip-placement=\"right\"\n" +
     "                              tooltip=\"Keyword search in journal titles and journal collections, in both Scout and our E-Resources database.\"></span>\n" +
     "                    </small>\n" +
     "                </h2>\n" +
@@ -17716,7 +17716,7 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "                    Databases\n" +
     "                    <small>\n" +
     "                        <span class=\"fa fa-info-circle\"\n" +
-    "                              tooltip-placement=\"bottom\"\n" +
+    "                              tooltip-placement=\"right\"\n" +
     "                              tooltip=\"Keyword search in titles and databases descriptions from our own Databases Page.\"></span>\n" +
     "                    </small>\n" +
     "                </h2>\n" +
@@ -17728,7 +17728,7 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "                    Libraries' Website\n" +
     "                    <small>\n" +
     "                        <span class=\"fa fa-info-circle\"\n" +
-    "                              tooltip-placement=\"bottom\"\n" +
+    "                              tooltip-placement=\"right\"\n" +
     "                              tooltip=\"Targeted, full-text search of library website pages and sections.\"></span>\n" +
     "                    </small>\n" +
     "                </h2>\n" +
@@ -17740,7 +17740,7 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "                    Acumen\n" +
     "                    <small>\n" +
     "                        <span class=\"fa fa-info-circle\"\n" +
-    "                              tooltip-placement=\"bottom\"\n" +
+    "                              tooltip-placement=\"right\"\n" +
     "                              tooltip=\"Returns a keyword search in titles and full text of our Special Collections Digital Archive.\"></span>\n" +
     "                    </small>\n" +
     "                </h2>\n" +
@@ -17754,7 +17754,7 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "                    Other Items & Media\n" +
     "                    <small>\n" +
     "                        <span class=\"fa fa-info-circle\"\n" +
-    "                              tooltip-placement=\"bottom\"\n" +
+    "                              tooltip-placement=\"right\"\n" +
     "                              tooltip=\"Keyword and item type search in the Libraries' catalog and Scout, retrieving media items - videos, DVDs, CDs, etc.\"></span>\n" +
     "                    </small>\n" +
     "                </h2>\n" +
@@ -17766,7 +17766,7 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "                    FAQ\n" +
     "                    <small>\n" +
     "                        <span class=\"fa fa-info-circle\"\n" +
-    "                              tooltip-placement=\"bottom\"\n" +
+    "                              tooltip-placement=\"right\"\n" +
     "                              tooltip='Full text keyword search via our Google search engine interface, through our FAQ repository, also known as \"Ask a Librarian.\"'></span>\n" +
     "                    </small>\n" +
     "                </h2>\n" +
@@ -17778,7 +17778,7 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "                    Research Guides\n" +
     "                    <small>\n" +
     "                        <span class=\"fa fa-info-circle\"\n" +
-    "                              tooltip-placement=\"bottom\"\n" +
+    "                              tooltip-placement=\"right\"\n" +
     "                              tooltip=\"Uses Google API to run a keyword search in titles and full text for our research guides.\"></span>\n" +
     "                    </small>\n" +
     "                </h2>\n" +
@@ -17791,7 +17791,6 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "                <h2>\n" +
     "                    Recommended Links\n" +
     "                </h2>\n" +
-    "\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
@@ -21442,7 +21441,7 @@ function plural(ms, n, name) {
 
 /**
  * @license
- * lodash 4.9.0 <https://lodash.com/>
+ * lodash 4.10.0 <https://lodash.com/>
  * Copyright jQuery Foundation and other contributors <https://jquery.org/>
  * Released under MIT license <https://lodash.com/license>
  * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
@@ -21454,7 +21453,7 @@ function plural(ms, n, name) {
   var undefined;
 
   /** Used as the semantic version number. */
-  var VERSION = '4.9.0';
+  var VERSION = '4.10.0';
 
   /** Used as the size to enable large array optimizations. */
   var LARGE_ARRAY_SIZE = 200;
@@ -21572,6 +21571,9 @@ function plural(ms, n, name) {
       reTrimStart = /^\s+/,
       reTrimEnd = /\s+$/;
 
+  /** Used to match non-compound words composed of alphanumeric characters. */
+  var reBasicWord = /[a-zA-Z0-9]+/g;
+
   /** Used to match backslashes in property paths. */
   var reEscapeChar = /\\(\\)?/g;
 
@@ -21660,12 +21662,6 @@ function plural(ms, n, name) {
   /** Used to match [string symbols](https://mathiasbynens.be/notes/javascript-unicode). */
   var reComplexSymbol = RegExp(rsFitz + '(?=' + rsFitz + ')|' + rsSymbol + rsSeq, 'g');
 
-  /** Used to detect strings with [zero-width joiners or code points from the astral planes](http://eev.ee/blog/2015/09/12/dark-corners-of-unicode/). */
-  var reHasComplexSymbol = RegExp('[' + rsZWJ + rsAstralRange  + rsComboMarksRange + rsComboSymbolsRange + rsVarRange + ']');
-
-  /** Used to match non-compound words composed of alphanumeric characters. */
-  var reBasicWord = /[a-zA-Z0-9]+/g;
-
   /** Used to match complex or compound words. */
   var reComplexWord = RegExp([
     rsUpper + '?' + rsLower + '+(?=' + [rsBreak, rsUpper, '$'].join('|') + ')',
@@ -21675,6 +21671,9 @@ function plural(ms, n, name) {
     rsDigits,
     rsEmoji
   ].join('|'), 'g');
+
+  /** Used to detect strings with [zero-width joiners or code points from the astral planes](http://eev.ee/blog/2015/09/12/dark-corners-of-unicode/). */
+  var reHasComplexSymbol = RegExp('[' + rsZWJ + rsAstralRange  + rsComboMarksRange + rsComboSymbolsRange + rsVarRange + ']');
 
   /** Used to detect strings that need a more robust regexp to match words. */
   var reHasComplexWord = /[a-z][A-Z]|[A-Z]{2,}[a-z]|[0-9][a-zA-Z]|[a-zA-Z][0-9]|[^a-zA-Z0-9 ]/;
@@ -23799,50 +23798,6 @@ function plural(ms, n, name) {
     }
 
     /**
-     * Casts `value` to an empty array if it's not an array like object.
-     *
-     * @private
-     * @param {*} value The value to inspect.
-     * @returns {Array|Object} Returns the cast array-like object.
-     */
-    function baseCastArrayLikeObject(value) {
-      return isArrayLikeObject(value) ? value : [];
-    }
-
-    /**
-     * Casts `value` to `identity` if it's not a function.
-     *
-     * @private
-     * @param {*} value The value to inspect.
-     * @returns {Function} Returns cast function.
-     */
-    function baseCastFunction(value) {
-      return typeof value == 'function' ? value : identity;
-    }
-
-    /**
-     * Casts `value` to a string if it's not a string or symbol.
-     *
-     * @private
-     * @param {*} value The value to inspect.
-     * @returns {string|symbol} Returns the cast key.
-     */
-    function baseCastKey(key) {
-      return (typeof key == 'string' || isSymbol(key)) ? key : (key + '');
-    }
-
-    /**
-     * Casts `value` to a path array if it's not one.
-     *
-     * @private
-     * @param {*} value The value to inspect.
-     * @returns {Array} Returns the cast property path array.
-     */
-    function baseCastPath(value) {
-      return isArray(value) ? value : stringToPath(value);
-    }
-
-    /**
      * The base implementation of `_.clamp` which doesn't coerce arguments to numbers.
      *
      * @private
@@ -24172,7 +24127,7 @@ function plural(ms, n, name) {
 
     /**
      * The base implementation of `baseForOwn` which iterates over `object`
-     * properties returned by `keysFunc` invoking `iteratee` for each property.
+     * properties returned by `keysFunc` and invokes `iteratee` for each property.
      * Iteratee functions may exit iteration early by explicitly returning `false`.
      *
      * @private
@@ -24243,7 +24198,7 @@ function plural(ms, n, name) {
      * @returns {*} Returns the resolved value.
      */
     function baseGet(object, path) {
-      path = isKey(path, object) ? [path] : baseCastPath(path);
+      path = isKey(path, object) ? [path] : castPath(path);
 
       var index = 0,
           length = path.length;
@@ -24405,7 +24360,7 @@ function plural(ms, n, name) {
      */
     function baseInvoke(object, path, args) {
       if (!isKey(path, object)) {
-        path = baseCastPath(path);
+        path = castPath(path);
         object = parent(object, path);
         path = last(path);
       }
@@ -24927,7 +24882,7 @@ function plural(ms, n, name) {
             splice.call(array, index, 1);
           }
           else if (!isKey(index, array)) {
-            var path = baseCastPath(index),
+            var path = castPath(index),
                 object = parent(array, path);
 
             if (object != null) {
@@ -25017,7 +24972,7 @@ function plural(ms, n, name) {
      * @returns {Object} Returns `object`.
      */
     function baseSet(object, path, value, customizer) {
-      path = isKey(path, object) ? [path] : baseCastPath(path);
+      path = isKey(path, object) ? [path] : castPath(path);
 
       var index = -1,
           length = path.length,
@@ -25296,7 +25251,7 @@ function plural(ms, n, name) {
      * @returns {boolean} Returns `true` if the property is deleted, else `false`.
      */
     function baseUnset(object, path) {
-      path = isKey(path, object) ? [path] : baseCastPath(path);
+      path = isKey(path, object) ? [path] : castPath(path);
       object = parent(object, path);
       var key = last(path);
       return (object != null && has(object, key)) ? delete object[key] : true;
@@ -25404,6 +25359,54 @@ function plural(ms, n, name) {
         assignFunc(result, props[index], value);
       }
       return result;
+    }
+
+    /**
+     * Casts `value` to an empty array if it's not an array like object.
+     *
+     * @private
+     * @param {*} value The value to inspect.
+     * @returns {Array|Object} Returns the cast array-like object.
+     */
+    function castArrayLikeObject(value) {
+      return isArrayLikeObject(value) ? value : [];
+    }
+
+    /**
+     * Casts `value` to `identity` if it's not a function.
+     *
+     * @private
+     * @param {*} value The value to inspect.
+     * @returns {Function} Returns cast function.
+     */
+    function castFunction(value) {
+      return typeof value == 'function' ? value : identity;
+    }
+
+    /**
+     * Casts `value` to a path array if it's not one.
+     *
+     * @private
+     * @param {*} value The value to inspect.
+     * @returns {Array} Returns the cast property path array.
+     */
+    function castPath(value) {
+      return isArray(value) ? value : stringToPath(value);
+    }
+
+    /**
+     * Casts `array` to a slice if it's needed.
+     *
+     * @private
+     * @param {Array} array The array to inspect.
+     * @param {number} start The start position.
+     * @param {number} [end=array.length] The end position.
+     * @returns {Array} Returns the cast slice.
+     */
+    function castSlice(array, start, end) {
+      var length = array.length;
+      end = end === undefined ? length : end;
+      return (!start && end >= length) ? array : baseSlice(array, start, end);
     }
 
     /**
@@ -25799,8 +25802,13 @@ function plural(ms, n, name) {
           ? stringToArray(string)
           : undefined;
 
-        var chr = strSymbols ? strSymbols[0] : string.charAt(0),
-            trailing = strSymbols ? strSymbols.slice(1).join('') : string.slice(1);
+        var chr = strSymbols
+          ? strSymbols[0]
+          : string.charAt(0);
+
+        var trailing = strSymbols
+          ? castSlice(strSymbols, 1).join('')
+          : string.slice(1);
 
         return chr[methodName]() + trailing;
       };
@@ -26079,7 +26087,7 @@ function plural(ms, n, name) {
       }
       var result = baseRepeat(chars, nativeCeil(length / stringSize(chars)));
       return reHasComplexSymbol.test(chars)
-        ? stringToArray(result).slice(0, length).join('')
+        ? castSlice(stringToArray(result), 0, length).join('')
         : result.slice(0, length);
     }
 
@@ -26787,7 +26795,7 @@ function plural(ms, n, name) {
      * @returns {boolean} Returns `true` if `path` exists, else `false`.
      */
     function hasPath(object, path, hasFunc) {
-      path = isKey(path, object) ? [path] : baseCastPath(path);
+      path = isKey(path, object) ? [path] : castPath(path);
 
       var result,
           index = -1,
@@ -27224,6 +27232,17 @@ function plural(ms, n, name) {
       });
       return result;
     });
+
+    /**
+     * Converts `value` to a string key if it's not a string or symbol.
+     *
+     * @private
+     * @param {*} value The value to inspect.
+     * @returns {string|symbol} Returns the key.
+     */
+    function toKey(key) {
+      return (typeof key == 'string' || isSymbol(key)) ? key : (key + '');
+    }
 
     /**
      * Converts `func` to its source code.
@@ -27923,7 +27942,7 @@ function plural(ms, n, name) {
      * // => [2]
      */
     var intersection = rest(function(arrays) {
-      var mapped = arrayMap(arrays, baseCastArrayLikeObject);
+      var mapped = arrayMap(arrays, castArrayLikeObject);
       return (mapped.length && mapped[0] === arrays[0])
         ? baseIntersection(mapped)
         : [];
@@ -27954,7 +27973,7 @@ function plural(ms, n, name) {
      */
     var intersectionBy = rest(function(arrays) {
       var iteratee = last(arrays),
-          mapped = arrayMap(arrays, baseCastArrayLikeObject);
+          mapped = arrayMap(arrays, castArrayLikeObject);
 
       if (iteratee === last(mapped)) {
         iteratee = undefined;
@@ -27989,7 +28008,7 @@ function plural(ms, n, name) {
      */
     var intersectionWith = rest(function(arrays) {
       var comparator = last(arrays),
-          mapped = arrayMap(arrays, baseCastArrayLikeObject);
+          mapped = arrayMap(arrays, castArrayLikeObject);
 
       if (comparator === last(mapped)) {
         comparator = undefined;
@@ -28206,8 +28225,7 @@ function plural(ms, n, name) {
      * @since 3.0.0
      * @category Array
      * @param {Array} array The array to modify.
-     * @param {...(number|number[])} [indexes] The indexes of elements to remove,
-     *  specified individually or in arrays.
+     * @param {...(number|number[])} [indexes] The indexes of elements to remove.
      * @returns {Array} Returns the new array of removed elements.
      * @example
      *
@@ -29215,8 +29233,7 @@ function plural(ms, n, name) {
      * @memberOf _
      * @since 1.0.0
      * @category Seq
-     * @param {...(string|string[])} [paths] The property paths of elements to pick,
-     *  specified individually or in arrays.
+     * @param {...(string|string[])} [paths] The property paths of elements to pick.
      * @returns {Object} Returns the new `lodash` wrapper instance.
      * @example
      *
@@ -29733,7 +29750,7 @@ function plural(ms, n, name) {
     }
 
     /**
-     * Iterates over elements of `collection` invoking `iteratee` for each element.
+     * Iterates over elements of `collection` and invokes `iteratee` for each element.
      * The iteratee is invoked with three arguments: (value, index|key, collection).
      * Iteratee functions may exit iteration early by explicitly returning `false`.
      *
@@ -29947,8 +29964,8 @@ function plural(ms, n, name) {
      * The guarded methods are:
      * `ary`, `chunk`, `curry`, `curryRight`, `drop`, `dropRight`, `every`,
      * `fill`, `invert`, `parseInt`, `random`, `range`, `rangeRight`, `repeat`,
-     * `sampleSize`, `slice`, `some`, `sortBy`, `take`, `takeRight`, `template`,
-     * `trim`, `trimEnd`, `trimStart`, and `words`
+     * `sampleSize`, `slice`, `some`, `sortBy`, `split`, `take`, `takeRight`,
+     * `template`, `trim`, `trimEnd`, `trimStart`, and `words`
      *
      * @static
      * @memberOf _
@@ -30358,8 +30375,7 @@ function plural(ms, n, name) {
      * @category Collection
      * @param {Array|Object} collection The collection to iterate over.
      * @param {...(Array|Array[]|Function|Function[]|Object|Object[]|string|string[])}
-     *  [iteratees=[_.identity]] The iteratees to sort by, specified individually
-     *  or in arrays.
+     *  [iteratees=[_.identity]] The iteratees to sort by.
      * @returns {Array} Returns the new sorted array.
      * @example
      *
@@ -30389,7 +30405,7 @@ function plural(ms, n, name) {
       if (length > 1 && isIterateeCall(collection, iteratees[0], iteratees[1])) {
         iteratees = [];
       } else if (length > 2 && isIterateeCall(iteratees[0], iteratees[1], iteratees[2])) {
-        iteratees.length = 1;
+        iteratees = [iteratees[0]];
       }
       return baseOrderBy(collection, baseFlatten(iteratees, 1), []);
     });
@@ -30861,6 +30877,9 @@ function plural(ms, n, name) {
           timerId = setTimeout(timerExpired, wait);
           return invokeFunc(lastCallTime);
         }
+        if (timerId === undefined) {
+          timerId = setTimeout(timerExpired, wait);
+        }
         return result;
       }
       debounced.cancel = cancel;
@@ -31062,8 +31081,8 @@ function plural(ms, n, name) {
      * @memberOf _
      * @category Function
      * @param {Function} func The function to wrap.
-     * @param {...(Function|Function[])} [transforms] The functions to transform.
-     * arguments, specified individually or in arrays.
+     * @param {...(Array|Array[]|Function|Function[]|Object|Object[]|string|string[])}
+     *  [transforms[_.identity]] The functions to transform.
      * @returns {Function} Returns the new function.
      * @example
      *
@@ -31185,8 +31204,7 @@ function plural(ms, n, name) {
      * @since 3.0.0
      * @category Function
      * @param {Function} func The function to rearrange arguments for.
-     * @param {...(number|number[])} indexes The arranged argument indexes,
-     *  specified individually or in arrays.
+     * @param {...(number|number[])} indexes The arranged argument indexes.
      * @returns {Function} Returns the new function.
      * @example
      *
@@ -31296,7 +31314,7 @@ function plural(ms, n, name) {
       start = start === undefined ? 0 : nativeMax(toInteger(start), 0);
       return rest(function(args) {
         var array = args[start],
-            otherArgs = args.slice(0, start);
+            otherArgs = castSlice(args, 0, start);
 
         if (array) {
           arrayPush(otherArgs, array);
@@ -32944,8 +32962,8 @@ function plural(ms, n, name) {
     }
 
     /**
-     * Converts `value` to a string if it's not one. An empty string is returned
-     * for `null` and `undefined` values. The sign of `-0` is preserved.
+     * Converts `value` to a string. An empty string is returned for `null`
+     * and `undefined` values. The sign of `-0` is preserved.
      *
      * @static
      * @memberOf _
@@ -33135,8 +33153,7 @@ function plural(ms, n, name) {
      * @since 1.0.0
      * @category Object
      * @param {Object} object The object to iterate over.
-     * @param {...(string|string[])} [paths] The property paths of elements to pick,
-     *  specified individually or in arrays.
+     * @param {...(string|string[])} [paths] The property paths of elements to pick.
      * @returns {Array} Returns the new array of picked elements.
      * @example
      *
@@ -33322,9 +33339,9 @@ function plural(ms, n, name) {
 
     /**
      * Iterates over own and inherited enumerable string keyed properties of an
-     * object invoking `iteratee` for each property. The iteratee is invoked with
-     * three arguments: (value, key, object). Iteratee functions may exit iteration
-     * early by explicitly returning `false`.
+     * object and invokes `iteratee` for each property. The iteratee is invoked
+     * with three arguments: (value, key, object). Iteratee functions may exit
+     * iteration early by explicitly returning `false`.
      *
      * @static
      * @memberOf _
@@ -33385,10 +33402,10 @@ function plural(ms, n, name) {
     }
 
     /**
-     * Iterates over own enumerable string keyed properties of an object invoking
-     * `iteratee` for each property. The iteratee is invoked with three arguments:
-     * (value, key, object). Iteratee functions may exit iteration early by
-     * explicitly returning `false`.
+     * Iterates over own enumerable string keyed properties of an object and
+     * invokes `iteratee` for each property. The iteratee is invoked with three
+     * arguments: (value, key, object). Iteratee functions may exit iteration
+     * early by explicitly returning `false`.
      *
      * @static
      * @memberOf _
@@ -33911,8 +33928,7 @@ function plural(ms, n, name) {
      * @memberOf _
      * @category Object
      * @param {Object} object The source object.
-     * @param {...(string|string[])} [props] The property identifiers to omit,
-     *  specified individually or in arrays.
+     * @param {...(string|string[])} [props] The property identifiers to omit.
      * @returns {Object} Returns the new object.
      * @example
      *
@@ -33925,7 +33941,7 @@ function plural(ms, n, name) {
       if (object == null) {
         return {};
       }
-      props = arrayMap(baseFlatten(props, 1), baseCastKey);
+      props = arrayMap(baseFlatten(props, 1), toKey);
       return basePick(object, baseDifference(getAllKeysIn(object), props));
     });
 
@@ -33965,8 +33981,7 @@ function plural(ms, n, name) {
      * @memberOf _
      * @category Object
      * @param {Object} object The source object.
-     * @param {...(string|string[])} [props] The property identifiers to pick,
-     *  specified individually or in arrays.
+     * @param {...(string|string[])} [props] The property identifiers to pick.
      * @returns {Object} Returns the new object.
      * @example
      *
@@ -34032,7 +34047,7 @@ function plural(ms, n, name) {
      * // => 'default'
      */
     function result(object, path, defaultValue) {
-      path = isKey(path, object) ? [path] : baseCastPath(path);
+      path = isKey(path, object) ? [path] : castPath(path);
 
       var index = -1,
           length = path.length;
@@ -34278,7 +34293,7 @@ function plural(ms, n, name) {
      * // => 0
      */
     function update(object, path, updater) {
-      return object == null ? object : baseUpdate(object, path, baseCastFunction(updater));
+      return object == null ? object : baseUpdate(object, path, castFunction(updater));
     }
 
     /**
@@ -34307,7 +34322,7 @@ function plural(ms, n, name) {
      */
     function updateWith(object, path, updater, customizer) {
       customizer = typeof customizer == 'function' ? customizer : undefined;
-      return object == null ? object : baseUpdate(object, path, baseCastFunction(updater), customizer);
+      return object == null ? object : baseUpdate(object, path, castFunction(updater), customizer);
     }
 
     /**
@@ -35002,6 +35017,13 @@ function plural(ms, n, name) {
      * // => ['a', 'b']
      */
     function split(string, separator, limit) {
+      if (limit && typeof limit != 'number' && isIterateeCall(string, separator, limit)) {
+        separator = limit = undefined;
+      }
+      limit = limit === undefined ? MAX_ARRAY_LENGTH : limit >>> 0;
+      if (!limit) {
+        return [];
+      }
       string = toString(string);
       if (string && (
             typeof separator == 'string' ||
@@ -35009,8 +35031,7 @@ function plural(ms, n, name) {
           )) {
         separator += '';
         if (separator == '' && reHasComplexSymbol.test(string)) {
-          var strSymbols = stringToArray(string);
-          return limit === undefined ? strSymbols : strSymbols.slice(0, limit < 0 ? 0 : limit);
+          return castSlice(stringToArray(string), 0, limit);
         }
       }
       return string.split(separator, limit);
@@ -35361,16 +35382,15 @@ function plural(ms, n, name) {
       if (guard || chars === undefined) {
         return string.replace(reTrim, '');
       }
-      chars = (chars + '');
-      if (!chars) {
+      if (!(chars += '')) {
         return string;
       }
       var strSymbols = stringToArray(string),
-          chrSymbols = stringToArray(chars);
+          chrSymbols = stringToArray(chars),
+          start = charsStartIndex(strSymbols, chrSymbols),
+          end = charsEndIndex(strSymbols, chrSymbols) + 1;
 
-      return strSymbols
-        .slice(charsStartIndex(strSymbols, chrSymbols), charsEndIndex(strSymbols, chrSymbols) + 1)
-        .join('');
+      return castSlice(strSymbols, start, end).join('');
     }
 
     /**
@@ -35400,14 +35420,13 @@ function plural(ms, n, name) {
       if (guard || chars === undefined) {
         return string.replace(reTrimEnd, '');
       }
-      chars = (chars + '');
-      if (!chars) {
+      if (!(chars += '')) {
         return string;
       }
-      var strSymbols = stringToArray(string);
-      return strSymbols
-        .slice(0, charsEndIndex(strSymbols, stringToArray(chars)) + 1)
-        .join('');
+      var strSymbols = stringToArray(string),
+          end = charsEndIndex(strSymbols, stringToArray(chars)) + 1;
+
+      return castSlice(strSymbols, 0, end).join('');
     }
 
     /**
@@ -35437,14 +35456,13 @@ function plural(ms, n, name) {
       if (guard || chars === undefined) {
         return string.replace(reTrimStart, '');
       }
-      chars = (chars + '');
-      if (!chars) {
+      if (!(chars += '')) {
         return string;
       }
-      var strSymbols = stringToArray(string);
-      return strSymbols
-        .slice(charsStartIndex(strSymbols, stringToArray(chars)))
-        .join('');
+      var strSymbols = stringToArray(string),
+          start = charsStartIndex(strSymbols, stringToArray(chars));
+
+      return castSlice(strSymbols, start).join('');
     }
 
     /**
@@ -35508,7 +35526,7 @@ function plural(ms, n, name) {
         return omission;
       }
       var result = strSymbols
-        ? strSymbols.slice(0, end).join('')
+        ? castSlice(strSymbols, 0, end).join('')
         : string.slice(0, end);
 
       if (separator === undefined) {
@@ -35681,8 +35699,7 @@ function plural(ms, n, name) {
      * @memberOf _
      * @category Util
      * @param {Object} object The object to bind and assign the bound methods to.
-     * @param {...(string|string[])} methodNames The object method names to bind,
-     *  specified individually or in arrays.
+     * @param {...(string|string[])} methodNames The object method names to bind.
      * @returns {Object} Returns `object`.
      * @example
      *
@@ -35705,7 +35722,7 @@ function plural(ms, n, name) {
     });
 
     /**
-     * Creates a function that iterates over `pairs` invoking the corresponding
+     * Creates a function that iterates over `pairs` and invokes the corresponding
      * function of the first predicate to return truthy. The predicate-function
      * pairs are invoked with the `this` binding and arguments of the created
      * function.
@@ -36171,7 +36188,8 @@ function plural(ms, n, name) {
      * @memberOf _
      * @since 4.0.0
      * @category Util
-     * @param {...(Function|Function[])} iteratees The iteratees to invoke.
+     * @param {...(Array|Array[]|Function|Function[]|Object|Object[]|string|string[])}
+     *  [iteratees=[_.identity]] The iteratees to invoke.
      * @returns {Function} Returns the new function.
      * @example
      *
@@ -36190,7 +36208,8 @@ function plural(ms, n, name) {
      * @memberOf _
      * @since 4.0.0
      * @category Util
-     * @param {...(Function|Function[])} predicates The predicates to check.
+     * @param {...(Array|Array[]|Function|Function[]|Object|Object[]|string|string[])}
+     *  [predicates=[_.identity]] The predicates to check.
      * @returns {Function} Returns the new function.
      * @example
      *
@@ -36215,7 +36234,8 @@ function plural(ms, n, name) {
      * @memberOf _
      * @since 4.0.0
      * @category Util
-     * @param {...(Function|Function[])} predicates The predicates to check.
+     * @param {...(Array|Array[]|Function|Function[]|Object|Object[]|string|string[])}
+     *  [predicates=[_.identity]] The predicates to check.
      * @returns {Function} Returns the new function.
      * @example
      *
@@ -36429,7 +36449,7 @@ function plural(ms, n, name) {
      */
     function toPath(value) {
       if (isArray(value)) {
-        return arrayMap(value, baseCastKey);
+        return arrayMap(value, toKey);
       }
       return isSymbol(value) ? [value] : copyArray(stringToPath(value));
     }

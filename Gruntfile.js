@@ -361,6 +361,7 @@ module.exports = function(grunt) {
     grunt.registerTask('default', [
         'dev', 'watch'
     ]);
+
     grunt.registerTask('dev', [
         'auto_install',
         'html2js:dev',
