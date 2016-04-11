@@ -9,7 +9,9 @@ module.exports = function(grunt) {
         'assets/js/ualib-templates.js',
         'assets/js/plugins/*.js',
         'assets/js/_*.js',
-        '!assets/js/_main.js'
+        '!assets/js/_main.js',
+        '!assets/js/_scripts-local.js',
+        '!assets/**/*.min.js'
     ];
 
     var lessFileList = [
@@ -30,7 +32,8 @@ module.exports = function(grunt) {
                 '!assets/js/*_bower.js',
                 '!assets/js/scripts.js',
                 '!assets/**/*.min.*',
-                '!assets/js/header-footer-export.js'
+                '!assets/js/header-footer-export.js',
+                '!assets/js/_scripts-local.js'
             ]
         },
         clean: {
@@ -165,6 +168,14 @@ module.exports = function(grunt) {
                     src: ['**'],
                     dest: 'assets/fonts',
                     filter: 'isFile'
+                }]
+            },
+            local: {
+                files: [{
+                    expand: true,
+                    cwd: 'assets/js',
+                    src: ['scripts.js'],
+                    dest: '_scripts-local.js'
                 }]
             }
         },
@@ -308,18 +319,18 @@ module.exports = function(grunt) {
         dev_prod_switch: {
             dev: {
                 options: {
-                    environment: 'dev',
+                    environment: 'dev'
                 },
                 files: {
-                    'assets/js/scripts.js': 'assets/js/scripts.js'
+                    'assets/js/_scripts-local.js': 'assets/js/_scripts-local.js'
                 }
             },
             live: {
                 options: {
-                    environment: 'prod',
+                    environment: 'prod'
                 },
                 files: {
-                    'assets/js/scripts.js': 'assets/js/scripts.js'
+                    'assets/js/_scripts-local.js': 'assets/js/_scripts-local.js'
                 }
             }
         },
@@ -336,7 +347,7 @@ module.exports = function(grunt) {
                     jsFileList,
                     '<%= jshint.all %>'
                 ],
-                tasks: ['jshint', 'concat']
+                tasks: ['jshint', 'concat', 'copy:local', 'dev_prod_switch:dev']
             },
             livereload: {
                 // Browser live reloading
@@ -348,6 +359,7 @@ module.exports = function(grunt) {
                     'assets/css/main.css',
                     'assets/js/scripts.js',
                     'templates/*.php',
+                    'lib/*.php',
                     '*.php'
                 ]
             }
@@ -370,13 +382,14 @@ module.exports = function(grunt) {
         'autoprefixer:dev',
         'concat:dist',
         'bower_concat:dev',
+        'copy:local',
         'dev_prod_switch:dev'
     ]);
     grunt.registerTask('live-build', [
         'auto_install',
         'html2js',
         'jshint',
-        'copy',
+        'copy:dist',
         'less:build',
         'autoprefixer:build',
         'concat:dist',
@@ -386,8 +399,7 @@ module.exports = function(grunt) {
         'bower_concat:build',
         'uglify:dist',
         'headerFooterExport',
-        'replace',
-        'dev_prod_switch:live'
+        'replace'
     ]);
 
     grunt.registerTask('headerFooterExport', [

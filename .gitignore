@@ -10,6 +10,9 @@ assets/vendor/modernizr/*
 #assets/js/vendor/modernizr.min.js
 #assets/manifest.json
 
+# Ignore local build JS
+assets/js/_scripts-local.js
+
 # Ignore the styleguide folder used for testing
 styleguide/
 
