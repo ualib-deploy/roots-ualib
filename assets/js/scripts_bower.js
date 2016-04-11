@@ -17904,11 +17904,11 @@ angular.module("common/engines/catalog/catalog.tpl.html", []).run(["$templateCac
     "            </span>\n" +
     "        </div>\n" +
     "        <ul class=\"list-inline\">\n" +
-    "            <li>\n" +
-    "                <a ng-href=\"{{resourceLink}}\" class=\"external-link\" ng-if=\"resourceLink\" target=\"_{{engine}}\" ng-click=\"gaMore()\">Results in {{engineName}}</a>\n" +
-    "            </li>\n" +
     "            <li ng-show=\"item.author\">\n" +
     "                <a href=\"\" ng-click=\"isCollapsed = !isCollapsed\">Item details <span class=\"fa\" ng-class=\"{'fa-caret-down': isCollapsed, 'fa-caret-up': !isCollapsed}\"></span></a>\n" +
+    "            </li>\n" +
+    "            <li>\n" +
+    "                <a ng-href=\"{{resourceLink}}\" class=\"external-link\" ng-if=\"resourceLink\" target=\"_{{engine}}\" ng-click=\"gaMore()\">Results in {{engineName}}</a>\n" +
     "            </li>\n" +
     "        </ul>\n" +
     "    </div>\n" +
@@ -17966,11 +17966,11 @@ angular.module("common/engines/ejournals/ejournals.tpl.html", []).run(["$templat
     "        </div>\n" +
     "\n" +
     "        <ul class=\"list-inline\">\n" +
-    "            <li>\n" +
-    "                <a ng-href=\"{{resourceLink}}\" class=\"external-link\" ng-if=\"resourceLink\" target=\"_{{engine}}\" ng-click=\"gaMore()\">Results in {{engineName}}</a>\n" +
-    "            </li>\n" +
     "            <li ng-show=\"item.links[1]\">\n" +
     "                <a href=\"\" ng-click=\"isCollapsed = !isCollapsed\">Item details <span class=\"fa\" ng-class=\"{'fa-caret-down': isCollapsed, 'fa-caret-up': !isCollapsed}\"></span></a>\n" +
+    "            </li>\n" +
+    "            <li>\n" +
+    "                <a ng-href=\"{{resourceLink}}\" class=\"external-link\" ng-if=\"resourceLink\" target=\"_{{engine}}\" ng-click=\"gaMore()\">Results in {{engineName}}</a>\n" +
     "            </li>\n" +
     "        </ul>\n" +
     "    </div>\n" +
@@ -18034,11 +18034,11 @@ angular.module("common/engines/scout/scout.tpl.html", []).run(["$templateCache",
     "            </div>\n" +
     "        </div>\n" +
     "        <ul class=\"list-inline\">\n" +
-    "            <li>\n" +
-    "                <a ng-href=\"{{resourceLink}}\" class=\"external-link\" ng-if=\"resourceLink\" target=\"_{{engine}}\" ng-click=\"gaMore()\">Results in {{engineName}}</a>\n" +
-    "            </li>\n" +
     "            <li ng-show=\"item.RecordInfo.BibRecord.BibRelationships.HasContributorRelationships || item.source || item.RecordInfo.BibRecord.BibEntity.Subjects\">\n" +
     "                <a href=\"\" ng-click=\"isCollapsed = !isCollapsed\">Item details <span class=\"fa\" ng-class=\"{'fa-caret-down': isCollapsed, 'fa-caret-up': !isCollapsed}\"></span></a>\n" +
+    "            </li>\n" +
+    "            <li>\n" +
+    "                <a ng-href=\"{{resourceLink}}\" class=\"external-link\" ng-if=\"resourceLink\" target=\"_{{engine}}\" ng-click=\"gaMore()\">Results in {{engineName}}</a>\n" +
     "            </li>\n" +
     "        </ul>\n" +
     "\n" +
