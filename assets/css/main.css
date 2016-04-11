@@ -6844,7 +6844,7 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
   padding-left: 0px;
   padding-right: 0px;
   background: none;
-  margin-top: 5px;
+  margin-top: 3px;
   margin-bottom: -20px;
 }
 .pagination {
@@ -9400,7 +9400,7 @@ div[role="document"] {
 .jumbotron-header > .jumbotron .breadcrumb {
   padding: 8px 15px;
   margin-left: -10px;
-  margin-bottom: 64px;
+  margin-bottom: 21px;
 }
 /**
  * Your styles here
