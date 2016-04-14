@@ -29,12 +29,13 @@ function roots_scripts() {
    * Read the asset names from assets-manifest.json
    */
   if (WP_ENV === 'development') {
+    $scripts_js = in_array($_SERVER['REMOTE_ADDR'], array('127.0.0.1', '::1')) ? '/assets/js/_scripts-local.js' : '/assets/js/scripts.js';
     $assets = array(
       'css_bower'       => '/assets/css/main_bower.css',
       'css'       => '/assets/css/main.css',
       'CDN'       => '//fonts.googleapis.com/css?family=Roboto:300,400,500,700|Open+Sans:300,400,600,700|EB+Garamond',
       'js_bower'        => '/assets/js/scripts_bower.js',
-      'js'        => '/assets/js/scripts.js',
+      'js'        => $scripts_js,
       'modernizr' => '/assets/vendor/modernizr/modernizr.js',
       'jquery'    => '//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.js'
     );

@@ -33,6 +33,54 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                        </div>\n" +
     "                    </div>\n" +
     "\n" +
+    "                    <!-- Replicated display for xs, sm device display -->\n" +
+    "                    <div class=\"card front-page-card hidden-md hidden-lg\">\n" +
+    "                        <div class=\"card-body\">\n" +
+    "                            <div class=\"row\">\n" +
+    "                                <div class=\"col-sm-6\">\n" +
+    "                                    <a href=\"/#/databases\" class=\"service-card\">\n" +
+    "                                        <span class=\"fa fa-3x fa-database\"></span>\n" +
+    "                                        <h4>Databases</h4>\n" +
+    "                                    </a>\n" +
+    "\n" +
+    "                                    <a href=\"http://guides.lib.ua.edu/\" class=\"service-card\">\n" +
+    "                                        <span class=\"fa fa-book\"></span>\n" +
+    "                                        <h4>Research Guides</h4>\n" +
+    "                                    </a>\n" +
+    "                                    <a href=\"http://library.ua.edu/vwebv/searchBasic\" class=\"service-card\">\n" +
+    "                                        <span class=\"fa fa-search\"></span>\n" +
+    "                                        <h4>Libraries' Catalog</h4>\n" +
+    "                                    </a>\n" +
+    "                                    <a href=\"https://ua.illiad.oclc.org/illiad/\" class=\"service-card\">\n" +
+    "                                        <span class=\"fa fa-exchange\"></span>\n" +
+    "                                        <h4>Interlibrary Loan</h4>\n" +
+    "                                    </a>\n" +
+    "                                </div>\n" +
+    "\n" +
+    "                                <div class=\"col-sm-6\">\n" +
+    "                                    <a href=\"/research-tools/e-resources/\" class=\"service-card\">\n" +
+    "                                        <span class=\"fa fa-bolt\"></span>\n" +
+    "                                        <h4>E-Resources</h4>\n" +
+    "                                    </a>\n" +
+    "\n" +
+    "                                    <a href=\"/scout/\" class=\"service-card\">\n" +
+    "                                        <span class=\"fa fa-binoculars\"></span>\n" +
+    "                                        <h4>Scout</h4>\n" +
+    "                                    </a>\n" +
+    "                                    <a href=\"/#/staffdir\" class=\"service-card\">\n" +
+    "                                        <span class=\"fa fa-users\"></span>\n" +
+    "                                        <h4>Staff Directory</h4>\n" +
+    "                                    </a>\n" +
+    "\n" +
+    "                                    <a href=\"http://ask.lib.ua.edu/\" class=\"service-card\">\n" +
+    "                                        <span class=\"fa fa-question-circle\"></span>\n" +
+    "                                        <h4>Ask A Librarian</h4>\n" +
+    "                                    </a>\n" +
+    "                                </div>\n" +
+    "                            </div>\n" +
+    "                        </div>\n" +
+    "                    </div>\n" +
+    "\n" +
     "                    <div class=\"card front-page-card\" ng-show=\"events\">\n" +
     "                        <div class=\"card-heading\">\n" +
     "                            <h2>Events</h2>\n" +
@@ -45,12 +93,13 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                            <a href=\"http://events.ua.edu/category/22/view/month/\" class=\"more-link\">More Events</a>\n" +
     "                        </div>\n" +
     "                    </div>\n" +
+    "\n" +
     "                </div>\n" +
     "\n" +
     "                <div class=\"col-md-6\">\n" +
     "\n" +
-    "\n" +
-    "                    <div class=\"card front-page-card\">\n" +
+    "                    <!-- Replicated display for md, lg device display -->\n" +
+    "                    <div class=\"card front-page-card hidden-sm hidden-xs\">\n" +
     "                        <div class=\"card-body\">\n" +
     "                            <div class=\"row\">\n" +
     "                                <div class=\"col-sm-6\">\n" +
@@ -154,7 +203,9 @@ angular.module("../assets/js/_ualib-image-carousel.tpl.html", []).run(["$templat
     'ualib.ui',
     'hours',
     'oneSearch',
+    /* env:prod */
     'manage',
+    /* env:prod:end */
     'ualib.databases',
     'musicSearch',
     'ualib.staffdir',
@@ -214,7 +265,8 @@ angular.module("../assets/js/_ualib-image-carousel.tpl.html", []).run(["$templat
             // Check if changing from another angular route, and if the previous route is different.
             // We should only force page views in GA when navigating from one app to another.
             // Otherwise the page view will have already be sent to GA via the WP base.php template
-            if (pre && pre.hasOwnProperty('$$route') && pre.$$route.hasOwnProperty('originalPath') && current.$$route.originalPath !== pre.$$route.originalPath){
+            // TODO: make this better - seems a bit long winded ya?
+            if (pre && pre.hasOwnProperty('$$route') && pre.$$route.hasOwnProperty('originalPath') && current.hasOwnProperty('$$route') && current.$$route.hasOwnProperty('originalPath') && current.$$route.originalPath !== pre.$$route.originalPath){
                 // Send Google Analytics page view when routes are accessed
                 ga('require', 'linkid');
                 ga('send', 'pageview', $location.url());
