@@ -9,7 +9,9 @@ module.exports = function(grunt) {
         'assets/js/ualib-templates.js',
         'assets/js/plugins/*.js',
         'assets/js/_*.js',
-        '!assets/js/_main.js'
+        '!assets/js/_main.js',
+        '!assets/js/_scripts-local.js',
+        '!assets/**/*.min.js'
     ];
 
     var lessFileList = [
@@ -30,7 +32,8 @@ module.exports = function(grunt) {
                 '!assets/js/*_bower.js',
                 '!assets/js/scripts.js',
                 '!assets/**/*.min.*',
-                '!assets/js/header-footer-export.js'
+                '!assets/js/header-footer-export.js',
+                '!assets/js/_scripts-local.js'
             ]
         },
         clean: {
@@ -165,6 +168,14 @@ module.exports = function(grunt) {
                     src: ['**'],
                     dest: 'assets/fonts',
                     filter: 'isFile'
+                }]
+            },
+            local: {
+                files: [{
+                    expand: true,
+                    cwd: 'assets/js',
+                    src: ['scripts.js'],
+                    dest: '_scripts-local.js'
                 }]
             }
         },
@@ -305,6 +316,24 @@ module.exports = function(grunt) {
                 regExp: false
             }
         },
+        dev_prod_switch: {
+            dev: {
+                options: {
+                    environment: 'dev'
+                },
+                files: {
+                    'assets/js/_scripts-local.js': 'assets/js/_scripts-local.js'
+                }
+            },
+            live: {
+                options: {
+                    environment: 'prod'
+                },
+                files: {
+                    'assets/js/_scripts-local.js': 'assets/js/_scripts-local.js'
+                }
+            }
+        },
         watch: {
             less: {
                 files: [
@@ -318,110 +347,49 @@ module.exports = function(grunt) {
                     jsFileList,
                     '<%= jshint.all %>'
                 ],
-                tasks: ['jshint', 'concat']
+                tasks: ['jshint', 'concat', 'copy:local', 'dev_prod_switch:dev']
             },
             livereload: {
                 // Browser live reloading
                 // https://github.com/gruntjs/grunt-contrib-watch#live-reloading
                 options: {
-                    livereload: false
+                    livereload: 35729
                 },
                 files: [
                     'assets/css/main.css',
                     'assets/js/scripts.js',
                     'templates/*.php',
+                    'lib/*.php',
                     '*.php'
                 ]
             }
         },
-        lessToSass: {
-            lessVars: {
-                files: [{
-                    expand: true,
-                    cwd: 'assets/less',
-                    src: ['_variables.less'],
-                    ext: '.scss',
-                    dest: 'assets/sass'
-                }]
-            }
-        },
-        htmlSnapshot: {
-            all: {
-                options: {
-                    //that's the path where the snapshots should be placed
-                    //it's empty by default which means they will go into the directory
-                    //where your Gruntfile.js is placed
-                    removeScripts: true,
-                    snapshotPath: 'assets/snapshots/',
-                    //This should be either the base path to your index.html file
-                    //or your base URL. Currently the task does not use it's own
-                    //webserver. So if your site needs a webserver to be fully
-                    //functional configure it here.
-                    sitePath: 'https://www.lib.ua.edu/',
-                    //by default the task waits 500ms before fetching the html.
-                    //this is to give the page enough time to to assemble itself.
-                    //if your page needs more time, tweak here.
-                    msWaitForPages: 1000,
-                    //sanitize function to be used for filenames. Converts '#!/' to '_' as default
-                    //has a filename argument, must have a return that is a sanitized string
-                    sanitize: function (requestUri) {
-                        //returns 'index.html' if the url is '/', otherwise a prefix
-                        return requestUri.replace(/[\?=&]/g, '_');
-                    },
-                    //here goes the list of all urls that should be fetched
-                    urls: [
-                        '',
-                        '#/hours',
-                        '#/hours?library=gorgas',
-                        '#/hours?library=music',
-                        '#/hours?library=media',
-                        '#/hours?library=williams',
-                        '#/hours?library=rodgers',
-                        '#/hours?library=mclure',
-                        '#/hours?library=hoole',
-                        '#/hours?library=bruno',
-                        '#/databases',
-                        '#/news-exhibits',
-                        '#/staffdir',
-                        '#/videos',
-                        '#/hours?library=gorgas',
-                        '#/hours?library=music',
-                        '#/hours?library=media',
-                        '#/hours?library=williams',
-                        '#/hours?library=rodgers',
-                        '#/hours?library=mclure',
-                        '#/hours?library=hoole',
-                        '#/hours?library=bruno'
-                    ],
-                    // options for phantomJs' page object
-                    // see http://phantomjs.org/api/webpage/ for available options
-                    pageOptions: {
-                        viewportSize : {
-                            width: 1200,
-                            height: 800
-                        }
-                    }
-                }
-            }
+        auto_install: {
+            local: {}
         }
     });
 
     // Register tasks
     grunt.registerTask('default', [
-        'dev'
+        'dev', 'watch'
     ]);
+
     grunt.registerTask('dev', [
+        'auto_install',
         'html2js:dev',
         'jshint',
         'less:dev',
         'autoprefixer:dev',
         'concat:dist',
-        'bower_concat:dev'
+        'bower_concat:dev',
+        'copy:local',
+        'dev_prod_switch:dev'
     ]);
     grunt.registerTask('live-build', [
+        'auto_install',
         'html2js',
         'jshint',
-        'copy',
+        'copy:dist',
         'less:build',
         'autoprefixer:build',
         'concat:dist',
@@ -433,7 +401,7 @@ module.exports = function(grunt) {
         'headerFooterExport',
         'replace'
     ]);
-    grunt.registerTask('lessVarsToSass', ['lessToSass:lessVars']);
+
     grunt.registerTask('headerFooterExport', [
         'less:header_footer_export',
         'bower_concat:header_footer_export',
