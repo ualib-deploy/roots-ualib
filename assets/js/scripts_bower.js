@@ -2285,6 +2285,268 @@ angular.module('angular.filter', [
   'a8m.filter-watcher'
 ]);
 })( window, window.angular );
+/*
+ * angular-lazy-load
+ *
+ * Copyright(c) 2014 Paweł Wszoła <wszola.p@gmail.com>
+ * MIT Licensed
+ *
+ */
+
+/**
+ * @author Paweł Wszoła (wszola.p@gmail.com)
+ *
+ */
+
+angular.module('angularLazyImg', []);
+
+angular.module('angularLazyImg').factory('LazyImgMagic', [
+  '$window', '$rootScope', 'lazyImgConfig', 'lazyImgHelpers',
+  function($window, $rootScope, lazyImgConfig, lazyImgHelpers){
+    'use strict';
+
+    var winDimensions, $win, images, isListening, options;
+    var checkImagesT, saveWinOffsetT, containers;
+
+    images = [];
+    isListening = false;
+    options = lazyImgConfig.getOptions();
+    $win = angular.element($window);
+    winDimensions = lazyImgHelpers.getWinDimensions();
+    saveWinOffsetT = lazyImgHelpers.throttle(function(){
+      winDimensions = lazyImgHelpers.getWinDimensions();
+    }, 60);
+    containers = [options.container || $win];
+
+    function checkImages(){
+      for(var i = images.length - 1; i >= 0; i--){
+        var image = images[i];
+        if(image && lazyImgHelpers.isElementInView(image.$elem[0], options.offset, winDimensions)){
+          loadImage(image);
+          images.splice(i, 1);
+        }
+      }
+      if(images.length === 0){ stopListening(); }
+    }
+
+    checkImagesT = lazyImgHelpers.throttle(checkImages, 30);
+
+    function listen(param){
+      containers.forEach(function (container) {
+        container[param]('scroll', checkImagesT);
+        container[param]('touchmove', checkImagesT);
+      });
+      $win[param]('resize', checkImagesT);
+      $win[param]('resize', saveWinOffsetT);
+    }
+
+    function startListening(){
+      isListening = true;
+      setTimeout(function(){
+        checkImages();
+        listen('on');
+      }, 1);
+    }
+
+    function stopListening(){
+      isListening = false;
+      listen('off');
+    }
+
+    function removeImage(image){
+      var index = images.indexOf(image);
+      if(index !== -1) {
+        images.splice(index, 1);
+      }
+    }
+
+    function loadImage(photo){
+      var img = new Image();
+      img.onerror = function(){
+        if(options.errorClass){
+          photo.$elem.addClass(options.errorClass);
+        }
+        $rootScope.$emit('lazyImg:error', photo);
+        options.onError(photo);
+      };
+      img.onload = function(){
+        setPhotoSrc(photo.$elem, photo.src);
+        if(options.successClass){
+          photo.$elem.addClass(options.successClass);
+        }
+        $rootScope.$emit('lazyImg:success', photo);
+        options.onSuccess(photo);
+      };
+      img.src = photo.src;
+    }
+
+    function setPhotoSrc($elem, src){
+      if ($elem[0].nodeName.toLowerCase() === 'img') {
+        $elem[0].src = src;
+      } else {
+        $elem.css('background-image', 'url("' + src + '")');
+      }
+    }
+
+    // PHOTO
+    function Photo($elem){
+      this.$elem = $elem;
+    }
+
+    Photo.prototype.setSource = function(source){
+      this.src = source;
+      images.unshift(this);
+      if (!isListening){ startListening(); }
+    };
+
+    Photo.prototype.removeImage = function(){
+      removeImage(this);
+      if(images.length === 0){ stopListening(); }
+    };
+
+    Photo.prototype.checkImages = function(){
+      checkImages();
+    };
+
+    Photo.addContainer = function (container) {
+      stopListening();
+      containers.push(container);
+      startListening();
+    };
+
+    Photo.removeContainer = function (container) {
+      stopListening();
+      containers.splice(containers.indexOf(container), 1);
+      startListening();
+    };
+
+    return Photo;
+
+  }
+]);
+
+angular.module('angularLazyImg').provider('lazyImgConfig', function() {
+  'use strict';
+
+  this.options = {
+    offset       : 100,
+    errorClass   : null,
+    successClass : null,
+    onError      : function(){},
+    onSuccess    : function(){}
+  };
+
+  this.$get = function() {
+    var options = this.options;
+    return {
+      getOptions: function() {
+        return options;
+      }
+    };
+  };
+
+  this.setOptions = function(options) {
+    angular.extend(this.options, options);
+  };
+});
+angular.module('angularLazyImg').factory('lazyImgHelpers', [
+  '$window', function($window){
+    'use strict';
+
+    function getWinDimensions(){
+      return {
+        height: $window.innerHeight,
+        width: $window.innerWidth
+      };
+    }
+
+    function isElementInView(elem, offset, winDimensions) {
+      var rect = elem.getBoundingClientRect();
+      var bottomline = winDimensions.height + offset;
+      return (
+       rect.left >= 0 && rect.right <= winDimensions.width + offset && (
+         rect.top >= 0 && rect.top <= bottomline ||
+         rect.bottom <= bottomline && rect.bottom >= 0 - offset
+        )
+      );
+    }
+
+    // http://remysharp.com/2010/07/21/throttling-function-calls/
+    function throttle(fn, threshhold, scope) {
+      var last, deferTimer;
+      return function () {
+        var context = scope || this;
+        var now = +new Date(),
+            args = arguments;
+        if (last && now < last + threshhold) {
+          clearTimeout(deferTimer);
+          deferTimer = setTimeout(function () {
+            last = now;
+            fn.apply(context, args);
+          }, threshhold);
+        } else {
+          last = now;
+          fn.apply(context, args);
+        }
+      };
+    }
+
+    return {
+      isElementInView: isElementInView,
+      getWinDimensions: getWinDimensions,
+      throttle: throttle
+    };
+
+  }
+]);
+angular.module('angularLazyImg')
+  .directive('lazyImg', [
+    '$rootScope', 'LazyImgMagic', function ($rootScope, LazyImgMagic) {
+      'use strict';
+
+      function link(scope, element, attributes) {
+        var lazyImage = new LazyImgMagic(element);
+        attributes.$observe('lazyImg', function (newSource) {
+          if (newSource) {
+            // in angular 1.3 it might be nice to remove observer here
+            lazyImage.setSource(newSource);
+          }
+        });
+        scope.$on('$destroy', function () {
+          lazyImage.removeImage();
+        });
+        $rootScope.$on('lazyImg.runCheck', function () {
+          lazyImage.checkImages();
+        });
+        $rootScope.$on('lazyImg:refresh', function () {
+          lazyImage.checkImages();
+        });
+      }
+
+      return {
+        link: link,
+        restrict: 'A'
+      };
+    }
+  ])
+  .directive('lazyImgContainer', [
+    'LazyImgMagic', function (LazyImgMagic) {
+      'use strict';
+
+      function link(scope, element) {
+        LazyImgMagic.addContainer(element);
+        scope.$on('$destroy', function () {
+          LazyImgMagic.removeContainer(element);
+        });
+      }
+
+      return {
+        link: link,
+        restrict: 'A'
+      };
+    }
+  ]);
+
 /**
   * x is a value between 0 and 1, indicating where in the animation you are.
   */
@@ -6041,6 +6303,14 @@ angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", f
     "    <div class=\"jumbotron\">\n" +
     "        <div class=\"container\">\n" +
     "            <div class=\"row\">\n" +
+    "                <div class=\"col-sm-12\">\n" +
+    "                    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
+    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
+    "                        <li><a title=\"Go to News.\" href=\"/#/databases\" class=\"post post-page\">Databases</a></li>\n" +
+    "                    </ol>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "            <div class=\"row\">\n" +
     "                <div class=\"col-md-7\">\n" +
     "                    <h1>Databases</h1>\n" +
     "                </div>\n" +
@@ -6399,6 +6669,7 @@ angular.module('ualib.databases')
         });
 
         $scope.$on('$locationChangeSuccess', function(){
+            console.log('wut?');
             paramsToScope();
         });
 
@@ -6437,7 +6708,7 @@ angular.module('ualib.databases')
             $scope.filteredDB = filtered;
             updatePager();
 
-            var newParams = angular.extend({}, newVal, {page: $scope.pager.page});
+            var newParams = angular.extend({}, newVal);
 
             processFacets(filtered);
             scopeToParams(newParams);
@@ -6523,6 +6794,26 @@ angular.module('ualib.databases')
             var typeAvail = [];
             var typeCount = {};
 
+            function processFacetsSubj(subj){
+                if (subjAvail.indexOf(subj.sid) == -1){
+                    subjAvail.push(subj.sid);
+                    subjCount[subj.sid] = 1;
+                }
+                else{
+                    subjCount[subj.sid]++;
+                }
+            }
+
+            function processFacetsType(type){
+                if (typeAvail.indexOf(type.tid) == -1){
+                    typeAvail.push(type.tid);
+                    typeCount[type.tid] = 1;
+                }
+                else{
+                    typeCount[type.tid]++;
+                }
+            }
+
 
             for (var i = 0, len = databases.length; i < len; i++){
                 databases[i].subjects.map(processFacetsSubj);
@@ -6544,25 +6835,7 @@ angular.module('ualib.databases')
             });
         }
 
-        function processFacetsSubj(subj){
-            if (subjAvail.indexOf(subj.sid) == -1){
-                subjAvail.push(subj.sid);
-                subjCount[subj.sid] = 1;
-            }
-            else{
-                subjCount[subj.sid]++;
-            }
-        }
 
-        function processFacetsType(type){
-            if (typeAvail.indexOf(type.tid) == -1){
-                typeAvail.push(type.tid);
-                typeCount[type.tid] = 1;
-            }
-            else{
-                typeCount[type.tid]++;
-            }
-        }
 
         function processStartsWith(databases){
             $scope.startsWithDisabled = {};
@@ -17703,7 +17976,7 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "                    <small>\n" +
     "                        <span class=\"fa fa-info-circle\"\n" +
     "                              tooltip-placement=\"right\"\n" +
-    "                              tooltip=\"Keyword search in journal titles and journal collections, in both Scout and our E-Resources database.\"></span>\n" +
+    "                              tooltip=\"Keyword search in journal titles and journal collections, in both Scout and our E-Resources.\"></span>\n" +
     "                    </small>\n" +
     "                </h2>\n" +
     "            </div>\n" +
@@ -17737,7 +18010,7 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "        <div class=\"col-md-4\">\n" +
     "            <div class=\"bento-box\" bento-box=\"acumen\">\n" +
     "                <h2 id=\"acumen\">\n" +
-    "                    Acumen\n" +
+    "                    Acumen <small>Digital Archives</small>\n" +
     "                    <small>\n" +
     "                        <span class=\"fa fa-info-circle\"\n" +
     "                              tooltip-placement=\"right\"\n" +
@@ -18738,7 +19011,7 @@ angular.module('oneSearch.common')
                 model: '=',
                 search: '='
             },
-            controller: function($scope, $window, $timeout, $document,  dataFactory){
+            controller: ['$scope', '$window', '$timeout', '$document', 'dataFactory', function($scope, $window, $timeout, $document,  dataFactory){
                 $scope.items = {};
                 $scope.filteredItems = [];
                 $scope.model = "";
@@ -18855,7 +19128,7 @@ angular.module('oneSearch.common')
                 $scope.gaTypeAhead = function(linkTitle){
                     ga('send', 'event', 'oneSearch', 'type_ahead_click', linkTitle);
                 };
-            },
+            }],
             link: function(scope, elem, attrs) {
                 scope.showSuggestions = false;
                 var suggestWatcher = scope.$watch('items', function(newVal, oldVal){
@@ -19008,7 +19281,7 @@ angular.module('engines.acumen', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('AcumenCtrl', function($scope, $filter){
+    .controller('AcumenCtrl', ['$scope', '$filter', function($scope, $filter){
         var items = $scope.items;
 
         for (var i = 0, len = items.length; i < len; i++) {
@@ -19018,7 +19291,7 @@ angular.module('engines.acumen', [])
                 else items[i].type = items[i].type.sort().shift();
             }
         }
-    });
+    }]);
 angular.module('engines.catalog', [])
 
     /**
@@ -19079,7 +19352,7 @@ angular.module('engines.catalog', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('CatalogCtrl', function($scope, $filter){
+    .controller('CatalogCtrl', ['$scope', '$filter', function($scope, $filter){
         var types = {
             bc: "Archive/Manuscript",
             cm: "Music Score",
@@ -19121,7 +19394,7 @@ angular.module('engines.catalog', [])
         }
 
         $scope.items = items;
-    });
+    }]);
 
 angular.module('engines.databases', [])
 
@@ -19205,7 +19478,7 @@ angular.module('engines.ejournals', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('EjouralsCtrl', function($scope){
+    .controller('EjouralsCtrl', ['$scope', function($scope){
 
         var param;
         switch ($scope.mediaType){
@@ -19222,7 +19495,7 @@ angular.module('engines.ejournals', [])
         if (param){
             $scope.resourceLink = $scope.resourceLink.replace('SS_searchTypeAll=yes&SS_searchTypeBook=yes&SS_searchTypeJournal=yes&SS_searchTypeOther=yes', param);
         }
-    });
+    }]);
 /**
  * @ngdoc overview
  * @name engines
@@ -19570,7 +19843,7 @@ angular.module('engines.scout', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('ScoutCtrl', function($scope){
+    .controller('ScoutCtrl', ['$scope', function($scope){
         var title; // Title variable to bind to $scope. ".BibRelationships.IsPartOfRelationships" title is used if no item title is present.
         var items = $scope.items;
         for (var i = 0; i < items.length; i++){
@@ -19644,7 +19917,7 @@ angular.module('engines.scout', [])
         }
 
         $scope.resourceLink = angular.copy(link);
-    });
+    }]);
 angular.module('filters.nameFilter', [])
 
     .filter('nameFilter', ['$filter', function($filter){
@@ -21441,7 +21714,7 @@ function plural(ms, n, name) {
 
 /**
  * @license
- * lodash 4.10.0 <https://lodash.com/>
+ * lodash 4.11.1 <https://lodash.com/>
  * Copyright jQuery Foundation and other contributors <https://jquery.org/>
  * Released under MIT license <https://lodash.com/license>
  * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
@@ -21453,7 +21726,7 @@ function plural(ms, n, name) {
   var undefined;
 
   /** Used as the semantic version number. */
-  var VERSION = '4.10.0';
+  var VERSION = '4.11.1';
 
   /** Used as the size to enable large array optimizations. */
   var LARGE_ARRAY_SIZE = 200;
@@ -21628,7 +21901,8 @@ function plural(ms, n, name) {
       rsBreakRange = rsMathOpRange + rsNonCharRange + rsQuoteRange + rsSpaceRange;
 
   /** Used to compose unicode capture groups. */
-  var rsAstral = '[' + rsAstralRange + ']',
+  var rsApos = "['\u2019]",
+      rsAstral = '[' + rsAstralRange + ']',
       rsBreak = '[' + rsBreakRange + ']',
       rsCombo = '[' + rsComboMarksRange + rsComboSymbolsRange + ']',
       rsDigits = '\\d+',
@@ -21646,12 +21920,17 @@ function plural(ms, n, name) {
   /** Used to compose unicode regexes. */
   var rsLowerMisc = '(?:' + rsLower + '|' + rsMisc + ')',
       rsUpperMisc = '(?:' + rsUpper + '|' + rsMisc + ')',
+      rsOptLowerContr = '(?:' + rsApos + '(?:d|ll|m|re|s|t|ve))?',
+      rsOptUpperContr = '(?:' + rsApos + '(?:D|LL|M|RE|S|T|VE))?',
       reOptMod = rsModifier + '?',
       rsOptVar = '[' + rsVarRange + ']?',
       rsOptJoin = '(?:' + rsZWJ + '(?:' + [rsNonAstral, rsRegional, rsSurrPair].join('|') + ')' + rsOptVar + reOptMod + ')*',
       rsSeq = rsOptVar + reOptMod + rsOptJoin,
       rsEmoji = '(?:' + [rsDingbat, rsRegional, rsSurrPair].join('|') + ')' + rsSeq,
       rsSymbol = '(?:' + [rsNonAstral + rsCombo + '?', rsCombo, rsRegional, rsSurrPair, rsAstral].join('|') + ')';
+
+  /** Used to match apostrophes. */
+  var reApos = RegExp(rsApos, 'g');
 
   /**
    * Used to match [combining diacritical marks](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks) and
@@ -21664,10 +21943,10 @@ function plural(ms, n, name) {
 
   /** Used to match complex or compound words. */
   var reComplexWord = RegExp([
-    rsUpper + '?' + rsLower + '+(?=' + [rsBreak, rsUpper, '$'].join('|') + ')',
-    rsUpperMisc + '+(?=' + [rsBreak, rsUpper + rsLowerMisc, '$'].join('|') + ')',
-    rsUpper + '?' + rsLowerMisc + '+',
-    rsUpper + '+',
+    rsUpper + '?' + rsLower + '+' + rsOptLowerContr + '(?=' + [rsBreak, rsUpper, '$'].join('|') + ')',
+    rsUpperMisc + '+' + rsOptUpperContr + '(?=' + [rsBreak, rsUpper + rsLowerMisc, '$'].join('|') + ')',
+    rsUpper + '?' + rsLowerMisc + '+' + rsOptLowerContr,
+    rsUpper + '+' + rsOptUpperContr,
     rsDigits,
     rsEmoji
   ].join('|'), 'g');
@@ -22822,7 +23101,8 @@ function plural(ms, n, name) {
 
     /** Used for built-in method references. */
     var arrayProto = context.Array.prototype,
-        objectProto = context.Object.prototype;
+        objectProto = context.Object.prototype,
+        stringProto = context.String.prototype;
 
     /** Used to resolve the decompiled source of functions. */
     var funcToString = context.Function.prototype.toString;
@@ -22877,7 +23157,9 @@ function plural(ms, n, name) {
         nativeMin = Math.min,
         nativeParseInt = context.parseInt,
         nativeRandom = Math.random,
-        nativeReverse = arrayProto.reverse;
+        nativeReplace = stringProto.replace,
+        nativeReverse = arrayProto.reverse,
+        nativeSplit = stringProto.split;
 
     /* Built-in method references that are verified to be native. */
     var DataView = getNative(context, 'DataView'),
@@ -22990,7 +23272,7 @@ function plural(ms, n, name) {
      * `isSet`, `isString`, `isUndefined`, `isTypedArray`, `isWeakMap`, `isWeakSet`,
      * `join`, `kebabCase`, `last`, `lastIndexOf`, `lowerCase`, `lowerFirst`,
      * `lt`, `lte`, `max`, `maxBy`, `mean`, `meanBy`, `min`, `minBy`, `multiply`,
-     * `noConflict`, `noop`, `now`, `pad`, `padEnd`, `padStart`, `parseInt`,
+     * `noConflict`, `noop`, `now`, `nth`, `pad`, `padEnd`, `padStart`, `parseInt`,
      * `pop`, `random`, `reduce`, `reduceRight`, `repeat`, `result`, `round`,
      * `runInContext`, `sample`, `shift`, `size`, `snakeCase`, `some`, `sortedIndex`,
      * `sortedIndexBy`, `sortedLastIndex`, `sortedLastIndexBy`, `startCase`,
@@ -24732,6 +25014,23 @@ function plural(ms, n, name) {
     }
 
     /**
+     * The base implementation of `_.nth` which doesn't coerce `n` to an integer.
+     *
+     * @private
+     * @param {Array} array The array to query.
+     * @param {number} n The index of the element to return.
+     * @returns {*} Returns the nth element of `array`.
+     */
+    function baseNth(array, n) {
+      var length = array.length;
+      if (!length) {
+        return;
+      }
+      n += n < 0 ? length : 0;
+      return isIndex(n, length) ? array[n] : undefined;
+    }
+
+    /**
      * The base implementation of `_.orderBy` without param guards.
      *
      * @private
@@ -24742,7 +25041,7 @@ function plural(ms, n, name) {
      */
     function baseOrderBy(collection, iteratees, orders) {
       var index = -1;
-      iteratees = arrayMap(iteratees.length ? iteratees : [identity], getIteratee());
+      iteratees = arrayMap(iteratees.length ? iteratees : [identity], baseUnary(getIteratee()));
 
       var result = baseMap(collection, function(value, key, collection) {
         var criteria = arrayMap(iteratees, function(iteratee) {
@@ -25615,24 +25914,10 @@ function plural(ms, n, name) {
      * @param {Object} source The object to copy properties from.
      * @param {Array} props The property identifiers to copy.
      * @param {Object} [object={}] The object to copy properties to.
-     * @returns {Object} Returns `object`.
-     */
-    function copyObject(source, props, object) {
-      return copyObjectWith(source, props, object);
-    }
-
-    /**
-     * This function is like `copyObject` except that it accepts a function to
-     * customize copied values.
-     *
-     * @private
-     * @param {Object} source The object to copy properties from.
-     * @param {Array} props The property identifiers to copy.
-     * @param {Object} [object={}] The object to copy properties to.
      * @param {Function} [customizer] The function to customize copied values.
      * @returns {Object} Returns `object`.
      */
-    function copyObjectWith(source, props, object, customizer) {
+    function copyObject(source, props, object, customizer) {
       object || (object = {});
 
       var index = -1,
@@ -25823,7 +26108,7 @@ function plural(ms, n, name) {
      */
     function createCompounder(callback) {
       return function(string) {
-        return arrayReduce(words(deburr(string)), callback, '');
+        return arrayReduce(words(deburr(string).replace(reApos, '')), callback, '');
       };
     }
 
@@ -26059,7 +26344,10 @@ function plural(ms, n, name) {
      */
     function createOver(arrayFunc) {
       return rest(function(iteratees) {
-        iteratees = arrayMap(baseFlatten(iteratees, 1, isFlattenableIteratee), getIteratee());
+        iteratees = (iteratees.length == 1 && isArray(iteratees[0]))
+          ? arrayMap(iteratees[0], baseUnary(getIteratee()))
+          : arrayMap(baseFlatten(iteratees, 1, isFlattenableIteratee), baseUnary(getIteratee()));
+
         return rest(function(args) {
           var thisArg = this;
           return arrayFunc(iteratees, function(iteratee) {
@@ -26173,7 +26461,6 @@ function plural(ms, n, name) {
      */
     function createRecurryWrapper(func, bitmask, wrapFunc, placeholder, thisArg, partials, holders, argPos, ary, arity) {
       var isCurry = bitmask & CURRY_FLAG,
-          newArgPos = argPos ? copyArray(argPos) : undefined,
           newHolders = isCurry ? holders : undefined,
           newHoldersRight = isCurry ? undefined : holders,
           newPartials = isCurry ? partials : undefined,
@@ -26187,7 +26474,7 @@ function plural(ms, n, name) {
       }
       var newData = [
         func, bitmask, thisArg, newPartials, newHolders, newPartialsRight,
-        newHoldersRight, newArgPos, ary, arity
+        newHoldersRight, argPos, ary, arity
       ];
 
       var result = wrapFunc.apply(undefined, newData);
@@ -27100,20 +27387,20 @@ function plural(ms, n, name) {
       var value = source[3];
       if (value) {
         var partials = data[3];
-        data[3] = partials ? composeArgs(partials, value, source[4]) : copyArray(value);
-        data[4] = partials ? replaceHolders(data[3], PLACEHOLDER) : copyArray(source[4]);
+        data[3] = partials ? composeArgs(partials, value, source[4]) : value;
+        data[4] = partials ? replaceHolders(data[3], PLACEHOLDER) : source[4];
       }
       // Compose partial right arguments.
       value = source[5];
       if (value) {
         partials = data[5];
-        data[5] = partials ? composeArgsRight(partials, value, source[6]) : copyArray(value);
-        data[6] = partials ? replaceHolders(data[5], PLACEHOLDER) : copyArray(source[6]);
+        data[5] = partials ? composeArgsRight(partials, value, source[6]) : value;
+        data[6] = partials ? replaceHolders(data[5], PLACEHOLDER) : source[6];
       }
       // Use source `argPos` if available.
       value = source[7];
       if (value) {
-        data[7] = copyArray(value);
+        data[7] = value;
       }
       // Use source `ary` if it's smaller.
       if (srcBitmask & ARY_FLAG) {
@@ -27868,7 +28155,7 @@ function plural(ms, n, name) {
      * // => undefined
      */
     function head(array) {
-      return array ? array[0] : undefined;
+      return (array && array.length) ? array[0] : undefined;
     }
 
     /**
@@ -28102,6 +28389,31 @@ function plural(ms, n, name) {
         }
       }
       return -1;
+    }
+
+    /**
+     * Gets the nth element of `array`. If `n` is negative, the nth element
+     * from the end is returned.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.11.0
+     * @category Array
+     * @param {Array} array The array to query.
+     * @param {number} [n=0] The index of the element to return.
+     * @returns {*} Returns the nth element of `array`.
+     * @example
+     *
+     * var array = ['a', 'b', 'c', 'd'];
+     *
+     * _.nth(array, 1);
+     * // => 'b'
+     *
+     * _.nth(array, -2);
+     * // => 'c';
+     */
+    function nth(array, n) {
+      return (array && array.length) ? baseNth(array, toInteger(n)) : undefined;
     }
 
     /**
@@ -30407,7 +30719,11 @@ function plural(ms, n, name) {
       } else if (length > 2 && isIterateeCall(iteratees[0], iteratees[1], iteratees[2])) {
         iteratees = [iteratees[0]];
       }
-      return baseOrderBy(collection, baseFlatten(iteratees, 1), []);
+      iteratees = (iteratees.length == 1 && isArray(iteratees[0]))
+        ? iteratees[0]
+        : baseFlatten(iteratees, 1, isFlattenableIteratee);
+
+      return baseOrderBy(collection, iteratees, []);
     });
 
     /*------------------------------------------------------------------------*/
@@ -30770,12 +31086,13 @@ function plural(ms, n, name) {
     function debounce(func, wait, options) {
       var lastArgs,
           lastThis,
+          maxWait,
           result,
           timerId,
           lastCallTime = 0,
           lastInvokeTime = 0,
           leading = false,
-          maxWait = false,
+          maxing = false,
           trailing = true;
 
       if (typeof func != 'function') {
@@ -30784,7 +31101,8 @@ function plural(ms, n, name) {
       wait = toNumber(wait) || 0;
       if (isObject(options)) {
         leading = !!options.leading;
-        maxWait = 'maxWait' in options && nativeMax(toNumber(options.maxWait) || 0, wait);
+        maxing = 'maxWait' in options;
+        maxWait = maxing ? nativeMax(toNumber(options.maxWait) || 0, wait) : maxWait;
         trailing = 'trailing' in options ? !!options.trailing : trailing;
       }
 
@@ -30812,7 +31130,7 @@ function plural(ms, n, name) {
             timeSinceLastInvoke = time - lastInvokeTime,
             result = wait - timeSinceLastCall;
 
-        return maxWait === false ? result : nativeMin(result, maxWait - timeSinceLastInvoke);
+        return maxing ? nativeMin(result, maxWait - timeSinceLastInvoke) : result;
       }
 
       function shouldInvoke(time) {
@@ -30823,7 +31141,7 @@ function plural(ms, n, name) {
         // trailing edge, the system time has gone backwards and we're treating
         // it as the trailing edge, or we've hit the `maxWait` limit.
         return (!lastCallTime || (timeSinceLastCall >= wait) ||
-          (timeSinceLastCall < 0) || (maxWait !== false && timeSinceLastInvoke >= maxWait));
+          (timeSinceLastCall < 0) || (maxing && timeSinceLastInvoke >= maxWait));
       }
 
       function timerExpired() {
@@ -30872,10 +31190,12 @@ function plural(ms, n, name) {
           if (timerId === undefined) {
             return leadingEdge(lastCallTime);
           }
-          // Handle invocations in a tight loop.
-          clearTimeout(timerId);
-          timerId = setTimeout(timerExpired, wait);
-          return invokeFunc(lastCallTime);
+          if (maxing) {
+            // Handle invocations in a tight loop.
+            clearTimeout(timerId);
+            timerId = setTimeout(timerExpired, wait);
+            return invokeFunc(lastCallTime);
+          }
         }
         if (timerId === undefined) {
           timerId = setTimeout(timerExpired, wait);
@@ -31105,7 +31425,10 @@ function plural(ms, n, name) {
      * // => [100, 10]
      */
     var overArgs = rest(function(func, transforms) {
-      transforms = arrayMap(baseFlatten(transforms, 1, isFlattenableIteratee), getIteratee());
+      transforms = (transforms.length == 1 && isArray(transforms[0]))
+        ? arrayMap(transforms[0], baseUnary(getIteratee()))
+        : arrayMap(baseFlatten(transforms, 1, isFlattenableIteratee), baseUnary(getIteratee()));
+
       var funcsLength = transforms.length;
       return rest(function(args) {
         var index = -1,
@@ -33111,7 +33434,7 @@ function plural(ms, n, name) {
      * // => { 'a': 1, 'b': 2 }
      */
     var assignInWith = createAssigner(function(object, source, srcIndex, customizer) {
-      copyObjectWith(source, keysIn(source), object, customizer);
+      copyObject(source, keysIn(source), object, customizer);
     });
 
     /**
@@ -33142,7 +33465,7 @@ function plural(ms, n, name) {
      * // => { 'a': 1, 'b': 2 }
      */
     var assignWith = createAssigner(function(object, source, srcIndex, customizer) {
-      copyObjectWith(source, keys(source), object, customizer);
+      copyObject(source, keys(source), object, customizer);
     });
 
     /**
@@ -34969,7 +35292,7 @@ function plural(ms, n, name) {
       var args = arguments,
           string = toString(args[0]);
 
-      return args.length < 3 ? string : string.replace(args[1], args[2]);
+      return args.length < 3 ? string : nativeReplace.call(string, args[1], args[2]);
     }
 
     /**
@@ -35034,7 +35357,7 @@ function plural(ms, n, name) {
           return castSlice(stringToArray(string), 0, limit);
         }
       }
-      return string.split(separator, limit);
+      return nativeSplit.call(string, separator, limit);
     }
 
     /**
@@ -36093,7 +36416,7 @@ function plural(ms, n, name) {
         object = this;
         methodNames = baseFunctions(source, keys(source));
       }
-      var chain = (isObject(options) && 'chain' in options) ? options.chain : true,
+      var chain = !(isObject(options) && 'chain' in options) || !!options.chain,
           isFunc = isFunction(object);
 
       arrayEach(methodNames, function(methodName) {
@@ -36158,7 +36481,8 @@ function plural(ms, n, name) {
     }
 
     /**
-     * Creates a function that returns its nth argument.
+     * Creates a function that returns its nth argument. If `n` is negative,
+     * the nth argument from the end is returned.
      *
      * @static
      * @memberOf _
@@ -36169,15 +36493,18 @@ function plural(ms, n, name) {
      * @example
      *
      * var func = _.nthArg(1);
-     *
-     * func('a', 'b', 'c');
+     * func('a', 'b', 'c', 'd');
      * // => 'b'
+     *
+     * var func = _.nthArg(-2);
+     * func('a', 'b', 'c', 'd');
+     * // => 'c'
      */
     function nthArg(n) {
       n = toInteger(n);
-      return function() {
-        return arguments[n];
-      };
+      return rest(function(args) {
+        return baseNth(args, n);
+      });
     }
 
     /**
@@ -37085,6 +37412,7 @@ function plural(ms, n, name) {
     lodash.min = min;
     lodash.minBy = minBy;
     lodash.multiply = multiply;
+    lodash.nth = nth;
     lodash.noConflict = noConflict;
     lodash.noop = noop;
     lodash.now = now;
@@ -56685,6 +57013,18 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "    <div class=\"jumbotron\">\n" +
     "        <div class=\"container\">\n" +
     "            <div class=\"row\">\n" +
+    "                <div class=\"col-sm-12\">\n" +
+    "                    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
+    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
+    "                        <li><a title=\"Go to News.\" href=\"/#/news-exhibits\" class=\"post post-page\">News</a></li>\n" +
+    "                        <li><a title=\"Go to News.\" href=\"\" class=\"post post-page\">{{newsItem.title | breadcrumbTruncate}}</a></li>\n" +
+    "                        <script>\n" +
+    "                            console.log(\"TEST!!\")\n" +
+    "                        </script>\n" +
+    "                    </ol>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "            <div class=\"row\">\n" +
     "                <div class=\"col-sm-7\">\n" +
     "                    <h1>News &amp; Exhibits</h1>\n" +
     "                </div>\n" +
@@ -56782,6 +57122,14 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "<div class=\"jumbotron-header\">\n" +
     "    <div class=\"jumbotron\">\n" +
     "        <div class=\"container\">\n" +
+    "            <div class=\"row\">\n" +
+    "                <div class=\"col-sm-12\">\n" +
+    "                    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
+    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
+    "                        <li><a title=\"Go to News.\" href=\"/#/news-exhibits\" class=\"post post-page\">News</a></li>\n" +
+    "                    </ol>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
     "            <div class=\"row\">\n" +
     "                <div class=\"col-sm-7\">\n" +
     "                    <h1>News &amp; Exhibits</h1>\n" +
@@ -57194,7 +57542,7 @@ angular.module('ualib.news', [
         $document.duScrollTo(0, 30, 500, function (t) { return (--t)*t*t+1; });
         $scope.showEnlarged = false;
         $scope.curImage = 0;
-        $scope.curEnlImage = 0;
+
         var controlElms;
 
         function loadImages(item, i, len, deferred){
@@ -57348,7 +57696,19 @@ angular.module('ualib.news', [
                 return 'news-item/' + type + '-card.tpl.html';
             }
         };
-    }]);;/**
+    }])
+
+    .filter('breadcrumbTruncate', function () {
+        return function(x){
+            pageArray = x.split(' ');
+
+            if (pageArray.length > 4) {
+                newPageArray = pageArray.slice(0, 4);
+                x = newPageArray.join(' ') + '...';
+            }
+            return x;
+        };
+    });;/**
  * @ngdoc overview
  * @name news
  * 
@@ -57845,268 +58205,6 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
 
 
     }]);
-/*
- * angular-lazy-load
- *
- * Copyright(c) 2014 Paweł Wszoła <wszola.p@gmail.com>
- * MIT Licensed
- *
- */
-
-/**
- * @author Paweł Wszoła (wszola.p@gmail.com)
- *
- */
-
-angular.module('angularLazyImg', []);
-
-angular.module('angularLazyImg').factory('LazyImgMagic', [
-  '$window', '$rootScope', 'lazyImgConfig', 'lazyImgHelpers',
-  function($window, $rootScope, lazyImgConfig, lazyImgHelpers){
-    'use strict';
-
-    var winDimensions, $win, images, isListening, options;
-    var checkImagesT, saveWinOffsetT, containers;
-
-    images = [];
-    isListening = false;
-    options = lazyImgConfig.getOptions();
-    $win = angular.element($window);
-    winDimensions = lazyImgHelpers.getWinDimensions();
-    saveWinOffsetT = lazyImgHelpers.throttle(function(){
-      winDimensions = lazyImgHelpers.getWinDimensions();
-    }, 60);
-    containers = [options.container || $win];
-
-    function checkImages(){
-      for(var i = images.length - 1; i >= 0; i--){
-        var image = images[i];
-        if(image && lazyImgHelpers.isElementInView(image.$elem[0], options.offset, winDimensions)){
-          loadImage(image);
-          images.splice(i, 1);
-        }
-      }
-      if(images.length === 0){ stopListening(); }
-    }
-
-    checkImagesT = lazyImgHelpers.throttle(checkImages, 30);
-
-    function listen(param){
-      containers.forEach(function (container) {
-        container[param]('scroll', checkImagesT);
-        container[param]('touchmove', checkImagesT);
-      });
-      $win[param]('resize', checkImagesT);
-      $win[param]('resize', saveWinOffsetT);
-    }
-
-    function startListening(){
-      isListening = true;
-      setTimeout(function(){
-        checkImages();
-        listen('on');
-      }, 1);
-    }
-
-    function stopListening(){
-      isListening = false;
-      listen('off');
-    }
-
-    function removeImage(image){
-      var index = images.indexOf(image);
-      if(index !== -1) {
-        images.splice(index, 1);
-      }
-    }
-
-    function loadImage(photo){
-      var img = new Image();
-      img.onerror = function(){
-        if(options.errorClass){
-          photo.$elem.addClass(options.errorClass);
-        }
-        $rootScope.$emit('lazyImg:error', photo);
-        options.onError(photo);
-      };
-      img.onload = function(){
-        setPhotoSrc(photo.$elem, photo.src);
-        if(options.successClass){
-          photo.$elem.addClass(options.successClass);
-        }
-        $rootScope.$emit('lazyImg:success', photo);
-        options.onSuccess(photo);
-      };
-      img.src = photo.src;
-    }
-
-    function setPhotoSrc($elem, src){
-      if ($elem[0].nodeName.toLowerCase() === 'img') {
-        $elem[0].src = src;
-      } else {
-        $elem.css('background-image', 'url("' + src + '")');
-      }
-    }
-
-    // PHOTO
-    function Photo($elem){
-      this.$elem = $elem;
-    }
-
-    Photo.prototype.setSource = function(source){
-      this.src = source;
-      images.unshift(this);
-      if (!isListening){ startListening(); }
-    };
-
-    Photo.prototype.removeImage = function(){
-      removeImage(this);
-      if(images.length === 0){ stopListening(); }
-    };
-
-    Photo.prototype.checkImages = function(){
-      checkImages();
-    };
-
-    Photo.addContainer = function (container) {
-      stopListening();
-      containers.push(container);
-      startListening();
-    };
-
-    Photo.removeContainer = function (container) {
-      stopListening();
-      containers.splice(containers.indexOf(container), 1);
-      startListening();
-    };
-
-    return Photo;
-
-  }
-]);
-
-angular.module('angularLazyImg').provider('lazyImgConfig', function() {
-  'use strict';
-
-  this.options = {
-    offset       : 100,
-    errorClass   : null,
-    successClass : null,
-    onError      : function(){},
-    onSuccess    : function(){}
-  };
-
-  this.$get = function() {
-    var options = this.options;
-    return {
-      getOptions: function() {
-        return options;
-      }
-    };
-  };
-
-  this.setOptions = function(options) {
-    angular.extend(this.options, options);
-  };
-});
-angular.module('angularLazyImg').factory('lazyImgHelpers', [
-  '$window', function($window){
-    'use strict';
-
-    function getWinDimensions(){
-      return {
-        height: $window.innerHeight,
-        width: $window.innerWidth
-      };
-    }
-
-    function isElementInView(elem, offset, winDimensions) {
-      var rect = elem.getBoundingClientRect();
-      var bottomline = winDimensions.height + offset;
-      return (
-       rect.left >= 0 && rect.right <= winDimensions.width + offset && (
-         rect.top >= 0 && rect.top <= bottomline ||
-         rect.bottom <= bottomline && rect.bottom >= 0 - offset
-        )
-      );
-    }
-
-    // http://remysharp.com/2010/07/21/throttling-function-calls/
-    function throttle(fn, threshhold, scope) {
-      var last, deferTimer;
-      return function () {
-        var context = scope || this;
-        var now = +new Date(),
-            args = arguments;
-        if (last && now < last + threshhold) {
-          clearTimeout(deferTimer);
-          deferTimer = setTimeout(function () {
-            last = now;
-            fn.apply(context, args);
-          }, threshhold);
-        } else {
-          last = now;
-          fn.apply(context, args);
-        }
-      };
-    }
-
-    return {
-      isElementInView: isElementInView,
-      getWinDimensions: getWinDimensions,
-      throttle: throttle
-    };
-
-  }
-]);
-angular.module('angularLazyImg')
-  .directive('lazyImg', [
-    '$rootScope', 'LazyImgMagic', function ($rootScope, LazyImgMagic) {
-      'use strict';
-
-      function link(scope, element, attributes) {
-        var lazyImage = new LazyImgMagic(element);
-        attributes.$observe('lazyImg', function (newSource) {
-          if (newSource) {
-            // in angular 1.3 it might be nice to remove observer here
-            lazyImage.setSource(newSource);
-          }
-        });
-        scope.$on('$destroy', function () {
-          lazyImage.removeImage();
-        });
-        $rootScope.$on('lazyImg.runCheck', function () {
-          lazyImage.checkImages();
-        });
-        $rootScope.$on('lazyImg:refresh', function () {
-          lazyImage.checkImages();
-        });
-      }
-
-      return {
-        link: link,
-        restrict: 'A'
-      };
-    }
-  ])
-  .directive('lazyImgContainer', [
-    'LazyImgMagic', function (LazyImgMagic) {
-      'use strict';
-
-      function link(scope, element) {
-        LazyImgMagic.addContainer(element);
-        scope.$on('$destroy', function () {
-          LazyImgMagic.removeContainer(element);
-        });
-      }
-
-      return {
-        link: link,
-        restrict: 'A'
-      };
-    }
-  ]);
-
 angular.module('ualib.staffdir.templates', ['staff-card/staff-card-list.tpl.html', 'staff-card/staff-card-md.tpl.html', 'staff-directory/staff-directory-facets.tpl.html', 'staff-directory/staff-directory-listing.tpl.html', 'staff-directory/staff-directory.tpl.html', 'staff-profile/staff-profile.tpl.html']);
 
 angular.module("staff-card/staff-card-list.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -58360,6 +58458,12 @@ angular.module("staff-directory/staff-directory.tpl.html", []).run(["$templateCa
     "<div class=\"jumbotron-header\">\n" +
     "    <div class=\"jumbotron\">\n" +
     "        <div class=\"container\">\n" +
+    "            <div class=\"row\">\n" +
+    "                <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
+    "                    <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
+    "                    <li><a title=\"Go to News.\" href=\"/#/staffdir\" class=\"post post-page\">Staff Directory</a></li>\n" +
+    "                </ol>\n" +
+    "            </div>\n" +
     "            <div class=\"row\">\n" +
     "                <div class=\"col-md-12\">\n" +
     "                    <h1>Staff Directory</h1>\n" +
