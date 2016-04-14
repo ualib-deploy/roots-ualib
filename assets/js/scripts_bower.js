@@ -58459,10 +58459,12 @@ angular.module("staff-directory/staff-directory.tpl.html", []).run(["$templateCa
     "    <div class=\"jumbotron\">\n" +
     "        <div class=\"container\">\n" +
     "            <div class=\"row\">\n" +
-    "                <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
-    "                    <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
-    "                    <li><a title=\"Go to News.\" href=\"/#/staffdir\" class=\"post post-page\">Staff Directory</a></li>\n" +
-    "                </ol>\n" +
+    "                <div class=\"col-sm-12\">\n" +
+    "                    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
+    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
+    "                        <li><a title=\"Go to News.\" href=\"/#/staffdir\" class=\"post post-page\">Staff Directory</a></li>\n" +
+    "                    </ol>\n" +
+    "                </div>\n" +
     "            </div>\n" +
     "            <div class=\"row\">\n" +
     "                <div class=\"col-md-12\">\n" +
