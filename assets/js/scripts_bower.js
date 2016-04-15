@@ -17488,7 +17488,16 @@ angular.module("videos/videos-list.tpl.html", []).run(["$templateCache", functio
   $templateCache.put("videos/videos-list.tpl.html",
     "<div class=\"jumbotron-header\">\n" +
     "    <div class=\"jumbotron\">\n" +
+    "\n" +
     "        <div class=\"container\">\n" +
+    "            <div class=\"row\">\n" +
+    "                <div class=\"col-md-12\">\n" +
+    "                    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
+    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/#/home\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
+    "                        <li><a title=\"Go to Video Database.\" href=\"/#/videos\" class=\"post post-page\">Video Database</a></li>\n" +
+    "                    </ol>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
     "            <div class=\"row\">\n" +
     "                <div class=\"col-md-7\">\n" +
     "                    <h1>Video Database</h1>\n" +
@@ -57895,6 +57904,14 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
     "        <div class=\"container\">\n" +
     "            <div class=\"row\">\n" +
     "                <div class=\"col-md-12\">\n" +
+    "                    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
+    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/#/home\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
+    "                        <li><a title=\"Go to SoftwareList.\" href=\"/#/software\" class=\"post post-page\">Software List</a></li>\n" +
+    "                    </ol>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "            <div class=\"row\">\n" +
+    "                <div class=\"col-md-12\">\n" +
     "                    <h1>Libraries' Software List</h1>\n" +
     "                </div>\n" +
     "            </div>\n" +
@@ -58055,7 +58072,7 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
             .when('/software', {
                 reloadOnSearch: false,
                 resolve: {
-                    software: function($filter, softwareFactory){
+                    software: ['$filter', 'softwareFactory', function($filter, softwareFactory){
                         return softwareFactory.get({software: 'all'}, function(data){
 
                             for (var i = 0, len = data.software.length; i < len; i++){
@@ -58090,7 +58107,7 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
                                 config: config
                             });
                         });
-                    }
+                    }]
                 },
                 templateUrl: 'software-list/software-list.tpl.html',
                 controller: 'SoftwareListCtrl'
