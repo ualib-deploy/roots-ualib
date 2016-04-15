@@ -15,7 +15,7 @@
   <div class="wrap page-row page-row-expanded">
     <div role="document">
       <?php
-        $fields = get_fields();
+        $fields = $fields = function_exists('get_fields') ? get_fields() : null;
         if (is_array($fields['jumbotron_header'])){
             get_template_part('templates/jumbotron-header');
         }

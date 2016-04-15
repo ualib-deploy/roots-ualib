@@ -1,4 +1,4 @@
-<?php $is_jumbortron_header = get_field( "jumbotron_header" ); ?>
+<?php $is_jumbortron_header = function_exists('get_fields') ? get_field( "jumbotron_header" ) : null; ?>
 <?php if(!is_front_page() && !is_array($is_jumbortron_header)): ?>
 
 <ol class="breadcrumb" typeof="BreadcrumbList" vocab="http://schema.org/">
