@@ -1,4 +1,4 @@
-angular.module('ualib.templates', ['../assets/js/_ualib-alerts.tpl.html', '../assets/js/_ualib-home.tpl.html', '../assets/js/_ualib-image-carousel.tpl.html']);
+angular.module('ualib.templates', ['../assets/js/_ualib-alerts.tpl.html', '../assets/js/_ualib-home.tpl.html']);
 
 angular.module("../assets/js/_ualib-alerts.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("../assets/js/_ualib-alerts.tpl.html",
@@ -152,7 +152,7 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                                <ul rn-carousel rn-carousel-auto-slide=\"6\" rn-carousel-buffered\n" +
     "                                    rn-carousel-index=\"curImage\" rn-carousel-locked=\"isLocked\">\n" +
     "                                    <li ng-repeat=\"slide in slides track by $index\">\n" +
-    "                                        <a class=\"layer text-center\" title=\"{{slide.title}}\">\n" +
+    "                                        <a ng-href=\"{{slide.url}}\" class=\"layer text-center\" title=\"{{slide.title}}\">\n" +
     "                                            <div class=\"slide-image\" ng-style=\"{'background-image':slide.styles}\">\n" +
     "                                                <div class=\"slide-title\">\n" +
     "                                                    {{slide.title}}\n" +
@@ -182,26 +182,6 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
-    "    </div>\n" +
-    "</div>");
-}]);
-
-angular.module("../assets/js/_ualib-image-carousel.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("../assets/js/_ualib-image-carousel.tpl.html",
-    "<div class=\"text-center\">\n" +
-    "    <ul rn-carousel rn-carousel-auto-slide=\"6\" rn-carousel-buffered\n" +
-    "        rn-carousel-index=\"curImage\" rn-carousel-locked=\"isLocked\">\n" +
-    "        <li ng-repeat=\"slide in slides track by $index\">\n" +
-    "            <a class=\"layer text-center\" title=\"{{slide.title}}\">\n" +
-    "                <div class=\"slide-image\" ng-style=\"{'background-image':slide.styles}\">\n" +
-    "                    <div class=\"slide-title\">\n" +
-    "                        {{slide.title}}\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "            </a>\n" +
-    "        </li>\n" +
-    "    </ul>\n" +
-    "    <div rn-carousel-indicators ng-if=\"slides.length > 1\" slides=\"slides\" rn-carousel-index=\"curImage\">\n" +
     "    </div>\n" +
     "</div>");
 }]);
@@ -351,7 +331,7 @@ angular.module("../assets/js/_ualib-image-carousel.tpl.html", []).run(["$templat
         };
     }]);
 ;angular.module('ualib.imageCarousel', ['angular-carousel'])
-    .constant('VIEW_IMAGES_URL', 'http://wwwdev2.lib.ua.edu/erCarousel/api/slides/active')
+    .constant('VIEW_IMAGES_URL', '//wwwdev2.lib.ua.edu/erCarousel/api/slides/active')
 
     .factory('imageCarouselFactory', ['$http', 'VIEW_IMAGES_URL', function imageCarouselFactory($http, url){
         return {
@@ -376,8 +356,8 @@ angular.module("../assets/js/_ualib-image-carousel.tpl.html", []).run(["$templat
                 var image = new Image();
 
                 image.onload = function(){
-                    this.styles = 'url('+this.src+')';
-                    slides[i] = this;
+                    slides[i].styles = 'url('+this.src+')';
+                    slides[i].image = this;
 
                     if (i+1 === len){
                         deferred.resolve(slides);

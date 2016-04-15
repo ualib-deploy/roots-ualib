@@ -139,7 +139,7 @@
                                 <ul rn-carousel rn-carousel-auto-slide="6" rn-carousel-buffered
                                     rn-carousel-index="curImage" rn-carousel-locked="isLocked">
                                     <li ng-repeat="slide in slides track by $index">
-                                        <a class="layer text-center" title="{{slide.title}}">
+                                        <a ng-href="{{slide.url}}" class="layer text-center" title="{{slide.title}}">
                                             <div class="slide-image" ng-style="{'background-image':slide.styles}">
                                                 <div class="slide-title">
                                                     {{slide.title}}

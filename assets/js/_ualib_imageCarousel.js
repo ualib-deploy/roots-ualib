@@ -1,5 +1,5 @@
 angular.module('ualib.imageCarousel', ['angular-carousel'])
-    .constant('VIEW_IMAGES_URL', 'http://wwwdev2.lib.ua.edu/erCarousel/api/slides/active')
+    .constant('VIEW_IMAGES_URL', '//wwwdev2.lib.ua.edu/erCarousel/api/slides/active')
 
     .factory('imageCarouselFactory', ['$http', 'VIEW_IMAGES_URL', function imageCarouselFactory($http, url){
         return {
@@ -24,8 +24,8 @@ angular.module('ualib.imageCarousel', ['angular-carousel'])
                 var image = new Image();
 
                 image.onload = function(){
-                    this.styles = 'url('+this.src+')';
-                    slides[i] = this;
+                    slides[i].styles = 'url('+this.src+')';
+                    slides[i].image = this;
 
                     if (i+1 === len){
                         deferred.resolve(slides);
