@@ -6305,7 +6305,7 @@ angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", f
     "            <div class=\"row\">\n" +
     "                <div class=\"col-sm-12\">\n" +
     "                    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
-    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
+    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/#/home\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
     "                        <li><a title=\"Go to News.\" href=\"/#/databases\" class=\"post post-page\">Databases</a></li>\n" +
     "                    </ol>\n" +
     "                </div>\n" +
@@ -57015,12 +57015,9 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "            <div class=\"row\">\n" +
     "                <div class=\"col-sm-12\">\n" +
     "                    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
-    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
+    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/#/home\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
     "                        <li><a title=\"Go to News.\" href=\"/#/news-exhibits\" class=\"post post-page\">News</a></li>\n" +
-    "                        <li><a title=\"Go to News.\" href=\"\" class=\"post post-page\">{{newsItem.title | breadcrumbTruncate}}</a></li>\n" +
-    "                        <script>\n" +
-    "                            console.log(\"TEST!!\")\n" +
-    "                        </script>\n" +
+    "                        <li><a title=\"Go to news article.\" href=\"\" class=\"post post-page\">{{newsItem.title | breadcrumbTruncate}}</a></li>\n" +
     "                    </ol>\n" +
     "                </div>\n" +
     "            </div>\n" +
@@ -57125,7 +57122,7 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "            <div class=\"row\">\n" +
     "                <div class=\"col-sm-12\">\n" +
     "                    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
-    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
+    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/#/home\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
     "                        <li><a title=\"Go to News.\" href=\"/#/news-exhibits\" class=\"post post-page\">News</a></li>\n" +
     "                    </ol>\n" +
     "                </div>\n" +
@@ -58461,7 +58458,7 @@ angular.module("staff-directory/staff-directory.tpl.html", []).run(["$templateCa
     "            <div class=\"row\">\n" +
     "                <div class=\"col-sm-12\">\n" +
     "                    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
-    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
+    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/#/home\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
     "                        <li><a title=\"Go to News.\" href=\"/#/staffdir\" class=\"post post-page\">Staff Directory</a></li>\n" +
     "                    </ol>\n" +
     "                </div>\n" +
@@ -58515,6 +58512,11 @@ angular.module("staff-directory/staff-directory.tpl.html", []).run(["$templateCa
 angular.module("staff-profile/staff-profile.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staff-profile/staff-profile.tpl.html",
     "<div class=\"container\">\n" +
+    "    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
+    "        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/#/home\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
+    "        <li><a title=\"Go to the Staff Directory.\" href=\"/#/staffdir\" class=\"home\">Staff Directory</a></li>\n" +
+    "        <li><a title=\"Go to user profile.\" href=\"\" class=\"home\">{{userProfile.person.firstname}} {{userProfile.person.lastname}}</a></li>\n" +
+    "    </ol>\n" +
     "    <div class=\"page-header\">\n" +
     "        <h2>Faculty/Staff Profile</h2>\n" +
     "    </div>\n" +
