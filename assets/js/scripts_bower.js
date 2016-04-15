@@ -6305,7 +6305,7 @@ angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", f
     "            <div class=\"row\">\n" +
     "                <div class=\"col-sm-12\">\n" +
     "                    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
-    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/#/home\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
+    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
     "                        <li><a title=\"Go to News.\" href=\"/#/databases\" class=\"post post-page\">Databases</a></li>\n" +
     "                    </ol>\n" +
     "                </div>\n" +
@@ -17488,16 +17488,7 @@ angular.module("videos/videos-list.tpl.html", []).run(["$templateCache", functio
   $templateCache.put("videos/videos-list.tpl.html",
     "<div class=\"jumbotron-header\">\n" +
     "    <div class=\"jumbotron\">\n" +
-    "\n" +
     "        <div class=\"container\">\n" +
-    "            <div class=\"row\">\n" +
-    "                <div class=\"col-md-12\">\n" +
-    "                    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
-    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/#/home\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
-    "                        <li><a title=\"Go to Video Database.\" href=\"/#/videos\" class=\"post post-page\">Video Database</a></li>\n" +
-    "                    </ol>\n" +
-    "                </div>\n" +
-    "            </div>\n" +
     "            <div class=\"row\">\n" +
     "                <div class=\"col-md-7\">\n" +
     "                    <h1>Video Database</h1>\n" +
@@ -53525,19 +53516,9 @@ angular.module("calendar/calendar.tpl.html", []).run(["$templateCache", function
 angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("hours-locations/hours-locations.tpl.html",
     "<!--<script src='//maps.googleapis.com/maps/api/js?sensor=false&key=AIzaSyCdXuKwZiDx5W2uP8plV5d-o-jLQ5UQtIQ&mid=z4A8-271j5C8.kowwE312jycE'></script>-->\n" +
-    "\n" +
-    "\n" +
     "<div class=\"jumbotron-header\">\n" +
     "    <div class=\"jumbotron\">\n" +
     "        <div class=\"container\">\n" +
-    "            <div class=\"row\">\n" +
-    "                <div class=\"col-sm-12\">\n" +
-    "                    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
-    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/#/home\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
-    "                        <li><a title=\"Go to Hours.\" href=\"/#/hours\" class=\"post post-page\">Hours</a></li>\n" +
-    "                    </ol>\n" +
-    "                </div>\n" +
-    "            </div>\n" +
     "            <div class=\"row\">\n" +
     "                <div class=\"col-sm-8\">\n" +
     "                    <h1>Hours & Locations</h1>\n" +
@@ -57034,9 +57015,12 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "            <div class=\"row\">\n" +
     "                <div class=\"col-sm-12\">\n" +
     "                    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
-    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/#/home\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
+    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
     "                        <li><a title=\"Go to News.\" href=\"/#/news-exhibits\" class=\"post post-page\">News</a></li>\n" +
-    "                        <li><a title=\"Go to news article.\" href=\"\" class=\"post post-page\">{{newsItem.title | breadcrumbTruncate}}</a></li>\n" +
+    "                        <li><a title=\"Go to News.\" href=\"\" class=\"post post-page\">{{newsItem.title | breadcrumbTruncate}}</a></li>\n" +
+    "                        <script>\n" +
+    "                            console.log(\"TEST!!\")\n" +
+    "                        </script>\n" +
     "                    </ol>\n" +
     "                </div>\n" +
     "            </div>\n" +
@@ -57141,7 +57125,7 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "            <div class=\"row\">\n" +
     "                <div class=\"col-sm-12\">\n" +
     "                    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
-    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/#/home\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
+    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
     "                        <li><a title=\"Go to News.\" href=\"/#/news-exhibits\" class=\"post post-page\">News</a></li>\n" +
     "                    </ol>\n" +
     "                </div>\n" +
@@ -57914,14 +57898,6 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
     "        <div class=\"container\">\n" +
     "            <div class=\"row\">\n" +
     "                <div class=\"col-md-12\">\n" +
-    "                    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
-    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/#/home\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
-    "                        <li><a title=\"Go to SoftwareList.\" href=\"/#/software\" class=\"post post-page\">Software List</a></li>\n" +
-    "                    </ol>\n" +
-    "                </div>\n" +
-    "            </div>\n" +
-    "            <div class=\"row\">\n" +
-    "                <div class=\"col-md-12\">\n" +
     "                    <h1>Libraries' Software List</h1>\n" +
     "                </div>\n" +
     "            </div>\n" +
@@ -58082,7 +58058,7 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
             .when('/software', {
                 reloadOnSearch: false,
                 resolve: {
-                    software: ['$filter', 'softwareFactory', function($filter, softwareFactory){
+                    software: function($filter, softwareFactory){
                         return softwareFactory.get({software: 'all'}, function(data){
 
                             for (var i = 0, len = data.software.length; i < len; i++){
@@ -58117,7 +58093,7 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
                                 config: config
                             });
                         });
-                    }]
+                    }
                 },
                 templateUrl: 'software-list/software-list.tpl.html',
                 controller: 'SoftwareListCtrl'
@@ -58485,7 +58461,7 @@ angular.module("staff-directory/staff-directory.tpl.html", []).run(["$templateCa
     "            <div class=\"row\">\n" +
     "                <div class=\"col-sm-12\">\n" +
     "                    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
-    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/#/home\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
+    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
     "                        <li><a title=\"Go to News.\" href=\"/#/staffdir\" class=\"post post-page\">Staff Directory</a></li>\n" +
     "                    </ol>\n" +
     "                </div>\n" +
@@ -58539,11 +58515,6 @@ angular.module("staff-directory/staff-directory.tpl.html", []).run(["$templateCa
 angular.module("staff-profile/staff-profile.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staff-profile/staff-profile.tpl.html",
     "<div class=\"container\">\n" +
-    "    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
-    "        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/#/home\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
-    "        <li><a title=\"Go to the Staff Directory.\" href=\"/#/staffdir\" class=\"home\">Staff Directory</a></li>\n" +
-    "        <li><a title=\"Go to user profile.\" href=\"\" class=\"home\">{{userProfile.person.firstname}} {{userProfile.person.lastname}}</a></li>\n" +
-    "    </ol>\n" +
     "    <div class=\"page-header\">\n" +
     "        <h2>Faculty/Staff Profile</h2>\n" +
     "    </div>\n" +

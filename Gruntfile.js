@@ -171,12 +171,9 @@ module.exports = function(grunt) {
                 }]
             },
             local: {
-                files: [{
-                    expand: true,
-                    cwd: 'assets/js',
-                    src: ['scripts.js'],
-                    dest: '_scripts-local.js'
-                }]
+                files: {
+                    'assets/js/_scripts-local.js': 'assets/js/scripts.js'
+                }
             }
         },
         ngAnnotate: {
@@ -344,10 +341,12 @@ module.exports = function(grunt) {
             },
             js: {
                 files: [
-                    jsFileList,
-                    '<%= jshint.all %>'
+                    'assets/js/**/_*.js',
+                    'assets/js/**/*.tpl.html',
+                    '!assets/js/**/*.min.js',
+                    '!assets/js/_scripts-local.js'
                 ],
-                tasks: ['jshint', 'concat', 'copy:local', 'dev_prod_switch:dev']
+                tasks: ['jshint', 'html2js:dev', 'concat', 'copy:local', 'dev_prod_switch:dev']
             },
             livereload: {
                 // Browser live reloading

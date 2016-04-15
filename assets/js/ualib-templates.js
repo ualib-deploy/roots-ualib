@@ -146,6 +146,27 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                        </div>\n" +
     "                    </div>\n" +
     "\n" +
+    "                    <div class=\"card front-page-card ualib-image-carousel\" ng-show=\"slides\">\n" +
+    "                        <div class=\"card-body\">\n" +
+    "                            <div class=\"text-center\">\n" +
+    "                                <ul rn-carousel rn-carousel-auto-slide=\"6\" rn-carousel-buffered\n" +
+    "                                    rn-carousel-index=\"curImage\" rn-carousel-locked=\"isLocked\">\n" +
+    "                                    <li ng-repeat=\"slide in slides track by $index\">\n" +
+    "                                        <a class=\"layer text-center\" title=\"{{slide.title}}\">\n" +
+    "                                            <div class=\"slide-image\" ng-style=\"{'background-image':slide.styles}\">\n" +
+    "                                                <div class=\"slide-title\">\n" +
+    "                                                    {{slide.title}}\n" +
+    "                                                </div>\n" +
+    "                                            </div>\n" +
+    "                                        </a>\n" +
+    "                                    </li>\n" +
+    "                                </ul>\n" +
+    "                                <div rn-carousel-indicators ng-if=\"slides.length > 1\" slides=\"slides\" rn-carousel-index=\"curImage\">\n" +
+    "                                </div>\n" +
+    "                            </div>\n" +
+    "                        </div>\n" +
+    "                    </div>\n" +
+    "\n" +
     "                    <div class=\"card front-page-card\">\n" +
     "                        <div class=\"card-heading\">\n" +
     "                            <h2>News</h2>\n" +
@@ -158,16 +179,6 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                            <a href=\"/#/news-exhibits\" class=\"more-link\">More News</a>\n" +
     "                        </div>\n" +
     "                    </div>\n" +
-    "\n" +
-    "                    <!--\n" +
-    "                    <div class=\"card front-page-card\">\n" +
-    "                        <div class=\"card-body\">\n" +
-    "                            <div class=\"row\">\n" +
-    "                                <div class=\"ualib-image-carousel\"></div>\n" +
-    "                            </div>\n" +
-    "                        </div>\n" +
-    "                    </div>\n" +
-    "                    -->\n" +
     "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
@@ -177,22 +188,20 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
 
 angular.module("../assets/js/_ualib-image-carousel.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("../assets/js/_ualib-image-carousel.tpl.html",
-    "<div class=\"text-center\" ng-if=\"images.length > 0\">\n" +
-    "    <ul rn-carousel rn-carousel-auto-slide=\"8\" rn-carousel-buffered rn-carousel-transition=\"slide\"\n" +
-    "        rn-carousel-index=\"curImage\" class=\"image news-carousel-small\">\n" +
-    "        <li ng-repeat=\"img in images\">\n" +
-    "            <div class=\"layer text-center\">\n" +
-    "                <div class=\"news-carousel-image-small\"\n" +
-    "                     ng-style=\"{'background-image':'url('+img+')'}\">\n" +
+    "<div class=\"text-center\">\n" +
+    "    <ul rn-carousel rn-carousel-auto-slide=\"6\" rn-carousel-buffered\n" +
+    "        rn-carousel-index=\"curImage\" rn-carousel-locked=\"isLocked\">\n" +
+    "        <li ng-repeat=\"slide in slides track by $index\">\n" +
+    "            <a class=\"layer text-center\" title=\"{{slide.title}}\">\n" +
+    "                <div class=\"slide-image\" ng-style=\"{'background-image':slide.styles}\">\n" +
+    "                    <div class=\"slide-title\">\n" +
+    "                        {{slide.title}}\n" +
+    "                    </div>\n" +
     "                </div>\n" +
-    "            </div>\n" +
+    "            </a>\n" +
     "        </li>\n" +
     "    </ul>\n" +
-    "    <div class=\"rn-carousel-indicator custom-indicator\">\n" +
-    "        <span ng-repeat=\"img in images\" ng-click=\"$parent.curImage = $index\">&nbsp;\n" +
-    "            <span class=\"fa fa-circle-o\" ng-show=\"$index != $parent.curImage\"></span>\n" +
-    "            <span class=\"fa fa-circle\" ng-show=\"$index == $parent.curImage\"></span>\n" +
-    "        </span>\n" +
+    "    <div rn-carousel-indicators ng-if=\"slides.length > 1\" slides=\"slides\" rn-carousel-index=\"curImage\">\n" +
     "    </div>\n" +
     "</div>");
 }]);
