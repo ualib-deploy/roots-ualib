@@ -9446,7 +9446,7 @@ div[role="document"] {
   position: absolute;
   bottom: 0;
   padding: 15px;
-  background-color: rgba(0, 0, 0, 0.9);
+  background-color: rgba(0, 0, 0, 0.75);
 }
 /**
  * Your styles here
