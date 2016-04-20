@@ -15,7 +15,7 @@ angular.module('ualib', [
     'ualib.news',
     'ualib.alerts',
     'ualib.imageCarousel',
-    'ualib.compfinder'
+    'compfinder'
 ])
 
 
