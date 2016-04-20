@@ -6305,7 +6305,7 @@ angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", f
     "            <div class=\"row\">\n" +
     "                <div class=\"col-sm-12\">\n" +
     "                    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
-    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
+    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/#/home\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
     "                        <li><a title=\"Go to News.\" href=\"/#/databases\" class=\"post post-page\">Databases</a></li>\n" +
     "                    </ol>\n" +
     "                </div>\n" +
@@ -17488,7 +17488,16 @@ angular.module("videos/videos-list.tpl.html", []).run(["$templateCache", functio
   $templateCache.put("videos/videos-list.tpl.html",
     "<div class=\"jumbotron-header\">\n" +
     "    <div class=\"jumbotron\">\n" +
+    "\n" +
     "        <div class=\"container\">\n" +
+    "            <div class=\"row\">\n" +
+    "                <div class=\"col-md-12\">\n" +
+    "                    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
+    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/#/home\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
+    "                        <li><a title=\"Go to Video Database.\" href=\"/#/videos\" class=\"post post-page\">Video Database</a></li>\n" +
+    "                    </ol>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
     "            <div class=\"row\">\n" +
     "                <div class=\"col-md-7\">\n" +
     "                    <h1>Video Database</h1>\n" +
@@ -21076,6 +21085,387 @@ angular.module('common.oneSearch', [])
     w.attachEvent("onresize", callMedia);
   }
 })(this);
+/*
+ * Hamster.js v1.1.2
+ * (c) 2013 Monospaced http://monospaced.com
+ * License: MIT
+ */
+
+(function(window, document){
+'use strict';
+
+/**
+ * Hamster
+ * use this to create instances
+ * @returns {Hamster.Instance}
+ * @constructor
+ */
+var Hamster = function(element) {
+  return new Hamster.Instance(element);
+};
+
+// default event name
+Hamster.SUPPORT = 'wheel';
+
+// default DOM methods
+Hamster.ADD_EVENT = 'addEventListener';
+Hamster.REMOVE_EVENT = 'removeEventListener';
+Hamster.PREFIX = '';
+
+// until browser inconsistencies have been fixed...
+Hamster.READY = false;
+
+Hamster.Instance = function(element){
+  if (!Hamster.READY) {
+    // fix browser inconsistencies
+    Hamster.normalise.browser();
+
+    // Hamster is ready...!
+    Hamster.READY = true;
+  }
+
+  this.element = element;
+
+  // store attached event handlers
+  this.handlers = [];
+
+  // return instance
+  return this;
+};
+
+/**
+ * create new hamster instance
+ * all methods should return the instance itself, so it is chainable.
+ * @param   {HTMLElement}       element
+ * @returns {Hamster.Instance}
+ * @constructor
+ */
+Hamster.Instance.prototype = {
+  /**
+   * bind events to the instance
+   * @param   {Function}    handler
+   * @param   {Boolean}     useCapture
+   * @returns {Hamster.Instance}
+   */
+  wheel: function onEvent(handler, useCapture){
+    Hamster.event.add(this, Hamster.SUPPORT, handler, useCapture);
+
+    // handle MozMousePixelScroll in older Firefox
+    if (Hamster.SUPPORT === 'DOMMouseScroll') {
+      Hamster.event.add(this, 'MozMousePixelScroll', handler, useCapture);
+    }
+
+    return this;
+  },
+
+  /**
+   * unbind events to the instance
+   * @param   {Function}    handler
+   * @param   {Boolean}     useCapture
+   * @returns {Hamster.Instance}
+   */
+  unwheel: function offEvent(handler, useCapture){
+    // if no handler argument,
+    // unbind the last bound handler (if exists)
+    if (handler === undefined && (handler = this.handlers.slice(-1)[0])) {
+      handler = handler.original;
+    }
+
+    Hamster.event.remove(this, Hamster.SUPPORT, handler, useCapture);
+
+    // handle MozMousePixelScroll in older Firefox
+    if (Hamster.SUPPORT === 'DOMMouseScroll') {
+      Hamster.event.remove(this, 'MozMousePixelScroll', handler, useCapture);
+    }
+
+    return this;
+  }
+};
+
+Hamster.event = {
+  /**
+   * cross-browser 'addWheelListener'
+   * @param   {Instance}    hamster
+   * @param   {String}      eventName
+   * @param   {Function}    handler
+   * @param   {Boolean}     useCapture
+   */
+  add: function add(hamster, eventName, handler, useCapture){
+    // store the original handler
+    var originalHandler = handler;
+
+    // redefine the handler
+    handler = function(originalEvent){
+
+      if (!originalEvent) {
+        originalEvent = window.event;
+      }
+
+      // create a normalised event object,
+      // and normalise "deltas" of the mouse wheel
+      var event = Hamster.normalise.event(originalEvent),
+          delta = Hamster.normalise.delta(originalEvent);
+
+      // fire the original handler with normalised arguments
+      return originalHandler(event, delta[0], delta[1], delta[2]);
+
+    };
+
+    // cross-browser addEventListener
+    hamster.element[Hamster.ADD_EVENT](Hamster.PREFIX + eventName, handler, useCapture || false);
+
+    // store original and normalised handlers on the instance
+    hamster.handlers.push({
+      original: originalHandler,
+      normalised: handler
+    });
+  },
+
+  /**
+   * removeWheelListener
+   * @param   {Instance}    hamster
+   * @param   {String}      eventName
+   * @param   {Function}    handler
+   * @param   {Boolean}     useCapture
+   */
+  remove: function remove(hamster, eventName, handler, useCapture){
+    // find the normalised handler on the instance
+    var originalHandler = handler,
+        lookup = {},
+        handlers;
+    for (var i = 0, len = hamster.handlers.length; i < len; ++i) {
+      lookup[hamster.handlers[i].original] = hamster.handlers[i];
+    }
+    handlers = lookup[originalHandler];
+    handler = handlers.normalised;
+
+    // cross-browser removeEventListener
+    hamster.element[Hamster.REMOVE_EVENT](Hamster.PREFIX + eventName, handler, useCapture || false);
+
+    // remove original and normalised handlers from the instance
+    for (var h in hamster.handlers) {
+      if (hamster.handlers[h] == handlers) {
+        hamster.handlers.splice(h, 1);
+        break;
+      }
+    }
+  }
+};
+
+/**
+ * these hold the lowest deltas,
+ * used to normalise the delta values
+ * @type {Number}
+ */
+var lowestDelta,
+    lowestDeltaXY;
+
+Hamster.normalise = {
+  /**
+   * fix browser inconsistencies
+   */
+  browser: function normaliseBrowser(){
+    // detect deprecated wheel events
+    if (!('onwheel' in document || document.documentMode >= 9)) {
+      Hamster.SUPPORT = document.onmousewheel !== undefined ?
+                        'mousewheel' : // webkit and IE < 9 support at least "mousewheel"
+                        'DOMMouseScroll'; // assume remaining browsers are older Firefox
+    }
+
+    // detect deprecated event model
+    if (!window.addEventListener) {
+      // assume IE < 9
+      Hamster.ADD_EVENT = 'attachEvent';
+      Hamster.REMOVE_EVENT = 'detachEvent';
+      Hamster.PREFIX = 'on';
+    }
+
+  },
+
+  /**
+   * create a normalised event object
+   * @param   {Function}    originalEvent
+   * @returns {Object}      event
+   */
+   event: function normaliseEvent(originalEvent){
+    var event = {
+          // keep a reference to the original event object
+          originalEvent: originalEvent,
+          target: originalEvent.target || originalEvent.srcElement,
+          type: 'wheel',
+          deltaMode: originalEvent.type === 'MozMousePixelScroll' ? 0 : 1,
+          deltaX: 0,
+          delatZ: 0,
+          preventDefault: function(){
+            if (originalEvent.preventDefault) {
+              originalEvent.preventDefault();
+            } else {
+              originalEvent.returnValue = false;
+            }
+          },
+          stopPropagation: function(){
+            if (originalEvent.stopPropagation) {
+              originalEvent.stopPropagation();
+            } else {
+              originalEvent.cancelBubble = false;
+            }
+          }
+        };
+
+    // calculate deltaY (and deltaX) according to the event
+
+    // 'mousewheel'
+    if (originalEvent.wheelDelta) {
+      event.deltaY = - 1/40 * originalEvent.wheelDelta;
+    }
+    // webkit
+    if (originalEvent.wheelDeltaX) {
+      event.deltaX = - 1/40 * originalEvent.wheelDeltaX;
+    }
+
+    // 'DomMouseScroll'
+    if (originalEvent.detail) {
+      event.deltaY = originalEvent.detail;
+    }
+
+    return event;
+  },
+
+  /**
+   * normalise 'deltas' of the mouse wheel
+   * @param   {Function}    originalEvent
+   * @returns {Array}       deltas
+   */
+  delta: function normaliseDelta(originalEvent){
+    var delta = 0,
+      deltaX = 0,
+      deltaY = 0,
+      absDelta = 0,
+      absDeltaXY = 0,
+      fn;
+
+    // normalise deltas according to the event
+
+    // 'wheel' event
+    if (originalEvent.deltaY) {
+      deltaY = originalEvent.deltaY * -1;
+      delta  = deltaY;
+    }
+    if (originalEvent.deltaX) {
+      deltaX = originalEvent.deltaX;
+      delta  = deltaX * -1;
+    }
+
+    // 'mousewheel' event
+    if (originalEvent.wheelDelta) {
+      delta = originalEvent.wheelDelta;
+    }
+    // webkit
+    if (originalEvent.wheelDeltaY) {
+      deltaY = originalEvent.wheelDeltaY;
+    }
+    if (originalEvent.wheelDeltaX) {
+      deltaX = originalEvent.wheelDeltaX * -1;
+    }
+
+    // 'DomMouseScroll' event
+    if (originalEvent.detail) {
+      delta = originalEvent.detail * -1;
+    }
+
+    // Don't return NaN
+    if (delta === 0) {
+      return [0, 0, 0];
+    }
+
+    // look for lowest delta to normalize the delta values
+    absDelta = Math.abs(delta);
+    if (!lowestDelta || absDelta < lowestDelta) {
+      lowestDelta = absDelta;
+    }
+    absDeltaXY = Math.max(Math.abs(deltaY), Math.abs(deltaX));
+    if (!lowestDeltaXY || absDeltaXY < lowestDeltaXY) {
+      lowestDeltaXY = absDeltaXY;
+    }
+
+    // convert deltas to whole numbers
+    fn = delta > 0 ? 'floor' : 'ceil';
+    delta  = Math[fn](delta / lowestDelta);
+    deltaX = Math[fn](deltaX / lowestDeltaXY);
+    deltaY = Math[fn](deltaY / lowestDeltaXY);
+
+    return [delta, deltaX, deltaY];
+  }
+};
+
+if (typeof window.define === 'function' && window.define.amd) {
+  // AMD
+  window.define('hamster', [], function(){
+    return Hamster;
+  });
+} else if (typeof exports === 'object') {
+  // CommonJS
+  module.exports = Hamster;
+} else {
+  // Browser global
+  window.Hamster = Hamster;
+}
+
+})(window, window.document);
+
+/*
+ * angular-mousewheel v1.0.5
+ * (c) 2013 Monospaced http://monospaced.com
+ * License: MIT
+ */
+
+angular.module('monospaced.mousewheel', [])
+  .directive('msdWheel', ['$parse', function($parse){
+    return {
+      restrict: 'A, C',
+        link: function(scope, element, attr) {
+        var expr = $parse(attr['msdWheel']),
+            fn = function(event, delta, deltaX, deltaY){
+              scope.$apply(function(){
+                expr(scope, {
+                  $event: event,
+                  $delta: delta,
+                  $deltaX: deltaX,
+                  $deltaY: deltaY
+                });
+              });
+            },
+            hamster;
+
+        if (typeof Hamster === 'undefined') {
+          // fallback to standard wheel event
+          element.bind('wheel', function(event){
+            scope.$apply(function() {
+              expr(scope, {
+                $event: event
+              });
+            });
+          });
+          return;
+        }
+
+        // don't create multiple Hamster instances per element
+        if (!(hamster = element.data('hamster'))) {
+          hamster = Hamster(element[0]);
+          element.data('hamster', hamster);
+        }
+
+        // bind Hamster wheel event
+        hamster.wheel(fn);
+
+        // unbind Hamster wheel event
+        scope.$on('$destroy', function(){
+          hamster.unwheel(fn);
+        });
+      }
+    };
+  }]);
+
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 angular.module('nemLogging', []);
 
@@ -53516,9 +53906,19 @@ angular.module("calendar/calendar.tpl.html", []).run(["$templateCache", function
 angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("hours-locations/hours-locations.tpl.html",
     "<!--<script src='//maps.googleapis.com/maps/api/js?sensor=false&key=AIzaSyCdXuKwZiDx5W2uP8plV5d-o-jLQ5UQtIQ&mid=z4A8-271j5C8.kowwE312jycE'></script>-->\n" +
+    "\n" +
+    "\n" +
     "<div class=\"jumbotron-header\">\n" +
     "    <div class=\"jumbotron\">\n" +
     "        <div class=\"container\">\n" +
+    "            <div class=\"row\">\n" +
+    "                <div class=\"col-sm-12\">\n" +
+    "                    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
+    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/#/home\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
+    "                        <li><a title=\"Go to Hours.\" href=\"/#/hours\" class=\"post post-page\">Hours</a></li>\n" +
+    "                    </ol>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
     "            <div class=\"row\">\n" +
     "                <div class=\"col-sm-8\">\n" +
     "                    <h1>Hours & Locations</h1>\n" +
@@ -54144,11 +54544,11 @@ angular.module('hours.list', [])
         }
     }]);
 /**
- * @license AngularJS v1.5.3
+ * @license AngularJS v1.5.5
  * (c) 2010-2016 Google, Inc. http://angularjs.org
  * License: MIT
  */
-(function(window, angular, undefined) {'use strict';
+(function(window, angular) {'use strict';
 
 /* global ngTouchClickDirectiveFactory: false,
  */
@@ -57015,12 +57415,9 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "            <div class=\"row\">\n" +
     "                <div class=\"col-sm-12\">\n" +
     "                    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
-    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
+    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/#/home\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
     "                        <li><a title=\"Go to News.\" href=\"/#/news-exhibits\" class=\"post post-page\">News</a></li>\n" +
-    "                        <li><a title=\"Go to News.\" href=\"\" class=\"post post-page\">{{newsItem.title | breadcrumbTruncate}}</a></li>\n" +
-    "                        <script>\n" +
-    "                            console.log(\"TEST!!\")\n" +
-    "                        </script>\n" +
+    "                        <li><a title=\"Go to news article.\" href=\"\" class=\"post post-page\">{{newsItem.title | breadcrumbTruncate}}</a></li>\n" +
     "                    </ol>\n" +
     "                </div>\n" +
     "            </div>\n" +
@@ -57125,7 +57522,7 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "            <div class=\"row\">\n" +
     "                <div class=\"col-sm-12\">\n" +
     "                    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
-    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
+    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/#/home\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
     "                        <li><a title=\"Go to News.\" href=\"/#/news-exhibits\" class=\"post post-page\">News</a></li>\n" +
     "                    </ol>\n" +
     "                </div>\n" +
@@ -57898,6 +58295,14 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
     "        <div class=\"container\">\n" +
     "            <div class=\"row\">\n" +
     "                <div class=\"col-md-12\">\n" +
+    "                    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
+    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/#/home\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
+    "                        <li><a title=\"Go to SoftwareList.\" href=\"/#/software\" class=\"post post-page\">Software List</a></li>\n" +
+    "                    </ol>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "            <div class=\"row\">\n" +
+    "                <div class=\"col-md-12\">\n" +
     "                    <h1>Libraries' Software List</h1>\n" +
     "                </div>\n" +
     "            </div>\n" +
@@ -58058,7 +58463,7 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
             .when('/software', {
                 reloadOnSearch: false,
                 resolve: {
-                    software: function($filter, softwareFactory){
+                    software: ['$filter', 'softwareFactory', function($filter, softwareFactory){
                         return softwareFactory.get({software: 'all'}, function(data){
 
                             for (var i = 0, len = data.software.length; i < len; i++){
@@ -58093,7 +58498,7 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
                                 config: config
                             });
                         });
-                    }
+                    }]
                 },
                 templateUrl: 'software-list/software-list.tpl.html',
                 controller: 'SoftwareListCtrl'
@@ -58461,7 +58866,7 @@ angular.module("staff-directory/staff-directory.tpl.html", []).run(["$templateCa
     "            <div class=\"row\">\n" +
     "                <div class=\"col-sm-12\">\n" +
     "                    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
-    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
+    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/#/home\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
     "                        <li><a title=\"Go to News.\" href=\"/#/staffdir\" class=\"post post-page\">Staff Directory</a></li>\n" +
     "                    </ol>\n" +
     "                </div>\n" +
@@ -58515,6 +58920,11 @@ angular.module("staff-directory/staff-directory.tpl.html", []).run(["$templateCa
 angular.module("staff-profile/staff-profile.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staff-profile/staff-profile.tpl.html",
     "<div class=\"container\">\n" +
+    "    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
+    "        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/#/home\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
+    "        <li><a title=\"Go to the Staff Directory.\" href=\"/#/staffdir\" class=\"home\">Staff Directory</a></li>\n" +
+    "        <li><a title=\"Go to user profile.\" href=\"\" class=\"home\">{{userProfile.person.firstname}} {{userProfile.person.lastname}}</a></li>\n" +
+    "    </ol>\n" +
     "    <div class=\"page-header\">\n" +
     "        <h2>Faculty/Staff Profile</h2>\n" +
     "    </div>\n" +

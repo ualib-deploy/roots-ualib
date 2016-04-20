@@ -201,7 +201,8 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     'ualib.softwareList',
     'ualib.news',
     'ualib.alerts',
-    'ualib.imageCarousel'
+    'ualib.imageCarousel',
+    'ualib.compfinder'
 ])
 
 
