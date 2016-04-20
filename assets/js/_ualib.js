@@ -8,14 +8,16 @@ angular.module('ualib', [
     /* env:prod */
     'manage',
     /* env:prod:end */
+    /* env:dev */
+    'compfinder',
+    /* env:dev:end */
     'ualib.databases',
     'musicSearch',
     'ualib.staffdir',
     'ualib.softwareList',
     'ualib.news',
     'ualib.alerts',
-    'ualib.imageCarousel',
-    'compfinder'
+    'ualib.imageCarousel'
 ])
 
 

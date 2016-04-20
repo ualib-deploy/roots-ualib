@@ -140,7 +140,8 @@ module.exports = function(grunt) {
                     'tinymce-dist',
                     'jquery',
                     'modernizr',
-                    'roots-ualib'
+                    'roots-ualib',
+                    'compfinder'
                 ],
                 callback: function(mainFiles, component) {
                     return mainFiles.map(function(filepath) {
@@ -199,7 +200,7 @@ module.exports = function(grunt) {
                     mangle: false
                 },
                 files: {
-                    'assets/js/scripts.min.js': ['assets/js/scripts.js'],
+                    'assets/js/scripts.min.js': ['assets/js/_scripts-local.js'],
                     'assets/js/scripts_bower.min.js': ['assets/js/scripts_bower.min.js']
                 }
             },
@@ -393,6 +394,8 @@ module.exports = function(grunt) {
         'autoprefixer:build',
         'concat:dist',
         'ngAnnotate',
+        'copy:local',
+        'dev_prod_switch:live',
         'modernizr',
         'version',
         'bower_concat:build',
