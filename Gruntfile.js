@@ -140,7 +140,8 @@ module.exports = function(grunt) {
                     'tinymce-dist',
                     'jquery',
                     'modernizr',
-                    'roots-ualib'
+                    'roots-ualib',
+                    'compfinder'
                 ],
                 callback: function(mainFiles, component) {
                     return mainFiles.map(function(filepath) {
@@ -171,12 +172,9 @@ module.exports = function(grunt) {
                 }]
             },
             local: {
-                files: [{
-                    expand: true,
-                    cwd: 'assets/js',
-                    src: ['scripts.js'],
-                    dest: '_scripts-local.js'
-                }]
+                files: {
+                    'assets/js/_scripts-local.js': 'assets/js/scripts.js'
+                }
             }
         },
         ngAnnotate: {
@@ -202,7 +200,7 @@ module.exports = function(grunt) {
                     mangle: false
                 },
                 files: {
-                    'assets/js/scripts.min.js': ['assets/js/scripts.js'],
+                    'assets/js/scripts.min.js': ['assets/js/_scripts-local.js'],
                     'assets/js/scripts_bower.min.js': ['assets/js/scripts_bower.min.js']
                 }
             },
@@ -344,10 +342,12 @@ module.exports = function(grunt) {
             },
             js: {
                 files: [
-                    jsFileList,
-                    '<%= jshint.all %>'
+                    'assets/js/**/_*.js',
+                    'assets/js/**/*.tpl.html',
+                    '!assets/js/**/*.min.js',
+                    '!assets/js/_scripts-local.js'
                 ],
-                tasks: ['jshint', 'concat', 'copy:local', 'dev_prod_switch:dev']
+                tasks: ['jshint', 'html2js:dev', 'concat', 'copy:local', 'dev_prod_switch:dev']
             },
             livereload: {
                 // Browser live reloading
@@ -394,6 +394,8 @@ module.exports = function(grunt) {
         'autoprefixer:build',
         'concat:dist',
         'ngAnnotate',
+        'copy:local',
+        'dev_prod_switch:live',
         'modernizr',
         'version',
         'bower_concat:build',

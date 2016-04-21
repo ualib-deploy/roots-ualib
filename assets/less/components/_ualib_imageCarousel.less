@@ -1,0 +1,39 @@
+
+.ualib-image-carousel {
+  ul, .slide-image {
+    width: auto;
+    @media (min-width: @screen-sm-min) {
+      height: 276px;
+    }
+    @media (min-width: @screen-md-min) {
+      height: 170px;
+    }
+    @media (min-width: @screen-lg-min) {
+      height: 210px;
+    }
+  }
+
+  .layer {
+    color: @gray-lighter;
+    margin: 0 auto;
+
+    &:hover,
+    &:active,
+    &:visited {
+      color: @gray-lighter;
+    }
+  }
+
+  .slide-image{
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
+
+  .slide-title {
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    padding: 15px;
+    background-color: rgba(0,0,0,.75);
+  }
+}

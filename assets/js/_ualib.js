@@ -8,6 +8,9 @@ angular.module('ualib', [
     /* env:prod */
     'manage',
     /* env:prod:end */
+    /* env:dev */
+    'compfinder',
+    /* env:dev:end */
     'ualib.databases',
     'musicSearch',
     'ualib.staffdir',

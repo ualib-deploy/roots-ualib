@@ -9323,6 +9323,9 @@ div[role="document"] {
     background-image: none !important;
   }
 }
+.home-webapp .wrap {
+  background-color: rgba(38, 30, 30, 0.5);
+}
 .card {
   margin-bottom: 15px;
 }
@@ -9401,6 +9404,49 @@ div[role="document"] {
   padding: 8px 15px;
   margin-left: -10px;
   margin-bottom: 21px;
+}
+.ualib-image-carousel ul,
+.ualib-image-carousel .slide-image {
+  width: auto;
+}
+@media (min-width: 768px) {
+  .ualib-image-carousel ul,
+  .ualib-image-carousel .slide-image {
+    height: 276px;
+  }
+}
+@media (min-width: 992px) {
+  .ualib-image-carousel ul,
+  .ualib-image-carousel .slide-image {
+    height: 170px;
+  }
+}
+@media (min-width: 1200px) {
+  .ualib-image-carousel ul,
+  .ualib-image-carousel .slide-image {
+    height: 210px;
+  }
+}
+.ualib-image-carousel .layer {
+  color: #f9f9f9;
+  margin: 0 auto;
+}
+.ualib-image-carousel .layer:hover,
+.ualib-image-carousel .layer:active,
+.ualib-image-carousel .layer:visited {
+  color: #f9f9f9;
+}
+.ualib-image-carousel .slide-image {
+  -webkit-background-size: contain;
+          background-size: contain;
+  background-repeat: no-repeat;
+}
+.ualib-image-carousel .slide-title {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  padding: 15px;
+  background-color: rgba(0, 0, 0, 0.75);
 }
 /**
  * Your styles here
