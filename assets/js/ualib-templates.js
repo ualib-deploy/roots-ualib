@@ -21,17 +21,6 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "        <div class=\"home-slice\">\n" +
     "            <div class=\"row\">\n" +
     "                <div class=\"col-md-6\">\n" +
-    "                    <div class=\"card front-page-card\">\n" +
-    "                        <div class=\"card-heading\">\n" +
-    "                            <h2>Hours <small>today</small></h2>\n" +
-    "                        </div>\n" +
-    "                        <div class=\"card-body\">\n" +
-    "                            <div class=\"hours-list\"></div>\n" +
-    "                        </div>\n" +
-    "                        <div class=\"card-footer\">\n" +
-    "                            <a href=\"/#/hours\" class=\"more-link\">All Hours</a>\n" +
-    "                        </div>\n" +
-    "                    </div>\n" +
     "\n" +
     "                    <!-- Replicated display for xs, sm device display -->\n" +
     "                    <div class=\"card front-page-card hidden-md hidden-lg\">\n" +
@@ -78,6 +67,18 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                                    </a>\n" +
     "                                </div>\n" +
     "                            </div>\n" +
+    "                        </div>\n" +
+    "                    </div>\n" +
+    "\n" +
+    "                    <div class=\"card front-page-card\">\n" +
+    "                        <div class=\"card-heading\">\n" +
+    "                            <h2>Hours <small>today</small></h2>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"card-body\">\n" +
+    "                            <div class=\"hours-list\"></div>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"card-footer\">\n" +
+    "                            <a href=\"/#/hours\" class=\"more-link\">All Hours</a>\n" +
     "                        </div>\n" +
     "                    </div>\n" +
     "\n" +
