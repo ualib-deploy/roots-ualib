@@ -82,6 +82,27 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                        </div>\n" +
     "                    </div>\n" +
     "\n" +
+    "                    <div class=\"card front-page-card ualib-image-carousel hidden-md hidden-lg\" ng-show=\"slides\">\n" +
+    "                        <div class=\"card-body\">\n" +
+    "                            <div class=\"text-center\">\n" +
+    "                                <ul rn-carousel rn-carousel-auto-slide=\"6\" rn-carousel-buffered\n" +
+    "                                    rn-carousel-index=\"curImage\" rn-carousel-locked=\"isLocked\">\n" +
+    "                                    <li ng-repeat=\"slide in slides track by $index\">\n" +
+    "                                        <a ng-href=\"{{slide.url}}\" class=\"layer text-center\" title=\"{{slide.title}}\">\n" +
+    "                                            <div class=\"slide-image\" ng-style=\"{'background-image':slide.styles}\">\n" +
+    "                                                <div class=\"slide-title\">\n" +
+    "                                                    {{slide.title}}\n" +
+    "                                                </div>\n" +
+    "                                            </div>\n" +
+    "                                        </a>\n" +
+    "                                    </li>\n" +
+    "                                </ul>\n" +
+    "                                <div rn-carousel-indicators ng-if=\"slides.length > 1\" slides=\"slides\" rn-carousel-index=\"curImage\">\n" +
+    "                                </div>\n" +
+    "                            </div>\n" +
+    "                        </div>\n" +
+    "                    </div>\n" +
+    "\n" +
     "                    <div class=\"card front-page-card\" ng-show=\"events\">\n" +
     "                        <div class=\"card-heading\">\n" +
     "                            <h2>Events</h2>\n" +
@@ -147,7 +168,7 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                        </div>\n" +
     "                    </div>\n" +
     "\n" +
-    "                    <div class=\"card front-page-card ualib-image-carousel\" ng-show=\"slides\">\n" +
+    "                    <div class=\"card front-page-card ualib-image-carousel hidden-sm hidden-xs\" ng-show=\"slides\">\n" +
     "                        <div class=\"card-body\">\n" +
     "                            <div class=\"text-center\">\n" +
     "                                <ul rn-carousel rn-carousel-auto-slide=\"6\" rn-carousel-buffered\n" +
