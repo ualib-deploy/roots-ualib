@@ -8,17 +8,6 @@
         <div class="home-slice">
             <div class="row">
                 <div class="col-md-6">
-                    <div class="card front-page-card">
-                        <div class="card-heading">
-                            <h2>Hours <small>today</small></h2>
-                        </div>
-                        <div class="card-body">
-                            <div class="hours-list"></div>
-                        </div>
-                        <div class="card-footer">
-                            <a href="/#/hours" class="more-link">All Hours</a>
-                        </div>
-                    </div>
 
                     <!-- Replicated display for xs, sm device display -->
                     <div class="card front-page-card hidden-md hidden-lg">
@@ -63,6 +52,39 @@
                                         <span class="fa fa-question-circle"></span>
                                         <h4>Ask A Librarian</h4>
                                     </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card front-page-card">
+                        <div class="card-heading">
+                            <h2>Hours <small>today</small></h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="hours-list"></div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="/#/hours" class="more-link">All Hours</a>
+                        </div>
+                    </div>
+
+                    <div class="card front-page-card ualib-image-carousel hidden-md hidden-lg" ng-show="slides">
+                        <div class="card-body">
+                            <div class="text-center">
+                                <ul rn-carousel rn-carousel-auto-slide="6" rn-carousel-buffered
+                                    rn-carousel-index="curImage" rn-carousel-locked="isLocked">
+                                    <li ng-repeat="slide in slides track by $index">
+                                        <a ng-href="{{slide.url}}" class="layer text-center" title="{{slide.title}}">
+                                            <div class="slide-image" ng-style="{'background-image':slide.styles}">
+                                                <div class="slide-title">
+                                                    {{slide.title}}
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                </ul>
+                                <div rn-carousel-indicators ng-if="slides.length > 1" slides="slides" rn-carousel-index="curImage">
                                 </div>
                             </div>
                         </div>
@@ -133,7 +155,7 @@
                         </div>
                     </div>
 
-                    <div class="card front-page-card ualib-image-carousel" ng-show="slides">
+                    <div class="card front-page-card ualib-image-carousel hidden-sm hidden-xs" ng-show="slides">
                         <div class="card-body">
                             <div class="text-center">
                                 <ul rn-carousel rn-carousel-auto-slide="6" rn-carousel-buffered
