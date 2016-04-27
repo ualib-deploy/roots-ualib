@@ -147,7 +147,7 @@ module.exports = function(grunt) {
                 }
             },
             build: {
-                dest: 'assets/js/scripts_bower.js',
+                dest: 'assets/js/scripts_bower.min.js',
                 cssDest: 'assets/css/main_bower.min.css',
                 exclude: [
                     'angular',
@@ -246,7 +246,7 @@ module.exports = function(grunt) {
                 },
                 files: {
                     'assets/js/scripts.min.js': ['tmp/assets/js/scripts.js'],
-                    'assets/js/scripts_bower.min.js': ['assets/js/scripts_bower.js']
+                    'assets/js/scripts_bower.min.js': ['assets/js/scripts_bower.min.js']
                 }
             },
             header_footer_export: {
