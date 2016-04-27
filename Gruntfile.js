@@ -6,10 +6,10 @@ module.exports = function(grunt) {
     require('time-grunt')(grunt);
 
     var jsFileList = [
-        'assets/js/ualib-template.js',
         'assets/js/plugins/*.js',
         'assets/js/_*.js',
         '!assets/js/_main.js',
+        '!assets/js/scripts.js',
         '!assets/js/_scripts-local.js',
         '!assets/**/*.min.js'
     ];
@@ -366,7 +366,7 @@ module.exports = function(grunt) {
                         NODE_ENV: 'local'
                     }
                 },
-                src: [jsFileList, 'assets/js/**/*.tpl.html', 'assets/css/*.css', '!**/*.min.*', '!**/*.map'],
+                src: [jsFileList, 'assets/js/**/*.tpl.html'],
                 dest: 'tmp',
                 expand: true
             },
@@ -376,7 +376,7 @@ module.exports = function(grunt) {
                         NODE_ENV: 'dev'
                     }
                 },
-                src: [jsFileList, 'assets/js/**/*.tpl.html', 'assets/css/*.css', '!**/*.min.*', '!**/*.map'],
+                src: [jsFileList, 'assets/js/**/*.tpl.html', 'assets/css/*.css', '!assets/css/*_bower.css', '!**/*.min.*', '!**/*.map'],
                 dest: 'tmp',
                 expand: true
             },
@@ -386,7 +386,7 @@ module.exports = function(grunt) {
                         NODE_ENV: 'live'
                     }
                 },
-                src: [jsFileList, 'assets/js/**/*.tpl.html', 'assets/css/*.css', '!**/*.min.*', '!**/*.map'],
+                src: [jsFileList, 'assets/js/**/*.tpl.html', 'assets/css/*.css', '!assets/css/*_bower.css', '!**/*.min.*', '!**/*.map'],
                 dest: 'tmp',
                 expand: true
             }
@@ -397,16 +397,26 @@ module.exports = function(grunt) {
                     'assets/less/*.less',
                     'assets/less/**/*.less'
                 ],
-                tasks: ['less:dev', 'autoprefixer:dev']
+                tasks: ['less:dev', 'autoprefixer:dev', 'preprocess:dev', 'copy:dev', 'clean:tmp']
             },
             js: {
                 files: [
                     'assets/js/**/_*.js',
                     'assets/js/**/*.tpl.html',
+                    '!assets/js/scripts.js',
                     '!assets/js/**/*.min.js',
                     '!assets/js/_scripts-local.js'
                 ],
-                tasks: ['jshint', 'html2js:dev', 'concat', 'dev_prod_switch:local']
+                tasks: [
+                    'preprocess:local',
+                    'html2js:dev',
+                    'concat:local',
+                    'preprocess:dev',
+                    'html2js:dev',
+                    'concat:js',
+                    'copy:dev',
+                    'clean:tmp'
+                ]
             },
             livereload: {
                 // Browser live reloading
@@ -440,7 +450,6 @@ module.exports = function(grunt) {
         'preprocess:local',
         'html2js:dev',
         'concat:local',
-        'copy:dev',
         'preprocess:dev',
         'html2js:dev',
         'concat:js',
@@ -470,7 +479,6 @@ module.exports = function(grunt) {
     grunt.registerTask('headerFooterExport', [
         'less:header_footer_export',
         'bower_concat:header_footer_export',
-        'html2js:header_footer_export',
         'concat:header_footer_export',
         'uglify:header_footer_export'
     ]);

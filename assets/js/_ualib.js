@@ -10,6 +10,8 @@ angular.module('ualib', [
     // @endif
     // @if NODE_ENV='dev'
     'compfinder',
+    // @endif
+    // @if NODE_ENV!='live'
     'ualib.imageCarousel',
     // @endif
     'ualib.databases',
@@ -19,6 +21,7 @@ angular.module('ualib', [
     'ualib.news',
     'ualib.alerts'
 ])
+
 
     .config(['$httpProvider', '$routeProvider', '$compileProvider', function($httpProvider, $routeProvider, $compileProvider) {
         //HTML tags are stripped after JSON data in all AJAX responses

@@ -224,6 +224,7 @@ angular.module("_ualib-home.tpl.html", []).run(["$templateCache", function($temp
     'ualib.alerts'
 ])
 
+    
     .config(['$httpProvider', '$routeProvider', '$compileProvider', function($httpProvider, $routeProvider, $compileProvider) {
         //HTML tags are stripped after JSON data in all AJAX responses
         function stripHTMLFromJSON(data) {
