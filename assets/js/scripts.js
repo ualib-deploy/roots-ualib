@@ -1,7 +1,7 @@
-angular.module('ualib.templates', ['../assets/js/_ualib-alerts.tpl.html', '../assets/js/_ualib-home.tpl.html']);
+angular.module('ualib.templates', ['_ualib-alerts.tpl.html', '_ualib-home.tpl.html']);
 
-angular.module("../assets/js/_ualib-alerts.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("../assets/js/_ualib-alerts.tpl.html",
+angular.module("_ualib-alerts.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("_ualib-alerts.tpl.html",
     "<alert class=\"animate\" ng-repeat=\"alert in list.alerts\" type=\"{{alert.typeStr}}\" close=\"closeAlert($index)\">\n" +
     "    <span class=\"fa fa-exclamation-triangle\"></span> {{alert.message}}\n" +
     "    <span ng-if=\"alert.url\"><a ng-href=\"{{alert.url}}\">More...</a></span>\n" +
@@ -9,8 +9,8 @@ angular.module("../assets/js/_ualib-alerts.tpl.html", []).run(["$templateCache",
     "");
 }]);
 
-angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("../assets/js/_ualib-home.tpl.html",
+angular.module("_ualib-home.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("_ualib-home.tpl.html",
     "<div class=\"container\">\n" +
     "    <div class=\"row\">\n" +
     "        <div class=\"col-md-12\">\n" +
@@ -167,31 +167,26 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                            </div>\n" +
     "                        </div>\n" +
     "                    </div>\n" +
-    "\n" +
-    "                    <div class=\"hidden-sm hidden-xs\">\n" +
-    "                        <div class=\"card front-page-card ualib-image-carousel\" ng-show=\"slides\">\n" +
-    "                            <div class=\"card-body\">\n" +
-    "                                <div class=\"text-center\">\n" +
-    "                                    <ul rn-carousel rn-carousel-auto-slide=\"6\" rn-carousel-buffered\n" +
-    "                                        rn-carousel-index=\"curImage\" rn-carousel-locked=\"isLocked\">\n" +
-    "                                        <li ng-repeat=\"slide in slides track by $index\">\n" +
-    "                                            <a ng-href=\"{{slide.url}}\" class=\"layer text-center\" title=\"{{slide.title}}\">\n" +
-    "                                                <div class=\"slide-image\" ng-style=\"{'background-image':slide.styles}\">\n" +
-    "                                                    <div class=\"slide-title\">\n" +
-    "                                                        {{slide.title}}\n" +
-    "                                                    </div>\n" +
+    "                    <div class=\"card front-page-card ualib-image-carousel hidden-sm hidden-xs\" ng-show=\"slides\">\n" +
+    "                        <div class=\"card-body\">\n" +
+    "                            <div class=\"text-center\">\n" +
+    "                                <ul rn-carousel rn-carousel-auto-slide=\"6\" rn-carousel-buffered\n" +
+    "                                    rn-carousel-index=\"curImage\" rn-carousel-locked=\"isLocked\">\n" +
+    "                                    <li ng-repeat=\"slide in slides track by $index\">\n" +
+    "                                        <a ng-href=\"{{slide.url}}\" class=\"layer text-center\" title=\"{{slide.title}}\">\n" +
+    "                                            <div class=\"slide-image\" ng-style=\"{'background-image':slide.styles}\">\n" +
+    "                                                <div class=\"slide-title\">\n" +
+    "                                                    {{slide.title}}\n" +
     "                                                </div>\n" +
-    "                                            </a>\n" +
-    "                                        </li>\n" +
-    "                                    </ul>\n" +
-    "                                    <div rn-carousel-indicators ng-if=\"slides.length > 1\" slides=\"slides\" rn-carousel-index=\"curImage\">\n" +
-    "                                    </div>\n" +
+    "                                            </div>\n" +
+    "                                        </a>\n" +
+    "                                    </li>\n" +
+    "                                </ul>\n" +
+    "                                <div rn-carousel-indicators ng-if=\"slides.length > 1\" slides=\"slides\" rn-carousel-index=\"curImage\">\n" +
     "                                </div>\n" +
     "                            </div>\n" +
     "                        </div>\n" +
     "                    </div>\n" +
-    "\n" +
-    "\n" +
     "\n" +
     "                    <div class=\"card front-page-card\">\n" +
     "                        <div class=\"card-heading\">\n" +
@@ -220,13 +215,13 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     'oneSearch',
     'manage',
     'compfinder',
+    'ualib.imageCarousel',
     'ualib.databases',
     'musicSearch',
     'ualib.staffdir',
     'ualib.softwareList',
     'ualib.news',
-    'ualib.alerts',
-    'ualib.imageCarousel'
+    'ualib.alerts'
 ])
 
     .config(['$httpProvider', '$routeProvider', '$compileProvider', function($httpProvider, $routeProvider, $compileProvider) {
@@ -250,7 +245,7 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
          */
         $routeProvider
             .when('/home', {
-                templateUrl: '../assets/js/_ualib-home.tpl.html',
+                templateUrl: '_ualib-home.tpl.html',
                 controller: ['$scope' ,'$rootScope', function($scope, $rootScope){
                     //$rootScope.appClass = 'front-page';
                     var testVar = 1;
@@ -349,7 +344,7 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
             controller: 'alertsCtrl',
             link: function(scope, elm, attrs){
             },
-            templateUrl: '../assets/js/_ualib-alerts.tpl.html'
+            templateUrl: '_ualib-alerts.tpl.html'
         };
     }]);
 ;angular.module('ualib.imageCarousel', ['angular-carousel'])

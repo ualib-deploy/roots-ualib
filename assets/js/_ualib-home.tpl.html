@@ -69,6 +69,7 @@
                         </div>
                     </div>
 
+                    <!-- @if NODE_ENV!='live' -->
                     <div class="card front-page-card ualib-image-carousel hidden-md hidden-lg" ng-show="slides">
                         <div class="card-body">
                             <div class="text-center">
@@ -89,6 +90,7 @@
                             </div>
                         </div>
                     </div>
+                    <!-- @endif -->
 
                     <div class="card front-page-card" ng-show="events">
                         <div class="card-heading">
@@ -154,7 +156,7 @@
                             </div>
                         </div>
                     </div>
-
+                    <!-- @if NODE_ENV!='live' -->
                     <div class="card front-page-card ualib-image-carousel hidden-sm hidden-xs" ng-show="slides">
                         <div class="card-body">
                             <div class="text-center">
@@ -175,6 +177,7 @@
                             </div>
                         </div>
                     </div>
+                    <!-- @endif -->
 
                     <div class="card front-page-card">
                         <div class="card-heading">

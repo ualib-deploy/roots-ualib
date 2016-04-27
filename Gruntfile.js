@@ -6,6 +6,7 @@ module.exports = function(grunt) {
     require('time-grunt')(grunt);
 
     var jsFileList = [
+        'assets/js/ualib-template.js',
         'assets/js/plugins/*.js',
         'assets/js/_*.js',
         '!assets/js/_main.js',
@@ -71,34 +72,55 @@ module.exports = function(grunt) {
         },
         html2js:{
             dev: {
-                src: 'assets/js/**/*.tpl.html',
-                dest: 'tmp/ualib-templates.js',
+                options:{
+                    base: 'tmp/assets/js'
+                },
+                src: 'tmp/assets/js/**/*.tpl.html',
+                dest: 'tmp/assets/js/ualib-templates.js',
                 module: 'ualib.templates'
             },
             header_footer_export: {
                 src: ['vendor/onesearch/src/app/common/directives/suggest.tpl.html'],
-                dest: 'tmp/header-footer-export-templates.js'
+                dest: 'tmp/assets/js/header-footer-export-templates.js'
             }
         },
         concat: {
             options: {
                 separator: ';'
             },
-            dist: {
-                src: ['tmp/ualib-templates.js', jsFileList],
-                dest: 'tmp/scripts.js'
+            js: {
+                src: [
+                    'tmp/assets/js/ualib-templates.js',
+                    'tmp/assets/js/plugins/*.js',
+                    'tmp/assets/js/_*.js',
+                    '!tmp/assets/js/_main.js',
+                    '!tmp/assets/js/_scripts-local.js',
+                    '!tmp/assets/**/*.min.js'
+                ],
+                dest: 'tmp/assets/js/scripts.js'
+            },
+            local: {
+                src: [
+                    'tmp/assets/js/ualib-templates.js',
+                    'tmp/assets/js/plugins/*.js',
+                    'tmp/assets/js/_*.js',
+                    '!tmp/assets/js/_main.js',
+                    '!tmp/assets/js/_scripts-local.js',
+                    '!tmp/assets/**/*.min.js'
+                ],
+                dest: 'tmp/assets/js/_scripts-local.js'
             },
             header_footer_export: {
-              options: {
-                  banner: "angular.module('ualib', ['ngAnimate', 'ui.bootstrap','ualib.ui', 'oneSearch']);angular.module('ui.bootstrap', ['ui.bootstrap.collapse']);angular.module('ualib.ui', []);\n"
-              },
-              src: ['tmp/header-footer-export-templates.js', 'tmp/header-footer-export.js'],
-                dest: 'tmp/header-footer-export.js'
+                options: {
+                    banner: "angular.module('ualib', ['ngAnimate', 'ui.bootstrap','ualib.ui', 'oneSearch']);angular.module('ui.bootstrap', ['ui.bootstrap.collapse']);angular.module('ualib.ui', []);\n"
+                },
+                src: ['tmp/assets/js/header-footer-export-templates.js', 'tmp/assets/js/header-footer-export.js'],
+                dest: 'tmp/assets/js/header-footer-export.js'
             }
         },
         bower_concat: {
             dev: {
-                dest: 'tmp/scripts_bower.js',
+                dest: 'assets/js/scripts_bower.js',
                 cssDest: 'assets/css/main_bower.css',
                 exclude: [
                     'angular',
@@ -125,7 +147,7 @@ module.exports = function(grunt) {
                 }
             },
             build: {
-                dest: 'tmp/scripts_bower.js',
+                dest: 'assets/js/scripts_bower.js',
                 cssDest: 'assets/css/main_bower.min.css',
                 exclude: [
                     'angular',
@@ -155,7 +177,7 @@ module.exports = function(grunt) {
                 }
             },
             header_footer_export: {
-                dest: 'tmp/header-footer-export.js',
+                dest: 'tmp/assets/js/header-footer-export.js',
                 include: ['angular-bootstrap', 'ualib-ui', 'onesearch', 'angular-filter', 'angular-scroll'],
                 mainFiles: {
                     'ualib-ui': ['src/dropdown/dropdown.js', 'src/dropdown/dropdown-sticky.js'],
@@ -165,7 +187,7 @@ module.exports = function(grunt) {
 
         },
         copy: {
-            dist: {
+            fontawesome: {
                 files: [{
                     expand: true,
                     cwd: '<%= bower.directory %>/fontawesome/fonts',
@@ -174,12 +196,28 @@ module.exports = function(grunt) {
                     filter: 'isFile'
                 }]
             },
-            js: {
+            dev: {
                 files: [{
                     expand: true,
                     cwd: 'tmp',
-                    src: ['**/*.js', '!**/*-templates.js'],
-                    dest: 'assets/js',
+                    src: [
+                        'assets/css/**/*.css',
+                        'assets/js/scripts.js',
+                        'assets/js/_scripts-local.js',
+                        '!assets/**/*.min.*'
+                        ],
+                    dest: '',
+                    filter: 'isFile'
+                }]
+            },
+            live: {
+                files: [{
+                    expand: true,
+                    cwd: 'tmp',
+                    src: [
+                        'assets/**/*.min.*'
+                        ],
+                    dest: '',
                     filter: 'isFile'
                 }]
             }
@@ -191,13 +229,13 @@ module.exports = function(grunt) {
             dist: {
                 files: [
                     {
-                        'tmp/scripts.js': ['tmp/scripts.js']
+                        'tmp/assets/js/scripts.js': ['tmp/assets/js/scripts.js']
                     }
                 ]
             },
             header_footer_export: {
                 files: [{
-                    'tmp/header-footer-export.js': ['tmp/header-footer-export.js']
+                    'tmp/assets/js/header-footer-export.min.js': ['tmp/assets/js/header-footer-export.min.js']
                 }]
             }
         },
@@ -207,8 +245,8 @@ module.exports = function(grunt) {
                     mangle: false
                 },
                 files: {
-                    'assets/js/scripts.min.js': ['tmp/scripts.js'],
-                    'assets/js/scripts_bower.min.js': ['tmp/scripts_bower.js']
+                    'assets/js/scripts.min.js': ['tmp/assets/js/scripts.js'],
+                    'assets/js/scripts_bower.min.js': ['assets/js/scripts_bower.js']
                 }
             },
             header_footer_export: {
@@ -216,7 +254,7 @@ module.exports = function(grunt) {
                     mangle: true
                 },
                 files: [{
-                    'assets/js/header-footer-export.min.js': ['tmp/header-footer-export.js']
+                    'assets/js/header-footer-export.min.js': ['tmp/assets/js/header-footer-export.js']
                 }]
             }
         },
@@ -321,34 +359,6 @@ module.exports = function(grunt) {
                 regExp: false
             }
         },
-        dev_prod_switch: {
-            local: {
-                options: {
-                    environment: 'dev',
-                    env_block_dev: 'env:local',
-                    env_block_prod: 'env:dev'
-                },
-                files: {
-                    'assets/js/_scripts-local.js': 'assets/js/scripts.js'
-                }
-            },
-            dev: {
-                options: {
-                    environment: 'dev'
-                },
-                files: {
-                    'assets/js/scripts.js': 'assets/js/scripts.js'
-                }
-            },
-            live: {
-                options: {
-                    environment: 'prod'
-                },
-                files: {
-                    'assets/js/scripts.js': 'assets/js/scripts.js'
-                }
-            }
-        },
         preprocess: {
             local: {
                 options: {
@@ -356,9 +366,9 @@ module.exports = function(grunt) {
                         NODE_ENV: 'local'
                     }
                 },
-                files: {
-                    'tmp/_scripts-local.js': 'tmp/scripts.js'
-                }
+                src: [jsFileList, 'assets/js/**/*.tpl.html', 'assets/css/*.css', '!**/*.min.*', '!**/*.map'],
+                dest: 'tmp',
+                expand: true
             },
             dev: {
                 options: {
@@ -366,9 +376,9 @@ module.exports = function(grunt) {
                         NODE_ENV: 'dev'
                     }
                 },
-                files: {
-                    'tmp/scripts.js': 'tmp/scripts.js'
-                }
+                src: [jsFileList, 'assets/js/**/*.tpl.html', 'assets/css/*.css', '!**/*.min.*', '!**/*.map'],
+                dest: 'tmp',
+                expand: true
             },
             live: {
                 options: {
@@ -376,9 +386,9 @@ module.exports = function(grunt) {
                         NODE_ENV: 'live'
                     }
                 },
-                files: {
-                    'tmp/scripts.js': 'tmp/scripts.js'
-                }
+                src: [jsFileList, 'assets/js/**/*.tpl.html', 'assets/css/*.css', '!**/*.min.*', '!**/*.map'],
+                dest: 'tmp',
+                expand: true
             }
         },
         watch: {
@@ -425,30 +435,32 @@ module.exports = function(grunt) {
 
     grunt.registerTask('dev', [
         'auto_install',
-        'html2js:dev',
-        'jshint',
         'less:dev',
         'autoprefixer:dev',
-        'concat:dist',
-        'bower_concat:dev',
         'preprocess:local',
+        'html2js:dev',
+        'concat:local',
+        'copy:dev',
         'preprocess:dev',
-        'copy:js',
+        'html2js:dev',
+        'concat:js',
+        'copy:dev',
+        'bower_concat:dev',
         'clean:tmp'
     ]);
     grunt.registerTask('live-build', [
         'auto_install',
-        'html2js',
-        'jshint',
-        'copy:dist',
         'less:build',
         'autoprefixer:build',
-        'concat:dist',
-        'ngAnnotate',
-        'bower_concat:build',
+        'jshint',
         'preprocess:live',
-        'uglify:dist',
+        'html2js',
+        'concat:js',
         'headerFooterExport',
+        'copy:live',
+        'bower_concat:build',
+        'uglify:dist',
+        'ngAnnotate',
         'replace',
         'version',
         'modernizr',

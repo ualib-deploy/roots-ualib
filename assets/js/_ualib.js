@@ -5,20 +5,19 @@ angular.module('ualib', [
     'ualib.ui',
     'hours',
     'oneSearch',
-    // @if NODE_ENV='live'
+    // @if NODE_ENV!='local'
     'manage',
     // @endif
     // @if NODE_ENV='dev'
-    'manage',
     'compfinder',
+    'ualib.imageCarousel',
     // @endif
     'ualib.databases',
     'musicSearch',
     'ualib.staffdir',
     'ualib.softwareList',
     'ualib.news',
-    'ualib.alerts',
-    'ualib.imageCarousel'
+    'ualib.alerts'
 ])
 
     .config(['$httpProvider', '$routeProvider', '$compileProvider', function($httpProvider, $routeProvider, $compileProvider) {
@@ -42,7 +41,7 @@ angular.module('ualib', [
          */
         $routeProvider
             .when('/home', {
-                templateUrl: '../assets/js/_ualib-home.tpl.html',
+                templateUrl: '_ualib-home.tpl.html',
                 controller: ['$scope' ,'$rootScope', function($scope, $rootScope){
                     //$rootScope.appClass = 'front-page';
                     var testVar = 1;
