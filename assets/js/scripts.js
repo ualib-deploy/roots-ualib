@@ -168,26 +168,30 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     "                        </div>\n" +
     "                    </div>\n" +
     "\n" +
-    "                    <div class=\"card front-page-card ualib-image-carousel hidden-sm hidden-xs\" ng-show=\"slides\">\n" +
-    "                        <div class=\"card-body\">\n" +
-    "                            <div class=\"text-center\">\n" +
-    "                                <ul rn-carousel rn-carousel-auto-slide=\"6\" rn-carousel-buffered\n" +
-    "                                    rn-carousel-index=\"curImage\" rn-carousel-locked=\"isLocked\">\n" +
-    "                                    <li ng-repeat=\"slide in slides track by $index\">\n" +
-    "                                        <a ng-href=\"{{slide.url}}\" class=\"layer text-center\" title=\"{{slide.title}}\">\n" +
-    "                                            <div class=\"slide-image\" ng-style=\"{'background-image':slide.styles}\">\n" +
-    "                                                <div class=\"slide-title\">\n" +
-    "                                                    {{slide.title}}\n" +
+    "                    <div class=\"hidden-sm hidden-xs\">\n" +
+    "                        <div class=\"card front-page-card ualib-image-carousel\" ng-show=\"slides\">\n" +
+    "                            <div class=\"card-body\">\n" +
+    "                                <div class=\"text-center\">\n" +
+    "                                    <ul rn-carousel rn-carousel-auto-slide=\"6\" rn-carousel-buffered\n" +
+    "                                        rn-carousel-index=\"curImage\" rn-carousel-locked=\"isLocked\">\n" +
+    "                                        <li ng-repeat=\"slide in slides track by $index\">\n" +
+    "                                            <a ng-href=\"{{slide.url}}\" class=\"layer text-center\" title=\"{{slide.title}}\">\n" +
+    "                                                <div class=\"slide-image\" ng-style=\"{'background-image':slide.styles}\">\n" +
+    "                                                    <div class=\"slide-title\">\n" +
+    "                                                        {{slide.title}}\n" +
+    "                                                    </div>\n" +
     "                                                </div>\n" +
-    "                                            </div>\n" +
-    "                                        </a>\n" +
-    "                                    </li>\n" +
-    "                                </ul>\n" +
-    "                                <div rn-carousel-indicators ng-if=\"slides.length > 1\" slides=\"slides\" rn-carousel-index=\"curImage\">\n" +
+    "                                            </a>\n" +
+    "                                        </li>\n" +
+    "                                    </ul>\n" +
+    "                                    <div rn-carousel-indicators ng-if=\"slides.length > 1\" slides=\"slides\" rn-carousel-index=\"curImage\">\n" +
+    "                                    </div>\n" +
     "                                </div>\n" +
     "                            </div>\n" +
     "                        </div>\n" +
     "                    </div>\n" +
+    "\n" +
+    "\n" +
     "\n" +
     "                    <div class=\"card front-page-card\">\n" +
     "                        <div class=\"card-heading\">\n" +
@@ -214,12 +218,8 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     'ualib.ui',
     'hours',
     'oneSearch',
-    /* env:prod */
     'manage',
-    /* env:prod:end */
-    /* env:prod */
     'compfinder',
-    /* env:prod:end */
     'ualib.databases',
     'musicSearch',
     'ualib.staffdir',
@@ -228,7 +228,6 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
     'ualib.alerts',
     'ualib.imageCarousel'
 ])
-
 
     .config(['$httpProvider', '$routeProvider', '$compileProvider', function($httpProvider, $routeProvider, $compileProvider) {
         //HTML tags are stripped after JSON data in all AJAX responses
@@ -269,10 +268,8 @@ angular.module("../assets/js/_ualib-home.tpl.html", []).run(["$templateCache", f
 
     }])
 
-
-
-    .run(['$routeParams', '$location', '$rootScope', '$document', 'duScrollOffset',
-    function($routeParams, $location, $rootScope, $document, duScrollOffset){
+    .run(['$routeParams', '$location', '$rootScope',
+    function($routeParams, $location, $rootScope){
         $rootScope.appClass = 'page-loaded';
         $rootScope.$on('$routeChangeSuccess', function(e, current, pre) {
 

@@ -5,12 +5,13 @@ angular.module('ualib', [
     'ualib.ui',
     'hours',
     'oneSearch',
-    /* env:prod */
+    // @if NODE_ENV='live'
     'manage',
-    /* env:prod:end */
-    /* env:prod */
+    // @endif
+    // @if NODE_ENV='dev'
+    'manage',
     'compfinder',
-    /* env:prod:end */
+    // @endif
     'ualib.databases',
     'musicSearch',
     'ualib.staffdir',
@@ -19,7 +20,6 @@ angular.module('ualib', [
     'ualib.alerts',
     'ualib.imageCarousel'
 ])
-
 
     .config(['$httpProvider', '$routeProvider', '$compileProvider', function($httpProvider, $routeProvider, $compileProvider) {
         //HTML tags are stripped after JSON data in all AJAX responses
@@ -60,10 +60,8 @@ angular.module('ualib', [
 
     }])
 
-
-
-    .run(['$routeParams', '$location', '$rootScope', '$document', 'duScrollOffset',
-    function($routeParams, $location, $rootScope, $document, duScrollOffset){
+    .run(['$routeParams', '$location', '$rootScope',
+    function($routeParams, $location, $rootScope){
         $rootScope.appClass = 'page-loaded';
         $rootScope.$on('$routeChangeSuccess', function(e, current, pre) {
 

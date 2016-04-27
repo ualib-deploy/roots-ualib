@@ -37,6 +37,8 @@
     "load-grunt-tasks": "~1.0.0",
     "time-grunt": "~1.0.0",
     "grunt-auto-install": "~0.3.0",
-    "grunt-contrib-watch": "~1.0.0"
+    "grunt-contrib-watch": "~1.0.0",
+    "grunt-devcode": "0.0.4-c",
+    "grunt-preprocess": "~5.1.0"
   }
 }

@@ -13,6 +13,9 @@ assets/vendor/modernizr/*
 # Ignore local build JS
 assets/js/_scripts-local.js
 
+# Ignore temporary build/process dir
+tmp/*
+
 # Ignore the styleguide folder used for testing
 styleguide/
 

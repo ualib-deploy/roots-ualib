@@ -6,7 +6,6 @@ module.exports = function(grunt) {
     require('time-grunt')(grunt);
 
     var jsFileList = [
-        'assets/js/ualib-templates.js',
         'assets/js/plugins/*.js',
         'assets/js/_*.js',
         '!assets/js/_main.js',
@@ -37,7 +36,7 @@ module.exports = function(grunt) {
             ]
         },
         clean: {
-            header_footer_export: ['assets/js/header-footer-export.js','assets/js/header-footer-export-templates.js']
+            tmp: ['tmp']
         },
         less: {
             dev: {
@@ -73,12 +72,12 @@ module.exports = function(grunt) {
         html2js:{
             dev: {
                 src: 'assets/js/**/*.tpl.html',
-                dest: 'assets/js/ualib-templates.js',
+                dest: 'tmp/ualib-templates.js',
                 module: 'ualib.templates'
             },
             header_footer_export: {
                 src: ['vendor/onesearch/src/app/common/directives/suggest.tpl.html'],
-                dest: 'assets/js/header-footer-export-templates.js'
+                dest: 'tmp/header-footer-export-templates.js'
             }
         },
         concat: {
@@ -86,20 +85,20 @@ module.exports = function(grunt) {
                 separator: ';'
             },
             dist: {
-                src: [jsFileList],
-                dest: 'assets/js/scripts.js'
+                src: ['tmp/ualib-templates.js', jsFileList],
+                dest: 'tmp/scripts.js'
             },
             header_footer_export: {
               options: {
                   banner: "angular.module('ualib', ['ngAnimate', 'ui.bootstrap','ualib.ui', 'oneSearch']);angular.module('ui.bootstrap', ['ui.bootstrap.collapse']);angular.module('ualib.ui', []);\n"
               },
-              src: ['assets/js/header-footer-export-templates.js', 'assets/js/header-footer-export.js'],
-                dest: 'assets/js/header-footer-export.js'
+              src: ['tmp/header-footer-export-templates.js', 'tmp/header-footer-export.js'],
+                dest: 'tmp/header-footer-export.js'
             }
         },
         bower_concat: {
             dev: {
-                dest: 'assets/js/scripts_bower.js',
+                dest: 'tmp/scripts_bower.js',
                 cssDest: 'assets/css/main_bower.css',
                 exclude: [
                     'angular',
@@ -114,7 +113,8 @@ module.exports = function(grunt) {
                     'tinymce-dist',
                     'jquery',
                     'modernizr',
-                    'roots-ualib'
+                    'roots-ualib',
+                    'angular-lazy-img'
                 ],
                 callback: function(mainFiles, component) {
                     return mainFiles.map(function(filepath) {
@@ -125,7 +125,7 @@ module.exports = function(grunt) {
                 }
             },
             build: {
-                dest: 'assets/js/scripts_bower.min.js',
+                dest: 'tmp/scripts_bower.js',
                 cssDest: 'assets/css/main_bower.min.css',
                 exclude: [
                     'angular',
@@ -141,7 +141,10 @@ module.exports = function(grunt) {
                     'jquery',
                     'modernizr',
                     'roots-ualib',
-                    'compfinder'
+                    'compfinder',
+                    'angular-mousewheel',
+                    'hamsterjs',
+                    'angular-lazy-img'
                 ],
                 callback: function(mainFiles, component) {
                     return mainFiles.map(function(filepath) {
@@ -152,7 +155,7 @@ module.exports = function(grunt) {
                 }
             },
             header_footer_export: {
-                dest: 'assets/js/header-footer-export.js',
+                dest: 'tmp/header-footer-export.js',
                 include: ['angular-bootstrap', 'ualib-ui', 'onesearch', 'angular-filter', 'angular-scroll'],
                 mainFiles: {
                     'ualib-ui': ['src/dropdown/dropdown.js', 'src/dropdown/dropdown-sticky.js'],
@@ -171,10 +174,14 @@ module.exports = function(grunt) {
                     filter: 'isFile'
                 }]
             },
-            local: {
-                files: {
-                    'assets/js/_scripts-local.js': 'assets/js/scripts.js'
-                }
+            js: {
+                files: [{
+                    expand: true,
+                    cwd: 'tmp',
+                    src: ['**/*.js', '!**/*-templates.js'],
+                    dest: 'assets/js',
+                    filter: 'isFile'
+                }]
             }
         },
         ngAnnotate: {
@@ -184,13 +191,13 @@ module.exports = function(grunt) {
             dist: {
                 files: [
                     {
-                        'assets/js/scripts.js': ['assets/js/scripts.js']
+                        'tmp/scripts.js': ['tmp/scripts.js']
                     }
                 ]
             },
             header_footer_export: {
                 files: [{
-                    'assets/js/header-footer-export.js': ['assets/js/header-footer-export.js']
+                    'tmp/header-footer-export.js': ['tmp/header-footer-export.js']
                 }]
             }
         },
@@ -200,8 +207,8 @@ module.exports = function(grunt) {
                     mangle: false
                 },
                 files: {
-                    'assets/js/scripts.min.js': ['assets/js/_scripts-local.js'],
-                    'assets/js/scripts_bower.min.js': ['assets/js/scripts_bower.min.js']
+                    'assets/js/scripts.min.js': ['tmp/scripts.js'],
+                    'assets/js/scripts_bower.min.js': ['tmp/scripts_bower.js']
                 }
             },
             header_footer_export: {
@@ -209,7 +216,7 @@ module.exports = function(grunt) {
                     mangle: true
                 },
                 files: [{
-                    'assets/js/header-footer-export.min.js': ['assets/js/header-footer-export.js']
+                    'assets/js/header-footer-export.min.js': ['tmp/header-footer-export.js']
                 }]
             }
         },
@@ -315,12 +322,22 @@ module.exports = function(grunt) {
             }
         },
         dev_prod_switch: {
+            local: {
+                options: {
+                    environment: 'dev',
+                    env_block_dev: 'env:local',
+                    env_block_prod: 'env:dev'
+                },
+                files: {
+                    'assets/js/_scripts-local.js': 'assets/js/scripts.js'
+                }
+            },
             dev: {
                 options: {
                     environment: 'dev'
                 },
                 files: {
-                    'assets/js/_scripts-local.js': 'assets/js/_scripts-local.js'
+                    'assets/js/scripts.js': 'assets/js/scripts.js'
                 }
             },
             live: {
@@ -328,7 +345,39 @@ module.exports = function(grunt) {
                     environment: 'prod'
                 },
                 files: {
-                    'assets/js/_scripts-local.js': 'assets/js/_scripts-local.js'
+                    'assets/js/scripts.js': 'assets/js/scripts.js'
+                }
+            }
+        },
+        preprocess: {
+            local: {
+                options: {
+                    context: {
+                        NODE_ENV: 'local'
+                    }
+                },
+                files: {
+                    'tmp/_scripts-local.js': 'tmp/scripts.js'
+                }
+            },
+            dev: {
+                options: {
+                    context: {
+                        NODE_ENV: 'dev'
+                    }
+                },
+                files: {
+                    'tmp/scripts.js': 'tmp/scripts.js'
+                }
+            },
+            live: {
+                options: {
+                    context: {
+                        NODE_ENV: 'live'
+                    }
+                },
+                files: {
+                    'tmp/scripts.js': 'tmp/scripts.js'
                 }
             }
         },
@@ -347,7 +396,7 @@ module.exports = function(grunt) {
                     '!assets/js/**/*.min.js',
                     '!assets/js/_scripts-local.js'
                 ],
-                tasks: ['jshint', 'html2js:dev', 'concat', 'copy:local', 'dev_prod_switch:dev']
+                tasks: ['jshint', 'html2js:dev', 'concat', 'dev_prod_switch:local']
             },
             livereload: {
                 // Browser live reloading
@@ -382,8 +431,10 @@ module.exports = function(grunt) {
         'autoprefixer:dev',
         'concat:dist',
         'bower_concat:dev',
-        'copy:local',
-        'dev_prod_switch:dev'
+        'preprocess:local',
+        'preprocess:dev',
+        'copy:js',
+        'clean:tmp'
     ]);
     grunt.registerTask('live-build', [
         'auto_install',
@@ -394,14 +445,14 @@ module.exports = function(grunt) {
         'autoprefixer:build',
         'concat:dist',
         'ngAnnotate',
-        'copy:local',
-        'dev_prod_switch:live',
-        'modernizr',
-        'version',
         'bower_concat:build',
+        'preprocess:live',
         'uglify:dist',
         'headerFooterExport',
-        'replace'
+        'replace',
+        'version',
+        'modernizr',
+        'clean:tmp'
     ]);
 
     grunt.registerTask('headerFooterExport', [
@@ -409,7 +460,6 @@ module.exports = function(grunt) {
         'bower_concat:header_footer_export',
         'html2js:header_footer_export',
         'concat:header_footer_export',
-        'uglify:header_footer_export',
-        'clean:header_footer_export'
+        'uglify:header_footer_export'
     ]);
 };
