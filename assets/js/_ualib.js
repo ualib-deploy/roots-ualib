@@ -5,19 +5,21 @@ angular.module('ualib', [
     'ualib.ui',
     'hours',
     'oneSearch',
-    /* env:prod */
+    // @if NODE_ENV!='local'
     'manage',
-    /* env:prod:end */
-    /* env:dev */
+    // @endif
+    // @if NODE_ENV='dev'
     'compfinder',
-    /* env:dev:end */
+    // @endif
+    // @if NODE_ENV!='live'
+    'ualib.imageCarousel',
+    // @endif
     'ualib.databases',
     'musicSearch',
     'ualib.staffdir',
     'ualib.softwareList',
     'ualib.news',
-    'ualib.alerts',
-    'ualib.imageCarousel'
+    'ualib.alerts'
 ])
 
 
@@ -42,7 +44,7 @@ angular.module('ualib', [
          */
         $routeProvider
             .when('/home', {
-                templateUrl: '../assets/js/_ualib-home.tpl.html',
+                templateUrl: '_ualib-home.tpl.html',
                 controller: ['$scope' ,'$rootScope', function($scope, $rootScope){
                     //$rootScope.appClass = 'front-page';
                     var testVar = 1;
@@ -60,10 +62,8 @@ angular.module('ualib', [
 
     }])
 
-
-
-    .run(['$routeParams', '$location', '$rootScope', '$document', 'duScrollOffset',
-    function($routeParams, $location, $rootScope, $document, duScrollOffset){
+    .run(['$routeParams', '$location', '$rootScope',
+    function($routeParams, $location, $rootScope){
         $rootScope.appClass = 'page-loaded';
         $rootScope.$on('$routeChangeSuccess', function(e, current, pre) {
 

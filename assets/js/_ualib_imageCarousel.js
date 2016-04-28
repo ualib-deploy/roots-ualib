@@ -1,3 +1,4 @@
+// @if NODE_ENV!='live'
 angular.module('ualib.imageCarousel', ['angular-carousel'])
     .constant('VIEW_IMAGES_URL', '//wwwdev2.lib.ua.edu/erCarousel/api/slides/active')
 
@@ -60,3 +61,4 @@ angular.module('ualib.imageCarousel', ['angular-carousel'])
             }
         };
     }]);
+// @endif

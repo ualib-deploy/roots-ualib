@@ -3,22 +3,22 @@
   "querystring": true,
   "assets/css/main.min.css": {
     "path": "assets/css/main.min.css",
-    "hash": "e99999f73f85215eb0167efc8671a50c",
+    "hash": "672e73549106699fd314a401b1d30d63",
     "handle": "roots_css"
   },
   "assets/css/main_bower.min.css": {
     "path": "assets/css/main_bower.min.css",
-    "hash": "ce12f7c8f3540d41b39607f584cc5613",
+    "hash": "e194681aa42de45e605337a525047fbc",
     "handle": "roots_css"
   },
   "assets/js/scripts.min.js": {
     "path": "assets/js/scripts.min.js",
-    "hash": "057d344d664cbc0ca2bc910118425347",
+    "hash": "e73456d2e1ed25dbb6959d7b719ab68d",
     "handle": "roots_js"
   },
   "assets/js/scripts_bower.min.js": {
     "path": "assets/js/scripts_bower.min.js",
-    "hash": "f8e73414ef815a62626a1ed270c564c1",
+    "hash": "e88a6134f56b16b79afb2290991f6e8b",
     "handle": "roots_js"
   }
 }

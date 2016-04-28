@@ -2286,268 +2286,6 @@ angular.module('angular.filter', [
 ]);
 })( window, window.angular );
 /*
- * angular-lazy-load
- *
- * Copyright(c) 2014 Paweł Wszoła <wszola.p@gmail.com>
- * MIT Licensed
- *
- */
-
-/**
- * @author Paweł Wszoła (wszola.p@gmail.com)
- *
- */
-
-angular.module('angularLazyImg', []);
-
-angular.module('angularLazyImg').factory('LazyImgMagic', [
-  '$window', '$rootScope', 'lazyImgConfig', 'lazyImgHelpers',
-  function($window, $rootScope, lazyImgConfig, lazyImgHelpers){
-    'use strict';
-
-    var winDimensions, $win, images, isListening, options;
-    var checkImagesT, saveWinOffsetT, containers;
-
-    images = [];
-    isListening = false;
-    options = lazyImgConfig.getOptions();
-    $win = angular.element($window);
-    winDimensions = lazyImgHelpers.getWinDimensions();
-    saveWinOffsetT = lazyImgHelpers.throttle(function(){
-      winDimensions = lazyImgHelpers.getWinDimensions();
-    }, 60);
-    containers = [options.container || $win];
-
-    function checkImages(){
-      for(var i = images.length - 1; i >= 0; i--){
-        var image = images[i];
-        if(image && lazyImgHelpers.isElementInView(image.$elem[0], options.offset, winDimensions)){
-          loadImage(image);
-          images.splice(i, 1);
-        }
-      }
-      if(images.length === 0){ stopListening(); }
-    }
-
-    checkImagesT = lazyImgHelpers.throttle(checkImages, 30);
-
-    function listen(param){
-      containers.forEach(function (container) {
-        container[param]('scroll', checkImagesT);
-        container[param]('touchmove', checkImagesT);
-      });
-      $win[param]('resize', checkImagesT);
-      $win[param]('resize', saveWinOffsetT);
-    }
-
-    function startListening(){
-      isListening = true;
-      setTimeout(function(){
-        checkImages();
-        listen('on');
-      }, 1);
-    }
-
-    function stopListening(){
-      isListening = false;
-      listen('off');
-    }
-
-    function removeImage(image){
-      var index = images.indexOf(image);
-      if(index !== -1) {
-        images.splice(index, 1);
-      }
-    }
-
-    function loadImage(photo){
-      var img = new Image();
-      img.onerror = function(){
-        if(options.errorClass){
-          photo.$elem.addClass(options.errorClass);
-        }
-        $rootScope.$emit('lazyImg:error', photo);
-        options.onError(photo);
-      };
-      img.onload = function(){
-        setPhotoSrc(photo.$elem, photo.src);
-        if(options.successClass){
-          photo.$elem.addClass(options.successClass);
-        }
-        $rootScope.$emit('lazyImg:success', photo);
-        options.onSuccess(photo);
-      };
-      img.src = photo.src;
-    }
-
-    function setPhotoSrc($elem, src){
-      if ($elem[0].nodeName.toLowerCase() === 'img') {
-        $elem[0].src = src;
-      } else {
-        $elem.css('background-image', 'url("' + src + '")');
-      }
-    }
-
-    // PHOTO
-    function Photo($elem){
-      this.$elem = $elem;
-    }
-
-    Photo.prototype.setSource = function(source){
-      this.src = source;
-      images.unshift(this);
-      if (!isListening){ startListening(); }
-    };
-
-    Photo.prototype.removeImage = function(){
-      removeImage(this);
-      if(images.length === 0){ stopListening(); }
-    };
-
-    Photo.prototype.checkImages = function(){
-      checkImages();
-    };
-
-    Photo.addContainer = function (container) {
-      stopListening();
-      containers.push(container);
-      startListening();
-    };
-
-    Photo.removeContainer = function (container) {
-      stopListening();
-      containers.splice(containers.indexOf(container), 1);
-      startListening();
-    };
-
-    return Photo;
-
-  }
-]);
-
-angular.module('angularLazyImg').provider('lazyImgConfig', function() {
-  'use strict';
-
-  this.options = {
-    offset       : 100,
-    errorClass   : null,
-    successClass : null,
-    onError      : function(){},
-    onSuccess    : function(){}
-  };
-
-  this.$get = function() {
-    var options = this.options;
-    return {
-      getOptions: function() {
-        return options;
-      }
-    };
-  };
-
-  this.setOptions = function(options) {
-    angular.extend(this.options, options);
-  };
-});
-angular.module('angularLazyImg').factory('lazyImgHelpers', [
-  '$window', function($window){
-    'use strict';
-
-    function getWinDimensions(){
-      return {
-        height: $window.innerHeight,
-        width: $window.innerWidth
-      };
-    }
-
-    function isElementInView(elem, offset, winDimensions) {
-      var rect = elem.getBoundingClientRect();
-      var bottomline = winDimensions.height + offset;
-      return (
-       rect.left >= 0 && rect.right <= winDimensions.width + offset && (
-         rect.top >= 0 && rect.top <= bottomline ||
-         rect.bottom <= bottomline && rect.bottom >= 0 - offset
-        )
-      );
-    }
-
-    // http://remysharp.com/2010/07/21/throttling-function-calls/
-    function throttle(fn, threshhold, scope) {
-      var last, deferTimer;
-      return function () {
-        var context = scope || this;
-        var now = +new Date(),
-            args = arguments;
-        if (last && now < last + threshhold) {
-          clearTimeout(deferTimer);
-          deferTimer = setTimeout(function () {
-            last = now;
-            fn.apply(context, args);
-          }, threshhold);
-        } else {
-          last = now;
-          fn.apply(context, args);
-        }
-      };
-    }
-
-    return {
-      isElementInView: isElementInView,
-      getWinDimensions: getWinDimensions,
-      throttle: throttle
-    };
-
-  }
-]);
-angular.module('angularLazyImg')
-  .directive('lazyImg', [
-    '$rootScope', 'LazyImgMagic', function ($rootScope, LazyImgMagic) {
-      'use strict';
-
-      function link(scope, element, attributes) {
-        var lazyImage = new LazyImgMagic(element);
-        attributes.$observe('lazyImg', function (newSource) {
-          if (newSource) {
-            // in angular 1.3 it might be nice to remove observer here
-            lazyImage.setSource(newSource);
-          }
-        });
-        scope.$on('$destroy', function () {
-          lazyImage.removeImage();
-        });
-        $rootScope.$on('lazyImg.runCheck', function () {
-          lazyImage.checkImages();
-        });
-        $rootScope.$on('lazyImg:refresh', function () {
-          lazyImage.checkImages();
-        });
-      }
-
-      return {
-        link: link,
-        restrict: 'A'
-      };
-    }
-  ])
-  .directive('lazyImgContainer', [
-    'LazyImgMagic', function (LazyImgMagic) {
-      'use strict';
-
-      function link(scope, element) {
-        LazyImgMagic.addContainer(element);
-        scope.$on('$destroy', function () {
-          LazyImgMagic.removeContainer(element);
-        });
-      }
-
-      return {
-        link: link,
-        restrict: 'A'
-      };
-    }
-  ]);
-
-/*
  * Hamster.js v1.1.2
  * (c) 2013 Monospaced http://monospaced.com
  * License: MIT
@@ -2928,6 +2666,1921 @@ angular.module('monospaced.mousewheel', [])
     };
   }]);
 
+angular.module('compfinder.templates', ['admin/admin.tpl.html', 'admin/floorFields.tpl.html', 'common/maps/map.tpl.html', 'signage/signage.tpl.html']);
+
+angular.module("admin/admin.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("admin/admin.tpl.html",
+    "<tabset justified=\"true\" ng-if=\"hasAccess\">\n" +
+    "    <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
+    "        <div ng-if=\"tab.number == 0\">\n" +
+    "            <nav class=\"navbar navbar-default\">\n" +
+    "                <div class=\"container\">\n" +
+    "                    <ul class=\"nav navbar-nav\">\n" +
+    "                        <li>\n" +
+    "                            <button class=\"btn btn-default navbar-btn\" ng-click=\"mapTools.undo()\">\n" +
+    "                                <span class=\"fa fa-reply\"></span> Undo\n" +
+    "                            </button>\n" +
+    "                        </li>\n" +
+    "                        <li>\n" +
+    "                            <button class=\"btn btn-default navbar-btn\" ng-click=\"mapTools.redo()\">\n" +
+    "                                <span class=\"fa fa-share\"></span> Redo\n" +
+    "                            </button>\n" +
+    "                        </li>\n" +
+    "                    </ul>\n" +
+    "                    <ul class=\"nav navbar-nav\" ng-show=\"mapTools.current == 'selector'\">\n" +
+    "                        <li>\n" +
+    "                            <button class=\"btn btn-default navbar-btn\" ng-click=\"mapTools.helper('hAlignCenter')\">\n" +
+    "                                <span class=\"fa fa-align-center\"></span> Horizontal Align Center\n" +
+    "                            </button>\n" +
+    "                        </li>\n" +
+    "                        <li>\n" +
+    "                            <button class=\"btn btn-default navbar-btn\" ng-click=\"mapTools.helper('vAlignCenter')\">\n" +
+    "                                <span class=\"fa fa-align-center fa-rotate-90\"></span> Vertical Align Center\n" +
+    "                            </button>\n" +
+    "                        </li>\n" +
+    "                    </ul>\n" +
+    "\n" +
+    "\n" +
+    "                </div>\n" +
+    "            </nav>\n" +
+    "\n" +
+    "            <div class=\"row\">\n" +
+    "                <div class=\"col-md-10\" style=\"height: 600px;\">\n" +
+    "                    <map></map>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "        <div ng-if=\"tab.number == 1\" >\n" +
+    "            <div class=\"row\">\n" +
+    "                <div class=\"col-md-6\">\n" +
+    "                    <h4>Buildings</h4>\n" +
+    "                    <div class=\"row\">\n" +
+    "                        <div class=\"col-md-4 form-group\">\n" +
+    "                            <input type=\"text\" class=\"form-control\" placeholder=\"gorgas\" ng-model=\"newBldg.name\"\n" +
+    "                                   maxlength=\"20\">\n" +
+    "                        </div>\n" +
+    "                        <div class=\"col-md-6 form-group\">\n" +
+    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Gorgas Library\" ng-model=\"newBldg.title\"\n" +
+    "                                   maxlength=\"100\">\n" +
+    "                        </div>\n" +
+    "                        <div class=\"col-md-2 form-group\">\n" +
+    "                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"createBuilding(newBldg)\" ng-disabled=\"uploading\">\n" +
+    "                                <span class=\"fa fa-fw fa-plus\"></span> Add\n" +
+    "                            </button><br>\n" +
+    "                            {{formResponse}}\n" +
+    "                        </div>\n" +
+    "                    </div>\n" +
+    "                    <div class=\"row well\" ng-repeat=\"building in buildings\">\n" +
+    "                        <div class=\"col-md-12 clickable\" ng-if=\"selBldg !== $index\" ng-click=\"openBuilding($index)\">\n" +
+    "                            <a>\n" +
+    "                                {{building.name}} : {{building.title}}\n" +
+    "                            </a>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"col-md-12\" ng-if=\"selBldg == $index\">\n" +
+    "                            <h4>{{building.title}}</h4>\n" +
+    "                            <div class=\"col-md-4 form-group\">\n" +
+    "                                <input type=\"text\" class=\"form-control\" placeholder=\"gorgas\" ng-model=\"building.name\"\n" +
+    "                                       maxlength=\"20\">\n" +
+    "                            </div>\n" +
+    "                            <div class=\"col-md-5 form-group\">\n" +
+    "                                <input type=\"text\" class=\"form-control\" placeholder=\"Gorgas Library\" ng-model=\"building.title\"\n" +
+    "                                       maxlength=\"100\">\n" +
+    "                            </div>\n" +
+    "                            <div class=\"col-md-3 form-group\">\n" +
+    "                                <button type=\"button\" class=\"btn btn-success\" ng-click=\"updateBuilding(building)\" ng-disabled=\"uploading\">\n" +
+    "                                    <span class=\"fa fa-fw fa-edit\"></span>\n" +
+    "                                </button>\n" +
+    "                                <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteBuilding(building)\" ng-disabled=\"uploading\">\n" +
+    "                                    <span class=\"fa fa-fw fa-trash-o\"></span>\n" +
+    "                                </button>\n" +
+    "                                <div>\n" +
+    "                                    {{building.formResponse}}\n" +
+    "                                </div>\n" +
+    "                            </div>\n" +
+    "\n" +
+    "                            <h4>Floors <small>{{building.title}}</small></h4>\n" +
+    "                            <h5>Create New Floor</h5>\n" +
+    "                            <div class=\"row\">\n" +
+    "                                <div floor-fields-list floor=\"newFloor\">\n" +
+    "                                </div>\n" +
+    "                                <div class=\"col-md-4 form-group\">\n" +
+    "                                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"createFloor(newFloor)\" ng-disabled=\"uploading\">\n" +
+    "                                        <span class=\"fa fa-fw fa-plus\"></span> Add New Floor\n" +
+    "                                    </button>\n" +
+    "                                </div>\n" +
+    "                                {{formResponse}}\n" +
+    "                            </div>\n" +
+    "\n" +
+    "                            <div class=\"row well well-sm\" ng-repeat=\"floor in building.floors\">\n" +
+    "                                <div class=\"col-md-12 clickable\" ng-if=\"selFloor !== $index\" ng-click=\"openFloor($index)\">\n" +
+    "                                    <div class=\"col-md-2\">\n" +
+    "                                        <img class=\"thumbnail\" ng-src=\"{{floor.image.url}}\">\n" +
+    "                                    </div>\n" +
+    "                                    <div class=\"col-md-10\">\n" +
+    "                                        {{floor.name}} : {{floor.title}}\n" +
+    "                                    </div>\n" +
+    "                                </div>\n" +
+    "                                <div class=\"row\" ng-if=\"selFloor == $index\">\n" +
+    "                                    <div class=\"col-md-2\">\n" +
+    "                                        <img class=\"thumbnail\" ng-src=\"{{floor.image.url}}\">\n" +
+    "                                    </div>\n" +
+    "                                    <div class=\"col-md-10\">\n" +
+    "                                        <h5>{{floor.title}}</h5>\n" +
+    "                                        <div floor-fields-list floor=\"floor\">\n" +
+    "                                        </div>\n" +
+    "                                        <div class=\"col-md-4 form-group\">\n" +
+    "                                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"updateFloor(floor)\" ng-disabled=\"uploading\">\n" +
+    "                                                <span class=\"fa fa-fw fa-edit\"></span>\n" +
+    "                                            </button>\n" +
+    "                                            <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteFloor(floor)\" ng-disabled=\"uploading\">\n" +
+    "                                                <span class=\"fa fa-fw fa-trash-o\"></span>\n" +
+    "                                            </button>\n" +
+    "                                            <div ng-if=\"floor.formResponse\">\n" +
+    "                                                {{floor.formResponse}}\n" +
+    "                                            </div>\n" +
+    "                                        </div>\n" +
+    "                                    </div>\n" +
+    "                                </div>\n" +
+    "                            </div>\n" +
+    "                        </div>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-3\">\n" +
+    "                    <h4>Computers <small>{{buildings[selBldg].name}}:{{buildings[selBldg].floors[selFloor].name}}</small></h4>\n" +
+    "\n" +
+    "                    <div class=\"col-md-12\" ng-repeat=\"comp in buildings[selBldg].floors[selFloor].desktops\">\n" +
+    "                        {{comp.name}}\n" +
+    "                    </div>\n" +
+    "\n" +
+    "                </div>\n" +
+    "                <div class=\"col-md-3\">\n" +
+    "                    <h4>Unassigned Computers</h4>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </tab>\n" +
+    "</tabset>\n" +
+    "<div ng-if=\"!hasAccess\">\n" +
+    "    <h3>Sorry, you don't have permissions to edit computers</h3>\n" +
+    "</div>\n" +
+    "");
+}]);
+
+angular.module("admin/floorFields.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("admin/floorFields.tpl.html",
+    "<div class=\"col-md-6 form-group\">\n" +
+    "    <input type=\"text\" class=\"form-control\" placeholder=\"first\" ng-model=\"floor.name\"\n" +
+    "           maxlength=\"20\">\n" +
+    "</div>\n" +
+    "<div class=\"col-md-6 form-group\">\n" +
+    "    <input type=\"text\" class=\"form-control\" placeholder=\"First Floor\" ng-model=\"floor.title\"\n" +
+    "           maxlength=\"100\">\n" +
+    "</div>\n" +
+    "<div class=\"col-md-4 form-group\">\n" +
+    "    <label for=\"browse\">Select Floor Plan</label>\n" +
+    "    <div id=\"browse\">\n" +
+    "        <button type=\"file\" ngf-select=\"\" ng-model=\"floor.picFile\" accept=\"image/*\" ngf-multiple=\"false\"\n" +
+    "                ngf-change=\"generateThumb($files, slide)\" class=\"btn btn-primary\">\n" +
+    "            <span class=\"fa fa-fw fa-plus\"></span>Browse\n" +
+    "        </button>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div class=\"col-md-4 form-group\">\n" +
+    "    <label for=\"selected\">Selected Floor Plan Image</label>\n" +
+    "    <div id=\"selected\">\n" +
+    "        <div ng-repeat=\"img in floor.selectedFiles\">\n" +
+    "            <img ngf-src=\"img\" width=\"150px\" height=\"100px\">\n" +
+    "            <button type=\"button\" class=\"btn btn-danger\" ng-click=\"floor.selectedFiles.splice($index,1)\">\n" +
+    "                <span class=\"fa fa-fw fa-close\"></span>\n" +
+    "            </button>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "");
+}]);
+
+angular.module("common/maps/map.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("common/maps/map.tpl.html",
+    "<canvas id=\"map\" class=\"map\"></canvas>");
+}]);
+
+angular.module("signage/signage.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("signage/signage.tpl.html",
+    "<header class=\"page-row\">\n" +
+    "    <nav class=\"navbar navbar-static-top navbar-mega\">\n" +
+    "        <div class=\"container-fluid\">\n" +
+    "            <div class=\"navbar-header\">\n" +
+    "                <p class=\"navbar-text lead\">\n" +
+    "                    <strong>Floor {{computers.buildings[0].floors[0].name}}</strong>\n" +
+    "                </p>\n" +
+    "            </div>\n" +
+    "\n" +
+    "\n" +
+    "            <div class=\"navbar-header navbar-right\">\n" +
+    "                <p class=\"navbar-text lead\">\n" +
+    "                    <strong>Available Computers:</strong>\n" +
+    "                </p>\n" +
+    "                <p class=\"navbar-text lead\">\n" +
+    "                    {{computers.buildings[0].available.desktops}}\n" +
+    "                </p>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </nav>\n" +
+    "</header>\n" +
+    "\n" +
+    "<div class=\"wrap page-row page-row-expanded comp-signage-body\">\n" +
+    "    <canvas id=\"asset_image\" class=\"asset-image\"></canvas>\n" +
+    "</div>\n" +
+    "<footer class=\"page-row\">\n" +
+    "    <nav class=\"navbar navbar-static-bottom navbar-mega\">\n" +
+    "        <div class=\"container-fluid\">\n" +
+    "            <div class=\"nav navbar-nav\">\n" +
+    "                <p class=\"navbar-text\">\n" +
+    "                    <img src=\"ualib-computers-qr.jpg\" style=\"height: 50px;\"/>\n" +
+    "\n" +
+    "                </p>\n" +
+    "                <p class=\"navbar-text\">\n" +
+    "                    For computer availability in all libraries<br> visit <a href=\"#\">www.lib.ua.edu/computers</a>\n" +
+    "                </p>\n" +
+    "            </div>\n" +
+    "\n" +
+    "            <div class=\"nav navbar-nav navbar-right\">\n" +
+    "                <p class=\"navbar-text lead\">\n" +
+    "                    <strong>Apple:</strong>\n" +
+    "                </p>\n" +
+    "                <p class=\"navbar-text\">\n" +
+    "                    <span class=\"apple available\"></span> available<br> <span class=\"apple taken\"></span> taken\n" +
+    "                </p>\n" +
+    "            </div>\n" +
+    "            <div class=\"nav navbar-nav navbar-right\">\n" +
+    "                <p class=\"navbar-text lead\">\n" +
+    "                    <strong>Windows:</strong>\n" +
+    "                </p>\n" +
+    "                <p class=\"navbar-text\">\n" +
+    "                    <span class=\"windows available\"></span> available<br> <span class=\"windows taken\"></span> taken\n" +
+    "                </p>\n" +
+    "            </div>\n" +
+    "\n" +
+    "        </div>\n" +
+    "    </nav>\n" +
+    "</footer>\n" +
+    "");
+}]);
+
+angular.module('ualib.compfinder.admin', [
+    'ualib.compfinder.mapsDirective',
+    'ualib.compfinder.service',
+    'ngFileUpload'
+])
+    .constant('SOFTWARE_GROUP', 64)
+
+    .run(['$rootScope', function($rootScope) {
+        $rootScope.userInfo = {};
+    }])
+
+    .config(['$routeProvider', function($routeProvider){
+        $routeProvider
+            .when('/computers/admin/', {
+                reloadOnSearch: false,
+                resolve: {
+                    mapData: ['Computers', function(Computers){
+                        return Computers.init({}, {noRefresh: true});
+                    }],
+                    userData: function(tokenReceiver){
+                        return tokenReceiver.getPromise();
+                    }
+                },
+                templateUrl: 'admin/admin.tpl.html',
+                controller: 'ComputersAdminCtrl'
+            });
+    }])
+
+    .controller('ComputersAdminCtrl', ['$scope', '$timeout', 'Computers', 'userData', 'SOFTWARE_GROUP', 'AuthService', 'compSoftFactory', 'Upload', 'SW_API',
+    function($scope, $timeout, Computers, userData, SOFTWARE_GROUP, AuthService, compSoftFactory, Upload, API){
+        $scope.userInfo = AuthService.isAuthorized();
+        $scope.buildings = [];
+        $scope.unassigned = [];
+        $scope.newBldg = {};
+        $scope.newBldg.name = "";
+        $scope.newBldg.title = "";
+        $scope.newFloor = {};
+        $scope.newFloor.name = "";
+        $scope.newFloor.title = "";
+        $scope.newFloor.selectedFiles = [];
+        $scope.selBldg = 0;
+        $scope.selFloor = 0;
+
+        $scope.hasAccess = false;
+        if (angular.isDefined($scope.userInfo.group)) {
+            /*jslint bitwise: true*/
+            if ((parseInt($scope.userInfo.group) & SOFTWARE_GROUP) === SOFTWARE_GROUP) {
+                $scope.hasAccess = true;
+                $scope.buildings = Computers.buildings;
+                $scope.unassigned = Computers.unassigned;
+                console.dir(Computers);
+            }
+            /*jslint bitwise: false*/
+        }
+
+        $scope.tabs = [
+            { name: 'Map',
+                number: 0,
+                active: true
+            },
+            { name: 'List',
+                number: 1,
+                active: false
+            }
+        ];
+
+        $scope.deleteComputer = function(computer, parentArray){
+            if (confirm("Delete " + computer.name  + " permanently?") === true){
+                $scope.uploading = true;
+                compSoftFactory.computers().delete({compID: computer.compid})
+                    .$promise.then(function(data){
+                        $scope.uploading = false;
+                        parentArray.splice(parentArray.indexOf(computer), 1);
+                    }, function(data, status){
+                        $scope.uploading = false;
+                        $scope.formResponse = "Error: Could not delete computer! " + data;
+                        console.dir(data);
+                    });
+            }
+        };
+
+        $scope.updateComputers = function(compArray){
+            $scope.uploading = true;
+            compSoftFactory.computers().save({}, compArray)
+                .$promise.then(function(data){
+                    $scope.uploading = false;
+                    $scope.formResponse = data.message;
+                }, function(data, status){
+                    $scope.uploading = false;
+                    $scope.formResponse = "Error: Could not update computers! " + data;
+                    console.dir(data);
+                });
+        };
+
+        $scope.validateBldg = function(building) {
+            if (building.name.length < 1) {
+                return "Form error: Please fill out building name!";
+            }
+            if (building.title.length < 1) {
+                return "Form error: Please fill out building title!";
+            }
+            return "";
+        };
+        $scope.deleteBuilding = function(building){
+            if (confirm("Delete " + building.title  + " permanently?") === true){
+                $scope.uploading = true;
+                compSoftFactory.buildings().delete({buildingID: building.bid})
+                    .$promise.then(function(data){
+                        $scope.uploading = false;
+                        $scope.buildings.splice($scope.buildings.indexOf(building), 1);
+                    }, function(data, status){
+                        $scope.uploading = false;
+                        $scope.formResponse = "Error: Could not delete building! " + data;
+                        console.dir(data);
+                    });
+            }
+        };
+        $scope.updateBuilding = function(building){
+            building.formResponse = $scope.validateBldg(building);
+            if (building.formResponse.length < 1) {
+                $scope.uploading = true;
+                compSoftFactory.buildings().save({buildingID: building.bid}, building)
+                    .$promise.then(function (data) {
+                        $scope.uploading = false;
+                        building.formResponse = data.message;
+                    }, function (data, status) {
+                        $scope.uploading = false;
+                        building.formResponse = "Error: Could not update building! " + data;
+                        console.dir(data);
+                    });
+            }
+        };
+        $scope.createBuilding = function(building){
+            $scope.formResponse = $scope.validateBldg(building);
+            if ($scope.formResponse.length < 1) {
+                $scope.uploading = true;
+                compSoftFactory.buildings().save({}, building)
+                    .$promise.then(function (data) {
+                        $scope.uploading = false;
+                        if (angular.isDefined(data.bid) ) {
+                            var newBldg = {};
+                            newBldg.bid = data.bid;
+                            newBldg.name = building.name;
+                            newBldg.title = building.title;
+                            $scope.buildings.push(newBldg);
+                        }
+                        $scope.formResponse = data.message;
+                    }, function (data, status) {
+                        $scope.uploading = false;
+                        $scope.formResponse = "Error: Could not create building! " + data;
+                        console.dir(data);
+                    });
+            }
+        };
+        $scope.openBuilding = function(index) {
+            $scope.selBldg = index;
+        };
+        $scope.openFloor = function(index) {
+            $scope.selFloor = index;
+        };
+
+        $scope.validateFloor = function(floor) {
+            if (floor.name.length < 1) {
+                return "Form error: Please fill out floor name!";
+            }
+            if (floor.title.length < 1) {
+                return "Form error: Please fill out floor title!";
+            }
+            return "";
+        };
+        $scope.deleteFloor = function(floor){
+            if (confirm("Delete " + floor.title  + " permanently?") === true){
+                $scope.uploading = true;
+                compSoftFactory.floors().delete({floorID: floor.fid})
+                    .$promise.then(function(data){
+                        $scope.uploading = false;
+                        $scope.buildings[$scope.selBldg].floors.splice($scope.selFloor, 1);
+                    }, function(data, status){
+                        $scope.uploading = false;
+                        $scope.formResponse = "Error: Could not delete floor! " + data;
+                        console.dir(data);
+                    });
+            }
+        };
+        $scope.updateFloor = function(floor){
+            floor.formResponse = $scope.validateFloor(floor);
+            if (floor.formResponse.length > 0) {
+                return false;
+            }
+            $scope.uploading = true;
+            if (floor.selectedFiles.length < 1){
+                compSoftFactory.floors().save({floorID: floor.fid}, floor)
+                    .$promise.then(function(data){
+                        $scope.uploading = false;
+                        floor.formResponse = data.message;
+                    }, function(data, status){
+                        $scope.uploading = false;
+                        floor.formResponse = data.message;
+                        console.dir(data);
+                    });
+            } else {
+                var names = [];
+                for (var i = 0; i < floor.selectedFiles.length; i++) {
+                    names.push(floor.selectedFiles[i].name);
+                }
+                floor.selectedFiles.upload = Upload.upload({
+                    url: API + 'floors/' + floor.fid,
+                    method: 'POST',
+                    fields: {
+                        floorMap: floor
+                    },
+                    file: floor.selectedFiles,
+                    fileFormDataName: names
+                });
+                floor.selectedFiles.upload.then(function(res) {
+                    $timeout(function() {
+                        floor.selectedFiles.length = 0;
+                        floor.picFile.length = 0;
+                        if (angular.isDefined(res.data.map_file) && angular.isDefined(res.data.width) && angular.isDefined(res.data.height)) {
+                            floor.image.url = res.data.map_file;
+                            floor.image.width = res.data.width;
+                            floor.image.height = res.data.height;
+                        }
+                        floor.formResponse = res.data.message;
+                        $scope.uploading = false;
+                    });
+                }, function(response) {
+                    if (response.status > 0) {
+                        floor.formResponse = response.status + ': ' + response.data;
+                    }
+                    $scope.uploading = false;
+                });
+                floor.selectedFiles.upload.progress(function(evt) {
+                    // Math.min is to fix IE which reports 200% sometimes
+                    floor.selectedFiles.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+                });
+            }
+        };
+        $scope.createFloor = function(floor){
+            $scope.formResponse = $scope.validateFloor(floor);
+            if ($scope.formResponse.length > 0) {
+                return false;
+            }
+            floor.bid = $scope.buildings[$scope.selBldg].bid;
+            $scope.uploading = true;
+            if (floor.selectedFiles.length < 1){
+                compSoftFactory.floors().save({}, floor)
+                    .$promise.then(function(data){
+                        $scope.uploading = false;
+                        if (angular.isDefined(data.fid)) {
+                            var newFloor = {};
+                            newFloor.fid = data.fid;
+                            newFloor.bid = floor.bid;
+                            newFloor.image = {};
+                            newFloor.image.url = "";
+                            newFloor.image.width = 0;
+                            newFloor.image.height = 0;
+                            newFloor.name = floor.name;
+                            newFloor.title = floor.title;
+                            newFloor.selectedFiles = [];
+                            $scope.buildings[$scope.selBldg].floors.push(newFloor);
+                        }
+                        $scope.formResponse = data.message;
+                    }, function(data, status){
+                        $scope.uploading = false;
+                        $scope.formResponse = data.message;
+                        console.dir(data);
+                    });
+            } else {
+                var names = [];
+                for (var i = 0; i < floor.selectedFiles.length; i++) {
+                    names.push(floor.selectedFiles[i].name);
+                }
+                floor.selectedFiles.upload = Upload.upload({
+                    url: API + 'floors/',
+                    method: 'POST',
+                    fields: {
+                        floorMap: floor
+                    },
+                    file: floor.selectedFiles,
+                    fileFormDataName: names
+                });
+                floor.selectedFiles.upload.then(function(res) {
+                    $timeout(function() {
+                        $scope.uploading = false;
+                        if (angular.isDefined(res.data.fid) && angular.isDefined(res.data.map_file) &&
+                            angular.isDefined(res.data.width) && angular.isDefined(res.data.height)) {
+                            var newFloor = {};
+                            newFloor.fid = res.data.fid;
+                            newFloor.bid = floor.bid;
+                            newFloor.image = {};
+                            newFloor.image.url = res.data.map_file;
+                            newFloor.image.width = res.data.width;
+                            newFloor.image.height = res.data.height;
+                            newFloor.name = floor.name;
+                            newFloor.title = floor.title;
+                            newFloor.selectedFiles = [];
+                            $scope.buildings[$scope.selBldg].floors.push(newFloor);
+                        }
+                        $scope.formResponse = res.data.message;
+                    });
+                }, function(response) {
+                    $scope.uploading = false;
+                    if (response.status > 0) {
+                        $scope.formResponse = response.status + ': ' + response.data;
+                    }
+                });
+                floor.selectedFiles.upload.progress(function(evt) {
+                    // Math.min is to fix IE which reports 200% sometimes
+                    floor.selectedFiles.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+                });
+            }
+        };
+
+    }])
+
+    .controller('floorFieldsCtrl', ['$scope', '$timeout', 'Upload',
+        function floorFieldsCtrl($scope, $timeout, Upload){
+            $scope.generateThumb = function(files) {
+                if (files.length > 0 && files !== null) {
+                    $scope.floor.selectedFiles.push(files[0]);
+                    if ($scope.fileReaderSupported && files[0].type.indexOf('image') > -1) {
+                        $timeout(function() {
+                            var fileReader = new FileReader();
+                            fileReader.readAsDataURL(files[0]);
+                            fileReader.onload = function(e) {
+                                $timeout(function() {
+                                    files[0].dataUrl = e.target.result;
+                                });
+                            };
+                        });
+                    }
+                }
+            };
+        }])
+
+    .directive('floorFieldsList', ['$timeout', function($timeout) {
+        return {
+            restrict: 'AC',
+            scope: {
+                floor: '='
+            },
+            controller: 'floorFieldsCtrl',
+            link: function(scope, elm, attrs){
+            },
+            templateUrl: 'admin/floorFields.tpl.html'
+        };
+    }]);
+
+angular.module('ualib.compfinder', [
+    'ngRoute',
+    'ngResource',
+    'oc.lazyLoad',
+    'compfinder.templates',
+    'ualib.compfinder.admin',
+    'ualib.compfinder.signage'
+])
+
+    .value('mapStyles', {
+        desktops: {
+            available: {
+                shape: 'fillRect',
+                color: '#61a661'
+            },
+            taken: {
+                shape: 'strokeRect',
+                color: '#eee'
+            }
+        }
+    })
+
+    .config(['$routeProvider', '$ocLazyLoadProvider', function($routeProvider, $ocLazyLoadProvider) {
+        $ocLazyLoadProvider.config({
+            modules: [
+                {
+                    name: 'angular.filter',
+                    files: ['//cdnjs.cloudflare.com/ajax/libs/angular-filter/0.5.8/angular-filter.min.js']
+                },
+                {
+                    name: 'monospaced.mousewheel',
+                    files: [
+                        'vendor/hamster.js',
+                        'vendor/mousewheel.js'
+                    ]
+                }
+            ]
+        });
+
+    }]);
+
+angular.module('compfinder', ['ualib.compfinder']);
+angular.module('ualib.compfinder.service', [
+    'ualib.compfinder.factory'
+])
+
+    .service('Computers', ['compSoftFactory', '$timeout', '$q', '$rootScope', function(compSoftFactory, $timeout, $q, $rootScope){
+        var _params = {};
+        var _options = {
+            noRefresh: false
+        };
+        var _refresh = null;
+        var _cancel = false;
+        var self = this;
+
+        this.buildings = [];
+        
+        this.init = function(params, opt){
+            var deferred = $q.defer();
+            params = angular.isDefined(params) ? params : {};
+            _params = params;
+            opt = angular.isDefined(opt) ? opt : {};
+
+
+            angular.extend(_options, opt);
+
+            if (_refresh) {
+                self.cancelRefresh();
+            }
+            
+            getComputers().$promise.then(function(data){
+                self.buildings = angular.copy(data.buildings);
+                if (_options.noRefresh === false){
+                    refresh();
+                }
+                deferred.resolve();
+            });
+
+            return deferred.promise;
+        };
+
+        this.cancelRefresh = function(){
+            var _cancel = true;
+        };
+        
+        function refresh(){
+            if (!_cancel){
+                _refresh = $timeout(function(){
+                    getComputers().$promise.then(function(data){
+                        self.buildings = angular.copy(data.buildings);
+                        refresh();
+                    });
+                }, 8000);
+            }
+            else {
+                $timeout.cancel(_refresh);
+            }
+        }
+        
+        function getComputers(){
+            if (_params.hasOwnProperty('floor')){
+                return compSoftFactory.floors().get(_params, function(data){
+                    return data;
+                }, function(data, status, headers, config) {
+                    console.log('ERROR: Computers and Software');
+                    console.log({
+                        data: data,
+                        status: status,
+                        headers: headers,
+                        config: config
+                    });
+                });
+            }
+            else {
+                return compSoftFactory.buildings().get(_params, function(data){
+                    return data;
+                }, function(data, status, headers, config) {
+                    console.log('ERROR: Computers and Software');
+                    console.log({
+                        data: data,
+                        status: status,
+                        headers: headers,
+                        config: config
+                    });
+                });
+            }
+        }
+        
+        
+
+    }]);
+angular.module('ualib.compfinder.factory', [])
+    .constant('DOMAIN', 'https://wwwdev2.lib.ua.edu/')
+    .constant('WP_API', 'https://wwwdev2.lib.ua.edu/wp-json/wp/v2/')
+    .constant('SW_API', 'https://wwwdev2.lib.ua.edu/softwareList/api/')
+
+    .config(['$httpProvider', function($httpProvider) {
+        $httpProvider.interceptors.push('AuthInterceptor');
+    }])
+
+    .factory('AuthInterceptor', ['AuthService', 'DOMAIN', function (AuthService, DOMAIN) {
+        return {
+            // automatically attach Authorization header
+            request: function(config) {
+                config.headers = config.headers || {};
+
+                //interceptor for UALib JWT tokens
+                var token = AuthService.getToken();
+                if(config.url.indexOf(DOMAIN) === 0 && token) {
+                    config.headers.Authorization = "Bearer " + token;
+                }
+
+                //interceptor for WordPress nonce headers
+                if (typeof myLocalized !== 'undefined') {
+                    config.headers['X-WP-Nonce'] = myLocalized.nonce;
+                } else {
+                    console.log("myLocalized script is not defined, cannot read WP nonce.");
+                }
+                return config;
+            },
+
+            // If a token was sent back, save it
+            response: function(res) {
+                if(res.config.url.indexOf(DOMAIN) === 0 && angular.isDefined(res.data.token)) {
+                    AuthService.saveToken(res.data.token);
+                }
+                return res;
+            }
+        };
+    }])
+
+    .service('AuthService', ['$window', function($window){
+        var self = this;
+
+        self.parseJWT = function(token) {
+            var base64Url = token.split('.')[1];
+            var base64 = base64Url.replace('-', '+').replace('_', '/');
+            return JSON.parse($window.atob(base64));
+        };
+        self.saveToken = function(token) {
+            $window.localStorage['ualibweb.Token'] = token;
+            console.log('Token saved');
+        };
+        self.getToken = function() {
+            return $window.localStorage['ualibweb.Token'];
+        };
+        self.isAuthorized = function() {
+            var token = self.getToken();
+            if (token) {
+                var params = self.parseJWT(token);
+                if (Math.round(new Date().getTime() / 1000) <= params.exp) {
+                    console.log('Authenticated.');
+                    return params.user;
+                }
+            }
+            console.log('Authentication failed.');
+            return false;
+        };
+        self.logout = function() {
+            $window.localStorage.removeItem('ualibweb.Token');
+            console.log('Token deleted');
+        };
+    }])
+
+    .service('tokenReceiver', ['$http', 'WP_API', function($http, API){
+        this.promise = null;
+        function makeRequest() {
+            return $http.get(API + 'users/me')
+                .then(function(r1){
+                    if (angular.isDefined(r1.data.id)) {
+                        $http.get(API + 'users/' + r1.data.id, {context: 'edit'})
+                            .then(function (r2) {
+                                return r2.data;
+                            });
+                    }
+                });
+        }
+        this.getPromise = function(update){
+            if (update || !this.promise) {
+                this.promise = makeRequest();
+            }
+            return this.promise;
+        };
+    }])
+
+    .factory('compSoftFactory', ['$resource', '$http', 'SW_API', function($resource, $http, API){
+
+        function getTotalAvail(array, prop){
+            prop = angular.isUndefined(prop) ? 'desktops' : prop;
+            return array.filter(function(item){
+                return prop === 'desktops' ? item.status === 3 : item.available === 0;
+            }).length;
+        }
+
+        function appendTransform(defaults, transform) {
+
+            // We can't guarantee that the default transformation is an array
+            defaults = angular.isArray(defaults) ? defaults : [defaults];
+            //console.log(defaults.concat(transform));
+            // Append the new transformation to the defaults
+            return defaults.concat(transform);
+        }
+
+        function buildingsTransform(data){
+            var b = angular.fromJson(data);
+            var buildings = [];
+
+            angular.forEach(b.buildings, function(building, idx){
+                var desktops = 0;
+                var laptops = 0;
+
+                for (var i = 0, len = building.floors.length; i < len; i++){
+                    var floor = {available: {}, selectedFiles: []};
+
+                    if (building.floors[i].hasOwnProperty('desktops')){
+                        var d = getTotalAvail(building.floors[i].desktops, 'desktops');
+                        floor.available.desktops = d;
+                        desktops += d;
+                    }
+
+                    if (building.floors[i].hasOwnProperty('laptops')){
+                        var l = getTotalAvail(building.floors[i].laptops, 'laptops');
+                        floor.available.laptops = l;
+                        laptops += l;
+                    }
+
+                    building.floors[i] = angular.extend({}, building.floors[i], floor);
+
+                }
+
+                building.available = {
+                    desktops: desktops,
+                    laptops: laptops
+                };
+
+                buildings.push(building);
+            });
+
+            b.buildings = buildings;
+            return b;
+        }
+
+        return {
+            buildings: function(){
+                console.log("compSoftFactory.Buildings");
+                return $resource(API + 'buildings/:buildingID', {buildingID:'@buildingID'}, {
+                    get: {
+                        method: 'GET',
+                        transformResponse: appendTransform($http.defaults.transformResponse, buildingsTransform)
+                    }
+                });
+            },
+            floors: function(){
+                console.log("compSoftFactory.Floors");
+                return $resource(API + 'floors/:floorID', {floorID:'@floorID'}, {
+                    get: {
+                        method: 'GET',
+                        url: API + 'buildings/:building/floors/:floor',
+                        transformResponse: appendTransform($http.defaults.transformResponse, buildingsTransform)
+                    }
+                });
+            },
+            computers: function(){
+                console.log("compSoftFactory.Computers");
+                return $resource(API + 'computers/:compID', {compID:'@compID'});
+            }
+        };
+    }]);
+angular.module('ualib.compfinder.mapsDirective', [
+    'ualib.compfinder.maps',
+    'ualib.compfinder.mapTools',
+    'ualib.compfinder.service'
+])
+
+    .directive('map', ['$maps', '$mapTools','Computers', '$timeout', '$window',  function($maps, $mapTools, Computers, $timeout, $window){
+        return{
+            restrict: 'EA',
+            replace: true,
+            template: '<canvas id="map" class="map" ng-class="mapTools.current" msd-wheel="mapTools.zoom($event, $delta)"></canvas>',
+            link: function(scope, elm){
+                
+                scope.mapTools = $mapTools;
+
+                $maps.init({
+                    src: 'https://wwwdev2.lib.ua.edu/' + scope.buildings[scope.selBldg].floors[scope.selFloor].image.url,
+                    canvas: elm[0], 
+                    objects: {
+                        desktops: scope.buildings[scope.selBldg].floors[scope.selFloor].desktops
+                    }
+                }).then(function(){
+                    scope.mapTools.init();
+                });
+
+                scope.reset = function(){
+                    $maps.setDefaults();
+                    $maps.draw();
+                    //$mapTools.zoomSlider.init();
+                };
+
+
+                /*scope.$on('detail-toggle', function(){
+                 $timeout(function(){
+                 $maps.refactor({width: detailElm.offsetWidth});
+                 }, 100);
+                 });
+
+                 scope.reset = function(){
+                 $maps.setDefaults();
+                 $maps.draw();
+                 $mapTools.zoomSlider.init();
+                 };
+
+                 scope.mouseZoom = function(event, delta){
+                 if (zooming){
+                 scope.mapTools.current = delta > 0 ? 'zoom-in' : 'zoom-out';
+                 scope.mapTools.zoom(event, delta);
+                 }
+                 };*/
+
+                angular.element($window).bind('resize', function(){
+                    $maps.resizeCanvas();
+                    $maps.resizeImage();
+                    $maps.posImage();
+                    $maps.draw();
+                });
+
+            }
+        };
+    }]);
+
+
+angular.module('ualib.compfinder.mapObjects', [])
+
+    .service('$mapObjects', ['$maps', '$q', '$filter', '$rootScope', function($maps, $q, $filter, $rootScope){
+        var self = this;
+        var undoStates = [];
+        var redoStates = [];
+        this.selected = [];
+        this.state = [];
+       
+
+        this.selectBounds = {};
+
+        this.init = function(objects){
+            self.state = collapseObjects(objects);
+        };
+
+        this.select = function(func){
+            self.state = self.state.map(function(o){
+                o.selected = func(o);
+                return o;
+            });
+            return self.getSelected();
+        };
+
+        this.getSelected = function(){
+            return self.selected.length > 0 ? self.selected : self.state.filter(function(obj){
+                return obj && obj.hasOwnProperty('selected') && obj.selected;
+            });
+        };
+
+        this.update = function(objects){
+            objects = objects ? objects : self.getSelected();
+            self.state = angular.extend([], objects, self.state);
+            var expanded = expandObjects(self.state);
+            angular.copy(expanded, $maps.objects);
+            console.log(angular.copy($maps.objects));
+            $rootScope.$broadcast('mapObjectsUpdated');
+
+        };
+
+        this.recordState = function(objects){
+            objects = objects ? objects : self.getSelected();
+            undoStates.push(angular.copy(objects));
+        };
+
+        this.undo = function(){
+            console.log('undo????');
+            if (undoStates.length > 0){
+                console.log('UNDOOOO!!!!');
+                redoStates.push(self.getSelected());
+                var undo = undoStates.pop();
+                self.update(undo);
+            }
+        };
+
+        this.redo = function(){
+            if (redoState.length > 0){
+                undoStates.push(angular.copy(self.state));
+                angular.copy(redoStates.pop(), self.state);
+            }
+        };
+
+        this.centerOfSelection = function(objects){
+            objects = objects ? objects : self.getSelected();
+
+            var maxX = getMax(objects, 'x');
+            var maxY = getMax(objects, 'y');
+            var minX = getMin(objects, 'x');
+            var minY = getMin(objects, 'y');
+
+            //self.selectBounds = self.boundsOfSelection(objects);
+
+            var vcenter = ((maxX - minX)/2) + minX;
+            var hcenter = ((maxY - minY)/2) + minY;
+            return {
+                x: vcenter,
+                y: hcenter
+            };
+        };
+
+        this.setSelectionBounds = function(objects){
+            objects = objects ? objects : self.getSelected();
+
+            var maxX = getMax(objects, 'x');
+            var maxY = getMax(objects, 'y');
+            var minX = getMin(objects, 'x');
+            var minY = getMin(objects, 'y');
+
+            self.selectBounds = {x: minX, y: minY, w: (maxX - minX + 15), h: (maxY - minY + 15)};
+        };
+
+        function getSelected(obj){
+            if (angular.isObject(obj)){
+                return getSelected();
+            }
+
+            return obj.filter(function(comp){
+                return comp.selected;
+            });
+        }
+
+        // Adopted from http://stackoverflow.com/questions/11149843/get-largest-value-in-multi-dimensional-array-javascript-or-coffeescript
+        function getMax(objects, coord){
+            return objects.reduce(function(max, arr) {
+                return max >= parseInt(arr.coordinates[coord]) ? max : parseInt(arr.coordinates[coord]);
+            }, -Infinity);
+        }
+
+        function getMin(objects, coord){
+            return objects.reduce(function(min, arr) {
+                return arr.coordinates[coord] < min ? arr.coordinates[coord] : min;
+            }, Infinity);
+        }
+
+        function collapseObjects(objects){
+            var collapsed = [];
+
+            function collapseMapper(o){
+                o.oType = obj;
+                return o;
+            }
+
+            for (var obj in objects){
+                if (objects.hasOwnProperty(obj)){
+                    var newObj = objects[obj].map(collapseMapper);
+                    collapsed = collapsed.concat(newObj);
+                }
+            }
+            return collapsed;
+        }
+
+        function expandObjects(objects){
+            var expanded = {};
+            objects.map(function(obj){
+                var newObj = {};
+                for (var p in obj){
+                    if (obj.hasOwnProperty(p) && p !== 'oType'){
+                        newObj[p] = obj[p];
+                    }
+                }
+                if (expanded.hasOwnProperty(obj.oType)){
+                    expanded[obj.oType].push(newObj);
+                }
+                else {
+                    expanded[obj.oType] = [];
+                    expanded[obj.oType].push(newObj);
+                }
+            });
+            return expanded;
+        }
+
+    }]);
+angular.module('ualib.compfinder.mapTools', [
+    'ualib.compfinder.mapObjects'
+])
+    .service('$mapTools', ['$maps', '$mapObjects', '$document', '$window', '$location', function MapTools($maps, $mapObjects, $document, $window, $location){
+        var self = this;
+        var offset;
+        var tool;
+        var canvas;
+        this.canvasEventPause = false;
+
+        this.current = null;
+        this.prev = null;
+
+        this.mapUndoStates = [];
+
+        this.init = function(){
+            var defaultTool = $location.search().tool || 'selector';
+            $mapObjects.init($maps.objects);
+            canvas = angular.element($maps.canvas);
+            offset = getOffset($maps.canvas);
+            self.select(defaultTool);
+            readyCanvas();
+        };
+
+        this.destroy = function(){
+            canvas.unbind();
+            $document.unbind();
+        };
+
+        this.select = function(newTool){
+            if (newTool !== self.current){
+                self.prev = self.current;
+                tool = new Tools[newTool]();
+                self.current = newTool;
+                $location.search('tool', self.current);
+                $location.replace();
+            }
+        };
+
+        this.prevTool = function(){
+            if (angular.isDefined(self.prev)){
+                self.select(self.prev);
+            }
+        };
+
+        this.helper = function(helper){
+            if (angular.isObject(tool) && tool.hasOwnProperty(helper) && angular.isFunction(tool[helper])){
+                tool[helper]();
+            }
+        };
+
+        function readyCanvas(){
+            canvas.bind('mousedown', function(ev){
+                canvasEvent(ev);
+                $document.bind('mousedown', toolCursor);
+                $document.bind('mouseup', toolCursor);
+                $document.bind('mouseup', toolChangedImage);
+            });
+            /*canvas.bind('mousemove', function(ev){
+             ev = self.mouseLoc(ev);
+             if (mouseInBounds($maps.x, $maps.y, $maps.x2, $maps.y2, ev.mx, ev.my)){
+             if (!hover) hover = true;
+             angular.element('body').addClass(self.current);
+             canvas.bind('mousedown', canvasEvent);
+             }
+             else if (hover){
+             hover = false;
+             angular.element('body').removeClass(self.current);
+             }
+             });
+             canvas.bind('mouseup', toolChangedImage);*/
+        }
+
+        function toolCursor(ev){
+            if (ev.type === 'mousedown'){
+                $document.find('body').addClass(self.current);
+            }
+            else if (ev.type === 'mouseup'){
+                $document.find('body').removeClass(self.current);
+                $document.unbind('mousedown', toolCursor);
+            }
+        }
+
+        function canvasEvent(ev){
+            if (!self.canvasEventPause){
+                ev = self.mouseLoc(ev); //set current mouse (mx, my)
+                var func = tool[ev.type];
+                if (func){
+                    func(ev);
+                }
+            }
+            return ev.preventDefault() && false;
+        }
+
+        function toolChangedImage(){
+            $maps.changed = true;
+            canvas.unbind('mouseup', toolChangedImage);
+        }
+
+        this.mouseLoc = function(ev){
+            ev.mx = ev.pageX - offset.left;
+            ev.my = ev.pageY - offset.top;
+            return ev;
+        };
+
+        function getBounds(x, y, w, h){
+            var x1, y1, x2, y2;
+
+            if (w < 0){
+                x1 = x + w;
+                x2 = x;
+            }
+            else {
+                x1 = x;
+                x2 = x + w;
+            }
+
+            if (h < 0){
+                y1 = y + h;
+                y2 = y;
+            }
+            else {
+                y1 = y;
+                y2 = y + h;
+            }
+
+            return {x1: x1, y1: y1, x2: x2, y2: y2};
+
+        }
+
+        function mouseInBounds(x1, y1, w, h, mx, my){
+            var x2 = x1+w;
+            var y2 = y1+h;
+            //console.log(mx +' > '+ x1 +' && '+ my +' > '+ y1 +' && '+ mx +' < '+ x2 +' && '+ my +' < '+ y2);
+            return (mx > x1 && my > y1 && mx < x2 && my < y2);
+        }
+
+        function inRectBounds(x1, y1, w1, h1, rx, ry, rw, rh){
+            // get x2,y2 of object being checked
+            var x2 = w1+x1;
+            var y2 = h1+y1;
+            // get bounds of select rect
+            var bounds = getBounds(rx, ry, rw, rh);
+            //console.log(bounds.x1 +' < '+ x1 +' && '+ bounds.y1 +' < '+ y1 +' && '+ bounds.x2 +' > '+ x2 +' && '+ bounds.y2 +' > '+ y2);
+            return (bounds.x1 < x1 && bounds.y1 < y1 && bounds.x2 > x2 && bounds.y2 > y2);
+
+        }
+
+        function getOffset(elm){
+            var rect = elm.getBoundingClientRect();
+            //return {top: rect.top, left: rect.left};
+            var doc = elm.ownerDocument;
+            var docElem = doc.documentElement;
+
+            return {
+                top: rect.top + $window.pageYOffset - docElem.clientTop,
+                left: rect.left + $window.pageXOffset - docElem.clientLeft
+            };
+        }
+
+        this.map = function(val, xMin, xMax, yMin, yMax) {
+            return (val - xMax) / (xMin - xMax) * (yMax - yMin) + yMin;
+        };
+
+        //Buttons - these are not selectable tools, but perform a single redefined function
+        this.zoomSlider = {
+            height: 0,
+            pos: 0,
+            elm: null,
+            init: function(){
+                self.zoomSlider.height = self.zoomSlider.elm.offsetHeight-2;
+                self.zoomSlider.defaultPos();
+            },
+            defaultPos: function(){ self.zoomSlider.pos = self.map($maps.scalar, $maps.maxScale, $maps.minScale, self.zoomSlider.height, 0); }
+        };
+
+        this.zoom = function(ev, delta, deltaX, deltaY){
+            // extend event variable with mouse location
+            ev = self.mouseLoc(ev);
+            var slideBarY;
+            var dScale;
+            var zoomCenter = true;
+
+            if (!delta){
+                var pos = ev.my - self.zoomSlider.height;
+                dScale = self.map(pos, 0, self.zoomSlider.height, $maps.minScale, $maps.maxScale);
+                delta = dScale - $maps.scalar;
+            }
+            else{
+                delta = delta/10;
+                dScale = Math.round(($maps.scalar + delta) * 1e1) / 1e1;
+
+                zoomCenter = mouseInBounds($maps.x, $maps.y, $maps.x2, $maps.y2, ev.mx, ev.my) ? false : true;
+            }
+
+            // If mouse is not over the image, zoom from the center of the image instead of mouse location (ev.mx, ev.my)
+            if (zoomCenter){
+                ev.mx = ($maps.x + $maps.x2)/2;
+                ev.my = ($maps.y + $maps.y2)/2;
+            }
+            //var clipScale = Math.min(Math.max($maps.minScale, dScale), $maps.maxScale);
+            //If dScale is within scale limits
+            if (!(dScale < $maps.minScale || dScale > $maps.maxScale)){
+
+                $maps.x = ev.mx - ($maps.scalar + delta) * ((ev.mx-$maps.x) / $maps.scalar);
+                $maps.y = ev.my - ($maps.scalar + delta) * ((ev.my-$maps.y) / $maps.scalar);
+
+                $maps.scalar = dScale;
+                $maps.width = $maps.image.width*$maps.scalar;
+                $maps.height = $maps.image.height*$maps.scalar;
+
+                $maps.draw();
+            }
+            //set slideBarY position
+            slideBarY = self.map(dScale, $maps.maxScale, $maps.minScale, self.zoomSlider.height, 0);
+
+            //zoom slider bar position - always changes, but differently depending on mousewheel or slider zoom
+            self.zoomSlider.pos = Math.min(Math.max(slideBarY, 0), self.zoomSlider.height);
+            return ev.preventDefault() && false;
+        };
+
+        this.undo = function(){
+            $mapObjects.undo();
+            $maps.draw();
+        };
+
+        this.redo = function(){
+            $mapObjects.redo();
+            $maps.draw();
+        };
+
+
+        //Tools - only one can be selected at a time
+        var Tools = {
+            selector: function () {
+                var self = this;
+                var mox = 0;
+                var moy = 0;
+                var ox = 0;
+                var oy = 0;
+                var offsets = [];
+                var selected = [];
+                var selectRectOffset = {};
+
+                this.mousedown = function (ev) {
+                    mox = ev.mx;
+                    moy = ev.my;
+
+                    ox = (ev.mx - $maps.x) / $maps.scalar;
+                    oy = (ev.my - $maps.y) / $maps.scalar;
+
+                    if (($maps.objects.hasOwnProperty('selectRect') && !mouseInBounds($maps.objects.selectRect.x, $maps.objects.selectRect.y, $maps.objects.selectRect.w, $maps.objects.selectRect.h, ox, oy)) || !$maps.objects.hasOwnProperty('selectRect')) {
+                        selected = $mapObjects.select(function (obj) {
+                            return mouseInBounds(obj.mapX, obj.mapY, 10, 10, (ev.mx - $maps.x) / $maps.scalar, (ev.my - $maps.y) / $maps.scalar);
+                        });
+                    }
+                    else {
+                        selectRectOffset = {
+                            x: ev.mx - $maps.objects.selectRect.x,
+                            y: ev.my - $maps.objects.selectRect.y
+                        };
+                    }
+
+                    offsets = selected.map(function (obj) {
+                        return {
+                            x: ev.mx - obj.mapX,
+                            y: ev.my - obj.mapY
+                        };
+                    });
+
+                    $maps.draw();
+
+                    $document.bind('mousemove', canvasEvent);
+                    $document.bind('mouseup', canvasEvent);
+
+                };
+
+                this.mousemove = function (ev) {
+                    var dx = (ev.mx - mox) / $maps.scalar;
+                    var dy = (ev.my - moy) / $maps.scalar;
+
+                    if (selected.length > 0) {
+                        if ($maps.objects.hasOwnProperty('selectRect')) {
+                            console.log(selectRectOffset);
+                            $maps.objects.selectRect.x = mox + dx - selectRectOffset.x;
+                            $maps.objects.selectRect.y = moy + dy - selectRectOffset.y;
+                        }
+                        selected = selected.map(function (obj, i) {
+                            obj.mapX = (mox + dx - offsets[i].x);
+                            obj.mapY = (moy + dy - offsets[i].y);
+                            return obj;
+                        });
+
+                        $mapObjects.update(selected);
+                    }
+                    else {
+                        if (!$maps.objects.hasOwnProperty('selectRect')) {
+
+                            $maps.objects.selectRect = {
+                                x: (ev.mx - $maps.x) / $maps.scalar,
+                                y: (ev.my - $maps.y) / $maps.scalar,
+                                w: 0,
+                                h: 0
+                            };
+                        }
+                        $maps.objects.selectRect.w = dx;
+                        $maps.objects.selectRect.h = dy;
+
+                        $mapObjects.select(function (obj) {
+                            return inRectBounds(obj.mapX, obj.mapY, 10, 10, $maps.objects.selectRect.x, $maps.objects.selectRect.y, $maps.objects.selectRect.w, $maps.objects.selectRect.h);
+                        });
+                    }
+
+                    $maps.draw();
+                };
+
+                this.mouseup = function () {
+                    if ($maps.objects.hasOwnProperty('selectRect') && selected.length < 1) {
+                        selected = $mapObjects.getSelected();
+                        if (selected.length > 0) {
+                            $mapObjects.setSelectionBounds(selected);
+                            console.log($mapObjects.selectBounds);
+                            angular.copy($mapObjects.selectBounds, $maps.objects.selectRect);
+                        }
+                        else {
+                            var objects = {};
+                            for (var prop in $maps.objects) {
+                                if ($maps.objects.hasOwnProperty(prop) && prop !== 'selectRect') {
+                                    objects[prop] = $maps.objects[prop];
+                                }
+                            }
+                            $maps.objects = objects;
+                        }
+                    }
+
+                    $mapObjects.recordState(selected);
+                    $maps.draw();
+                    $document.unbind('mousemove', canvasEvent);
+                    $document.unbind('mouseup', canvasEvent);
+                };
+
+                /**
+                 * noncanvas event sub tools for the selector tool
+                 */
+
+                this.hAlignCenter = function () {
+                    var selected = $mapObjects.getSelected();
+                    var center = $mapObjects.centerOfSelection(selected);
+
+                    for (var i = 0, len = selected.length; i < len; i++) {
+                        selected[i].mapX = center.x;
+                    }
+
+                    $mapObjects.merge(selected);
+                    $maps.draw();
+                };
+
+                this.vAlignCenter = function () {
+                    var selected = $mapObjects.getSelected();
+                    var center = $mapObjects.centerOfSelection(selected);
+
+                    for (var i = 0, len = selected.length; i < len; i++) {
+                        selected[i].mapY = center.y;
+                    }
+
+                    $mapObjects.merge(selected);
+                    $maps.draw();
+                };
+            },
+            move: function () {
+                var mox = 0;
+                var moy = 0;
+                var ox = 0;
+                var oy = 0;
+
+                this.mousedown = function (ev) {
+                    mox = ev.mx;
+                    moy = ev.my;
+
+                    ox = ev.mx - $maps.x;
+                    oy = ev.my - $maps.y;
+
+                    $document.bind('mousemove', canvasEvent);
+                    $document.bind('mouseup', canvasEvent);
+                };
+
+                this.mousemove = function (ev) {
+                    var dx = ev.mx - mox;
+                    var dy = ev.my - moy;
+
+                    $maps.x = mox + dx - ox;
+                    $maps.y = moy + dy - oy;
+
+                    $maps.draw();
+                };
+
+                this.mouseup = function () {
+                    $document.unbind('mousemove', canvasEvent);
+                    $document.unbind('mouseup', canvasEvent);
+                };
+            },
+            rotate: function () {
+                var cX;
+                var cY;
+                var clickAngle;
+
+                this.mousedown = function (ev) {
+                    cX = $maps.x + ($maps.width / 2);
+                    cY = $maps.y + ($maps.height / 2);
+                    clickAngle = getAngle(cX, cY, ev.mx, ev.my) - $maps.angle;
+
+                    $document.bind('mousemove', canvasEvent);
+                    $document.bind('mouseup', canvasEvent);
+                };
+
+                this.mousemove = function (ev) {
+                    $maps.angle = getAngle(cX, cY, ev.mx, ev.my) - clickAngle;
+                    $maps.draw();
+                };
+
+                this.mouseup = function (ev) {
+                    $document.unbind('mousemove', canvasEvent);
+                    $document.unbind('mouseup', canvasEvent);
+                };
+
+                /**
+                 * angle helper function
+                 */
+                function getAngle(cX, cY, mx, my) {
+                    var angle = Math.atan2(my - cY, mx - cX);
+                    return angle;
+                }
+            }
+        };
+
+    }]);
+angular.module('ualib.compfinder.maps', [])
+
+    .factory('loadMap', ['$q', function($q){
+        return function(src){
+            var deferred = $q.defer();
+            var map = new Image();
+
+            map.onload = function(){
+                deferred.resolve(map);
+            };
+            map.src = src;
+
+            return deferred.promise;
+        };
+    }])
+
+    .service('$maps', ['$q', 'mapStyles', function($q, styles){
+        var self = this;
+        this.canvas = null;
+        this.ctx = null;
+        this.image = null;
+        this.changed = false;
+        this.prev = {};
+        this.objects = {};
+
+        this.margin = {
+            width: 0,
+            height: 0
+        };
+        this.offset = {
+            width: 0,
+            height: 0
+        };
+
+        this.x = 0;
+        this.y = 0;
+        this.x2 = 0;
+        this.y2 = 0;
+        this.width = 0;
+        this.height = 0;
+        this.scalar = 0.4;
+        this.minScale = 0.2;
+        this.maxScale = 1.4;
+        this.angle = 0;
+
+        this.setDefaults = function(){
+            self.resizeCanvas();
+            self.changed = false;
+            self.x = 0;
+            self.y = 0;
+            self.angle = 0;
+            self.setScale();
+            self.resizeImage();
+            self.center();
+            //console.log({changed: self.changed});
+        };
+
+        this.refactor = function(offset){
+            if (offset.width !== self.width){
+                self.setOffset(offset);
+                if (!self.changed){
+                    self.setDefaults();
+                }
+                else{
+                    var x = self.x + (self.prev.canvas_width - self.canvas.width)/2;
+                    var y = self.y + (self.prev.canvas_height - self.canvas.height)/2;
+                    if (x > 0 && (self.x+self.width) < (self.canvas.width - self.margin.width - self.offset.width)) {
+                        self.x = x;
+                    }
+                    if (y > 0 && (self.y+self.height) < (self.canvas.height - self.margin.height - self.offset.height)) {
+                        self.y = y;
+                    }
+                    //if ((self.x - dx) > 0 && dx < (self.x+self.width)) self.x -= dx;
+                    //if ((self.y - dy) > 0 && dy < (self.y+self.height)) self.y -= dy;
+
+                }
+                self.draw();
+            }
+        };
+
+        this.init = function(params){
+            var deferred = $q.defer();
+            if (params.src){
+                if (params.offset) {
+                    self.setOffset(params.offset);
+                }
+                if (params.objects){
+                    self.objects = angular.copy(params.objects);
+                }
+                self.canvas = params.canvas;
+                self.ctx = self.canvas.getContext('2d');
+                self.loadImage(params.src).then(function(){
+                    self.setDefaults();
+                    self.draw();
+                    deferred.resolve();
+                });
+            }
+            else{
+                deferred.reject('No image src given.');
+            }
+            return deferred.promise;
+        };
+
+        this.setOffset = function(offset){
+            if (self.offset.width !== offset.width) {
+                self.offset.width = offset.width;
+            }
+        };
+
+        this.loadImage = function(src){
+            var deferred = $q.defer();
+            self.image = new Image();
+
+            self.image.onload = function(){
+                deferred.resolve();
+            };
+            self.image.src = src;
+            return deferred.promise;
+        };
+
+        this.draw = function(){
+            //console.log(self.scalar);
+            // Clear the canvas
+            self.clear();
+            // Save matrix state
+            self.ctx.save();
+
+            // Translate matrix to (x, y) then scale matrix
+            self.ctx.translate(self.x, self.y);
+            self.ctx.scale(self.scalar, self.scalar);
+
+            // Translate matrix to (x, y) values representing the distance to the image's center
+            self.ctx.translate(self.image.width/2, self.image.height/2);
+            // Rotate matrix
+            self.ctx.rotate(self.angle);
+            // Translate matrix back to state before it was translated to the (x, y) matching the image's center
+            self.ctx.translate(-self.image.width/2, -self.image.height/2);
+
+            // Draw image to canvas
+            self.ctx.drawImage(self.image, 0, 0);
+            self.drawObjects();
+
+            // Restore matrix to it's saved state.
+            // If the matrix was not saved, then altered, then restored
+            // 	for every draw, then the transforms would stack (i.e., without save/restore
+            //	and image at scale 1, scaled to 1.2, then scale to 1 would result in a final scale
+            // 	of 1.2 - because (1 * 1.2) * 1 = 1.2
+            self.ctx.restore();
+
+            self.x2 = self.x + self.width;
+            self.y2 = self.y + self.height;
+        };
+
+        this.drawObjects = function(){
+
+            if (self.objects.hasOwnProperty('desktops')){
+                self.ctx.fillStyle = styles.desktops.available.color;
+
+                for (var i = 0, len = self.objects.desktops.length; i < len; i++){
+                    var comp = self.objects.desktops[i];
+                    var x = comp.mapX;
+                    var y = comp.mapY;
+
+                    self.ctx.save();
+                    self.ctx.translate(x, y);
+                    if (comp.status !== 3){
+                        self.ctx.fillStyle = styles.desktops.taken.color;
+                    }
+
+                    if (comp.os === 1){
+                        self.ctx.fillRect(2, 2, 13, 13);
+                        /*if (parseInt(comp.monitors) > 1){
+                            self.ctx.fillRect(x+5, y-5, 15, 15);
+                            self.ctx.clearRect(x+5, y, 10, 10);
+                        }*/
+                        if (comp.selected){
+                            self.ctx.lineWidth = 5;
+                            self.ctx.strokeStyle = '#00ff00';
+                            self.ctx.strokeRect(0, 0, 13, 13);
+                        }
+                    }
+                    else if (comp.os === 2){
+
+                        self.ctx.beginPath();
+                        self.ctx.arc(7, 7, 7, 0, 2*Math.PI);
+                        self.ctx.fill();
+                        if (comp.selected){
+                            self.ctx.lineWidth = 5;
+                            self.ctx.strokeStyle = '#00ff00';
+                            self.ctx.stroke();
+                        }
+                    }
+                    self.ctx.restore();
+
+                }
+            }
+            if (self.objects.hasOwnProperty('selectRect')){
+                var rect = angular.copy(self.objects.selectRect);
+                self.ctx.save();
+                self.ctx.setLineDash([6, 4]);
+                self.ctx.strokeStyle = '#333';
+                self.ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
+                self.ctx.restore();
+
+            }
+        };
+
+        this.setScale = function(){
+            var width_ratio = (self.canvas.width - self.margin.width - self.offset.width) / self.image.width;
+            var height_ratio = (self.canvas.height - self.margin.height - self.offset.height) / self.image.height;
+            self.scalar = Math.min(width_ratio, height_ratio);
+            /*console.log({w_ratio: width_ratio, h_ratio: height_ratio});
+             console.log('width_ratio = ('+self.canvas.width+' - ('+self.margin.width+' + '+self.offset.width+')) / '+self.image.width);
+             console.log('height_ratio = ('+self.canvas.height+' - ('+self.margin.height+' + '+self.offset.height+')) / '+self.image.height);*/
+        };
+
+        this.clear = function(){
+            self.ctx.clearRect(0, 0, self.canvas.width, self.canvas.height);
+        };
+
+        this.resizeCanvas = function(){
+            self.prev.canvas_width = self.canvas.width;
+            self.prev.canvas_height = self.canvas.height;
+
+            self.canvas.style.width = '100%';
+            self.canvas.style.height = '100%';
+
+            self.canvas.width = self.canvas.offsetWidth;
+            self.canvas.height = self.canvas.offsetHeight;
+
+        };
+
+        this.resizeImage = function(){
+            self.width = self.image.width*self.scalar;
+            self.height = self.image.height*self.scalar;
+        };
+
+        this.center = function(){
+            self.x = ((self.canvas.width - self.offset.width) - self.width)/2;
+            self.y = ((self.canvas.height) - self.height)/2;
+        };
+
+        this.scaleXY = function(newWidth, newHeight){
+            self.x = newWidth/self.canvas.width;
+            self.y = newHeight/self.canvas.height;
+        };
+
+        this.posImage = function(){
+            if (!self.changed){
+                self.center();
+            }
+            else{
+                self.x *= self.canvas.width/self.prev.canvas_width;
+                self.y *= self.canvas.height/self.prev.canvas_height;
+            }
+        };
+
+        this.getSelectedObjects = function(){
+            self.objects.filter(function(comp){
+                return comp.selected;
+            });
+        };
+    }]);
+
+angular.module('ualib.compfinder.signage', [
+    'ualib.compfinder.service',
+    'ualib.compfinder.maps'
+])
+
+    .config(['$routeProvider', function($routeProvider){
+        $routeProvider
+            .when('/computers/signage/:building/:floor', {
+                reloadOnSearch: false,
+                resolve: {
+                    floors: ['Computers', '$route', function(Computers, $route){
+
+                        return Computers.init($route.current.params).then(function(){
+                            return true;
+                        });
+                        /*console.log($route);
+                        return CFF.floors().get($route.current.params, function(data){
+                            return data;
+                        }, function(data, status, headers, config) {
+                            console.log('ERROR: Computers and Software');
+                            console.log({
+                                data: data,
+                                status: status,
+                                headers: headers,
+                                config: config
+                            });
+                        });*/
+                    }]
+                },
+                templateUrl: 'signage/signage.tpl.html',
+                controller: 'SignageCtrl'
+            });
+    }])
+
+    .controller('SignageCtrl', ['$scope', 'Computers', function($scope, Computers){
+        $scope.computers = Computers;
+
+    }])
+
+    .directive('assetImage', ['$maps', '$timeout', '$window',  function($maps, $timeout, $window){
+        return{
+            restrict: 'AC',
+            link: function(scope, elm){
+
+
+                var scalar = 0.27;
+                var yOffset = 60;
+                var floor = parseInt(scope.computers.buildings[0].floors[0].name);
+
+                if (floor === 3){
+                    scalar = 0.14;
+                    yOffset = 85;
+                }
+                else if(floor === 2){
+                    scalar = 0.14;
+                    yOffset = 85;
+                }
+
+                $maps.init({
+                 src: 'http://wwwdev.lib.ua.edu/' + scope.computers.buildings[0].floors[0].image.url,
+                 canvas: elm[0], objects: {desktops: scope.computers.buildings[0].floors[0].desktops},
+                 width: scope.computers.buildings[0].floors[0].image.width,
+                 height: scope.computers.buildings[0].floors[0].image.height,
+                 scalar: scalar,
+                 yOffset: yOffset
+                 });
+
+                angular.element($window).bind('resize', function(){
+                    $maps.resizeCanvas();
+                    $maps.setScale();
+                    $maps.resizeImage();
+                    $maps.posImage();
+                    $maps.draw();
+                });
+
+                scope.$on('$destroy', function(){
+                    angular.element($window).unbind('resize');
+                });
+
+            }
+        };
+    }]);
 /**
   * x is a value between 0 and 1, indicating where in the animation you are.
   */
@@ -7050,7 +8703,6 @@ angular.module('ualib.databases')
         });
 
         $scope.$on('$locationChangeSuccess', function(){
-            console.log('wut?');
             paramsToScope();
         });
 
@@ -22104,7 +23756,7 @@ function plural(ms, n, name) {
 
 /**
  * @license
- * lodash 4.11.1 <https://lodash.com/>
+ * lodash 4.11.2 <https://lodash.com/>
  * Copyright jQuery Foundation and other contributors <https://jquery.org/>
  * Released under MIT license <https://lodash.com/license>
  * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
@@ -22116,7 +23768,7 @@ function plural(ms, n, name) {
   var undefined;
 
   /** Used as the semantic version number. */
-  var VERSION = '4.11.1';
+  var VERSION = '4.11.2';
 
   /** Used as the size to enable large array optimizations. */
   var LARGE_ARRAY_SIZE = 200;
@@ -22284,11 +23936,11 @@ function plural(ms, n, name) {
       rsLowerRange = 'a-z\\xdf-\\xf6\\xf8-\\xff',
       rsMathOpRange = '\\xac\\xb1\\xd7\\xf7',
       rsNonCharRange = '\\x00-\\x2f\\x3a-\\x40\\x5b-\\x60\\x7b-\\xbf',
-      rsQuoteRange = '\\u2018\\u2019\\u201c\\u201d',
+      rsPunctuationRange = '\\u2000-\\u206f',
       rsSpaceRange = ' \\t\\x0b\\f\\xa0\\ufeff\\n\\r\\u2028\\u2029\\u1680\\u180e\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200a\\u202f\\u205f\\u3000',
       rsUpperRange = 'A-Z\\xc0-\\xd6\\xd8-\\xde',
       rsVarRange = '\\ufe0e\\ufe0f',
-      rsBreakRange = rsMathOpRange + rsNonCharRange + rsQuoteRange + rsSpaceRange;
+      rsBreakRange = rsMathOpRange + rsNonCharRange + rsPunctuationRange + rsSpaceRange;
 
   /** Used to compose unicode capture groups. */
   var rsApos = "['\u2019]",
@@ -22815,35 +24467,6 @@ function plural(ms, n, name) {
   }
 
   /**
-   * The base implementation of methods like `_.max` and `_.min` which accepts a
-   * `comparator` to determine the extremum value.
-   *
-   * @private
-   * @param {Array} array The array to iterate over.
-   * @param {Function} iteratee The iteratee invoked per iteration.
-   * @param {Function} comparator The comparator used to compare values.
-   * @returns {*} Returns the extremum value.
-   */
-  function baseExtremum(array, iteratee, comparator) {
-    var index = -1,
-        length = array.length;
-
-    while (++index < length) {
-      var value = array[index],
-          current = iteratee(value);
-
-      if (current != null && (computed === undefined
-            ? current === current
-            : comparator(current, computed)
-          )) {
-        var computed = current,
-            result = value;
-      }
-    }
-    return result;
-  }
-
-  /**
    * The base implementation of methods like `_.find` and `_.findKey`, without
    * support for iteratee shorthands, which iterates over `collection` using
    * `eachFunc`.
@@ -23122,79 +24745,6 @@ function plural(ms, n, name) {
   }
 
   /**
-   * Compares values to sort them in ascending order.
-   *
-   * @private
-   * @param {*} value The value to compare.
-   * @param {*} other The other value to compare.
-   * @returns {number} Returns the sort order indicator for `value`.
-   */
-  function compareAscending(value, other) {
-    if (value !== other) {
-      var valIsNull = value === null,
-          valIsUndef = value === undefined,
-          valIsReflexive = value === value;
-
-      var othIsNull = other === null,
-          othIsUndef = other === undefined,
-          othIsReflexive = other === other;
-
-      if ((value > other && !othIsNull) || !valIsReflexive ||
-          (valIsNull && !othIsUndef && othIsReflexive) ||
-          (valIsUndef && othIsReflexive)) {
-        return 1;
-      }
-      if ((value < other && !valIsNull) || !othIsReflexive ||
-          (othIsNull && !valIsUndef && valIsReflexive) ||
-          (othIsUndef && valIsReflexive)) {
-        return -1;
-      }
-    }
-    return 0;
-  }
-
-  /**
-   * Used by `_.orderBy` to compare multiple properties of a value to another
-   * and stable sort them.
-   *
-   * If `orders` is unspecified, all values are sorted in ascending order. Otherwise,
-   * specify an order of "desc" for descending or "asc" for ascending sort order
-   * of corresponding values.
-   *
-   * @private
-   * @param {Object} object The object to compare.
-   * @param {Object} other The other object to compare.
-   * @param {boolean[]|string[]} orders The order to sort by for each property.
-   * @returns {number} Returns the sort order indicator for `object`.
-   */
-  function compareMultiple(object, other, orders) {
-    var index = -1,
-        objCriteria = object.criteria,
-        othCriteria = other.criteria,
-        length = objCriteria.length,
-        ordersLength = orders.length;
-
-    while (++index < length) {
-      var result = compareAscending(objCriteria[index], othCriteria[index]);
-      if (result) {
-        if (index >= ordersLength) {
-          return result;
-        }
-        var order = orders[index];
-        return result * (order == 'desc' ? -1 : 1);
-      }
-    }
-    // Fixes an `Array#sort` bug in the JS engine embedded in Adobe applications
-    // that causes it, under certain circumstances, to provide the same value for
-    // `object` and `other`. See https://github.com/jashkenas/underscore/pull/1247
-    // for more details.
-    //
-    // This also ensures a stable sort in V8 and other engines.
-    // See https://bugs.chromium.org/p/v8/issues/detail?id=90 for more details.
-    return object.index - other.index;
-  }
-
-  /**
    * Gets the number of `placeholder` occurrences in `array`.
    *
    * @private
@@ -23212,29 +24762,6 @@ function plural(ms, n, name) {
       }
     }
     return result;
-  }
-
-  /**
-   * Creates a function that performs a mathematical operation on two values.
-   *
-   * @private
-   * @param {Function} operator The function to perform the operation.
-   * @returns {Function} Returns the new mathematical operation function.
-   */
-  function createMathOperation(operator) {
-    return function(value, other) {
-      var result;
-      if (value === undefined && other === undefined) {
-        return 0;
-      }
-      if (value !== undefined) {
-        result = value;
-      }
-      if (other !== undefined) {
-        result = result === undefined ? other : operator(result, other);
-      }
-      return result;
-    };
   }
 
   /**
@@ -23309,20 +24836,6 @@ function plural(ms, n, name) {
       } catch (e) {}
     }
     return result;
-  }
-
-  /**
-   * Checks if `value` is a valid array-like index.
-   *
-   * @private
-   * @param {*} value The value to check.
-   * @param {number} [length=MAX_SAFE_INTEGER] The upper bounds of a valid index.
-   * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
-   */
-  function isIndex(value, length) {
-    value = (typeof value == 'number' || reIsUint.test(value)) ? +value : -1;
-    length = length == null ? MAX_SAFE_INTEGER : length;
-    return value > -1 && value % 1 == 0 && value < length;
   }
 
   /**
@@ -24663,6 +26176,7 @@ function plural(ms, n, name) {
         var value = array[index],
             computed = iteratee ? iteratee(value) : value;
 
+        value = (comparator || value !== 0) ? value : 0;
         if (isCommon && computed === computed) {
           var valuesIndex = valuesLength;
           while (valuesIndex--) {
@@ -24714,6 +26228,35 @@ function plural(ms, n, name) {
         result = !!predicate(value, index, collection);
         return result;
       });
+      return result;
+    }
+
+    /**
+     * The base implementation of methods like `_.max` and `_.min` which accepts a
+     * `comparator` to determine the extremum value.
+     *
+     * @private
+     * @param {Array} array The array to iterate over.
+     * @param {Function} iteratee The iteratee invoked per iteration.
+     * @param {Function} comparator The comparator used to compare values.
+     * @returns {*} Returns the extremum value.
+     */
+    function baseExtremum(array, iteratee, comparator) {
+      var index = -1,
+          length = array.length;
+
+      while (++index < length) {
+        var value = array[index],
+            current = iteratee(value);
+
+        if (current != null && (computed === undefined
+              ? (current === current && !isSymbol(current))
+              : comparator(current, computed)
+            )) {
+          var computed = current,
+              result = value;
+        }
+      }
       return result;
     }
 
@@ -24876,7 +26419,7 @@ function plural(ms, n, name) {
           length = path.length;
 
       while (object != null && index < length) {
-        object = object[path[index++]];
+        object = object[toKey(path[index++])];
       }
       return (index && index == length) ? object : undefined;
     }
@@ -24897,6 +26440,19 @@ function plural(ms, n, name) {
       return isArray(object)
         ? result
         : arrayPush(result, symbolsFunc(object));
+    }
+
+    /**
+     * The base implementation of `_.gt` which doesn't coerce arguments to numbers.
+     *
+     * @private
+     * @param {*} value The value to compare.
+     * @param {*} other The other value to compare.
+     * @returns {boolean} Returns `true` if `value` is greater than `other`,
+     *  else `false`.
+     */
+    function baseGt(value, other) {
+      return value > other;
     }
 
     /**
@@ -24979,6 +26535,7 @@ function plural(ms, n, name) {
         var value = array[index],
             computed = iteratee ? iteratee(value) : value;
 
+        value = (comparator || value !== 0) ? value : 0;
         if (!(seen
               ? cacheHas(seen, computed)
               : includes(result, computed, comparator)
@@ -25036,7 +26593,7 @@ function plural(ms, n, name) {
         object = parent(object, path);
         path = last(path);
       }
-      var func = object == null ? object : object[path];
+      var func = object == null ? object : object[toKey(path)];
       return func == null ? undefined : apply(func, object, args);
     }
 
@@ -25239,6 +26796,19 @@ function plural(ms, n, name) {
     }
 
     /**
+     * The base implementation of `_.lt` which doesn't coerce arguments to numbers.
+     *
+     * @private
+     * @param {*} value The value to compare.
+     * @param {*} other The other value to compare.
+     * @returns {boolean} Returns `true` if `value` is less than `other`,
+     *  else `false`.
+     */
+    function baseLt(value, other) {
+      return value < other;
+    }
+
+    /**
      * The base implementation of `_.map` without support for iteratee shorthands.
      *
      * @private
@@ -25283,7 +26853,7 @@ function plural(ms, n, name) {
      */
     function baseMatchesProperty(path, srcValue) {
       if (isKey(path) && isStrictComparable(srcValue)) {
-        return matchesStrictComparable(path, srcValue);
+        return matchesStrictComparable(toKey(path), srcValue);
       }
       return function(object) {
         var objValue = get(object, path);
@@ -25565,7 +27135,7 @@ function plural(ms, n, name) {
 
       while (length--) {
         var index = indexes[length];
-        if (lastIndex == length || index != previous) {
+        if (length == lastIndex || index !== previous) {
           var previous = index;
           if (isIndex(index)) {
             splice.call(array, index, 1);
@@ -25575,11 +27145,11 @@ function plural(ms, n, name) {
                 object = parent(array, path);
 
             if (object != null) {
-              delete object[last(path)];
+              delete object[toKey(last(path))];
             }
           }
           else {
-            delete array[index];
+            delete array[toKey(index)];
           }
         }
       }
@@ -25669,7 +27239,7 @@ function plural(ms, n, name) {
           nested = object;
 
       while (nested != null && ++index < length) {
-        var key = path[index];
+        var key = toKey(path[index]);
         if (isObject(nested)) {
           var newValue = value;
           if (index != lastIndex) {
@@ -25771,7 +27341,8 @@ function plural(ms, n, name) {
           var mid = (low + high) >>> 1,
               computed = array[mid];
 
-          if ((retHighest ? (computed <= value) : (computed < value)) && computed !== null) {
+          if (computed !== null && !isSymbol(computed) &&
+              (retHighest ? (computed <= value) : (computed < value))) {
             low = mid + 1;
           } else {
             high = mid;
@@ -25802,21 +27373,26 @@ function plural(ms, n, name) {
           high = array ? array.length : 0,
           valIsNaN = value !== value,
           valIsNull = value === null,
-          valIsUndef = value === undefined;
+          valIsSymbol = isSymbol(value),
+          valIsUndefined = value === undefined;
 
       while (low < high) {
         var mid = nativeFloor((low + high) / 2),
             computed = iteratee(array[mid]),
-            isDef = computed !== undefined,
-            isReflexive = computed === computed;
+            othIsDefined = computed !== undefined,
+            othIsNull = computed === null,
+            othIsReflexive = computed === computed,
+            othIsSymbol = isSymbol(computed);
 
         if (valIsNaN) {
-          var setLow = isReflexive || retHighest;
+          var setLow = retHighest || othIsReflexive;
+        } else if (valIsUndefined) {
+          setLow = othIsReflexive && (retHighest || othIsDefined);
         } else if (valIsNull) {
-          setLow = isReflexive && isDef && (retHighest || computed != null);
-        } else if (valIsUndef) {
-          setLow = isReflexive && (retHighest || isDef);
-        } else if (computed == null) {
+          setLow = othIsReflexive && othIsDefined && (retHighest || !othIsNull);
+        } else if (valIsSymbol) {
+          setLow = othIsReflexive && othIsDefined && !othIsNull && (retHighest || !othIsSymbol);
+        } else if (othIsNull || othIsSymbol) {
           setLow = false;
         } else {
           setLow = retHighest ? (computed <= value) : (computed < value);
@@ -25831,44 +27407,68 @@ function plural(ms, n, name) {
     }
 
     /**
-     * The base implementation of `_.sortedUniq`.
-     *
-     * @private
-     * @param {Array} array The array to inspect.
-     * @returns {Array} Returns the new duplicate free array.
-     */
-    function baseSortedUniq(array) {
-      return baseSortedUniqBy(array);
-    }
-
-    /**
-     * The base implementation of `_.sortedUniqBy` without support for iteratee
-     * shorthands.
+     * The base implementation of `_.sortedUniq` and `_.sortedUniqBy` without
+     * support for iteratee shorthands.
      *
      * @private
      * @param {Array} array The array to inspect.
      * @param {Function} [iteratee] The iteratee invoked per element.
      * @returns {Array} Returns the new duplicate free array.
      */
-    function baseSortedUniqBy(array, iteratee) {
-      var index = 0,
+    function baseSortedUniq(array, iteratee) {
+      var index = -1,
           length = array.length,
-          value = array[0],
-          computed = iteratee ? iteratee(value) : value,
-          seen = computed,
-          resIndex = 1,
-          result = [value];
+          resIndex = 0,
+          result = [];
 
       while (++index < length) {
-        value = array[index],
-        computed = iteratee ? iteratee(value) : value;
+        var value = array[index],
+            computed = iteratee ? iteratee(value) : value;
 
-        if (!eq(computed, seen)) {
-          seen = computed;
-          result[resIndex++] = value;
+        if (!index || !eq(computed, seen)) {
+          var seen = computed;
+          result[resIndex++] = value === 0 ? 0 : value;
         }
       }
       return result;
+    }
+
+    /**
+     * The base implementation of `_.toNumber` which doesn't ensure correct
+     * conversions of binary, hexadecimal, or octal string values.
+     *
+     * @private
+     * @param {*} value The value to process.
+     * @returns {number} Returns the number.
+     */
+    function baseToNumber(value) {
+      if (typeof value == 'number') {
+        return value;
+      }
+      if (isSymbol(value)) {
+        return NAN;
+      }
+      return +value;
+    }
+
+    /**
+     * The base implementation of `_.toString` which doesn't convert nullish
+     * values to empty strings.
+     *
+     * @private
+     * @param {*} value The value to process.
+     * @returns {string} Returns the string.
+     */
+    function baseToString(value) {
+      // Exit early for strings to avoid a performance hit in some environments.
+      if (typeof value == 'string') {
+        return value;
+      }
+      if (isSymbol(value)) {
+        return symbolToString ? symbolToString.call(value) : '';
+      }
+      var result = (value + '');
+      return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
     }
 
     /**
@@ -25909,6 +27509,7 @@ function plural(ms, n, name) {
         var value = array[index],
             computed = iteratee ? iteratee(value) : value;
 
+        value = (comparator || value !== 0) ? value : 0;
         if (isCommon && computed === computed) {
           var seenIndex = seen.length;
           while (seenIndex--) {
@@ -25942,8 +27543,9 @@ function plural(ms, n, name) {
     function baseUnset(object, path) {
       path = isKey(path, object) ? [path] : castPath(path);
       object = parent(object, path);
-      var key = last(path);
-      return (object != null && has(object, key)) ? delete object[key] : true;
+
+      var key = toKey(last(path));
+      return !(object != null && baseHas(object, key)) || delete object[key];
     }
 
     /**
@@ -26204,6 +27806,85 @@ function plural(ms, n, name) {
     function cloneTypedArray(typedArray, isDeep) {
       var buffer = isDeep ? cloneArrayBuffer(typedArray.buffer) : typedArray.buffer;
       return new typedArray.constructor(buffer, typedArray.byteOffset, typedArray.length);
+    }
+
+    /**
+     * Compares values to sort them in ascending order.
+     *
+     * @private
+     * @param {*} value The value to compare.
+     * @param {*} other The other value to compare.
+     * @returns {number} Returns the sort order indicator for `value`.
+     */
+    function compareAscending(value, other) {
+      if (value !== other) {
+        var valIsDefined = value !== undefined,
+            valIsNull = value === null,
+            valIsReflexive = value === value,
+            valIsSymbol = isSymbol(value);
+
+        var othIsDefined = other !== undefined,
+            othIsNull = other === null,
+            othIsReflexive = other === other,
+            othIsSymbol = isSymbol(other);
+
+        if ((!othIsNull && !othIsSymbol && !valIsSymbol && value > other) ||
+            (valIsSymbol && othIsDefined && othIsReflexive && !othIsNull && !othIsSymbol) ||
+            (valIsNull && othIsDefined && othIsReflexive) ||
+            (!valIsDefined && othIsReflexive) ||
+            !valIsReflexive) {
+          return 1;
+        }
+        if ((!valIsNull && !valIsSymbol && !othIsSymbol && value < other) ||
+            (othIsSymbol && valIsDefined && valIsReflexive && !valIsNull && !valIsSymbol) ||
+            (othIsNull && valIsDefined && valIsReflexive) ||
+            (!othIsDefined && valIsReflexive) ||
+            !othIsReflexive) {
+          return -1;
+        }
+      }
+      return 0;
+    }
+
+    /**
+     * Used by `_.orderBy` to compare multiple properties of a value to another
+     * and stable sort them.
+     *
+     * If `orders` is unspecified, all values are sorted in ascending order. Otherwise,
+     * specify an order of "desc" for descending or "asc" for ascending sort order
+     * of corresponding values.
+     *
+     * @private
+     * @param {Object} object The object to compare.
+     * @param {Object} other The other object to compare.
+     * @param {boolean[]|string[]} orders The order to sort by for each property.
+     * @returns {number} Returns the sort order indicator for `object`.
+     */
+    function compareMultiple(object, other, orders) {
+      var index = -1,
+          objCriteria = object.criteria,
+          othCriteria = other.criteria,
+          length = objCriteria.length,
+          ordersLength = orders.length;
+
+      while (++index < length) {
+        var result = compareAscending(objCriteria[index], othCriteria[index]);
+        if (result) {
+          if (index >= ordersLength) {
+            return result;
+          }
+          var order = orders[index];
+          return result * (order == 'desc' ? -1 : 1);
+        }
+      }
+      // Fixes an `Array#sort` bug in the JS engine embedded in Adobe applications
+      // that causes it, under certain circumstances, to provide the same value for
+      // `object` and `other`. See https://github.com/jashkenas/underscore/pull/1247
+      // for more details.
+      //
+      // This also ensures a stable sort in V8 and other engines.
+      // See https://bugs.chromium.org/p/v8/issues/detail?id=90 for more details.
+      return object.index - other.index;
     }
 
     /**
@@ -26726,6 +28407,39 @@ function plural(ms, n, name) {
     }
 
     /**
+     * Creates a function that performs a mathematical operation on two values.
+     *
+     * @private
+     * @param {Function} operator The function to perform the operation.
+     * @returns {Function} Returns the new mathematical operation function.
+     */
+    function createMathOperation(operator) {
+      return function(value, other) {
+        var result;
+        if (value === undefined && other === undefined) {
+          return 0;
+        }
+        if (value !== undefined) {
+          result = value;
+        }
+        if (other !== undefined) {
+          if (result === undefined) {
+            return other;
+          }
+          if (typeof value == 'string' || typeof other == 'string') {
+            value = baseToString(value);
+            other = baseToString(other);
+          } else {
+            value = baseToNumber(value);
+            other = baseToNumber(other);
+          }
+          result = operator(value, other);
+        }
+        return result;
+      };
+    }
+
+    /**
      * Creates a function like `_.over`.
      *
      * @private
@@ -26757,7 +28471,7 @@ function plural(ms, n, name) {
      * @returns {string} Returns the padding for `string`.
      */
     function createPadding(length, chars) {
-      chars = chars === undefined ? ' ' : (chars + '');
+      chars = chars === undefined ? ' ' : baseToString(chars);
 
       var charsLength = chars.length;
       if (charsLength < 2) {
@@ -26828,6 +28542,23 @@ function plural(ms, n, name) {
         }
         step = step === undefined ? (start < end ? 1 : -1) : (toNumber(step) || 0);
         return baseRange(start, end, step, fromRight);
+      };
+    }
+
+    /**
+     * Creates a function that performs a relational operation on two values.
+     *
+     * @private
+     * @param {Function} operator The function to perform the operation.
+     * @returns {Function} Returns the new relational operation function.
+     */
+    function createRelationalOperation(operator) {
+      return function(value, other) {
+        if (!(typeof value == 'string' && typeof other == 'string')) {
+          value = toNumber(value);
+          other = toNumber(other);
+        }
+        return operator(value, other);
       };
     }
 
@@ -26907,7 +28638,7 @@ function plural(ms, n, name) {
      * @param {Array} values The values to add to the set.
      * @returns {Object} Returns the new set.
      */
-    var createSet = !(Set && new Set([1, 2]).size === 2) ? noop : function(values) {
+    var createSet = !(Set && (1 / setToArray(new Set([,-0]))[1]) == INFINITY) ? noop : function(values) {
       return new Set(values);
     };
 
@@ -27479,7 +29210,7 @@ function plural(ms, n, name) {
           length = path.length;
 
       while (++index < length) {
-        var key = path[index];
+        var key = toKey(path[index]);
         if (!(result = object != null && hasFunc(object, key))) {
           break;
         }
@@ -27615,6 +29346,21 @@ function plural(ms, n, name) {
     }
 
     /**
+     * Checks if `value` is a valid array-like index.
+     *
+     * @private
+     * @param {*} value The value to check.
+     * @param {number} [length=MAX_SAFE_INTEGER] The upper bounds of a valid index.
+     * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
+     */
+    function isIndex(value, length) {
+      length = length == null ? MAX_SAFE_INTEGER : length;
+      return !!length &&
+        (typeof value == 'number' || reIsUint.test(value)) &&
+        (value > -1 && value % 1 == 0 && value < length);
+    }
+
+    /**
      * Checks if the given arguments are from an iteratee call.
      *
      * @private
@@ -27647,13 +29393,16 @@ function plural(ms, n, name) {
      * @returns {boolean} Returns `true` if `value` is a property name, else `false`.
      */
     function isKey(value, object) {
+      if (isArray(value)) {
+        return false;
+      }
       var type = typeof value;
-      if (type == 'number' || type == 'symbol') {
+      if (type == 'number' || type == 'symbol' || type == 'boolean' ||
+          value == null || isSymbol(value)) {
         return true;
       }
-      return !isArray(value) &&
-        (isSymbol(value) || reIsPlainProp.test(value) || !reIsDeepProp.test(value) ||
-          (object != null && value in Object(object)));
+      return reIsPlainProp.test(value) || !reIsDeepProp.test(value) ||
+        (object != null && value in Object(object));
     }
 
     /**
@@ -27665,8 +29414,9 @@ function plural(ms, n, name) {
      */
     function isKeyable(value) {
       var type = typeof value;
-      return type == 'number' || type == 'boolean' ||
-        (type == 'string' && value != '__proto__') || value == null;
+      return (type == 'string' || type == 'number' || type == 'symbol' || type == 'boolean')
+        ? (value !== '__proto__')
+        : (value === null);
     }
 
     /**
@@ -27917,8 +29667,12 @@ function plural(ms, n, name) {
      * @param {*} value The value to inspect.
      * @returns {string|symbol} Returns the key.
      */
-    function toKey(key) {
-      return (typeof key == 'string' || isSymbol(key)) ? key : (key + '');
+    function toKey(value) {
+      if (typeof value == 'string' || isSymbol(value)) {
+        return value;
+      }
+      var result = (value + '');
+      return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
     }
 
     /**
@@ -28080,6 +29834,7 @@ function plural(ms, n, name) {
      * @param {Array} array The array to inspect.
      * @param {...Array} [values] The values to exclude.
      * @returns {Array} Returns the new array of filtered values.
+     * @see _.without, _.xor
      * @example
      *
      * _.difference([3, 2, 1], [4, 2]);
@@ -28941,10 +30696,15 @@ function plural(ms, n, name) {
      * // => [10, 20]
      */
     var pullAt = rest(function(array, indexes) {
-      indexes = arrayMap(baseFlatten(indexes, 1), String);
+      indexes = baseFlatten(indexes, 1);
 
-      var result = baseAt(array, indexes);
-      basePullAt(array, indexes.sort(compareAscending));
+      var length = array ? array.length : 0,
+          result = baseAt(array, indexes);
+
+      basePullAt(array, arrayMap(indexes, function(index) {
+        return isIndex(index, length) ? +index : index;
+      }).sort(compareAscending));
+
       return result;
     });
 
@@ -29251,7 +31011,7 @@ function plural(ms, n, name) {
      */
     function sortedUniqBy(array, iteratee) {
       return (array && array.length)
-        ? baseSortedUniqBy(array, getIteratee(iteratee))
+        ? baseSortedUniq(array, getIteratee(iteratee))
         : [];
     }
 
@@ -29661,6 +31421,7 @@ function plural(ms, n, name) {
      * @param {Array} array The array to filter.
      * @param {...*} [values] The values to exclude.
      * @returns {Array} Returns the new array of filtered values.
+     * @see _.difference, _.xor
      * @example
      *
      * _.without([1, 2, 1, 3], 1, 2);
@@ -29684,6 +31445,7 @@ function plural(ms, n, name) {
      * @category Array
      * @param {...Array} [arrays] The arrays to inspect.
      * @returns {Array} Returns the new array of values.
+     * @see _.difference, _.without
      * @example
      *
      * _.xor([2, 1], [4, 2]);
@@ -30273,6 +32035,7 @@ function plural(ms, n, name) {
      * @param {Array|Function|Object|string} [predicate=_.identity]
      *  The function invoked per iteration.
      * @returns {Array} Returns the new filtered array.
+     * @see _.reject
      * @example
      *
      * var users = [
@@ -30468,6 +32231,7 @@ function plural(ms, n, name) {
      * @param {Array|Object} collection The collection to iterate over.
      * @param {Function} [iteratee=_.identity] The function invoked per iteration.
      * @returns {Array|Object} Returns `collection`.
+     * @see _.forEachRight
      * @example
      *
      * _([1, 2]).forEach(function(value) {
@@ -30498,6 +32262,7 @@ function plural(ms, n, name) {
      * @param {Array|Object} collection The collection to iterate over.
      * @param {Function} [iteratee=_.identity] The function invoked per iteration.
      * @returns {Array|Object} Returns `collection`.
+     * @see _.forEach
      * @example
      *
      * _.forEachRight([1, 2], function(value) {
@@ -30810,6 +32575,7 @@ function plural(ms, n, name) {
      * @param {Function} [iteratee=_.identity] The function invoked per iteration.
      * @param {*} [accumulator] The initial value.
      * @returns {*} Returns the accumulated value.
+     * @see _.reduceRight
      * @example
      *
      * _.reduce([1, 2], function(sum, n) {
@@ -30842,6 +32608,7 @@ function plural(ms, n, name) {
      * @param {Function} [iteratee=_.identity] The function invoked per iteration.
      * @param {*} [accumulator] The initial value.
      * @returns {*} Returns the accumulated value.
+     * @see _.reduce
      * @example
      *
      * var array = [[0, 1], [2, 3], [4, 5]];
@@ -30870,6 +32637,7 @@ function plural(ms, n, name) {
      * @param {Array|Function|Object|string} [predicate=_.identity]
      *  The function invoked per iteration.
      * @returns {Array} Returns the new filtered array.
+     * @see _.filter
      * @example
      *
      * var users = [
@@ -32201,6 +33969,7 @@ function plural(ms, n, name) {
      * @category Lang
      * @param {*} value The value to clone.
      * @returns {*} Returns the cloned value.
+     * @see _.cloneDeep
      * @example
      *
      * var objects = [{ 'a': 1 }, { 'b': 2 }];
@@ -32226,6 +33995,7 @@ function plural(ms, n, name) {
      * @param {*} value The value to clone.
      * @param {Function} [customizer] The function to customize cloning.
      * @returns {*} Returns the cloned value.
+     * @see _.cloneDeepWith
      * @example
      *
      * function customizer(value) {
@@ -32256,6 +34026,7 @@ function plural(ms, n, name) {
      * @category Lang
      * @param {*} value The value to recursively clone.
      * @returns {*} Returns the deep cloned value.
+     * @see _.clone
      * @example
      *
      * var objects = [{ 'a': 1 }, { 'b': 2 }];
@@ -32278,6 +34049,7 @@ function plural(ms, n, name) {
      * @param {*} value The value to recursively clone.
      * @param {Function} [customizer] The function to customize cloning.
      * @returns {*} Returns the deep cloned value.
+     * @see _.cloneWith
      * @example
      *
      * function customizer(value) {
@@ -32346,6 +34118,7 @@ function plural(ms, n, name) {
      * @param {*} other The other value to compare.
      * @returns {boolean} Returns `true` if `value` is greater than `other`,
      *  else `false`.
+     * @see _.lt
      * @example
      *
      * _.gt(3, 1);
@@ -32357,9 +34130,7 @@ function plural(ms, n, name) {
      * _.gt(1, 3);
      * // => false
      */
-    function gt(value, other) {
-      return value > other;
-    }
+    var gt = createRelationalOperation(baseGt);
 
     /**
      * Checks if `value` is greater than or equal to `other`.
@@ -32372,6 +34143,7 @@ function plural(ms, n, name) {
      * @param {*} other The other value to compare.
      * @returns {boolean} Returns `true` if `value` is greater than or equal to
      *  `other`, else `false`.
+     * @see _.lte
      * @example
      *
      * _.gte(3, 1);
@@ -32383,9 +34155,9 @@ function plural(ms, n, name) {
      * _.gte(1, 3);
      * // => false
      */
-    function gte(value, other) {
+    var gte = createRelationalOperation(function(value, other) {
       return value >= other;
-    }
+    });
 
     /**
      * Checks if `value` is likely an `arguments` object.
@@ -33424,6 +35196,7 @@ function plural(ms, n, name) {
      * @param {*} other The other value to compare.
      * @returns {boolean} Returns `true` if `value` is less than `other`,
      *  else `false`.
+     * @see _.gt
      * @example
      *
      * _.lt(1, 3);
@@ -33435,9 +35208,7 @@ function plural(ms, n, name) {
      * _.lt(3, 1);
      * // => false
      */
-    function lt(value, other) {
-      return value < other;
-    }
+    var lt = createRelationalOperation(baseLt);
 
     /**
      * Checks if `value` is less than or equal to `other`.
@@ -33450,6 +35221,7 @@ function plural(ms, n, name) {
      * @param {*} other The other value to compare.
      * @returns {boolean} Returns `true` if `value` is less than or equal to
      *  `other`, else `false`.
+     * @see _.gte
      * @example
      *
      * _.lte(1, 3);
@@ -33461,9 +35233,9 @@ function plural(ms, n, name) {
      * _.lte(3, 1);
      * // => false
      */
-    function lte(value, other) {
+    var lte = createRelationalOperation(function(value, other) {
       return value <= other;
-    }
+    });
 
     /**
      * Converts `value` to an array.
@@ -33696,18 +35468,7 @@ function plural(ms, n, name) {
      * // => '1,2,3'
      */
     function toString(value) {
-      // Exit early for strings to avoid a performance hit in some environments.
-      if (typeof value == 'string') {
-        return value;
-      }
-      if (value == null) {
-        return '';
-      }
-      if (isSymbol(value)) {
-        return symbolToString ? symbolToString.call(value) : '';
-      }
-      var result = (value + '');
-      return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
+      return value == null ? '' : baseToString(value);
     }
 
     /*------------------------------------------------------------------------*/
@@ -33727,6 +35488,7 @@ function plural(ms, n, name) {
      * @param {Object} object The destination object.
      * @param {...Object} [sources] The source objects.
      * @returns {Object} Returns `object`.
+     * @see _.assignIn
      * @example
      *
      * function Foo() {
@@ -33769,6 +35531,7 @@ function plural(ms, n, name) {
      * @param {Object} object The destination object.
      * @param {...Object} [sources] The source objects.
      * @returns {Object} Returns `object`.
+     * @see _.assign
      * @example
      *
      * function Foo() {
@@ -33812,6 +35575,7 @@ function plural(ms, n, name) {
      * @param {...Object} sources The source objects.
      * @param {Function} [customizer] The function to customize assigned values.
      * @returns {Object} Returns `object`.
+     * @see _.assignWith
      * @example
      *
      * function customizer(objValue, srcValue) {
@@ -33843,6 +35607,7 @@ function plural(ms, n, name) {
      * @param {...Object} sources The source objects.
      * @param {Function} [customizer] The function to customize assigned values.
      * @returns {Object} Returns `object`.
+     * @see _.assignInWith
      * @example
      *
      * function customizer(objValue, srcValue) {
@@ -33936,6 +35701,7 @@ function plural(ms, n, name) {
      * @param {Object} object The destination object.
      * @param {...Object} [sources] The source objects.
      * @returns {Object} Returns `object`.
+     * @see _.defaultsDeep
      * @example
      *
      * _.defaults({ 'user': 'barney' }, { 'age': 36 }, { 'user': 'fred' });
@@ -33959,6 +35725,7 @@ function plural(ms, n, name) {
      * @param {Object} object The destination object.
      * @param {...Object} [sources] The source objects.
      * @returns {Object} Returns `object`.
+     * @see _.defaults
      * @example
      *
      * _.defaultsDeep({ 'user': { 'name': 'barney' } }, { 'user': { 'name': 'fred', 'age': 36 } });
@@ -34063,6 +35830,7 @@ function plural(ms, n, name) {
      * @param {Object} object The object to iterate over.
      * @param {Function} [iteratee=_.identity] The function invoked per iteration.
      * @returns {Object} Returns `object`.
+     * @see _.forInRight
      * @example
      *
      * function Foo() {
@@ -34094,6 +35862,7 @@ function plural(ms, n, name) {
      * @param {Object} object The object to iterate over.
      * @param {Function} [iteratee=_.identity] The function invoked per iteration.
      * @returns {Object} Returns `object`.
+     * @see _.forIn
      * @example
      *
      * function Foo() {
@@ -34127,6 +35896,7 @@ function plural(ms, n, name) {
      * @param {Object} object The object to iterate over.
      * @param {Function} [iteratee=_.identity] The function invoked per iteration.
      * @returns {Object} Returns `object`.
+     * @see _.forOwnRight
      * @example
      *
      * function Foo() {
@@ -34156,6 +35926,7 @@ function plural(ms, n, name) {
      * @param {Object} object The object to iterate over.
      * @param {Function} [iteratee=_.identity] The function invoked per iteration.
      * @returns {Object} Returns `object`.
+     * @see _.forOwn
      * @example
      *
      * function Foo() {
@@ -34184,6 +35955,7 @@ function plural(ms, n, name) {
      * @category Object
      * @param {Object} object The object to inspect.
      * @returns {Array} Returns the new array of property names.
+     * @see _.functionsIn
      * @example
      *
      * function Foo() {
@@ -34210,6 +35982,7 @@ function plural(ms, n, name) {
      * @category Object
      * @param {Object} object The object to inspect.
      * @returns {Array} Returns the new array of property names.
+     * @see _.functions
      * @example
      *
      * function Foo() {
@@ -34499,6 +36272,7 @@ function plural(ms, n, name) {
      * @param {Array|Function|Object|string} [iteratee=_.identity]
      *  The function invoked per iteration.
      * @returns {Object} Returns the new mapped object.
+     * @see _.mapValues
      * @example
      *
      * _.mapKeys({ 'a': 1, 'b': 2 }, function(value, key) {
@@ -34530,6 +36304,7 @@ function plural(ms, n, name) {
      * @param {Array|Function|Object|string} [iteratee=_.identity]
      *  The function invoked per iteration.
      * @returns {Object} Returns the new mapped object.
+     * @see _.mapKeys
      * @example
      *
      * var users = {
@@ -34704,7 +36479,7 @@ function plural(ms, n, name) {
      * // => { 'a': 1, 'c': 3 }
      */
     var pick = rest(function(object, props) {
-      return object == null ? {} : basePick(object, baseFlatten(props, 1));
+      return object == null ? {} : basePick(object, arrayMap(baseFlatten(props, 1), toKey));
     });
 
     /**
@@ -34771,7 +36546,7 @@ function plural(ms, n, name) {
         length = 1;
       }
       while (++index < length) {
-        var value = object == null ? undefined : object[path[index]];
+        var value = object == null ? undefined : object[toKey(path[index])];
         if (value === undefined) {
           index = length;
           value = defaultValue;
@@ -35134,7 +36909,7 @@ function plural(ms, n, name) {
     }
 
     /**
-     * Checks if `n` is between `start` and up to but not including, `end`. If
+     * Checks if `n` is between `start` and up to, but not including, `end`. If
      * `end` is not specified, it's set to `start` with `start` then set to `0`.
      * If `start` is greater than `end` the params are swapped to support
      * negative ranges.
@@ -35147,6 +36922,7 @@ function plural(ms, n, name) {
      * @param {number} [start=0] The start of the range.
      * @param {number} end The end of the range.
      * @returns {boolean} Returns `true` if `number` is in the range, else `false`.
+     * @see _.range, _.rangeRight
      * @example
      *
      * _.inRange(3, 2, 4);
@@ -35345,7 +37121,7 @@ function plural(ms, n, name) {
      */
     function endsWith(string, target, position) {
       string = toString(string);
-      target = typeof target == 'string' ? target : (target + '');
+      target = baseToString(target);
 
       var length = string.length;
       position = position === undefined
@@ -35742,7 +37518,7 @@ function plural(ms, n, name) {
             typeof separator == 'string' ||
             (separator != null && !isRegExp(separator))
           )) {
-        separator += '';
+        separator = baseToString(separator);
         if (separator == '' && reHasComplexSymbol.test(string)) {
           return castSlice(stringToArray(string), 0, limit);
         }
@@ -35801,7 +37577,7 @@ function plural(ms, n, name) {
     function startsWith(string, target, position) {
       string = toString(string);
       position = baseClamp(toInteger(position), 0, string.length);
-      return string.lastIndexOf(target, position) == position;
+      return string.lastIndexOf(baseToString(target), position) == position;
     }
 
     /**
@@ -36089,13 +37865,10 @@ function plural(ms, n, name) {
      */
     function trim(string, chars, guard) {
       string = toString(string);
-      if (!string) {
-        return string;
-      }
-      if (guard || chars === undefined) {
+      if (string && (guard || chars === undefined)) {
         return string.replace(reTrim, '');
       }
-      if (!(chars += '')) {
+      if (!string || !(chars = baseToString(chars))) {
         return string;
       }
       var strSymbols = stringToArray(string),
@@ -36127,13 +37900,10 @@ function plural(ms, n, name) {
      */
     function trimEnd(string, chars, guard) {
       string = toString(string);
-      if (!string) {
-        return string;
-      }
-      if (guard || chars === undefined) {
+      if (string && (guard || chars === undefined)) {
         return string.replace(reTrimEnd, '');
       }
-      if (!(chars += '')) {
+      if (!string || !(chars = baseToString(chars))) {
         return string;
       }
       var strSymbols = stringToArray(string),
@@ -36163,13 +37933,10 @@ function plural(ms, n, name) {
      */
     function trimStart(string, chars, guard) {
       string = toString(string);
-      if (!string) {
-        return string;
-      }
-      if (guard || chars === undefined) {
+      if (string && (guard || chars === undefined)) {
         return string.replace(reTrimStart, '');
       }
-      if (!(chars += '')) {
+      if (!string || !(chars = baseToString(chars))) {
         return string;
       }
       var strSymbols = stringToArray(string),
@@ -36222,7 +37989,7 @@ function plural(ms, n, name) {
       if (isObject(options)) {
         var separator = 'separator' in options ? options.separator : separator;
         length = 'length' in options ? toInteger(options.length) : length;
-        omission = 'omission' in options ? toString(options.omission) : omission;
+        omission = 'omission' in options ? baseToString(options.omission) : omission;
       }
       string = toString(string);
 
@@ -36262,7 +38029,7 @@ function plural(ms, n, name) {
           }
           result = result.slice(0, newEnd === undefined ? end : newEnd);
         }
-      } else if (string.indexOf(separator, end) != end) {
+      } else if (string.indexOf(baseToString(separator), end) != end) {
         var index = result.lastIndexOf(separator);
         if (index > -1) {
           result = result.slice(0, index);
@@ -36429,6 +38196,7 @@ function plural(ms, n, name) {
      */
     var bindAll = rest(function(object, methodNames) {
       arrayEach(baseFlatten(methodNames, 1), function(key) {
+        key = toKey(key);
         object[key] = bind(object[key], object);
       });
       return object;
@@ -36544,6 +38312,7 @@ function plural(ms, n, name) {
      * @category Util
      * @param {...(Function|Function[])} [funcs] Functions to invoke.
      * @returns {Function} Returns the new function.
+     * @see _.flowRight
      * @example
      *
      * function square(n) {
@@ -36561,11 +38330,12 @@ function plural(ms, n, name) {
      * invokes the given functions from right to left.
      *
      * @static
-     * @since 0.1.0
+     * @since 3.0.0
      * @memberOf _
      * @category Util
      * @param {...(Function|Function[])} [funcs] Functions to invoke.
      * @returns {Function} Returns the new function.
+     * @see _.flow
      * @example
      *
      * function square(n) {
@@ -36992,7 +38762,7 @@ function plural(ms, n, name) {
      * // => [1, 2]
      */
     function property(path) {
-      return isKey(path) ? baseProperty(path) : basePropertyDeep(path);
+      return isKey(path) ? baseProperty(toKey(path)) : basePropertyDeep(path);
     }
 
     /**
@@ -37039,6 +38809,7 @@ function plural(ms, n, name) {
      * @param {number} end The end of the range.
      * @param {number} [step=1] The value to increment or decrement by.
      * @returns {Array} Returns the new array of numbers.
+     * @see _.inRange, _.rangeRight
      * @example
      *
      * _.range(4);
@@ -37076,6 +38847,7 @@ function plural(ms, n, name) {
      * @param {number} end The end of the range.
      * @param {number} [step=1] The value to increment or decrement by.
      * @returns {Array} Returns the new array of numbers.
+     * @see _.inRange, _.range
      * @example
      *
      * _.rangeRight(4);
@@ -37299,7 +39071,7 @@ function plural(ms, n, name) {
      */
     function max(array) {
       return (array && array.length)
-        ? baseExtremum(array, identity, gt)
+        ? baseExtremum(array, identity, baseGt)
         : undefined;
     }
 
@@ -37329,7 +39101,7 @@ function plural(ms, n, name) {
      */
     function maxBy(array, iteratee) {
       return (array && array.length)
-        ? baseExtremum(array, getIteratee(iteratee), gt)
+        ? baseExtremum(array, getIteratee(iteratee), baseGt)
         : undefined;
     }
 
@@ -37399,7 +39171,7 @@ function plural(ms, n, name) {
      */
     function min(array) {
       return (array && array.length)
-        ? baseExtremum(array, identity, lt)
+        ? baseExtremum(array, identity, baseLt)
         : undefined;
     }
 
@@ -37429,7 +39201,7 @@ function plural(ms, n, name) {
      */
     function minBy(array, iteratee) {
       return (array && array.length)
-        ? baseExtremum(array, getIteratee(iteratee), lt)
+        ? baseExtremum(array, getIteratee(iteratee), baseLt)
         : undefined;
     }
 
@@ -38101,9 +39873,11 @@ function plural(ms, n, name) {
   // Export lodash.
   var _ = runInContext();
 
-  // Expose lodash on the free variable `window` or `self` when available. This
-  // prevents errors in cases where lodash is loaded by a script tag in the presence
-  // of an AMD loader. See http://requirejs.org/docs/errors.html#mismatch for more details.
+  // Expose Lodash on the free variable `window` or `self` when available so it's
+  // globally accessible, even when bundled with Browserify, Webpack, etc. This
+  // also prevents errors in cases where Lodash is loaded by a script tag in the
+  // presence of an AMD loader. See http://requirejs.org/docs/errors.html#mismatch
+  // for more details. Use `_.noConflict` to remove Lodash from the global object.
   (freeWindow || freeSelf || {})._ = _;
 
   // Some AMD build optimizers like r.js check for condition patterns like the following:
@@ -59644,1528 +61418,3 @@ angular.module('staffdir', ['ualib.staffdir']);
         };
     }]);
 
-angular.module('compfinder.templates', ['admin/admin.tpl.html', 'common/maps/map.tpl.html', 'signage/signage.tpl.html']);
-
-angular.module("admin/admin.tpl.html", []).run(["$templateCache", function($templateCache) {
-    $templateCache.put("admin/admin.tpl.html",
-        "<tabset justified=\"true\" ng-if=\"hasAccess\">\n" +
-        "    <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
-        "        <div ng-if=\"tab.number == 0\">\n" +
-        "            <nav class=\"navbar navbar-default\">\n" +
-        "                <div class=\"container\">\n" +
-        "                    <ul class=\"nav navbar-nav\">\n" +
-        "                        <li>\n" +
-        "                            <button class=\"btn btn-default navbar-btn\" ng-click=\"mapTools.undo()\">\n" +
-        "                                <span class=\"fa fa-reply\"></span> Undo\n" +
-        "                            </button>\n" +
-        "                        </li>\n" +
-        "                        <li>\n" +
-        "                            <button class=\"btn btn-default navbar-btn\" ng-click=\"mapTools.redo()\">\n" +
-        "                                <span class=\"fa fa-share\"></span> Redo\n" +
-        "                            </button>\n" +
-        "                        </li>\n" +
-        "                    </ul>\n" +
-        "                    <ul class=\"nav navbar-nav\" ng-show=\"mapTools.current == 'selector'\">\n" +
-        "                        <li>\n" +
-        "                            <button class=\"btn btn-default navbar-btn\" ng-click=\"mapTools.helper('hAlignCenter')\">\n" +
-        "                                <span class=\"fa fa-align-center\"></span> Horizontal Align Center\n" +
-        "                            </button>\n" +
-        "                        </li>\n" +
-        "                        <li>\n" +
-        "                            <button class=\"btn btn-default navbar-btn\" ng-click=\"mapTools.helper('vAlignCenter')\">\n" +
-        "                                <span class=\"fa fa-align-center fa-rotate-90\"></span> Vertical Align Center\n" +
-        "                            </button>\n" +
-        "                        </li>\n" +
-        "                    </ul>\n" +
-        "\n" +
-        "\n" +
-        "                </div>\n" +
-        "            </nav>\n" +
-        "\n" +
-        "            <div class=\"row\">\n" +
-        "                <div class=\"col-md-1\">\n" +
-        "                    <ul class=\"nav nav-pills nav-stacked\">\n" +
-        "                        <li ng-class=\"{active: mapTools.current == 'selector'}\">\n" +
-        "                            <button class=\"btn btn-default\" ng-click=\"mapTools.select('selector')\">\n" +
-        "                                <span class=\"fa fa-fw fa-crosshairs\"></span>\n" +
-        "                            </button>\n" +
-        "                        </li>\n" +
-        "                        <li ng-class=\"{active: mapTools.current == 'move'}\">\n" +
-        "                            <button class=\"btn btn-default\" ng-click=\"mapTools.select('move')\">\n" +
-        "                                <span class=\"fa fa-fw fa-arrows\"></span>\n" +
-        "                            </button>\n" +
-        "                        </li>\n" +
-        "                        <li ng-class=\"{active: mapTools.current == 'move'}\">\n" +
-        "                            <button class=\"btn btn-default\" ng-click=\"mapTools.select('rotate')\">\n" +
-        "                                <span class=\"fa fa-fw fa-repeat\"></span>\n" +
-        "                            </button>\n" +
-        "                        </li>\n" +
-        "                        <li>\n" +
-        "                            <button class=\"btn btn-default\" ng-click=\"reset()\">\n" +
-        "                                <span class=\"fa fa-fw fa-refresh\"></span>\n" +
-        "                            </button>\n" +
-        "                        </li>\n" +
-        "                    </ul>\n" +
-        "                </div>\n" +
-        "                <div class=\"col-md-8\" style=\"height: 600px;\">\n" +
-        "                    <map></map>\n" +
-        "                </div>\n" +
-        "                <div class=\"col-md-3\">\n" +
-        "                    <div style=\"height: 400px\">\n" +
-        "                        <div style=\"height: 70%\">\n" +
-        "                            <div class=\"list-group\" style=\"height: 100%; overflow-y: auto\">\n" +
-        "                                <a href=\"#\" class=\"list-group-item\" ng-repeat=\"object in mapObjects.state\">\n" +
-        "                                    {{object.name}}\n" +
-        "                                </a>\n" +
-        "                            </div>\n" +
-        "                        </div>\n" +
-        "                    </div>\n" +
-        "                </div>\n" +
-        "            </div>\n" +
-        "        </div>\n" +
-        "        <div ng-if=\"tab.number == 1\" >\n" +
-        "\n" +
-        "        </div>\n" +
-        "    </tab>\n" +
-        "</tabset>\n" +
-        "<div ng-if=\"!hasAccess\">\n" +
-        "    <h3>Sorry, you don't have permissions to edit software</h3>\n" +
-        "</div>\n" +
-        "");
-}]);
-
-angular.module("common/maps/map.tpl.html", []).run(["$templateCache", function($templateCache) {
-    $templateCache.put("common/maps/map.tpl.html",
-        "<canvas id=\"map\" class=\"map\"></canvas>");
-}]);
-
-angular.module("signage/signage.tpl.html", []).run(["$templateCache", function($templateCache) {
-    $templateCache.put("signage/signage.tpl.html",
-        "<header class=\"page-row\">\n" +
-        "    <nav class=\"navbar navbar-static-top navbar-mega\">\n" +
-        "        <div class=\"container-fluid\">\n" +
-        "            <div class=\"navbar-header\">\n" +
-        "                <p class=\"navbar-text lead\">\n" +
-        "                    <strong>Floor {{computers.buildings[0].floors[0].name}}</strong>\n" +
-        "                </p>\n" +
-        "            </div>\n" +
-        "\n" +
-        "\n" +
-        "            <div class=\"navbar-header navbar-right\">\n" +
-        "                <p class=\"navbar-text lead\">\n" +
-        "                    <strong>Available Computers:</strong>\n" +
-        "                </p>\n" +
-        "                <p class=\"navbar-text lead\">\n" +
-        "                    {{computers.buildings[0].available.desktops}}\n" +
-        "                </p>\n" +
-        "            </div>\n" +
-        "        </div>\n" +
-        "    </nav>\n" +
-        "</header>\n" +
-        "\n" +
-        "<div class=\"wrap page-row page-row-expanded comp-signage-body\">\n" +
-        "    <canvas id=\"asset_image\" class=\"asset-image\"></canvas>\n" +
-        "</div>\n" +
-        "<footer class=\"page-row\">\n" +
-        "    <nav class=\"navbar navbar-static-bottom navbar-mega\">\n" +
-        "        <div class=\"container-fluid\">\n" +
-        "            <div class=\"nav navbar-nav\">\n" +
-        "                <p class=\"navbar-text\">\n" +
-        "                    <img src=\"ualib-computers-qr.jpg\" style=\"height: 50px;\"/>\n" +
-        "\n" +
-        "                </p>\n" +
-        "                <p class=\"navbar-text\">\n" +
-        "                    For computer availability in all libraries<br> visit <a href=\"#\">www.lib.ua.edu/computers</a>\n" +
-        "                </p>\n" +
-        "            </div>\n" +
-        "\n" +
-        "            <div class=\"nav navbar-nav navbar-right\">\n" +
-        "                <p class=\"navbar-text lead\">\n" +
-        "                    <strong>Apple:</strong>\n" +
-        "                </p>\n" +
-        "                <p class=\"navbar-text\">\n" +
-        "                    <span class=\"apple available\"></span> available<br> <span class=\"apple taken\"></span> taken\n" +
-        "                </p>\n" +
-        "            </div>\n" +
-        "            <div class=\"nav navbar-nav navbar-right\">\n" +
-        "                <p class=\"navbar-text lead\">\n" +
-        "                    <strong>Windows:</strong>\n" +
-        "                </p>\n" +
-        "                <p class=\"navbar-text\">\n" +
-        "                    <span class=\"windows available\"></span> available<br> <span class=\"windows taken\"></span> taken\n" +
-        "                </p>\n" +
-        "            </div>\n" +
-        "\n" +
-        "        </div>\n" +
-        "    </nav>\n" +
-        "</footer>\n" +
-        "");
-}]);
-
-angular.module('ualib.compfinder.admin', [
-    'ualib.compfinder.mapsDirective',
-    'ualib.compfinder.service',
-    'ngFileUpload'
-])
-    .constant('SOFTWARE_GROUP', 64)
-
-    .run(['$rootScope', function($rootScope) {
-        $rootScope.userInfo = {};
-    }])
-
-    .config(['$routeProvider', function($routeProvider){
-        $routeProvider
-            .when('/computers/admin/:building/:floor', {
-                reloadOnSearch: false,
-                resolve: {
-                    mapdata: ['Computers', '$route', function(Computers, $route){
-                        return Computers.init($route.current.params, {noRefresh: true});
-                    }],
-                    userData: function(tokenReceiver){
-                        return tokenReceiver.getPromise();
-                    }
-                },
-                templateUrl: 'admin/admin.tpl.html',
-                controller: 'ComputersAdminCtrl'
-            });
-    }])
-
-    .controller('ComputersAdminCtrl', ['$scope', 'Computers', '$mapObjects', 'userData', 'SOFTWARE_GROUP', 'AuthService',
-        function($scope, Computers, $mapObjects, userData, SOFTWARE_GROUP, AuthService){
-            $scope.userInfo = AuthService.isAuthorized();
-            $scope.mapdata = {};
-            $scope.mapObjects = {};
-
-            $scope.hasAccess = false;
-            if (angular.isDefined($scope.userInfo.group)) {
-                /*jslint bitwise: true*/
-                if ((parseInt($scope.userInfo.group) & SOFTWARE_GROUP) === SOFTWARE_GROUP) {
-                    $scope.hasAccess = true;
-                    $scope.mapdata = Computers;
-                    $scope.mapObjects = $mapObjects;
-                    console.dir($scope.mapdata);
-                    console.dir($scope.mapObjects);
-                }
-                /*jslint bitwise: false*/
-            }
-
-            $scope.tabs = [
-                { name: 'Map',
-                    number: 0,
-                    active: true
-                },
-                { name: 'List',
-                    number: 1,
-                    active: false
-                }
-            ];
-
-
-
-        }]);
-angular.module('ualib.compfinder', [
-    'ngRoute',
-    'ngResource',
-    'oc.lazyLoad',
-    'compfinder.templates',
-    'ualib.compfinder.admin',
-    'ualib.compfinder.signage'
-])
-
-    .value('mapStyles', {
-        desktops: {
-            available: {
-                shape: 'fillRect',
-                color: '#61a661'
-            },
-            taken: {
-                shape: 'strokeRect',
-                color: '#eee'
-            }
-        }
-    })
-
-    .config(['$routeProvider', '$ocLazyLoadProvider', function($routeProvider, $ocLazyLoadProvider) {
-        $ocLazyLoadProvider.config({
-            modules: [
-                {
-                    name: 'angular.filter',
-                    files: ['//cdnjs.cloudflare.com/ajax/libs/angular-filter/0.5.8/angular-filter.min.js']
-                },
-                {
-                    name: 'monospaced.mousewheel',
-                    files: [
-                        'vendor/hamster.js',
-                        'vendor/mousewheel.js'
-                    ]
-                }
-            ]
-        });
-
-    }]);
-
-angular.module('compfinder', ['ualib.compfinder']);
-angular.module('ualib.compfinder.service', [
-    'ualib.compfinder.factory'
-])
-
-    .service('Computers', ['compSoftFactory', '$timeout', '$q', '$rootScope', function(compSoftFactory, $timeout, $q, $rootScope){
-        var _params = {};
-        var _options = {
-            noRefresh: false
-        };
-        var _refresh = null;
-        var _cancel = false;
-        var self = this;
-
-        this.buildings = [];
-
-        this.init = function(params, opt){
-            var deferred = $q.defer();
-            params = angular.isDefined(params) ? params : {};
-            _params = params;
-            opt = angular.isDefined(opt) ? opt : {};
-
-
-            angular.extend(_options, opt);
-
-            if (_refresh) {
-                self.cancelRefresh();
-            }
-
-            getComputers().$promise.then(function(data){
-                self.buildings = angular.copy(data.buildings);
-                if (_options.noRefresh === false){
-                    refresh();
-                }
-                deferred.resolve();
-            });
-
-            return deferred.promise;
-        };
-
-        this.cancelRefresh = function(){
-            var _cancel = true;
-        };
-
-        function refresh(){
-            if (!_cancel){
-                _refresh = $timeout(function(){
-                    getComputers().$promise.then(function(data){
-                        self.buildings = angular.copy(data.buildings);
-                        refresh();
-                    });
-                }, 8000);
-            }
-            else {
-                $timeout.cancel(_refresh);
-            }
-        }
-
-        function getComputers(){
-            if (_params.hasOwnProperty('floor')){
-                return compSoftFactory.floors().get(_params, function(data){
-                    return data;
-                }, function(data, status, headers, config) {
-                    console.log('ERROR: Computers and Software');
-                    console.log({
-                        data: data,
-                        status: status,
-                        headers: headers,
-                        config: config
-                    });
-                });
-            }
-            else {
-                return compSoftFactory.buildings().get(_params, function(data){
-                    return data;
-                }, function(data, status, headers, config) {
-                    console.log('ERROR: Computers and Software');
-                    console.log({
-                        data: data,
-                        status: status,
-                        headers: headers,
-                        config: config
-                    });
-                });
-            }
-        }
-
-
-
-    }]);
-angular.module('ualib.compfinder.factory', [])
-    .constant('DOMAIN', 'https://wwwdev2.lib.ua.edu/')
-    .constant('WP_API', 'https://wwwdev2.lib.ua.edu/wp-json/wp/v2/')
-    .constant('SW_API', 'https://wwwdev2.lib.ua.edu/softwareList/api/')
-
-    .config(['$httpProvider', function($httpProvider) {
-        $httpProvider.interceptors.push('AuthInterceptor');
-    }])
-
-    .factory('AuthInterceptor', ['AuthService', 'DOMAIN', function (AuthService, DOMAIN) {
-        return {
-            // automatically attach Authorization header
-            request: function(config) {
-                config.headers = config.headers || {};
-
-                //interceptor for UALib JWT tokens
-                var token = AuthService.getToken();
-                if(config.url.indexOf(DOMAIN) === 0 && token) {
-                    config.headers.Authorization = "Bearer " + token;
-                }
-
-                //interceptor for WordPress nonce headers
-                if (typeof myLocalized !== 'undefined') {
-                    config.headers['X-WP-Nonce'] = myLocalized.nonce;
-                } else {
-                    console.log("myLocalized script is not defined, cannot read WP nonce.");
-                }
-                return config;
-            },
-
-            // If a token was sent back, save it
-            response: function(res) {
-                if(res.config.url.indexOf(DOMAIN) === 0 && angular.isDefined(res.data.token)) {
-                    AuthService.saveToken(res.data.token);
-                }
-                return res;
-            }
-        };
-    }])
-
-    .service('AuthService', ['$window', function($window){
-        var self = this;
-
-        self.parseJWT = function(token) {
-            var base64Url = token.split('.')[1];
-            var base64 = base64Url.replace('-', '+').replace('_', '/');
-            return JSON.parse($window.atob(base64));
-        };
-        self.saveToken = function(token) {
-            $window.localStorage['ualibweb.Token'] = token;
-            console.log('Token saved');
-        };
-        self.getToken = function() {
-            return $window.localStorage['ualibweb.Token'];
-        };
-        self.isAuthorized = function() {
-            var token = self.getToken();
-            if (token) {
-                var params = self.parseJWT(token);
-                if (Math.round(new Date().getTime() / 1000) <= params.exp) {
-                    console.log('Authenticated.');
-                    return params.user;
-                }
-            }
-            console.log('Authentication failed.');
-            return false;
-        };
-        self.logout = function() {
-            $window.localStorage.removeItem('ualibweb.Token');
-            console.log('Token deleted');
-        };
-    }])
-
-    .service('tokenReceiver', ['$http', 'WP_API', function($http, API){
-        this.promise = null;
-        function makeRequest() {
-            return $http.get(API + 'users/me')
-                .then(function(r1){
-                    if (angular.isDefined(r1.data.id)) {
-                        $http.get(API + 'users/' + r1.data.id, {context: 'edit'})
-                            .then(function (r2) {
-                                return r2.data;
-                            });
-                    }
-                });
-        }
-        this.getPromise = function(update){
-            if (update || !this.promise) {
-                this.promise = makeRequest();
-            }
-            return this.promise;
-        };
-    }])
-
-    .factory('compSoftFactory', ['$resource', '$http', 'SW_API', function($resource, $http, API){
-
-        function getTotalAvail(array, prop){
-            prop = angular.isUndefined(prop) ? 'desktops' : prop;
-            return array.filter(function(item){
-                return prop === 'desktops' ? item.status === 3 : item.available === 0;
-            }).length;
-        }
-
-        function appendTransform(defaults, transform) {
-
-            // We can't guarantee that the default transformation is an array
-            defaults = angular.isArray(defaults) ? defaults : [defaults];
-            //console.log(defaults.concat(transform));
-            // Append the new transformation to the defaults
-            return defaults.concat(transform);
-        }
-
-        function buildingsTransform(data){
-            var b = angular.fromJson(data);
-            var buildings = [];
-
-            angular.forEach(b.buildings, function(building, idx){
-                var desktops = 0;
-                var laptops = 0;
-
-                for (var i = 0, len = building.floors.length; i < len; i++){
-                    var floor = {available: {}};
-
-                    if (building.floors[i].hasOwnProperty('desktops')){
-                        var d = getTotalAvail(building.floors[i].desktops, 'desktops');
-                        floor.available.desktops = d;
-                        desktops += d;
-                    }
-
-                    if (building.floors[i].hasOwnProperty('laptops')){
-                        var l = getTotalAvail(building.floors[i].laptops, 'laptops');
-                        floor.available.laptops = l;
-                        laptops += l;
-                    }
-
-                    building.floors[i] = angular.extend({}, building.floors[i], floor);
-
-                }
-
-                building.available = {
-                    desktops: desktops,
-                    laptops: laptops
-                };
-
-                buildings.push(building);
-            });
-
-            b.buildings = buildings;
-            return b;
-        }
-
-        return {
-            buildings: function(){
-                console.log("compSoftFactory.Buildings");
-                return $resource(API + 'buildings/:buildingID', {buildingID:'@buildingID'}, {
-                    get: {
-                        method: 'GET',
-                        transformResponse: appendTransform($http.defaults.transformResponse, buildingsTransform)
-                    }
-                });
-            },
-            floors: function(){
-                console.log("compSoftFactory.Floors");
-                return $resource(API + 'floors/:floorID', {floorID:'@floorID'}, {
-                    get: {
-                        method: 'GET',
-                        url: API + 'buildings/:building/floors/:floor',
-                        transformResponse: appendTransform($http.defaults.transformResponse, buildingsTransform)
-                    }
-                });
-            },
-            computers: function(){
-                console.log("compSoftFactory.Computers");
-                return $resource(API + 'computers', {});
-            }
-        };
-    }]);
-angular.module('ualib.compfinder.mapsDirective', [
-    'ualib.compfinder.maps',
-    'ualib.compfinder.mapTools',
-    'ualib.compfinder.service'
-])
-
-    .directive('map', ['$maps', '$mapTools','Computers', '$timeout', '$window',  function($maps, $mapTools, Computers, $timeout, $window){
-        return{
-            restrict: 'EA',
-            replace: true,
-            template: '<canvas id="map" class="map" ng-class="mapTools.current" msd-wheel="mapTools.zoom($event, $delta)"></canvas>',
-            link: function(scope, elm){
-
-                scope.mapTools = $mapTools;
-
-                $maps.init({
-                    src: 'http://wwwdev.lib.ua.edu/' + scope.mapdata.buildings[0].floors[0].image.url,
-                    canvas: elm[0],
-                    objects: {
-                        desktops: scope.mapdata.buildings[0].floors[0].desktops,
-                        equipment: scope.mapdata.buildings[0].floors[0].equipment
-                    }
-                }).then(function(){
-                    scope.mapTools.init();
-                });
-
-                scope.reset = function(){
-                    $maps.setDefaults();
-                    $maps.draw();
-                    //$mapTools.zoomSlider.init();
-                };
-
-
-                /*scope.$on('detail-toggle', function(){
-                 $timeout(function(){
-                 $maps.refactor({width: detailElm.offsetWidth});
-                 }, 100);
-                 });
-
-                 scope.reset = function(){
-                 $maps.setDefaults();
-                 $maps.draw();
-                 $mapTools.zoomSlider.init();
-                 };
-
-                 scope.mouseZoom = function(event, delta){
-                 if (zooming){
-                 scope.mapTools.current = delta > 0 ? 'zoom-in' : 'zoom-out';
-                 scope.mapTools.zoom(event, delta);
-                 }
-                 };*/
-
-                angular.element($window).bind('resize', function(){
-                    $maps.resizeCanvas();
-                    $maps.resizeImage();
-                    $maps.posImage();
-                    $maps.draw();
-                });
-
-            }
-        };
-    }]);
-
-
-angular.module('ualib.compfinder.mapObjects', [])
-
-    .service('$mapObjects', ['$maps', '$q', '$filter', '$rootScope', function($maps, $q, $filter, $rootScope){
-        var self = this;
-        var undoStates = [];
-        var redoStates = [];
-        this.selected = [];
-        this.state = [];
-
-
-        this.selectBounds = {};
-
-        this.init = function(objects){
-            self.state = collapseObjects(objects);
-        };
-
-        this.select = function(func){
-            self.state = self.state.map(function(o){
-                o.selected = func(o);
-                return o;
-            });
-            return self.getSelected();
-        };
-
-        this.getSelected = function(){
-            return self.selected.length > 0 ? self.selected : self.state.filter(function(obj){
-                return obj && obj.hasOwnProperty('selected') && obj.selected;
-            });
-        };
-
-        this.update = function(objects){
-            objects = objects ? objects : self.getSelected();
-            self.state = angular.extend([], objects, self.state);
-            var expanded = expandObjects(self.state);
-            angular.copy(expanded, $maps.objects);
-            console.log(angular.copy($maps.objects));
-            $rootScope.$broadcast('mapObjectsUpdated');
-
-        };
-
-        this.recordState = function(objects){
-            objects = objects ? objects : self.getSelected();
-            undoStates.push(angular.copy(objects));
-        };
-
-        this.undo = function(){
-            console.log('undo????');
-            if (undoStates.length > 0){
-                console.log('UNDOOOO!!!!');
-                redoStates.push(self.getSelected());
-                var undo = undoStates.pop();
-                self.update(undo);
-            }
-        };
-
-        this.redo = function(){
-            if (redoState.length > 0){
-                undoStates.push(angular.copy(self.state));
-                angular.copy(redoStates.pop(), self.state);
-            }
-        };
-
-        this.centerOfSelection = function(objects){
-            objects = objects ? objects : self.getSelected();
-
-            var maxX = getMax(objects, 'x');
-            var maxY = getMax(objects, 'y');
-            var minX = getMin(objects, 'x');
-            var minY = getMin(objects, 'y');
-
-            //self.selectBounds = self.boundsOfSelection(objects);
-
-            var vcenter = ((maxX - minX)/2) + minX;
-            var hcenter = ((maxY - minY)/2) + minY;
-            return {
-                x: vcenter,
-                y: hcenter
-            };
-        };
-
-        this.setSelectionBounds = function(objects){
-            objects = objects ? objects : self.getSelected();
-
-            var maxX = getMax(objects, 'x');
-            var maxY = getMax(objects, 'y');
-            var minX = getMin(objects, 'x');
-            var minY = getMin(objects, 'y');
-
-            self.selectBounds = {x: minX, y: minY, w: (maxX - minX + 15), h: (maxY - minY + 15)};
-        };
-
-        function getSelected(obj){
-            if (angular.isObject(obj)){
-                return getSelected();
-            }
-
-            return obj.filter(function(comp){
-                return comp.selected;
-            });
-        }
-
-        // Adopted from http://stackoverflow.com/questions/11149843/get-largest-value-in-multi-dimensional-array-javascript-or-coffeescript
-        function getMax(objects, coord){
-            return objects.reduce(function(max, arr) {
-                return max >= parseInt(arr.coordinates[coord]) ? max : parseInt(arr.coordinates[coord]);
-            }, -Infinity);
-        }
-
-        function getMin(objects, coord){
-            return objects.reduce(function(min, arr) {
-                return arr.coordinates[coord] < min ? arr.coordinates[coord] : min;
-            }, Infinity);
-        }
-
-        function collapseObjects(objects){
-            var collapsed = [];
-
-            function collapseMapper(o){
-                o.oType = obj;
-                return o;
-            }
-
-            for (var obj in objects){
-                if (objects.hasOwnProperty(obj)){
-                    var newObj = objects[obj].map(collapseMapper);
-                    collapsed = collapsed.concat(newObj);
-                }
-            }
-            return collapsed;
-        }
-
-        function expandObjects(objects){
-            var expanded = {};
-            objects.map(function(obj){
-                var newObj = {};
-                for (var p in obj){
-                    if (obj.hasOwnProperty(p) && p !== 'oType'){
-                        newObj[p] = obj[p];
-                    }
-                }
-                if (expanded.hasOwnProperty(obj.oType)){
-                    expanded[obj.oType].push(newObj);
-                }
-                else {
-                    expanded[obj.oType] = [];
-                    expanded[obj.oType].push(newObj);
-                }
-            });
-            return expanded;
-        }
-
-    }]);
-angular.module('ualib.compfinder.mapTools', [
-    'ualib.compfinder.mapObjects'
-])
-    .service('$mapTools', ['$maps', '$mapObjects', '$document', '$window', '$location', function MapTools($maps, $mapObjects, $document, $window, $location){
-        var self = this;
-        var offset;
-        var tool;
-        var canvas;
-        this.canvasEventPause = false;
-
-        this.current = null;
-        this.prev = null;
-
-        this.mapUndoStates = [];
-
-        this.init = function(){
-            var defaultTool = $location.search().tool || 'selector';
-            $mapObjects.init($maps.objects);
-            canvas = angular.element($maps.canvas);
-            offset = getOffset($maps.canvas);
-            self.select(defaultTool);
-            readyCanvas();
-        };
-
-        this.destroy = function(){
-            canvas.unbind();
-            $document.unbind();
-        };
-
-        this.select = function(newTool){
-            if (newTool !== self.current){
-                self.prev = self.current;
-                tool = new Tools[newTool]();
-                self.current = newTool;
-                $location.search('tool', self.current);
-                $location.replace();
-            }
-        };
-
-        this.prevTool = function(){
-            if (angular.isDefined(self.prev)){
-                self.select(self.prev);
-            }
-        };
-
-        this.helper = function(helper){
-            if (angular.isObject(tool) && tool.hasOwnProperty(helper) && angular.isFunction(tool[helper])){
-                tool[helper]();
-            }
-        };
-
-        function readyCanvas(){
-            canvas.bind('mousedown', function(ev){
-                canvasEvent(ev);
-                $document.bind('mousedown', toolCursor);
-                $document.bind('mouseup', toolCursor);
-                $document.bind('mouseup', toolChangedImage);
-            });
-            /*canvas.bind('mousemove', function(ev){
-             ev = self.mouseLoc(ev);
-             if (mouseInBounds($maps.x, $maps.y, $maps.x2, $maps.y2, ev.mx, ev.my)){
-             if (!hover) hover = true;
-             angular.element('body').addClass(self.current);
-             canvas.bind('mousedown', canvasEvent);
-             }
-             else if (hover){
-             hover = false;
-             angular.element('body').removeClass(self.current);
-             }
-             });
-             canvas.bind('mouseup', toolChangedImage);*/
-        }
-
-        function toolCursor(ev){
-            if (ev.type === 'mousedown'){
-                $document.find('body').addClass(self.current);
-            }
-            else if (ev.type === 'mouseup'){
-                $document.find('body').removeClass(self.current);
-                $document.unbind('mousedown', toolCursor);
-            }
-        }
-
-        function canvasEvent(ev){
-            if (!self.canvasEventPause){
-                ev = self.mouseLoc(ev); //set current mouse (mx, my)
-                var func = tool[ev.type];
-                if (func){
-                    func(ev);
-                }
-            }
-            return ev.preventDefault() && false;
-        }
-
-        function toolChangedImage(){
-            $maps.changed = true;
-            canvas.unbind('mouseup', toolChangedImage);
-        }
-
-        this.mouseLoc = function(ev){
-            ev.mx = ev.pageX - offset.left;
-            ev.my = ev.pageY - offset.top;
-            return ev;
-        };
-
-        function getBounds(x, y, w, h){
-            var x1, y1, x2, y2;
-
-            if (w < 0){
-                x1 = x + w;
-                x2 = x;
-            }
-            else {
-                x1 = x;
-                x2 = x + w;
-            }
-
-            if (h < 0){
-                y1 = y + h;
-                y2 = y;
-            }
-            else {
-                y1 = y;
-                y2 = y + h;
-            }
-
-            return {x1: x1, y1: y1, x2: x2, y2: y2};
-
-        }
-
-        function mouseInBounds(x1, y1, w, h, mx, my){
-            var x2 = x1+w;
-            var y2 = y1+h;
-            //console.log(mx +' > '+ x1 +' && '+ my +' > '+ y1 +' && '+ mx +' < '+ x2 +' && '+ my +' < '+ y2);
-            return (mx > x1 && my > y1 && mx < x2 && my < y2);
-        }
-
-        function inRectBounds(x1, y1, w1, h1, rx, ry, rw, rh){
-            // get x2,y2 of object being checked
-            var x2 = w1+x1;
-            var y2 = h1+y1;
-            // get bounds of select rect
-            var bounds = getBounds(rx, ry, rw, rh);
-            //console.log(bounds.x1 +' < '+ x1 +' && '+ bounds.y1 +' < '+ y1 +' && '+ bounds.x2 +' > '+ x2 +' && '+ bounds.y2 +' > '+ y2);
-            return (bounds.x1 < x1 && bounds.y1 < y1 && bounds.x2 > x2 && bounds.y2 > y2);
-
-        }
-
-        function getOffset(elm){
-            var rect = elm.getBoundingClientRect();
-            //return {top: rect.top, left: rect.left};
-            var doc = elm.ownerDocument;
-            var docElem = doc.documentElement;
-
-            return {
-                top: rect.top + $window.pageYOffset - docElem.clientTop,
-                left: rect.left + $window.pageXOffset - docElem.clientLeft
-            };
-        }
-
-        this.map = function(val, xMin, xMax, yMin, yMax) {
-            return (val - xMax) / (xMin - xMax) * (yMax - yMin) + yMin;
-        };
-
-        //Buttons - these are not selectable tools, but perform a single redefined function
-        this.zoomSlider = {
-            height: 0,
-            pos: 0,
-            elm: null,
-            init: function(){
-                self.zoomSlider.height = self.zoomSlider.elm.offsetHeight-2;
-                self.zoomSlider.defaultPos();
-            },
-            defaultPos: function(){ self.zoomSlider.pos = self.map($maps.scalar, $maps.maxScale, $maps.minScale, self.zoomSlider.height, 0); }
-        };
-
-        this.zoom = function(ev, delta, deltaX, deltaY){
-            // extend event variable with mouse location
-            ev = self.mouseLoc(ev);
-            var slideBarY;
-            var dScale;
-            var zoomCenter = true;
-
-            if (!delta){
-                var pos = ev.my - self.zoomSlider.height;
-                dScale = self.map(pos, 0, self.zoomSlider.height, $maps.minScale, $maps.maxScale);
-                delta = dScale - $maps.scalar;
-            }
-            else{
-                delta = delta/10;
-                dScale = Math.round(($maps.scalar + delta) * 1e1) / 1e1;
-
-                zoomCenter = mouseInBounds($maps.x, $maps.y, $maps.x2, $maps.y2, ev.mx, ev.my) ? false : true;
-            }
-
-            // If mouse is not over the image, zoom from the center of the image instead of mouse location (ev.mx, ev.my)
-            if (zoomCenter){
-                ev.mx = ($maps.x + $maps.x2)/2;
-                ev.my = ($maps.y + $maps.y2)/2;
-            }
-            //var clipScale = Math.min(Math.max($maps.minScale, dScale), $maps.maxScale);
-            //If dScale is within scale limits
-            if (!(dScale < $maps.minScale || dScale > $maps.maxScale)){
-
-                $maps.x = ev.mx - ($maps.scalar + delta) * ((ev.mx-$maps.x) / $maps.scalar);
-                $maps.y = ev.my - ($maps.scalar + delta) * ((ev.my-$maps.y) / $maps.scalar);
-
-                $maps.scalar = dScale;
-                $maps.width = $maps.image.width*$maps.scalar;
-                $maps.height = $maps.image.height*$maps.scalar;
-
-                $maps.draw();
-            }
-            //set slideBarY position
-            slideBarY = self.map(dScale, $maps.maxScale, $maps.minScale, self.zoomSlider.height, 0);
-
-            //zoom slider bar position - always changes, but differently depending on mousewheel or slider zoom
-            self.zoomSlider.pos = Math.min(Math.max(slideBarY, 0), self.zoomSlider.height);
-            return ev.preventDefault() && false;
-        };
-
-        this.undo = function(){
-            $mapObjects.undo();
-            $maps.draw();
-        };
-
-        this.redo = function(){
-            $mapObjects.redo();
-            $maps.draw();
-        };
-
-
-        //Tools - only one can be selected at a time
-        var Tools = {
-            selector: function () {
-                var self = this;
-                var mox = 0;
-                var moy = 0;
-                var ox = 0;
-                var oy = 0;
-                var offsets = [];
-                var selected = [];
-                var selectRectOffset = {};
-
-                this.mousedown = function (ev) {
-                    mox = ev.mx;
-                    moy = ev.my;
-
-                    ox = (ev.mx - $maps.x) / $maps.scalar;
-                    oy = (ev.my - $maps.y) / $maps.scalar;
-
-                    if (($maps.objects.hasOwnProperty('selectRect') && !mouseInBounds($maps.objects.selectRect.x, $maps.objects.selectRect.y, $maps.objects.selectRect.w, $maps.objects.selectRect.h, ox, oy)) || !$maps.objects.hasOwnProperty('selectRect')) {
-                        selected = $mapObjects.select(function (obj) {
-                            return mouseInBounds(obj.coordinates.x, obj.coordinates.y, 10, 10, (ev.mx - $maps.x) / $maps.scalar, (ev.my - $maps.y) / $maps.scalar);
-                        });
-                    }
-                    else {
-                        selectRectOffset = {
-                            x: ev.mx - $maps.objects.selectRect.x,
-                            y: ev.my - $maps.objects.selectRect.y
-                        };
-                    }
-
-                    offsets = selected.map(function (obj) {
-                        return {
-                            x: ev.mx - obj.coordinates.x,
-                            y: ev.my - obj.coordinates.y
-                        };
-                    });
-
-                    $maps.draw();
-
-                    $document.bind('mousemove', canvasEvent);
-                    $document.bind('mouseup', canvasEvent);
-
-                };
-
-                this.mousemove = function (ev) {
-                    var dx = (ev.mx - mox) / $maps.scalar;
-                    var dy = (ev.my - moy) / $maps.scalar;
-
-                    if (selected.length > 0) {
-                        if ($maps.objects.hasOwnProperty('selectRect')) {
-                            console.log(selectRectOffset);
-                            $maps.objects.selectRect.x = mox + dx - selectRectOffset.x;
-                            $maps.objects.selectRect.y = moy + dy - selectRectOffset.y;
-                        }
-                        selected = selected.map(function (obj, i) {
-                            obj.coordinates.x = (mox + dx - offsets[i].x);
-                            obj.coordinates.y = (moy + dy - offsets[i].y);
-                            return obj;
-                        });
-
-                        $mapObjects.update(selected);
-                    }
-                    else {
-                        if (!$maps.objects.hasOwnProperty('selectRect')) {
-
-                            $maps.objects.selectRect = {
-                                x: (ev.mx - $maps.x) / $maps.scalar,
-                                y: (ev.my - $maps.y) / $maps.scalar,
-                                w: 0,
-                                h: 0
-                            };
-                        }
-                        $maps.objects.selectRect.w = dx;
-                        $maps.objects.selectRect.h = dy;
-
-                        $mapObjects.select(function (obj) {
-                            return inRectBounds(obj.coordinates.x, obj.coordinates.y, 10, 10, $maps.objects.selectRect.x, $maps.objects.selectRect.y, $maps.objects.selectRect.w, $maps.objects.selectRect.h);
-                        });
-                    }
-
-                    $maps.draw();
-                };
-
-                this.mouseup = function () {
-                    if ($maps.objects.hasOwnProperty('selectRect') && selected.length < 1) {
-                        selected = $mapObjects.getSelected();
-                        if (selected.length > 0) {
-                            $mapObjects.setSelectionBounds(selected);
-                            console.log($mapObjects.selectBounds);
-                            angular.copy($mapObjects.selectBounds, $maps.objects.selectRect);
-                        }
-                        else {
-                            var objects = {};
-                            for (var prop in $maps.objects) {
-                                if ($maps.objects.hasOwnProperty(prop) && prop !== 'selectRect') {
-                                    objects[prop] = $maps.objects[prop];
-                                }
-                            }
-                            $maps.objects = objects;
-                        }
-                    }
-
-                    $mapObjects.recordState(selected);
-                    $maps.draw();
-                    $document.unbind('mousemove', canvasEvent);
-                    $document.unbind('mouseup', canvasEvent);
-                };
-
-                /**
-                 * noncanvas event sub tools for the selector tool
-                 */
-
-                this.hAlignCenter = function () {
-                    var selected = $mapObjects.getSelected();
-                    var center = $mapObjects.centerOfSelection(selected);
-
-                    for (var i = 0, len = selected.length; i < len; i++) {
-                        selected[i].coordinates.x = center.x;
-                    }
-
-                    $mapObjects.merge(selected);
-                    $maps.draw();
-                };
-
-                this.vAlignCenter = function () {
-                    var selected = $mapObjects.getSelected();
-                    var center = $mapObjects.centerOfSelection(selected);
-
-                    for (var i = 0, len = selected.length; i < len; i++) {
-                        selected[i].coordinates.y = center.y;
-                    }
-
-                    $mapObjects.merge(selected);
-                    $maps.draw();
-                };
-            },
-            move: function () {
-                var mox = 0;
-                var moy = 0;
-                var ox = 0;
-                var oy = 0;
-
-                this.mousedown = function (ev) {
-                    mox = ev.mx;
-                    moy = ev.my;
-
-                    ox = ev.mx - $maps.x;
-                    oy = ev.my - $maps.y;
-
-                    $document.bind('mousemove', canvasEvent);
-                    $document.bind('mouseup', canvasEvent);
-                };
-
-                this.mousemove = function (ev) {
-                    var dx = ev.mx - mox;
-                    var dy = ev.my - moy;
-
-                    $maps.x = mox + dx - ox;
-                    $maps.y = moy + dy - oy;
-
-                    $maps.draw();
-                };
-
-                this.mouseup = function () {
-                    $document.unbind('mousemove', canvasEvent);
-                    $document.unbind('mouseup', canvasEvent);
-                };
-            },
-            rotate: function () {
-                var cX;
-                var cY;
-                var clickAngle;
-
-                this.mousedown = function (ev) {
-                    cX = $maps.x + ($maps.width / 2);
-                    cY = $maps.y + ($maps.height / 2);
-                    clickAngle = getAngle(cX, cY, ev.mx, ev.my) - $maps.angle;
-
-                    $document.bind('mousemove', canvasEvent);
-                    $document.bind('mouseup', canvasEvent);
-                };
-
-                this.mousemove = function (ev) {
-                    $maps.angle = getAngle(cX, cY, ev.mx, ev.my) - clickAngle;
-                    $maps.draw();
-                };
-
-                this.mouseup = function (ev) {
-                    $document.unbind('mousemove', canvasEvent);
-                    $document.unbind('mouseup', canvasEvent);
-                };
-
-                /**
-                 * angle helper function
-                 */
-                function getAngle(cX, cY, mx, my) {
-                    var angle = Math.atan2(my - cY, mx - cX);
-                    return angle;
-                }
-            }
-        };
-
-    }]);
-angular.module('ualib.compfinder.maps', [])
-
-    .factory('loadMap', ['$q', function($q){
-        return function(src){
-            var deferred = $q.defer();
-            var map = new Image();
-
-            map.onload = function(){
-                deferred.resolve(map);
-            };
-            map.src = src;
-
-            return deferred.promise;
-        };
-    }])
-
-    .service('$maps', ['$q', 'mapStyles', function($q, styles){
-        var self = this;
-        this.canvas = null;
-        this.ctx = null;
-        this.image = null;
-        this.changed = false;
-        this.prev = {};
-        this.objects = {};
-
-        this.margin = {
-            width: 0,
-            height: 0
-        };
-        this.offset = {
-            width: 0,
-            height: 0
-        };
-
-        this.x = 0;
-        this.y = 0;
-        this.x2 = 0;
-        this.y2 = 0;
-        this.width = 0;
-        this.height = 0;
-        this.scalar = 0.4;
-        this.minScale = 0.2;
-        this.maxScale = 1.4;
-        this.angle = 0;
-
-        this.setDefaults = function(){
-            self.resizeCanvas();
-            self.changed = false;
-            self.x = 0;
-            self.y = 0;
-            self.angle = 0;
-            self.setScale();
-            self.resizeImage();
-            self.center();
-            //console.log({changed: self.changed});
-        };
-
-        this.refactor = function(offset){
-            if (offset.width !== self.width){
-                self.setOffset(offset);
-                if (!self.changed){
-                    self.setDefaults();
-                }
-                else{
-                    var x = self.x + (self.prev.canvas_width - self.canvas.width)/2;
-                    var y = self.y + (self.prev.canvas_height - self.canvas.height)/2;
-                    if (x > 0 && (self.x+self.width) < (self.canvas.width - self.margin.width - self.offset.width)) {
-                        self.x = x;
-                    }
-                    if (y > 0 && (self.y+self.height) < (self.canvas.height - self.margin.height - self.offset.height)) {
-                        self.y = y;
-                    }
-                    //if ((self.x - dx) > 0 && dx < (self.x+self.width)) self.x -= dx;
-                    //if ((self.y - dy) > 0 && dy < (self.y+self.height)) self.y -= dy;
-
-                }
-                self.draw();
-            }
-        };
-
-        this.init = function(params){
-            var deferred = $q.defer();
-            if (params.src){
-                if (params.offset) {
-                    self.setOffset(params.offset);
-                }
-                if (params.objects){
-                    self.objects = angular.copy(params.objects);
-                }
-                self.canvas = params.canvas;
-                self.ctx = self.canvas.getContext('2d');
-                self.loadImage(params.src).then(function(){
-                    self.setDefaults();
-                    self.draw();
-                    deferred.resolve();
-                });
-            }
-            else{
-                deferred.reject('No image src given.');
-            }
-            return deferred.promise;
-        };
-
-        this.setOffset = function(offset){
-            if (self.offset.width !== offset.width) {
-                self.offset.width = offset.width;
-            }
-        };
-
-        this.loadImage = function(src){
-            var deferred = $q.defer();
-            self.image = new Image();
-
-            self.image.onload = function(){
-                deferred.resolve();
-            };
-            self.image.src = src;
-            return deferred.promise;
-        };
-
-        this.draw = function(){
-            //console.log(self.scalar);
-            // Clear the canvas
-            self.clear();
-            // Save matrix state
-            self.ctx.save();
-
-            // Translate matrix to (x, y) then scale matrix
-            self.ctx.translate(self.x, self.y);
-            self.ctx.scale(self.scalar, self.scalar);
-
-            // Translate matrix to (x, y) values representing the distance to the image's center
-            self.ctx.translate(self.image.width/2, self.image.height/2);
-            // Rotate matrix
-            self.ctx.rotate(self.angle);
-            // Translate matrix back to state before it was translated to the (x, y) matching the image's center
-            self.ctx.translate(-self.image.width/2, -self.image.height/2);
-
-            // Draw image to canvas
-            self.ctx.drawImage(self.image, 0, 0);
-            self.drawObjects();
-
-            // Restore matrix to it's saved state.
-            // If the matrix was not saved, then altered, then restored
-            // 	for every draw, then the transforms would stack (i.e., without save/restore
-            //	and image at scale 1, scaled to 1.2, then scale to 1 would result in a final scale
-            // 	of 1.2 - because (1 * 1.2) * 1 = 1.2
-            self.ctx.restore();
-
-            self.x2 = self.x + self.width;
-            self.y2 = self.y + self.height;
-        };
-
-        this.drawObjects = function(){
-
-            if (self.objects.hasOwnProperty('desktops')){
-                self.ctx.fillStyle = styles.desktops.available.color;
-
-                for (var i = 0, len = self.objects.desktops.length; i < len; i++){
-                    var comp = self.objects.desktops[i];
-                    var x = comp.coordinates.x;
-                    var y = comp.coordinates.y;
-
-                    self.ctx.save();
-                    self.ctx.translate(x, y);
-                    if (comp.status !== 3){
-                        self.ctx.fillStyle = styles.desktops.taken.color;
-                    }
-
-                    if (comp.os === 1){
-                        self.ctx.fillRect(2, 2, 13, 13);
-                        /*if (parseInt(comp.monitors) > 1){
-                         self.ctx.fillRect(x+5, y-5, 15, 15);
-                         self.ctx.clearRect(x+5, y, 10, 10);
-                         }*/
-                        if (comp.selected){
-                            self.ctx.lineWidth = 5;
-                            self.ctx.strokeStyle = '#00ff00';
-                            self.ctx.strokeRect(0, 0, 13, 13);
-                        }
-                    }
-                    else if (comp.os === 2){
-
-                        self.ctx.beginPath();
-                        self.ctx.arc(7, 7, 7, 0, 2*Math.PI);
-                        self.ctx.fill();
-                        if (comp.selected){
-                            self.ctx.lineWidth = 5;
-                            self.ctx.strokeStyle = '#00ff00';
-                            self.ctx.stroke();
-                        }
-                    }
-                    self.ctx.restore();
-
-                }
-            }
-            if (self.objects.hasOwnProperty('selectRect')){
-                var rect = angular.copy(self.objects.selectRect);
-                self.ctx.save();
-                self.ctx.setLineDash([6, 4]);
-                self.ctx.strokeStyle = '#333';
-                self.ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
-                self.ctx.restore();
-
-            }
-        };
-
-        this.setScale = function(){
-            var width_ratio = (self.canvas.width - self.margin.width - self.offset.width) / self.image.width;
-            var height_ratio = (self.canvas.height - self.margin.height - self.offset.height) / self.image.height;
-            self.scalar = Math.min(width_ratio, height_ratio);
-            /*console.log({w_ratio: width_ratio, h_ratio: height_ratio});
-             console.log('width_ratio = ('+self.canvas.width+' - ('+self.margin.width+' + '+self.offset.width+')) / '+self.image.width);
-             console.log('height_ratio = ('+self.canvas.height+' - ('+self.margin.height+' + '+self.offset.height+')) / '+self.image.height);*/
-        };
-
-        this.clear = function(){
-            self.ctx.clearRect(0, 0, self.canvas.width, self.canvas.height);
-        };
-
-        this.resizeCanvas = function(){
-            self.prev.canvas_width = self.canvas.width;
-            self.prev.canvas_height = self.canvas.height;
-
-            self.canvas.style.width = '100%';
-            self.canvas.style.height = '100%';
-
-            self.canvas.width = self.canvas.offsetWidth;
-            self.canvas.height = self.canvas.offsetHeight;
-
-        };
-
-        this.resizeImage = function(){
-            self.width = self.image.width*self.scalar;
-            self.height = self.image.height*self.scalar;
-        };
-
-        this.center = function(){
-            self.x = ((self.canvas.width - self.offset.width) - self.width)/2;
-            self.y = ((self.canvas.height) - self.height)/2;
-        };
-
-        this.scaleXY = function(newWidth, newHeight){
-            self.x = newWidth/self.canvas.width;
-            self.y = newHeight/self.canvas.height;
-        };
-
-        this.posImage = function(){
-            if (!self.changed){
-                self.center();
-            }
-            else{
-                self.x *= self.canvas.width/self.prev.canvas_width;
-                self.y *= self.canvas.height/self.prev.canvas_height;
-            }
-        };
-
-        this.getSelectedObjects = function(){
-            self.objects.filter(function(comp){
-                return comp.selected;
-            });
-        };
-    }]);
-
-angular.module('ualib.compfinder.signage', [
-    'ualib.compfinder.service',
-    'ualib.compfinder.maps'
-])
-
-    .config(['$routeProvider', function($routeProvider){
-        $routeProvider
-            .when('/computers/signage/:building/:floor', {
-                reloadOnSearch: false,
-                resolve: {
-                    floors: ['Computers', '$route', function(Computers, $route){
-
-                        return Computers.init($route.current.params).then(function(){
-                            return true;
-                        });
-                        /*console.log($route);
-                         return CFF.floors().get($route.current.params, function(data){
-                         return data;
-                         }, function(data, status, headers, config) {
-                         console.log('ERROR: Computers and Software');
-                         console.log({
-                         data: data,
-                         status: status,
-                         headers: headers,
-                         config: config
-                         });
-                         });*/
-                    }]
-                },
-                templateUrl: 'signage/signage.tpl.html',
-                controller: 'SignageCtrl'
-            });
-    }])
-
-    .controller('SignageCtrl', ['$scope', 'Computers', function($scope, Computers){
-        $scope.computers = Computers;
-
-    }])
-
-    .directive('assetImage', ['$maps', '$timeout', '$window',  function($maps, $timeout, $window){
-        return{
-            restrict: 'AC',
-            link: function(scope, elm){
-
-
-                var scalar = 0.27;
-                var yOffset = 60;
-                var floor = parseInt(scope.computers.buildings[0].floors[0].name);
-
-                if (floor === 3){
-                    scalar = 0.14;
-                    yOffset = 85;
-                }
-                else if(floor === 2){
-                    scalar = 0.14;
-                    yOffset = 85;
-                }
-
-                $maps.init({
-                    src: 'http://wwwdev.lib.ua.edu/' + scope.computers.buildings[0].floors[0].image.url,
-                    canvas: elm[0], objects: {desktops: scope.computers.buildings[0].floors[0].desktops},
-                    width: scope.computers.buildings[0].floors[0].image.width,
-                    height: scope.computers.buildings[0].floors[0].image.height,
-                    scalar: scalar,
-                    yOffset: yOffset
-                });
-
-                angular.element($window).bind('resize', function(){
-                    $maps.resizeCanvas();
-                    $maps.setScale();
-                    $maps.resizeImage();
-                    $maps.posImage();
-                    $maps.draw();
-                });
-
-                scope.$on('$destroy', function(){
-                    angular.element($window).unbind('resize');
-                });
-
-            }
-        };
-    }]);
