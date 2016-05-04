@@ -21076,15 +21076,12 @@ angular.module('oneSearch.common')
                 // hides the list initially
                 $scope.selected = false;
 
-                $scope.checkboxChange = function(){
-                    console.log("CHECKBOX CHANGE CALLED;")
-                    Bento.getBoxes();
-                };
+
 
                 $scope.onChange = function(){
-                    //console.log("OnChange event.");
 
-                    //window.location = 'http://search.ebscohost.com/login.aspx?direct=true&site=eds-live&;scope=site&type=0&custid=s4594951&groupid=main&profid=eds&mode=and&authtype=ip,guest&bquery=test'; //params['s']
+
+
 
                     $scope.selected = true;
                     var fixedString = $scope.model.replace(/[&\/\\#+()$~%':*?<>{}]/g, ' ').trim();
@@ -22452,11 +22449,19 @@ angular.module('common.oneSearch', [])
         function search(params){
 
             var checkbox = document.querySelector('#scoutCheckbox input');
-            if (checkbox.checked) {
+            var searchtext = document.querySelector('#osTextField').value;
+
+
+/*
+            console.log('SEARCHTEXT IS ');
+            console.log(searchtext);
+            if ((checkbox.checked) && (searchtext != null)) {
                 window.location = 'http://search.ebscohost.com/login.aspx?direct=true&site=eds-live&;scope=site&type=0&custid=s4594951&groupid=main&profid=eds&mode=and&authtype=ip,guest&bquery=' + params['s'];
             }
+            else {
+                break;
+            }*/
 
-            console.log("TEST");
 
             var canceller = $q.defer();
             var url = '//wwwdev2.lib.ua.edu/oneSearch/api/search/' + params['s'] + '/engine/' + params['engine'] + '/limit/' + params['limit'];
@@ -22805,6 +22810,16 @@ angular.module('common.oneSearch', [])
              *  @description
              * The $scope model for the search string, bound to the input text box.
              */
+
+
+            var checkbox = document.querySelector('#scoutCheckbox input');
+            var searchtext = document.querySelector('#osTextField').value;
+
+            if ((checkbox.checked) && (searchtext !== '')) {
+                window.location = 'http://search.ebscohost.com/login.aspx?direct=true&site=eds-live&;scope=site&type=0&custid=s4594951&groupid=main&profid=eds&mode=and&authtype=ip,guest&bquery=' + searchtext;
+            }
+
+
             if ($scope.searchText){
                 $scope.searchText = $scope.searchText.replace(/[&\/\\#+()$~%':*?<>{}]/g, ' ').trim();
                 $scope.searchText = $scope.searchText.substring(0, 150);
