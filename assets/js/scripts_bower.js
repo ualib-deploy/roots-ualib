@@ -22818,36 +22818,36 @@ angular.module('common.oneSearch', [])
             if ((checkbox.checked) && (searchtext !== '')) {
                 window.location = 'http://search.ebscohost.com/login.aspx?direct=true&site=eds-live&;scope=site&type=0&custid=s4594951&groupid=main&profid=eds&mode=and&authtype=ip,guest&bquery=' + searchtext;
             }
+            else {
+                if ($scope.searchText) {
+                    $scope.searchText = $scope.searchText.replace(/[&\/\\#+()$~%':*?<>{}]/g, ' ').trim();
+                    $scope.searchText = $scope.searchText.substring(0, 150);
+                    var searchText = encodeURIComponent($scope.searchText);
 
+                    //Cancel any pending searches - prevents mixed results by canceling the ajax requests
+                    abortPendingSearches();
 
-            if ($scope.searchText){
-                $scope.searchText = $scope.searchText.replace(/[&\/\\#+()$~%':*?<>{}]/g, ' ').trim();
-                $scope.searchText = $scope.searchText.substring(0, 150);
-                var searchText = encodeURIComponent($scope.searchText);
-
-                //Cancel any pending searches - prevents mixed results by canceling the ajax requests
-                abortPendingSearches();
-
-                // Compensate for when not on home page
-                // Since WP pages aren't loaded as angular routes, we must detect if there is no '#/PATH' present
-                // after the URI (or that it's not a 'bento' route), then send the browser to a pre-build URL.
-                if (!$location.path() || $location.path().indexOf('/bento') < 0){
-                    var url = '#/bento/' + searchText;
-                    switch ($location.host()){
-                        case 'wwwdev2.lib.ua.edu':
-                        case 'www.lib.ua.edu':
-                            url = '//' + $location.host() + url;
-                            break;
-                        case 'localhost':
-                            url = $location.absUrl().replace(/(#.*)/, '') + url;
-                            break;
-                        default:
-                            url = '//www.lib.ua.edu' + url;
+                    // Compensate for when not on home page
+                    // Since WP pages aren't loaded as angular routes, we must detect if there is no '#/PATH' present
+                    // after the URI (or that it's not a 'bento' route), then send the browser to a pre-build URL.
+                    if (!$location.path() || $location.path().indexOf('/bento') < 0) {
+                        var url = '#/bento/' + searchText;
+                        switch ($location.host()) {
+                            case 'wwwdev2.lib.ua.edu':
+                            case 'www.lib.ua.edu':
+                                url = '//' + $location.host() + url;
+                                break;
+                            case 'localhost':
+                                url = $location.absUrl().replace(/(#.*)/, '') + url;
+                                break;
+                            default:
+                                url = '//www.lib.ua.edu' + url;
+                        }
+                        $window.location = url; //Angular 1.2.8 $location is too limited...
                     }
-                    $window.location = url; //Angular 1.2.8 $location is too limited...
-                }
-                else{
-                    $location.path('/bento/'+$scope.searchText);
+                    else {
+                        $location.path('/bento/' + $scope.searchText);
+                    }
                 }
             }
         };
