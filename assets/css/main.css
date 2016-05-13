@@ -9081,6 +9081,14 @@ a.service-card:focus {
   border-color: transparent;
   /*text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.35);*/
 }
+.onesearch-box .yamm-content #scoutCheckbox {
+  float: right;
+  margin-top: 5px;
+}
+.onesearch-box .yamm-content #scoutCheckbox input {
+  position: relative;
+  top: 2px;
+}
 .onesearch-box .yamm-content .what-is-link {
   color: #993333;
   font-size: 18px;
