@@ -136,6 +136,7 @@ module.exports = function(grunt) {
                     'jquery',
                     'modernizr',
                     'roots-ualib',
+                    'compfinder',
                     'angular-lazy-img'
                 ],
                 callback: function(mainFiles, component) {
