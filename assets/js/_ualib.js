@@ -8,9 +8,6 @@ angular.module('ualib', [
     // @if NODE_ENV!='local'
     'manage',
     // @endif
-    // @if NODE_ENV='dev'
-    'compfinder',
-    // @endif
     // @if NODE_ENV!='live'
     'ualib.imageCarousel',
     // @endif
