@@ -2666,1926 +2666,6 @@ angular.module('monospaced.mousewheel', [])
     };
   }]);
 
-angular.module('compfinder.templates', ['admin/admin.tpl.html', 'admin/floorFields.tpl.html', 'common/maps/map.tpl.html', 'signage/signage.tpl.html']);
-
-angular.module("admin/admin.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("admin/admin.tpl.html",
-    "<tabset justified=\"true\" ng-if=\"hasAccess\">\n" +
-    "    <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
-    "        <div ng-if=\"tab.number == 0\">\n" +
-    "            <nav class=\"navbar navbar-default\">\n" +
-    "                <div class=\"container\">\n" +
-    "                    <ul class=\"nav navbar-nav\">\n" +
-    "                        <li>\n" +
-    "                            <button class=\"btn btn-default navbar-btn\" ng-click=\"mapTools.undo()\">\n" +
-    "                                <span class=\"fa fa-reply\"></span> Undo\n" +
-    "                            </button>\n" +
-    "                        </li>\n" +
-    "                        <li>\n" +
-    "                            <button class=\"btn btn-default navbar-btn\" ng-click=\"mapTools.redo()\">\n" +
-    "                                <span class=\"fa fa-share\"></span> Redo\n" +
-    "                            </button>\n" +
-    "                        </li>\n" +
-    "                    </ul>\n" +
-    "                    <ul class=\"nav navbar-nav\" ng-show=\"mapTools.current == 'selector'\">\n" +
-    "                        <li>\n" +
-    "                            <button class=\"btn btn-default navbar-btn\" ng-click=\"mapTools.helper('hAlignCenter')\">\n" +
-    "                                <span class=\"fa fa-align-center\"></span> Horizontal Align Center\n" +
-    "                            </button>\n" +
-    "                        </li>\n" +
-    "                        <li>\n" +
-    "                            <button class=\"btn btn-default navbar-btn\" ng-click=\"mapTools.helper('vAlignCenter')\">\n" +
-    "                                <span class=\"fa fa-align-center fa-rotate-90\"></span> Vertical Align Center\n" +
-    "                            </button>\n" +
-    "                        </li>\n" +
-    "                    </ul>\n" +
-    "\n" +
-    "\n" +
-    "                </div>\n" +
-    "            </nav>\n" +
-    "\n" +
-    "            <div class=\"row\">\n" +
-    "                <div class=\"col-md-10\" style=\"height: 600px;\">\n" +
-    "                    <map></map>\n" +
-    "                </div>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "        <div ng-if=\"tab.number == 1\" >\n" +
-    "            <div class=\"row\">\n" +
-    "                <div class=\"col-md-6\">\n" +
-    "                    <h4>Buildings</h4>\n" +
-    "                    <div class=\"row\">\n" +
-    "                        <div class=\"col-md-4 form-group\">\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"gorgas\" ng-model=\"newBldg.name\"\n" +
-    "                                   maxlength=\"20\">\n" +
-    "                        </div>\n" +
-    "                        <div class=\"col-md-6 form-group\">\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Gorgas Library\" ng-model=\"newBldg.title\"\n" +
-    "                                   maxlength=\"100\">\n" +
-    "                        </div>\n" +
-    "                        <div class=\"col-md-2 form-group\">\n" +
-    "                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"createBuilding(newBldg)\" ng-disabled=\"uploading\">\n" +
-    "                                <span class=\"fa fa-fw fa-plus\"></span> Add\n" +
-    "                            </button><br>\n" +
-    "                            {{formResponse}}\n" +
-    "                        </div>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"row well\" ng-repeat=\"building in buildings\">\n" +
-    "                        <div class=\"col-md-12 clickable\" ng-if=\"selBldg !== $index\" ng-click=\"openBuilding($index)\">\n" +
-    "                            <a>\n" +
-    "                                {{building.name}} : {{building.title}}\n" +
-    "                            </a>\n" +
-    "                        </div>\n" +
-    "                        <div class=\"col-md-12\" ng-if=\"selBldg == $index\">\n" +
-    "                            <h4>{{building.title}}</h4>\n" +
-    "                            <div class=\"col-md-4 form-group\">\n" +
-    "                                <input type=\"text\" class=\"form-control\" placeholder=\"gorgas\" ng-model=\"building.name\"\n" +
-    "                                       maxlength=\"20\">\n" +
-    "                            </div>\n" +
-    "                            <div class=\"col-md-5 form-group\">\n" +
-    "                                <input type=\"text\" class=\"form-control\" placeholder=\"Gorgas Library\" ng-model=\"building.title\"\n" +
-    "                                       maxlength=\"100\">\n" +
-    "                            </div>\n" +
-    "                            <div class=\"col-md-3 form-group\">\n" +
-    "                                <button type=\"button\" class=\"btn btn-success\" ng-click=\"updateBuilding(building)\" ng-disabled=\"uploading\">\n" +
-    "                                    <span class=\"fa fa-fw fa-edit\"></span>\n" +
-    "                                </button>\n" +
-    "                                <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteBuilding(building)\" ng-disabled=\"uploading\">\n" +
-    "                                    <span class=\"fa fa-fw fa-trash-o\"></span>\n" +
-    "                                </button>\n" +
-    "                                <div>\n" +
-    "                                    {{building.formResponse}}\n" +
-    "                                </div>\n" +
-    "                            </div>\n" +
-    "\n" +
-    "                            <h4>Floors <small>{{building.title}}</small></h4>\n" +
-    "                            <h5>Create New Floor</h5>\n" +
-    "                            <div class=\"row\">\n" +
-    "                                <div floor-fields-list floor=\"newFloor\">\n" +
-    "                                </div>\n" +
-    "                                <div class=\"col-md-4 form-group\">\n" +
-    "                                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"createFloor(newFloor)\" ng-disabled=\"uploading\">\n" +
-    "                                        <span class=\"fa fa-fw fa-plus\"></span> Add New Floor\n" +
-    "                                    </button>\n" +
-    "                                </div>\n" +
-    "                                {{formResponse}}\n" +
-    "                            </div>\n" +
-    "\n" +
-    "                            <div class=\"row well well-sm\" ng-repeat=\"floor in building.floors\">\n" +
-    "                                <div class=\"col-md-12 clickable\" ng-if=\"selFloor !== $index\" ng-click=\"openFloor($index)\">\n" +
-    "                                    <div class=\"col-md-2\">\n" +
-    "                                        <img class=\"thumbnail\" ng-src=\"{{floor.image.url}}\">\n" +
-    "                                    </div>\n" +
-    "                                    <div class=\"col-md-10\">\n" +
-    "                                        {{floor.name}} : {{floor.title}}\n" +
-    "                                    </div>\n" +
-    "                                </div>\n" +
-    "                                <div class=\"row\" ng-if=\"selFloor == $index\">\n" +
-    "                                    <div class=\"col-md-2\">\n" +
-    "                                        <img class=\"thumbnail\" ng-src=\"{{floor.image.url}}\">\n" +
-    "                                    </div>\n" +
-    "                                    <div class=\"col-md-10\">\n" +
-    "                                        <h5>{{floor.title}}</h5>\n" +
-    "                                        <div floor-fields-list floor=\"floor\">\n" +
-    "                                        </div>\n" +
-    "                                        <div class=\"col-md-4 form-group\">\n" +
-    "                                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"updateFloor(floor)\" ng-disabled=\"uploading\">\n" +
-    "                                                <span class=\"fa fa-fw fa-edit\"></span>\n" +
-    "                                            </button>\n" +
-    "                                            <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteFloor(floor)\" ng-disabled=\"uploading\">\n" +
-    "                                                <span class=\"fa fa-fw fa-trash-o\"></span>\n" +
-    "                                            </button>\n" +
-    "                                            <div ng-if=\"floor.formResponse\">\n" +
-    "                                                {{floor.formResponse}}\n" +
-    "                                            </div>\n" +
-    "                                        </div>\n" +
-    "                                    </div>\n" +
-    "                                </div>\n" +
-    "                            </div>\n" +
-    "                        </div>\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-3\">\n" +
-    "                    <h4>Computers <small>{{buildings[selBldg].name}}:{{buildings[selBldg].floors[selFloor].name}}</small></h4>\n" +
-    "\n" +
-    "                    <div class=\"col-md-12\" ng-repeat=\"comp in buildings[selBldg].floors[selFloor].desktops\">\n" +
-    "                        {{comp.name}}\n" +
-    "                    </div>\n" +
-    "\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-3\">\n" +
-    "                    <h4>Unassigned Computers</h4>\n" +
-    "                </div>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "    </tab>\n" +
-    "</tabset>\n" +
-    "<div ng-if=\"!hasAccess\">\n" +
-    "    <h3>Sorry, you don't have permissions to edit computers</h3>\n" +
-    "</div>\n" +
-    "");
-}]);
-
-angular.module("admin/floorFields.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("admin/floorFields.tpl.html",
-    "<div class=\"col-md-6 form-group\">\n" +
-    "    <input type=\"text\" class=\"form-control\" placeholder=\"first\" ng-model=\"floor.name\"\n" +
-    "           maxlength=\"20\">\n" +
-    "</div>\n" +
-    "<div class=\"col-md-6 form-group\">\n" +
-    "    <input type=\"text\" class=\"form-control\" placeholder=\"First Floor\" ng-model=\"floor.title\"\n" +
-    "           maxlength=\"100\">\n" +
-    "</div>\n" +
-    "<div class=\"col-md-4 form-group\">\n" +
-    "    <label for=\"browse\">Select Floor Plan</label>\n" +
-    "    <div id=\"browse\">\n" +
-    "        <button type=\"file\" ngf-select=\"\" ng-model=\"floor.picFile\" accept=\"image/*\" ngf-multiple=\"false\"\n" +
-    "                ngf-change=\"generateThumb($files, slide)\" class=\"btn btn-primary\">\n" +
-    "            <span class=\"fa fa-fw fa-plus\"></span>Browse\n" +
-    "        </button>\n" +
-    "    </div>\n" +
-    "</div>\n" +
-    "<div class=\"col-md-4 form-group\">\n" +
-    "    <label for=\"selected\">Selected Floor Plan Image</label>\n" +
-    "    <div id=\"selected\">\n" +
-    "        <div ng-repeat=\"img in floor.selectedFiles\">\n" +
-    "            <img ngf-src=\"img\" width=\"150px\" height=\"100px\">\n" +
-    "            <button type=\"button\" class=\"btn btn-danger\" ng-click=\"floor.selectedFiles.splice($index,1)\">\n" +
-    "                <span class=\"fa fa-fw fa-close\"></span>\n" +
-    "            </button>\n" +
-    "        </div>\n" +
-    "    </div>\n" +
-    "</div>\n" +
-    "");
-}]);
-
-angular.module("common/maps/map.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("common/maps/map.tpl.html",
-    "<canvas id=\"map\" class=\"map\"></canvas>");
-}]);
-
-angular.module("signage/signage.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("signage/signage.tpl.html",
-    "<header class=\"page-row\">\n" +
-    "    <nav class=\"navbar navbar-static-top navbar-mega\">\n" +
-    "        <div class=\"container-fluid\">\n" +
-    "            <div class=\"navbar-header\">\n" +
-    "                <p class=\"navbar-text lead\">\n" +
-    "                    <strong>Floor {{computers.buildings[0].floors[0].name}}</strong>\n" +
-    "                </p>\n" +
-    "            </div>\n" +
-    "\n" +
-    "\n" +
-    "            <div class=\"navbar-header navbar-right\">\n" +
-    "                <p class=\"navbar-text lead\">\n" +
-    "                    <strong>Available Computers:</strong>\n" +
-    "                </p>\n" +
-    "                <p class=\"navbar-text lead\">\n" +
-    "                    {{computers.buildings[0].available.desktops}}\n" +
-    "                </p>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "    </nav>\n" +
-    "</header>\n" +
-    "\n" +
-    "<div class=\"wrap page-row page-row-expanded comp-signage-body\">\n" +
-    "    <canvas id=\"asset_image\" class=\"asset-image\"></canvas>\n" +
-    "</div>\n" +
-    "<footer class=\"page-row\">\n" +
-    "    <nav class=\"navbar navbar-static-bottom navbar-mega\">\n" +
-    "        <div class=\"container-fluid\">\n" +
-    "            <div class=\"nav navbar-nav\">\n" +
-    "                <p class=\"navbar-text\">\n" +
-    "                    <img src=\"ualib-computers-qr.jpg\" style=\"height: 50px;\"/>\n" +
-    "\n" +
-    "                </p>\n" +
-    "                <p class=\"navbar-text\">\n" +
-    "                    For computer availability in all libraries<br> visit <a href=\"#\">www.lib.ua.edu/computers</a>\n" +
-    "                </p>\n" +
-    "            </div>\n" +
-    "\n" +
-    "            <div class=\"nav navbar-nav navbar-right\">\n" +
-    "                <p class=\"navbar-text lead\">\n" +
-    "                    <strong>Apple:</strong>\n" +
-    "                </p>\n" +
-    "                <p class=\"navbar-text\">\n" +
-    "                    <span class=\"apple available\"></span> available<br> <span class=\"apple taken\"></span> taken\n" +
-    "                </p>\n" +
-    "            </div>\n" +
-    "            <div class=\"nav navbar-nav navbar-right\">\n" +
-    "                <p class=\"navbar-text lead\">\n" +
-    "                    <strong>Windows:</strong>\n" +
-    "                </p>\n" +
-    "                <p class=\"navbar-text\">\n" +
-    "                    <span class=\"windows available\"></span> available<br> <span class=\"windows taken\"></span> taken\n" +
-    "                </p>\n" +
-    "            </div>\n" +
-    "\n" +
-    "        </div>\n" +
-    "    </nav>\n" +
-    "</footer>\n" +
-    "");
-}]);
-
-angular.module('ualib.compfinder.admin', [
-    'ualib.compfinder.mapsDirective',
-    'ualib.compfinder.service',
-    'ngFileUpload'
-])
-    .constant('SOFTWARE_GROUP', 64)
-
-    .run(['$rootScope', function($rootScope) {
-        $rootScope.userInfo = {};
-    }])
-
-    .config(['$routeProvider', function($routeProvider){
-        $routeProvider
-            .when('/computers/admin/', {
-                reloadOnSearch: false,
-                resolve: {
-                    mapData: ['Computers', function(Computers){
-                        return Computers.init({}, {noRefresh: true});
-                    }],
-                    userData: function(tokenReceiver){
-                        return tokenReceiver.getPromise();
-                    }
-                },
-                templateUrl: 'admin/admin.tpl.html',
-                controller: 'ComputersAdminCtrl'
-            });
-    }])
-
-    .controller('ComputersAdminCtrl', ['$scope', '$timeout', 'Computers', 'userData', 'SOFTWARE_GROUP', 'AuthService', 'compSoftFactory', 'Upload', 'SW_API',
-    function($scope, $timeout, Computers, userData, SOFTWARE_GROUP, AuthService, compSoftFactory, Upload, API){
-        $scope.userInfo = AuthService.isAuthorized();
-        $scope.buildings = [];
-        $scope.unassigned = [];
-        $scope.newBldg = {};
-        $scope.newBldg.name = "";
-        $scope.newBldg.title = "";
-        $scope.newFloor = {};
-        $scope.newFloor.name = "";
-        $scope.newFloor.title = "";
-        $scope.newFloor.selectedFiles = [];
-        $scope.selBldg = 0;
-        $scope.selFloor = 0;
-
-        $scope.hasAccess = false;
-        if (angular.isDefined($scope.userInfo.group)) {
-            /*jslint bitwise: true*/
-            if ((parseInt($scope.userInfo.group) & SOFTWARE_GROUP) === SOFTWARE_GROUP) {
-                $scope.hasAccess = true;
-                $scope.buildings = Computers.buildings;
-                $scope.unassigned = Computers.unassigned;
-                console.dir(Computers);
-            }
-            /*jslint bitwise: false*/
-        }
-
-        $scope.tabs = [
-            { name: 'Map',
-                number: 0,
-                active: true
-            },
-            { name: 'List',
-                number: 1,
-                active: false
-            }
-        ];
-
-        $scope.deleteComputer = function(computer, parentArray){
-            if (confirm("Delete " + computer.name  + " permanently?") === true){
-                $scope.uploading = true;
-                compSoftFactory.computers().delete({compID: computer.compid})
-                    .$promise.then(function(data){
-                        $scope.uploading = false;
-                        parentArray.splice(parentArray.indexOf(computer), 1);
-                    }, function(data, status){
-                        $scope.uploading = false;
-                        $scope.formResponse = "Error: Could not delete computer! " + data;
-                        console.dir(data);
-                    });
-            }
-        };
-
-        $scope.updateComputers = function(compArray){
-            $scope.uploading = true;
-            compSoftFactory.computers().save({}, compArray)
-                .$promise.then(function(data){
-                    $scope.uploading = false;
-                    $scope.formResponse = data.message;
-                }, function(data, status){
-                    $scope.uploading = false;
-                    $scope.formResponse = "Error: Could not update computers! " + data;
-                    console.dir(data);
-                });
-        };
-        $scope.updateComputer = function(computer) {
-            var compArray = [];
-            compArray.push(computer);
-            $scope.updateComputers(compArray);
-        };
-
-        $scope.validateBldg = function(building) {
-            if (building.name.length < 1) {
-                return "Form error: Please fill out building name!";
-            }
-            if (building.title.length < 1) {
-                return "Form error: Please fill out building title!";
-            }
-            return "";
-        };
-        $scope.deleteBuilding = function(building){
-            if (confirm("Delete " + building.title  + " permanently?") === true){
-                $scope.uploading = true;
-                compSoftFactory.buildings().delete({buildingID: building.bid})
-                    .$promise.then(function(data){
-                        $scope.uploading = false;
-                        $scope.buildings.splice($scope.buildings.indexOf(building), 1);
-                    }, function(data, status){
-                        $scope.uploading = false;
-                        $scope.formResponse = "Error: Could not delete building! " + data;
-                        console.dir(data);
-                    });
-            }
-        };
-        $scope.updateBuilding = function(building){
-            building.formResponse = $scope.validateBldg(building);
-            if (building.formResponse.length < 1) {
-                $scope.uploading = true;
-                compSoftFactory.buildings().save({buildingID: building.bid}, building)
-                    .$promise.then(function (data) {
-                        $scope.uploading = false;
-                        building.formResponse = data.message;
-                    }, function (data, status) {
-                        $scope.uploading = false;
-                        building.formResponse = "Error: Could not update building! " + data;
-                        console.dir(data);
-                    });
-            }
-        };
-        $scope.createBuilding = function(building){
-            $scope.formResponse = $scope.validateBldg(building);
-            if ($scope.formResponse.length < 1) {
-                $scope.uploading = true;
-                compSoftFactory.buildings().save({}, building)
-                    .$promise.then(function (data) {
-                        $scope.uploading = false;
-                        if (angular.isDefined(data.bid) ) {
-                            var newBldg = {};
-                            newBldg.bid = data.bid;
-                            newBldg.name = building.name;
-                            newBldg.title = building.title;
-                            $scope.buildings.push(newBldg);
-                        }
-                        $scope.formResponse = data.message;
-                    }, function (data, status) {
-                        $scope.uploading = false;
-                        $scope.formResponse = "Error: Could not create building! " + data;
-                        console.dir(data);
-                    });
-            }
-        };
-        $scope.openBuilding = function(index) {
-            $scope.selBldg = index;
-        };
-        $scope.openFloor = function(index) {
-            $scope.selFloor = index;
-        };
-
-        $scope.validateFloor = function(floor) {
-            if (floor.name.length < 1) {
-                return "Form error: Please fill out floor name!";
-            }
-            if (floor.title.length < 1) {
-                return "Form error: Please fill out floor title!";
-            }
-            return "";
-        };
-        $scope.deleteFloor = function(floor){
-            if (confirm("Delete " + floor.title  + " permanently?") === true){
-                $scope.uploading = true;
-                compSoftFactory.floors().delete({floorID: floor.fid})
-                    .$promise.then(function(data){
-                        $scope.uploading = false;
-                        $scope.buildings[$scope.selBldg].floors.splice($scope.selFloor, 1);
-                    }, function(data, status){
-                        $scope.uploading = false;
-                        $scope.formResponse = "Error: Could not delete floor! " + data;
-                        console.dir(data);
-                    });
-            }
-        };
-        $scope.updateFloor = function(floor){
-            floor.formResponse = $scope.validateFloor(floor);
-            if (floor.formResponse.length > 0) {
-                return false;
-            }
-            $scope.uploading = true;
-            if (floor.selectedFiles.length < 1){
-                compSoftFactory.floors().save({floorID: floor.fid}, floor)
-                    .$promise.then(function(data){
-                        $scope.uploading = false;
-                        floor.formResponse = data.message;
-                    }, function(data, status){
-                        $scope.uploading = false;
-                        floor.formResponse = data.message;
-                        console.dir(data);
-                    });
-            } else {
-                var names = [];
-                for (var i = 0; i < floor.selectedFiles.length; i++) {
-                    names.push(floor.selectedFiles[i].name);
-                }
-                floor.selectedFiles.upload = Upload.upload({
-                    url: API + 'floors/' + floor.fid,
-                    method: 'POST',
-                    fields: {
-                        floorMap: floor
-                    },
-                    file: floor.selectedFiles,
-                    fileFormDataName: names
-                });
-                floor.selectedFiles.upload.then(function(res) {
-                    $timeout(function() {
-                        floor.selectedFiles.length = 0;
-                        floor.picFile.length = 0;
-                        if (angular.isDefined(res.data.map_file) && angular.isDefined(res.data.width) && angular.isDefined(res.data.height)) {
-                            floor.image.url = res.data.map_file;
-                            floor.image.width = res.data.width;
-                            floor.image.height = res.data.height;
-                        }
-                        floor.formResponse = res.data.message;
-                        $scope.uploading = false;
-                    });
-                }, function(response) {
-                    if (response.status > 0) {
-                        floor.formResponse = response.status + ': ' + response.data;
-                    }
-                    $scope.uploading = false;
-                });
-                floor.selectedFiles.upload.progress(function(evt) {
-                    // Math.min is to fix IE which reports 200% sometimes
-                    floor.selectedFiles.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
-                });
-            }
-        };
-        $scope.createFloor = function(floor){
-            $scope.formResponse = $scope.validateFloor(floor);
-            if ($scope.formResponse.length > 0) {
-                return false;
-            }
-            floor.bid = $scope.buildings[$scope.selBldg].bid;
-            $scope.uploading = true;
-            if (floor.selectedFiles.length < 1){
-                compSoftFactory.floors().save({}, floor)
-                    .$promise.then(function(data){
-                        $scope.uploading = false;
-                        if (angular.isDefined(data.fid)) {
-                            var newFloor = {};
-                            newFloor.fid = data.fid;
-                            newFloor.bid = floor.bid;
-                            newFloor.image = {};
-                            newFloor.image.url = "";
-                            newFloor.image.width = 0;
-                            newFloor.image.height = 0;
-                            newFloor.name = floor.name;
-                            newFloor.title = floor.title;
-                            newFloor.selectedFiles = [];
-                            $scope.buildings[$scope.selBldg].floors.push(newFloor);
-                        }
-                        $scope.formResponse = data.message;
-                    }, function(data, status){
-                        $scope.uploading = false;
-                        $scope.formResponse = data.message;
-                        console.dir(data);
-                    });
-            } else {
-                var names = [];
-                for (var i = 0; i < floor.selectedFiles.length; i++) {
-                    names.push(floor.selectedFiles[i].name);
-                }
-                floor.selectedFiles.upload = Upload.upload({
-                    url: API + 'floors/',
-                    method: 'POST',
-                    fields: {
-                        floorMap: floor
-                    },
-                    file: floor.selectedFiles,
-                    fileFormDataName: names
-                });
-                floor.selectedFiles.upload.then(function(res) {
-                    $timeout(function() {
-                        $scope.uploading = false;
-                        if (angular.isDefined(res.data.fid) && angular.isDefined(res.data.map_file) &&
-                            angular.isDefined(res.data.width) && angular.isDefined(res.data.height)) {
-                            var newFloor = {};
-                            newFloor.fid = res.data.fid;
-                            newFloor.bid = floor.bid;
-                            newFloor.image = {};
-                            newFloor.image.url = res.data.map_file;
-                            newFloor.image.width = res.data.width;
-                            newFloor.image.height = res.data.height;
-                            newFloor.name = floor.name;
-                            newFloor.title = floor.title;
-                            newFloor.selectedFiles = [];
-                            $scope.buildings[$scope.selBldg].floors.push(newFloor);
-                        }
-                        $scope.formResponse = res.data.message;
-                    });
-                }, function(response) {
-                    $scope.uploading = false;
-                    if (response.status > 0) {
-                        $scope.formResponse = response.status + ': ' + response.data;
-                    }
-                });
-                floor.selectedFiles.upload.progress(function(evt) {
-                    // Math.min is to fix IE which reports 200% sometimes
-                    floor.selectedFiles.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
-                });
-            }
-        };
-
-    }])
-
-    .controller('floorFieldsCtrl', ['$scope', '$timeout', 'Upload',
-        function floorFieldsCtrl($scope, $timeout, Upload){
-            $scope.generateThumb = function(files) {
-                if (files.length > 0 && files !== null) {
-                    $scope.floor.selectedFiles.push(files[0]);
-                    if ($scope.fileReaderSupported && files[0].type.indexOf('image') > -1) {
-                        $timeout(function() {
-                            var fileReader = new FileReader();
-                            fileReader.readAsDataURL(files[0]);
-                            fileReader.onload = function(e) {
-                                $timeout(function() {
-                                    files[0].dataUrl = e.target.result;
-                                });
-                            };
-                        });
-                    }
-                }
-            };
-        }])
-
-    .directive('floorFieldsList', ['$timeout', function($timeout) {
-        return {
-            restrict: 'AC',
-            scope: {
-                floor: '='
-            },
-            controller: 'floorFieldsCtrl',
-            link: function(scope, elm, attrs){
-            },
-            templateUrl: 'admin/floorFields.tpl.html'
-        };
-    }]);
-
-angular.module('ualib.compfinder', [
-    'ngRoute',
-    'ngResource',
-    'oc.lazyLoad',
-    'compfinder.templates',
-    'ualib.compfinder.admin',
-    'ualib.compfinder.signage'
-])
-
-    .value('mapStyles', {
-        desktops: {
-            available: {
-                shape: 'fillRect',
-                color: '#61a661'
-            },
-            taken: {
-                shape: 'strokeRect',
-                color: '#eee'
-            }
-        }
-    })
-
-    .config(['$routeProvider', '$ocLazyLoadProvider', function($routeProvider, $ocLazyLoadProvider) {
-        $ocLazyLoadProvider.config({
-            modules: [
-                {
-                    name: 'angular.filter',
-                    files: ['//cdnjs.cloudflare.com/ajax/libs/angular-filter/0.5.8/angular-filter.min.js']
-                },
-                {
-                    name: 'monospaced.mousewheel',
-                    files: [
-                        'vendor/hamster.js',
-                        'vendor/mousewheel.js'
-                    ]
-                }
-            ]
-        });
-
-    }]);
-
-angular.module('compfinder', ['ualib.compfinder']);
-angular.module('ualib.compfinder.service', [
-    'ualib.compfinder.factory'
-])
-
-    .service('Computers', ['compSoftFactory', '$timeout', '$q', '$rootScope', function(compSoftFactory, $timeout, $q, $rootScope){
-        var _params = {};
-        var _options = {
-            noRefresh: false
-        };
-        var _refresh = null;
-        var _cancel = false;
-        var self = this;
-
-        this.buildings = [];
-        
-        this.init = function(params, opt){
-            var deferred = $q.defer();
-            params = angular.isDefined(params) ? params : {};
-            _params = params;
-            opt = angular.isDefined(opt) ? opt : {};
-
-
-            angular.extend(_options, opt);
-
-            if (_refresh) {
-                self.cancelRefresh();
-            }
-            
-            getComputers().$promise.then(function(data){
-                self.buildings = angular.copy(data.buildings);
-                if (_options.noRefresh === false){
-                    refresh();
-                }
-                deferred.resolve();
-            });
-
-            return deferred.promise;
-        };
-
-        this.cancelRefresh = function(){
-            var _cancel = true;
-        };
-        
-        function refresh(){
-            if (!_cancel){
-                _refresh = $timeout(function(){
-                    getComputers().$promise.then(function(data){
-                        self.buildings = angular.copy(data.buildings);
-                        refresh();
-                    });
-                }, 8000);
-            }
-            else {
-                $timeout.cancel(_refresh);
-            }
-        }
-        
-        function getComputers(){
-            if (_params.hasOwnProperty('floor')){
-                return compSoftFactory.floors().get(_params, function(data){
-                    return data;
-                }, function(data, status, headers, config) {
-                    console.log('ERROR: Computers and Software');
-                    console.log({
-                        data: data,
-                        status: status,
-                        headers: headers,
-                        config: config
-                    });
-                });
-            }
-            else {
-                return compSoftFactory.buildings().get(_params, function(data){
-                    return data;
-                }, function(data, status, headers, config) {
-                    console.log('ERROR: Computers and Software');
-                    console.log({
-                        data: data,
-                        status: status,
-                        headers: headers,
-                        config: config
-                    });
-                });
-            }
-        }
-        
-        
-
-    }]);
-angular.module('ualib.compfinder.factory', [])
-    .constant('DOMAIN', 'https://wwwdev2.lib.ua.edu/')
-    .constant('WP_API', 'https://wwwdev2.lib.ua.edu/wp-json/wp/v2/')
-    .constant('SW_API', 'https://wwwdev2.lib.ua.edu/softwareList/api/')
-
-    .config(['$httpProvider', function($httpProvider) {
-        $httpProvider.interceptors.push('AuthInterceptor');
-    }])
-
-    .factory('AuthInterceptor', ['AuthService', 'DOMAIN', function (AuthService, DOMAIN) {
-        return {
-            // automatically attach Authorization header
-            request: function(config) {
-                config.headers = config.headers || {};
-
-                //interceptor for UALib JWT tokens
-                var token = AuthService.getToken();
-                if(config.url.indexOf(DOMAIN) === 0 && token) {
-                    config.headers.Authorization = "Bearer " + token;
-                }
-
-                //interceptor for WordPress nonce headers
-                if (typeof myLocalized !== 'undefined') {
-                    config.headers['X-WP-Nonce'] = myLocalized.nonce;
-                } else {
-                    console.log("myLocalized script is not defined, cannot read WP nonce.");
-                }
-                return config;
-            },
-
-            // If a token was sent back, save it
-            response: function(res) {
-                if(res.config.url.indexOf(DOMAIN) === 0 && angular.isDefined(res.data.token)) {
-                    AuthService.saveToken(res.data.token);
-                }
-                return res;
-            }
-        };
-    }])
-
-    .service('AuthService', ['$window', function($window){
-        var self = this;
-
-        self.parseJWT = function(token) {
-            var base64Url = token.split('.')[1];
-            var base64 = base64Url.replace('-', '+').replace('_', '/');
-            return JSON.parse($window.atob(base64));
-        };
-        self.saveToken = function(token) {
-            $window.localStorage['ualibweb.Token'] = token;
-            console.log('Token saved');
-        };
-        self.getToken = function() {
-            return $window.localStorage['ualibweb.Token'];
-        };
-        self.isAuthorized = function() {
-            var token = self.getToken();
-            if (token) {
-                var params = self.parseJWT(token);
-                if (Math.round(new Date().getTime() / 1000) <= params.exp) {
-                    console.log('Authenticated.');
-                    return params.user;
-                }
-            }
-            console.log('Authentication failed.');
-            return false;
-        };
-        self.logout = function() {
-            $window.localStorage.removeItem('ualibweb.Token');
-            console.log('Token deleted');
-        };
-    }])
-
-    .service('tokenReceiver', ['$http', 'WP_API', function($http, API){
-        this.promise = null;
-        function makeRequest() {
-            return $http.get(API + 'users/me')
-                .then(function(r1){
-                    if (angular.isDefined(r1.data.id)) {
-                        $http.get(API + 'users/' + r1.data.id, {context: 'edit'})
-                            .then(function (r2) {
-                                return r2.data;
-                            });
-                    }
-                });
-        }
-        this.getPromise = function(update){
-            if (update || !this.promise) {
-                this.promise = makeRequest();
-            }
-            return this.promise;
-        };
-    }])
-
-    .factory('compSoftFactory', ['$resource', '$http', 'SW_API', function($resource, $http, API){
-
-        function getTotalAvail(array, prop){
-            prop = angular.isUndefined(prop) ? 'desktops' : prop;
-            return array.filter(function(item){
-                return prop === 'desktops' ? item.status === 3 : item.available === 0;
-            }).length;
-        }
-
-        function appendTransform(defaults, transform) {
-
-            // We can't guarantee that the default transformation is an array
-            defaults = angular.isArray(defaults) ? defaults : [defaults];
-            //console.log(defaults.concat(transform));
-            // Append the new transformation to the defaults
-            return defaults.concat(transform);
-        }
-
-        function buildingsTransform(data){
-            var b = angular.fromJson(data);
-            var buildings = [];
-
-            angular.forEach(b.buildings, function(building, idx){
-                var desktops = 0;
-                var laptops = 0;
-
-                for (var i = 0, len = building.floors.length; i < len; i++){
-                    var floor = {available: {}, selectedFiles: []};
-
-                    if (building.floors[i].hasOwnProperty('desktops')){
-                        var d = getTotalAvail(building.floors[i].desktops, 'desktops');
-                        floor.available.desktops = d;
-                        desktops += d;
-                    }
-
-                    if (building.floors[i].hasOwnProperty('laptops')){
-                        var l = getTotalAvail(building.floors[i].laptops, 'laptops');
-                        floor.available.laptops = l;
-                        laptops += l;
-                    }
-
-                    building.floors[i] = angular.extend({}, building.floors[i], floor);
-
-                }
-
-                building.available = {
-                    desktops: desktops,
-                    laptops: laptops
-                };
-
-                buildings.push(building);
-            });
-
-            b.buildings = buildings;
-            return b;
-        }
-
-        return {
-            buildings: function(){
-                console.log("compSoftFactory.Buildings");
-                return $resource(API + 'buildings/:buildingID', {buildingID:'@buildingID'}, {
-                    get: {
-                        method: 'GET',
-                        transformResponse: appendTransform($http.defaults.transformResponse, buildingsTransform)
-                    }
-                });
-            },
-            floors: function(){
-                console.log("compSoftFactory.Floors");
-                return $resource(API + 'floors/:floorID', {floorID:'@floorID'}, {
-                    get: {
-                        method: 'GET',
-                        url: API + 'buildings/:building/floors/:floor',
-                        transformResponse: appendTransform($http.defaults.transformResponse, buildingsTransform)
-                    }
-                });
-            },
-            computers: function(){
-                console.log("compSoftFactory.Computers");
-                return $resource(API + 'computers/:compID', {compID:'@compID'});
-            }
-        };
-    }]);
-angular.module('ualib.compfinder.mapsDirective', [
-    'ualib.compfinder.maps',
-    'ualib.compfinder.mapTools',
-    'ualib.compfinder.service'
-])
-
-    .directive('map', ['$maps', '$mapTools','Computers', '$timeout', '$window',  function($maps, $mapTools, Computers, $timeout, $window){
-        return{
-            restrict: 'EA',
-            replace: true,
-            template: '<canvas id="map" class="map" ng-class="mapTools.current" msd-wheel="mapTools.zoom($event, $delta)"></canvas>',
-            link: function(scope, elm){
-                
-                scope.mapTools = $mapTools;
-
-                $maps.init({
-                    src: 'https://wwwdev2.lib.ua.edu/' + scope.buildings[scope.selBldg].floors[scope.selFloor].image.url,
-                    canvas: elm[0], 
-                    objects: {
-                        desktops: scope.buildings[scope.selBldg].floors[scope.selFloor].desktops
-                    }
-                }).then(function(){
-                    scope.mapTools.init();
-                });
-
-                scope.reset = function(){
-                    $maps.setDefaults();
-                    $maps.draw();
-                    //$mapTools.zoomSlider.init();
-                };
-
-
-                /*scope.$on('detail-toggle', function(){
-                 $timeout(function(){
-                 $maps.refactor({width: detailElm.offsetWidth});
-                 }, 100);
-                 });
-
-                 scope.reset = function(){
-                 $maps.setDefaults();
-                 $maps.draw();
-                 $mapTools.zoomSlider.init();
-                 };
-
-                 scope.mouseZoom = function(event, delta){
-                 if (zooming){
-                 scope.mapTools.current = delta > 0 ? 'zoom-in' : 'zoom-out';
-                 scope.mapTools.zoom(event, delta);
-                 }
-                 };*/
-
-                angular.element($window).bind('resize', function(){
-                    $maps.resizeCanvas();
-                    $maps.resizeImage();
-                    $maps.posImage();
-                    $maps.draw();
-                });
-
-            }
-        };
-    }]);
-
-
-angular.module('ualib.compfinder.mapObjects', [])
-
-    .service('$mapObjects', ['$maps', '$q', '$filter', '$rootScope', function($maps, $q, $filter, $rootScope){
-        var self = this;
-        var undoStates = [];
-        var redoStates = [];
-        this.selected = [];
-        this.state = [];
-       
-
-        this.selectBounds = {};
-
-        this.init = function(objects){
-            self.state = collapseObjects(objects);
-        };
-
-        this.select = function(func){
-            self.state = self.state.map(function(o){
-                o.selected = func(o);
-                return o;
-            });
-            return self.getSelected();
-        };
-
-        this.getSelected = function(){
-            return self.selected.length > 0 ? self.selected : self.state.filter(function(obj){
-                return obj && obj.hasOwnProperty('selected') && obj.selected;
-            });
-        };
-
-        this.update = function(objects){
-            objects = objects ? objects : self.getSelected();
-            self.state = angular.extend([], objects, self.state);
-            var expanded = expandObjects(self.state);
-            angular.copy(expanded, $maps.objects);
-            console.log(angular.copy($maps.objects));
-            $rootScope.$broadcast('mapObjectsUpdated');
-
-        };
-
-        this.recordState = function(objects){
-            objects = objects ? objects : self.getSelected();
-            undoStates.push(angular.copy(objects));
-        };
-
-        this.undo = function(){
-            console.log('undo????');
-            if (undoStates.length > 0){
-                console.log('UNDOOOO!!!!');
-                redoStates.push(self.getSelected());
-                var undo = undoStates.pop();
-                self.update(undo);
-            }
-        };
-
-        this.redo = function(){
-            if (redoState.length > 0){
-                undoStates.push(angular.copy(self.state));
-                angular.copy(redoStates.pop(), self.state);
-            }
-        };
-
-        this.centerOfSelection = function(objects){
-            objects = objects ? objects : self.getSelected();
-
-            var maxX = getMax(objects, 'x');
-            var maxY = getMax(objects, 'y');
-            var minX = getMin(objects, 'x');
-            var minY = getMin(objects, 'y');
-
-            //self.selectBounds = self.boundsOfSelection(objects);
-
-            var vcenter = ((maxX - minX)/2) + minX;
-            var hcenter = ((maxY - minY)/2) + minY;
-            return {
-                x: vcenter,
-                y: hcenter
-            };
-        };
-
-        this.setSelectionBounds = function(objects){
-            objects = objects ? objects : self.getSelected();
-
-            var maxX = getMax(objects, 'x');
-            var maxY = getMax(objects, 'y');
-            var minX = getMin(objects, 'x');
-            var minY = getMin(objects, 'y');
-
-            self.selectBounds = {x: minX, y: minY, w: (maxX - minX + 15), h: (maxY - minY + 15)};
-        };
-
-        function getSelected(obj){
-            if (angular.isObject(obj)){
-                return getSelected();
-            }
-
-            return obj.filter(function(comp){
-                return comp.selected;
-            });
-        }
-
-        // Adopted from http://stackoverflow.com/questions/11149843/get-largest-value-in-multi-dimensional-array-javascript-or-coffeescript
-        function getMax(objects, coord){
-            return objects.reduce(function(max, arr) {
-                return max >= parseInt(arr.coordinates[coord]) ? max : parseInt(arr.coordinates[coord]);
-            }, -Infinity);
-        }
-
-        function getMin(objects, coord){
-            return objects.reduce(function(min, arr) {
-                return arr.coordinates[coord] < min ? arr.coordinates[coord] : min;
-            }, Infinity);
-        }
-
-        function collapseObjects(objects){
-            var collapsed = [];
-
-            function collapseMapper(o){
-                o.oType = obj;
-                return o;
-            }
-
-            for (var obj in objects){
-                if (objects.hasOwnProperty(obj)){
-                    var newObj = objects[obj].map(collapseMapper);
-                    collapsed = collapsed.concat(newObj);
-                }
-            }
-            return collapsed;
-        }
-
-        function expandObjects(objects){
-            var expanded = {};
-            objects.map(function(obj){
-                var newObj = {};
-                for (var p in obj){
-                    if (obj.hasOwnProperty(p) && p !== 'oType'){
-                        newObj[p] = obj[p];
-                    }
-                }
-                if (expanded.hasOwnProperty(obj.oType)){
-                    expanded[obj.oType].push(newObj);
-                }
-                else {
-                    expanded[obj.oType] = [];
-                    expanded[obj.oType].push(newObj);
-                }
-            });
-            return expanded;
-        }
-
-    }]);
-angular.module('ualib.compfinder.mapTools', [
-    'ualib.compfinder.mapObjects'
-])
-    .service('$mapTools', ['$maps', '$mapObjects', '$document', '$window', '$location', function MapTools($maps, $mapObjects, $document, $window, $location){
-        var self = this;
-        var offset;
-        var tool;
-        var canvas;
-        this.canvasEventPause = false;
-
-        this.current = null;
-        this.prev = null;
-
-        this.mapUndoStates = [];
-
-        this.init = function(){
-            var defaultTool = $location.search().tool || 'selector';
-            $mapObjects.init($maps.objects);
-            canvas = angular.element($maps.canvas);
-            offset = getOffset($maps.canvas);
-            self.select(defaultTool);
-            readyCanvas();
-        };
-
-        this.destroy = function(){
-            canvas.unbind();
-            $document.unbind();
-        };
-
-        this.select = function(newTool){
-            if (newTool !== self.current){
-                self.prev = self.current;
-                tool = new Tools[newTool]();
-                self.current = newTool;
-                $location.search('tool', self.current);
-                $location.replace();
-            }
-        };
-
-        this.prevTool = function(){
-            if (angular.isDefined(self.prev)){
-                self.select(self.prev);
-            }
-        };
-
-        this.helper = function(helper){
-            if (angular.isObject(tool) && tool.hasOwnProperty(helper) && angular.isFunction(tool[helper])){
-                tool[helper]();
-            }
-        };
-
-        function readyCanvas(){
-            canvas.bind('mousedown', function(ev){
-                canvasEvent(ev);
-                $document.bind('mousedown', toolCursor);
-                $document.bind('mouseup', toolCursor);
-                $document.bind('mouseup', toolChangedImage);
-            });
-            /*canvas.bind('mousemove', function(ev){
-             ev = self.mouseLoc(ev);
-             if (mouseInBounds($maps.x, $maps.y, $maps.x2, $maps.y2, ev.mx, ev.my)){
-             if (!hover) hover = true;
-             angular.element('body').addClass(self.current);
-             canvas.bind('mousedown', canvasEvent);
-             }
-             else if (hover){
-             hover = false;
-             angular.element('body').removeClass(self.current);
-             }
-             });
-             canvas.bind('mouseup', toolChangedImage);*/
-        }
-
-        function toolCursor(ev){
-            if (ev.type === 'mousedown'){
-                $document.find('body').addClass(self.current);
-            }
-            else if (ev.type === 'mouseup'){
-                $document.find('body').removeClass(self.current);
-                $document.unbind('mousedown', toolCursor);
-            }
-        }
-
-        function canvasEvent(ev){
-            if (!self.canvasEventPause){
-                ev = self.mouseLoc(ev); //set current mouse (mx, my)
-                var func = tool[ev.type];
-                if (func){
-                    func(ev);
-                }
-            }
-            return ev.preventDefault() && false;
-        }
-
-        function toolChangedImage(){
-            $maps.changed = true;
-            canvas.unbind('mouseup', toolChangedImage);
-        }
-
-        this.mouseLoc = function(ev){
-            ev.mx = ev.pageX - offset.left;
-            ev.my = ev.pageY - offset.top;
-            return ev;
-        };
-
-        function getBounds(x, y, w, h){
-            var x1, y1, x2, y2;
-
-            if (w < 0){
-                x1 = x + w;
-                x2 = x;
-            }
-            else {
-                x1 = x;
-                x2 = x + w;
-            }
-
-            if (h < 0){
-                y1 = y + h;
-                y2 = y;
-            }
-            else {
-                y1 = y;
-                y2 = y + h;
-            }
-
-            return {x1: x1, y1: y1, x2: x2, y2: y2};
-
-        }
-
-        function mouseInBounds(x1, y1, w, h, mx, my){
-            var x2 = x1+w;
-            var y2 = y1+h;
-            //console.log(mx +' > '+ x1 +' && '+ my +' > '+ y1 +' && '+ mx +' < '+ x2 +' && '+ my +' < '+ y2);
-            return (mx > x1 && my > y1 && mx < x2 && my < y2);
-        }
-
-        function inRectBounds(x1, y1, w1, h1, rx, ry, rw, rh){
-            // get x2,y2 of object being checked
-            var x2 = w1+x1;
-            var y2 = h1+y1;
-            // get bounds of select rect
-            var bounds = getBounds(rx, ry, rw, rh);
-            //console.log(bounds.x1 +' < '+ x1 +' && '+ bounds.y1 +' < '+ y1 +' && '+ bounds.x2 +' > '+ x2 +' && '+ bounds.y2 +' > '+ y2);
-            return (bounds.x1 < x1 && bounds.y1 < y1 && bounds.x2 > x2 && bounds.y2 > y2);
-
-        }
-
-        function getOffset(elm){
-            var rect = elm.getBoundingClientRect();
-            //return {top: rect.top, left: rect.left};
-            var doc = elm.ownerDocument;
-            var docElem = doc.documentElement;
-
-            return {
-                top: rect.top + $window.pageYOffset - docElem.clientTop,
-                left: rect.left + $window.pageXOffset - docElem.clientLeft
-            };
-        }
-
-        this.map = function(val, xMin, xMax, yMin, yMax) {
-            return (val - xMax) / (xMin - xMax) * (yMax - yMin) + yMin;
-        };
-
-        //Buttons - these are not selectable tools, but perform a single redefined function
-        this.zoomSlider = {
-            height: 0,
-            pos: 0,
-            elm: null,
-            init: function(){
-                self.zoomSlider.height = self.zoomSlider.elm.offsetHeight-2;
-                self.zoomSlider.defaultPos();
-            },
-            defaultPos: function(){ self.zoomSlider.pos = self.map($maps.scalar, $maps.maxScale, $maps.minScale, self.zoomSlider.height, 0); }
-        };
-
-        this.zoom = function(ev, delta, deltaX, deltaY){
-            // extend event variable with mouse location
-            ev = self.mouseLoc(ev);
-            var slideBarY;
-            var dScale;
-            var zoomCenter = true;
-
-            if (!delta){
-                var pos = ev.my - self.zoomSlider.height;
-                dScale = self.map(pos, 0, self.zoomSlider.height, $maps.minScale, $maps.maxScale);
-                delta = dScale - $maps.scalar;
-            }
-            else{
-                delta = delta/10;
-                dScale = Math.round(($maps.scalar + delta) * 1e1) / 1e1;
-
-                zoomCenter = mouseInBounds($maps.x, $maps.y, $maps.x2, $maps.y2, ev.mx, ev.my) ? false : true;
-            }
-
-            // If mouse is not over the image, zoom from the center of the image instead of mouse location (ev.mx, ev.my)
-            if (zoomCenter){
-                ev.mx = ($maps.x + $maps.x2)/2;
-                ev.my = ($maps.y + $maps.y2)/2;
-            }
-            //var clipScale = Math.min(Math.max($maps.minScale, dScale), $maps.maxScale);
-            //If dScale is within scale limits
-            if (!(dScale < $maps.minScale || dScale > $maps.maxScale)){
-
-                $maps.x = ev.mx - ($maps.scalar + delta) * ((ev.mx-$maps.x) / $maps.scalar);
-                $maps.y = ev.my - ($maps.scalar + delta) * ((ev.my-$maps.y) / $maps.scalar);
-
-                $maps.scalar = dScale;
-                $maps.width = $maps.image.width*$maps.scalar;
-                $maps.height = $maps.image.height*$maps.scalar;
-
-                $maps.draw();
-            }
-            //set slideBarY position
-            slideBarY = self.map(dScale, $maps.maxScale, $maps.minScale, self.zoomSlider.height, 0);
-
-            //zoom slider bar position - always changes, but differently depending on mousewheel or slider zoom
-            self.zoomSlider.pos = Math.min(Math.max(slideBarY, 0), self.zoomSlider.height);
-            return ev.preventDefault() && false;
-        };
-
-        this.undo = function(){
-            $mapObjects.undo();
-            $maps.draw();
-        };
-
-        this.redo = function(){
-            $mapObjects.redo();
-            $maps.draw();
-        };
-
-
-        //Tools - only one can be selected at a time
-        var Tools = {
-            selector: function () {
-                var self = this;
-                var mox = 0;
-                var moy = 0;
-                var ox = 0;
-                var oy = 0;
-                var offsets = [];
-                var selected = [];
-                var selectRectOffset = {};
-
-                this.mousedown = function (ev) {
-                    mox = ev.mx;
-                    moy = ev.my;
-
-                    ox = (ev.mx - $maps.x) / $maps.scalar;
-                    oy = (ev.my - $maps.y) / $maps.scalar;
-
-                    if (($maps.objects.hasOwnProperty('selectRect') && !mouseInBounds($maps.objects.selectRect.x, $maps.objects.selectRect.y, $maps.objects.selectRect.w, $maps.objects.selectRect.h, ox, oy)) || !$maps.objects.hasOwnProperty('selectRect')) {
-                        selected = $mapObjects.select(function (obj) {
-                            return mouseInBounds(obj.mapX, obj.mapY, 10, 10, (ev.mx - $maps.x) / $maps.scalar, (ev.my - $maps.y) / $maps.scalar);
-                        });
-                    }
-                    else {
-                        selectRectOffset = {
-                            x: ev.mx - $maps.objects.selectRect.x,
-                            y: ev.my - $maps.objects.selectRect.y
-                        };
-                    }
-
-                    offsets = selected.map(function (obj) {
-                        return {
-                            x: ev.mx - obj.mapX,
-                            y: ev.my - obj.mapY
-                        };
-                    });
-
-                    $maps.draw();
-
-                    $document.bind('mousemove', canvasEvent);
-                    $document.bind('mouseup', canvasEvent);
-
-                };
-
-                this.mousemove = function (ev) {
-                    var dx = (ev.mx - mox) / $maps.scalar;
-                    var dy = (ev.my - moy) / $maps.scalar;
-
-                    if (selected.length > 0) {
-                        if ($maps.objects.hasOwnProperty('selectRect')) {
-                            console.log(selectRectOffset);
-                            $maps.objects.selectRect.x = mox + dx - selectRectOffset.x;
-                            $maps.objects.selectRect.y = moy + dy - selectRectOffset.y;
-                        }
-                        selected = selected.map(function (obj, i) {
-                            obj.mapX = (mox + dx - offsets[i].x);
-                            obj.mapY = (moy + dy - offsets[i].y);
-                            return obj;
-                        });
-
-                        $mapObjects.update(selected);
-                    }
-                    else {
-                        if (!$maps.objects.hasOwnProperty('selectRect')) {
-
-                            $maps.objects.selectRect = {
-                                x: (ev.mx - $maps.x) / $maps.scalar,
-                                y: (ev.my - $maps.y) / $maps.scalar,
-                                w: 0,
-                                h: 0
-                            };
-                        }
-                        $maps.objects.selectRect.w = dx;
-                        $maps.objects.selectRect.h = dy;
-
-                        $mapObjects.select(function (obj) {
-                            return inRectBounds(obj.mapX, obj.mapY, 10, 10, $maps.objects.selectRect.x, $maps.objects.selectRect.y, $maps.objects.selectRect.w, $maps.objects.selectRect.h);
-                        });
-                    }
-
-                    $maps.draw();
-                };
-
-                this.mouseup = function () {
-                    if ($maps.objects.hasOwnProperty('selectRect') && selected.length < 1) {
-                        selected = $mapObjects.getSelected();
-                        if (selected.length > 0) {
-                            $mapObjects.setSelectionBounds(selected);
-                            console.log($mapObjects.selectBounds);
-                            angular.copy($mapObjects.selectBounds, $maps.objects.selectRect);
-                        }
-                        else {
-                            var objects = {};
-                            for (var prop in $maps.objects) {
-                                if ($maps.objects.hasOwnProperty(prop) && prop !== 'selectRect') {
-                                    objects[prop] = $maps.objects[prop];
-                                }
-                            }
-                            $maps.objects = objects;
-                        }
-                    }
-
-                    $mapObjects.recordState(selected);
-                    $maps.draw();
-                    $document.unbind('mousemove', canvasEvent);
-                    $document.unbind('mouseup', canvasEvent);
-                };
-
-                /**
-                 * noncanvas event sub tools for the selector tool
-                 */
-
-                this.hAlignCenter = function () {
-                    var selected = $mapObjects.getSelected();
-                    var center = $mapObjects.centerOfSelection(selected);
-
-                    for (var i = 0, len = selected.length; i < len; i++) {
-                        selected[i].mapX = center.x;
-                    }
-
-                    $mapObjects.merge(selected);
-                    $maps.draw();
-                };
-
-                this.vAlignCenter = function () {
-                    var selected = $mapObjects.getSelected();
-                    var center = $mapObjects.centerOfSelection(selected);
-
-                    for (var i = 0, len = selected.length; i < len; i++) {
-                        selected[i].mapY = center.y;
-                    }
-
-                    $mapObjects.merge(selected);
-                    $maps.draw();
-                };
-            },
-            move: function () {
-                var mox = 0;
-                var moy = 0;
-                var ox = 0;
-                var oy = 0;
-
-                this.mousedown = function (ev) {
-                    mox = ev.mx;
-                    moy = ev.my;
-
-                    ox = ev.mx - $maps.x;
-                    oy = ev.my - $maps.y;
-
-                    $document.bind('mousemove', canvasEvent);
-                    $document.bind('mouseup', canvasEvent);
-                };
-
-                this.mousemove = function (ev) {
-                    var dx = ev.mx - mox;
-                    var dy = ev.my - moy;
-
-                    $maps.x = mox + dx - ox;
-                    $maps.y = moy + dy - oy;
-
-                    $maps.draw();
-                };
-
-                this.mouseup = function () {
-                    $document.unbind('mousemove', canvasEvent);
-                    $document.unbind('mouseup', canvasEvent);
-                };
-            },
-            rotate: function () {
-                var cX;
-                var cY;
-                var clickAngle;
-
-                this.mousedown = function (ev) {
-                    cX = $maps.x + ($maps.width / 2);
-                    cY = $maps.y + ($maps.height / 2);
-                    clickAngle = getAngle(cX, cY, ev.mx, ev.my) - $maps.angle;
-
-                    $document.bind('mousemove', canvasEvent);
-                    $document.bind('mouseup', canvasEvent);
-                };
-
-                this.mousemove = function (ev) {
-                    $maps.angle = getAngle(cX, cY, ev.mx, ev.my) - clickAngle;
-                    $maps.draw();
-                };
-
-                this.mouseup = function (ev) {
-                    $document.unbind('mousemove', canvasEvent);
-                    $document.unbind('mouseup', canvasEvent);
-                };
-
-                /**
-                 * angle helper function
-                 */
-                function getAngle(cX, cY, mx, my) {
-                    var angle = Math.atan2(my - cY, mx - cX);
-                    return angle;
-                }
-            }
-        };
-
-    }]);
-angular.module('ualib.compfinder.maps', [])
-
-    .factory('loadMap', ['$q', function($q){
-        return function(src){
-            var deferred = $q.defer();
-            var map = new Image();
-
-            map.onload = function(){
-                deferred.resolve(map);
-            };
-            map.src = src;
-
-            return deferred.promise;
-        };
-    }])
-
-    .service('$maps', ['$q', 'mapStyles', function($q, styles){
-        var self = this;
-        this.canvas = null;
-        this.ctx = null;
-        this.image = null;
-        this.changed = false;
-        this.prev = {};
-        this.objects = {};
-
-        this.margin = {
-            width: 0,
-            height: 0
-        };
-        this.offset = {
-            width: 0,
-            height: 0
-        };
-
-        this.x = 0;
-        this.y = 0;
-        this.x2 = 0;
-        this.y2 = 0;
-        this.width = 0;
-        this.height = 0;
-        this.scalar = 0.4;
-        this.minScale = 0.2;
-        this.maxScale = 1.4;
-        this.angle = 0;
-
-        this.setDefaults = function(){
-            self.resizeCanvas();
-            self.changed = false;
-            self.x = 0;
-            self.y = 0;
-            self.angle = 0;
-            self.setScale();
-            self.resizeImage();
-            self.center();
-            //console.log({changed: self.changed});
-        };
-
-        this.refactor = function(offset){
-            if (offset.width !== self.width){
-                self.setOffset(offset);
-                if (!self.changed){
-                    self.setDefaults();
-                }
-                else{
-                    var x = self.x + (self.prev.canvas_width - self.canvas.width)/2;
-                    var y = self.y + (self.prev.canvas_height - self.canvas.height)/2;
-                    if (x > 0 && (self.x+self.width) < (self.canvas.width - self.margin.width - self.offset.width)) {
-                        self.x = x;
-                    }
-                    if (y > 0 && (self.y+self.height) < (self.canvas.height - self.margin.height - self.offset.height)) {
-                        self.y = y;
-                    }
-                    //if ((self.x - dx) > 0 && dx < (self.x+self.width)) self.x -= dx;
-                    //if ((self.y - dy) > 0 && dy < (self.y+self.height)) self.y -= dy;
-
-                }
-                self.draw();
-            }
-        };
-
-        this.init = function(params){
-            var deferred = $q.defer();
-            if (params.src){
-                if (params.offset) {
-                    self.setOffset(params.offset);
-                }
-                if (params.objects){
-                    self.objects = angular.copy(params.objects);
-                }
-                self.canvas = params.canvas;
-                self.ctx = self.canvas.getContext('2d');
-                self.loadImage(params.src).then(function(){
-                    self.setDefaults();
-                    self.draw();
-                    deferred.resolve();
-                });
-            }
-            else{
-                deferred.reject('No image src given.');
-            }
-            return deferred.promise;
-        };
-
-        this.setOffset = function(offset){
-            if (self.offset.width !== offset.width) {
-                self.offset.width = offset.width;
-            }
-        };
-
-        this.loadImage = function(src){
-            var deferred = $q.defer();
-            self.image = new Image();
-
-            self.image.onload = function(){
-                deferred.resolve();
-            };
-            self.image.src = src;
-            return deferred.promise;
-        };
-
-        this.draw = function(){
-            //console.log(self.scalar);
-            // Clear the canvas
-            self.clear();
-            // Save matrix state
-            self.ctx.save();
-
-            // Translate matrix to (x, y) then scale matrix
-            self.ctx.translate(self.x, self.y);
-            self.ctx.scale(self.scalar, self.scalar);
-
-            // Translate matrix to (x, y) values representing the distance to the image's center
-            self.ctx.translate(self.image.width/2, self.image.height/2);
-            // Rotate matrix
-            self.ctx.rotate(self.angle);
-            // Translate matrix back to state before it was translated to the (x, y) matching the image's center
-            self.ctx.translate(-self.image.width/2, -self.image.height/2);
-
-            // Draw image to canvas
-            self.ctx.drawImage(self.image, 0, 0);
-            self.drawObjects();
-
-            // Restore matrix to it's saved state.
-            // If the matrix was not saved, then altered, then restored
-            // 	for every draw, then the transforms would stack (i.e., without save/restore
-            //	and image at scale 1, scaled to 1.2, then scale to 1 would result in a final scale
-            // 	of 1.2 - because (1 * 1.2) * 1 = 1.2
-            self.ctx.restore();
-
-            self.x2 = self.x + self.width;
-            self.y2 = self.y + self.height;
-        };
-
-        this.drawObjects = function(){
-
-            if (self.objects.hasOwnProperty('desktops')){
-                self.ctx.fillStyle = styles.desktops.available.color;
-
-                for (var i = 0, len = self.objects.desktops.length; i < len; i++){
-                    var comp = self.objects.desktops[i];
-                    var x = comp.mapX;
-                    var y = comp.mapY;
-
-                    self.ctx.save();
-                    self.ctx.translate(x, y);
-                    if (comp.status !== 3){
-                        self.ctx.fillStyle = styles.desktops.taken.color;
-                    }
-
-                    if (comp.os === 1){
-                        self.ctx.fillRect(2, 2, 13, 13);
-                        /*if (parseInt(comp.monitors) > 1){
-                            self.ctx.fillRect(x+5, y-5, 15, 15);
-                            self.ctx.clearRect(x+5, y, 10, 10);
-                        }*/
-                        if (comp.selected){
-                            self.ctx.lineWidth = 5;
-                            self.ctx.strokeStyle = '#00ff00';
-                            self.ctx.strokeRect(0, 0, 13, 13);
-                        }
-                    }
-                    else if (comp.os === 2){
-
-                        self.ctx.beginPath();
-                        self.ctx.arc(7, 7, 7, 0, 2*Math.PI);
-                        self.ctx.fill();
-                        if (comp.selected){
-                            self.ctx.lineWidth = 5;
-                            self.ctx.strokeStyle = '#00ff00';
-                            self.ctx.stroke();
-                        }
-                    }
-                    self.ctx.restore();
-
-                }
-            }
-            if (self.objects.hasOwnProperty('selectRect')){
-                var rect = angular.copy(self.objects.selectRect);
-                self.ctx.save();
-                self.ctx.setLineDash([6, 4]);
-                self.ctx.strokeStyle = '#333';
-                self.ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
-                self.ctx.restore();
-
-            }
-        };
-
-        this.setScale = function(){
-            var width_ratio = (self.canvas.width - self.margin.width - self.offset.width) / self.image.width;
-            var height_ratio = (self.canvas.height - self.margin.height - self.offset.height) / self.image.height;
-            self.scalar = Math.min(width_ratio, height_ratio);
-            /*console.log({w_ratio: width_ratio, h_ratio: height_ratio});
-             console.log('width_ratio = ('+self.canvas.width+' - ('+self.margin.width+' + '+self.offset.width+')) / '+self.image.width);
-             console.log('height_ratio = ('+self.canvas.height+' - ('+self.margin.height+' + '+self.offset.height+')) / '+self.image.height);*/
-        };
-
-        this.clear = function(){
-            self.ctx.clearRect(0, 0, self.canvas.width, self.canvas.height);
-        };
-
-        this.resizeCanvas = function(){
-            self.prev.canvas_width = self.canvas.width;
-            self.prev.canvas_height = self.canvas.height;
-
-            self.canvas.style.width = '100%';
-            self.canvas.style.height = '100%';
-
-            self.canvas.width = self.canvas.offsetWidth;
-            self.canvas.height = self.canvas.offsetHeight;
-
-        };
-
-        this.resizeImage = function(){
-            self.width = self.image.width*self.scalar;
-            self.height = self.image.height*self.scalar;
-        };
-
-        this.center = function(){
-            self.x = ((self.canvas.width - self.offset.width) - self.width)/2;
-            self.y = ((self.canvas.height) - self.height)/2;
-        };
-
-        this.scaleXY = function(newWidth, newHeight){
-            self.x = newWidth/self.canvas.width;
-            self.y = newHeight/self.canvas.height;
-        };
-
-        this.posImage = function(){
-            if (!self.changed){
-                self.center();
-            }
-            else{
-                self.x *= self.canvas.width/self.prev.canvas_width;
-                self.y *= self.canvas.height/self.prev.canvas_height;
-            }
-        };
-
-        this.getSelectedObjects = function(){
-            self.objects.filter(function(comp){
-                return comp.selected;
-            });
-        };
-    }]);
-
-angular.module('ualib.compfinder.signage', [
-    'ualib.compfinder.service',
-    'ualib.compfinder.maps'
-])
-
-    .config(['$routeProvider', function($routeProvider){
-        $routeProvider
-            .when('/computers/signage/:building/:floor', {
-                reloadOnSearch: false,
-                resolve: {
-                    floors: ['Computers', '$route', function(Computers, $route){
-
-                        return Computers.init($route.current.params).then(function(){
-                            return true;
-                        });
-                        /*console.log($route);
-                        return CFF.floors().get($route.current.params, function(data){
-                            return data;
-                        }, function(data, status, headers, config) {
-                            console.log('ERROR: Computers and Software');
-                            console.log({
-                                data: data,
-                                status: status,
-                                headers: headers,
-                                config: config
-                            });
-                        });*/
-                    }]
-                },
-                templateUrl: 'signage/signage.tpl.html',
-                controller: 'SignageCtrl'
-            });
-    }])
-
-    .controller('SignageCtrl', ['$scope', 'Computers', function($scope, Computers){
-        $scope.computers = Computers;
-
-    }])
-
-    .directive('assetImage', ['$maps', '$timeout', '$window',  function($maps, $timeout, $window){
-        return{
-            restrict: 'AC',
-            link: function(scope, elm){
-
-
-                var scalar = 0.27;
-                var yOffset = 60;
-                var floor = parseInt(scope.computers.buildings[0].floors[0].name);
-
-                if (floor === 3){
-                    scalar = 0.14;
-                    yOffset = 85;
-                }
-                else if(floor === 2){
-                    scalar = 0.14;
-                    yOffset = 85;
-                }
-
-                $maps.init({
-                 src: 'http://wwwdev.lib.ua.edu/' + scope.computers.buildings[0].floors[0].image.url,
-                 canvas: elm[0], objects: {desktops: scope.computers.buildings[0].floors[0].desktops},
-                 width: scope.computers.buildings[0].floors[0].image.width,
-                 height: scope.computers.buildings[0].floors[0].image.height,
-                 scalar: scalar,
-                 yOffset: yOffset
-                 });
-
-                angular.element($window).bind('resize', function(){
-                    $maps.resizeCanvas();
-                    $maps.setScale();
-                    $maps.resizeImage();
-                    $maps.posImage();
-                    $maps.draw();
-                });
-
-                scope.$on('$destroy', function(){
-                    angular.element($window).unbind('resize');
-                });
-
-            }
-        };
-    }]);
 /**
   * x is a value between 0 and 1, indicating where in the animation you are.
   */
@@ -12013,34 +10093,34 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                <div class=\"form-group col-md-12\">\n" +
     "                    <label for=\"filterBy\">Filter <small>{{filteredDB.length}}</small> results by</label>\n" +
     "                    <div id=\"filterBy\">\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Title starts with\" ng-model=\"titleStartFilter\">\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"titleFilter\">\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Description contains\" ng-model=\"descrFilter\">\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Subjects contain\" ng-model=\"subjectFilter\">\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Media Types contain\" ng-model=\"typeFilter\">\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Publisher contains\" ng-model=\"publisherFilter\">\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Vendor contains\" ng-model=\"vendorFilter\">\n" +
-    "                        <select class=\"form-control\" ng-model=\"disFilter\" ng-options=\"val.name for val in disValues\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Title starts with\" ng-model=\"filters.titleStart\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"filters.title\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Description contains\" ng-model=\"filters.description\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Subjects contain\" ng-model=\"filters.subjects\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Media Types contain\" ng-model=\"filters.types\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Publisher contains\" ng-model=\"filters.publisher\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Vendor contains\" ng-model=\"filters.vendor\">\n" +
+    "                        <select class=\"form-control\" ng-model=\"filters.disabled\" ng-options=\"val.value as val.name for val in disValues\">\n" +
     "                        </select>\n" +
     "                    </div>\n" +
     "                    <label for=\"sortBy\">Sort by</label>\n" +
     "                    <div id=\"sortBy\">\n" +
-    "                        <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"0\" ng-click=\"sortBy(0)\">\n" +
+    "                        <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortMode\" btn-radio=\"0\" ng-click=\"sortBy(0)\">\n" +
     "                            Title\n" +
     "                            <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[0].reverse\"></span>\n" +
     "                            <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[0].reverse\"></span>\n" +
     "                        </button>\n" +
-    "                        <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"1\" ng-click=\"sortBy(1)\">\n" +
+    "                        <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortMode\" btn-radio=\"1\" ng-click=\"sortBy(1)\">\n" +
     "                            Creation Date\n" +
     "                            <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[1].reverse\"></span>\n" +
     "                            <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[1].reverse\"></span>\n" +
     "                        </button>\n" +
-    "                        <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"2\" ng-click=\"sortBy(2)\">\n" +
+    "                        <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortMode\" btn-radio=\"2\" ng-click=\"sortBy(2)\">\n" +
     "                            Last Modified\n" +
     "                            <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[2].reverse\"></span>\n" +
     "                            <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[2].reverse\"></span>\n" +
     "                        </button>\n" +
-    "                        <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"3\" ng-click=\"sortBy(3)\">\n" +
+    "                        <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortMode\" btn-radio=\"3\" ng-click=\"sortBy(3)\">\n" +
     "                            Temporary Disabled\n" +
     "                            <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[3].reverse\"></span>\n" +
     "                            <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[3].reverse\"></span>\n" +
@@ -12054,16 +10134,7 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                            boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredDB.length > perPage\"></pagination>\n" +
     "            </div>\n" +
     "            <div class=\"row row-clickable\"\n" +
-    "                 ng-repeat=\"db in filteredDB = (DBList.databases | filter:{title:titleStartFilter}:startTitle\n" +
-    "                                                                 | filter:{title:titleFilter}\n" +
-    "                                                                 | filter:{description:descrFilter}\n" +
-    "                                                                 | filter:{subjects:subjectFilter}\n" +
-    "                                                                 | filter:{types:typeFilter}\n" +
-    "                                                                 | filter:{publisher:publisherFilter}\n" +
-    "                                                                 | filter:{vendor:vendorFilter}\n" +
-    "                                                                 | filter:{disabled:disFilter.value}\n" +
-    "                                                                 | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\n" +
-    "                | startFrom:(currentPage-1)*perPage | limitTo:perPage\"\n" +
+    "                 ng-repeat=\"db in filteredDB | startFrom:(currentPage-1)*perPage | limitTo:perPage track by $index\"\n" +
     "                 ng-class=\"{sdOpen: db.show}\">\n" +
     "                <div class=\"col-md-12\" ng-click=\"toggleDB(db)\" style=\"cursor: pointer;\">\n" +
     "                    <div class=\"col-md-10\">\n" +
@@ -12086,7 +10157,7 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                        <h4 ng-show=\"db.disabled == 1 || db.tmpDisabled == 1\"><small><span class=\"label label-danger\">Disabled</span></small></h4>\n" +
     "                    </div>\n" +
     "                </div>\n" +
-    "                <div class=\"col-md-12\" ng-show=\"db.show\">\n" +
+    "                <div class=\"col-md-12\" ng-if=\"db.show\">\n" +
     "                    <form ng-submit=\"updateDB(db)\">\n" +
     "                        <div class=\"col-md-6 form-group\">\n" +
     "                            <label for=\"{{db.id}}_title\">Title</label>\n" +
@@ -12194,41 +10265,45 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                                   id=\"{{db.id}}_tmpDisable\" ng-change=\"changed(db)\">\n" +
     "                        </div>\n" +
     "                        <div class=\"col-md-12\">\n" +
-    "                            <div class=\"col-md-6 form-group\">\n" +
-    "                                <label for=\"{{db.id}}_subjects\">Subjects</label>\n" +
-    "                                <ul class=\"list-group\" id=\"{{db.id}}_subjects\">\n" +
-    "                                    <li class=\"list-group-item\" ng-repeat=\"subject in db.subjects\">\n" +
-    "                                        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteSubject(db,subject)\">Delete</button>\n" +
-    "                                        {{subject.subject}} : {{subject.type}}\n" +
-    "                                    </li>\n" +
-    "                                    <li class=\"list-group-item col-md-12\">\n" +
-    "                                        <div class=\"col-md-7\">\n" +
-    "                                            <select class=\"form-control\" ng-model=\"db.selSubj\" ng-options=\"sub.subject for sub in DBList.subjects\">\n" +
+    "                            <div class=\"row\">\n" +
+    "                                <div class=\"col-md-6 form-group\">\n" +
+    "                                    <label for=\"{{db.id}}_subjects\">Subjects</label>\n" +
+    "                                    <ul class=\"list-group\" id=\"{{db.id}}_subjects\">\n" +
+    "                                        <li class=\"list-group-item\" ng-repeat=\"subject in db.subjects\">\n" +
+    "                                            <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteSubject(db,subject)\">Delete</button>\n" +
+    "                                            {{subject.subject}} : {{subject.type}}\n" +
+    "                                        </li>\n" +
+    "                                        <li class=\"list-group-item\">\n" +
+    "                                            <div class=\"row\">\n" +
+    "                                                <div class=\"col-md-7\">\n" +
+    "                                                    <select class=\"form-control\" ng-model=\"db.selSubj\" ng-options=\"sub.subject for sub in subjects\">\n" +
+    "                                                    </select>\n" +
+    "                                                </div>\n" +
+    "                                                <div class=\"col-md-2\">\n" +
+    "                                                    <select class=\"form-control\" ng-model=\"db.subjType\" ng-options=\"val for val in subjectValues\">\n" +
+    "                                                    </select>\n" +
+    "                                                </div>\n" +
+    "                                                <div class=\"col-md-3\">\n" +
+    "                                                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"addSubject(db)\">Add Subject</button>\n" +
+    "                                                </div>\n" +
+    "                                            </div>\n" +
+    "                                        </li>\n" +
+    "                                    </ul>\n" +
+    "                                </div>\n" +
+    "                                <div class=\"col-md-6 form-group\">\n" +
+    "                                    <label for=\"{{db.id}}_types\">Types</label>\n" +
+    "                                    <ul class=\"list-group\" id=\"{{db.id}}_types\">\n" +
+    "                                        <li class=\"list-group-item\" ng-repeat=\"type in db.types\">\n" +
+    "                                            <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteType(db,type)\">Delete</button>\n" +
+    "                                            {{type.type}}\n" +
+    "                                        </li>\n" +
+    "                                        <li class=\"list-group-item form-inline\">\n" +
+    "                                            <select class=\"form-control\" ng-model=\"db.selType\" ng-options=\"typ.type for typ in types\">\n" +
     "                                            </select>\n" +
-    "                                        </div>\n" +
-    "                                        <div class=\"col-md-2\">\n" +
-    "                                            <select class=\"form-control\" ng-model=\"db.subjType\" ng-options=\"val for val in subjectValues\">\n" +
-    "                                            </select>\n" +
-    "                                        </div>\n" +
-    "                                        <div class=\"col-md-3\">\n" +
-    "                                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"addSubject(db)\">Add Subject</button>\n" +
-    "                                        </div>\n" +
-    "                                    </li>\n" +
-    "                                </ul>\n" +
-    "                            </div>\n" +
-    "                            <div class=\"col-md-6 form-group\">\n" +
-    "                                <label for=\"{{db.id}}_types\">Types</label>\n" +
-    "                                <ul class=\"list-group\" id=\"{{db.id}}_types\">\n" +
-    "                                    <li class=\"list-group-item\" ng-repeat=\"type in db.types\">\n" +
-    "                                        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteType(db,type)\">Delete</button>\n" +
-    "                                        {{type.type}}\n" +
-    "                                    </li>\n" +
-    "                                    <li class=\"list-group-item form-inline\">\n" +
-    "                                        <select class=\"form-control\" ng-model=\"db.selType\" ng-options=\"typ.type for typ in DBList.types\">\n" +
-    "                                        </select>\n" +
-    "                                        <button type=\"button\" class=\"btn btn-success\" ng-click=\"addType(db)\">Add Type</button>\n" +
-    "                                    </li>\n" +
-    "                                </ul>\n" +
+    "                                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"addType(db)\">Add Type</button>\n" +
+    "                                        </li>\n" +
+    "                                    </ul>\n" +
+    "                                </div>\n" +
     "                            </div>\n" +
     "                        </div>\n" +
     "                        <div class=\"col-md-12 text-center\">\n" +
@@ -12356,7 +10431,7 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                                </li>\n" +
     "                                <li class=\"list-group-item col-md-12\">\n" +
     "                                    <div class=\"col-md-7\">\n" +
-    "                                        <select class=\"form-control\" ng-model=\"newDB.selSubj\" ng-options=\"sub.subject for sub in DBList.subjects\">\n" +
+    "                                        <select class=\"form-control\" ng-model=\"newDB.selSubj\" ng-options=\"sub.subject for sub in subjects\">\n" +
     "                                        </select>\n" +
     "                                    </div>\n" +
     "                                    <div class=\"col-md-2\">\n" +
@@ -12377,7 +10452,7 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                                    {{type.type}}\n" +
     "                                </li>\n" +
     "                                <li class=\"list-group-item form-inline\">\n" +
-    "                                    <select class=\"form-control\" ng-model=\"newDB.selType\" ng-options=\"typ.type for typ in DBList.types\">\n" +
+    "                                    <select class=\"form-control\" ng-model=\"newDB.selType\" ng-options=\"typ.type for typ in types\">\n" +
     "                                    </select>\n" +
     "                                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"addTypeNewDB()\">Add Type</button>\n" +
     "                                </li>\n" +
@@ -15035,10 +13110,20 @@ angular.module('manage', [
     .constant('ALERTS_URL', 'https://wwwdev2.lib.ua.edu/alerts/')
     .constant('ERRORS_URL', 'https://wwwdev2.lib.ua.edu/errors/')
     .constant('ERCAROUSEL_URL', 'https://wwwdev2.lib.ua.edu/erCarousel/api/');
-
 angular.module('manage.common', [
     'common.manage'
 ])
+
+    .filter('startFrom', [ function() {
+        return function(input, start) {
+            if (angular.isObject(input)){
+                start = +start; //parse to int
+                if (typeof input == 'undefined')
+                    return input;
+                return input.slice(start);
+            }
+        };
+    }]);
 
 angular.module('common.manage', [])
     .constant('API', 'https://wwwdev2.lib.ua.edu/wp-json/wp/v2/')
@@ -15459,15 +13544,6 @@ angular.module('manage.manageAlerts', [])
         };
     }])
 
-    .filter('startFrom', [ function() {
-        return function(input, start) {
-            start = +start; //parse to int
-            if (typeof input == 'undefined')
-                return input;
-            return input.slice(start);
-        }
-    }])
-
     .controller('manageAlertFieldsCtrl', ['$scope', 'TYPES',
     function manageAlertFieldsCtrl($scope, TYPES){
         $scope.types = TYPES;
@@ -15526,31 +13602,35 @@ angular.module('manage.manageDatabases', [])
             }
         });
     }])
-    .controller('manageDBCtrl', ['$scope', 'mdbFactory', 'userData', 'DATABASES_GROUP', 'AuthService',
-        function manageDBCtrl($scope, mdbFactory, userData, DATABASES_GROUP, AuthService){
+    .controller('manageDBCtrl', ['$scope', '$filter', 'mdbFactory', 'userData', 'DATABASES_GROUP', 'AuthService',
+        function manageDBCtrl($scope, $filter, mdbFactory, userData, DATABASES_GROUP, AuthService){
             $scope.userInfo = AuthService.isAuthorized();
-            $scope.DBList = {};
-            $scope.titleFilter = '';
-            $scope.titleStartFilter = '';
-            $scope.descrFilter = '';
-            $scope.subjectFilter = '';
-            $scope.typeFilter = '';
-            $scope.publisherFilter = '';
-            $scope.vendorFilter = '';
+
+            var DBList = {};
+            $scope.filters = {
+                titleStart: '',
+                title: '',
+                description: '',
+                subjects: '',
+                types: '',
+                publisher: '',
+                vendor: '',
+                disabled: '',
+                sort: {}
+            };
+            $scope.filteredDB = null;
             $scope.disValues = [
                 {name:'Show all', value:''},
                 {name:'Enabled only', value:'0'},
                 {name:'Disabled only', value:'1'}
             ];
-            $scope.disFilter = $scope.disValues[0];
             $scope.sortMode = 0;
             $scope.sortModes = [
                 {by:'title', reverse:false},
                 {by:'dateCreated', reverse:false},
                 {by:'lastModified', reverse:false},
                 {by:'tmpDisabled', reverse:true}
-                ];
-            $scope.sortButton = $scope.sortMode;
+            ];
             $scope.newDB = {};
             $scope.newDB.subjects = [];
             $scope.newDB.types = [];
@@ -15565,16 +13645,15 @@ angular.module('manage.manageDatabases', [])
             $scope.inEDSValues = [ "", "Y", "P" ];
 
             $scope.hasAccess = false;
-            if (angular.isDefined($scope.userInfo.group)) {
+             if (angular.isDefined($scope.userInfo.group)) {
                 if ((parseInt($scope.userInfo.group) & DATABASES_GROUP) === DATABASES_GROUP) {
                     $scope.hasAccess = true;
                     $scope.newDB.updatedBy = $scope.userInfo.login;
                 }
-            }
+             }
 
             mdbFactory.getData()
                 .success(function(data) {
-                    console.dir(data);
                     for (var i = 0; i < data.databases.length; i++){
                         data.databases[i].show = false;
                         data.databases[i].changed = false;
@@ -15586,31 +13665,66 @@ angular.module('manage.manageDatabases', [])
                     $scope.newDB.selSubj = data.subjects[0];
                     $scope.newDB.subjType = 1;
                     $scope.newDB.selType = data.types[0];
-                    $scope.DBList = data;
+
+                    $scope.types = angular.copy(data.types);
+                    $scope.subjects = angular.copy(data.subjects);
+                    DBList = angular.copy(data);
+                    $scope.filteredDB = angular.copy(data.databases);
+                    $scope.filters.sort = {by:'title', reverse:false};
                 })
                 .error(function(data, status, headers, config) {
                     console.log(data);
                 });
 
-            $scope.startTitle = function(actual, expected){
+            $scope.$watchCollection('filters', processFilters);
+
+            function processFilters(newVal, oldVal){
+                newVal = angular.isUndefined(newVal) ? angular.copy($scope.filters) : newVal;
+                var db = angular.copy(DBList.databases);
+
+                for(var filter in newVal){
+                    if (oldVal === undefined || newVal[filter] !== oldVal[filter] || filter === 'sort'){
+                        switch(filter){
+                            case 'sort':
+                                db = $filter('orderBy')(db, newVal[filter].by, newVal[filter].reverse);
+                                break;
+                            case 'titleStart':
+                                db = $filter('filter')(db, {title:newVal[filter]}, startTitle);
+                                break;
+                            default:
+                                var f = {};
+                                f[filter] = newVal[filter];
+                                db = $filter('filter')(db, f);
+                        }
+                    }
+                }
+
+                $scope.filteredDB = angular.copy(db);
+            }
+
+
+            function startTitle(actual, expected){
                 if (!expected)
                     return true;
                 if (actual.toLowerCase().indexOf(expected.toLowerCase()) == 0)
                     return true;
                 return false;
-            };
-            $scope.toggleDB = function(db){
-                $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].show =
-                    !$scope.DBList.databases[$scope.DBList.databases.indexOf(db)].show;
-            };
+            }
+
             $scope.sortBy = function(by){
                 if ($scope.sortMode === by)
                     $scope.sortModes[by].reverse = !$scope.sortModes[by].reverse;
                 else
                     $scope.sortMode = by;
+                $scope.filters.sort = angular.copy($scope.sortModes[by]);
             };
+
+            $scope.toggleDB = function(db){
+                db.show = !db.show;
+            };
+
             $scope.changed = function(db){
-                $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].changed = true;
+                db.changed = true;
             };
 
             $scope.deleteDB = function(db){
@@ -15618,7 +13732,11 @@ angular.module('manage.manageDatabases', [])
                     mdbFactory.postData({action : 1}, db)
                         .success(function(data, status, headers, config) {
                             if (data == 1){
-                                $scope.DBList.databases.splice($scope.DBList.databases.indexOf(db), 1);
+                                //$scope.DBList.databases.splice($scope.DBList.databases.indexOf(db), 1);
+                                $scope.filteredDB.splice($scope.filteredDB.indexOf(db), 1);
+                                DBList.databases = DBList.databases.filter(function(item){
+                                    return item.id !== db.id;
+                                });
                                 $scope.formResponse = "Database has been deleted.";
                             } else {
                                 $scope.formResponse = "Error: Can not delete database! " + data;
@@ -15654,8 +13772,13 @@ angular.module('manage.manageDatabases', [])
                         } else {
                             $scope.formResponse = "Error: Can not update database! " + data;
                         }
-                        $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].changed = false;
+                        db.changed = false;
+
                         alert($scope.formResponse);
+                        DBList.databases = DBList.databases.filter(function(item){
+                            return item.id !== db.id;
+                        });
+                        DBList.databases.push(angular.copy(db));
                         console.log(data);
                     })
                     .error(function(data, status, headers, config) {
@@ -15664,13 +13787,15 @@ angular.module('manage.manageDatabases', [])
                         console.log(data);
                     });
             };
+
+
+
             $scope.createDB = function(){
-                console.dir($scope.newDB);
                 mdbFactory.postData({action : 3}, $scope.newDB)
                     .success(function(data, status, headers, config) {
                         if ((typeof data === 'object') && (data !== null)){
                             var newDB = {};
-                            newDB = angular.copy($scope.newDB);
+                            newDB = angular.extend({publisher: '', vendor:'', disabled: 0}, $scope.newDB);
                             newDB.id = data.id;
                             newDB.subjects = angular.copy(data.subjects);
                             newDB.types = angular.copy(data.types);
@@ -15680,7 +13805,8 @@ angular.module('manage.manageDatabases', [])
                             newDB.selSubj = data.subjects[0];
                             newDB.subjType = 1;
                             newDB.selType = data.types[0];
-                            $scope.DBList.databases.push(newDB);
+                            DBList.databases.push(newDB);
+                            processFilters();
                             $scope.formResponse = "Database has been created.";
                         } else {
                             $scope.formResponse = "Error: Can not create database! " + data;
@@ -15704,9 +13830,9 @@ angular.module('manage.manageDatabases', [])
                     .success(function(data, status, headers, config) {
                         if ((typeof data === 'object') && (data !== null)){
                             newSubject.id = data.id;
-                            if (typeof $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].subjects == 'undefined')
-                                $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].subjects = [];
-                            $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].subjects.push(newSubject);
+                            if (typeof db.subjects == 'undefined')
+                                db.subjects = [];
+                            db.subjects.push(newSubject);
                             $scope.formResponse = "Subject has been added.";
                         } else {
                             $scope.formResponse = "Error: Can not add subject! " + data;
@@ -15726,8 +13852,8 @@ angular.module('manage.manageDatabases', [])
                 mdbFactory.postData({action : 5}, subject)
                     .success(function(data, status, headers, config) {
                         if (data == 1){
-                            $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].subjects.splice(
-                                $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].subjects.indexOf(subject),1
+                            db.subjects.splice(
+                                db.subjects.indexOf(subject),1
                             );
                             $scope.formResponse = "Subject has been deleted.";
                         } else {
@@ -15750,9 +13876,9 @@ angular.module('manage.manageDatabases', [])
                     .success(function(data, status, headers, config) {
                         if ((typeof data === 'object') && (data !== null)){
                             newType.id = data.id;
-                            if (typeof $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].types == 'undefined')
-                                $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].types = [];
-                            $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].types.push(newType);
+                            if (typeof db.types == 'undefined')
+                                db.types = [];
+                            db.types.push(newType);
                             $scope.formResponse = "Type has been added.";
                         } else {
                             $scope.formResponse = "Error: Can not add type! " + data;
@@ -15770,8 +13896,8 @@ angular.module('manage.manageDatabases', [])
                 mdbFactory.postData({action : 7}, type)
                     .success(function(data, status, headers, config) {
                         if (data == 1){
-                            $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].types.splice(
-                                $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].types.indexOf(type),1
+                            db.types.splice(
+                                db.types.indexOf(type),1
                             );
                             $scope.formResponse = "Type has been deleted.";
                         } else {
@@ -15823,16 +13949,6 @@ angular.module('manage.manageDatabases', [])
                     $scope.newDB.types.push(newType);
             };
         }])
-
-    .filter('startFrom', [ function() {
-        return function(input, start) {
-            start = +start; //parse to int
-            if (typeof input == 'undefined')
-                return input;
-            return input.slice(start);
-        }
-    }])
-
 angular.module('manage.manageERCarousel', ['ngFileUpload'])
     .constant('ERC_GROUP', 1024)
 
@@ -17052,14 +15168,6 @@ angular.module('manage.manageNews', ['ngFileUpload', 'oc.lazyLoad', 'ui.tinymce'
             templateUrl: 'manageNews/manageNewsList.tpl.html'
         };
     }])
-    .filter('startFrom', [ function() {
-        return function(input, start) {
-            start = +start; //parse to int
-            if (typeof input == 'undefined')
-                return input;
-            return input.slice(start);
-        }
-    }])
 
     .controller('NewsItemFieldsCtrl', ['$scope', '$timeout', 'Upload',
         function NewsItemFieldsCtrl($scope, $timeout, Upload){
@@ -17712,14 +15820,6 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             },
             templateUrl: 'manageSoftware/manageSoftwareList.tpl.html'
         };
-    }])
-    .filter('startFrom', [ function() {
-        return function(input, start) {
-            start = +start; //parse to int
-            if (typeof input == 'undefined')
-                return input;
-            return input.slice(start);
-        }
     }])
 
     .controller('SWItemFieldsCtrl', ['$scope', '$timeout', 'Upload', 'OS',
@@ -19065,12 +17165,6 @@ angular.module('manage.staffDirectory', ['oc.lazyLoad', 'ui.tinymce'])
             templateUrl: 'staffDirectory/staffDirectoryPeople.tpl.html'
         };
     }])
-    .filter('startFrom', [ function() {
-        return function(input, start) {
-            start = +start; //parse to int
-            return input.slice(start);
-        }
-    }])
 
     .controller('staffDirSubjectsCtrl', ['$scope', 'sdFactory',
         function staffDirSubjectsCtrl($scope, sdFactory){
@@ -19425,15 +17519,6 @@ angular.module('manage.submittedForms', ['ngFileUpload'])
             else
                 $scope.sortMode = by;
         };
-    }])
-
-    .filter('startFrom', [ function() {
-        return function(input, start) {
-            start = +start; //parse to int
-            if (typeof input == 'undefined')
-                return input;
-            return input.slice(start);
-        }
     }])
 
     .controller('customFormCtrl', ['$scope', '$timeout', 'formFactory', 'Upload', 'FORMS_URL',
@@ -23814,7 +21899,7 @@ function plural(ms, n, name) {
   var undefined;
 
   /** Used as the semantic version number. */
-  var VERSION = '4.12.0';
+  var VERSION = '4.13.1';
 
   /** Used as the size to enable large array optimizations. */
   var LARGE_ARRAY_SIZE = 200;
@@ -23918,7 +22003,7 @@ function plural(ms, n, name) {
   /** Used to match property names within property paths. */
   var reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/,
       reIsPlainProp = /^\w*$/,
-      rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]/g;
+      rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(\.|\[\])(?:\4|$))/g;
 
   /**
    * Used to match `RegExp`
@@ -24051,7 +22136,7 @@ function plural(ms, n, name) {
     'Function', 'Int8Array', 'Int16Array', 'Int32Array', 'Map', 'Math', 'Object',
     'Promise', 'Reflect', 'RegExp', 'Set', 'String', 'Symbol', 'TypeError',
     'Uint8Array', 'Uint8ClampedArray', 'Uint16Array', 'Uint32Array', 'WeakMap',
-    '_', 'clearTimeout', 'isFinite', 'parseInt', 'setTimeout'
+    '_', 'isFinite', 'parseInt', 'setTimeout'
   ];
 
   /** Used to make template sourceURLs easier to identify. */
@@ -24130,12 +22215,6 @@ function plural(ms, n, name) {
     '&#96;': '`'
   };
 
-  /** Used to determine if values are of the language type `Object`. */
-  var objectTypes = {
-    'function': true,
-    'object': true
-  };
-
   /** Used to escape characters for inclusion in compiled string literals. */
   var stringEscapes = {
     '\\': '\\',
@@ -24151,41 +22230,25 @@ function plural(ms, n, name) {
       freeParseInt = parseInt;
 
   /** Detect free variable `exports`. */
-  var freeExports = (objectTypes[typeof exports] && exports && !exports.nodeType)
-    ? exports
-    : undefined;
+  var freeExports = typeof exports == 'object' && exports;
 
   /** Detect free variable `module`. */
-  var freeModule = (objectTypes[typeof module] && module && !module.nodeType)
-    ? module
-    : undefined;
+  var freeModule = freeExports && typeof module == 'object' && module;
 
   /** Detect the popular CommonJS extension `module.exports`. */
-  var moduleExports = (freeModule && freeModule.exports === freeExports)
-    ? freeExports
-    : undefined;
+  var moduleExports = freeModule && freeModule.exports === freeExports;
 
   /** Detect free variable `global` from Node.js. */
-  var freeGlobal = checkGlobal(freeExports && freeModule && typeof global == 'object' && global);
+  var freeGlobal = checkGlobal(typeof global == 'object' && global);
 
   /** Detect free variable `self`. */
-  var freeSelf = checkGlobal(objectTypes[typeof self] && self);
-
-  /** Detect free variable `window`. */
-  var freeWindow = checkGlobal(objectTypes[typeof window] && window);
+  var freeSelf = checkGlobal(typeof self == 'object' && self);
 
   /** Detect `this` as the global object. */
-  var thisGlobal = checkGlobal(objectTypes[typeof this] && this);
+  var thisGlobal = checkGlobal(typeof this == 'object' && this);
 
-  /**
-   * Used as a reference to the global object.
-   *
-   * The `this` value is used if it's the global object to avoid Greasemonkey's
-   * restricted `window` object, otherwise the `window` object is used.
-   */
-  var root = freeGlobal ||
-    ((freeWindow !== (thisGlobal && thisGlobal.window)) && freeWindow) ||
-      freeSelf || thisGlobal || Function('return this')();
+  /** Used as a reference to the global object. */
+  var root = freeGlobal || freeSelf || thisGlobal || Function('return this')();
 
   /*--------------------------------------------------------------------------*/
 
@@ -24241,7 +22304,7 @@ function plural(ms, n, name) {
    * A specialized version of `baseAggregator` for arrays.
    *
    * @private
-   * @param {Array} array The array to iterate over.
+   * @param {Array} [array] The array to iterate over.
    * @param {Function} setter The function to set `accumulator` values.
    * @param {Function} iteratee The iteratee to transform keys.
    * @param {Object} accumulator The initial aggregated object.
@@ -24249,7 +22312,7 @@ function plural(ms, n, name) {
    */
   function arrayAggregator(array, setter, iteratee, accumulator) {
     var index = -1,
-        length = array.length;
+        length = array ? array.length : 0;
 
     while (++index < length) {
       var value = array[index];
@@ -24263,13 +22326,13 @@ function plural(ms, n, name) {
    * iteratee shorthands.
    *
    * @private
-   * @param {Array} array The array to iterate over.
+   * @param {Array} [array] The array to iterate over.
    * @param {Function} iteratee The function invoked per iteration.
    * @returns {Array} Returns `array`.
    */
   function arrayEach(array, iteratee) {
     var index = -1,
-        length = array.length;
+        length = array ? array.length : 0;
 
     while (++index < length) {
       if (iteratee(array[index], index, array) === false) {
@@ -24284,12 +22347,12 @@ function plural(ms, n, name) {
    * iteratee shorthands.
    *
    * @private
-   * @param {Array} array The array to iterate over.
+   * @param {Array} [array] The array to iterate over.
    * @param {Function} iteratee The function invoked per iteration.
    * @returns {Array} Returns `array`.
    */
   function arrayEachRight(array, iteratee) {
-    var length = array.length;
+    var length = array ? array.length : 0;
 
     while (length--) {
       if (iteratee(array[length], length, array) === false) {
@@ -24304,14 +22367,14 @@ function plural(ms, n, name) {
    * iteratee shorthands.
    *
    * @private
-   * @param {Array} array The array to iterate over.
+   * @param {Array} [array] The array to iterate over.
    * @param {Function} predicate The function invoked per iteration.
    * @returns {boolean} Returns `true` if all elements pass the predicate check,
    *  else `false`.
    */
   function arrayEvery(array, predicate) {
     var index = -1,
-        length = array.length;
+        length = array ? array.length : 0;
 
     while (++index < length) {
       if (!predicate(array[index], index, array)) {
@@ -24326,13 +22389,13 @@ function plural(ms, n, name) {
    * iteratee shorthands.
    *
    * @private
-   * @param {Array} array The array to iterate over.
+   * @param {Array} [array] The array to iterate over.
    * @param {Function} predicate The function invoked per iteration.
    * @returns {Array} Returns the new filtered array.
    */
   function arrayFilter(array, predicate) {
     var index = -1,
-        length = array.length,
+        length = array ? array.length : 0,
         resIndex = 0,
         result = [];
 
@@ -24350,26 +22413,27 @@ function plural(ms, n, name) {
    * specifying an index to search from.
    *
    * @private
-   * @param {Array} array The array to search.
+   * @param {Array} [array] The array to search.
    * @param {*} target The value to search for.
    * @returns {boolean} Returns `true` if `target` is found, else `false`.
    */
   function arrayIncludes(array, value) {
-    return !!array.length && baseIndexOf(array, value, 0) > -1;
+    var length = array ? array.length : 0;
+    return !!length && baseIndexOf(array, value, 0) > -1;
   }
 
   /**
    * This function is like `arrayIncludes` except that it accepts a comparator.
    *
    * @private
-   * @param {Array} array The array to search.
+   * @param {Array} [array] The array to search.
    * @param {*} target The value to search for.
    * @param {Function} comparator The comparator invoked per element.
    * @returns {boolean} Returns `true` if `target` is found, else `false`.
    */
   function arrayIncludesWith(array, value, comparator) {
     var index = -1,
-        length = array.length;
+        length = array ? array.length : 0;
 
     while (++index < length) {
       if (comparator(value, array[index])) {
@@ -24384,13 +22448,13 @@ function plural(ms, n, name) {
    * shorthands.
    *
    * @private
-   * @param {Array} array The array to iterate over.
+   * @param {Array} [array] The array to iterate over.
    * @param {Function} iteratee The function invoked per iteration.
    * @returns {Array} Returns the new mapped array.
    */
   function arrayMap(array, iteratee) {
     var index = -1,
-        length = array.length,
+        length = array ? array.length : 0,
         result = Array(length);
 
     while (++index < length) {
@@ -24423,7 +22487,7 @@ function plural(ms, n, name) {
    * iteratee shorthands.
    *
    * @private
-   * @param {Array} array The array to iterate over.
+   * @param {Array} [array] The array to iterate over.
    * @param {Function} iteratee The function invoked per iteration.
    * @param {*} [accumulator] The initial value.
    * @param {boolean} [initAccum] Specify using the first element of `array` as
@@ -24432,7 +22496,7 @@ function plural(ms, n, name) {
    */
   function arrayReduce(array, iteratee, accumulator, initAccum) {
     var index = -1,
-        length = array.length;
+        length = array ? array.length : 0;
 
     if (initAccum && length) {
       accumulator = array[++index];
@@ -24448,7 +22512,7 @@ function plural(ms, n, name) {
    * iteratee shorthands.
    *
    * @private
-   * @param {Array} array The array to iterate over.
+   * @param {Array} [array] The array to iterate over.
    * @param {Function} iteratee The function invoked per iteration.
    * @param {*} [accumulator] The initial value.
    * @param {boolean} [initAccum] Specify using the last element of `array` as
@@ -24456,7 +22520,7 @@ function plural(ms, n, name) {
    * @returns {*} Returns the accumulated value.
    */
   function arrayReduceRight(array, iteratee, accumulator, initAccum) {
-    var length = array.length;
+    var length = array ? array.length : 0;
     if (initAccum && length) {
       accumulator = array[--length];
     }
@@ -24471,14 +22535,14 @@ function plural(ms, n, name) {
    * shorthands.
    *
    * @private
-   * @param {Array} array The array to iterate over.
+   * @param {Array} [array] The array to iterate over.
    * @param {Function} predicate The function invoked per iteration.
    * @returns {boolean} Returns `true` if any element passes the predicate check,
    *  else `false`.
    */
   function arraySome(array, predicate) {
     var index = -1,
-        length = array.length;
+        length = array ? array.length : 0;
 
     while (++index < length) {
       if (predicate(array[index], index, array)) {
@@ -24489,23 +22553,21 @@ function plural(ms, n, name) {
   }
 
   /**
-   * The base implementation of methods like `_.find` and `_.findKey`, without
-   * support for iteratee shorthands, which iterates over `collection` using
-   * `eachFunc`.
+   * The base implementation of methods like `_.findKey` and `_.findLastKey`,
+   * without support for iteratee shorthands, which iterates over `collection`
+   * using `eachFunc`.
    *
    * @private
    * @param {Array|Object} collection The collection to search.
    * @param {Function} predicate The function invoked per iteration.
    * @param {Function} eachFunc The function to iterate over `collection`.
-   * @param {boolean} [retKey] Specify returning the key of the found element
-   *  instead of the element itself.
    * @returns {*} Returns the found element or its key, else `undefined`.
    */
-  function baseFind(collection, predicate, eachFunc, retKey) {
+  function baseFindKey(collection, predicate, eachFunc) {
     var result;
     eachFunc(collection, function(value, key, collection) {
       if (predicate(value, key, collection)) {
-        result = retKey ? key : value;
+        result = key;
         return false;
       }
     });
@@ -24519,12 +22581,13 @@ function plural(ms, n, name) {
    * @private
    * @param {Array} array The array to search.
    * @param {Function} predicate The function invoked per iteration.
+   * @param {number} fromIndex The index to search from.
    * @param {boolean} [fromRight] Specify iterating from right to left.
    * @returns {number} Returns the index of the matched value, else `-1`.
    */
-  function baseFindIndex(array, predicate, fromRight) {
+  function baseFindIndex(array, predicate, fromIndex, fromRight) {
     var length = array.length,
-        index = fromRight ? length : -1;
+        index = fromIndex + (fromRight ? 1 : -1);
 
     while ((fromRight ? index-- : ++index < length)) {
       if (predicate(array[index], index, array)) {
@@ -24832,6 +22895,18 @@ function plural(ms, n, name) {
   }
 
   /**
+   * Gets the value at `key` of `object`.
+   *
+   * @private
+   * @param {Object} [object] The object to query.
+   * @param {string} key The key of the property to get.
+   * @returns {*} Returns the property value.
+   */
+  function getValue(object, key) {
+    return object == null ? undefined : object[key];
+  }
+
+  /**
    * Gets the index at which the first occurrence of `NaN` is found in `array`.
    *
    * @private
@@ -24842,7 +22917,7 @@ function plural(ms, n, name) {
    */
   function indexOfNaN(array, fromIndex, fromRight) {
     var length = array.length,
-        index = fromIndex + (fromRight ? 0 : -1);
+        index = fromIndex + (fromRight ? 1 : -1);
 
     while ((fromRight ? index-- : ++index < length)) {
       var other = array[index];
@@ -25033,10 +23108,10 @@ function plural(ms, n, name) {
    * lodash.isFunction(lodash.bar);
    * // => true
    *
-   * // Use `context` to mock `Date#getTime` use in `_.now`.
-   * var mock = _.runInContext({
+   * // Use `context` to stub `Date#getTime` use in `_.now`.
+   * var stubbed = _.runInContext({
    *   'Date': function() {
-   *     return { 'getTime': getTimeMock };
+   *     return { 'getTime': stubGetTime };
    *   }
    * });
    *
@@ -25057,6 +23132,15 @@ function plural(ms, n, name) {
     var arrayProto = context.Array.prototype,
         objectProto = context.Object.prototype,
         stringProto = context.String.prototype;
+
+    /** Used to detect overreaching core-js shims. */
+    var coreJsData = context['__core-js_shared__'];
+
+    /** Used to detect methods masquerading as native. */
+    var maskSrcKey = (function() {
+      var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || '');
+      return uid ? ('Symbol(src)_1.' + uid) : '';
+    }());
 
     /** Used to resolve the decompiled source of functions. */
     var funcToString = context.Function.prototype.toString;
@@ -25091,14 +23175,15 @@ function plural(ms, n, name) {
         Reflect = context.Reflect,
         Symbol = context.Symbol,
         Uint8Array = context.Uint8Array,
-        clearTimeout = context.clearTimeout,
         enumerate = Reflect ? Reflect.enumerate : undefined,
         getOwnPropertySymbols = Object.getOwnPropertySymbols,
         iteratorSymbol = typeof (iteratorSymbol = Symbol && Symbol.iterator) == 'symbol' ? iteratorSymbol : undefined,
         objectCreate = Object.create,
         propertyIsEnumerable = objectProto.propertyIsEnumerable,
-        setTimeout = context.setTimeout,
         splice = arrayProto.splice;
+
+    /** Built-in method references that are mockable. */
+    var setTimeout = function(func, wait) { return context.setTimeout.call(root, func, wait); };
 
     /* Built-in method references for those with the same name as other `lodash` methods. */
     var nativeCeil = Math.ceil,
@@ -25221,19 +23306,21 @@ function plural(ms, n, name) {
      * `isArrayBuffer`, `isArrayLike`, `isArrayLikeObject`, `isBoolean`,
      * `isBuffer`, `isDate`, `isElement`, `isEmpty`, `isEqual`, `isEqualWith`,
      * `isError`, `isFinite`, `isFunction`, `isInteger`, `isLength`, `isMap`,
-     * `isMatch`, `isMatchWith`, `isNaN`, `isNative`, `isNil`, `isNull`, `isNumber`,
-     * `isObject`, `isObjectLike`, `isPlainObject`, `isRegExp`, `isSafeInteger`,
-     * `isSet`, `isString`, `isUndefined`, `isTypedArray`, `isWeakMap`, `isWeakSet`,
-     * `join`, `kebabCase`, `last`, `lastIndexOf`, `lowerCase`, `lowerFirst`,
-     * `lt`, `lte`, `max`, `maxBy`, `mean`, `meanBy`, `min`, `minBy`, `multiply`,
-     * `noConflict`, `noop`, `now`, `nth`, `pad`, `padEnd`, `padStart`, `parseInt`,
-     * `pop`, `random`, `reduce`, `reduceRight`, `repeat`, `result`, `round`,
-     * `runInContext`, `sample`, `shift`, `size`, `snakeCase`, `some`, `sortedIndex`,
-     * `sortedIndexBy`, `sortedLastIndex`, `sortedLastIndexBy`, `startCase`,
-     * `startsWith`, `subtract`, `sum`, `sumBy`, `template`, `times`, `toFinite`,
-     * `toInteger`, `toJSON`, `toLength`, `toLower`, `toNumber`, `toSafeInteger`,
-     * `toString`, `toUpper`, `trim`, `trimEnd`, `trimStart`, `truncate`, `unescape`,
-     * `uniqueId`, `upperCase`, `upperFirst`, `value`, and `words`
+     * `isMatch`, `isMatchWith`, `isNaN`, `isNative`, `isNil`, `isNull`,
+     * `isNumber`, `isObject`, `isObjectLike`, `isPlainObject`, `isRegExp`,
+     * `isSafeInteger`, `isSet`, `isString`, `isUndefined`, `isTypedArray`,
+     * `isWeakMap`, `isWeakSet`, `join`, `kebabCase`, `last`, `lastIndexOf`,
+     * `lowerCase`, `lowerFirst`, `lt`, `lte`, `max`, `maxBy`, `mean`, `meanBy`,
+     * `min`, `minBy`, `multiply`, `noConflict`, `noop`, `now`, `nth`, `pad`,
+     * `padEnd`, `padStart`, `parseInt`, `pop`, `random`, `reduce`, `reduceRight`,
+     * `repeat`, `result`, `round`, `runInContext`, `sample`, `shift`, `size`,
+     * `snakeCase`, `some`, `sortedIndex`, `sortedIndexBy`, `sortedLastIndex`,
+     * `sortedLastIndexBy`, `startCase`, `startsWith`, `stubArray`, `stubFalse`,
+     * `stubObject`, `stubString`, `stubTrue`, `subtract`, `sum`, `sumBy`,
+     * `template`, `times`, `toFinite`, `toInteger`, `toJSON`, `toLength`,
+     * `toLower`, `toNumber`, `toSafeInteger`, `toString`, `toUpper`, `trim`,
+     * `trimEnd`, `trimStart`, `truncate`, `unescape`, `uniqueId`, `upperCase`,
+     * `upperFirst`, `value`, and `words`
      *
      * @name _
      * @constructor
@@ -26534,7 +24621,7 @@ function plural(ms, n, name) {
      * The base implementation of `_.has` without support for deep paths.
      *
      * @private
-     * @param {Object} object The object to query.
+     * @param {Object} [object] The object to query.
      * @param {Array|string} key The key to check.
      * @returns {boolean} Returns `true` if `key` exists, else `false`.
      */
@@ -26542,20 +24629,21 @@ function plural(ms, n, name) {
       // Avoid a bug in IE 10-11 where objects with a [[Prototype]] of `null`,
       // that are composed entirely of index properties, return `false` for
       // `hasOwnProperty` checks of them.
-      return hasOwnProperty.call(object, key) ||
-        (typeof object == 'object' && key in object && getPrototype(object) === null);
+      return object != null &&
+        (hasOwnProperty.call(object, key) ||
+          (typeof object == 'object' && key in object && getPrototype(object) === null));
     }
 
     /**
      * The base implementation of `_.hasIn` without support for deep paths.
      *
      * @private
-     * @param {Object} object The object to query.
+     * @param {Object} [object] The object to query.
      * @param {Array|string} key The key to check.
      * @returns {boolean} Returns `true` if `key` exists, else `false`.
      */
     function baseHasIn(object, key) {
-      return key in Object(object);
+      return object != null && key in Object(object);
     }
 
     /**
@@ -26807,6 +24895,22 @@ function plural(ms, n, name) {
         }
       }
       return true;
+    }
+
+    /**
+     * The base implementation of `_.isNative` without bad shim checks.
+     *
+     * @private
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is a native function,
+     *  else `false`.
+     */
+    function baseIsNative(value) {
+      if (!isObject(value) || isMasked(value)) {
+        return false;
+      }
+      var pattern = (isFunction(value) || isHostObject(value)) ? reIsNative : reIsHostCtor;
+      return pattern.test(toSource(value));
     }
 
     /**
@@ -27177,6 +25281,9 @@ function plural(ms, n, name) {
           length = values.length,
           seen = array;
 
+      if (array === values) {
+        values = copyArray(values);
+      }
       if (iteratee) {
         seen = arrayMap(array, baseUnary(iteratee));
       }
@@ -28330,6 +26437,31 @@ function plural(ms, n, name) {
     }
 
     /**
+     * Creates a `_.find` or `_.findLast` function.
+     *
+     * @private
+     * @param {Function} findIndexFunc The function to find the collection index.
+     * @returns {Function} Returns the new find function.
+     */
+    function createFind(findIndexFunc) {
+      return function(collection, predicate, fromIndex) {
+        var iterable = Object(collection);
+        predicate = getIteratee(predicate, 3);
+        if (!isArrayLike(collection)) {
+          var props = keys(collection);
+        }
+        var index = findIndexFunc(props || collection, function(value, key) {
+          if (props) {
+            key = value;
+            value = iterable[key];
+          }
+          return predicate(value, key, iterable);
+        }, fromIndex);
+        return index > -1 ? collection[props ? props[index] : index] : undefined;
+      };
+    }
+
+    /**
      * Creates a `_.flow` or `_.flowRight` function.
      *
      * @private
@@ -28692,7 +26824,7 @@ function plural(ms, n, name) {
       var func = Math[methodName];
       return function(number, precision) {
         number = toNumber(number);
-        precision = toInteger(precision);
+        precision = nativeMin(toInteger(precision), 292);
         if (precision) {
           // Shift with exponential notation to avoid floating-point issues.
           // See [MDN](https://mdn.io/round#Examples) for more details.
@@ -29173,11 +27305,14 @@ function plural(ms, n, name) {
      * @returns {Array} Returns the match data of `object`.
      */
     function getMatchData(object) {
-      var result = toPairs(object),
+      var result = keys(object),
           length = result.length;
 
       while (length--) {
-        result[length][2] = isStrictComparable(result[length][1]);
+        var key = result[length],
+            value = object[key];
+
+        result[length] = [key, value, isStrictComparable(value)];
       }
       return result;
     }
@@ -29191,8 +27326,8 @@ function plural(ms, n, name) {
      * @returns {*} Returns the function if it's native, else `undefined`.
      */
     function getNative(object, key) {
-      var value = object[key];
-      return isNative(value) ? value : undefined;
+      var value = getValue(object, key);
+      return baseIsNative(value) ? value : undefined;
     }
 
     /**
@@ -29221,9 +27356,7 @@ function plural(ms, n, name) {
 
     // Fallback for IE < 11.
     if (!getOwnPropertySymbols) {
-      getSymbols = function() {
-        return [];
-      };
+      getSymbols = stubArray;
     }
 
     /**
@@ -29554,6 +27687,26 @@ function plural(ms, n, name) {
       var data = getData(other);
       return !!data && func === data[0];
     }
+
+    /**
+     * Checks if `func` has its source masked.
+     *
+     * @private
+     * @param {Function} func The function to check.
+     * @returns {boolean} Returns `true` if `func` is masked, else `false`.
+     */
+    function isMasked(func) {
+      return !!maskSrcKey && (maskSrcKey in func);
+    }
+
+    /**
+     * Checks if `func` is capable of being masked.
+     *
+     * @private
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `func` is maskable, else `false`.
+     */
+    var isMaskable = coreJsData ? isFunction : stubFalse;
 
     /**
      * Checks if `value` is likely a prototype object.
@@ -29951,8 +28104,8 @@ function plural(ms, n, name) {
      * @see _.without, _.xor
      * @example
      *
-     * _.difference([3, 2, 1], [4, 2]);
-     * // => [3, 1]
+     * _.difference([2, 1], [2, 3]);
+     * // => [1]
      */
     var difference = rest(function(array, values) {
       return isArrayLikeObject(array)
@@ -29977,8 +28130,8 @@ function plural(ms, n, name) {
      * @returns {Array} Returns the new array of filtered values.
      * @example
      *
-     * _.differenceBy([3.1, 2.2, 1.3], [4.4, 2.5], Math.floor);
-     * // => [3.1, 1.3]
+     * _.differenceBy([2.1, 1.2], [2.3, 3.4], Math.floor);
+     * // => [1.2]
      *
      * // The `_.property` iteratee shorthand.
      * _.differenceBy([{ 'x': 2 }, { 'x': 1 }], [{ 'x': 1 }], 'x');
@@ -30230,6 +28383,7 @@ function plural(ms, n, name) {
      * @param {Array} array The array to search.
      * @param {Array|Function|Object|string} [predicate=_.identity]
      *  The function invoked per iteration.
+     * @param {number} [fromIndex=0] The index to search from.
      * @returns {number} Returns the index of the found element, else `-1`.
      * @example
      *
@@ -30254,10 +28408,16 @@ function plural(ms, n, name) {
      * _.findIndex(users, 'active');
      * // => 2
      */
-    function findIndex(array, predicate) {
-      return (array && array.length)
-        ? baseFindIndex(array, getIteratee(predicate, 3))
-        : -1;
+    function findIndex(array, predicate, fromIndex) {
+      var length = array ? array.length : 0;
+      if (!length) {
+        return -1;
+      }
+      var index = fromIndex == null ? 0 : toInteger(fromIndex);
+      if (index < 0) {
+        index = nativeMax(length + index, 0);
+      }
+      return baseFindIndex(array, getIteratee(predicate, 3), index);
     }
 
     /**
@@ -30271,6 +28431,7 @@ function plural(ms, n, name) {
      * @param {Array} array The array to search.
      * @param {Array|Function|Object|string} [predicate=_.identity]
      *  The function invoked per iteration.
+     * @param {number} [fromIndex=array.length-1] The index to search from.
      * @returns {number} Returns the index of the found element, else `-1`.
      * @example
      *
@@ -30295,10 +28456,19 @@ function plural(ms, n, name) {
      * _.findLastIndex(users, 'active');
      * // => 0
      */
-    function findLastIndex(array, predicate) {
-      return (array && array.length)
-        ? baseFindIndex(array, getIteratee(predicate, 3), true)
-        : -1;
+    function findLastIndex(array, predicate, fromIndex) {
+      var length = array ? array.length : 0;
+      if (!length) {
+        return -1;
+      }
+      var index = length - 1;
+      if (fromIndex !== undefined) {
+        index = toInteger(fromIndex);
+        index = fromIndex < 0
+          ? nativeMax(length + index, 0)
+          : nativeMin(index, length - 1);
+      }
+      return baseFindIndex(array, getIteratee(predicate, 3), index, true);
     }
 
     /**
@@ -30445,11 +28615,11 @@ function plural(ms, n, name) {
       if (!length) {
         return -1;
       }
-      fromIndex = toInteger(fromIndex);
-      if (fromIndex < 0) {
-        fromIndex = nativeMax(length + fromIndex, 0);
+      var index = fromIndex == null ? 0 : toInteger(fromIndex);
+      if (index < 0) {
+        index = nativeMax(length + index, 0);
       }
-      return baseIndexOf(array, value, fromIndex);
+      return baseIndexOf(array, value, index);
     }
 
     /**
@@ -30484,7 +28654,7 @@ function plural(ms, n, name) {
      * @returns {Array} Returns the new array of intersecting values.
      * @example
      *
-     * _.intersection([2, 1], [4, 2], [1, 2]);
+     * _.intersection([2, 1], [2, 3]);
      * // => [2]
      */
     var intersection = rest(function(arrays) {
@@ -30510,7 +28680,7 @@ function plural(ms, n, name) {
      * @returns {Array} Returns the new array of intersecting values.
      * @example
      *
-     * _.intersectionBy([2.1, 1.2], [4.3, 2.4], Math.floor);
+     * _.intersectionBy([2.1, 1.2], [2.3, 3.4], Math.floor);
      * // => [2.1]
      *
      * // The `_.property` iteratee shorthand.
@@ -30640,7 +28810,7 @@ function plural(ms, n, name) {
         ) + 1;
       }
       if (value !== value) {
-        return indexOfNaN(array, index, true);
+        return indexOfNaN(array, index - 1, true);
       }
       while (index--) {
         if (array[index] === value) {
@@ -30651,7 +28821,7 @@ function plural(ms, n, name) {
     }
 
     /**
-     * Gets the element at `n` index of `array`. If `n` is negative, the nth
+     * Gets the element at index `n` of `array`. If `n` is negative, the nth
      * element from the end is returned.
      *
      * @static
@@ -30692,11 +28862,11 @@ function plural(ms, n, name) {
      * @returns {Array} Returns `array`.
      * @example
      *
-     * var array = [1, 2, 3, 1, 2, 3];
+     * var array = ['a', 'b', 'c', 'a', 'b', 'c'];
      *
-     * _.pull(array, 2, 3);
+     * _.pull(array, 'a', 'c');
      * console.log(array);
-     * // => [1, 1]
+     * // => ['b', 'b']
      */
     var pull = rest(pullAll);
 
@@ -30714,11 +28884,11 @@ function plural(ms, n, name) {
      * @returns {Array} Returns `array`.
      * @example
      *
-     * var array = [1, 2, 3, 1, 2, 3];
+     * var array = ['a', 'b', 'c', 'a', 'b', 'c'];
      *
-     * _.pullAll(array, [2, 3]);
+     * _.pullAll(array, ['a', 'c']);
      * console.log(array);
-     * // => [1, 1]
+     * // => ['b', 'b']
      */
     function pullAll(array, values) {
       return (array && array.length && values && values.length)
@@ -30800,14 +28970,14 @@ function plural(ms, n, name) {
      * @returns {Array} Returns the new array of removed elements.
      * @example
      *
-     * var array = [5, 10, 15, 20];
-     * var evens = _.pullAt(array, 1, 3);
+     * var array = ['a', 'b', 'c', 'd'];
+     * var pulled = _.pullAt(array, [1, 3]);
      *
      * console.log(array);
-     * // => [5, 15]
+     * // => ['a', 'c']
      *
-     * console.log(evens);
-     * // => [10, 20]
+     * console.log(pulled);
+     * // => ['b', 'd']
      */
     var pullAt = rest(function(array, indexes) {
       indexes = baseFlatten(indexes, 1);
@@ -30947,9 +29117,6 @@ function plural(ms, n, name) {
      *
      * _.sortedIndex([30, 50], 40);
      * // => 1
-     *
-     * _.sortedIndex([4, 5], 4);
-     * // => 0
      */
     function sortedIndex(array, value) {
       return baseSortedIndex(array, value);
@@ -30972,13 +29139,13 @@ function plural(ms, n, name) {
      *  into `array`.
      * @example
      *
-     * var dict = { 'thirty': 30, 'forty': 40, 'fifty': 50 };
+     * var objects = [{ 'x': 4 }, { 'x': 5 }];
      *
-     * _.sortedIndexBy(['thirty', 'fifty'], 'forty', _.propertyOf(dict));
-     * // => 1
+     * _.sortedIndexBy(objects, { 'x': 4 }, function(o) { return o.x; });
+     * // => 0
      *
      * // The `_.property` iteratee shorthand.
-     * _.sortedIndexBy([{ 'x': 4 }, { 'x': 5 }], { 'x': 4 }, 'x');
+     * _.sortedIndexBy(objects, { 'x': 4 }, 'x');
      * // => 0
      */
     function sortedIndexBy(array, value, iteratee) {
@@ -30998,8 +29165,8 @@ function plural(ms, n, name) {
      * @returns {number} Returns the index of the matched value, else `-1`.
      * @example
      *
-     * _.sortedIndexOf([1, 1, 2, 2], 2);
-     * // => 2
+     * _.sortedIndexOf([4, 5, 5, 5, 6], 5);
+     * // => 1
      */
     function sortedIndexOf(array, value) {
       var length = array ? array.length : 0;
@@ -31027,8 +29194,8 @@ function plural(ms, n, name) {
      *  into `array`.
      * @example
      *
-     * _.sortedLastIndex([4, 5], 4);
-     * // => 1
+     * _.sortedLastIndex([4, 5, 5, 5, 6], 5);
+     * // => 4
      */
     function sortedLastIndex(array, value) {
       return baseSortedIndex(array, value, true);
@@ -31051,8 +29218,13 @@ function plural(ms, n, name) {
      *  into `array`.
      * @example
      *
+     * var objects = [{ 'x': 4 }, { 'x': 5 }];
+     *
+     * _.sortedLastIndexBy(objects, { 'x': 4 }, function(o) { return o.x; });
+     * // => 1
+     *
      * // The `_.property` iteratee shorthand.
-     * _.sortedLastIndexBy([{ 'x': 4 }, { 'x': 5 }], { 'x': 4 }, 'x');
+     * _.sortedLastIndexBy(objects, { 'x': 4 }, 'x');
      * // => 1
      */
     function sortedLastIndexBy(array, value, iteratee) {
@@ -31072,7 +29244,7 @@ function plural(ms, n, name) {
      * @returns {number} Returns the index of the matched value, else `-1`.
      * @example
      *
-     * _.sortedLastIndexOf([1, 1, 2, 2], 2);
+     * _.sortedLastIndexOf([4, 5, 5, 5, 6], 5);
      * // => 3
      */
     function sortedLastIndexOf(array, value) {
@@ -31312,8 +29484,8 @@ function plural(ms, n, name) {
      * @returns {Array} Returns the new array of combined values.
      * @example
      *
-     * _.union([2, 1], [4, 2], [1, 2]);
-     * // => [2, 1, 4]
+     * _.union([2], [1, 2]);
+     * // => [2, 1]
      */
     var union = rest(function(arrays) {
       return baseUniq(baseFlatten(arrays, 1, isArrayLikeObject, true));
@@ -31335,8 +29507,8 @@ function plural(ms, n, name) {
      * @returns {Array} Returns the new array of combined values.
      * @example
      *
-     * _.unionBy([2.1, 1.2], [4.3, 2.4], Math.floor);
-     * // => [2.1, 1.2, 4.3]
+     * _.unionBy([2.1], [1.2, 2.3], Math.floor);
+     * // => [2.1, 1.2]
      *
      * // The `_.property` iteratee shorthand.
      * _.unionBy([{ 'x': 1 }], [{ 'x': 2 }, { 'x': 1 }], 'x');
@@ -31443,7 +29615,7 @@ function plural(ms, n, name) {
      * @returns {Array} Returns the new duplicate free array.
      * @example
      *
-     * var objects = [{ 'x': 1, 'y': 2 }, { 'x': 2, 'y': 1 },  { 'x': 1, 'y': 2 }];
+     * var objects = [{ 'x': 1, 'y': 2 }, { 'x': 2, 'y': 1 }, { 'x': 1, 'y': 2 }];
      *
      * _.uniqWith(objects, _.isEqual);
      * // => [{ 'x': 1, 'y': 2 }, { 'x': 2, 'y': 1 }]
@@ -31538,7 +29710,7 @@ function plural(ms, n, name) {
      * @see _.difference, _.xor
      * @example
      *
-     * _.without([1, 2, 1, 3], 1, 2);
+     * _.without([2, 1, 2, 3], 1, 2);
      * // => [3]
      */
     var without = rest(function(array, values) {
@@ -31562,8 +29734,8 @@ function plural(ms, n, name) {
      * @see _.difference, _.without
      * @example
      *
-     * _.xor([2, 1], [4, 2]);
-     * // => [1, 4]
+     * _.xor([2, 1], [2, 3]);
+     * // => [1, 3]
      */
     var xor = rest(function(arrays) {
       return baseXor(arrayFilter(arrays, isArrayLikeObject));
@@ -31585,8 +29757,8 @@ function plural(ms, n, name) {
      * @returns {Array} Returns the new array of filtered values.
      * @example
      *
-     * _.xorBy([2.1, 1.2], [4.3, 2.4], Math.floor);
-     * // => [1.2, 4.3]
+     * _.xorBy([2.1, 1.2], [2.3, 3.4], Math.floor);
+     * // => [1.2, 3.4]
      *
      * // The `_.property` iteratee shorthand.
      * _.xorBy([{ 'x': 1 }], [{ 'x': 2 }, { 'x': 1 }], 'x');
@@ -31819,9 +29991,6 @@ function plural(ms, n, name) {
      *
      * _(object).at(['a[0].b.c', 'a[1]']).value();
      * // => [3, 4]
-     *
-     * _(['a', 'b', 'c']).at(0, 2).value();
-     * // => ['a', 'c']
      */
     var wrapperAt = rest(function(paths) {
       paths = baseFlatten(paths, 1);
@@ -32084,6 +30253,7 @@ function plural(ms, n, name) {
      * _.countBy([6.1, 4.2, 6.3], Math.floor);
      * // => { '4': 1, '6': 2 }
      *
+     * // The `_.property` iteratee shorthand.
      * _.countBy(['one', 'two', 'three'], 'length');
      * // => { '3': 2, '5': 1 }
      */
@@ -32189,6 +30359,7 @@ function plural(ms, n, name) {
      * @param {Array|Object} collection The collection to search.
      * @param {Array|Function|Object|string} [predicate=_.identity]
      *  The function invoked per iteration.
+     * @param {number} [fromIndex=0] The index to search from.
      * @returns {*} Returns the matched element, else `undefined`.
      * @example
      *
@@ -32213,14 +30384,7 @@ function plural(ms, n, name) {
      * _.find(users, 'active');
      * // => object for 'barney'
      */
-    function find(collection, predicate) {
-      predicate = getIteratee(predicate, 3);
-      if (isArray(collection)) {
-        var index = baseFindIndex(collection, predicate);
-        return index > -1 ? collection[index] : undefined;
-      }
-      return baseFind(collection, predicate, baseEach);
-    }
+    var find = createFind(findIndex);
 
     /**
      * This method is like `_.find` except that it iterates over elements of
@@ -32233,6 +30397,7 @@ function plural(ms, n, name) {
      * @param {Array|Object} collection The collection to search.
      * @param {Array|Function|Object|string} [predicate=_.identity]
      *  The function invoked per iteration.
+     * @param {number} [fromIndex=collection.length-1] The index to search from.
      * @returns {*} Returns the matched element, else `undefined`.
      * @example
      *
@@ -32241,14 +30406,7 @@ function plural(ms, n, name) {
      * });
      * // => 3
      */
-    function findLast(collection, predicate) {
-      predicate = getIteratee(predicate, 3);
-      if (isArray(collection)) {
-        var index = baseFindIndex(collection, predicate, true);
-        return index > -1 ? collection[index] : undefined;
-      }
-      return baseFind(collection, predicate, baseEachRight);
-    }
+    var findLast = createFind(findLastIndex);
 
     /**
      * Creates a flattened array of values by running each element in `collection`
@@ -33005,7 +31163,6 @@ function plural(ms, n, name) {
      * @static
      * @memberOf _
      * @since 2.4.0
-     * @type {Function}
      * @category Date
      * @returns {number} Returns the timestamp.
      * @example
@@ -33013,9 +31170,11 @@ function plural(ms, n, name) {
      * _.defer(function(stamp) {
      *   console.log(_.now() - stamp);
      * }, _.now());
-     * // => Logs the number of milliseconds it took for the deferred function to be invoked.
+     * // => Logs the number of milliseconds it took for the deferred invocation.
      */
-    var now = Date.now;
+    function now() {
+      return Date.now();
+    }
 
     /*------------------------------------------------------------------------*/
 
@@ -33119,7 +31278,7 @@ function plural(ms, n, name) {
      * The `_.bind.placeholder` value, which defaults to `_` in monolithic builds,
      * may be used as a placeholder for partially applied arguments.
      *
-     * **Note:** Unlike native `Function#bind` this method doesn't set the "length"
+     * **Note:** Unlike native `Function#bind`, this method doesn't set the "length"
      * property of bound functions.
      *
      * @static
@@ -33359,7 +31518,7 @@ function plural(ms, n, name) {
           maxWait,
           result,
           timerId,
-          lastCallTime = 0,
+          lastCallTime,
           lastInvokeTime = 0,
           leading = false,
           maxing = false,
@@ -33410,7 +31569,7 @@ function plural(ms, n, name) {
         // Either this is the first call, activity has stopped and we're at the
         // trailing edge, the system time has gone backwards and we're treating
         // it as the trailing edge, or we've hit the `maxWait` limit.
-        return (!lastCallTime || (timeSinceLastCall >= wait) ||
+        return (lastCallTime === undefined || (timeSinceLastCall >= wait) ||
           (timeSinceLastCall < 0) || (maxing && timeSinceLastInvoke >= maxWait));
       }
 
@@ -33424,7 +31583,6 @@ function plural(ms, n, name) {
       }
 
       function trailingEdge(time) {
-        clearTimeout(timerId);
         timerId = undefined;
 
         // Only invoke if we have `lastArgs` which means `func` has been
@@ -33437,11 +31595,8 @@ function plural(ms, n, name) {
       }
 
       function cancel() {
-        if (timerId !== undefined) {
-          clearTimeout(timerId);
-        }
-        lastCallTime = lastInvokeTime = 0;
-        lastArgs = lastThis = timerId = undefined;
+        lastInvokeTime = 0;
+        lastArgs = lastCallTime = lastThis = timerId = undefined;
       }
 
       function flush() {
@@ -33462,7 +31617,6 @@ function plural(ms, n, name) {
           }
           if (maxing) {
             // Handle invocations in a tight loop.
-            clearTimeout(timerId);
             timerId = setTimeout(timerExpired, wait);
             return invokeFunc(lastCallTime);
           }
@@ -33686,7 +31840,7 @@ function plural(ms, n, name) {
      *
      * var func = _.overArgs(function(x, y) {
      *   return [x, y];
-     * }, square, doubled);
+     * }, [square, doubled]);
      *
      * func(9, 3);
      * // => [81, 6]
@@ -33803,7 +31957,7 @@ function plural(ms, n, name) {
      *
      * var rearged = _.rearg(function(a, b, c) {
      *   return [a, b, c];
-     * }, 2, 0, 1);
+     * }, [2, 0, 1]);
      *
      * rearged('b', 'c', 'a')
      * // => ['a', 'b', 'c']
@@ -34442,7 +32596,7 @@ function plural(ms, n, name) {
      * _.isBuffer(new Uint8Array(2));
      * // => false
      */
-    var isBuffer = !Buffer ? constant(false) : function(value) {
+    var isBuffer = !Buffer ? stubFalse : function(value) {
       return value instanceof Buffer;
     };
 
@@ -34942,7 +33096,15 @@ function plural(ms, n, name) {
     }
 
     /**
-     * Checks if `value` is a native function.
+     * Checks if `value` is a pristine native function.
+     *
+     * **Note:** This method can't reliably detect native functions in the
+     * presence of the `core-js` package because `core-js` circumvents this kind
+     * of detection. Despite multiple requests, the `core-js` maintainer has made
+     * it clear: any attempt to fix the detection will be obstructed. As a result,
+     * we're left with little choice but to throw an error. Unfortunately, this
+     * also affects packages, like [babel-polyfill](https://www.npmjs.com/package/babel-polyfill),
+     * which rely on `core-js`.
      *
      * @static
      * @memberOf _
@@ -34960,11 +33122,10 @@ function plural(ms, n, name) {
      * // => false
      */
     function isNative(value) {
-      if (!isObject(value)) {
-        return false;
+      if (isMaskable(value)) {
+        throw new Error('This method is not supported with `core-js`. Try https://github.com/es-shims.');
       }
-      var pattern = (isFunction(value) || isHostObject(value)) ? reIsNative : reIsHostCtor;
-      return pattern.test(toSource(value));
+      return baseIsNative(value);
     }
 
     /**
@@ -35426,7 +33587,7 @@ function plural(ms, n, name) {
     /**
      * Converts `value` to an integer.
      *
-     * **Note:** This function is loosely based on
+     * **Note:** This method is loosely based on
      * [`ToInteger`](http://www.ecma-international.org/ecma-262/6.0/#sec-tointeger).
      *
      * @static
@@ -35780,9 +33941,6 @@ function plural(ms, n, name) {
      *
      * _.at(object, ['a[0].b.c', 'a[1]']);
      * // => [3, 4]
-     *
-     * _.at(['a', 'b', 'c'], 0, 2);
-     * // => ['a', 'c']
      */
     var at = rest(function(object, paths) {
       return baseAt(object, baseFlatten(paths, 1));
@@ -35915,7 +34073,7 @@ function plural(ms, n, name) {
      * // => 'barney'
      */
     function findKey(object, predicate) {
-      return baseFind(object, getIteratee(predicate, 3), baseForOwn, true);
+      return baseFindKey(object, getIteratee(predicate, 3), baseForOwn);
     }
 
     /**
@@ -35955,7 +34113,7 @@ function plural(ms, n, name) {
      * // => 'pebbles'
      */
     function findLastKey(object, predicate) {
-      return baseFind(object, getIteratee(predicate, 3), baseForOwnRight, true);
+      return baseFindKey(object, getIteratee(predicate, 3), baseForOwnRight);
     }
 
     /**
@@ -36814,15 +34972,16 @@ function plural(ms, n, name) {
      * An alternative to `_.reduce`; this method transforms `object` to a new
      * `accumulator` object which is the result of running each of its own
      * enumerable string keyed properties thru `iteratee`, with each invocation
-     * potentially mutating the `accumulator` object. The iteratee is invoked
-     * with four arguments: (accumulator, value, key, object). Iteratee functions
-     * may exit iteration early by explicitly returning `false`.
+     * potentially mutating the `accumulator` object. If `accumulator` is not
+     * provided, a new object with the same `[[Prototype]]` will be used. The
+     * iteratee is invoked with four arguments: (accumulator, value, key, object).
+     * Iteratee functions may exit iteration early by explicitly returning `false`.
      *
      * @static
      * @memberOf _
      * @since 1.3.0
      * @category Object
-     * @param {Array|Object} object The object to iterate over.
+     * @param {Object} object The object to iterate over.
      * @param {Function} [iteratee=_.identity] The function invoked per iteration.
      * @param {*} [accumulator] The custom accumulator value.
      * @returns {*} Returns the accumulated value.
@@ -37244,7 +35403,7 @@ function plural(ms, n, name) {
      * @category String
      * @param {string} [string=''] The string to search.
      * @param {string} [target] The string to search for.
-     * @param {number} [position=string.length] The position to search from.
+     * @param {number} [position=string.length] The position to search up to.
      * @returns {boolean} Returns `true` if `string` ends with `target`,
      *  else `false`.
      * @example
@@ -38329,7 +36488,7 @@ function plural(ms, n, name) {
      *   }
      * };
      *
-     * _.bindAll(view, 'onClick');
+     * _.bindAll(view, ['onClick']);
      * jQuery(element).on('click', view.onClick);
      * // => Logs 'clicked docs' when clicked.
      */
@@ -38410,7 +36569,7 @@ function plural(ms, n, name) {
      *   { 'user': 'fred',   'age': 40 }
      * ];
      *
-     * _.filter(users, _.conforms({ 'age': _.partial(_.gt, _, 38) }));
+     * _.filter(users, _.conforms({ 'age': function(n) { return n > 38; } }));
      * // => [{ 'user': 'fred', 'age': 40 }]
      */
     function conforms(source) {
@@ -38428,10 +36587,12 @@ function plural(ms, n, name) {
      * @returns {Function} Returns the new constant function.
      * @example
      *
-     * var object = { 'user': 'fred' };
-     * var getter = _.constant(object);
+     * var objects = _.times(2, _.constant({ 'a': 1 }));
      *
-     * getter() === object;
+     * console.log(objects);
+     * // => [{ 'a': 1 }, { 'a': 1 }]
+     *
+     * console.log(objects[0] === objects[1]);
      * // => true
      */
     function constant(value) {
@@ -38458,7 +36619,7 @@ function plural(ms, n, name) {
      *   return n * n;
      * }
      *
-     * var addSquare = _.flow(_.add, square);
+     * var addSquare = _.flow([_.add, square]);
      * addSquare(1, 2);
      * // => 9
      */
@@ -38481,7 +36642,7 @@ function plural(ms, n, name) {
      *   return n * n;
      * }
      *
-     * var addSquare = _.flowRight(square, _.add);
+     * var addSquare = _.flowRight([square, _.add]);
      * addSquare(1, 2);
      * // => 9
      */
@@ -38500,7 +36661,7 @@ function plural(ms, n, name) {
      *
      * var object = { 'user': 'fred' };
      *
-     * _.identity(object) === object;
+     * console.log(_.identity(object) === object);
      * // => true
      */
     function identity(value) {
@@ -38761,8 +36922,7 @@ function plural(ms, n, name) {
     }
 
     /**
-     * A no-operation function that returns `undefined` regardless of the
-     * arguments it receives.
+     * A method that returns `undefined`.
      *
      * @static
      * @memberOf _
@@ -38770,17 +36930,15 @@ function plural(ms, n, name) {
      * @category Util
      * @example
      *
-     * var object = { 'user': 'fred' };
-     *
-     * _.noop(object) === undefined;
-     * // => true
+     * _.times(2, _.noop);
+     * // => [undefined, undefined]
      */
     function noop() {
       // No operation performed.
     }
 
     /**
-     * Creates a function that gets the argument at `n` index. If `n` is negative,
+     * Creates a function that gets the argument at index `n`. If `n` is negative,
      * the nth argument from the end is returned.
      *
      * @static
@@ -38819,7 +36977,7 @@ function plural(ms, n, name) {
      * @returns {Function} Returns the new function.
      * @example
      *
-     * var func = _.over(Math.max, Math.min);
+     * var func = _.over([Math.max, Math.min]);
      *
      * func(1, 2, 3, 4);
      * // => [4, 1]
@@ -38839,7 +36997,7 @@ function plural(ms, n, name) {
      * @returns {Function} Returns the new function.
      * @example
      *
-     * var func = _.overEvery(Boolean, isFinite);
+     * var func = _.overEvery([Boolean, isFinite]);
      *
      * func('1');
      * // => true
@@ -38865,7 +37023,7 @@ function plural(ms, n, name) {
      * @returns {Function} Returns the new function.
      * @example
      *
-     * var func = _.overSome(Boolean, isFinite);
+     * var func = _.overSome([Boolean, isFinite]);
      *
      * func('1');
      * // => true
@@ -39013,6 +37171,101 @@ function plural(ms, n, name) {
     var rangeRight = createRange(true);
 
     /**
+     * A method that returns a new empty array.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.13.0
+     * @category Util
+     * @returns {Array} Returns the new empty array.
+     * @example
+     *
+     * var arrays = _.times(2, _.stubArray);
+     *
+     * console.log(arrays);
+     * // => [[], []]
+     *
+     * console.log(arrays[0] === arrays[1]);
+     * // => false
+     */
+    function stubArray() {
+      return [];
+    }
+
+    /**
+     * A method that returns `false`.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.13.0
+     * @category Util
+     * @returns {boolean} Returns `false`.
+     * @example
+     *
+     * _.times(2, _.stubFalse);
+     * // => [false, false]
+     */
+    function stubFalse() {
+      return false;
+    }
+
+    /**
+     * A method that returns a new empty object.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.13.0
+     * @category Util
+     * @returns {Object} Returns the new empty object.
+     * @example
+     *
+     * var objects = _.times(2, _.stubObject);
+     *
+     * console.log(objects);
+     * // => [{}, {}]
+     *
+     * console.log(objects[0] === objects[1]);
+     * // => false
+     */
+    function stubObject() {
+      return {};
+    }
+
+    /**
+     * A method that returns an empty string.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.13.0
+     * @category Util
+     * @returns {string} Returns the empty string.
+     * @example
+     *
+     * _.times(2, _.stubString);
+     * // => ['', '']
+     */
+    function stubString() {
+      return '';
+    }
+
+    /**
+     * A method that returns `true`.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.13.0
+     * @category Util
+     * @returns {boolean} Returns `true`.
+     * @example
+     *
+     * _.times(2, _.stubTrue);
+     * // => [true, true]
+     */
+    function stubTrue() {
+      return true;
+    }
+
+    /**
      * Invokes the iteratee `n` times, returning an array of the results of
      * each invocation. The iteratee is invoked with one argument; (index).
      *
@@ -39028,8 +37281,8 @@ function plural(ms, n, name) {
      * _.times(3, String);
      * // => ['0', '1', '2']
      *
-     *  _.times(4, _.constant(true));
-     * // => [true, true, true, true]
+     *  _.times(4, _.constant(0));
+     * // => [0, 0, 0, 0]
      */
     function times(n, iteratee) {
       n = toInteger(n);
@@ -39065,15 +37318,6 @@ function plural(ms, n, name) {
      *
      * _.toPath('a[0].b.c');
      * // => ['a', '0', 'b', 'c']
-     *
-     * var path = ['a', 'b', 'c'],
-     *     newPath = _.toPath(path);
-     *
-     * console.log(newPath);
-     * // => ['a', 'b', 'c']
-     *
-     * console.log(path === newPath);
-     * // => false
      */
     function toPath(value) {
       if (isArray(value)) {
@@ -39712,6 +37956,11 @@ function plural(ms, n, name) {
     lodash.meanBy = meanBy;
     lodash.min = min;
     lodash.minBy = minBy;
+    lodash.stubArray = stubArray;
+    lodash.stubFalse = stubFalse;
+    lodash.stubObject = stubObject;
+    lodash.stubString = stubString;
+    lodash.stubTrue = stubTrue;
     lodash.multiply = multiply;
     lodash.nth = nth;
     lodash.noConflict = noConflict;
@@ -40018,7 +38267,7 @@ function plural(ms, n, name) {
   // also prevents errors in cases where Lodash is loaded by a script tag in the
   // presence of an AMD loader. See http://requirejs.org/docs/errors.html#mismatch
   // for more details. Use `_.noConflict` to remove Lodash from the global object.
-  (freeWindow || freeSelf || {})._ = _;
+  (freeSelf || {})._ = _;
 
   // Some AMD build optimizers like r.js check for condition patterns like the following:
   if (typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
@@ -40029,11 +38278,9 @@ function plural(ms, n, name) {
     });
   }
   // Check for `exports` after `define` in case a build optimizer adds an `exports` object.
-  else if (freeExports && freeModule) {
+  else if (freeModule) {
     // Export for Node.js.
-    if (moduleExports) {
-      (freeModule.exports = _)._ = _;
-    }
+    (freeModule.exports = _)._ = _;
     // Export for CommonJS support.
     freeExports._ = _;
   }
@@ -59331,7 +57578,7 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "                    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
     "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/#/home\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
     "                        <li><a title=\"Go to News.\" href=\"/#/news-exhibits\" class=\"post post-page\">News</a></li>\n" +
-    "                        <li><a title=\"Go to news article.\" href=\"\" class=\"post post-page\">{{newsItem.title | breadcrumbTruncate}}</a></li>\n" +
+    "                        <li><a title=\"Go to news article.\" href=\"\" class=\"post post-page\">{{newsItem.title | truncate: 30: '...': true}}</a></li>\n" +
     "                    </ol>\n" +
     "                </div>\n" +
     "            </div>\n" +
@@ -60007,19 +58254,7 @@ angular.module('ualib.news', [
                 return 'news-item/' + type + '-card.tpl.html';
             }
         };
-    }])
-
-    .filter('breadcrumbTruncate', function () {
-        return function(x){
-            pageArray = x.split(' ');
-
-            if (pageArray.length > 4) {
-                newPageArray = pageArray.slice(0, 4);
-                x = newPageArray.join(' ') + '...';
-            }
-            return x;
-        };
-    });;/**
+    }]);;/**
  * @ngdoc overview
  * @name news
  * 
