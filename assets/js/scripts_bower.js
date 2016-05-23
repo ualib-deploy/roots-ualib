@@ -2666,137 +2666,273 @@ angular.module('monospaced.mousewheel', [])
     };
   }]);
 
-angular.module('compfinder.templates', ['admin/admin.tpl.html', 'admin/floorFields.tpl.html', 'common/maps/map.tpl.html', 'signage/signage.tpl.html']);
+angular.module('compfinder.templates', ['admin/admin.tpl.html', 'admin/floorFields.tpl.html', 'common/maps/map.tpl.html', 'computers/computers-floor.tpl.html', 'computers/computers.tpl.html', 'signage/signage.tpl.html']);
 
 angular.module("admin/admin.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("admin/admin.tpl.html",
-    "<tabset justified=\"true\" ng-if=\"hasAccess\">\n" +
-    "    <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
-    "        <div ng-if=\"tab.number == 0\">\n" +
-    "            <nav class=\"navbar navbar-default\">\n" +
-    "                <div class=\"container\">\n" +
-    "                    <ul class=\"nav navbar-nav\">\n" +
-    "                        <li>\n" +
-    "                            <button class=\"btn btn-default navbar-btn\" ng-click=\"mapTools.undo()\">\n" +
-    "                                <span class=\"fa fa-reply\"></span> Undo\n" +
-    "                            </button>\n" +
-    "                        </li>\n" +
-    "                        <li>\n" +
-    "                            <button class=\"btn btn-default navbar-btn\" ng-click=\"mapTools.redo()\">\n" +
-    "                                <span class=\"fa fa-share\"></span> Redo\n" +
-    "                            </button>\n" +
-    "                        </li>\n" +
-    "                    </ul>\n" +
-    "                    <ul class=\"nav navbar-nav\" ng-show=\"mapTools.current == 'selector'\">\n" +
-    "                        <li>\n" +
-    "                            <button class=\"btn btn-default navbar-btn\" ng-click=\"mapTools.helper('hAlignCenter')\">\n" +
-    "                                <span class=\"fa fa-align-center\"></span> Horizontal Align Center\n" +
-    "                            </button>\n" +
-    "                        </li>\n" +
-    "                        <li>\n" +
-    "                            <button class=\"btn btn-default navbar-btn\" ng-click=\"mapTools.helper('vAlignCenter')\">\n" +
-    "                                <span class=\"fa fa-align-center fa-rotate-90\"></span> Vertical Align Center\n" +
-    "                            </button>\n" +
-    "                        </li>\n" +
-    "                    </ul>\n" +
-    "\n" +
-    "\n" +
+    "<div class=\"comp-admin-container\">\n" +
+    "    <div ui-layout ui-layout-loaded>\n" +
+    "        <div ui-layout-container=\"central\">\n" +
+    "            <div ui-layout=\"{flow: 'column'}\">\n" +
+    "                <div class=\"map-container\" ui-layout-container=\"central\">\n" +
+    "                    <map mapdata=\"floor\"></map>\n" +
     "                </div>\n" +
-    "            </nav>\n" +
-    "\n" +
-    "            <div class=\"row\">\n" +
-    "                <div class=\"col-md-10\" style=\"height: 600px;\">\n" +
-    "                    <map></map>\n" +
+    "                <div ui-layout-container size=\"25%\">\n" +
+    "                    <h3>Desktops</h3>\n" +
+    "                    <div class=\"list-group\">\n" +
+    "                        <a href=\"\" class=\"list-group-item\" ng-repeat=\"desktop in floor.desktops\">{{desktop.name}}</a>\n" +
+    "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
-    "        <div ng-if=\"tab.number == 1\" >\n" +
-    "            <div class=\"row\">\n" +
-    "                <div class=\"col-md-6\">\n" +
-    "                    <h4>Buildings</h4>\n" +
-    "                    <div class=\"row\">\n" +
-    "                        <div class=\"col-md-4 form-group\">\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"gorgas\" ng-model=\"newBldg.name\"\n" +
-    "                                   maxlength=\"20\">\n" +
+    "        <div ui-layout-container>\n" +
+    "            <div ui-layout=\"{flow: 'column'}\">\n" +
+    "                <div ui-layout-container min-size=\"20%\">\n" +
+    "                    <h2>Buildings</h2>\n" +
+    "                    <ul class=\"nav nav-pills nav-stacked\">\n" +
+    "                        <li ng-repeat=\"building in buildings\" ng-class=\"{active: building.bid == bid}\"><a href=\"\" ng-click=\"selectBuilding(building)\">{{building.title}}</a></li>\n" +
+    "                    </ul>\n" +
+    "                    <form>\n" +
+    "                        <div class=\"input-group\">\n" +
+    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Building name\">\n" +
+    "                            <div class=\"input-group-btn\">\n" +
+    "                                <button type=\"button\" class=\"btn btn-success\">\n" +
+    "                                    <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "                                </button>\n" +
+    "                            </div>\n" +
     "                        </div>\n" +
-    "                        <div class=\"col-md-6 form-group\">\n" +
-    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Gorgas Library\" ng-model=\"newBldg.title\"\n" +
-    "                                   maxlength=\"100\">\n" +
-    "                        </div>\n" +
-    "                        <div class=\"col-md-2 form-group\">\n" +
-    "                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"createBuilding(newBldg)\" ng-disabled=\"uploading\">\n" +
-    "                                <span class=\"fa fa-fw fa-plus\"></span> Add\n" +
-    "                            </button><br>\n" +
-    "                            {{formResponse}}\n" +
+    "                    </form>\n" +
+    "                </div>\n" +
+    "                <div ui-layout-container min-size=\"20%\">\n" +
+    "                    <h2>Floors</h2>\n" +
+    "                    <div class=\"list-group\">\n" +
+    "                        <div class=\"media\" ng-repeat=\"floor in building.floors\">\n" +
+    "                            <div class=\"media-left\">\n" +
+    "                                <a href=\"\" ng-click=\"selectFloor(floor)\">\n" +
+    "                                    <img class=\"media-object\"style=\"max-width: 80px\"  ng-src=\"//wwwdev2.lib.ua.edu/{{floor.image.url}}\">\n" +
+    "                                </a>\n" +
+    "                            </div>\n" +
+    "                            <div class=\"media-body\" ng-click=\"selectFloor(floor)\">\n" +
+    "                                <div class=\"media-heading\">{{floor.title}}</div>\n" +
+    "                            </div>\n" +
     "                        </div>\n" +
     "                    </div>\n" +
-    "                    <div class=\"row well\" ng-repeat=\"building in buildings\">\n" +
-    "                        <div class=\"col-md-12 clickable\" ng-if=\"selBldg !== $index\" ng-click=\"openBuilding($index)\">\n" +
-    "                            <a>\n" +
-    "                                {{building.name}} : {{building.title}}\n" +
-    "                            </a>\n" +
+    "                    <form>\n" +
+    "                        <div class=\"input-group\">\n" +
+    "                            <input type=\"text\" class=\"form-control\" placeholder=\"Floor name\">\n" +
+    "                            <div class=\"input-group-btn\">\n" +
+    "                                <button type=\"button\" class=\"btn btn-success\">\n" +
+    "                                    <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "                                </button>\n" +
+    "                            </div>\n" +
     "                        </div>\n" +
-    "                        <div class=\"col-md-12\" ng-if=\"selBldg == $index\">\n" +
-    "                            <h4>{{building.title}}</h4>\n" +
-    "                            <div class=\"col-md-4 form-group\">\n" +
-    "                                <input type=\"text\" class=\"form-control\" placeholder=\"gorgas\" ng-model=\"building.name\"\n" +
-    "                                       maxlength=\"20\">\n" +
-    "                            </div>\n" +
-    "                            <div class=\"col-md-5 form-group\">\n" +
-    "                                <input type=\"text\" class=\"form-control\" placeholder=\"Gorgas Library\" ng-model=\"building.title\"\n" +
-    "                                       maxlength=\"100\">\n" +
-    "                            </div>\n" +
-    "                            <div class=\"col-md-3 form-group\">\n" +
-    "                                <button type=\"button\" class=\"btn btn-success\" ng-click=\"updateBuilding(building)\" ng-disabled=\"uploading\">\n" +
-    "                                    <span class=\"fa fa-fw fa-edit\"></span>\n" +
-    "                                </button>\n" +
-    "                                <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteBuilding(building)\" ng-disabled=\"uploading\">\n" +
-    "                                    <span class=\"fa fa-fw fa-trash-o\"></span>\n" +
-    "                                </button>\n" +
-    "                                <div>\n" +
-    "                                    {{building.formResponse}}\n" +
-    "                                </div>\n" +
-    "                            </div>\n" +
+    "                    </form>\n" +
+    "                </div>\n" +
+    "                <div ui-layout-container=\"central\" min-size=\"20%\">\n" +
+    "                    <h3>Unassigned</h3>\n" +
+    "                    <div class=\"list-group\">\n" +
+    "                        <a href=\"\" class=\"list-group-item\" ng-repeat=\"computer in unassigned\">{{computer.name}}</a>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "<div class=\"container\">\n" +
     "\n" +
-    "                            <h4>Floors <small>{{building.title}}</small></h4>\n" +
-    "                            <h5>Create New Floor</h5>\n" +
+    "\n" +
+    "\n" +
+    "\n" +
+    "    <!--<tabset>\n" +
+    "        <tab>\n" +
+    "            <tab-heading>List</tab-heading>\n" +
+    "\n" +
+    "        </tab>\n" +
+    "        <tab>\n" +
+    "            <tab-heading>Map</tab-heading>\n" +
+    "        </tab>\n" +
+    "    </tabset>-->\n" +
+    "    <!--<tabset justified=\"true\" ng-if=\"hasAccess\">\n" +
+    "        <tab ng-repeat=\"tab in tabs\" heading=\"{{tab.name}}\" active=\"tab.active\">\n" +
+    "            <div ng-if=\"tab.number == 0\">\n" +
+    "                <div class=\"page-row\">\n" +
+    "                    <div class=\"container\">\n" +
+    "                        <div class=\"page-slice\">\n" +
     "                            <div class=\"row\">\n" +
-    "                                <div floor-fields-list floor=\"newFloor\">\n" +
+    "                                <div class=\"col-sm-6\">\n" +
+    "                                    <label for=\"building\">Building</label>\n" +
+    "                                    <select class=\"form-control\" id=\"building\" size=\"5\" ng-model=\"building\" ng-options=\"building.title for building in buildings\">\n" +
+    "                                        <option value=\"\">&#45;&#45; Select Building &#45;&#45;</option>\n" +
+    "                                    </select>\n" +
     "                                </div>\n" +
-    "                                <div class=\"col-md-4 form-group\">\n" +
-    "                                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"createFloor(newFloor)\" ng-disabled=\"uploading\">\n" +
-    "                                        <span class=\"fa fa-fw fa-plus\"></span> Add New Floor\n" +
-    "                                    </button>\n" +
+    "                                <div class=\"col-sm-6\">\n" +
+    "                                    <label for=\"floor\">Floor</label>\n" +
+    "                                    <select class=\"form-control\" id=\"floor\" size=\"5\" ng-model=\"floor\" ng-options=\"floor.title for floor in building.floors\">\n" +
+    "                                        <option value=\"\">&#45;&#45; Select Floor &#45;&#45;</option>\n" +
+    "                                    </select>\n" +
+    "                                </div>\n" +
+    "\n" +
+    "                            </div>\n" +
+    "                        </div>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "                <div class=\"page-row\">\n" +
+    "                    <div class=\"container\">\n" +
+    "                        <div class=\"row\" ng-if=\"floor\">\n" +
+    "                            <div class=\"col-md-10\" style=\"height: 400px;\">\n" +
+    "                                <map mapdata=\"floor\"></map>\n" +
+    "                            </div>\n" +
+    "                            <div class=\"col-md-2\">\n" +
+    "                                &lt;!&ndash;<button class=\"btn btn-default navbar-btn\" ng-click=\"mapTools.undo()\">\n" +
+    "                                    <span class=\"fa fa-reply\"></span> Undo\n" +
+    "                                </button>\n" +
+    "                                <button class=\"btn btn-default navbar-btn\" ng-click=\"mapTools.redo()\">\n" +
+    "                                    <span class=\"fa fa-share\"></span> Redo\n" +
+    "                                </button>\n" +
+    "                                <button class=\"btn btn-default navbar-btn\" ng-click=\"mapTools.helper('hAlignCenter')\">\n" +
+    "                                    <span class=\"fa fa-align-center\"></span> Horizontal Align Center\n" +
+    "                                </button>\n" +
+    "                                <button class=\"btn btn-default navbar-btn\" ng-click=\"mapTools.helper('vAlignCenter')\">\n" +
+    "                                    <span class=\"fa fa-align-center fa-rotate-90\"></span> Vertical Align Center\n" +
+    "                                </button>&ndash;&gt;\n" +
+    "                                <div style=\"height: 400px; overflow-y: auto; overflow-x: hidden;\">\n" +
+    "                                    <ul class=\"list-group\">\n" +
+    "                                        <li class=\"list-group-item\" ng-repeat=\"desktop in floor.desktops\">\n" +
+    "                                            {{desktop.name}}\n" +
+    "                                <span class=\"text-right\">\n" +
+    "                                    <span class=\"fa fa-fw fa-edit\"></span>\n" +
+    "                                    <span class=\"fa fa-fw fa-trash-o\"></span>\n" +
+    "                                </span>\n" +
+    "                                        </li>\n" +
+    "                                    </ul>\n" +
+    "                                </div>\n" +
+    "                                &lt;!&ndash;<label for=\"desktops\">Desktops</label>\n" +
+    "                                <select class=\"form-control\" id=\"desktops\" size=\"5\" multiple ng-model=\"desktop\" ng-options=\"desktop.name for desktop in floor.desktops\">\n" +
+    "                                    <option value=\"\">&#45;&#45; Select Desktop &#45;&#45;</option>\n" +
+    "                                </select>\n" +
+    "                                <label for=\"unassigned\">Unassigned Desktops</label>\n" +
+    "                                <select class=\"form-control\" id=\"unassigned\" size=\"5\" multiple ng-model=\"ucomp\" ng-options=\"ucomp.name for ucomp in unassigned\">\n" +
+    "                                    <option value=\"\">&#45;&#45; Select Desktop &#45;&#45;</option>\n" +
+    "                                </select>&ndash;&gt;\n" +
+    "                            </div>\n" +
+    "                        </div>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "                &lt;!&ndash;<div class=\"row\">\n" +
+    "                    <div class=\"col-sm-4\">\n" +
+    "                        <h3>Buildings</h3>\n" +
+    "                        <div class=\"panel panel-default\">\n" +
+    "                            <div class=\"list-group\">\n" +
+    "                                <a href=\"\" ng-click=\"selectBuilding(building)\" class=\"list-group-item\" ng-repeat=\"building in buildings\">\n" +
+    "                                    {{building.title}}\n" +
+    "                                </a>\n" +
+    "                            </div>\n" +
+    "                            <div class=\"panel-footer\">\n" +
+    "                                <div class=\"input-group\">\n" +
+    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"Building name\" ng-model=\"newBldg.title\" maxlength=\"100\">\n" +
+    "                                    <span class=\"input-group-btn\">\n" +
+    "                                        <button class=\"btn btn-default\" type=\"button\" ng-click=\"createBuilding(newBldg)\" ng-disabled=\"uploading\">\n" +
+    "                                            Add <span class=\"fa fa-fw fa-plus\"></span>\n" +
+    "                                        </button>\n" +
+    "                                    </span>\n" +
     "                                </div>\n" +
     "                                {{formResponse}}\n" +
     "                            </div>\n" +
+    "                        </div>\n" +
     "\n" +
-    "                            <div class=\"row well well-sm\" ng-repeat=\"floor in building.floors\">\n" +
-    "                                <div class=\"col-md-12 clickable\" ng-if=\"selFloor !== $index\" ng-click=\"openFloor($index)\">\n" +
-    "                                    <div class=\"col-md-2\">\n" +
-    "                                        <img class=\"thumbnail\" ng-src=\"{{floor.image.url}}\">\n" +
-    "                                    </div>\n" +
-    "                                    <div class=\"col-md-10\">\n" +
-    "                                        {{floor.name}} : {{floor.title}}\n" +
+    "                    </div>\n" +
+    "                    <div class=\"col-sm-4\">\n" +
+    "                        <h3>Floors</h3>\n" +
+    "                        <div class=\"list-group\">\n" +
+    "                            <a href=\"\" ng-click=\"selectFloor(floor)\" class=\"list-group-item\" ng-repeat=\"floor in building.floors\">{{floor.title}}</a>\n" +
+    "                        </div>\n" +
+    "                    </div>\n" +
+    "                </div>&ndash;&gt;\n" +
+    "\n" +
+    "            </div>\n" +
+    "            <div ng-if=\"tab.number == 1\" >\n" +
+    "                <div class=\"row\">\n" +
+    "                    <div class=\"col-md-6\">\n" +
+    "                        <h4>Buildings</h4>\n" +
+    "                        <div class=\"row\">\n" +
+    "                            <div class=\"col-md-4 form-group\">\n" +
+    "                                <input type=\"text\" class=\"form-control\" placeholder=\"gorgas\" ng-model=\"newBldg.name\"\n" +
+    "                                       maxlength=\"20\">\n" +
+    "                            </div>\n" +
+    "                            <div class=\"col-md-6 form-group\">\n" +
+    "                                <input type=\"text\" class=\"form-control\" placeholder=\"Gorgas Library\" ng-model=\"newBldg.title\"\n" +
+    "                                       maxlength=\"100\">\n" +
+    "                            </div>\n" +
+    "                            <div class=\"col-md-2 form-group\">\n" +
+    "                                <button type=\"button\" class=\"btn btn-success\" ng-click=\"createBuilding(newBldg)\" ng-disabled=\"uploading\">\n" +
+    "                                    <span class=\"fa fa-fw fa-plus\"></span> Add\n" +
+    "                                </button><br>\n" +
+    "                                {{formResponse}}\n" +
+    "                            </div>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"row well\" ng-repeat=\"building in buildings\">\n" +
+    "                            <div class=\"col-md-12 clickable\" ng-if=\"selBldg !== $index\" ng-click=\"openBuilding($index)\">\n" +
+    "                                <a>\n" +
+    "                                    {{building.name}} : {{building.title}}\n" +
+    "                                </a>\n" +
+    "                            </div>\n" +
+    "                            <div class=\"col-md-12\" ng-if=\"selBldg == $index\">\n" +
+    "                                <h4>{{building.title}}</h4>\n" +
+    "                                <div class=\"col-md-4 form-group\">\n" +
+    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"gorgas\" ng-model=\"building.name\"\n" +
+    "                                           maxlength=\"20\">\n" +
+    "                                </div>\n" +
+    "                                <div class=\"col-md-5 form-group\">\n" +
+    "                                    <input type=\"text\" class=\"form-control\" placeholder=\"Gorgas Library\" ng-model=\"building.title\"\n" +
+    "                                           maxlength=\"100\">\n" +
+    "                                </div>\n" +
+    "                                <div class=\"col-md-3 form-group\">\n" +
+    "\n" +
+    "                                    <div>\n" +
+    "                                        {{building.formResponse}}\n" +
     "                                    </div>\n" +
     "                                </div>\n" +
-    "                                <div class=\"row\" ng-if=\"selFloor == $index\">\n" +
-    "                                    <div class=\"col-md-2\">\n" +
-    "                                        <img class=\"thumbnail\" ng-src=\"{{floor.image.url}}\">\n" +
+    "\n" +
+    "                                <h4>Floors <small>{{building.title}}</small></h4>\n" +
+    "                                <h5>Create New Floor</h5>\n" +
+    "                                <div class=\"row\">\n" +
+    "                                    <div floor-fields-list floor=\"newFloor\">\n" +
     "                                    </div>\n" +
-    "                                    <div class=\"col-md-10\">\n" +
-    "                                        <h5>{{floor.title}}</h5>\n" +
-    "                                        <div floor-fields-list floor=\"floor\">\n" +
+    "                                    <div class=\"col-md-4 form-group\">\n" +
+    "                                        <button type=\"button\" class=\"btn btn-success\" ng-click=\"createFloor(newFloor)\" ng-disabled=\"uploading\">\n" +
+    "                                            <span class=\"fa fa-fw fa-plus\"></span> Add New Floor\n" +
+    "                                        </button>\n" +
+    "                                    </div>\n" +
+    "                                    {{formResponse}}\n" +
+    "                                </div>\n" +
+    "\n" +
+    "                                <div class=\"row well well-sm\" ng-repeat=\"floor in building.floors\">\n" +
+    "                                    <div class=\"col-md-12 clickable\" ng-if=\"selFloor !== $index\" ng-click=\"openFloor($index)\">\n" +
+    "                                        <div class=\"col-md-2\">\n" +
+    "                                            <img class=\"thumbnail\" ng-src=\"{{floor.image.url}}\">\n" +
     "                                        </div>\n" +
-    "                                        <div class=\"col-md-4 form-group\">\n" +
-    "                                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"updateFloor(floor)\" ng-disabled=\"uploading\">\n" +
-    "                                                <span class=\"fa fa-fw fa-edit\"></span>\n" +
-    "                                            </button>\n" +
-    "                                            <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteFloor(floor)\" ng-disabled=\"uploading\">\n" +
-    "                                                <span class=\"fa fa-fw fa-trash-o\"></span>\n" +
-    "                                            </button>\n" +
-    "                                            <div ng-if=\"floor.formResponse\">\n" +
-    "                                                {{floor.formResponse}}\n" +
+    "                                        <div class=\"col-md-10\">\n" +
+    "                                            {{floor.name}} : {{floor.title}}\n" +
+    "                                        </div>\n" +
+    "                                    </div>\n" +
+    "                                    <div class=\"row\" ng-if=\"selFloor == $index\">\n" +
+    "                                        <div class=\"col-md-2\">\n" +
+    "                                            <img class=\"thumbnail\" ng-src=\"//wwwdev2.lib.ua.edu/{{floor.image.url}}\">\n" +
+    "                                        </div>\n" +
+    "                                        <div class=\"col-md-10\">\n" +
+    "                                            <h5>{{floor.title}}</h5>\n" +
+    "                                            <div floor-fields-list floor=\"floor\">\n" +
+    "                                            </div>\n" +
+    "                                            <div class=\"col-md-4 form-group\">\n" +
+    "                                                <button type=\"button\" class=\"btn btn-success\" ng-click=\"updateFloor(floor)\" ng-disabled=\"uploading\">\n" +
+    "                                                    <span class=\"fa fa-fw fa-edit\"></span>\n" +
+    "                                                </button>\n" +
+    "                                                <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteFloor(floor)\" ng-disabled=\"uploading\">\n" +
+    "                                                    <span class=\"fa fa-fw fa-trash-o\"></span>\n" +
+    "                                                </button>\n" +
+    "                                                <div ng-if=\"floor.formResponse\">\n" +
+    "                                                    {{floor.formResponse}}\n" +
+    "                                                </div>\n" +
     "                                            </div>\n" +
     "                                        </div>\n" +
     "                                    </div>\n" +
@@ -2804,24 +2940,25 @@ angular.module("admin/admin.tpl.html", []).run(["$templateCache", function($temp
     "                            </div>\n" +
     "                        </div>\n" +
     "                    </div>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-3\">\n" +
-    "                    <h4>Computers <small>{{buildings[selBldg].name}}:{{buildings[selBldg].floors[selFloor].name}}</small></h4>\n" +
+    "                    <div class=\"col-md-3\">\n" +
+    "                        <h4>Computers <small>{{buildings[selBldg].name}}:{{buildings[selBldg].floors[selFloor].name}}</small></h4>\n" +
     "\n" +
-    "                    <div class=\"col-md-12\" ng-repeat=\"comp in buildings[selBldg].floors[selFloor].desktops\">\n" +
-    "                        {{comp.name}}\n" +
+    "                        <div class=\"col-md-12\" ng-repeat=\"comp in buildings[selBldg].floors[selFloor].desktops\">\n" +
+    "                            {{comp.name}}\n" +
+    "                        </div>\n" +
+    "\n" +
     "                    </div>\n" +
-    "\n" +
-    "                </div>\n" +
-    "                <div class=\"col-md-3\">\n" +
-    "                    <h4>Unassigned Computers</h4>\n" +
+    "                    <div class=\"col-md-3\">\n" +
+    "                        <h4>Unassigned Computers</h4>\n" +
+    "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
-    "        </div>\n" +
-    "    </tab>\n" +
-    "</tabset>\n" +
-    "<div ng-if=\"!hasAccess\">\n" +
-    "    <h3>Sorry, you don't have permissions to edit computers</h3>\n" +
+    "        </tab>\n" +
+    "    </tabset>-->\n" +
+    "    <div ng-if=\"!hasAccess\">\n" +
+    "        <h3>Sorry, you don't have permissions to edit computers</h3>\n" +
+    "    </div>\n" +
+    "\n" +
     "</div>\n" +
     "");
 }]);
@@ -2862,6 +2999,97 @@ angular.module("admin/floorFields.tpl.html", []).run(["$templateCache", function
 angular.module("common/maps/map.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("common/maps/map.tpl.html",
     "<canvas id=\"map\" class=\"map\"></canvas>");
+}]);
+
+angular.module("computers/computers-floor.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("computers/computers-floor.tpl.html",
+    "<div style=\"height: 100%;\">\n" +
+    "    <map></map>\n" +
+    "</div>");
+}]);
+
+angular.module("computers/computers.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("computers/computers.tpl.html",
+    "<div class=\"container computers-container\">\n" +
+    "    <!--<div class=\"row\">\n" +
+    "        <div class=\"col-md-6\" ng-repeat=\"building in mapdata.buildings\" ng-if=\"building.available.desktops || building.available.laptops\">\n" +
+    "            <div class=\"card front-page-card\">\n" +
+    "                <div class=\"card-heading\">\n" +
+    "                    <h5>{{building.title}}</h5>\n" +
+    "                </div>\n" +
+    "                <div class=\"card-body\">\n" +
+    "                    <div class=\"row text-center\">\n" +
+    "                        <div class=\"col-xs-6\">\n" +
+    "                            <div style=\"display: inline-block;\">\n" +
+    "                                <span class=\"fa fa-fw fa-desktop fa-2x\"></span>\n" +
+    "                            </div>\n" +
+    "                            <div style=\"display: inline-block;\">\n" +
+    "                                <div style=\"font-size: 2em;\">{{building.available.desktops}}</div>\n" +
+    "                                <div><strong>Desktops</strong></div>\n" +
+    "                            </div>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"col-xs-6\">\n" +
+    "                            <div style=\"display: inline-block;\">\n" +
+    "                                <span class=\"fa fa-fw fa-laptop fa-2x\"></span>\n" +
+    "                            </div>\n" +
+    "                            <div style=\"display: inline-block;\">\n" +
+    "                                <div style=\"font-size: 2em;\">{{building.available.laptops}}</div>\n" +
+    "                                <div><strong>Laptops</strong></div>\n" +
+    "                            </div>\n" +
+    "                        </div>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>-->\n" +
+    "\n" +
+    "    <div class=\"card front-page-card\" style=\"border-top: 5px solid #933;\" ng-repeat=\"building in mapdata.buildings\"  ng-if=\"building.available.desktops || building.available.laptops\">\n" +
+    "        <div class=\"card-heading\" style=\"padding-top: 10px; border-bottom: 1px solid #eee; background-color:#eee;\">\n" +
+    "            <h2 style=\"padding-top: 5px; padding-left: 5px;\">{{building.title}}</h2>\n" +
+    "        </div>\n" +
+    "        <div class=\"card-body\" style=\"border-bottom: 1px solid #eee;\" ng-repeat=\"floor in building.floors\">\n" +
+    "            <h3 style=\"margin-bottom: 15px;\">{{floor.title}}</h3>\n" +
+    "            <div class=\"row\">\n" +
+    "\n" +
+    "                <div class=\"col-sm-8 col-sm-push-4\">\n" +
+    "                    <div class=\"row\" style=\"padding-bottom: 10px; padding-top: 10px;\">\n" +
+    "                        <div class=\"col-xs-6 text-primary text-center\">\n" +
+    "                            <p style=\"white-space: nowrap\">\n" +
+    "                                <span style=\"font-size: 3em;\">{{floor.available.desktops}}</span>\n" +
+    "                                <span class=\"fa fa-fw fa-desktop fa-2x\"></span><br>\n" +
+    "                                <span>Desktops</span>\n" +
+    "                            </p>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"col-xs-6 text-primary text-center\">\n" +
+    "                            <p>\n" +
+    "                                <span style=\"font-size: 3em;\">{{floor.available.laptops}}</span>\n" +
+    "                                <span class=\"fa fa-fw fa-laptop fa-2x\"></span><br>\n" +
+    "                                <span>Laptops</span>\n" +
+    "                            </p>\n" +
+    "                        </div>\n" +
+    "                        <div class=\"hidden-xs col-sm-12\">\n" +
+    "                            <div class=\"progress\">\n" +
+    "                                <div class=\"progress-bar\" role=\"progressbar\" aria-valuenow=\"{{100-((floor.available.desktops + floor.available.laptops) | percent: (floor.total.desktops+floor.total.laptops) : true)}}\" aria-valuemin=\"0\" aria-valuemax=\"100\" style=\"width: {{100-((floor.available.desktops + floor.available.laptops) | percent: (floor.total.desktops+floor.total.laptops) : true)}}%\">\n" +
+    "                                    {{100-((floor.available.desktops + floor.available.laptops) | percent: (floor.total.desktops+floor.total.laptops) : true)}}%\n" +
+    "                                </div>\n" +
+    "                            </div>\n" +
+    "                        </div>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "\n" +
+    "                <div class=\"col-sm-4 col-sm-pull-8\">\n" +
+    "                    <p class=\"hidden-xs\">\n" +
+    "                        <img ng-src=\"//wwwdev2.lib.ua.edu/{{floor.image.url}}\">\n" +
+    "                    </p>\n" +
+    "                    <p>\n" +
+    "                        <a class=\"btn btn-outlined btn-block\" ng-href=\"/#/computers/{{building.name}}/{{floor.name}}\"><span class=\"fa fa-fw fa-map\"></span> Real-time Map</a>\n" +
+    "                    </p>\n" +
+    "                </div>\n" +
+    "\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>");
 }]);
 
 angular.module("signage/signage.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -2930,7 +3158,9 @@ angular.module("signage/signage.tpl.html", []).run(["$templateCache", function($
 angular.module('ualib.compfinder.admin', [
     'ualib.compfinder.mapsDirective',
     'ualib.compfinder.service',
-    'ngFileUpload'
+    'ualib.compfinder.maps',
+    'ngFileUpload',
+    'ui.layout'
 ])
     .constant('SOFTWARE_GROUP', 64)
 
@@ -2947,7 +3177,8 @@ angular.module('ualib.compfinder.admin', [
                         return Computers.init({}, {noRefresh: true});
                     }],
                     userData: function(tokenReceiver){
-                        return tokenReceiver.getPromise();
+                        //return tokenReceiver.getPromise();
+                        return true;
                     }
                 },
                 templateUrl: 'admin/admin.tpl.html',
@@ -2955,9 +3186,9 @@ angular.module('ualib.compfinder.admin', [
             });
     }])
 
-    .controller('ComputersAdminCtrl', ['$scope', '$timeout', 'Computers', 'userData', 'SOFTWARE_GROUP', 'AuthService', 'compSoftFactory', 'Upload', 'SW_API',
-    function($scope, $timeout, Computers, userData, SOFTWARE_GROUP, AuthService, compSoftFactory, Upload, API){
-        $scope.userInfo = AuthService.isAuthorized();
+    .controller('ComputersAdminCtrl', ['$scope', '$timeout', '$window', '$maps', 'Computers', 'userData', 'SOFTWARE_GROUP', 'AuthService', 'compSoftFactory', 'Upload', 'SW_API',
+    function($scope, $timeout, $window, $maps, Computers, userData, SOFTWARE_GROUP, AuthService, compSoftFactory, Upload, API){
+        //$scope.userInfo = AuthService.isAuthorized();
         $scope.buildings = [];
         $scope.unassigned = [];
         $scope.newBldg = {};
@@ -2970,16 +3201,69 @@ angular.module('ualib.compfinder.admin', [
         $scope.selBldg = 0;
         $scope.selFloor = 0;
 
-        $scope.hasAccess = false;
+        $scope.hasAccess = true;
+        $scope.buildings = Computers.buildings;
+        $scope.unassigned = Computers.unassigned;
+
+        /*$scope.hasAccess = false;
         if (angular.isDefined($scope.userInfo.group)) {
-            /*jslint bitwise: true*/
+            /!*jslint bitwise: true*!/
             if ((parseInt($scope.userInfo.group) & SOFTWARE_GROUP) === SOFTWARE_GROUP) {
                 $scope.hasAccess = true;
                 $scope.buildings = Computers.buildings;
                 $scope.unassigned = Computers.unassigned;
                 console.dir(Computers);
             }
-            /*jslint bitwise: false*/
+            /!*jslint bitwise: false*!/
+        }*/
+
+        $scope.layout = {
+            map: false
+        };
+        $scope.layoutConfig = {
+            disableToggle: true
+        };
+
+        $scope.$on('ui.layout.loaded', function(){
+            resizeContainer();
+            $timeout(function(){
+                $scope.layout.map = true;
+            });
+        });
+
+        $scope.$on('ui.layout.toggle', function(e, container){
+            console.log(container);
+            if (container.layoutId < 2){
+                //$maps.clear();
+                $timeout(function(){
+                    resizeMap();
+                }, 10);
+            }
+        });
+
+        $scope.$on('ui.layout.resize', function(e, before, after){
+            console.log({before: before, after: after});
+            if (before.layoutId < 2){
+                resizeMap();
+            }
+        });
+
+        angular.element($window).bind('resize', function(){
+            resizeContainer();
+        });
+
+        function resizeContainer(){
+            var elm = document.querySelector('.comp-admin-container');
+            var h = ($window.innerHeight - elm.offsetTop)+"px";
+            elm.style.height = h;
+        }
+
+        function resizeMap(){
+            $maps.resizeCanvas();
+            $maps.setScale();
+            $maps.resizeImage();
+            $maps.posImage();
+            $maps.draw();
         }
 
         $scope.tabs = [
@@ -2992,6 +3276,16 @@ angular.module('ualib.compfinder.admin', [
                 active: false
             }
         ];
+
+        $scope.selectBuilding = function(building){
+            $scope.layout.map = true;
+            $scope.bid = building.bid;
+            $scope.building = angular.copy(building);    
+        };
+        $scope.selectFloor = function(floor){
+            $scope.layout.map = false;
+            $scope.floor = angular.copy(floor);    
+        };
 
         $scope.deleteComputer = function(computer, parentArray){
             if (confirm("Delete " + computer.name  + " permanently?") === true){
@@ -3285,9 +3579,11 @@ angular.module('ualib.compfinder', [
     'ngRoute',
     'ngResource',
     'oc.lazyLoad',
+    'ui.bootstrap',
     'compfinder.templates',
     'ualib.compfinder.admin',
-    'ualib.compfinder.signage'
+    'ualib.compfinder.signage',
+    'ualib.compfinder.computers'
 ])
 
     .value('mapStyles', {
@@ -3337,6 +3633,7 @@ angular.module('ualib.compfinder.service', [
         var self = this;
 
         this.buildings = [];
+        this.unassigned = [];
         
         this.init = function(params, opt){
             var deferred = $q.defer();
@@ -3355,6 +3652,9 @@ angular.module('ualib.compfinder.service', [
                 self.buildings = angular.copy(data.buildings);
                 if (_options.noRefresh === false){
                     refresh();
+                }
+                else {
+                    self.unassigned = angular.copy(data.unassigned);
                 }
                 deferred.resolve();
             });
@@ -3381,7 +3681,20 @@ angular.module('ualib.compfinder.service', [
         }
         
         function getComputers(){
-            if (_params.hasOwnProperty('floor')){
+            if (_options.hasOwnProperty('demo') && _options.demo === true){
+                return compSoftFactory.demo().get(_params, function(data){
+                    return data;
+                }, function(data, status, headers, config) {
+                    console.log('ERROR: Computers and Software');
+                    console.log({
+                        data: data,
+                        status: status,
+                        headers: headers,
+                        config: config
+                    });
+                });
+            }
+            else if (_params.hasOwnProperty('floor')){
                 return compSoftFactory.floors().get(_params, function(data){
                     return data;
                 }, function(data, status, headers, config) {
@@ -3595,31 +3908,59 @@ angular.module('ualib.compfinder.mapsDirective', [
     'ualib.compfinder.service'
 ])
 
-    .directive('map', ['$maps', '$mapTools','Computers', '$timeout', '$window',  function($maps, $mapTools, Computers, $timeout, $window){
+    .directive('map', ['$timeout', '$rootScope', '$maps', '$mapTools','Computers', '$timeout', '$window',  function($timeout, $rootScope, $maps, $mapTools, Computers, $timeout, $window){
         return{
             restrict: 'EA',
             replace: true,
+            scope: {
+                mapdata: '='
+            },
             template: '<canvas id="map" class="map" ng-class="mapTools.current" msd-wheel="mapTools.zoom($event, $delta)"></canvas>',
             link: function(scope, elm){
                 
                 scope.mapTools = $mapTools;
+                console.log(scope);
 
-                $maps.init({
-                    src: 'https://wwwdev2.lib.ua.edu/' + scope.buildings[scope.selBldg].floors[scope.selFloor].image.url,
-                    canvas: elm[0], 
-                    objects: {
-                        desktops: scope.buildings[scope.selBldg].floors[scope.selFloor].desktops
+                var resizeWindow = null;
+
+                var mapWatcher = scope.$watch('mapdata', function(){
+                    if (scope.mapdata){
+                        $maps.init({
+                            src: 'https://wwwdev2.lib.ua.edu/' + scope.mapdata.image.url,
+                            canvas: elm[0],
+                            objects: {
+                                desktops: scope.mapdata.desktops
+                            }
+                        }).then(function(){
+                            scope.mapTools.init();
+                        });
+
+                        scope.reset = function(){
+                            $maps.setDefaults();
+                            $maps.draw();
+                            //$mapTools.zoomSlider.init();
+                        };
+
+                        resizeWindow = angular.element($window).bind('resize', function(){
+                            $timeout(function(){
+                                $maps.resizeCanvas();
+                                $maps.setScale();
+                                $maps.resizeImage();
+                                $maps.posImage();
+                                $maps.draw();
+                            })
+                        });
+
+
                     }
-                }).then(function(){
-                    scope.mapTools.init();
+
+
                 });
 
-                scope.reset = function(){
-                    $maps.setDefaults();
-                    $maps.draw();
-                    //$mapTools.zoomSlider.init();
-                };
-
+                scope.$on('$destroy', function(){
+                    mapWatcher();
+                    resizeWindow();
+                });
 
                 /*scope.$on('detail-toggle', function(){
                  $timeout(function(){
@@ -3640,12 +3981,7 @@ angular.module('ualib.compfinder.mapsDirective', [
                  }
                  };*/
 
-                angular.element($window).bind('resize', function(){
-                    $maps.resizeCanvas();
-                    $maps.resizeImage();
-                    $maps.posImage();
-                    $maps.draw();
-                });
+
 
             }
         };
@@ -4266,8 +4602,8 @@ angular.module('ualib.compfinder.maps', [])
         this.objects = {};
 
         this.margin = {
-            width: 0,
-            height: 0
+            width: 10,
+            height: 10
         };
         this.offset = {
             width: 0,
@@ -4504,6 +4840,58 @@ angular.module('ualib.compfinder.maps', [])
         };
     }]);
 
+angular.module('ualib.compfinder.computers', [
+    'ualib.compfinder.mapsDirective',
+    'ualib.compfinder.service'
+])
+
+    .config(['$routeProvider', function($routeProvider){
+        $routeProvider
+            .when('/computers/:building?', {
+                reloadOnSearch: false,
+                resolve: {
+                    mapdata: ['Computers', '$route', function(Computers, $route){
+                        return Computers.init($route.current.params, {noRefresh: true});
+                    }],
+                    lazyLoad: ['$ocLazyLoad', function($ocLazyLoad) {
+                        // you can lazy load files for an existing module
+                        return $ocLazyLoad.load('angular.filter');
+                    }]
+                },
+                templateUrl: 'computers/computers.tpl.html',
+                controller: 'ComputersCtrl'
+            })
+            .when('/computers/:building/:floor', {
+                reloadOnSearch: false,
+                resolve: {
+                    mapdata: ['Computers', '$route', function(Computers, $route){
+                        return Computers.init($route.current.params, {noRefresh: true});
+                    }],
+                    lazyLoad: ['$ocLazyLoad', function($ocLazyLoad) {
+                        // you can lazy load files for an existing module
+                        return $ocLazyLoad.load('angular.filter');
+                    }]
+                },
+                templateUrl: 'computers/computers-floor.tpl.html',
+                controller: 'ComputersFloorCtrl'
+            });
+    }])
+
+    .controller('ComputersCtrl', ['$scope', 'Computers', '$route', function($scope, Computers, $route){
+        $scope.mapdata = Computers;
+        $scope.params = {};
+
+        $scope.$on('$routeChangeSuccess', function(ev, current){
+            $scope.params = angular.copy(current.params);
+        });
+    }])
+
+    .controller('ComputersFloorCtrl', ['$scope', 'Computers', '$mapObjects',
+        function($scope, Computers, $mapObjects){
+            $scope.mapdata = Computers;
+            $scope.mapObjects = $mapObjects;
+
+        }]);
 angular.module('ualib.compfinder.signage', [
     'ualib.compfinder.service',
     'ualib.compfinder.maps'
@@ -12013,34 +12401,34 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                <div class=\"form-group col-md-12\">\n" +
     "                    <label for=\"filterBy\">Filter <small>{{filteredDB.length}}</small> results by</label>\n" +
     "                    <div id=\"filterBy\">\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Title starts with\" ng-model=\"titleStartFilter\">\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"titleFilter\">\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Description contains\" ng-model=\"descrFilter\">\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Subjects contain\" ng-model=\"subjectFilter\">\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Media Types contain\" ng-model=\"typeFilter\">\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Publisher contains\" ng-model=\"publisherFilter\">\n" +
-    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Vendor contains\" ng-model=\"vendorFilter\">\n" +
-    "                        <select class=\"form-control\" ng-model=\"disFilter\" ng-options=\"val.name for val in disValues\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Title starts with\" ng-model=\"filters.titleStart\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Title contains\" ng-model=\"filters.title\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Description contains\" ng-model=\"filters.description\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Subjects contain\" ng-model=\"filters.subjects\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Media Types contain\" ng-model=\"filters.types\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Publisher contains\" ng-model=\"filters.publisher\">\n" +
+    "                        <input type=\"text\" class=\"form-control\" placeholder=\"Vendor contains\" ng-model=\"filters.vendor\">\n" +
+    "                        <select class=\"form-control\" ng-model=\"filters.disabled\" ng-options=\"val.value as val.name for val in disValues\">\n" +
     "                        </select>\n" +
     "                    </div>\n" +
     "                    <label for=\"sortBy\">Sort by</label>\n" +
     "                    <div id=\"sortBy\">\n" +
-    "                        <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"0\" ng-click=\"sortBy(0)\">\n" +
+    "                        <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortMode\" btn-radio=\"0\" ng-click=\"sortBy(0)\">\n" +
     "                            Title\n" +
     "                            <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[0].reverse\"></span>\n" +
     "                            <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[0].reverse\"></span>\n" +
     "                        </button>\n" +
-    "                        <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"1\" ng-click=\"sortBy(1)\">\n" +
+    "                        <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortMode\" btn-radio=\"1\" ng-click=\"sortBy(1)\">\n" +
     "                            Creation Date\n" +
     "                            <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[1].reverse\"></span>\n" +
     "                            <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[1].reverse\"></span>\n" +
     "                        </button>\n" +
-    "                        <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"2\" ng-click=\"sortBy(2)\">\n" +
+    "                        <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortMode\" btn-radio=\"2\" ng-click=\"sortBy(2)\">\n" +
     "                            Last Modified\n" +
     "                            <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[2].reverse\"></span>\n" +
     "                            <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[2].reverse\"></span>\n" +
     "                        </button>\n" +
-    "                        <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortButton\" btn-radio=\"3\" ng-click=\"sortBy(3)\">\n" +
+    "                        <button type=\"button\" class=\"btn btn-default\" ng-model=\"sortMode\" btn-radio=\"3\" ng-click=\"sortBy(3)\">\n" +
     "                            Temporary Disabled\n" +
     "                            <span class=\"fa fa-fw fa-long-arrow-down\" ng-show=\"!sortModes[3].reverse\"></span>\n" +
     "                            <span class=\"fa fa-fw fa-long-arrow-up\" ng-show=\"sortModes[3].reverse\"></span>\n" +
@@ -12054,16 +12442,7 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                            boundary-links=\"true\" rotate=\"false\" items-per-page=\"perPage\" ng-show=\"filteredDB.length > perPage\"></pagination>\n" +
     "            </div>\n" +
     "            <div class=\"row row-clickable\"\n" +
-    "                 ng-repeat=\"db in filteredDB = (DBList.databases | filter:{title:titleStartFilter}:startTitle\n" +
-    "                                                                 | filter:{title:titleFilter}\n" +
-    "                                                                 | filter:{description:descrFilter}\n" +
-    "                                                                 | filter:{subjects:subjectFilter}\n" +
-    "                                                                 | filter:{types:typeFilter}\n" +
-    "                                                                 | filter:{publisher:publisherFilter}\n" +
-    "                                                                 | filter:{vendor:vendorFilter}\n" +
-    "                                                                 | filter:{disabled:disFilter.value}\n" +
-    "                                                                 | orderBy:sortModes[sortMode].by:sortModes[sortMode].reverse)\n" +
-    "                | startFrom:(currentPage-1)*perPage | limitTo:perPage\"\n" +
+    "                 ng-repeat=\"db in filteredDB | startFrom:(currentPage-1)*perPage | limitTo:perPage track by $index\"\n" +
     "                 ng-class=\"{sdOpen: db.show}\">\n" +
     "                <div class=\"col-md-12\" ng-click=\"toggleDB(db)\" style=\"cursor: pointer;\">\n" +
     "                    <div class=\"col-md-10\">\n" +
@@ -12086,7 +12465,7 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                        <h4 ng-show=\"db.disabled == 1 || db.tmpDisabled == 1\"><small><span class=\"label label-danger\">Disabled</span></small></h4>\n" +
     "                    </div>\n" +
     "                </div>\n" +
-    "                <div class=\"col-md-12\" ng-show=\"db.show\">\n" +
+    "                <div class=\"col-md-12\" ng-if=\"db.show\">\n" +
     "                    <form ng-submit=\"updateDB(db)\">\n" +
     "                        <div class=\"col-md-6 form-group\">\n" +
     "                            <label for=\"{{db.id}}_title\">Title</label>\n" +
@@ -12194,41 +12573,45 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                                   id=\"{{db.id}}_tmpDisable\" ng-change=\"changed(db)\">\n" +
     "                        </div>\n" +
     "                        <div class=\"col-md-12\">\n" +
-    "                            <div class=\"col-md-6 form-group\">\n" +
-    "                                <label for=\"{{db.id}}_subjects\">Subjects</label>\n" +
-    "                                <ul class=\"list-group\" id=\"{{db.id}}_subjects\">\n" +
-    "                                    <li class=\"list-group-item\" ng-repeat=\"subject in db.subjects\">\n" +
-    "                                        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteSubject(db,subject)\">Delete</button>\n" +
-    "                                        {{subject.subject}} : {{subject.type}}\n" +
-    "                                    </li>\n" +
-    "                                    <li class=\"list-group-item col-md-12\">\n" +
-    "                                        <div class=\"col-md-7\">\n" +
-    "                                            <select class=\"form-control\" ng-model=\"db.selSubj\" ng-options=\"sub.subject for sub in DBList.subjects\">\n" +
+    "                            <div class=\"row\">\n" +
+    "                                <div class=\"col-md-6 form-group\">\n" +
+    "                                    <label for=\"{{db.id}}_subjects\">Subjects</label>\n" +
+    "                                    <ul class=\"list-group\" id=\"{{db.id}}_subjects\">\n" +
+    "                                        <li class=\"list-group-item\" ng-repeat=\"subject in db.subjects\">\n" +
+    "                                            <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteSubject(db,subject)\">Delete</button>\n" +
+    "                                            {{subject.subject}} : {{subject.type}}\n" +
+    "                                        </li>\n" +
+    "                                        <li class=\"list-group-item\">\n" +
+    "                                            <div class=\"row\">\n" +
+    "                                                <div class=\"col-md-7\">\n" +
+    "                                                    <select class=\"form-control\" ng-model=\"db.selSubj\" ng-options=\"sub.subject for sub in subjects\">\n" +
+    "                                                    </select>\n" +
+    "                                                </div>\n" +
+    "                                                <div class=\"col-md-2\">\n" +
+    "                                                    <select class=\"form-control\" ng-model=\"db.subjType\" ng-options=\"val for val in subjectValues\">\n" +
+    "                                                    </select>\n" +
+    "                                                </div>\n" +
+    "                                                <div class=\"col-md-3\">\n" +
+    "                                                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"addSubject(db)\">Add Subject</button>\n" +
+    "                                                </div>\n" +
+    "                                            </div>\n" +
+    "                                        </li>\n" +
+    "                                    </ul>\n" +
+    "                                </div>\n" +
+    "                                <div class=\"col-md-6 form-group\">\n" +
+    "                                    <label for=\"{{db.id}}_types\">Types</label>\n" +
+    "                                    <ul class=\"list-group\" id=\"{{db.id}}_types\">\n" +
+    "                                        <li class=\"list-group-item\" ng-repeat=\"type in db.types\">\n" +
+    "                                            <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteType(db,type)\">Delete</button>\n" +
+    "                                            {{type.type}}\n" +
+    "                                        </li>\n" +
+    "                                        <li class=\"list-group-item form-inline\">\n" +
+    "                                            <select class=\"form-control\" ng-model=\"db.selType\" ng-options=\"typ.type for typ in types\">\n" +
     "                                            </select>\n" +
-    "                                        </div>\n" +
-    "                                        <div class=\"col-md-2\">\n" +
-    "                                            <select class=\"form-control\" ng-model=\"db.subjType\" ng-options=\"val for val in subjectValues\">\n" +
-    "                                            </select>\n" +
-    "                                        </div>\n" +
-    "                                        <div class=\"col-md-3\">\n" +
-    "                                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"addSubject(db)\">Add Subject</button>\n" +
-    "                                        </div>\n" +
-    "                                    </li>\n" +
-    "                                </ul>\n" +
-    "                            </div>\n" +
-    "                            <div class=\"col-md-6 form-group\">\n" +
-    "                                <label for=\"{{db.id}}_types\">Types</label>\n" +
-    "                                <ul class=\"list-group\" id=\"{{db.id}}_types\">\n" +
-    "                                    <li class=\"list-group-item\" ng-repeat=\"type in db.types\">\n" +
-    "                                        <button type=\"button\" class=\"btn btn-danger\" ng-click=\"deleteType(db,type)\">Delete</button>\n" +
-    "                                        {{type.type}}\n" +
-    "                                    </li>\n" +
-    "                                    <li class=\"list-group-item form-inline\">\n" +
-    "                                        <select class=\"form-control\" ng-model=\"db.selType\" ng-options=\"typ.type for typ in DBList.types\">\n" +
-    "                                        </select>\n" +
-    "                                        <button type=\"button\" class=\"btn btn-success\" ng-click=\"addType(db)\">Add Type</button>\n" +
-    "                                    </li>\n" +
-    "                                </ul>\n" +
+    "                                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"addType(db)\">Add Type</button>\n" +
+    "                                        </li>\n" +
+    "                                    </ul>\n" +
+    "                                </div>\n" +
     "                            </div>\n" +
     "                        </div>\n" +
     "                        <div class=\"col-md-12 text-center\">\n" +
@@ -12356,7 +12739,7 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                                </li>\n" +
     "                                <li class=\"list-group-item col-md-12\">\n" +
     "                                    <div class=\"col-md-7\">\n" +
-    "                                        <select class=\"form-control\" ng-model=\"newDB.selSubj\" ng-options=\"sub.subject for sub in DBList.subjects\">\n" +
+    "                                        <select class=\"form-control\" ng-model=\"newDB.selSubj\" ng-options=\"sub.subject for sub in subjects\">\n" +
     "                                        </select>\n" +
     "                                    </div>\n" +
     "                                    <div class=\"col-md-2\">\n" +
@@ -12377,7 +12760,7 @@ angular.module("manageDatabases/manageDatabases.tpl.html", []).run(["$templateCa
     "                                    {{type.type}}\n" +
     "                                </li>\n" +
     "                                <li class=\"list-group-item form-inline\">\n" +
-    "                                    <select class=\"form-control\" ng-model=\"newDB.selType\" ng-options=\"typ.type for typ in DBList.types\">\n" +
+    "                                    <select class=\"form-control\" ng-model=\"newDB.selType\" ng-options=\"typ.type for typ in types\">\n" +
     "                                    </select>\n" +
     "                                    <button type=\"button\" class=\"btn btn-success\" ng-click=\"addTypeNewDB()\">Add Type</button>\n" +
     "                                </li>\n" +
@@ -15035,10 +15418,20 @@ angular.module('manage', [
     .constant('ALERTS_URL', 'https://wwwdev2.lib.ua.edu/alerts/')
     .constant('ERRORS_URL', 'https://wwwdev2.lib.ua.edu/errors/')
     .constant('ERCAROUSEL_URL', 'https://wwwdev2.lib.ua.edu/erCarousel/api/');
-
 angular.module('manage.common', [
     'common.manage'
 ])
+
+    .filter('startFrom', [ function() {
+        return function(input, start) {
+            if (angular.isObject(input)){
+                start = +start; //parse to int
+                if (typeof input == 'undefined')
+                    return input;
+                return input.slice(start);
+            }
+        };
+    }]);
 
 angular.module('common.manage', [])
     .constant('API', 'https://wwwdev2.lib.ua.edu/wp-json/wp/v2/')
@@ -15459,15 +15852,6 @@ angular.module('manage.manageAlerts', [])
         };
     }])
 
-    .filter('startFrom', [ function() {
-        return function(input, start) {
-            start = +start; //parse to int
-            if (typeof input == 'undefined')
-                return input;
-            return input.slice(start);
-        }
-    }])
-
     .controller('manageAlertFieldsCtrl', ['$scope', 'TYPES',
     function manageAlertFieldsCtrl($scope, TYPES){
         $scope.types = TYPES;
@@ -15526,31 +15910,35 @@ angular.module('manage.manageDatabases', [])
             }
         });
     }])
-    .controller('manageDBCtrl', ['$scope', 'mdbFactory', 'userData', 'DATABASES_GROUP', 'AuthService',
-        function manageDBCtrl($scope, mdbFactory, userData, DATABASES_GROUP, AuthService){
+    .controller('manageDBCtrl', ['$scope', '$filter', 'mdbFactory', 'userData', 'DATABASES_GROUP', 'AuthService',
+        function manageDBCtrl($scope, $filter, mdbFactory, userData, DATABASES_GROUP, AuthService){
             $scope.userInfo = AuthService.isAuthorized();
-            $scope.DBList = {};
-            $scope.titleFilter = '';
-            $scope.titleStartFilter = '';
-            $scope.descrFilter = '';
-            $scope.subjectFilter = '';
-            $scope.typeFilter = '';
-            $scope.publisherFilter = '';
-            $scope.vendorFilter = '';
+
+            var DBList = {};
+            $scope.filters = {
+                titleStart: '',
+                title: '',
+                description: '',
+                subjects: '',
+                types: '',
+                publisher: '',
+                vendor: '',
+                disabled: '',
+                sort: {}
+            };
+            $scope.filteredDB = null;
             $scope.disValues = [
                 {name:'Show all', value:''},
                 {name:'Enabled only', value:'0'},
                 {name:'Disabled only', value:'1'}
             ];
-            $scope.disFilter = $scope.disValues[0];
             $scope.sortMode = 0;
             $scope.sortModes = [
                 {by:'title', reverse:false},
                 {by:'dateCreated', reverse:false},
                 {by:'lastModified', reverse:false},
                 {by:'tmpDisabled', reverse:true}
-                ];
-            $scope.sortButton = $scope.sortMode;
+            ];
             $scope.newDB = {};
             $scope.newDB.subjects = [];
             $scope.newDB.types = [];
@@ -15565,16 +15953,15 @@ angular.module('manage.manageDatabases', [])
             $scope.inEDSValues = [ "", "Y", "P" ];
 
             $scope.hasAccess = false;
-            if (angular.isDefined($scope.userInfo.group)) {
+             if (angular.isDefined($scope.userInfo.group)) {
                 if ((parseInt($scope.userInfo.group) & DATABASES_GROUP) === DATABASES_GROUP) {
                     $scope.hasAccess = true;
                     $scope.newDB.updatedBy = $scope.userInfo.login;
                 }
-            }
+             }
 
             mdbFactory.getData()
                 .success(function(data) {
-                    console.dir(data);
                     for (var i = 0; i < data.databases.length; i++){
                         data.databases[i].show = false;
                         data.databases[i].changed = false;
@@ -15586,31 +15973,65 @@ angular.module('manage.manageDatabases', [])
                     $scope.newDB.selSubj = data.subjects[0];
                     $scope.newDB.subjType = 1;
                     $scope.newDB.selType = data.types[0];
-                    $scope.DBList = data;
+
+                    $scope.types = angular.copy(data.types);
+                    $scope.subjects = angular.copy(data.subjects);
+                    DBList = angular.copy(data);
+                    $scope.filteredDB = angular.copy(data.databases);
+                    $scope.filters.sort = {by:'title', reverse:false};
                 })
                 .error(function(data, status, headers, config) {
                     console.log(data);
                 });
 
-            $scope.startTitle = function(actual, expected){
+            $scope.$watchCollection('filters', processFilters);
+
+            function processFilters(newVal, oldVal){
+                var db = angular.copy(DBList.databases);
+
+                for(var filter in newVal){
+                    if (oldVal === undefined || newVal[filter] !== oldVal[filter] || filter === 'sort'){
+                        switch(filter){
+                            case 'sort':
+                                db = $filter('orderBy')(db, newVal[filter].by, newVal[filter].reverse);
+                                break;
+                            case 'titleStart':
+                                db = $filter('filter')(db, {title:newVal[filter]}, startTitle);
+                                break;
+                            default:
+                                var f = {};
+                                f[filter] = newVal[filter];
+                                db = $filter('filter')(db, f);
+                        }
+                    }
+                }
+
+                $scope.filteredDB = angular.copy(db);
+            }
+
+
+            function startTitle(actual, expected){
                 if (!expected)
                     return true;
                 if (actual.toLowerCase().indexOf(expected.toLowerCase()) == 0)
                     return true;
                 return false;
-            };
-            $scope.toggleDB = function(db){
-                $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].show =
-                    !$scope.DBList.databases[$scope.DBList.databases.indexOf(db)].show;
-            };
+            }
+
             $scope.sortBy = function(by){
                 if ($scope.sortMode === by)
                     $scope.sortModes[by].reverse = !$scope.sortModes[by].reverse;
                 else
                     $scope.sortMode = by;
+                $scope.filters.sort = angular.copy($scope.sortModes[by]);
             };
+
+            $scope.toggleDB = function(db){
+                db.show = !db.show;
+            };
+
             $scope.changed = function(db){
-                $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].changed = true;
+                db.changed = true;
             };
 
             $scope.deleteDB = function(db){
@@ -15618,7 +16039,8 @@ angular.module('manage.manageDatabases', [])
                     mdbFactory.postData({action : 1}, db)
                         .success(function(data, status, headers, config) {
                             if (data == 1){
-                                $scope.DBList.databases.splice($scope.DBList.databases.indexOf(db), 1);
+                                //$scope.DBList.databases.splice($scope.DBList.databases.indexOf(db), 1);
+                                $scope.filteredDB.splice($scope.filteredDB.indexOf(db), 1);
                                 $scope.formResponse = "Database has been deleted.";
                             } else {
                                 $scope.formResponse = "Error: Can not delete database! " + data;
@@ -15654,8 +16076,13 @@ angular.module('manage.manageDatabases', [])
                         } else {
                             $scope.formResponse = "Error: Can not update database! " + data;
                         }
-                        $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].changed = false;
+                        db.changed = false;
+
                         alert($scope.formResponse);
+                        DBList.databases = DBList.databases.filter(function(item){
+                            return item.id !== db.id;
+                        });
+                        DBList.databases.push(angular.copy(db));
                         console.log(data);
                     })
                     .error(function(data, status, headers, config) {
@@ -15664,6 +16091,9 @@ angular.module('manage.manageDatabases', [])
                         console.log(data);
                     });
             };
+
+
+
             $scope.createDB = function(){
                 console.dir($scope.newDB);
                 mdbFactory.postData({action : 3}, $scope.newDB)
@@ -15680,7 +16110,8 @@ angular.module('manage.manageDatabases', [])
                             newDB.selSubj = data.subjects[0];
                             newDB.subjType = 1;
                             newDB.selType = data.types[0];
-                            $scope.DBList.databases.push(newDB);
+                            DBList.databases.push(newDB);
+                            processFilters($scope.filters);
                             $scope.formResponse = "Database has been created.";
                         } else {
                             $scope.formResponse = "Error: Can not create database! " + data;
@@ -15704,9 +16135,9 @@ angular.module('manage.manageDatabases', [])
                     .success(function(data, status, headers, config) {
                         if ((typeof data === 'object') && (data !== null)){
                             newSubject.id = data.id;
-                            if (typeof $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].subjects == 'undefined')
-                                $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].subjects = [];
-                            $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].subjects.push(newSubject);
+                            if (typeof db.subjects == 'undefined')
+                                db.subjects = [];
+                            db.subjects.push(newSubject);
                             $scope.formResponse = "Subject has been added.";
                         } else {
                             $scope.formResponse = "Error: Can not add subject! " + data;
@@ -15726,8 +16157,8 @@ angular.module('manage.manageDatabases', [])
                 mdbFactory.postData({action : 5}, subject)
                     .success(function(data, status, headers, config) {
                         if (data == 1){
-                            $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].subjects.splice(
-                                $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].subjects.indexOf(subject),1
+                            db.subjects.splice(
+                                db.subjects.indexOf(subject),1
                             );
                             $scope.formResponse = "Subject has been deleted.";
                         } else {
@@ -15750,9 +16181,9 @@ angular.module('manage.manageDatabases', [])
                     .success(function(data, status, headers, config) {
                         if ((typeof data === 'object') && (data !== null)){
                             newType.id = data.id;
-                            if (typeof $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].types == 'undefined')
-                                $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].types = [];
-                            $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].types.push(newType);
+                            if (typeof db.types == 'undefined')
+                                db.types = [];
+                            db.types.push(newType);
                             $scope.formResponse = "Type has been added.";
                         } else {
                             $scope.formResponse = "Error: Can not add type! " + data;
@@ -15770,8 +16201,8 @@ angular.module('manage.manageDatabases', [])
                 mdbFactory.postData({action : 7}, type)
                     .success(function(data, status, headers, config) {
                         if (data == 1){
-                            $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].types.splice(
-                                $scope.DBList.databases[$scope.DBList.databases.indexOf(db)].types.indexOf(type),1
+                            db.types.splice(
+                                db.types.indexOf(type),1
                             );
                             $scope.formResponse = "Type has been deleted.";
                         } else {
@@ -15823,16 +16254,6 @@ angular.module('manage.manageDatabases', [])
                     $scope.newDB.types.push(newType);
             };
         }])
-
-    .filter('startFrom', [ function() {
-        return function(input, start) {
-            start = +start; //parse to int
-            if (typeof input == 'undefined')
-                return input;
-            return input.slice(start);
-        }
-    }])
-
 angular.module('manage.manageERCarousel', ['ngFileUpload'])
     .constant('ERC_GROUP', 1024)
 
@@ -17052,14 +17473,6 @@ angular.module('manage.manageNews', ['ngFileUpload', 'oc.lazyLoad', 'ui.tinymce'
             templateUrl: 'manageNews/manageNewsList.tpl.html'
         };
     }])
-    .filter('startFrom', [ function() {
-        return function(input, start) {
-            start = +start; //parse to int
-            if (typeof input == 'undefined')
-                return input;
-            return input.slice(start);
-        }
-    }])
 
     .controller('NewsItemFieldsCtrl', ['$scope', '$timeout', 'Upload',
         function NewsItemFieldsCtrl($scope, $timeout, Upload){
@@ -17712,14 +18125,6 @@ angular.module('manage.manageSoftware', ['ngFileUpload'])
             },
             templateUrl: 'manageSoftware/manageSoftwareList.tpl.html'
         };
-    }])
-    .filter('startFrom', [ function() {
-        return function(input, start) {
-            start = +start; //parse to int
-            if (typeof input == 'undefined')
-                return input;
-            return input.slice(start);
-        }
     }])
 
     .controller('SWItemFieldsCtrl', ['$scope', '$timeout', 'Upload', 'OS',
@@ -19065,12 +19470,6 @@ angular.module('manage.staffDirectory', ['oc.lazyLoad', 'ui.tinymce'])
             templateUrl: 'staffDirectory/staffDirectoryPeople.tpl.html'
         };
     }])
-    .filter('startFrom', [ function() {
-        return function(input, start) {
-            start = +start; //parse to int
-            return input.slice(start);
-        }
-    }])
 
     .controller('staffDirSubjectsCtrl', ['$scope', 'sdFactory',
         function staffDirSubjectsCtrl($scope, sdFactory){
@@ -19425,15 +19824,6 @@ angular.module('manage.submittedForms', ['ngFileUpload'])
             else
                 $scope.sortMode = by;
         };
-    }])
-
-    .filter('startFrom', [ function() {
-        return function(input, start) {
-            start = +start; //parse to int
-            if (typeof input == 'undefined')
-                return input;
-            return input.slice(start);
-        }
     }])
 
     .controller('customFormCtrl', ['$scope', '$timeout', 'formFactory', 'Upload', 'FORMS_URL',
@@ -23814,7 +24204,7 @@ function plural(ms, n, name) {
   var undefined;
 
   /** Used as the semantic version number. */
-  var VERSION = '4.12.0';
+  var VERSION = '4.13.1';
 
   /** Used as the size to enable large array optimizations. */
   var LARGE_ARRAY_SIZE = 200;
@@ -23918,7 +24308,7 @@ function plural(ms, n, name) {
   /** Used to match property names within property paths. */
   var reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/,
       reIsPlainProp = /^\w*$/,
-      rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]/g;
+      rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(\.|\[\])(?:\4|$))/g;
 
   /**
    * Used to match `RegExp`
@@ -24051,7 +24441,7 @@ function plural(ms, n, name) {
     'Function', 'Int8Array', 'Int16Array', 'Int32Array', 'Map', 'Math', 'Object',
     'Promise', 'Reflect', 'RegExp', 'Set', 'String', 'Symbol', 'TypeError',
     'Uint8Array', 'Uint8ClampedArray', 'Uint16Array', 'Uint32Array', 'WeakMap',
-    '_', 'clearTimeout', 'isFinite', 'parseInt', 'setTimeout'
+    '_', 'isFinite', 'parseInt', 'setTimeout'
   ];
 
   /** Used to make template sourceURLs easier to identify. */
@@ -24130,12 +24520,6 @@ function plural(ms, n, name) {
     '&#96;': '`'
   };
 
-  /** Used to determine if values are of the language type `Object`. */
-  var objectTypes = {
-    'function': true,
-    'object': true
-  };
-
   /** Used to escape characters for inclusion in compiled string literals. */
   var stringEscapes = {
     '\\': '\\',
@@ -24151,41 +24535,25 @@ function plural(ms, n, name) {
       freeParseInt = parseInt;
 
   /** Detect free variable `exports`. */
-  var freeExports = (objectTypes[typeof exports] && exports && !exports.nodeType)
-    ? exports
-    : undefined;
+  var freeExports = typeof exports == 'object' && exports;
 
   /** Detect free variable `module`. */
-  var freeModule = (objectTypes[typeof module] && module && !module.nodeType)
-    ? module
-    : undefined;
+  var freeModule = freeExports && typeof module == 'object' && module;
 
   /** Detect the popular CommonJS extension `module.exports`. */
-  var moduleExports = (freeModule && freeModule.exports === freeExports)
-    ? freeExports
-    : undefined;
+  var moduleExports = freeModule && freeModule.exports === freeExports;
 
   /** Detect free variable `global` from Node.js. */
-  var freeGlobal = checkGlobal(freeExports && freeModule && typeof global == 'object' && global);
+  var freeGlobal = checkGlobal(typeof global == 'object' && global);
 
   /** Detect free variable `self`. */
-  var freeSelf = checkGlobal(objectTypes[typeof self] && self);
-
-  /** Detect free variable `window`. */
-  var freeWindow = checkGlobal(objectTypes[typeof window] && window);
+  var freeSelf = checkGlobal(typeof self == 'object' && self);
 
   /** Detect `this` as the global object. */
-  var thisGlobal = checkGlobal(objectTypes[typeof this] && this);
+  var thisGlobal = checkGlobal(typeof this == 'object' && this);
 
-  /**
-   * Used as a reference to the global object.
-   *
-   * The `this` value is used if it's the global object to avoid Greasemonkey's
-   * restricted `window` object, otherwise the `window` object is used.
-   */
-  var root = freeGlobal ||
-    ((freeWindow !== (thisGlobal && thisGlobal.window)) && freeWindow) ||
-      freeSelf || thisGlobal || Function('return this')();
+  /** Used as a reference to the global object. */
+  var root = freeGlobal || freeSelf || thisGlobal || Function('return this')();
 
   /*--------------------------------------------------------------------------*/
 
@@ -24241,7 +24609,7 @@ function plural(ms, n, name) {
    * A specialized version of `baseAggregator` for arrays.
    *
    * @private
-   * @param {Array} array The array to iterate over.
+   * @param {Array} [array] The array to iterate over.
    * @param {Function} setter The function to set `accumulator` values.
    * @param {Function} iteratee The iteratee to transform keys.
    * @param {Object} accumulator The initial aggregated object.
@@ -24249,7 +24617,7 @@ function plural(ms, n, name) {
    */
   function arrayAggregator(array, setter, iteratee, accumulator) {
     var index = -1,
-        length = array.length;
+        length = array ? array.length : 0;
 
     while (++index < length) {
       var value = array[index];
@@ -24263,13 +24631,13 @@ function plural(ms, n, name) {
    * iteratee shorthands.
    *
    * @private
-   * @param {Array} array The array to iterate over.
+   * @param {Array} [array] The array to iterate over.
    * @param {Function} iteratee The function invoked per iteration.
    * @returns {Array} Returns `array`.
    */
   function arrayEach(array, iteratee) {
     var index = -1,
-        length = array.length;
+        length = array ? array.length : 0;
 
     while (++index < length) {
       if (iteratee(array[index], index, array) === false) {
@@ -24284,12 +24652,12 @@ function plural(ms, n, name) {
    * iteratee shorthands.
    *
    * @private
-   * @param {Array} array The array to iterate over.
+   * @param {Array} [array] The array to iterate over.
    * @param {Function} iteratee The function invoked per iteration.
    * @returns {Array} Returns `array`.
    */
   function arrayEachRight(array, iteratee) {
-    var length = array.length;
+    var length = array ? array.length : 0;
 
     while (length--) {
       if (iteratee(array[length], length, array) === false) {
@@ -24304,14 +24672,14 @@ function plural(ms, n, name) {
    * iteratee shorthands.
    *
    * @private
-   * @param {Array} array The array to iterate over.
+   * @param {Array} [array] The array to iterate over.
    * @param {Function} predicate The function invoked per iteration.
    * @returns {boolean} Returns `true` if all elements pass the predicate check,
    *  else `false`.
    */
   function arrayEvery(array, predicate) {
     var index = -1,
-        length = array.length;
+        length = array ? array.length : 0;
 
     while (++index < length) {
       if (!predicate(array[index], index, array)) {
@@ -24326,13 +24694,13 @@ function plural(ms, n, name) {
    * iteratee shorthands.
    *
    * @private
-   * @param {Array} array The array to iterate over.
+   * @param {Array} [array] The array to iterate over.
    * @param {Function} predicate The function invoked per iteration.
    * @returns {Array} Returns the new filtered array.
    */
   function arrayFilter(array, predicate) {
     var index = -1,
-        length = array.length,
+        length = array ? array.length : 0,
         resIndex = 0,
         result = [];
 
@@ -24350,26 +24718,27 @@ function plural(ms, n, name) {
    * specifying an index to search from.
    *
    * @private
-   * @param {Array} array The array to search.
+   * @param {Array} [array] The array to search.
    * @param {*} target The value to search for.
    * @returns {boolean} Returns `true` if `target` is found, else `false`.
    */
   function arrayIncludes(array, value) {
-    return !!array.length && baseIndexOf(array, value, 0) > -1;
+    var length = array ? array.length : 0;
+    return !!length && baseIndexOf(array, value, 0) > -1;
   }
 
   /**
    * This function is like `arrayIncludes` except that it accepts a comparator.
    *
    * @private
-   * @param {Array} array The array to search.
+   * @param {Array} [array] The array to search.
    * @param {*} target The value to search for.
    * @param {Function} comparator The comparator invoked per element.
    * @returns {boolean} Returns `true` if `target` is found, else `false`.
    */
   function arrayIncludesWith(array, value, comparator) {
     var index = -1,
-        length = array.length;
+        length = array ? array.length : 0;
 
     while (++index < length) {
       if (comparator(value, array[index])) {
@@ -24384,13 +24753,13 @@ function plural(ms, n, name) {
    * shorthands.
    *
    * @private
-   * @param {Array} array The array to iterate over.
+   * @param {Array} [array] The array to iterate over.
    * @param {Function} iteratee The function invoked per iteration.
    * @returns {Array} Returns the new mapped array.
    */
   function arrayMap(array, iteratee) {
     var index = -1,
-        length = array.length,
+        length = array ? array.length : 0,
         result = Array(length);
 
     while (++index < length) {
@@ -24423,7 +24792,7 @@ function plural(ms, n, name) {
    * iteratee shorthands.
    *
    * @private
-   * @param {Array} array The array to iterate over.
+   * @param {Array} [array] The array to iterate over.
    * @param {Function} iteratee The function invoked per iteration.
    * @param {*} [accumulator] The initial value.
    * @param {boolean} [initAccum] Specify using the first element of `array` as
@@ -24432,7 +24801,7 @@ function plural(ms, n, name) {
    */
   function arrayReduce(array, iteratee, accumulator, initAccum) {
     var index = -1,
-        length = array.length;
+        length = array ? array.length : 0;
 
     if (initAccum && length) {
       accumulator = array[++index];
@@ -24448,7 +24817,7 @@ function plural(ms, n, name) {
    * iteratee shorthands.
    *
    * @private
-   * @param {Array} array The array to iterate over.
+   * @param {Array} [array] The array to iterate over.
    * @param {Function} iteratee The function invoked per iteration.
    * @param {*} [accumulator] The initial value.
    * @param {boolean} [initAccum] Specify using the last element of `array` as
@@ -24456,7 +24825,7 @@ function plural(ms, n, name) {
    * @returns {*} Returns the accumulated value.
    */
   function arrayReduceRight(array, iteratee, accumulator, initAccum) {
-    var length = array.length;
+    var length = array ? array.length : 0;
     if (initAccum && length) {
       accumulator = array[--length];
     }
@@ -24471,14 +24840,14 @@ function plural(ms, n, name) {
    * shorthands.
    *
    * @private
-   * @param {Array} array The array to iterate over.
+   * @param {Array} [array] The array to iterate over.
    * @param {Function} predicate The function invoked per iteration.
    * @returns {boolean} Returns `true` if any element passes the predicate check,
    *  else `false`.
    */
   function arraySome(array, predicate) {
     var index = -1,
-        length = array.length;
+        length = array ? array.length : 0;
 
     while (++index < length) {
       if (predicate(array[index], index, array)) {
@@ -24489,23 +24858,21 @@ function plural(ms, n, name) {
   }
 
   /**
-   * The base implementation of methods like `_.find` and `_.findKey`, without
-   * support for iteratee shorthands, which iterates over `collection` using
-   * `eachFunc`.
+   * The base implementation of methods like `_.findKey` and `_.findLastKey`,
+   * without support for iteratee shorthands, which iterates over `collection`
+   * using `eachFunc`.
    *
    * @private
    * @param {Array|Object} collection The collection to search.
    * @param {Function} predicate The function invoked per iteration.
    * @param {Function} eachFunc The function to iterate over `collection`.
-   * @param {boolean} [retKey] Specify returning the key of the found element
-   *  instead of the element itself.
    * @returns {*} Returns the found element or its key, else `undefined`.
    */
-  function baseFind(collection, predicate, eachFunc, retKey) {
+  function baseFindKey(collection, predicate, eachFunc) {
     var result;
     eachFunc(collection, function(value, key, collection) {
       if (predicate(value, key, collection)) {
-        result = retKey ? key : value;
+        result = key;
         return false;
       }
     });
@@ -24519,12 +24886,13 @@ function plural(ms, n, name) {
    * @private
    * @param {Array} array The array to search.
    * @param {Function} predicate The function invoked per iteration.
+   * @param {number} fromIndex The index to search from.
    * @param {boolean} [fromRight] Specify iterating from right to left.
    * @returns {number} Returns the index of the matched value, else `-1`.
    */
-  function baseFindIndex(array, predicate, fromRight) {
+  function baseFindIndex(array, predicate, fromIndex, fromRight) {
     var length = array.length,
-        index = fromRight ? length : -1;
+        index = fromIndex + (fromRight ? 1 : -1);
 
     while ((fromRight ? index-- : ++index < length)) {
       if (predicate(array[index], index, array)) {
@@ -24832,6 +25200,18 @@ function plural(ms, n, name) {
   }
 
   /**
+   * Gets the value at `key` of `object`.
+   *
+   * @private
+   * @param {Object} [object] The object to query.
+   * @param {string} key The key of the property to get.
+   * @returns {*} Returns the property value.
+   */
+  function getValue(object, key) {
+    return object == null ? undefined : object[key];
+  }
+
+  /**
    * Gets the index at which the first occurrence of `NaN` is found in `array`.
    *
    * @private
@@ -24842,7 +25222,7 @@ function plural(ms, n, name) {
    */
   function indexOfNaN(array, fromIndex, fromRight) {
     var length = array.length,
-        index = fromIndex + (fromRight ? 0 : -1);
+        index = fromIndex + (fromRight ? 1 : -1);
 
     while ((fromRight ? index-- : ++index < length)) {
       var other = array[index];
@@ -25033,10 +25413,10 @@ function plural(ms, n, name) {
    * lodash.isFunction(lodash.bar);
    * // => true
    *
-   * // Use `context` to mock `Date#getTime` use in `_.now`.
-   * var mock = _.runInContext({
+   * // Use `context` to stub `Date#getTime` use in `_.now`.
+   * var stubbed = _.runInContext({
    *   'Date': function() {
-   *     return { 'getTime': getTimeMock };
+   *     return { 'getTime': stubGetTime };
    *   }
    * });
    *
@@ -25057,6 +25437,15 @@ function plural(ms, n, name) {
     var arrayProto = context.Array.prototype,
         objectProto = context.Object.prototype,
         stringProto = context.String.prototype;
+
+    /** Used to detect overreaching core-js shims. */
+    var coreJsData = context['__core-js_shared__'];
+
+    /** Used to detect methods masquerading as native. */
+    var maskSrcKey = (function() {
+      var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || '');
+      return uid ? ('Symbol(src)_1.' + uid) : '';
+    }());
 
     /** Used to resolve the decompiled source of functions. */
     var funcToString = context.Function.prototype.toString;
@@ -25091,14 +25480,15 @@ function plural(ms, n, name) {
         Reflect = context.Reflect,
         Symbol = context.Symbol,
         Uint8Array = context.Uint8Array,
-        clearTimeout = context.clearTimeout,
         enumerate = Reflect ? Reflect.enumerate : undefined,
         getOwnPropertySymbols = Object.getOwnPropertySymbols,
         iteratorSymbol = typeof (iteratorSymbol = Symbol && Symbol.iterator) == 'symbol' ? iteratorSymbol : undefined,
         objectCreate = Object.create,
         propertyIsEnumerable = objectProto.propertyIsEnumerable,
-        setTimeout = context.setTimeout,
         splice = arrayProto.splice;
+
+    /** Built-in method references that are mockable. */
+    var setTimeout = function(func, wait) { return context.setTimeout.call(root, func, wait); };
 
     /* Built-in method references for those with the same name as other `lodash` methods. */
     var nativeCeil = Math.ceil,
@@ -25221,19 +25611,21 @@ function plural(ms, n, name) {
      * `isArrayBuffer`, `isArrayLike`, `isArrayLikeObject`, `isBoolean`,
      * `isBuffer`, `isDate`, `isElement`, `isEmpty`, `isEqual`, `isEqualWith`,
      * `isError`, `isFinite`, `isFunction`, `isInteger`, `isLength`, `isMap`,
-     * `isMatch`, `isMatchWith`, `isNaN`, `isNative`, `isNil`, `isNull`, `isNumber`,
-     * `isObject`, `isObjectLike`, `isPlainObject`, `isRegExp`, `isSafeInteger`,
-     * `isSet`, `isString`, `isUndefined`, `isTypedArray`, `isWeakMap`, `isWeakSet`,
-     * `join`, `kebabCase`, `last`, `lastIndexOf`, `lowerCase`, `lowerFirst`,
-     * `lt`, `lte`, `max`, `maxBy`, `mean`, `meanBy`, `min`, `minBy`, `multiply`,
-     * `noConflict`, `noop`, `now`, `nth`, `pad`, `padEnd`, `padStart`, `parseInt`,
-     * `pop`, `random`, `reduce`, `reduceRight`, `repeat`, `result`, `round`,
-     * `runInContext`, `sample`, `shift`, `size`, `snakeCase`, `some`, `sortedIndex`,
-     * `sortedIndexBy`, `sortedLastIndex`, `sortedLastIndexBy`, `startCase`,
-     * `startsWith`, `subtract`, `sum`, `sumBy`, `template`, `times`, `toFinite`,
-     * `toInteger`, `toJSON`, `toLength`, `toLower`, `toNumber`, `toSafeInteger`,
-     * `toString`, `toUpper`, `trim`, `trimEnd`, `trimStart`, `truncate`, `unescape`,
-     * `uniqueId`, `upperCase`, `upperFirst`, `value`, and `words`
+     * `isMatch`, `isMatchWith`, `isNaN`, `isNative`, `isNil`, `isNull`,
+     * `isNumber`, `isObject`, `isObjectLike`, `isPlainObject`, `isRegExp`,
+     * `isSafeInteger`, `isSet`, `isString`, `isUndefined`, `isTypedArray`,
+     * `isWeakMap`, `isWeakSet`, `join`, `kebabCase`, `last`, `lastIndexOf`,
+     * `lowerCase`, `lowerFirst`, `lt`, `lte`, `max`, `maxBy`, `mean`, `meanBy`,
+     * `min`, `minBy`, `multiply`, `noConflict`, `noop`, `now`, `nth`, `pad`,
+     * `padEnd`, `padStart`, `parseInt`, `pop`, `random`, `reduce`, `reduceRight`,
+     * `repeat`, `result`, `round`, `runInContext`, `sample`, `shift`, `size`,
+     * `snakeCase`, `some`, `sortedIndex`, `sortedIndexBy`, `sortedLastIndex`,
+     * `sortedLastIndexBy`, `startCase`, `startsWith`, `stubArray`, `stubFalse`,
+     * `stubObject`, `stubString`, `stubTrue`, `subtract`, `sum`, `sumBy`,
+     * `template`, `times`, `toFinite`, `toInteger`, `toJSON`, `toLength`,
+     * `toLower`, `toNumber`, `toSafeInteger`, `toString`, `toUpper`, `trim`,
+     * `trimEnd`, `trimStart`, `truncate`, `unescape`, `uniqueId`, `upperCase`,
+     * `upperFirst`, `value`, and `words`
      *
      * @name _
      * @constructor
@@ -26534,7 +26926,7 @@ function plural(ms, n, name) {
      * The base implementation of `_.has` without support for deep paths.
      *
      * @private
-     * @param {Object} object The object to query.
+     * @param {Object} [object] The object to query.
      * @param {Array|string} key The key to check.
      * @returns {boolean} Returns `true` if `key` exists, else `false`.
      */
@@ -26542,20 +26934,21 @@ function plural(ms, n, name) {
       // Avoid a bug in IE 10-11 where objects with a [[Prototype]] of `null`,
       // that are composed entirely of index properties, return `false` for
       // `hasOwnProperty` checks of them.
-      return hasOwnProperty.call(object, key) ||
-        (typeof object == 'object' && key in object && getPrototype(object) === null);
+      return object != null &&
+        (hasOwnProperty.call(object, key) ||
+          (typeof object == 'object' && key in object && getPrototype(object) === null));
     }
 
     /**
      * The base implementation of `_.hasIn` without support for deep paths.
      *
      * @private
-     * @param {Object} object The object to query.
+     * @param {Object} [object] The object to query.
      * @param {Array|string} key The key to check.
      * @returns {boolean} Returns `true` if `key` exists, else `false`.
      */
     function baseHasIn(object, key) {
-      return key in Object(object);
+      return object != null && key in Object(object);
     }
 
     /**
@@ -26807,6 +27200,22 @@ function plural(ms, n, name) {
         }
       }
       return true;
+    }
+
+    /**
+     * The base implementation of `_.isNative` without bad shim checks.
+     *
+     * @private
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is a native function,
+     *  else `false`.
+     */
+    function baseIsNative(value) {
+      if (!isObject(value) || isMasked(value)) {
+        return false;
+      }
+      var pattern = (isFunction(value) || isHostObject(value)) ? reIsNative : reIsHostCtor;
+      return pattern.test(toSource(value));
     }
 
     /**
@@ -27177,6 +27586,9 @@ function plural(ms, n, name) {
           length = values.length,
           seen = array;
 
+      if (array === values) {
+        values = copyArray(values);
+      }
       if (iteratee) {
         seen = arrayMap(array, baseUnary(iteratee));
       }
@@ -28330,6 +28742,31 @@ function plural(ms, n, name) {
     }
 
     /**
+     * Creates a `_.find` or `_.findLast` function.
+     *
+     * @private
+     * @param {Function} findIndexFunc The function to find the collection index.
+     * @returns {Function} Returns the new find function.
+     */
+    function createFind(findIndexFunc) {
+      return function(collection, predicate, fromIndex) {
+        var iterable = Object(collection);
+        predicate = getIteratee(predicate, 3);
+        if (!isArrayLike(collection)) {
+          var props = keys(collection);
+        }
+        var index = findIndexFunc(props || collection, function(value, key) {
+          if (props) {
+            key = value;
+            value = iterable[key];
+          }
+          return predicate(value, key, iterable);
+        }, fromIndex);
+        return index > -1 ? collection[props ? props[index] : index] : undefined;
+      };
+    }
+
+    /**
      * Creates a `_.flow` or `_.flowRight` function.
      *
      * @private
@@ -28692,7 +29129,7 @@ function plural(ms, n, name) {
       var func = Math[methodName];
       return function(number, precision) {
         number = toNumber(number);
-        precision = toInteger(precision);
+        precision = nativeMin(toInteger(precision), 292);
         if (precision) {
           // Shift with exponential notation to avoid floating-point issues.
           // See [MDN](https://mdn.io/round#Examples) for more details.
@@ -29173,11 +29610,14 @@ function plural(ms, n, name) {
      * @returns {Array} Returns the match data of `object`.
      */
     function getMatchData(object) {
-      var result = toPairs(object),
+      var result = keys(object),
           length = result.length;
 
       while (length--) {
-        result[length][2] = isStrictComparable(result[length][1]);
+        var key = result[length],
+            value = object[key];
+
+        result[length] = [key, value, isStrictComparable(value)];
       }
       return result;
     }
@@ -29191,8 +29631,8 @@ function plural(ms, n, name) {
      * @returns {*} Returns the function if it's native, else `undefined`.
      */
     function getNative(object, key) {
-      var value = object[key];
-      return isNative(value) ? value : undefined;
+      var value = getValue(object, key);
+      return baseIsNative(value) ? value : undefined;
     }
 
     /**
@@ -29221,9 +29661,7 @@ function plural(ms, n, name) {
 
     // Fallback for IE < 11.
     if (!getOwnPropertySymbols) {
-      getSymbols = function() {
-        return [];
-      };
+      getSymbols = stubArray;
     }
 
     /**
@@ -29554,6 +29992,26 @@ function plural(ms, n, name) {
       var data = getData(other);
       return !!data && func === data[0];
     }
+
+    /**
+     * Checks if `func` has its source masked.
+     *
+     * @private
+     * @param {Function} func The function to check.
+     * @returns {boolean} Returns `true` if `func` is masked, else `false`.
+     */
+    function isMasked(func) {
+      return !!maskSrcKey && (maskSrcKey in func);
+    }
+
+    /**
+     * Checks if `func` is capable of being masked.
+     *
+     * @private
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `func` is maskable, else `false`.
+     */
+    var isMaskable = coreJsData ? isFunction : stubFalse;
 
     /**
      * Checks if `value` is likely a prototype object.
@@ -29951,8 +30409,8 @@ function plural(ms, n, name) {
      * @see _.without, _.xor
      * @example
      *
-     * _.difference([3, 2, 1], [4, 2]);
-     * // => [3, 1]
+     * _.difference([2, 1], [2, 3]);
+     * // => [1]
      */
     var difference = rest(function(array, values) {
       return isArrayLikeObject(array)
@@ -29977,8 +30435,8 @@ function plural(ms, n, name) {
      * @returns {Array} Returns the new array of filtered values.
      * @example
      *
-     * _.differenceBy([3.1, 2.2, 1.3], [4.4, 2.5], Math.floor);
-     * // => [3.1, 1.3]
+     * _.differenceBy([2.1, 1.2], [2.3, 3.4], Math.floor);
+     * // => [1.2]
      *
      * // The `_.property` iteratee shorthand.
      * _.differenceBy([{ 'x': 2 }, { 'x': 1 }], [{ 'x': 1 }], 'x');
@@ -30230,6 +30688,7 @@ function plural(ms, n, name) {
      * @param {Array} array The array to search.
      * @param {Array|Function|Object|string} [predicate=_.identity]
      *  The function invoked per iteration.
+     * @param {number} [fromIndex=0] The index to search from.
      * @returns {number} Returns the index of the found element, else `-1`.
      * @example
      *
@@ -30254,10 +30713,16 @@ function plural(ms, n, name) {
      * _.findIndex(users, 'active');
      * // => 2
      */
-    function findIndex(array, predicate) {
-      return (array && array.length)
-        ? baseFindIndex(array, getIteratee(predicate, 3))
-        : -1;
+    function findIndex(array, predicate, fromIndex) {
+      var length = array ? array.length : 0;
+      if (!length) {
+        return -1;
+      }
+      var index = fromIndex == null ? 0 : toInteger(fromIndex);
+      if (index < 0) {
+        index = nativeMax(length + index, 0);
+      }
+      return baseFindIndex(array, getIteratee(predicate, 3), index);
     }
 
     /**
@@ -30271,6 +30736,7 @@ function plural(ms, n, name) {
      * @param {Array} array The array to search.
      * @param {Array|Function|Object|string} [predicate=_.identity]
      *  The function invoked per iteration.
+     * @param {number} [fromIndex=array.length-1] The index to search from.
      * @returns {number} Returns the index of the found element, else `-1`.
      * @example
      *
@@ -30295,10 +30761,19 @@ function plural(ms, n, name) {
      * _.findLastIndex(users, 'active');
      * // => 0
      */
-    function findLastIndex(array, predicate) {
-      return (array && array.length)
-        ? baseFindIndex(array, getIteratee(predicate, 3), true)
-        : -1;
+    function findLastIndex(array, predicate, fromIndex) {
+      var length = array ? array.length : 0;
+      if (!length) {
+        return -1;
+      }
+      var index = length - 1;
+      if (fromIndex !== undefined) {
+        index = toInteger(fromIndex);
+        index = fromIndex < 0
+          ? nativeMax(length + index, 0)
+          : nativeMin(index, length - 1);
+      }
+      return baseFindIndex(array, getIteratee(predicate, 3), index, true);
     }
 
     /**
@@ -30445,11 +30920,11 @@ function plural(ms, n, name) {
       if (!length) {
         return -1;
       }
-      fromIndex = toInteger(fromIndex);
-      if (fromIndex < 0) {
-        fromIndex = nativeMax(length + fromIndex, 0);
+      var index = fromIndex == null ? 0 : toInteger(fromIndex);
+      if (index < 0) {
+        index = nativeMax(length + index, 0);
       }
-      return baseIndexOf(array, value, fromIndex);
+      return baseIndexOf(array, value, index);
     }
 
     /**
@@ -30484,7 +30959,7 @@ function plural(ms, n, name) {
      * @returns {Array} Returns the new array of intersecting values.
      * @example
      *
-     * _.intersection([2, 1], [4, 2], [1, 2]);
+     * _.intersection([2, 1], [2, 3]);
      * // => [2]
      */
     var intersection = rest(function(arrays) {
@@ -30510,7 +30985,7 @@ function plural(ms, n, name) {
      * @returns {Array} Returns the new array of intersecting values.
      * @example
      *
-     * _.intersectionBy([2.1, 1.2], [4.3, 2.4], Math.floor);
+     * _.intersectionBy([2.1, 1.2], [2.3, 3.4], Math.floor);
      * // => [2.1]
      *
      * // The `_.property` iteratee shorthand.
@@ -30640,7 +31115,7 @@ function plural(ms, n, name) {
         ) + 1;
       }
       if (value !== value) {
-        return indexOfNaN(array, index, true);
+        return indexOfNaN(array, index - 1, true);
       }
       while (index--) {
         if (array[index] === value) {
@@ -30651,7 +31126,7 @@ function plural(ms, n, name) {
     }
 
     /**
-     * Gets the element at `n` index of `array`. If `n` is negative, the nth
+     * Gets the element at index `n` of `array`. If `n` is negative, the nth
      * element from the end is returned.
      *
      * @static
@@ -30692,11 +31167,11 @@ function plural(ms, n, name) {
      * @returns {Array} Returns `array`.
      * @example
      *
-     * var array = [1, 2, 3, 1, 2, 3];
+     * var array = ['a', 'b', 'c', 'a', 'b', 'c'];
      *
-     * _.pull(array, 2, 3);
+     * _.pull(array, 'a', 'c');
      * console.log(array);
-     * // => [1, 1]
+     * // => ['b', 'b']
      */
     var pull = rest(pullAll);
 
@@ -30714,11 +31189,11 @@ function plural(ms, n, name) {
      * @returns {Array} Returns `array`.
      * @example
      *
-     * var array = [1, 2, 3, 1, 2, 3];
+     * var array = ['a', 'b', 'c', 'a', 'b', 'c'];
      *
-     * _.pullAll(array, [2, 3]);
+     * _.pullAll(array, ['a', 'c']);
      * console.log(array);
-     * // => [1, 1]
+     * // => ['b', 'b']
      */
     function pullAll(array, values) {
       return (array && array.length && values && values.length)
@@ -30800,14 +31275,14 @@ function plural(ms, n, name) {
      * @returns {Array} Returns the new array of removed elements.
      * @example
      *
-     * var array = [5, 10, 15, 20];
-     * var evens = _.pullAt(array, 1, 3);
+     * var array = ['a', 'b', 'c', 'd'];
+     * var pulled = _.pullAt(array, [1, 3]);
      *
      * console.log(array);
-     * // => [5, 15]
+     * // => ['a', 'c']
      *
-     * console.log(evens);
-     * // => [10, 20]
+     * console.log(pulled);
+     * // => ['b', 'd']
      */
     var pullAt = rest(function(array, indexes) {
       indexes = baseFlatten(indexes, 1);
@@ -30947,9 +31422,6 @@ function plural(ms, n, name) {
      *
      * _.sortedIndex([30, 50], 40);
      * // => 1
-     *
-     * _.sortedIndex([4, 5], 4);
-     * // => 0
      */
     function sortedIndex(array, value) {
       return baseSortedIndex(array, value);
@@ -30972,13 +31444,13 @@ function plural(ms, n, name) {
      *  into `array`.
      * @example
      *
-     * var dict = { 'thirty': 30, 'forty': 40, 'fifty': 50 };
+     * var objects = [{ 'x': 4 }, { 'x': 5 }];
      *
-     * _.sortedIndexBy(['thirty', 'fifty'], 'forty', _.propertyOf(dict));
-     * // => 1
+     * _.sortedIndexBy(objects, { 'x': 4 }, function(o) { return o.x; });
+     * // => 0
      *
      * // The `_.property` iteratee shorthand.
-     * _.sortedIndexBy([{ 'x': 4 }, { 'x': 5 }], { 'x': 4 }, 'x');
+     * _.sortedIndexBy(objects, { 'x': 4 }, 'x');
      * // => 0
      */
     function sortedIndexBy(array, value, iteratee) {
@@ -30998,8 +31470,8 @@ function plural(ms, n, name) {
      * @returns {number} Returns the index of the matched value, else `-1`.
      * @example
      *
-     * _.sortedIndexOf([1, 1, 2, 2], 2);
-     * // => 2
+     * _.sortedIndexOf([4, 5, 5, 5, 6], 5);
+     * // => 1
      */
     function sortedIndexOf(array, value) {
       var length = array ? array.length : 0;
@@ -31027,8 +31499,8 @@ function plural(ms, n, name) {
      *  into `array`.
      * @example
      *
-     * _.sortedLastIndex([4, 5], 4);
-     * // => 1
+     * _.sortedLastIndex([4, 5, 5, 5, 6], 5);
+     * // => 4
      */
     function sortedLastIndex(array, value) {
       return baseSortedIndex(array, value, true);
@@ -31051,8 +31523,13 @@ function plural(ms, n, name) {
      *  into `array`.
      * @example
      *
+     * var objects = [{ 'x': 4 }, { 'x': 5 }];
+     *
+     * _.sortedLastIndexBy(objects, { 'x': 4 }, function(o) { return o.x; });
+     * // => 1
+     *
      * // The `_.property` iteratee shorthand.
-     * _.sortedLastIndexBy([{ 'x': 4 }, { 'x': 5 }], { 'x': 4 }, 'x');
+     * _.sortedLastIndexBy(objects, { 'x': 4 }, 'x');
      * // => 1
      */
     function sortedLastIndexBy(array, value, iteratee) {
@@ -31072,7 +31549,7 @@ function plural(ms, n, name) {
      * @returns {number} Returns the index of the matched value, else `-1`.
      * @example
      *
-     * _.sortedLastIndexOf([1, 1, 2, 2], 2);
+     * _.sortedLastIndexOf([4, 5, 5, 5, 6], 5);
      * // => 3
      */
     function sortedLastIndexOf(array, value) {
@@ -31312,8 +31789,8 @@ function plural(ms, n, name) {
      * @returns {Array} Returns the new array of combined values.
      * @example
      *
-     * _.union([2, 1], [4, 2], [1, 2]);
-     * // => [2, 1, 4]
+     * _.union([2], [1, 2]);
+     * // => [2, 1]
      */
     var union = rest(function(arrays) {
       return baseUniq(baseFlatten(arrays, 1, isArrayLikeObject, true));
@@ -31335,8 +31812,8 @@ function plural(ms, n, name) {
      * @returns {Array} Returns the new array of combined values.
      * @example
      *
-     * _.unionBy([2.1, 1.2], [4.3, 2.4], Math.floor);
-     * // => [2.1, 1.2, 4.3]
+     * _.unionBy([2.1], [1.2, 2.3], Math.floor);
+     * // => [2.1, 1.2]
      *
      * // The `_.property` iteratee shorthand.
      * _.unionBy([{ 'x': 1 }], [{ 'x': 2 }, { 'x': 1 }], 'x');
@@ -31443,7 +31920,7 @@ function plural(ms, n, name) {
      * @returns {Array} Returns the new duplicate free array.
      * @example
      *
-     * var objects = [{ 'x': 1, 'y': 2 }, { 'x': 2, 'y': 1 },  { 'x': 1, 'y': 2 }];
+     * var objects = [{ 'x': 1, 'y': 2 }, { 'x': 2, 'y': 1 }, { 'x': 1, 'y': 2 }];
      *
      * _.uniqWith(objects, _.isEqual);
      * // => [{ 'x': 1, 'y': 2 }, { 'x': 2, 'y': 1 }]
@@ -31538,7 +32015,7 @@ function plural(ms, n, name) {
      * @see _.difference, _.xor
      * @example
      *
-     * _.without([1, 2, 1, 3], 1, 2);
+     * _.without([2, 1, 2, 3], 1, 2);
      * // => [3]
      */
     var without = rest(function(array, values) {
@@ -31562,8 +32039,8 @@ function plural(ms, n, name) {
      * @see _.difference, _.without
      * @example
      *
-     * _.xor([2, 1], [4, 2]);
-     * // => [1, 4]
+     * _.xor([2, 1], [2, 3]);
+     * // => [1, 3]
      */
     var xor = rest(function(arrays) {
       return baseXor(arrayFilter(arrays, isArrayLikeObject));
@@ -31585,8 +32062,8 @@ function plural(ms, n, name) {
      * @returns {Array} Returns the new array of filtered values.
      * @example
      *
-     * _.xorBy([2.1, 1.2], [4.3, 2.4], Math.floor);
-     * // => [1.2, 4.3]
+     * _.xorBy([2.1, 1.2], [2.3, 3.4], Math.floor);
+     * // => [1.2, 3.4]
      *
      * // The `_.property` iteratee shorthand.
      * _.xorBy([{ 'x': 1 }], [{ 'x': 2 }, { 'x': 1 }], 'x');
@@ -31819,9 +32296,6 @@ function plural(ms, n, name) {
      *
      * _(object).at(['a[0].b.c', 'a[1]']).value();
      * // => [3, 4]
-     *
-     * _(['a', 'b', 'c']).at(0, 2).value();
-     * // => ['a', 'c']
      */
     var wrapperAt = rest(function(paths) {
       paths = baseFlatten(paths, 1);
@@ -32084,6 +32558,7 @@ function plural(ms, n, name) {
      * _.countBy([6.1, 4.2, 6.3], Math.floor);
      * // => { '4': 1, '6': 2 }
      *
+     * // The `_.property` iteratee shorthand.
      * _.countBy(['one', 'two', 'three'], 'length');
      * // => { '3': 2, '5': 1 }
      */
@@ -32189,6 +32664,7 @@ function plural(ms, n, name) {
      * @param {Array|Object} collection The collection to search.
      * @param {Array|Function|Object|string} [predicate=_.identity]
      *  The function invoked per iteration.
+     * @param {number} [fromIndex=0] The index to search from.
      * @returns {*} Returns the matched element, else `undefined`.
      * @example
      *
@@ -32213,14 +32689,7 @@ function plural(ms, n, name) {
      * _.find(users, 'active');
      * // => object for 'barney'
      */
-    function find(collection, predicate) {
-      predicate = getIteratee(predicate, 3);
-      if (isArray(collection)) {
-        var index = baseFindIndex(collection, predicate);
-        return index > -1 ? collection[index] : undefined;
-      }
-      return baseFind(collection, predicate, baseEach);
-    }
+    var find = createFind(findIndex);
 
     /**
      * This method is like `_.find` except that it iterates over elements of
@@ -32233,6 +32702,7 @@ function plural(ms, n, name) {
      * @param {Array|Object} collection The collection to search.
      * @param {Array|Function|Object|string} [predicate=_.identity]
      *  The function invoked per iteration.
+     * @param {number} [fromIndex=collection.length-1] The index to search from.
      * @returns {*} Returns the matched element, else `undefined`.
      * @example
      *
@@ -32241,14 +32711,7 @@ function plural(ms, n, name) {
      * });
      * // => 3
      */
-    function findLast(collection, predicate) {
-      predicate = getIteratee(predicate, 3);
-      if (isArray(collection)) {
-        var index = baseFindIndex(collection, predicate, true);
-        return index > -1 ? collection[index] : undefined;
-      }
-      return baseFind(collection, predicate, baseEachRight);
-    }
+    var findLast = createFind(findLastIndex);
 
     /**
      * Creates a flattened array of values by running each element in `collection`
@@ -33005,7 +33468,6 @@ function plural(ms, n, name) {
      * @static
      * @memberOf _
      * @since 2.4.0
-     * @type {Function}
      * @category Date
      * @returns {number} Returns the timestamp.
      * @example
@@ -33013,9 +33475,11 @@ function plural(ms, n, name) {
      * _.defer(function(stamp) {
      *   console.log(_.now() - stamp);
      * }, _.now());
-     * // => Logs the number of milliseconds it took for the deferred function to be invoked.
+     * // => Logs the number of milliseconds it took for the deferred invocation.
      */
-    var now = Date.now;
+    function now() {
+      return Date.now();
+    }
 
     /*------------------------------------------------------------------------*/
 
@@ -33119,7 +33583,7 @@ function plural(ms, n, name) {
      * The `_.bind.placeholder` value, which defaults to `_` in monolithic builds,
      * may be used as a placeholder for partially applied arguments.
      *
-     * **Note:** Unlike native `Function#bind` this method doesn't set the "length"
+     * **Note:** Unlike native `Function#bind`, this method doesn't set the "length"
      * property of bound functions.
      *
      * @static
@@ -33359,7 +33823,7 @@ function plural(ms, n, name) {
           maxWait,
           result,
           timerId,
-          lastCallTime = 0,
+          lastCallTime,
           lastInvokeTime = 0,
           leading = false,
           maxing = false,
@@ -33410,7 +33874,7 @@ function plural(ms, n, name) {
         // Either this is the first call, activity has stopped and we're at the
         // trailing edge, the system time has gone backwards and we're treating
         // it as the trailing edge, or we've hit the `maxWait` limit.
-        return (!lastCallTime || (timeSinceLastCall >= wait) ||
+        return (lastCallTime === undefined || (timeSinceLastCall >= wait) ||
           (timeSinceLastCall < 0) || (maxing && timeSinceLastInvoke >= maxWait));
       }
 
@@ -33424,7 +33888,6 @@ function plural(ms, n, name) {
       }
 
       function trailingEdge(time) {
-        clearTimeout(timerId);
         timerId = undefined;
 
         // Only invoke if we have `lastArgs` which means `func` has been
@@ -33437,11 +33900,8 @@ function plural(ms, n, name) {
       }
 
       function cancel() {
-        if (timerId !== undefined) {
-          clearTimeout(timerId);
-        }
-        lastCallTime = lastInvokeTime = 0;
-        lastArgs = lastThis = timerId = undefined;
+        lastInvokeTime = 0;
+        lastArgs = lastCallTime = lastThis = timerId = undefined;
       }
 
       function flush() {
@@ -33462,7 +33922,6 @@ function plural(ms, n, name) {
           }
           if (maxing) {
             // Handle invocations in a tight loop.
-            clearTimeout(timerId);
             timerId = setTimeout(timerExpired, wait);
             return invokeFunc(lastCallTime);
           }
@@ -33686,7 +34145,7 @@ function plural(ms, n, name) {
      *
      * var func = _.overArgs(function(x, y) {
      *   return [x, y];
-     * }, square, doubled);
+     * }, [square, doubled]);
      *
      * func(9, 3);
      * // => [81, 6]
@@ -33803,7 +34262,7 @@ function plural(ms, n, name) {
      *
      * var rearged = _.rearg(function(a, b, c) {
      *   return [a, b, c];
-     * }, 2, 0, 1);
+     * }, [2, 0, 1]);
      *
      * rearged('b', 'c', 'a')
      * // => ['a', 'b', 'c']
@@ -34442,7 +34901,7 @@ function plural(ms, n, name) {
      * _.isBuffer(new Uint8Array(2));
      * // => false
      */
-    var isBuffer = !Buffer ? constant(false) : function(value) {
+    var isBuffer = !Buffer ? stubFalse : function(value) {
       return value instanceof Buffer;
     };
 
@@ -34942,7 +35401,15 @@ function plural(ms, n, name) {
     }
 
     /**
-     * Checks if `value` is a native function.
+     * Checks if `value` is a pristine native function.
+     *
+     * **Note:** This method can't reliably detect native functions in the
+     * presence of the `core-js` package because `core-js` circumvents this kind
+     * of detection. Despite multiple requests, the `core-js` maintainer has made
+     * it clear: any attempt to fix the detection will be obstructed. As a result,
+     * we're left with little choice but to throw an error. Unfortunately, this
+     * also affects packages, like [babel-polyfill](https://www.npmjs.com/package/babel-polyfill),
+     * which rely on `core-js`.
      *
      * @static
      * @memberOf _
@@ -34960,11 +35427,10 @@ function plural(ms, n, name) {
      * // => false
      */
     function isNative(value) {
-      if (!isObject(value)) {
-        return false;
+      if (isMaskable(value)) {
+        throw new Error('This method is not supported with `core-js`. Try https://github.com/es-shims.');
       }
-      var pattern = (isFunction(value) || isHostObject(value)) ? reIsNative : reIsHostCtor;
-      return pattern.test(toSource(value));
+      return baseIsNative(value);
     }
 
     /**
@@ -35426,7 +35892,7 @@ function plural(ms, n, name) {
     /**
      * Converts `value` to an integer.
      *
-     * **Note:** This function is loosely based on
+     * **Note:** This method is loosely based on
      * [`ToInteger`](http://www.ecma-international.org/ecma-262/6.0/#sec-tointeger).
      *
      * @static
@@ -35780,9 +36246,6 @@ function plural(ms, n, name) {
      *
      * _.at(object, ['a[0].b.c', 'a[1]']);
      * // => [3, 4]
-     *
-     * _.at(['a', 'b', 'c'], 0, 2);
-     * // => ['a', 'c']
      */
     var at = rest(function(object, paths) {
       return baseAt(object, baseFlatten(paths, 1));
@@ -35915,7 +36378,7 @@ function plural(ms, n, name) {
      * // => 'barney'
      */
     function findKey(object, predicate) {
-      return baseFind(object, getIteratee(predicate, 3), baseForOwn, true);
+      return baseFindKey(object, getIteratee(predicate, 3), baseForOwn);
     }
 
     /**
@@ -35955,7 +36418,7 @@ function plural(ms, n, name) {
      * // => 'pebbles'
      */
     function findLastKey(object, predicate) {
-      return baseFind(object, getIteratee(predicate, 3), baseForOwnRight, true);
+      return baseFindKey(object, getIteratee(predicate, 3), baseForOwnRight);
     }
 
     /**
@@ -36814,15 +37277,16 @@ function plural(ms, n, name) {
      * An alternative to `_.reduce`; this method transforms `object` to a new
      * `accumulator` object which is the result of running each of its own
      * enumerable string keyed properties thru `iteratee`, with each invocation
-     * potentially mutating the `accumulator` object. The iteratee is invoked
-     * with four arguments: (accumulator, value, key, object). Iteratee functions
-     * may exit iteration early by explicitly returning `false`.
+     * potentially mutating the `accumulator` object. If `accumulator` is not
+     * provided, a new object with the same `[[Prototype]]` will be used. The
+     * iteratee is invoked with four arguments: (accumulator, value, key, object).
+     * Iteratee functions may exit iteration early by explicitly returning `false`.
      *
      * @static
      * @memberOf _
      * @since 1.3.0
      * @category Object
-     * @param {Array|Object} object The object to iterate over.
+     * @param {Object} object The object to iterate over.
      * @param {Function} [iteratee=_.identity] The function invoked per iteration.
      * @param {*} [accumulator] The custom accumulator value.
      * @returns {*} Returns the accumulated value.
@@ -37244,7 +37708,7 @@ function plural(ms, n, name) {
      * @category String
      * @param {string} [string=''] The string to search.
      * @param {string} [target] The string to search for.
-     * @param {number} [position=string.length] The position to search from.
+     * @param {number} [position=string.length] The position to search up to.
      * @returns {boolean} Returns `true` if `string` ends with `target`,
      *  else `false`.
      * @example
@@ -38329,7 +38793,7 @@ function plural(ms, n, name) {
      *   }
      * };
      *
-     * _.bindAll(view, 'onClick');
+     * _.bindAll(view, ['onClick']);
      * jQuery(element).on('click', view.onClick);
      * // => Logs 'clicked docs' when clicked.
      */
@@ -38410,7 +38874,7 @@ function plural(ms, n, name) {
      *   { 'user': 'fred',   'age': 40 }
      * ];
      *
-     * _.filter(users, _.conforms({ 'age': _.partial(_.gt, _, 38) }));
+     * _.filter(users, _.conforms({ 'age': function(n) { return n > 38; } }));
      * // => [{ 'user': 'fred', 'age': 40 }]
      */
     function conforms(source) {
@@ -38428,10 +38892,12 @@ function plural(ms, n, name) {
      * @returns {Function} Returns the new constant function.
      * @example
      *
-     * var object = { 'user': 'fred' };
-     * var getter = _.constant(object);
+     * var objects = _.times(2, _.constant({ 'a': 1 }));
      *
-     * getter() === object;
+     * console.log(objects);
+     * // => [{ 'a': 1 }, { 'a': 1 }]
+     *
+     * console.log(objects[0] === objects[1]);
      * // => true
      */
     function constant(value) {
@@ -38458,7 +38924,7 @@ function plural(ms, n, name) {
      *   return n * n;
      * }
      *
-     * var addSquare = _.flow(_.add, square);
+     * var addSquare = _.flow([_.add, square]);
      * addSquare(1, 2);
      * // => 9
      */
@@ -38481,7 +38947,7 @@ function plural(ms, n, name) {
      *   return n * n;
      * }
      *
-     * var addSquare = _.flowRight(square, _.add);
+     * var addSquare = _.flowRight([square, _.add]);
      * addSquare(1, 2);
      * // => 9
      */
@@ -38500,7 +38966,7 @@ function plural(ms, n, name) {
      *
      * var object = { 'user': 'fred' };
      *
-     * _.identity(object) === object;
+     * console.log(_.identity(object) === object);
      * // => true
      */
     function identity(value) {
@@ -38761,8 +39227,7 @@ function plural(ms, n, name) {
     }
 
     /**
-     * A no-operation function that returns `undefined` regardless of the
-     * arguments it receives.
+     * A method that returns `undefined`.
      *
      * @static
      * @memberOf _
@@ -38770,17 +39235,15 @@ function plural(ms, n, name) {
      * @category Util
      * @example
      *
-     * var object = { 'user': 'fred' };
-     *
-     * _.noop(object) === undefined;
-     * // => true
+     * _.times(2, _.noop);
+     * // => [undefined, undefined]
      */
     function noop() {
       // No operation performed.
     }
 
     /**
-     * Creates a function that gets the argument at `n` index. If `n` is negative,
+     * Creates a function that gets the argument at index `n`. If `n` is negative,
      * the nth argument from the end is returned.
      *
      * @static
@@ -38819,7 +39282,7 @@ function plural(ms, n, name) {
      * @returns {Function} Returns the new function.
      * @example
      *
-     * var func = _.over(Math.max, Math.min);
+     * var func = _.over([Math.max, Math.min]);
      *
      * func(1, 2, 3, 4);
      * // => [4, 1]
@@ -38839,7 +39302,7 @@ function plural(ms, n, name) {
      * @returns {Function} Returns the new function.
      * @example
      *
-     * var func = _.overEvery(Boolean, isFinite);
+     * var func = _.overEvery([Boolean, isFinite]);
      *
      * func('1');
      * // => true
@@ -38865,7 +39328,7 @@ function plural(ms, n, name) {
      * @returns {Function} Returns the new function.
      * @example
      *
-     * var func = _.overSome(Boolean, isFinite);
+     * var func = _.overSome([Boolean, isFinite]);
      *
      * func('1');
      * // => true
@@ -39013,6 +39476,101 @@ function plural(ms, n, name) {
     var rangeRight = createRange(true);
 
     /**
+     * A method that returns a new empty array.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.13.0
+     * @category Util
+     * @returns {Array} Returns the new empty array.
+     * @example
+     *
+     * var arrays = _.times(2, _.stubArray);
+     *
+     * console.log(arrays);
+     * // => [[], []]
+     *
+     * console.log(arrays[0] === arrays[1]);
+     * // => false
+     */
+    function stubArray() {
+      return [];
+    }
+
+    /**
+     * A method that returns `false`.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.13.0
+     * @category Util
+     * @returns {boolean} Returns `false`.
+     * @example
+     *
+     * _.times(2, _.stubFalse);
+     * // => [false, false]
+     */
+    function stubFalse() {
+      return false;
+    }
+
+    /**
+     * A method that returns a new empty object.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.13.0
+     * @category Util
+     * @returns {Object} Returns the new empty object.
+     * @example
+     *
+     * var objects = _.times(2, _.stubObject);
+     *
+     * console.log(objects);
+     * // => [{}, {}]
+     *
+     * console.log(objects[0] === objects[1]);
+     * // => false
+     */
+    function stubObject() {
+      return {};
+    }
+
+    /**
+     * A method that returns an empty string.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.13.0
+     * @category Util
+     * @returns {string} Returns the empty string.
+     * @example
+     *
+     * _.times(2, _.stubString);
+     * // => ['', '']
+     */
+    function stubString() {
+      return '';
+    }
+
+    /**
+     * A method that returns `true`.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.13.0
+     * @category Util
+     * @returns {boolean} Returns `true`.
+     * @example
+     *
+     * _.times(2, _.stubTrue);
+     * // => [true, true]
+     */
+    function stubTrue() {
+      return true;
+    }
+
+    /**
      * Invokes the iteratee `n` times, returning an array of the results of
      * each invocation. The iteratee is invoked with one argument; (index).
      *
@@ -39028,8 +39586,8 @@ function plural(ms, n, name) {
      * _.times(3, String);
      * // => ['0', '1', '2']
      *
-     *  _.times(4, _.constant(true));
-     * // => [true, true, true, true]
+     *  _.times(4, _.constant(0));
+     * // => [0, 0, 0, 0]
      */
     function times(n, iteratee) {
       n = toInteger(n);
@@ -39065,15 +39623,6 @@ function plural(ms, n, name) {
      *
      * _.toPath('a[0].b.c');
      * // => ['a', '0', 'b', 'c']
-     *
-     * var path = ['a', 'b', 'c'],
-     *     newPath = _.toPath(path);
-     *
-     * console.log(newPath);
-     * // => ['a', 'b', 'c']
-     *
-     * console.log(path === newPath);
-     * // => false
      */
     function toPath(value) {
       if (isArray(value)) {
@@ -39712,6 +40261,11 @@ function plural(ms, n, name) {
     lodash.meanBy = meanBy;
     lodash.min = min;
     lodash.minBy = minBy;
+    lodash.stubArray = stubArray;
+    lodash.stubFalse = stubFalse;
+    lodash.stubObject = stubObject;
+    lodash.stubString = stubString;
+    lodash.stubTrue = stubTrue;
     lodash.multiply = multiply;
     lodash.nth = nth;
     lodash.noConflict = noConflict;
@@ -40018,7 +40572,7 @@ function plural(ms, n, name) {
   // also prevents errors in cases where Lodash is loaded by a script tag in the
   // presence of an AMD loader. See http://requirejs.org/docs/errors.html#mismatch
   // for more details. Use `_.noConflict` to remove Lodash from the global object.
-  (freeWindow || freeSelf || {})._ = _;
+  (freeSelf || {})._ = _;
 
   // Some AMD build optimizers like r.js check for condition patterns like the following:
   if (typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
@@ -40029,11 +40583,9 @@ function plural(ms, n, name) {
     });
   }
   // Check for `exports` after `define` in case a build optimizer adds an `exports` object.
-  else if (freeExports && freeModule) {
+  else if (freeModule) {
     // Export for Node.js.
-    if (moduleExports) {
-      (freeModule.exports = _)._ = _;
-    }
+    (freeModule.exports = _)._ = _;
     // Export for CommonJS support.
     freeExports._ = _;
   }
@@ -59331,7 +59883,7 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "                    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
     "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/#/home\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
     "                        <li><a title=\"Go to News.\" href=\"/#/news-exhibits\" class=\"post post-page\">News</a></li>\n" +
-    "                        <li><a title=\"Go to news article.\" href=\"\" class=\"post post-page\">{{newsItem.title | breadcrumbTruncate}}</a></li>\n" +
+    "                        <li><a title=\"Go to news article.\" href=\"\" class=\"post post-page\">{{newsItem.title | truncate: 30: '...': true}}</a></li>\n" +
     "                    </ol>\n" +
     "                </div>\n" +
     "            </div>\n" +
@@ -60007,19 +60559,7 @@ angular.module('ualib.news', [
                 return 'news-item/' + type + '-card.tpl.html';
             }
         };
-    }])
-
-    .filter('breadcrumbTruncate', function () {
-        return function(x){
-            pageArray = x.split(' ');
-
-            if (pageArray.length > 4) {
-                newPageArray = pageArray.slice(0, 4);
-                x = newPageArray.join(' ') + '...';
-            }
-            return x;
-        };
-    });;/**
+    }]);;/**
  * @ngdoc overview
  * @name news
  * 

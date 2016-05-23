@@ -1,6 +1,83 @@
-
+.comp-admin-container {
+  position: relative;
+  height: 630px;
+}
+.comp-admin-container .ui-layout-container {
+  display: inline-block;
+}
+.comp-admin-container .map-container {
+  overflow: hidden;
+}
+/*# sourceMappingURL=dist/compfinder.css.map */
 .map {
   background-color: #7F7D78;
+}
+/*# sourceMappingURL=dist/compfinder.css.map */
+.computers-container img {
+  background-color: #7F7D78;
+}
+.computers-container .page-slice > .page-slice {
+  border-bottom: 1px solid #ccc;
+}
+.computers-container .laptop .computer-total {
+  font-size: 3em !important;
+}
+.computers-container .laptop .computer-type .fa {
+  font-size: 2em !important;
+}
+.computers-container .computer-total {
+  font-size: 7em;
+}
+.computers-container .computer-total,
+.computers-container .computer-type {
+  display: inline-block;
+  padding: 0 15px;
+}
+.computers-container .computer-total .fa,
+.computers-container .computer-type .fa {
+  font-size: 3em;
+}
+.computers-container .computer-total .progress,
+.computers-container .computer-type .progress {
+  margin-bottom: 0;
+}
+@media (max-width: 768px) {
+  .computers-container .computer-total {
+    font-size: 1.5em;
+  }
+  .computers-container .computer-total,
+  .computers-container .computer-type {
+    padding: 10px 0;
+    text-align: left;
+  }
+  .computers-container .computer-total > div,
+  .computers-container .computer-type > div {
+    display: inline-block;
+  }
+  .computers-container .computer-total .fa,
+  .computers-container .computer-type .fa {
+    font-size: inherit;
+  }
+}
+.btn-outlined {
+  color: #933;
+  background-color: #f9f9f9;
+  border-color: #933;
+}
+.btn-outlined:hover,
+.btn-outlined:focus,
+.btn-outlined.focus,
+.btn-outlined:active,
+.btn-outlined.active,
+.open > .dropdown-toggle.btn-outlined {
+  color: #f9f9f9;
+  background-color: #732626;
+  border-color: #6b2424;
+}
+.btn-outlined:active,
+.btn-outlined.active,
+.open > .dropdown-toggle.btn-outlined {
+  background-image: none;
 }
 /*# sourceMappingURL=dist/compfinder.css.map */
 .comp-signage-header {
