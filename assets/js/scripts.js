@@ -214,7 +214,6 @@ angular.module("_ualib-home.tpl.html", []).run(["$templateCache", function($temp
     'hours',
     'oneSearch',
     'manage',
-    'compfinder',
     'ualib.imageCarousel',
     'ualib.databases',
     'musicSearch',
