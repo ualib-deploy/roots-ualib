@@ -9216,6 +9216,11 @@ div[ng-view].ng-enter {
 header .container-fluid {
   padding-right: 5px;
 }
+header[role="banner"] {
+  position: fixed;
+  width: 100%;
+  z-index: 5000;
+}
 .sidebar {
   position: relative;
   min-height: 1px;
@@ -9302,6 +9307,7 @@ body {
   min-height: 100%;
 }
 div[role="document"] {
+  margin-top: 81px;
   min-height: 705px;
 }
 .home-webapp > .wrap main,
