@@ -163,6 +163,18 @@
 
 .navbar-mega-inverse {
   .navbar-inverse;
+
+  .navbar-nav {
+    > li {
+      > a.dropdown-toggle {
+        @media (max-width: 1140px){
+          font-size: 15px;
+          padding-left: 20px;
+        }
+      }
+    }
+  }
+
   .megamenu(@gray-lighter, @brand-primary);
 }
 
@@ -195,9 +207,9 @@
         margin-top: -9px;
 //        max-width: 190px;
       }
-      @media (max-width: 1067px){
-        padding-top: 22px;
-        padding-bottom: 22px;
+      @media (max-width: 1140px){
+        padding-top: 21px;
+        padding-bottom: 21px;
         max-width: 217px;
       }
     }
