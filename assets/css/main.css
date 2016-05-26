@@ -6372,10 +6372,10 @@ fieldset[disabled] .navbar-mega .btn-link:focus {
   max-height: 69px;
   margin-top: -9px;
 }
-@media (max-width: 1067px) {
+@media (max-width: 1140px) {
   .navbar-mega .navbar-header .navbar-brand {
-    padding-top: 22px;
-    padding-bottom: 22px;
+    padding-top: 21px;
+    padding-bottom: 21px;
     max-width: 217px;
   }
 }
@@ -6612,6 +6612,12 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:hover,
 fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
   color: #e5d8d8;
 }
+@media (max-width: 1140px) {
+  .navbar-mega-inverse .navbar-nav > li > a.dropdown-toggle {
+    font-size: 15px;
+    padding-left: 20px;
+  }
+}
 @media (min-width: 992px) {
   .navbar-mega-inverse {
     margin-bottom: 0;
@@ -6631,10 +6637,10 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
   max-height: 69px;
   margin-top: -9px;
 }
-@media (max-width: 1067px) {
+@media (max-width: 1140px) {
   .navbar-mega-inverse .navbar-header .navbar-brand {
-    padding-top: 22px;
-    padding-bottom: 22px;
+    padding-top: 21px;
+    padding-bottom: 21px;
     max-width: 217px;
   }
 }
@@ -9206,6 +9212,9 @@ div[ng-view].ng-enter {
   to {
     opacity: 0;
   }
+}
+header .container-fluid {
+  padding-right: 5px;
 }
 .sidebar {
   position: relative;
