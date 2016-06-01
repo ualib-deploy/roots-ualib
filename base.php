@@ -1,5 +1,9 @@
 <?php get_template_part('templates/head'); ?>
+<?php if (WP_ENV === 'development'): ?>
+<body <?php body_class(); ?> ng-class="appClass" ng-style="appStyle" ui-scrollfix="80">
+<?php else: ?>
 <body <?php body_class(); ?> ng-class="appClass" ng-style="appStyle">
+<?php endif; ?>
 <!-- Google Tag Manager -->
 <noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-KHJ2CR"
                   height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -18,7 +22,12 @@
 
   <?php
     do_action('get_header');
-    get_template_part('templates/header');
+    if (WP_ENV === 'development'){
+        get_template_part('templates/header-fixed');
+    }
+    else {
+        get_template_part('templates/header');
+    }
   ?>
 
 

@@ -1,25 +1,24 @@
 @home-card-gutter: floor((@grid-gutter-width / 2));
 
-html, body {
-  min-height: 100%;
-}
-
-div[role="document"] {
-  margin-top: 81px;
-  min-height: 705px;
-}
-
 .home-webapp, .bento-webapp{
+  /* @if NODE_ENV='dev' */
+  @media (min-width: @screen-md-min){
+    padding-top: (@body-top-padding + 120px) !important;
+  }
+  /* @endif */
   > .wrap {
     main {
       position:relative;
+      /* @if NODE_ENV='live' */
       margin-top: 125px;
-    /* env:dev */
-      margin-top: 217px;
-    /* env:dev:end */
       @media (max-width: @screen-sm-max) {
         margin-top: 0;
       }
+      /* @endif */
+
+      /* @if NODE_ENV='dev' */
+      padding-top: 15px;
+      /* @endif */
     }
   }
 }
@@ -45,11 +44,6 @@ div[role="document"] {
     }
 
 
-  }
-  .card:first-child {
-    @media(max-width: @screen-md-min){
-      margin-top: 21px;
-    }
   }
 
   .wrap, header .nav, footer .container {

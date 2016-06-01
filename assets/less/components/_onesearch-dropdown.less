@@ -1,15 +1,36 @@
+/* @if NODE_ENV='dev' */
+body.scrollfix {
+  .onesearch-box {
+    -webkit-box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23) !important;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23) !important;
+    .yamm-content {
+      padding-top: 10px;
+
+      .onesearch-text {
+        font-size: 16px;
+        height: auto !important;
+      }
+      .btn-onesearch {
+        font-size: 16px !important;
+        height: auto !important;
+      }
+    }
+  }
+}
+/* @endif */
+
 .onesearch-box{
   .yamm-content{
     padding-bottom: 0;
 
     .onesearch-text {
-      height: 60px !important;
-      font-size: 20px !important;
+      height: 60px;
+      font-size: 20px;
       border-radius: 0;
     }
     .btn-onesearch {
-      font-size: 30px !important;
-      height: 60px !important;
+      font-size: 30px;
+      height: 60px;
       /*background-color: transparent;*/
       color: #f9f9f9;
       border-color: transparent;

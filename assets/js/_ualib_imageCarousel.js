@@ -43,7 +43,6 @@ angular.module('ualib.imageCarousel', ['angular-carousel'])
 
             imageCarouselFactory.getData()
                 .success(function(data) {
-                    console.log(data);
                     loadImages(data.slides).then(function(slides){
                         $scope.slides = slides;
                     });
@@ -58,6 +57,25 @@ angular.module('ualib.imageCarousel', ['angular-carousel'])
             restrict: 'AC',
             controller: 'imageCarouselCtrl',
             link: function(scope, elm, attrs, Ctrl){
+
+                var toggleLock = false;
+                scope.isLocked = false;
+
+                scope.pause = function(){
+                    toggleLock = true;
+                    scope.isLocked = true;
+                };
+                scope.play = function(){
+                    toggleLock = false;
+                    scope.isLocked = false;
+                };
+
+                scope.mouseToggle = function(){
+                    if (!toggleLock){
+                        scope.isLocked = !scope.isLocked;
+                    }
+                };
+
             }
         };
     }]);

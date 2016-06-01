@@ -9071,17 +9071,32 @@ a.service-card:focus {
   opacity: 1;
   max-height: 52px;
 }
+body.scrollfix .onesearch-box {
+  -webkit-box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23) !important;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23) !important;
+}
+body.scrollfix .onesearch-box .yamm-content {
+  padding-top: 10px;
+}
+body.scrollfix .onesearch-box .yamm-content .onesearch-text {
+  font-size: 16px;
+  height: auto !important;
+}
+body.scrollfix .onesearch-box .yamm-content .btn-onesearch {
+  font-size: 16px !important;
+  height: auto !important;
+}
 .onesearch-box .yamm-content {
   padding-bottom: 0;
 }
 .onesearch-box .yamm-content .onesearch-text {
-  height: 60px !important;
-  font-size: 20px !important;
+  height: 60px;
+  font-size: 20px;
   border-radius: 0;
 }
 .onesearch-box .yamm-content .btn-onesearch {
-  font-size: 30px !important;
-  height: 60px !important;
+  font-size: 30px;
+  height: 60px;
   /*background-color: transparent;*/
   color: #f9f9f9;
   border-color: transparent;
@@ -9135,12 +9150,26 @@ figure.alignnone {
   }
 }
 html,
-body.not-so-smart-board {
+body:last-child {
   height: 100%;
+  min-height: 100%;
 }
-body.not-so-smart-board {
+body:last-child {
   display: table;
-  width: 100%;
+  width: 100% !important;
+  padding-top: 80px;
+}
+@media (min-width: 992px) {
+  body:last-child.logged-in {
+    padding-top: 112px;
+  }
+}
+body.scrollfix {
+  position: relative;
+  top: 0;
+}
+div[role="document"] {
+  min-height: 705px;
 }
 .page-row {
   display: table-row;
@@ -9216,13 +9245,39 @@ div[ng-view].ng-enter {
 header .container-fluid {
   padding-right: 5px;
 }
-/* env:dev */
-header[role="banner"] {
-  position: fixed;
-  width: 100%;
-  z-index: 5000;
+.navbar-fixed-top .navbar-nav > li > a,
+.navbar-fixed-top .navbar-nav > li > button {
+  -webkit-transition: all 120ms;
+  /* property duration timing-function delay */
+  -o-transition: all 120ms;
+  transition: all 120ms;
 }
-/* env:dev:end */
+.navbar-fixed-top .navbar-header .navbar-brand {
+  -webkit-transition: all 120ms;
+  /* property duration timing-function delay */
+  -o-transition: all 120ms;
+  transition: all 120ms;
+}
+body.scrollfix .navbar-fixed-top .navbar-nav > li > a,
+body.scrollfix .navbar-fixed-top .navbar-nav > li > button {
+  -webkit-transition: all 200ms;
+  /* property duration timing-function delay */
+  -o-transition: all 200ms;
+  transition: all 200ms;
+  padding-top: 15px !important;
+  padding-bottom: 15px !important;
+}
+body.scrollfix .navbar-header .navbar-brand {
+  -webkit-transition: width 200ms;
+  /* property duration timing-function delay */
+  -o-transition: width 200ms;
+  transition: width 200ms;
+  padding: 11px 0 0 0;
+  max-width: 175px;
+}
+body.logged-in .navbar-fixed-top {
+  top: 32px;
+}
 .sidebar {
   position: relative;
   min-height: 1px;
@@ -9304,21 +9359,19 @@ footer > .sub-footer {
 .slice {
   text-align: center;
 }
-html,
-body {
-  min-height: 100%;
+.home-webapp,
+.bento-webapp {
 }
-div[role="document"] {
-  margin-top: 81px;
-  min-height: 705px;
+@media (min-width: 992px) {
+  .home-webapp,
+  .bento-webapp {
+    padding-top: 200px !important;
+  }
 }
 .home-webapp > .wrap main,
 .bento-webapp > .wrap main {
   position: relative;
-  margin-top: 125px;
-  /* env:dev */
-  margin-top: 217px;
-  /* env:dev:end */
+  padding-top: 15px;
 }
 @media (max-width: 991px) {
   .home-webapp > .wrap main,
@@ -9345,11 +9398,6 @@ div[role="document"] {
 .home-webapp.home:before {
   opacity: 0;
   position: absolute;
-}
-@media (max-width: 992px) {
-  .home .card:first-child {
-    margin-top: 21px;
-  }
 }
 .home .wrap,
 .home header .nav,
@@ -9460,6 +9508,9 @@ div[role="document"] {
   margin-left: -10px;
   margin-bottom: 21px;
 }
+.ualib-image-carousel {
+  position: relative;
+}
 .ualib-image-carousel ul,
 .ualib-image-carousel .slide-image {
   width: auto;
@@ -9502,6 +9553,27 @@ div[role="document"] {
   bottom: 0;
   padding: 15px;
   background-color: rgba(0, 0, 0, 0.75);
+}
+.ualib-image-carousel .rn-carousel-control {
+  opacity: 0.75;
+  background-color: rgba(0, 0, 0, 0.75);
+  padding: 15px;
+  border-radius: 4px;
+  -webkit-transition: opacity 0.2s ease-out;
+  -o-transition: opacity 0.2s ease-out;
+     transition: opacity 0.2s ease-out;
+  font-size: .3em;
+  position: absolute;
+  bottom: 0;
+  cursor: pointer;
+}
+.ualib-image-carousel .pause-play {
+  position: absolute;
+  bottom: 10px;
+  right: 15px;
+}
+.ualib-image-carousel .rn-carousel-indicator {
+  font-size: 20px;
 }
 /**
  * Your styles here
