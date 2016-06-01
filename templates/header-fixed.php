@@ -3,7 +3,7 @@
         <div class="container-fluid">
             <div class="navbar-header">
                 <a class="navbar-brand" href="/#/home">
-                    <img src="/wordpress/wp-content/themes/roots-ualib/assets/img/new-ualib-logo.png" class="hidden-xs" rel="home" alt="University of Alabama Libraries"/>
+                    <img src="/wp-content/themes/roots-ualib/assets/img/new-ualib-logo.png" class="hidden-xs" rel="home" alt="University of Alabama Libraries"/>
                     <span class="visible-xs">UA Libraries</span>
                 </a>
             </div>
