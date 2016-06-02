@@ -9071,23 +9071,34 @@ a.service-card:focus {
   opacity: 1;
   max-height: 52px;
 }
-body.scrollfix .onesearch-box {
+.scrollfix .onesearch-box {
   -webkit-box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23) !important;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23) !important;
 }
-body.scrollfix .onesearch-box .yamm-content {
+.scrollfix .onesearch-box .yamm-content {
   padding-top: 10px;
 }
-body.scrollfix .onesearch-box .yamm-content .onesearch-text {
-  font-size: 16px;
-  height: auto !important;
-}
-body.scrollfix .onesearch-box .yamm-content .btn-onesearch {
+.scrollfix .onesearch-box .yamm-content .onesearch-text,
+.scrollfix .onesearch-box .yamm-content .btn-onesearch,
+.scrollfix .onesearch-box .yamm-content .what-is-link {
   font-size: 16px !important;
   height: auto !important;
 }
+.scrollfix .onesearch-box .yamm-content .what-is-link,
+.scrollfix .onesearch-box .yamm-content .scout-checkbox {
+  margin-top: 5px;
+}
 .onesearch-box .yamm-content {
   padding-bottom: 0;
+}
+.onesearch-box .yamm-content .onesearch-text,
+.onesearch-box .yamm-content .btn-onesearch,
+.onesearch-box .yamm-content .what-is-link,
+.onesearch-box .yamm-content .scout-checkbox {
+  -webkit-transition: all 200ms;
+  /* property duration timing-function delay */
+  -o-transition: all 200ms;
+  transition: all 200ms;
 }
 .onesearch-box .yamm-content .onesearch-text {
   height: 60px;
@@ -9110,11 +9121,20 @@ body.scrollfix .onesearch-box .yamm-content .btn-onesearch {
   position: relative;
   top: 2px;
 }
+.onesearch-box .yamm-content .scout-checkbox {
+  text-align: right;
+  margin-bottom: 0;
+}
+.onesearch-box .yamm-content .scout-checkbox input {
+  position: relative;
+  float: right;
+  margin-left: 5px;
+}
 .onesearch-box .yamm-content .what-is-link {
   color: #993333;
   font-size: 18px;
   display: inline-block;
-  margin-top: 5px;
+  margin-top: 10px;
 }
 .onesearch-box .yamm-content .what-is-link:hover,
 .onesearch-box .yamm-content .what-is-link:active {
@@ -9156,17 +9176,13 @@ body:last-child {
 }
 body:last-child {
   display: table;
-  width: 100% !important;
+  width: 100%;
   padding-top: 80px;
 }
 @media (min-width: 992px) {
-  body:last-child.logged-in {
+  body:last-child.admin-bar {
     padding-top: 112px;
   }
-}
-body.scrollfix {
-  position: relative;
-  top: 0;
 }
 div[role="document"] {
   min-height: 705px;
@@ -9258,8 +9274,8 @@ header .container-fluid {
   -o-transition: all 120ms;
   transition: all 120ms;
 }
-body.scrollfix .navbar-fixed-top .navbar-nav > li > a,
-body.scrollfix .navbar-fixed-top .navbar-nav > li > button {
+.scrollfix .navbar-nav > li > a,
+.scrollfix .navbar-nav > li > button {
   -webkit-transition: all 200ms;
   /* property duration timing-function delay */
   -o-transition: all 200ms;
@@ -9267,15 +9283,15 @@ body.scrollfix .navbar-fixed-top .navbar-nav > li > button {
   padding-top: 15px !important;
   padding-bottom: 15px !important;
 }
-body.scrollfix .navbar-header .navbar-brand {
-  -webkit-transition: width 200ms;
+.scrollfix .navbar-header .navbar-brand {
+  -webkit-transition: all 200ms;
   /* property duration timing-function delay */
-  -o-transition: width 200ms;
-  transition: width 200ms;
+  -o-transition: all 200ms;
+  transition: all 200ms;
   padding: 11px 0 0 0;
   max-width: 175px;
 }
-body.logged-in .navbar-fixed-top {
+.admin-bar .navbar-fixed-top {
   top: 32px;
 }
 .sidebar {

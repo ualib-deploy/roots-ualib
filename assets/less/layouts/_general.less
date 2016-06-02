@@ -11,20 +11,16 @@ body:last-child { height: 100%; min-height: 100%; }
 /* @if NODE_ENV='dev' */
 body:last-child {
   display: table;
-  width: 100% !important;
+  width: 100%;
   padding-top: @body-top-padding;
 
   @media (min-width: @screen-md-min){
-    &.logged-in{
+    &.admin-bar{
       padding-top: @body-top-padding + @wp-admin-menu-height;
     }
   }
 }
 
-body.scrollfix {
-  position: relative;
-  top: 0;
-}
 /* @endif */
 
 div[role="document"] {

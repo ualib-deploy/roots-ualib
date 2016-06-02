@@ -25,39 +25,36 @@ header .container-fluid {
   }
 }
 
-body {
-  &.scrollfix {
-    .navbar-fixed-top {
-      .navbar-nav {
-        > li {
-          > a, > button {
-            -webkit-transition: all 200ms; /* property duration timing-function delay */
-            -moz-transition: all 200ms;
-            -o-transition: all 200ms;
-            transition:all 200ms;
-            padding-top: 15px !important;
-            padding-bottom: 15px !important;
-          }
-        }
-      }
-    }
-
-    .navbar-header {
-      .navbar-brand {
-        -webkit-transition: width 200ms; /* property duration timing-function delay */
-        -moz-transition: width 200ms;
-        -o-transition: width 200ms;
-        transition: width 200ms;
-        padding: 11px 0 0 0;
-        max-width: 175px;
+.scrollfix {
+  .navbar-nav {
+    > li {
+      > a, > button {
+        -webkit-transition: all 200ms; /* property duration timing-function delay */
+        -moz-transition: all 200ms;
+        -o-transition: all 200ms;
+        transition:all 200ms;
+        padding-top: 15px !important;
+        padding-bottom: 15px !important;
       }
     }
   }
 
-  &.logged-in {
-    .navbar-fixed-top {
-      top: @wp-admin-menu-height;
+  .navbar-header {
+    .navbar-brand {
+      -webkit-transition: all 200ms; /* property duration timing-function delay */
+      -moz-transition: all 200ms;
+      -o-transition: all 200ms;
+      transition: all 200ms;
+      padding: 11px 0 0 0;
+      max-width: 175px;
     }
   }
 }
+
+.admin-bar {
+    .navbar-fixed-top {
+      top: @wp-admin-menu-height;
+    }
+}
+
 /* @endif */

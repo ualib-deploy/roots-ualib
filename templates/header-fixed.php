@@ -1,5 +1,5 @@
 <header class="page-row" role="banner">
-    <nav class="navbar navbar-fixed-top navbar-mega-inverse" role="navigation">
+    <nav class="navbar navbar-fixed-top navbar-mega-inverse" role="navigation" ui-scrollfix="80">
         <div class="container-fluid">
             <div class="navbar-header">
                 <a class="navbar-brand" href="/#/home">
@@ -72,9 +72,16 @@
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col-md-12">
+                                            <div class="col-md-6">
                                                 <a href="http://guides.lib.ua.edu/onesearch-howto" class="what-is-link" title="What am I searching?"><span class="fa fa-info-circle"></span>  What am I searching?</a>
-                                                <div class="input-group-checkbox" id="scoutCheckbox"><span>Only search Scout</span>&nbsp;<input type="checkbox" ng-model="scoutCheckbox" ng-click="gaScoutOnly()"></input></div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="checkbox scout-checkbox">
+                                                    <label ng-click="gaScoutOnly()">
+                                                        Only search Scout
+                                                        <input type="checkbox" ng-model="scoutCheckbox">
+                                                    </label>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
