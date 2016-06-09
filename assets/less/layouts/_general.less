@@ -2,12 +2,30 @@
 // SMART Board applications (used in presentation rooms across campus), which inject a separate body tag into the page
 // instead of extending the existing <body>
 // So commonly used <body> styles such as "min-height: 100%" cause a giant empty space above the site content.
-html,
-body.not-so-smart-board { height: 100%; }
 
-body.not-so-smart-board {
+
+
+html,
+body:last-child { height: 100%; min-height: 100%; }
+
+/* @if NODE_ENV='dev' */
+body:last-child {
   display: table;
   width: 100%;
+  padding-top: @body-top-padding;
+
+  @media (min-width: @screen-md-min){
+    &.admin-bar{
+      padding-top: @body-top-padding + @wp-admin-menu-height;
+    }
+  }
+}
+
+/* @endif */
+
+div[role="document"] {
+  //margin-top: 81px;
+  min-height: 705px;
 }
 
 .page-row {

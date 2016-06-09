@@ -18,7 +18,8 @@ angular.module('ualib', [
     'ualib.news',
     'ualib.alerts'
 ])
-
+// Default offset for ui-scrollfix elements.
+    .value('duScrollOffset', 80)
 
     .config(['$httpProvider', '$routeProvider', '$compileProvider', function($httpProvider, $routeProvider, $compileProvider) {
         //HTML tags are stripped after JSON data in all AJAX responses

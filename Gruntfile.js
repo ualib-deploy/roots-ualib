@@ -137,7 +137,8 @@ module.exports = function(grunt) {
                     'modernizr',
                     'roots-ualib',
                     'compfinder',
-                    'angular-lazy-img'
+                    'angular-lazy-img',
+                    'hamsterjs'
                 ],
                 callback: function(mainFiles, component) {
                     return mainFiles.map(function(filepath) {

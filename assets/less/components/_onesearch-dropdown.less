@@ -1,23 +1,59 @@
+/* @if NODE_ENV='dev' */
+.scrollfix {
+  .onesearch-box {
+    -webkit-box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23) !important;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23) !important;
+    .yamm-content {
+      padding-top: 10px;
+
+
+      .onesearch-text,
+      .btn-onesearch,
+      .what-is-link {
+        font-size: 16px !important;
+        height: auto !important;
+      }
+
+      .what-is-link,
+      .scout-checkbox {
+        margin-top: 5px;
+      }
+    }
+  }
+}
+/* @endif */
+
 .onesearch-box{
   .yamm-content{
     padding-bottom: 0;
 
+    .onesearch-text,
+    .btn-onesearch,
+    .what-is-link,
+    .scout-checkbox {
+      -webkit-transition: all 200ms; /* property duration timing-function delay */
+      -moz-transition: all 200ms;
+      -o-transition: all 200ms;
+      transition: all 200ms;
+    }
+
     .onesearch-text {
-      height: 60px !important;
-      font-size: 20px !important;
+      height: 60px;
+      font-size: 20px;
       border-radius: 0;
     }
     .btn-onesearch {
-      font-size: 30px !important;
-      height: 60px !important;
+      font-size: 30px;
+      height: 60px;
       /*background-color: transparent;*/
       color: #f9f9f9;
       border-color: transparent;
       /*text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.35);*/
     }
 
+    /* @if NODE_ENV='live' */
     #scoutCheckbox {
-       float: right;
+      float: right;
        margin-top: 5px;
 
       input {
@@ -25,12 +61,26 @@
         top: 2px;
       }
     }
+    /* @endif */
+
+    /* @if NODE_ENV='dev' */
+    .scout-checkbox {
+      text-align: right;
+      margin-bottom: 0;
+
+      input {
+        position: relative;
+        float: right;
+        margin-left: 5px;
+      }
+    }
+    /* @endif */
 
     .what-is-link{
       color: @brand-primary;
       font-size: 18px;
       display: inline-block;
-      margin-top: 5px;
+      margin-top: 10px;
 
       &:hover,
       &:active {

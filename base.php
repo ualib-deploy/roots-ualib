@@ -18,7 +18,12 @@
 
   <?php
     do_action('get_header');
-    get_template_part('templates/header');
+    if (WP_ENV === 'development'){
+        get_template_part('templates/header-fixed');
+    }
+    else {
+        get_template_part('templates/header');
+    }
   ?>
 
 

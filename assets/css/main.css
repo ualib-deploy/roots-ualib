@@ -9071,17 +9071,43 @@ a.service-card:focus {
   opacity: 1;
   max-height: 52px;
 }
+.scrollfix .onesearch-box {
+  -webkit-box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23) !important;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23) !important;
+}
+.scrollfix .onesearch-box .yamm-content {
+  padding-top: 10px;
+}
+.scrollfix .onesearch-box .yamm-content .onesearch-text,
+.scrollfix .onesearch-box .yamm-content .btn-onesearch,
+.scrollfix .onesearch-box .yamm-content .what-is-link {
+  font-size: 16px !important;
+  height: auto !important;
+}
+.scrollfix .onesearch-box .yamm-content .what-is-link,
+.scrollfix .onesearch-box .yamm-content .scout-checkbox {
+  margin-top: 5px;
+}
 .onesearch-box .yamm-content {
   padding-bottom: 0;
 }
+.onesearch-box .yamm-content .onesearch-text,
+.onesearch-box .yamm-content .btn-onesearch,
+.onesearch-box .yamm-content .what-is-link,
+.onesearch-box .yamm-content .scout-checkbox {
+  -webkit-transition: all 200ms;
+  /* property duration timing-function delay */
+  -o-transition: all 200ms;
+  transition: all 200ms;
+}
 .onesearch-box .yamm-content .onesearch-text {
-  height: 60px !important;
-  font-size: 20px !important;
+  height: 60px;
+  font-size: 20px;
   border-radius: 0;
 }
 .onesearch-box .yamm-content .btn-onesearch {
-  font-size: 30px !important;
-  height: 60px !important;
+  font-size: 30px;
+  height: 60px;
   /*background-color: transparent;*/
   color: #f9f9f9;
   border-color: transparent;
@@ -9095,11 +9121,20 @@ a.service-card:focus {
   position: relative;
   top: 2px;
 }
+.onesearch-box .yamm-content .scout-checkbox {
+  text-align: right;
+  margin-bottom: 0;
+}
+.onesearch-box .yamm-content .scout-checkbox input {
+  position: relative;
+  float: right;
+  margin-left: 5px;
+}
 .onesearch-box .yamm-content .what-is-link {
   color: #993333;
   font-size: 18px;
   display: inline-block;
-  margin-top: 5px;
+  margin-top: 10px;
 }
 .onesearch-box .yamm-content .what-is-link:hover,
 .onesearch-box .yamm-content .what-is-link:active {
@@ -9135,12 +9170,22 @@ figure.alignnone {
   }
 }
 html,
-body.not-so-smart-board {
+body:last-child {
   height: 100%;
+  min-height: 100%;
 }
-body.not-so-smart-board {
+body:last-child {
   display: table;
   width: 100%;
+  padding-top: 80px;
+}
+@media (min-width: 992px) {
+  body:last-child.admin-bar {
+    padding-top: 112px;
+  }
+}
+div[role="document"] {
+  min-height: 705px;
 }
 .page-row {
   display: table-row;
@@ -9215,6 +9260,39 @@ div[ng-view].ng-enter {
 }
 header .container-fluid {
   padding-right: 5px;
+}
+.navbar-fixed-top .navbar-nav > li > a,
+.navbar-fixed-top .navbar-nav > li > button {
+  -webkit-transition: all 120ms;
+  /* property duration timing-function delay */
+  -o-transition: all 120ms;
+  transition: all 120ms;
+}
+.navbar-fixed-top .navbar-header .navbar-brand {
+  -webkit-transition: all 120ms;
+  /* property duration timing-function delay */
+  -o-transition: all 120ms;
+  transition: all 120ms;
+}
+.scrollfix .navbar-nav > li > a,
+.scrollfix .navbar-nav > li > button {
+  -webkit-transition: all 200ms;
+  /* property duration timing-function delay */
+  -o-transition: all 200ms;
+  transition: all 200ms;
+  padding-top: 15px !important;
+  padding-bottom: 15px !important;
+}
+.scrollfix .navbar-header .navbar-brand {
+  -webkit-transition: all 200ms;
+  /* property duration timing-function delay */
+  -o-transition: all 200ms;
+  transition: all 200ms;
+  padding: 11px 0 0 0;
+  max-width: 175px;
+}
+.admin-bar .navbar-fixed-top {
+  top: 32px;
 }
 .sidebar {
   position: relative;
@@ -9297,17 +9375,19 @@ footer > .sub-footer {
 .slice {
   text-align: center;
 }
-html,
-body {
-  min-height: 100%;
+.home-webapp,
+.bento-webapp {
 }
-div[role="document"] {
-  min-height: 705px;
+@media (min-width: 992px) {
+  .home-webapp,
+  .bento-webapp {
+    padding-top: 200px !important;
+  }
 }
 .home-webapp > .wrap main,
 .bento-webapp > .wrap main {
   position: relative;
-  margin-top: 135px;
+  padding-top: 15px;
 }
 @media (max-width: 991px) {
   .home-webapp > .wrap main,
@@ -9334,11 +9414,6 @@ div[role="document"] {
 .home-webapp.home:before {
   opacity: 0;
   position: absolute;
-}
-@media (max-width: 992px) {
-  .home .card:first-child {
-    margin-top: 21px;
-  }
 }
 .home .wrap,
 .home header .nav,
@@ -9449,6 +9524,9 @@ div[role="document"] {
   margin-left: -10px;
   margin-bottom: 21px;
 }
+.ualib-image-carousel {
+  position: relative;
+}
 .ualib-image-carousel ul,
 .ualib-image-carousel .slide-image {
   width: auto;
@@ -9491,6 +9569,27 @@ div[role="document"] {
   bottom: 0;
   padding: 15px;
   background-color: rgba(0, 0, 0, 0.75);
+}
+.ualib-image-carousel .rn-carousel-control {
+  opacity: 0.75;
+  background-color: rgba(0, 0, 0, 0.75);
+  padding: 15px;
+  border-radius: 4px;
+  -webkit-transition: opacity 0.2s ease-out;
+  -o-transition: opacity 0.2s ease-out;
+     transition: opacity 0.2s ease-out;
+  font-size: .3em;
+  position: absolute;
+  bottom: 0;
+  cursor: pointer;
+}
+.ualib-image-carousel .pause-play {
+  position: absolute;
+  bottom: 10px;
+  right: 15px;
+}
+.ualib-image-carousel .rn-carousel-indicator {
+  font-size: 20px;
 }
 /**
  * Your styles here

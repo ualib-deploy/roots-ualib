@@ -82,27 +82,6 @@ angular.module("_ualib-home.tpl.html", []).run(["$templateCache", function($temp
     "                        </div>\n" +
     "                    </div>\n" +
     "\n" +
-    "                    <div class=\"card front-page-card ualib-image-carousel hidden-md hidden-lg\" ng-show=\"slides\">\n" +
-    "                        <div class=\"card-body\">\n" +
-    "                            <div class=\"text-center\">\n" +
-    "                                <ul rn-carousel rn-carousel-auto-slide=\"6\" rn-carousel-buffered\n" +
-    "                                    rn-carousel-index=\"curImage\" rn-carousel-locked=\"isLocked\">\n" +
-    "                                    <li ng-repeat=\"slide in slides track by $index\">\n" +
-    "                                        <a ng-href=\"{{slide.url}}\" class=\"layer text-center\" title=\"{{slide.title}}\">\n" +
-    "                                            <div class=\"slide-image\" ng-style=\"{'background-image':slide.styles}\">\n" +
-    "                                                <div class=\"slide-title\">\n" +
-    "                                                    {{slide.title}}\n" +
-    "                                                </div>\n" +
-    "                                            </div>\n" +
-    "                                        </a>\n" +
-    "                                    </li>\n" +
-    "                                </ul>\n" +
-    "                                <div rn-carousel-indicators ng-if=\"slides.length > 1\" slides=\"slides\" rn-carousel-index=\"curImage\">\n" +
-    "                                </div>\n" +
-    "                            </div>\n" +
-    "                        </div>\n" +
-    "                    </div>\n" +
-    "\n" +
     "                    <div class=\"card front-page-card\" ng-show=\"events\">\n" +
     "                        <div class=\"card-heading\">\n" +
     "                            <h2>Events</h2>\n" +
@@ -167,10 +146,10 @@ angular.module("_ualib-home.tpl.html", []).run(["$templateCache", function($temp
     "                            </div>\n" +
     "                        </div>\n" +
     "                    </div>\n" +
-    "                    <div class=\"card front-page-card ualib-image-carousel hidden-sm hidden-xs\" ng-show=\"slides\">\n" +
+    "                    <div class=\"card front-page-card ualib-image-carousel\" ng-show=\"slides\">\n" +
     "                        <div class=\"card-body\">\n" +
     "                            <div class=\"text-center\">\n" +
-    "                                <ul rn-carousel rn-carousel-auto-slide=\"6\" rn-carousel-buffered\n" +
+    "                                <ul rn-carousel rn-carousel-auto-slide=\"6\" rn-carousel-buffered rn-carousel-pause-on-hover\n" +
     "                                    rn-carousel-index=\"curImage\" rn-carousel-locked=\"isLocked\">\n" +
     "                                    <li ng-repeat=\"slide in slides track by $index\">\n" +
     "                                        <a ng-href=\"{{slide.url}}\" class=\"layer text-center\" title=\"{{slide.title}}\">\n" +
@@ -222,7 +201,8 @@ angular.module("_ualib-home.tpl.html", []).run(["$templateCache", function($temp
     'ualib.news',
     'ualib.alerts'
 ])
-
+// Default offset for ui-scrollfix elements.
+    .value('duScrollOffset', 80)
 
     .config(['$httpProvider', '$routeProvider', '$compileProvider', function($httpProvider, $routeProvider, $compileProvider) {
         //HTML tags are stripped after JSON data in all AJAX responses
@@ -391,7 +371,6 @@ angular.module("_ualib-home.tpl.html", []).run(["$templateCache", function($temp
 
             imageCarouselFactory.getData()
                 .success(function(data) {
-                    console.log(data);
                     loadImages(data.slides).then(function(slides){
                         $scope.slides = slides;
                     });
@@ -406,6 +385,25 @@ angular.module("_ualib-home.tpl.html", []).run(["$templateCache", function($temp
             restrict: 'AC',
             controller: 'imageCarouselCtrl',
             link: function(scope, elm, attrs, Ctrl){
+
+                var toggleLock = false;
+                scope.isLocked = false;
+
+                scope.pause = function(){
+                    toggleLock = true;
+                    scope.isLocked = true;
+                };
+                scope.play = function(){
+                    toggleLock = false;
+                    scope.isLocked = false;
+                };
+
+                scope.mouseToggle = function(){
+                    if (!toggleLock){
+                        scope.isLocked = !scope.isLocked;
+                    }
+                };
+
             }
         };
     }]);
