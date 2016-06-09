@@ -227,8 +227,9 @@
                                                 <span class="fa fa-book"></span>
                                                 <h4>Borrow, Renew &amp; Course Reserves</h4>
                                                 <ul>
-                                                    <li class="menu-photocopying"><a href="/using-the-library/course-reserves/">Borrow, Renew, and Course Reserves</a></li>
+                                                    <li class="menu-reserves"><a href="/using-the-library/course-reserves/">Course Reserves</a></li>
                                                     <li class="menu-access-reserves"><a href="http://library.ua.edu/vwebv/enterCourseReserve.do">Find and access reserve items</a></li>
+                                                    <li class="menu-borrow"><a href="/using-the-library/circulation-services/borrowing/">Borrow and renew items</a></li>
 
                                                 </ul>
                                             </div>
