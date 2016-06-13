@@ -82,7 +82,8 @@ angular.module("_ualib-home.tpl.html", []).run(["$templateCache", function($temp
                         wp.templateUrl + '/assets/js/manage' + jsExt,
                         wp.templateUrl + '/assets/css/manage' + cssExt
                     ],
-                    cache: false
+                    cache: false,
+                    reconfig: true
                 });
             }
         });

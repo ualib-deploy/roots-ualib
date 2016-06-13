@@ -71,7 +71,8 @@ angular.module('ualib', [
                         wp.templateUrl + '/assets/js/manage' + jsExt,
                         wp.templateUrl + '/assets/css/manage' + cssExt
                     ],
-                    cache: false
+                    cache: false,
+                    reconfig: true
                 });
             }
         });
