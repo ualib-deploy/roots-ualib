@@ -2,209 +2,34 @@ angular.module('ualib.templates', ['_ualib-alerts.tpl.html', '_ualib-home.tpl.ht
 
 angular.module("_ualib-alerts.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("_ualib-alerts.tpl.html",
-    "<alert class=\"animate\" ng-repeat=\"alert in list.alerts\" type=\"{{alert.typeStr}}\" close=\"closeAlert($index)\">\n" +
-    "    <span class=\"fa fa-exclamation-triangle\"></span> {{alert.message}}\n" +
-    "    <span ng-if=\"alert.url\"><a ng-href=\"{{alert.url}}\">More...</a></span>\n" +
-    "</alert>\n" +
-    "");
+    "<alert class=animate ng-repeat=\"alert in list.alerts\" type={{alert.typeStr}} close=closeAlert($index)><span class=\"fa fa-exclamation-triangle\"></span> {{alert.message}} <span ng-if=alert.url><a ng-href={{alert.url}}>More...</a></span></alert>");
 }]);
 
 angular.module("_ualib-home.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("_ualib-home.tpl.html",
-    "<div class=\"container\">\n" +
-    "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-12\">\n" +
-    "            <div ualib-alerts></div>\n" +
-    "        </div>\n" +
-    "    </div>\n" +
-    "    <div ng-controller=\"NewsTodayCtrl\" class=\"animate\">\n" +
-    "        <div class=\"home-slice\">\n" +
-    "            <div class=\"row\">\n" +
-    "                <div class=\"col-md-6\">\n" +
-    "\n" +
-    "                    <!-- Replicated display for xs, sm device display -->\n" +
-    "                    <div class=\"card front-page-card hidden-md hidden-lg\">\n" +
-    "                        <div class=\"card-body\">\n" +
-    "                            <div class=\"row\">\n" +
-    "                                <div class=\"col-sm-6\">\n" +
-    "                                    <a href=\"/#/databases\" class=\"service-card\">\n" +
-    "                                        <span class=\"fa fa-3x fa-database\"></span>\n" +
-    "                                        <h4>Databases</h4>\n" +
-    "                                    </a>\n" +
-    "\n" +
-    "                                    <a href=\"http://guides.lib.ua.edu/\" class=\"service-card\">\n" +
-    "                                        <span class=\"fa fa-book\"></span>\n" +
-    "                                        <h4>Research Guides</h4>\n" +
-    "                                    </a>\n" +
-    "                                    <a href=\"http://library.ua.edu/vwebv/searchBasic\" class=\"service-card\">\n" +
-    "                                        <span class=\"fa fa-search\"></span>\n" +
-    "                                        <h4>Libraries' Catalog</h4>\n" +
-    "                                    </a>\n" +
-    "                                    <a href=\"https://ua.illiad.oclc.org/illiad/\" class=\"service-card\">\n" +
-    "                                        <span class=\"fa fa-exchange\"></span>\n" +
-    "                                        <h4>Interlibrary Loan</h4>\n" +
-    "                                    </a>\n" +
-    "                                </div>\n" +
-    "\n" +
-    "                                <div class=\"col-sm-6\">\n" +
-    "                                    <a href=\"/research-tools/e-resources/\" class=\"service-card\">\n" +
-    "                                        <span class=\"fa fa-bolt\"></span>\n" +
-    "                                        <h4>E-Resources</h4>\n" +
-    "                                    </a>\n" +
-    "\n" +
-    "                                    <a href=\"/scout/\" class=\"service-card\">\n" +
-    "                                        <span class=\"fa fa-binoculars\"></span>\n" +
-    "                                        <h4>Scout</h4>\n" +
-    "                                    </a>\n" +
-    "                                    <a href=\"/#/staffdir\" class=\"service-card\">\n" +
-    "                                        <span class=\"fa fa-users\"></span>\n" +
-    "                                        <h4>Staff Directory</h4>\n" +
-    "                                    </a>\n" +
-    "\n" +
-    "                                    <a href=\"http://ask.lib.ua.edu/\" class=\"service-card\">\n" +
-    "                                        <span class=\"fa fa-question-circle\"></span>\n" +
-    "                                        <h4>Ask A Librarian</h4>\n" +
-    "                                    </a>\n" +
-    "                                </div>\n" +
-    "                            </div>\n" +
-    "                        </div>\n" +
-    "                    </div>\n" +
-    "\n" +
-    "                    <div class=\"card front-page-card\">\n" +
-    "                        <div class=\"card-heading\">\n" +
-    "                            <h2>Hours <small>today</small></h2>\n" +
-    "                        </div>\n" +
-    "                        <div class=\"card-body\">\n" +
-    "                            <div class=\"hours-list\"></div>\n" +
-    "                        </div>\n" +
-    "                        <div class=\"card-footer\">\n" +
-    "                            <a href=\"/#/hours\" class=\"more-link\">All Hours</a>\n" +
-    "                        </div>\n" +
-    "                    </div>\n" +
-    "\n" +
-    "                    <div class=\"card front-page-card\" ng-show=\"events\">\n" +
-    "                        <div class=\"card-heading\">\n" +
-    "                            <h2>Events</h2>\n" +
-    "                        </div>\n" +
-    "                        <div class=\"card-body\">\n" +
-    "                            <div news-card=\"item\" news-type=\"event\" ng-repeat=\"item in events | limitTo : 3\">\n" +
-    "                            </div>\n" +
-    "                        </div>\n" +
-    "                        <div class=\"card-footer\">\n" +
-    "                            <a href=\"http://events.ua.edu/category/22/view/month/\" class=\"more-link\">More Events</a>\n" +
-    "                        </div>\n" +
-    "                    </div>\n" +
-    "\n" +
-    "                </div>\n" +
-    "\n" +
-    "                <div class=\"col-md-6\">\n" +
-    "\n" +
-    "                    <!-- Replicated display for md, lg device display -->\n" +
-    "                    <div class=\"card front-page-card hidden-sm hidden-xs\">\n" +
-    "                        <div class=\"card-body\">\n" +
-    "                            <div class=\"row\">\n" +
-    "                                <div class=\"col-sm-6\">\n" +
-    "                                    <a href=\"/#/databases\" class=\"service-card\">\n" +
-    "                                        <span class=\"fa fa-3x fa-database\"></span>\n" +
-    "                                        <h4>Databases</h4>\n" +
-    "                                    </a>\n" +
-    "\n" +
-    "                                    <a href=\"http://guides.lib.ua.edu/\" class=\"service-card\">\n" +
-    "                                        <span class=\"fa fa-book\"></span>\n" +
-    "                                        <h4>Research Guides</h4>\n" +
-    "                                    </a>\n" +
-    "                                    <a href=\"http://library.ua.edu/vwebv/searchBasic\" class=\"service-card\">\n" +
-    "                                        <span class=\"fa fa-search\"></span>\n" +
-    "                                        <h4>Libraries' Catalog</h4>\n" +
-    "                                    </a>\n" +
-    "                                    <a href=\"https://ua.illiad.oclc.org/illiad/\" class=\"service-card\">\n" +
-    "                                        <span class=\"fa fa-exchange\"></span>\n" +
-    "                                        <h4>Interlibrary Loan</h4>\n" +
-    "                                    </a>\n" +
-    "                                </div>\n" +
-    "\n" +
-    "                                <div class=\"col-sm-6\">\n" +
-    "                                    <a href=\"/research-tools/e-resources/\" class=\"service-card\">\n" +
-    "                                        <span class=\"fa fa-bolt\"></span>\n" +
-    "                                        <h4>E-Resources</h4>\n" +
-    "                                    </a>\n" +
-    "\n" +
-    "                                    <a href=\"/scout/\" class=\"service-card\">\n" +
-    "                                        <span class=\"fa fa-binoculars\"></span>\n" +
-    "                                        <h4>Scout</h4>\n" +
-    "                                    </a>\n" +
-    "                                    <a href=\"/#/staffdir\" class=\"service-card\">\n" +
-    "                                        <span class=\"fa fa-users\"></span>\n" +
-    "                                        <h4>Staff Directory</h4>\n" +
-    "                                    </a>\n" +
-    "\n" +
-    "                                    <a href=\"http://ask.lib.ua.edu/\" class=\"service-card\">\n" +
-    "                                        <span class=\"fa fa-question-circle\"></span>\n" +
-    "                                        <h4>Ask A Librarian</h4>\n" +
-    "                                    </a>\n" +
-    "                                </div>\n" +
-    "                            </div>\n" +
-    "                        </div>\n" +
-    "                    </div>\n" +
-    "                    <div class=\"card front-page-card ualib-image-carousel\" ng-show=\"slides\">\n" +
-    "                        <div class=\"card-body\">\n" +
-    "                            <div class=\"text-center\">\n" +
-    "                                <ul rn-carousel rn-carousel-auto-slide=\"6\" rn-carousel-buffered rn-carousel-pause-on-hover\n" +
-    "                                    rn-carousel-index=\"curImage\" rn-carousel-locked=\"isLocked\">\n" +
-    "                                    <li ng-repeat=\"slide in slides track by $index\">\n" +
-    "                                        <a ng-href=\"{{slide.url}}\" class=\"layer text-center\" title=\"{{slide.title}}\">\n" +
-    "                                            <div class=\"slide-image\" ng-style=\"{'background-image':slide.styles}\">\n" +
-    "                                                <div class=\"slide-title\">\n" +
-    "                                                    {{slide.title}}\n" +
-    "                                                </div>\n" +
-    "                                            </div>\n" +
-    "                                        </a>\n" +
-    "                                    </li>\n" +
-    "                                </ul>\n" +
-    "                                <div rn-carousel-indicators ng-if=\"slides.length > 1\" slides=\"slides\" rn-carousel-index=\"curImage\">\n" +
-    "                                </div>\n" +
-    "                            </div>\n" +
-    "                        </div>\n" +
-    "                    </div>\n" +
-    "\n" +
-    "                    <div class=\"card front-page-card\">\n" +
-    "                        <div class=\"card-heading\">\n" +
-    "                            <h2>News</h2>\n" +
-    "                        </div>\n" +
-    "                        <div class=\"card-body\">\n" +
-    "                            <div class=\"animate-repeat\" news-card=\"item\" ng-repeat=\"item in news\">\n" +
-    "                            </div>\n" +
-    "                        </div>\n" +
-    "                        <div class=\"card-footer\">\n" +
-    "                            <a href=\"/#/news-exhibits\" class=\"more-link\">More News</a>\n" +
-    "                        </div>\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "    </div>\n" +
-    "</div>");
+    "<div class=container><div class=row><div class=col-md-12><div ualib-alerts></div></div></div><div ng-controller=NewsTodayCtrl class=animate><div class=home-slice><div class=row><div class=col-md-6><div class=\"card front-page-card hidden-md hidden-lg\"><div class=card-body><div class=row><div class=col-sm-6><a href=/#/databases class=service-card><span class=\"fa fa-3x fa-database\"></span><h4>Databases</h4></a> <a href=\"http://guides.lib.ua.edu/\" class=service-card><span class=\"fa fa-book\"></span><h4>Research Guides</h4></a> <a href=http://library.ua.edu/vwebv/searchBasic class=service-card><span class=\"fa fa-search\"></span><h4>Libraries' Catalog</h4></a> <a href=\"https://ua.illiad.oclc.org/illiad/\" class=service-card><span class=\"fa fa-exchange\"></span><h4>Interlibrary Loan</h4></a></div><div class=col-sm-6><a href=\"/research-tools/e-resources/\" class=service-card><span class=\"fa fa-bolt\"></span><h4>E-Resources</h4></a> <a href=\"/scout/\" class=service-card><span class=\"fa fa-binoculars\"></span><h4>Scout</h4></a> <a href=/#/staffdir class=service-card><span class=\"fa fa-users\"></span><h4>Staff Directory</h4></a> <a href=\"http://ask.lib.ua.edu/\" class=service-card><span class=\"fa fa-question-circle\"></span><h4>Ask A Librarian</h4></a></div></div></div></div><div class=\"card front-page-card\"><div class=card-heading><h2>Hours <small>today</small></h2></div><div class=card-body><div class=hours-list></div></div><div class=card-footer><a href=/#/hours class=more-link>All Hours</a></div></div><div class=\"card front-page-card\" ng-show=events><div class=card-heading><h2>Events</h2></div><div class=card-body><div news-card=item news-type=event ng-repeat=\"item in events | limitTo : 3\"></div></div><div class=card-footer><a href=\"http://events.ua.edu/category/22/view/month/\" class=more-link>More Events</a></div></div></div><div class=col-md-6><div class=\"card front-page-card hidden-sm hidden-xs\"><div class=card-body><div class=row><div class=col-sm-6><a href=/#/databases class=service-card><span class=\"fa fa-3x fa-database\"></span><h4>Databases</h4></a> <a href=\"http://guides.lib.ua.edu/\" class=service-card><span class=\"fa fa-book\"></span><h4>Research Guides</h4></a> <a href=http://library.ua.edu/vwebv/searchBasic class=service-card><span class=\"fa fa-search\"></span><h4>Libraries' Catalog</h4></a> <a href=\"https://ua.illiad.oclc.org/illiad/\" class=service-card><span class=\"fa fa-exchange\"></span><h4>Interlibrary Loan</h4></a></div><div class=col-sm-6><a href=\"/research-tools/e-resources/\" class=service-card><span class=\"fa fa-bolt\"></span><h4>E-Resources</h4></a> <a href=\"/scout/\" class=service-card><span class=\"fa fa-binoculars\"></span><h4>Scout</h4></a> <a href=/#/staffdir class=service-card><span class=\"fa fa-users\"></span><h4>Staff Directory</h4></a> <a href=\"http://ask.lib.ua.edu/\" class=service-card><span class=\"fa fa-question-circle\"></span><h4>Ask A Librarian</h4></a></div></div></div></div><div class=\"card front-page-card ualib-image-carousel\" ng-show=slides><div class=card-body><div class=text-center><ul rn-carousel rn-carousel-auto-slide=6 rn-carousel-buffered rn-carousel-pause-on-hover rn-carousel-index=curImage rn-carousel-locked=isLocked><li ng-repeat=\"slide in slides track by $index\"><a ng-href={{slide.url}} class=\"layer text-center\" title={{slide.title}}><div class=slide-image ng-style=\"{'background-image':slide.styles}\"><div class=slide-title>{{slide.title}}</div></div></a></li></ul><div rn-carousel-indicators ng-if=\"slides.length > 1\" slides=slides rn-carousel-index=curImage></div></div></div></div><div class=\"card front-page-card\"><div class=card-heading><h2>News</h2></div><div class=card-body><div class=animate-repeat news-card=item ng-repeat=\"item in news\"></div></div><div class=card-footer><a href=/#/news-exhibits class=more-link>More News</a></div></div></div></div></div></div></div>");
 }]);
 ;angular.module('ualib', [
     'ngRoute',
     'ngAnimate',
     'ualib.templates',
     'ualib.ui',
-    'hours',
+    'ualib.hours',
     'oneSearch',
-    'manage',
     'ualib.imageCarousel',
     'ualib.databases',
     'musicSearch',
     'ualib.staffdir',
     'ualib.softwareList',
     'ualib.news',
-    'ualib.alerts'
+    'ualib.alerts',
+    'oc.lazyLoad'
 ])
 // Default offset for ui-scrollfix elements.
-    .value('duScrollOffset', 80)
+    .value('duScrollOffset', 100)
 
     .config(['$httpProvider', '$routeProvider', '$compileProvider', function($httpProvider, $routeProvider, $compileProvider) {
+
         //HTML tags are stripped after JSON data in all AJAX responses
         function stripHTMLFromJSON(data) {
             if (typeof data === 'string'){
@@ -233,18 +58,35 @@ angular.module("_ualib-home.tpl.html", []).run(["$templateCache", function($temp
                     $rootScope.appStyle = {"background-image": "url('wp-content/themes/roots-ualib/assets/img/quad-sunset-lg_" + bgNum + ".jpg')"};
                 }]
             })
-            .otherwise({
-                redirectTo: '/home'
-            });
+            .otherwise({redirectTo:'/home'});
 
         // Extend $compileProvider to allow mailto/file/ftp in ng-href - without this, links render as "unsafe:mailto:..."
         // This is only requires for Angular 1.2.28 - after upgrade, remove this
         $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|mailto|file|blob|tel):/);
-
     }])
 
-    .run(['$routeParams', '$location', '$rootScope',
-    function($routeParams, $location, $rootScope){
+    .run(['$routeParams', '$location', '$rootScope', '$ocLazyLoad', '$http',
+    function($routeParams, $location, $rootScope, $ocLazyLoad, $http){
+
+        $http({
+            method: 'POST',
+            url: wp.ajaxurl,
+            params: {action: 'is_user_logged_in'}
+        }).then(function(data){
+            if (data.data === 'yes'){
+                var jsExt = wp.env === 'live' ? '.min.js' : '.js';
+                var cssExt = wp.env === 'live' ? '.min.css' : '.css';
+
+                $ocLazyLoad.load({
+                    files: [
+                        wp.templateUrl + '/assets/js/manage' + jsExt,
+                        wp.templateUrl + '/assets/css/manage' + cssExt
+                    ],
+                    cache: false
+                });
+            }
+        });
+
         $rootScope.appClass = 'page-loaded';
         $rootScope.$on('$routeChangeSuccess', function(e, current, pre) {
 
@@ -347,25 +189,25 @@ angular.module("_ualib-home.tpl.html", []).run(["$templateCache", function($temp
                 deferred = deferred ? deferred : $q.defer();
 
                 if (len < 1){
-                    deferred.resolve(item);
+                    deferred.resolve(slides);
                 }
+                else{
+                    var image = new Image();
 
-                var image = new Image();
+                    image.onload = function(){
+                        slides[i].styles = 'url('+this.src+')';
+                        slides[i].image = this;
 
-                image.onload = function(){
-                    slides[i].styles = 'url('+this.src+')';
-                    slides[i].image = this;
-
-                    if (i+1 === len){
-                        deferred.resolve(slides);
-                    }
-                    else {
-                        i++;
-                        loadImages(slides, i, len, deferred);
-                    }
-                };
-
-                image.src = slides[i].image;
+                        if (i+1 === len){
+                            deferred.resolve(slides);
+                        }
+                        else {
+                            i++;
+                            loadImages(slides, i, len, deferred);
+                        }
+                    };
+                    image.src = slides[i].image;
+                }
                 return deferred.promise;
             }
 

@@ -1,11 +1,14 @@
 <?php
 define( 'WEBAPPS_PATH', '/srv/web/www/webapps/' );
+
+function ajax_check_user_logged_in() {
+    echo is_user_logged_in()?'yes':'no';
+    wp_die();
+}
+add_action('wp_ajax_is_user_logged_in', 'ajax_check_user_logged_in');
+add_action('wp_ajax_nopriv_is_user_logged_in', 'ajax_check_user_logged_in');
+
 function roots_ualib_scripts() {
-//local script added to allow communication between WP API and JS front end apps
-    wp_enqueue_script(
-        'localScript' ,
-        get_template_directory_uri() . '/assets/js/local.js'
-    );
     wp_localize_script(
         'localScript',
         'myLocalized',

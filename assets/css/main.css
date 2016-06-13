@@ -9113,14 +9113,6 @@ a.service-card:focus {
   border-color: transparent;
   /*text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.35);*/
 }
-.onesearch-box .yamm-content #scoutCheckbox {
-  float: right;
-  margin-top: 5px;
-}
-.onesearch-box .yamm-content #scoutCheckbox input {
-  position: relative;
-  top: 2px;
-}
 .onesearch-box .yamm-content .scout-checkbox {
   text-align: right;
   margin-bottom: 0;
@@ -9174,15 +9166,12 @@ body:last-child {
   height: 100%;
   min-height: 100%;
 }
-body:last-child {
+body {
   display: table;
   width: 100%;
-  padding-top: 80px;
 }
-@media (min-width: 992px) {
-  body:last-child.admin-bar {
-    padding-top: 112px;
-  }
+body:last-child {
+  padding-top: 80px;
 }
 div[role="document"] {
   min-height: 705px;
@@ -9195,6 +9184,7 @@ div[role="document"] {
   height: 100%;
 }
 .main {
+  position: relative;
   padding-bottom: 60px;
 }
 @media (max-width: 767px) {
@@ -9375,9 +9365,6 @@ footer > .sub-footer {
 .slice {
   text-align: center;
 }
-.home-webapp,
-.bento-webapp {
-}
 @media (min-width: 992px) {
   .home-webapp,
   .bento-webapp {
@@ -9388,12 +9375,6 @@ footer > .sub-footer {
 .bento-webapp > .wrap main {
   position: relative;
   padding-top: 15px;
-}
-@media (max-width: 991px) {
-  .home-webapp > .wrap main,
-  .bento-webapp > .wrap main {
-    margin-top: 0;
-  }
 }
 .home:before {
   content: '';

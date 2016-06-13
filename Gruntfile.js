@@ -6,6 +6,7 @@ module.exports = function(grunt) {
     require('time-grunt')(grunt);
 
     var jsFileList = [
+        'assets/js/ualib-templates.js',
         'assets/js/plugins/*.js',
         'assets/js/_*.js',
         '!assets/js/_main.js',
@@ -15,7 +16,7 @@ module.exports = function(grunt) {
     ];
 
     var lessFileList = [
-        'assets/less/main.less'
+        'tmp/assets/less/main.less'
     ];
 
 
@@ -30,6 +31,7 @@ module.exports = function(grunt) {
                 'Gruntfile.js',
                 'assets/js/*.js',
                 '!assets/js/*_bower.js',
+                '!assets/js/manage.js',
                 '!assets/js/scripts.js',
                 '!assets/**/*.min.*',
                 '!assets/js/header-footer-export.js',
@@ -42,9 +44,10 @@ module.exports = function(grunt) {
         less: {
             dev: {
                 files: {
-                    'assets/css/main.css': [lessFileList, '!*.min.css']
+                    'assets/css/main.css': [lessFileList]
                 },
                 options: {
+                    paths: ['assets/less'],
                     compress: false,
                     // LESS source map
                     // To enable, set sourceMap to true and update sourceMapRootpath based on your install
@@ -53,11 +56,12 @@ module.exports = function(grunt) {
                     sourceMapRootpath: '/wp-content/themes/roots/'
                 }
             },
-            build: {
+            live: {
                 files: {
                     'assets/css/main.min.css': [lessFileList]
                 },
                 options: {
+                    paths: ['assets/less'],
                     compress: true
                 }
             },
@@ -68,12 +72,30 @@ module.exports = function(grunt) {
                 files: {
                     'assets/css/header-footer-export.min.css': ['assets/less/layouts/_header-footer-export.less']
                 }
+            },
+            manage: {
+                files: {
+                    'assets/css/manage.min.css': ['assets/css/manage.css']
+                },
+                options: {
+                    compress: true
+                }
             }
         },
         html2js:{
             dev: {
                 options:{
-                    base: 'tmp/assets/js'
+                    base: 'tmp/assets/js',
+                    htmlmin: {
+                        collapseBooleanAttributes: true,
+                        collapseWhitespace: true,
+                        removeAttributeQuotes: true,
+                        removeComments: true,
+                        removeEmptyAttributes: true,
+                        removeRedundantAttributes: true,
+                        removeScriptTypeAttributes: true,
+                        removeStyleLinkTypeAttributes: true
+                    }
                 },
                 src: 'tmp/assets/js/**/*.tpl.html',
                 dest: 'tmp/assets/js/ualib-templates.js',
@@ -88,7 +110,7 @@ module.exports = function(grunt) {
             options: {
                 separator: ';'
             },
-            js: {
+            live: {
                 src: [
                     'tmp/assets/js/ualib-templates.js',
                     'tmp/assets/js/plugins/*.js',
@@ -99,6 +121,17 @@ module.exports = function(grunt) {
                 ],
                 dest: 'tmp/assets/js/scripts.js'
             },
+            dev: {
+                src: [
+                    'tmp/assets/js/ualib-templates.js',
+                    'tmp/assets/js/plugins/*.js',
+                    'tmp/assets/js/_*.js',
+                    '!tmp/assets/js/_main.js',
+                    '!tmp/assets/js/_scripts-local.js',
+                    '!tmp/assets/**/*.min.js'
+                ],
+                dest: 'assets/js/scripts.js'
+            },
             local: {
                 src: [
                     'tmp/assets/js/ualib-templates.js',
@@ -108,7 +141,7 @@ module.exports = function(grunt) {
                     '!tmp/assets/js/_scripts-local.js',
                     '!tmp/assets/**/*.min.js'
                 ],
-                dest: 'tmp/assets/js/_scripts-local.js'
+                dest: 'assets/js/_scripts-local.js'
             },
             header_footer_export: {
                 options: {
@@ -138,7 +171,12 @@ module.exports = function(grunt) {
                     'roots-ualib',
                     'compfinder',
                     'angular-lazy-img',
-                    'hamsterjs'
+                    'hamsterjs',
+                    'manage',
+                    'ng-file-upload',
+                    'angular-ui-tinymce',
+                    'angular-google-maps',
+                    'lodash'
                 ],
                 callback: function(mainFiles, component) {
                     return mainFiles.map(function(filepath) {
@@ -168,7 +206,10 @@ module.exports = function(grunt) {
                     'compfinder',
                     'angular-mousewheel',
                     'hamsterjs',
-                    'angular-lazy-img'
+                    'angular-lazy-img',
+                    'ng-file-upload',
+                    'angular-ui-tinymce',
+                    'manage'
                 ],
                 callback: function(mainFiles, component) {
                     return mainFiles.map(function(filepath) {
@@ -185,8 +226,39 @@ module.exports = function(grunt) {
                     'ualib-ui': ['src/dropdown/dropdown.js', 'src/dropdown/dropdown-sticky.js'],
                     'angular-bootstrap': [ 'src/transition/transition.js', 'src/collapse/collapse.js']
                 }
+            },
+            manage_dev: {
+                dest: 'assets/js/manage.js',
+                cssDest: 'assets/css/manage.css',
+                include: [
+                    'ng-file-upload',
+                    'angular-ui-tinymce',
+                    'manage'
+                ],
+                callback: function(mainFiles, component) {
+                    return mainFiles.map(function(filepath) {
+                        // Use minified files if available
+                        var min = filepath.replace(/\.min(?=\.)/, '');
+                        return grunt.file.exists(min) ? min : filepath;
+                    });
+                }
+            },
+            manage_live: {
+                dest: 'assets/js/manage.min.js',
+                cssDest: 'assets/css/manage.min.css',
+                include: [
+                    'ng-file-upload',
+                    'angular-ui-tinymce',
+                    'manage'
+                ],
+                callback: function(mainFiles, component) {
+                    return mainFiles.map(function(filepath) {
+                        // Use minified files if available
+                        var min = filepath.replace(/\.(js|css)$/, '.min$&');
+                        return grunt.file.exists(min) ? min : filepath;
+                    });
+                }
             }
-
         },
         copy: {
             fontawesome: {
@@ -195,31 +267,6 @@ module.exports = function(grunt) {
                     cwd: '<%= bower.directory %>/fontawesome/fonts',
                     src: ['**'],
                     dest: 'assets/fonts',
-                    filter: 'isFile'
-                }]
-            },
-            dev: {
-                files: [{
-                    expand: true,
-                    cwd: 'tmp',
-                    src: [
-                        'assets/css/**/*.css',
-                        'assets/js/scripts.js',
-                        'assets/js/_scripts-local.js',
-                        '!assets/**/*.min.*'
-                        ],
-                    dest: '',
-                    filter: 'isFile'
-                }]
-            },
-            live: {
-                files: [{
-                    expand: true,
-                    cwd: 'tmp',
-                    src: [
-                        'assets/**/*.min.*'
-                        ],
-                    dest: '',
                     filter: 'isFile'
                 }]
             }
@@ -244,7 +291,7 @@ module.exports = function(grunt) {
         uglify: {
             dist: {
                 options: {
-                    mangle: false
+                    mangle: true
                 },
                 files: {
                     'assets/js/scripts.min.js': ['tmp/assets/js/scripts.js'],
@@ -256,7 +303,7 @@ module.exports = function(grunt) {
                     mangle: true
                 },
                 files: [{
-                    'assets/js/header-footer-export.min.js': ['tmp/assets/js/header-footer-export.js']
+                    'tmp/assets/js/header-footer-export.min.js': ['tmp/assets/js/header-footer-export.js']
                 }]
             }
         },
@@ -341,6 +388,14 @@ module.exports = function(grunt) {
                     from: /(wwwdev2?)/g,
                     to: 'www'
                 }]
+            },
+            manageJS: {
+                src: ['assets/js/manage.min.js'],
+                dest: 'assets/js/',
+                replacements: [{
+                    from: /(wwwdev2?)/g,
+                    to: 'www'
+                }]
             }
         },
         bump: {
@@ -378,7 +433,7 @@ module.exports = function(grunt) {
                         NODE_ENV: 'dev'
                     }
                 },
-                src: [jsFileList, 'assets/js/**/*.tpl.html', 'assets/css/*.css', '!assets/css/*_bower.css', '!**/*.min.*', '!**/*.map'],
+                src: [jsFileList, 'assets/js/**/*.tpl.html', 'assets/less/**/*.*'],
                 dest: 'tmp',
                 expand: true
             },
@@ -388,7 +443,7 @@ module.exports = function(grunt) {
                         NODE_ENV: 'live'
                     }
                 },
-                src: [jsFileList, 'assets/js/**/*.tpl.html', 'assets/css/*.css', '!assets/css/*_bower.css', '!**/*.min.*', '!**/*.map'],
+                src: [jsFileList, 'assets/js/**/*.tpl.html', 'assets/less/**/*.*'],
                 dest: 'tmp',
                 expand: true
             }
@@ -399,7 +454,12 @@ module.exports = function(grunt) {
                     'assets/less/*.less',
                     'assets/less/**/*.less'
                 ],
-                tasks: ['less:dev', 'autoprefixer:dev', 'preprocess:dev', 'copy:dev', 'clean:tmp']
+                tasks: [
+                    'preprocess:dev',
+                    'less:dev',
+                    'autoprefixer:dev',
+                    'clean:tmp'
+                ]
             },
             js: {
                 files: [
@@ -415,8 +475,7 @@ module.exports = function(grunt) {
                     'concat:local',
                     'preprocess:dev',
                     'html2js:dev',
-                    'concat:js',
-                    'copy:dev',
+                    'concat:dev',
                     'clean:tmp'
                 ]
             },
@@ -435,8 +494,9 @@ module.exports = function(grunt) {
                 ]
             }
         },
-        auto_install: {
-            local: {}
+        exec: {
+            bower_prune: 'bower prune',
+            bower_update: 'bower update'
         }
     });
 
@@ -446,32 +506,32 @@ module.exports = function(grunt) {
     ]);
 
     grunt.registerTask('dev', [
-        'auto_install',
-        'less:dev',
-        'autoprefixer:dev',
+        'exec:bower_update',
+        'exec:bower_prune',
         'preprocess:local',
         'html2js:dev',
         'concat:local',
         'preprocess:dev',
+        'less:dev',
+        'autoprefixer:dev',
         'html2js:dev',
-        'concat:js',
-        'copy:dev',
+        'concat:dev',
         'bower_concat:dev',
-        'clean:tmp'
+        'clean:tmp',
+        'manage-dev'
     ]);
     grunt.registerTask('live-build', [
-        'auto_install',
-        'less:build',
-        'autoprefixer:build',
         'jshint',
         'preprocess:live',
         'html2js',
-        'concat:js',
-        'headerFooterExport',
-        'copy:live',
-        'bower_concat:build',
-        'uglify:dist',
+        'concat:live',
         'ngAnnotate',
+        'uglify:dist',
+        'less:live',
+        'autoprefixer:build',
+        'headerFooterExport',
+        'bower_concat:build',
+        'manage-live',
         'replace',
         'version',
         'modernizr',
@@ -483,5 +543,13 @@ module.exports = function(grunt) {
         'bower_concat:header_footer_export',
         'concat:header_footer_export',
         'uglify:header_footer_export'
+    ]);
+
+    grunt.registerTask('manage-dev', [
+        'bower_concat:manage_dev'
+    ]);
+    grunt.registerTask('manage-live', [
+        'bower_concat:manage_live',
+        'less:manage'
     ]);
 };

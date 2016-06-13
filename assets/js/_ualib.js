@@ -3,25 +3,22 @@ angular.module('ualib', [
     'ngAnimate',
     'ualib.templates',
     'ualib.ui',
-    'hours',
+    'ualib.hours',
     'oneSearch',
-    // @if NODE_ENV!='local'
-    'manage',
-    // @endif
-    // @if NODE_ENV!='live'
     'ualib.imageCarousel',
-    // @endif
     'ualib.databases',
     'musicSearch',
     'ualib.staffdir',
     'ualib.softwareList',
     'ualib.news',
-    'ualib.alerts'
+    'ualib.alerts',
+    'oc.lazyLoad'
 ])
 // Default offset for ui-scrollfix elements.
-    .value('duScrollOffset', 80)
+    .value('duScrollOffset', 100)
 
     .config(['$httpProvider', '$routeProvider', '$compileProvider', function($httpProvider, $routeProvider, $compileProvider) {
+
         //HTML tags are stripped after JSON data in all AJAX responses
         function stripHTMLFromJSON(data) {
             if (typeof data === 'string'){
@@ -50,18 +47,35 @@ angular.module('ualib', [
                     $rootScope.appStyle = {"background-image": "url('wp-content/themes/roots-ualib/assets/img/quad-sunset-lg_" + bgNum + ".jpg')"};
                 }]
             })
-            .otherwise({
-                redirectTo: '/home'
-            });
+            .otherwise({redirectTo:'/home'});
 
         // Extend $compileProvider to allow mailto/file/ftp in ng-href - without this, links render as "unsafe:mailto:..."
         // This is only requires for Angular 1.2.28 - after upgrade, remove this
         $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|mailto|file|blob|tel):/);
-
     }])
 
-    .run(['$routeParams', '$location', '$rootScope',
-    function($routeParams, $location, $rootScope){
+    .run(['$routeParams', '$location', '$rootScope', '$ocLazyLoad', '$http',
+    function($routeParams, $location, $rootScope, $ocLazyLoad, $http){
+
+        $http({
+            method: 'POST',
+            url: wp.ajaxurl,
+            params: {action: 'is_user_logged_in'}
+        }).then(function(data){
+            if (data.data === 'yes'){
+                var jsExt = wp.env === 'live' ? '.min.js' : '.js';
+                var cssExt = wp.env === 'live' ? '.min.css' : '.css';
+
+                $ocLazyLoad.load({
+                    files: [
+                        wp.templateUrl + '/assets/js/manage' + jsExt,
+                        wp.templateUrl + '/assets/css/manage' + cssExt
+                    ],
+                    cache: false
+                });
+            }
+        });
+
         $rootScope.appClass = 'page-loaded';
         $rootScope.$on('$routeChangeSuccess', function(e, current, pre) {
 
