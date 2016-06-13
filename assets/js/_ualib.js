@@ -56,58 +56,35 @@ angular.module('ualib', [
         $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|mailto|file|blob|tel):/);
     }])
 
-    .run(['$routeParams', '$location', '$rootScope', '$ocLazyLoad', '$http',
-    function($routeParams, $location, $rootScope, $ocLazyLoad, $http){
-        /*var jsExt = wp.env === 'live' ? '.min.js' : '.js';
-        var cssExt = wp.env === 'live' ? '.min.css' : '.css';
-        $ocLazyLoad.load({
-            files: [
-                wp.templateUrl + '/assets/js/manage' + jsExt,
-                wp.templateUrl + '/assets/css/manage' + cssExt
-            ],
-            cache: false,
-            reconfig: true,
-            rerun: true
-        });*/
-        /*$http({
-            method: 'POST',
-            url: wp.ajaxurl,
-            params: {action: 'is_user_logged_in'}
-        }).then(function(data){
-            if (data.data === 'yes'){
+    .run(['$routeParams', '$location', '$rootScope',
+        function($routeParams, $location, $rootScope){
+            $rootScope.appClass = 'page-loaded';
+            $rootScope.$on('$routeChangeSuccess', function(e, current, pre) {
 
+                // Check if changing from another angular route, and if the previous route is different.
+                // We should only force page views in GA when navigating from one app to another.
+                // Otherwise the page view will have already be sent to GA via the WP base.php template
+                // TODO: make this better - seems a bit long winded ya?
+                if (pre && pre.hasOwnProperty('$$route') && pre.$$route.hasOwnProperty('originalPath') && current.hasOwnProperty('$$route') && current.$$route.hasOwnProperty('originalPath') && current.$$route.originalPath !== pre.$$route.originalPath){
+                    // Send Google Analytics page view when routes are accessed
+                    ga('require', 'linkid');
+                    ga('send', 'pageview', $location.url());
+                }
 
+                var appRoute = $location.path().split('/')[1];
+                $rootScope.appStyle = {};
+                $rootScope.appClass = 'webapp ' + appRoute + '-webapp';
 
-            }
-        });*/
+                //TODO: Temporary!! Remove when either removing or pushing new home/webapp CSS animations
+                angular.element(document.querySelector('body')).addClass('webapp');
 
-        $rootScope.appClass = 'page-loaded';
-        $rootScope.$on('$routeChangeSuccess', function(e, current, pre) {
+                //if ($rootScope.appClass === 'home') {
+                //    $rootScope.appClass = 'front-page';
+                //    var bgNum = (Math.floor(Math.random() * 1000) % 16) + 1;
+                //    $rootScope.appStyle = {"background-image": "url('wp-content/themes/roots-ualib/assets/img/quad-sunset-lg_" + bgNum + ".jpg')"};
+                //    //console.log('Background 1.');
+                //}
+                //$rootScope.appClass += ' webapp';
+            });
 
-            // Check if changing from another angular route, and if the previous route is different.
-            // We should only force page views in GA when navigating from one app to another.
-            // Otherwise the page view will have already be sent to GA via the WP base.php template
-            // TODO: make this better - seems a bit long winded ya?
-            if (pre && pre.hasOwnProperty('$$route') && pre.$$route.hasOwnProperty('originalPath') && current.hasOwnProperty('$$route') && current.$$route.hasOwnProperty('originalPath') && current.$$route.originalPath !== pre.$$route.originalPath){
-                // Send Google Analytics page view when routes are accessed
-                ga('require', 'linkid');
-                ga('send', 'pageview', $location.url());
-            }
-
-            var appRoute = $location.path().split('/')[1];
-            $rootScope.appStyle = {};
-            $rootScope.appClass = 'webapp ' + appRoute + '-webapp';
-
-            //TODO: Temporary!! Remove when either removing or pushing new home/webapp CSS animations
-            angular.element(document.querySelector('body')).addClass('webapp');
-
-            //if ($rootScope.appClass === 'home') {
-            //    $rootScope.appClass = 'front-page';
-            //    var bgNum = (Math.floor(Math.random() * 1000) % 16) + 1;
-            //    $rootScope.appStyle = {"background-image": "url('wp-content/themes/roots-ualib/assets/img/quad-sunset-lg_" + bgNum + ".jpg')"};
-            //    //console.log('Background 1.');
-            //}
-            //$rootScope.appClass += ' webapp';
-        });
-
-    }]);
+        }]);
