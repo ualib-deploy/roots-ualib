@@ -31,7 +31,6 @@ module.exports = function(grunt) {
                 'Gruntfile.js',
                 'assets/js/*.js',
                 '!assets/js/*_bower.js',
-                '!assets/js/manage.js',
                 '!assets/js/scripts.js',
                 '!assets/**/*.min.*',
                 '!assets/js/header-footer-export.js',
@@ -71,14 +70,6 @@ module.exports = function(grunt) {
                 },
                 files: {
                     'assets/css/header-footer-export.min.css': ['assets/less/layouts/_header-footer-export.less']
-                }
-            },
-            manage: {
-                files: {
-                    'assets/css/manage.min.css': ['assets/css/manage.css']
-                },
-                options: {
-                    compress: true
                 }
             }
         },
@@ -172,9 +163,6 @@ module.exports = function(grunt) {
                     'compfinder',
                     'angular-lazy-img',
                     'hamsterjs',
-                    'manage',
-                    'ng-file-upload',
-                    'angular-ui-tinymce',
                     'angular-google-maps',
                     'lodash'
                 ],
@@ -204,12 +192,10 @@ module.exports = function(grunt) {
                     'modernizr',
                     'roots-ualib',
                     'compfinder',
-                    'angular-mousewheel',
-                    'hamsterjs',
                     'angular-lazy-img',
-                    'ng-file-upload',
-                    'angular-ui-tinymce',
-                    'manage'
+                    'hamsterjs',
+                    'angular-google-maps',
+                    'lodash'
                 ],
                 callback: function(mainFiles, component) {
                     return mainFiles.map(function(filepath) {
@@ -225,38 +211,6 @@ module.exports = function(grunt) {
                 mainFiles: {
                     'ualib-ui': ['src/dropdown/dropdown.js', 'src/dropdown/dropdown-sticky.js'],
                     'angular-bootstrap': [ 'src/transition/transition.js', 'src/collapse/collapse.js']
-                }
-            },
-            manage_dev: {
-                dest: 'assets/js/manage.js',
-                cssDest: 'assets/css/manage.css',
-                include: [
-                    'ng-file-upload',
-                    'angular-ui-tinymce',
-                    'manage'
-                ],
-                callback: function(mainFiles, component) {
-                    return mainFiles.map(function(filepath) {
-                        // Use minified files if available
-                        var min = filepath.replace(/\.min(?=\.)/, '');
-                        return grunt.file.exists(min) ? min : filepath;
-                    });
-                }
-            },
-            manage_live: {
-                dest: 'assets/js/manage.min.js',
-                cssDest: 'assets/css/manage.min.css',
-                include: [
-                    'ng-file-upload',
-                    'angular-ui-tinymce',
-                    'manage'
-                ],
-                callback: function(mainFiles, component) {
-                    return mainFiles.map(function(filepath) {
-                        // Use minified files if available
-                        var min = filepath.replace(/\.(js|css)$/, '.min$&');
-                        return grunt.file.exists(min) ? min : filepath;
-                    });
                 }
             }
         },
@@ -388,14 +342,6 @@ module.exports = function(grunt) {
                     from: /(wwwdev2?)/g,
                     to: 'www'
                 }]
-            },
-            manageJS: {
-                src: ['assets/js/manage.min.js'],
-                dest: 'assets/js/',
-                replacements: [{
-                    from: /(wwwdev2?)/g,
-                    to: 'www'
-                }]
             }
         },
         bump: {
@@ -517,8 +463,7 @@ module.exports = function(grunt) {
         'html2js:dev',
         'concat:dev',
         'bower_concat:dev',
-        'clean:tmp',
-        'manage-dev'
+        'clean:tmp'
     ]);
     grunt.registerTask('live-build', [
         'jshint',
@@ -531,7 +476,6 @@ module.exports = function(grunt) {
         'autoprefixer:build',
         'headerFooterExport',
         'bower_concat:build',
-        'manage-live',
         'replace',
         'version',
         'modernizr',
@@ -543,13 +487,5 @@ module.exports = function(grunt) {
         'bower_concat:header_footer_export',
         'concat:header_footer_export',
         'uglify:header_footer_export'
-    ]);
-
-    grunt.registerTask('manage-dev', [
-        'bower_concat:manage_dev'
-    ]);
-    grunt.registerTask('manage-live', [
-        'bower_concat:manage_live',
-        'less:manage'
     ]);
 };

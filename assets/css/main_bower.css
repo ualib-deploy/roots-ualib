@@ -85,6 +85,76 @@
   border-top-right-radius: 0;
 }
 /*# sourceMappingURL=dist/databases-ui.css.map */
+.clickable {
+    cursor: pointer;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.table-ebsco {
+    width: 30px;
+    background-color: rgb(170, 170, 221);
+}
+.table-catalog {
+    width: 30px;
+    background-color: rgb(128, 128, 162);
+}
+.table-eJournals {
+    width: 30px;
+    background-color: rgb(85, 85, 102);
+}
+.table-colors td {
+    border: 0px none;
+}
+
+.comps-map{
+    margin: 0 auto;
+    position: relative;
+}
+
+.comp-normal{
+    color:#428bca;
+    font-size:17px;
+    margin-top: -4px;
+}
+
+.comp-normal:hover{
+    cursor: pointer;
+    color:#333333;
+    font-size:19px;
+    margin-top: -4px;
+}
+
+.comp-selected{
+    color: #993333;
+    font-size:19px;
+    margin-top: -4px;
+}
+
+.comp-turned-off{
+    color:red;
+}
+
+.selected-form{
+    position:absolute;
+    background-color: #f9f9f9;
+    box-shadow: 5px 5px 10px #888888;
+    border-radius: 4px;
+    width:450px;
+}
+
+.row-clickable:hover{
+    background-color:#f9f9f9;
+}
+.sdOpen{
+    background-color: #f9f9f9;
+}
+
 .bento-box-container h2 {
   font-size: 25px;
   color: #555;

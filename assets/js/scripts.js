@@ -14,6 +14,7 @@ angular.module("_ualib-home.tpl.html", []).run(["$templateCache", function($temp
     'ngAnimate',
     'ualib.templates',
     'ualib.ui',
+    'manage',
     'ualib.hours',
     'oneSearch',
     'ualib.imageCarousel',
@@ -22,8 +23,7 @@ angular.module("_ualib-home.tpl.html", []).run(["$templateCache", function($temp
     'ualib.staffdir',
     'ualib.softwareList',
     'ualib.news',
-    'ualib.alerts',
-    'oc.lazyLoad'
+    'ualib.alerts'
 ])
 // Default offset for ui-scrollfix elements.
     .value('duScrollOffset', 100)
@@ -67,26 +67,28 @@ angular.module("_ualib-home.tpl.html", []).run(["$templateCache", function($temp
 
     .run(['$routeParams', '$location', '$rootScope', '$ocLazyLoad', '$http',
     function($routeParams, $location, $rootScope, $ocLazyLoad, $http){
-
-        $http({
+        /*var jsExt = wp.env === 'live' ? '.min.js' : '.js';
+        var cssExt = wp.env === 'live' ? '.min.css' : '.css';
+        $ocLazyLoad.load({
+            files: [
+                wp.templateUrl + '/assets/js/manage' + jsExt,
+                wp.templateUrl + '/assets/css/manage' + cssExt
+            ],
+            cache: false,
+            reconfig: true,
+            rerun: true
+        });*/
+        /*$http({
             method: 'POST',
             url: wp.ajaxurl,
             params: {action: 'is_user_logged_in'}
         }).then(function(data){
             if (data.data === 'yes'){
-                var jsExt = wp.env === 'live' ? '.min.js' : '.js';
-                var cssExt = wp.env === 'live' ? '.min.css' : '.css';
 
-                $ocLazyLoad.load({
-                    files: [
-                        wp.templateUrl + '/assets/js/manage' + jsExt,
-                        wp.templateUrl + '/assets/css/manage' + cssExt
-                    ],
-                    cache: false,
-                    reconfig: true
-                });
+
+
             }
-        });
+        });*/
 
         $rootScope.appClass = 'page-loaded';
         $rootScope.$on('$routeChangeSuccess', function(e, current, pre) {
