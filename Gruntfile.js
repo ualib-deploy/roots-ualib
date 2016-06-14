@@ -164,7 +164,8 @@ module.exports = function(grunt) {
                     'angular-lazy-img',
                     'hamsterjs',
                     'angular-google-maps',
-                    'lodash'
+                    'lodash',
+                    'angular-mousewheel'
                 ],
                 callback: function(mainFiles, component) {
                     return mainFiles.map(function(filepath) {
@@ -195,7 +196,8 @@ module.exports = function(grunt) {
                     'angular-lazy-img',
                     'hamsterjs',
                     'angular-google-maps',
-                    'lodash'
+                    'lodash',
+                    'angular-mousewheel'
                 ],
                 callback: function(mainFiles, component) {
                     return mainFiles.map(function(filepath) {
@@ -245,7 +247,7 @@ module.exports = function(grunt) {
         uglify: {
             dist: {
                 options: {
-                    mangle: true
+                    mangle: false
                 },
                 files: {
                     'assets/js/scripts.min.js': ['tmp/assets/js/scripts.js'],
@@ -471,11 +473,11 @@ module.exports = function(grunt) {
         'html2js',
         'concat:live',
         'ngAnnotate',
-        'uglify:dist',
         'less:live',
         'autoprefixer:build',
         'headerFooterExport',
         'bower_concat:build',
+        'uglify:dist',
         'replace',
         'version',
         'modernizr',
