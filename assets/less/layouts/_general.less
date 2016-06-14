@@ -8,20 +8,16 @@
 html,
 body:last-child { height: 100%; min-height: 100%; }
 
-/* @if NODE_ENV='dev' */
-body:last-child {
+body {
   display: table;
   width: 100%;
-  padding-top: @body-top-padding;
 
-  @media (min-width: @screen-md-min){
-    &.admin-bar{
-      padding-top: @body-top-padding + @wp-admin-menu-height;
-    }
+  &:last-child {
+    padding-top: @body-top-padding;
   }
 }
 
-/* @endif */
+
 
 div[role="document"] {
   //margin-top: 81px;
@@ -40,6 +36,7 @@ div[role="document"] {
 
 // Main content area
 .main {
+  position: relative;
   padding-bottom: 60px;
   @media (max-width: @screen-xs-max){
     padding-bottom: 0;

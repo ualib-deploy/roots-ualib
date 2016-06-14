@@ -1,5 +1,5 @@
 <header class="page-row" role="banner">
-    <nav class="navbar navbar-fixed-top navbar-mega-inverse" role="navigation" ui-scrollfix="80">
+    <nav class="navbar navbar-fixed-top navbar-mega-inverse" role="navigation" ui-scrollfix="80" ui-scrollfix-fluid-width>
         <div class="container-fluid">
             <div class="navbar-header">
                 <a class="navbar-brand" href="/#/home">

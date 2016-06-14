@@ -35,8 +35,8 @@
     "grunt-wp-assets": "~0.2.6",
     "load-grunt-tasks": "~1.0.0",
     "time-grunt": "~1.0.0",
-    "grunt-auto-install": "~0.3.0",
     "grunt-contrib-watch": "~1.0.0",
-    "grunt-preprocess": "~5.1.0"
+    "grunt-preprocess": "~5.1.0",
+    "grunt-exec": "~0.4.7"
   }
 }
