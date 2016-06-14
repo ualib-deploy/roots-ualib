@@ -2,6 +2,11 @@
 define( 'WEBAPPS_PATH', '/srv/web/www/webapps/' );
 
 function roots_ualib_scripts() {
+    //local script added to allow communication between WP API and JS front end apps
+    wp_enqueue_script(
+        'localScript' ,
+        get_template_directory_uri() . '/assets/js/local.js'
+    );
     wp_localize_script(
         'localScript',
         'myLocalized',
