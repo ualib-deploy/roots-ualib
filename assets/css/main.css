@@ -9368,7 +9368,7 @@ footer > .sub-footer {
 @media (min-width: 992px) {
   .home-webapp,
   .bento-webapp {
-    padding-top: 200px !important;
+    padding-top: 205px !important;
   }
 }
 .home-webapp > .wrap main,
@@ -9424,7 +9424,7 @@ footer > .sub-footer {
   }
 }
 .home-webapp .wrap {
-  background-color: rgba(38, 30, 30, 0.5);
+  background-color: rgba(38, 30, 30, 0.7);
 }
 .card {
   margin-bottom: 15px;
