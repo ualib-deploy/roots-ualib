@@ -173,7 +173,7 @@
                                                 <ul>
                                                     <li class="menu-video-database-search"><a href="/#/videos">Video Database Search</a></li>
                                                     <li class="menu-research-guides"><a href="http://guides.lib.ua.edu/visualperformingarts">Research Guides</a></li>
-                                                    <li class="menu-home"><a href="/libraries/music-library/">Music Library Home</a></li>
+                                                    <li class="menu-home"><a href="/libraries/music/">Music Library Home</a></li>
                                                 </ul>
                                             </div>
                                         </div>
