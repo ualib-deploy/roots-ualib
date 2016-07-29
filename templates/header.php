@@ -183,7 +183,7 @@
                                                 <h4>Division of Special Collections</h4>
                                                 <ul>
                                                     <li class="menu-acumen"><a href="http://acumen.lib.ua.edu/home">Acumen Digital Archives</a></li>
-                                                    <li class="menu-hoole"><a href="/libraries/hoole-library/">Hoole Special Collections</a></li>
+                                                    <li class="menu-hoole"><a href="/libraries/hoole/">Hoole Special Collections</a></li>
                                                     <li class="menu-williams"><a href="/collections/williams/">Williams Collection</a></li>
                                                 </ul>
                                             </div>
