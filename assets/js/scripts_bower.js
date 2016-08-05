@@ -1,6 +1,6 @@
 /**
  * Bunch of useful filters for angularJS(with no external dependencies!)
- * @version v0.5.7 - 2015-10-04 * @link https://github.com/a8m/angular-filter
+ * @version v0.5.9 - 2016-07-15 * @link https://github.com/a8m/angular-filter
  * @author Ariel Mashraki <ariel@mashraki.co.il>
  * @license MIT License, http://www.opensource.org/licenses/MIT
  */
@@ -504,7 +504,7 @@ function containsFilter($parse) {
       }
 
       return collection.some(function(elm) {
-        return (isObject(elm) || isFunction(expression))
+        return ((isString(expression) && isObject(elm)) || isFunction(expression))
           ? $parse(expression)(elm)
           : elm === expression;
       });
@@ -622,7 +622,7 @@ angular.module('a8m.every', [])
  */
 angular.module('a8m.filter-by', [])
   .filter('filterBy', ['$parse', function( $parse ) {
-    return function(collection, properties, search) {
+    return function(collection, properties, search, strict) {
       var comparator;
 
       search = (isString(search) || isNumber(search)) ?
@@ -646,16 +646,19 @@ angular.module('a8m.filter-by', [])
           if(!~prop.indexOf('+')) {
             comparator = $parse(prop)(elm)
           } else {
-            var propList = prop.replace(new RegExp('\\s', 'g'), '').split('+');
-            comparator = propList.reduce(function(prev, cur, index) {
-              return (index === 1) ? $parse(prev)(elm) + ' ' + $parse(cur)(elm) :
-                prev + ' ' + $parse(cur)(elm);
-            });
+            var propList = prop.replace(/\s+/g, '').split('+');
+            comparator = propList
+              .map(function(prop) { return $parse(prop)(elm); })
+              .join(' ');
           }
 
-          return (isString(comparator) || isNumber(comparator))
-            ? String(comparator).toLowerCase().contains(search)
-            : false;
+          if (!isString(comparator) && !isNumber(comparator)) {
+            return false;
+          }
+
+          comparator = String(comparator).toLowerCase();
+
+          return strict ? comparator === search : comparator.contains(search);
         });
       });
     }
@@ -1052,12 +1055,15 @@ angular.module('a8m.pick', [])
  */
 angular.module('a8m.range', [])
   .filter('range', function () {
-    return function (input, total) {
+    return function (input, total, start, increment, cb) {
+      start = start || 0;
+      increment = increment || 1;
       for (var i = 0; i < parseInt(total); i++) {
-        input.push(i);
+        var j = start + i * increment;
+        input.push(isFunction(cb) ? cb(j) : j);
       }
       return input;
-	  };
+    };
   });
 /**
  * @ngdoc filter
@@ -24854,7 +24860,7 @@ angular.module('hours.list', [])
         }
     }]);
 /**
- * @license AngularJS v1.5.7
+ * @license AngularJS v1.5.8
  * (c) 2010-2016 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -25022,6 +25028,12 @@ ngTouch.factory('$swipe', [function() {
       move: 'touchmove',
       end: 'touchend',
       cancel: 'touchcancel'
+    },
+    'pointer': {
+      start: 'pointerdown',
+      move: 'pointermove',
+      end: 'pointerup',
+      cancel: 'pointercancel'
     }
   };
 
@@ -25056,15 +25068,15 @@ ngTouch.factory('$swipe', [function() {
      * The main method of `$swipe`. It takes an element to be watched for swipe motions, and an
      * object containing event handlers.
      * The pointer types that should be used can be specified via the optional
-     * third argument, which is an array of strings `'mouse'` and `'touch'`. By default,
-     * `$swipe` will listen for `mouse` and `touch` events.
+     * third argument, which is an array of strings `'mouse'`, `'touch'` and `'pointer'`. By default,
+     * `$swipe` will listen for `mouse`, `touch` and `pointer` events.
      *
      * The four events are `start`, `move`, `end`, and `cancel`. `start`, `move`, and `end`
      * receive as a parameter a coordinates object of the form `{ x: 150, y: 310 }` and the raw
      * `event`. `cancel` receives the raw `event` as its single parameter.
      *
-     * `start` is called on either `mousedown` or `touchstart`. After this event, `$swipe` is
-     * watching for `touchmove` or `mousemove` events. These events are ignored until the total
+     * `start` is called on either `mousedown`, `touchstart` or `pointerdown`. After this event, `$swipe` is
+     * watching for `touchmove`, `mousemove` or `pointermove` events. These events are ignored until the total
      * distance moved in either dimension exceeds a small threshold.
      *
      * Once this threshold is exceeded, either the horizontal or vertical delta is greater.
@@ -25072,12 +25084,12 @@ ngTouch.factory('$swipe', [function() {
      * - If the vertical distance is greater, this is a scroll, and we let the browser take over.
      *   A `cancel` event is sent.
      *
-     * `move` is called on `mousemove` and `touchmove` after the above logic has determined that
+     * `move` is called on `mousemove`, `touchmove` and `pointermove` after the above logic has determined that
      * a swipe is in progress.
      *
-     * `end` is called when a swipe is successfully completed with a `touchend` or `mouseup`.
+     * `end` is called when a swipe is successfully completed with a `touchend`, `mouseup` or `pointerup`.
      *
-     * `cancel` is called either on a `touchcancel` from the browser, or when we begin scrolling
+     * `cancel` is called either on a `touchcancel` or `pointercancel`  from the browser, or when we begin scrolling
      * as described above.
      *
      */
@@ -25091,7 +25103,7 @@ ngTouch.factory('$swipe', [function() {
       // Whether a swipe is active.
       var active = false;
 
-      pointerTypes = pointerTypes || ['mouse', 'touch'];
+      pointerTypes = pointerTypes || ['mouse', 'touch', 'pointer'];
       element.on(getEvents(pointerTypes, 'start'), function(event) {
         startCoords = getCoordinates(event);
         active = true;

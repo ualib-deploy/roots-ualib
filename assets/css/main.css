@@ -9132,6 +9132,11 @@ a.service-card:focus {
 .onesearch-box .yamm-content .what-is-link:active {
   color: #6b2424;
 }
+@media (max-width: 768px) {
+  .onesearch-box .yamm-content #whatAmISearching {
+    display: none;
+  }
+}
 .comment-list ol {
   list-style: none;
 }
