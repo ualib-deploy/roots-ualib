@@ -78,7 +78,7 @@
                                                     <a href="http://search.ebscohost.com/login.aspx?groupid=main&amp;profid=eds&amp;direct=true&amp;setup=1" class="what-is-link" style="margin-top: 0px;"><span class="fa fa-binoculars"></span> Scout advanced search</a>
                                                     <label ng-click="gaScoutOnly()" style="margin-right: 15px;">
                                                         Only search Scout
-                                                        <input type="checkbox" ng-model="scoutCheckbox" class="ng-pristine ng-valid">
+                                                        <input type="checkbox" ng-model="scoutCheckbox">
                                                     </label>
                                                 </div>
                                             </div>
