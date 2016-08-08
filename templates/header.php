@@ -119,10 +119,13 @@
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="/#/databases">
+                                            <a class="service-card" href="http://guides.lib.ua.edu/az.php">
                                                 <span class="fa fa-database"></span>
                                                 <h4>Databases</h4>
                                                 <p>Organized collections of articles, journals, and published materials</p>
+                                                <ul>
+                                                    <li class="menu-legacydbs"><a href="/#/databases">RefWorks</a></li>
+                                                </ul>    
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
