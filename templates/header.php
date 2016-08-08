@@ -124,7 +124,7 @@
                                                 <h4>Databases</h4>
                                                 <p>Organized collections of articles, journals, and published materials</p>
                                                 <ul>
-                                                    <li class="menu-legacydbs"><a href="/#/databases">RefWorks</a></li>
+                                                    <li class="menu-legacydbs"><a href="/#/databases">Legacy Version</a></li>
                                                 </ul>    
                                             </a>
                                         </div>
