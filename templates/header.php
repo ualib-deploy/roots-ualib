@@ -122,10 +122,10 @@
                                             <a class="service-card" href="http://guides.lib.ua.edu/az.php">
                                                 <span class="fa fa-database"></span>
                                                 <h4>Databases</h4>
-                                                <p>Organized collections of articles, journals, and published materials</p>
                                                 <ul>
-                                                    <li class="menu-legacydbs"><a href="/#/databases">Legacy Version</a></li>
-                                                </ul>    
+                                                    <li class="menu-databases-new"><a href="http://guides.lib.ua.edu/az.php">Current Databases Listing</a></li>
+                                                    <li class="menu-databases-old"><a href="#/databases">(legacy, not updated) Databases</a></li>
+                                                </ul>
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">

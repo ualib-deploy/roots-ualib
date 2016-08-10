@@ -72,12 +72,11 @@
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col-md-6">
-                                                <a href="http://guides.lib.ua.edu/onesearch-howto" class="what-is-link" title="What am I searching?"><span class="fa fa-info-circle"></span>  What am I searching?</a>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="checkbox scout-checkbox">
-                                                    <label ng-click="gaScoutOnly()">
+                                            <div class="col-md-12">
+                                                <a href="http://guides.lib.ua.edu/onesearch-howto" class="what-is-link" id="whatAmISearching" title="What am I searching?"><span class="fa fa-info-circle"></span>  What am I searching?</a>
+                                                <div class="checkbox scout-checkbox" style="float: right;">
+                                                    <a href="http://search.ebscohost.com/login.aspx?groupid=main&amp;profid=eds&amp;direct=true&amp;setup=1" class="what-is-link" style="margin-top: 0px;"><span class="fa fa-binoculars"></span> Scout advanced search</a>
+                                                    <label ng-click="gaScoutOnly()" style="margin-right: 15px;">
                                                         Only search Scout
                                                         <input type="checkbox" ng-model="scoutCheckbox">
                                                     </label>
@@ -120,14 +119,14 @@
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <div class="service-list">
+                                            <a class="service-card" href="http://guides.lib.ua.edu/az.php">
                                                 <span class="fa fa-database"></span>
                                                 <h4>Databases</h4>
                                                 <ul>
                                                     <li class="menu-databases-new"><a href="http://guides.lib.ua.edu/az.php">Current Databases Listing</a></li>
                                                     <li class="menu-databases-old"><a href="#/databases">(legacy, not updated) Databases</a></li>
                                                 </ul>
-                                        </div>
+                                            </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="/research-help/google-scholar/">
@@ -176,7 +175,7 @@
                                                 <ul>
                                                     <li class="menu-video-database-search"><a href="/#/videos">Video Database Search</a></li>
                                                     <li class="menu-research-guides"><a href="http://guides.lib.ua.edu/visualperformingarts">Research Guides</a></li>
-                                                    <li class="menu-home"><a href="/libraries/music-library/">Music Library Home</a></li>
+                                                    <li class="menu-home"><a href="/libraries/music/">Music Library Home</a></li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -186,7 +185,7 @@
                                                 <h4>Division of Special Collections</h4>
                                                 <ul>
                                                     <li class="menu-acumen"><a href="http://acumen.lib.ua.edu/home">Acumen Digital Archives</a></li>
-                                                    <li class="menu-hoole"><a href="/libraries/hoole-library/">Hoole Special Collections</a></li>
+                                                    <li class="menu-hoole"><a href="/libraries/hoole/">Hoole Special Collections</a></li>
                                                     <li class="menu-williams"><a href="/collections/williams/">Williams Collection</a></li>
                                                 </ul>
                                             </div>
@@ -237,8 +236,9 @@
                                                 <span class="fa fa-book"></span>
                                                 <h4>Borrow, Renew &amp; Course Reserves</h4>
                                                 <ul>
-                                                    <li class="menu-photocopying"><a href="/using-the-library/course-reserves/">Borrow, Renew, and Course Reserves</a></li>
+                                                    <li class="menu-reserves"><a href="/using-the-library/course-reserves/">Course Reserves</a></li>
                                                     <li class="menu-access-reserves"><a href="http://library.ua.edu/vwebv/enterCourseReserve.do">Find and access reserve items</a></li>
+                                                    <li class="menu-borrow"><a href="/using-the-library/circulation-services/borrowing/">Borrow and renew items</a></li>
 
                                                 </ul>
                                             </div>
