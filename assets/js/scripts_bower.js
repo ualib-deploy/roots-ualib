@@ -6081,7 +6081,7 @@ angular.module("databases/databases-list.tpl.html", []).run(["$templateCache", f
     "<div class=\"container\">\n" +
     "    <div class=\"row\">\n" +
     "        <div class=\"col-md-12\">\n" +
-    "            <div class=\"alert alert-warning\" role=\"alert\"> <span class=\"fa fa-exclamation-triangle\"></span> </span>This is the legacy databases page.  Visit our <a href=\"http://guides.lib.ua.edu/az.php\">new databases page</a> for updated information.</div>\n" +
+    "            <div class=\"alert alert-warning\" role=\"alert\"> <span class=\"fa fa-exclamation-triangle\"></span> You have arrived at our legacy databases page, which is no longer being updated. Please visit our <a href=\"http://guides.lib.ua.edu/az.php\">new databases page</a> and make a note if you are linking to us from off-site, or have this location bookmarked</div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "    <div class=\"row\">\n" +
