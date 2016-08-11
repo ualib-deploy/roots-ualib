@@ -18359,9 +18359,10 @@ angular.module('oneSearch.bento', [])
                     var expecting = numResults + numEngines;
 
                     //console.log('box ' + box + ' number of results ' + numResults + ' number of engines' + numEngines +  'expecting ' + expecting);
-                    if (box == 'articles'){
+                    if ((box == 'articles') || (box == 'databases')){
                         self.boxes[box].resultLimit = 6;
                     }
+
                     else if (box == 'journals'){
                         if (expecting < 2 && self.boxes[box].resultLimit == 3){
                             self.boxes[box].resultLimit = 6;
