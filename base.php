@@ -71,6 +71,13 @@
       ga('require', 'linkid');
       ga('send', 'pageview');
   </script>
+  
+  <script> 
+  _gaq = {}; 
+  _gaq.push = function() { 
+  ga('send', 'pageview', arguments[0][1]);    
+  }; 
+  </script>
 
 </body>
 </html>
