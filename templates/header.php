@@ -124,7 +124,7 @@
                                                 <h4>Databases</h4>
                                                 <ul>
                                                     <li class="menu-databases-new"><a href="http://guides.lib.ua.edu/az.php">Current Databases Listing</a></li>
-                                                    <li class="menu-databases-old"><a href="#/databases">(legacy, not updated) Databases</a></li>
+                                                    <li class="menu-databases-old"><a href="/#/databases">(legacy, not updated) Databases</a></li>
                                                 </ul>
                                             </div>
                                         </div>
