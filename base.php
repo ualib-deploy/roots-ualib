@@ -70,13 +70,14 @@
       ga('create', 'UA-2255842-1', 'auto');
       ga('require', 'linkid');
       ga('send', 'pageview');
-  </script>
-  
-  <script> 
-  _gaq = {}; 
-  _gaq.push = function() { 
-  ga('send', 'pageview', arguments[0][1]);    
-  }; 
+      var hash = document.location.hash
+      if (hash != ''){
+        var isBentoResult = hash.search('/bento/');
+        if (isBentoResult != -1){
+          queryTerm = decodeURIComponent(hash.split('/').pop());
+          ga('send', 'event', 'oneSearch', 'oneSearchQuery', queryTerm);
+        }
+      }
   </script>
 
 </body>
