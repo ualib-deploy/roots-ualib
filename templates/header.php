@@ -256,12 +256,17 @@
                                                     </div>
                                                 </div>
                                                 <div class="col-sm-12 col-md-4">
-                                                    <a class="service-card" href="/using-the-library/sanford-media-center/">
-                                                        <span class="fa fa-cubes"></span>
-                                                        <h4>Sanford Media Center</h4>
-                                                        <p>A leading-edge facility for digital media production </p>
-                                                    </a>
+                                                    <div class="service-list" >
+                                                        <span class="fa fa-area-chart"></span>
+                                                        <h4>Reserve a Room</h4>
+                                                        <ul>
+                                                          <li><a href="/using-the-library/presentation-practice-rooms/">Presentation Practice Rooms</a></li>
+                                                          <li><a href="https://ua.libcal.com/booking/groupstudy">Group Study Rooms</a></li> 
+                                                          
+                                                          </ul>
+                                                    </div>
                                                 </div>
+                                                
                                                 <div class="col-sm-12 col-md-4">
                                                     <a class="service-card" href="/using-the-library/digital-humanities-center/">
                                                         <span class="fa fa-tachometer"></span>
@@ -279,15 +284,11 @@
                                                     </a>
                                                 </div>
                                                 <div class="col-sm-12 col-md-4">
-                                                    <div class="service-list" >
-                                                        <span class="fa fa-area-chart"></span>
-                                                        <h4>Reserve a Room</h4>
-                                                        <ul>
-                                                          <li><a href="/using-the-library/presentation-practice-rooms/">Presentation Practice Rooms</a></li>
-                                                          <li><a href="https://ua.libcal.com/booking/groupstudy">Group Study Rooms</a></li> 
-                                                          
-                                                          </ul>
-                                                    </div>
+                                                    <a class="service-card" href="/using-the-library/sanford-media-center/">
+                                                        <span class="fa fa-cubes"></span>
+                                                        <h4>Sanford Media Center</h4>
+                                                        <p>A leading-edge facility for digital media production </p>
+                                                    </a>
                                                 </div>
                                                 <div class="col-sm-12 col-md-4">
                                                     <a class="service-card" href="/using-the-library/library-instruction/">
