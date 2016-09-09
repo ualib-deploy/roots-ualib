@@ -71,17 +71,7 @@
       ga('require', 'linkid');
       ga('send', 'pageview');
     </script>
-    <script>
-      var hash = document.location.hash;
-      if (hash != ''){
-        var isBentoResult = hash.search('/bento/');
-        if (isBentoResult != -1){
-          queryTerm = decodeURIComponent(hash.split('/').pop());
-          ga('send', 'event', 'oneSearch', 'oneSearchQuery', queryTerm);
-          console.log("Post OneSearch Query Event -- queryTerm is " + queryTerm);
-        }
-      }
-  </script>
+    
 
 </body>
 </html>
