@@ -283,7 +283,7 @@
                                                         <span class="fa fa-area-chart"></span>
                                                         <h4>Reserve a Room</h4>
                                                         <ul>
-                                                          <li><a href="https://www.lib.ua.edu/using-the-library/presentation-practice-rooms/"Presentation Practice Rooms</a></li>
+                                                          <li><a href="https://www.lib.ua.edu/using-the-library/presentation-practice-rooms/">Presentation Practice Rooms</a></li>
                                                           <li><a href="https://ua.libcal.com/booking/groupstudy">Group Study Rooms</a></li> 
                                                           
                                                           </ul>
