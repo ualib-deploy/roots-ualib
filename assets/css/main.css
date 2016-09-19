@@ -6849,6 +6849,9 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
        transition: opacity 0.3s 0s, visibility 0s 0s, transform 0.3s 0s;
   }
 }
+header .navbar-fixed-top .navbar-collapse {
+  max-height: 90vh;
+}
 .breadcrumb {
   padding: 8px 15px;
   margin-bottom: 21px;
