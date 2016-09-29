@@ -72,16 +72,20 @@
       _gaq = {};
       var hash = document.location.hash;
       if (hash != ''){
+          console.log("Hash is present.");
           var isBentoResult = hash.search('/bento/');
           if (isBentoResult == -1){
+              console.log("Bento not found.");
               ga('send', 'pageview');
           }
           else{
+              console.log("Bento found!");
               queryTerm = decodeURIComponent(hash.split('/').pop());
               ga('send', 'pageview', 'bento?q=' + queryTerm);
           }
       }
       else{
+          console.log("Hash not found.")
           ga('send', 'pageview');
       }
       _gaq.push = function() {
