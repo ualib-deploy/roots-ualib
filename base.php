@@ -69,8 +69,26 @@
 
       ga('create', 'UA-2255842-1', 'auto');
       ga('require', 'linkid');
-      ga('send', 'pageview');
-    </script>
+      _gaq = {};
+      var hash = document.location.hash;
+      if (hash != ''){
+          var isBentoResult = hash.search('/bento/');
+          if (isBentoResult == -1){
+              ga('send', 'pageview');
+          }
+          else{
+              queryTerm = decodeURIComponent(hash.split('/').pop());
+              ga('send', 'pageview', 'bento?q=' + queryTerm);
+          }
+      }
+      else{
+          ga('send', 'pageview');
+      }
+      _gaq.push = function() {
+          ga('send', 'pageview', 'bento?q=');
+      };
+
+  </script>
     
 
 </body>
