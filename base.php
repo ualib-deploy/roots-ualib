@@ -85,12 +85,10 @@
           }
       }
       else{
-          console.log("Hash not found.")
+          console.log("Hash not found.");
           ga('send', 'pageview');
       }
-      _gaq.push = function() {
-          ga('send', 'pageview', 'bento?q=');
-      };
+
 
   </script>
     
