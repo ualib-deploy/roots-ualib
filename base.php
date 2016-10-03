@@ -69,7 +69,7 @@
 
       ga('create', 'UA-2255842-26', 'auto');
       ga('require', 'linkid');
-      ga( 'send', 'pageview', 'bento?q=keyword');
+      ga( 'send', 'pageview', 'bento?q=' + queryTerm);
       /*_gaq = {};
       //var hash = document.location.hash;
       //if (hash != ''){
