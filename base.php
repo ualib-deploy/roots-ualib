@@ -69,9 +69,10 @@
 
       ga('create', 'UA-2255842-26', 'auto');
       ga('require', 'linkid');
-      _gaq = {};
-      var hash = document.location.hash;
-      if (hash != ''){
+      ga( 'send', 'pageview', 'bento?q=keyword');
+      /*_gaq = {};
+      //var hash = document.location.hash;
+      //if (hash != ''){
           console.log("Hash is present.");
           var isBentoResult = hash.search('/bento/');
           if (isBentoResult == -1){
@@ -87,7 +88,7 @@
       else{
           console.log("Hash not found.");
           ga('send', 'pageview');
-      }
+      }*/
 
 
   </script>
