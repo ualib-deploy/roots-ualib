@@ -83,7 +83,7 @@ angular.module("_ualib-home.tpl.html", []).run(["$templateCache", function($temp
                         var isBentoResult = hash.search('/bento/');
                         if (isBentoResult == -1){
                             console.log("Bento not found.");
-                            ga('send', 'pageview');
+                            ga('send', 'pageview', $location.url());
                         }
                         else{
                             console.log("Bento found!");
@@ -93,7 +93,7 @@ angular.module("_ualib-home.tpl.html", []).run(["$templateCache", function($temp
                     }
                     else{
                         console.log("Hash not found.");
-                        ga('send', 'pageview');
+                        ga('send', 'pageview', $location.url());
                     }
                 }
 

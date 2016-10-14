@@ -74,7 +74,7 @@ angular.module('ualib', [
                         var isBentoResult = hash.search('/bento/');
                         if (isBentoResult == -1){
                             console.log("Bento not found.");
-                            ga('send', 'pageview');
+                            ga('send', 'pageview', $location.url());
                         }
                         else{
                             console.log("Bento found!");
@@ -84,7 +84,7 @@ angular.module('ualib', [
                     }
                     else{
                         console.log("Hash not found.");
-                        ga('send', 'pageview');
+                        ga('send', 'pageview', $location.url());
                     }
                 }
 
