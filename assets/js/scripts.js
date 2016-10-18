@@ -77,7 +77,30 @@ angular.module("_ualib-home.tpl.html", []).run(["$templateCache", function($temp
                 if (pre && pre.hasOwnProperty('$$route') && pre.$$route.hasOwnProperty('originalPath') && current.hasOwnProperty('$$route') && current.$$route.hasOwnProperty('originalPath') && current.$$route.originalPath !== pre.$$route.originalPath){
                     // Send Google Analytics page view when routes are accessed
                     ga('require', 'linkid');
-                    ga('send', 'pageview', $location.url());
+                    var hash = document.location.hash; //Get hash of URL if present -- for instance, /#/databases
+                    if (hash !== ''){
+                        console.log("Hash is present.");
+                        //Test for presence of bento in URL
+                        // If the bento is present, we send the pageview in the format needed to be tracked in GA Site Search
+                        var isBentoResult = hash.search('/bento/');
+                        if (isBentoResult === -1){
+                            console.log("Bento not found.");
+                            ga('send', 'pageview', $location.url());
+                        }
+                        else{
+                            console.log("Bento found!");
+
+                            //For lib.ua.edu/#/databases, this returns databases as a string
+                            queryTerm = decodeURIComponent(hash.split('/').pop());
+
+                            //This format is necessary for the pageview to be counted in the site search portion of GA
+                            ga('send', 'pageview', 'bento?q=' + queryTerm);
+                        }
+                    }
+                    else{
+                        console.log("Hash not found.");
+                        ga('send', 'pageview', $location.url());
+                    }
                 }
 
                 var appRoute = $location.path().split('/')[1];
