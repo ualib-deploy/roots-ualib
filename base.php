@@ -67,21 +67,30 @@
           m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
       })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
-      ga('create', 'UA-2255842-26', 'auto');
+      ga('create', 'UA-2255842-1', 'auto');
       ga('require', 'linkid');
       _gaq = {};
+
+      //Get hash of URL if present -- for instance, /#/databases
       var hash = document.location.hash;
       if (hash != ''){
           console.log("Hash is present.");
           var isBentoResult = hash.search('/bento/');
+          //Test for presence of bento in URL
+          // If the bento is present, we send the pageview in the format needed to be tracked in GA Site Search
           if (isBentoResult == -1){
               console.log("Bento not found.");
               var URLSegment = hash.split('/').pop();
+              //URLSegment is needed when an app is navigated to
               ga('send', 'pageview', URLSegment);
           }
           else{
               console.log("Bento found!");
+
+              //For lib.ua.edu/#/databases, this returns databases as a string
               queryTerm = decodeURIComponent(hash.split('/').pop());
+
+              //This format is necessary for the pageview to be counted in the site search portion of GA
               ga('send', 'pageview', 'bento?q=' + queryTerm);
           }
       }
