@@ -36,7 +36,6 @@
                   <li role="presentation"><a role="menuitem" tabindex="-1" href="http://cchs.ua.edu/library/">Health Sciences Library</a></li>
                   <li role="presentation"><a role="menuitem" tabindex="-1" href="http://maplibrary.ua.edu/">Map Library & Place Names Research Center</a></li>
                   <li role="presentation"><a role="menuitem" tabindex="-1" href="https://wgrc.sa.ua.edu/programming-and-resources/frances-s-summersell-library/">Summersell Library</a></li>
-                  <li role="presentation"><a role="menuitem" tabindex="-1" href="http://cis.ua.edu/undergraduates/resources/readingroom/">William E. Winter Reading Room</a></li>
               </ul>
               <button id="show-more-lib-btn" class="btn btn-default btn-xs"  type="button" ng-click="isCollapsed = !isCollapsed">
                   {{!isCollapsed ? 'Show More' : 'Show Less'}} Libraries...
