@@ -1,6 +1,6 @@
 /**
  * Bunch of useful filters for angularJS(with no external dependencies!)
- * @version v0.5.11 - 2016-08-16 * @link https://github.com/a8m/angular-filter
+ * @version v0.5.14 - 2016-12-06 * @link https://github.com/a8m/angular-filter
  * @author Ariel Mashraki <ariel@mashraki.co.il>
  * @license MIT License, http://www.opensource.org/licenses/MIT
  */
@@ -117,11 +117,10 @@ if (!String.prototype.contains) {
 /**
  * @param num {Number}
  * @param decimal {Number}
- * @param $math
  * @returns {Number}
  */
-function convertToDecimal(num, decimal, $math){
-  return $math.round(num * $math.pow(10,decimal)) / ($math.pow(10,decimal));
+function convertToDecimal(num, decimal){
+  return Math.round(num * Math.pow(10,decimal)) / (Math.pow(10, decimal));
 }
 
 /**
@@ -1334,6 +1333,21 @@ angular.module('a8m.xor', [])
 
 /**
  * @ngdoc filter
+ * @name abs
+ * @kind function
+ *
+ * @description
+ * Will return the absolute value of a number
+ */
+angular.module('a8m.math.abs', [])
+  .filter('abs', function () {
+    return function (input) {
+      return Math.abs(input);
+    }
+  });
+
+/**
+ * @ngdoc filter
  * @name formatBytes
  * @kind function
  *
@@ -1341,26 +1355,24 @@ angular.module('a8m.xor', [])
  * Convert bytes into appropriate display 
  * 1024 bytes => 1 KB
  */
-angular.module('a8m.math.byteFmt', ['a8m.math'])
-  .filter('byteFmt', ['$math', function ($math) {
+angular.module('a8m.math.byteFmt', [])
+  .filter('byteFmt', function () {
+    var compared = [{str: 'B', val: 1024}];
+    ['KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'].forEach(function(el, i) {
+      compared.push({str: el, val: compared[i].val * 1024 });
+    });
     return function (bytes, decimal) {
-
       if(isNumber(decimal) && isFinite(decimal) && decimal%1===0 && decimal >= 0 &&
         isNumber(bytes) && isFinite(bytes)) {
-        if(bytes < 1024) { // within 1 KB so B
-          return convertToDecimal(bytes, decimal, $math) + ' B';
-        } else if(bytes < 1048576) { // within 1 MB so KB
-          return convertToDecimal((bytes / 1024), decimal, $math) + ' KB';
-        } else if(bytes < 1073741824){ // within 1 GB so MB
-          return convertToDecimal((bytes / 1048576), decimal, $math) + ' MB';
-        } else { // GB or more
-          return convertToDecimal((bytes / 1073741824), decimal, $math) + ' GB';
-        }
-
+        var i = 0;
+        while (i < compared.length-1 && bytes >= compared[i].val) i++;
+        bytes /= i > 0 ? compared[i-1].val : 1;
+        return convertToDecimal(bytes, decimal) + ' ' + compared[i].str;
       }
-      return "NaN";
+      return 'NaN';
     }
-  }]);
+  });
+
 /**
  * @ngdoc filter
  * @name degrees
@@ -1369,20 +1381,20 @@ angular.module('a8m.math.byteFmt', ['a8m.math'])
  * @description
  * Convert angle from radians to degrees
  */
-angular.module('a8m.math.degrees', ['a8m.math'])
-  .filter('degrees', ['$math', function ($math) {
+angular.module('a8m.math.degrees', [])
+  .filter('degrees', function () {
     return function (radians, decimal) {
       // if decimal is not an integer greater than -1, we cannot do. quit with error "NaN"
       // if degrees is not a real number, we cannot do also. quit with error "NaN"
       if(isNumber(decimal) && isFinite(decimal) && decimal%1===0 && decimal >= 0 &&
         isNumber(radians) && isFinite(radians)) {
-        var degrees = (radians * 180) / $math.PI;
-        return $math.round(degrees * $math.pow(10,decimal)) / ($math.pow(10,decimal));
+        var degrees = (radians * 180) / Math.PI;
+        return Math.round(degrees * Math.pow(10,decimal)) / (Math.pow(10,decimal));
       } else {
-        return "NaN";
+        return 'NaN';
       }
     }
-  }]);
+  });
 
  
  
@@ -1395,34 +1407,23 @@ angular.module('a8m.math.degrees', ['a8m.math'])
  * Convert bytes into appropriate display 
  * 1024 kilobytes => 1 MB
  */
-angular.module('a8m.math.kbFmt', ['a8m.math'])
-  .filter('kbFmt', ['$math', function ($math) {
+angular.module('a8m.math.kbFmt', [])
+  .filter('kbFmt', function () {
+    var compared = [{str: 'KB', val: 1024}];
+    ['MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'].forEach(function(el, i) {
+      compared.push({str: el, val: compared[i].val * 1024 });
+    });
     return function (bytes, decimal) {
-
       if(isNumber(decimal) && isFinite(decimal) && decimal%1===0 && decimal >= 0 &&
         isNumber(bytes) && isFinite(bytes)) {
-        if(bytes < 1024) { // within 1 MB so KB
-          return convertToDecimal(bytes, decimal, $math) + ' KB';
-        } else if(bytes < 1048576) { // within 1 GB so MB
-          return convertToDecimal((bytes / 1024), decimal, $math) + ' MB';
-        } else {
-          return convertToDecimal((bytes / 1048576), decimal, $math) + ' GB';
-        }
+        var i = 0;
+        while (i < compared.length-1 && bytes >= compared[i].val) i++;
+        bytes /= i > 0 ? compared[i-1].val : 1;
+        return convertToDecimal(bytes, decimal) + ' ' + compared[i].str;
       }
-      return "NaN";
+      return 'NaN';
     }
-  }]);
-/**
- * @ngdoc module
- * @name math
- * @description
- * reference to global Math object
- */
-angular.module('a8m.math', [])
-  .factory('$math', ['$window', function ($window) {
-    return $window.Math;
-  }]);
-
+  });
 /**
  * @ngdoc filter
  * @name max
@@ -1432,15 +1433,15 @@ angular.module('a8m.math', [])
  * Math.max will get an array and return the max value. if an expression
  * is provided, will return max value by expression.
  */
-angular.module('a8m.math.max', ['a8m.math'])
-  .filter('max', ['$math', '$parse', function ($math, $parse) {
+angular.module('a8m.math.max', [])
+  .filter('max', ['$parse', function ($parse) {
     return function (input, expression) {
 
       if(!isArray(input)) {
         return input;
       }
       return isUndefined(expression)
-        ? $math.max.apply($math, input)
+        ? Math.max.apply(Math, input)
         : input[indexByMax(input, expression)];
     };
 
@@ -1454,7 +1455,7 @@ angular.module('a8m.math.max', ['a8m.math'])
       var mappedArray = array.map(function(elm){
         return $parse(exp)(elm);
       });
-      return mappedArray.indexOf($math.max.apply($math, mappedArray));
+      return mappedArray.indexOf(Math.max.apply(Math, mappedArray));
     }
   }]);
 /**
@@ -1466,15 +1467,15 @@ angular.module('a8m.math.max', ['a8m.math'])
  * Math.min will get an array and return the min value. if an expression
  * is provided, will return min value by expression.
  */
-angular.module('a8m.math.min', ['a8m.math'])
-  .filter('min', ['$math', '$parse', function ($math, $parse) {
+angular.module('a8m.math.min', [])
+  .filter('min', ['$parse', function ($parse) {
     return function (input, expression) {
 
       if(!isArray(input)) {
         return input;
       }
       return isUndefined(expression)
-        ? $math.min.apply($math, input)
+        ? Math.min.apply(Math, input)
         : input[indexByMin(input, expression)];
     };
 
@@ -1488,7 +1489,7 @@ angular.module('a8m.math.min', ['a8m.math'])
       var mappedArray = array.map(function(elm){
         return $parse(exp)(elm);
       });
-      return mappedArray.indexOf($math.min.apply($math, mappedArray));
+      return mappedArray.indexOf(Math.min.apply(Math, mappedArray));
     }
   }]);
 /**
@@ -1499,21 +1500,21 @@ angular.module('a8m.math.min', ['a8m.math'])
  * @description
  * percentage between two numbers
  */
-angular.module('a8m.math.percent', ['a8m.math'])
-  .filter('percent', ['$math', '$window', function ($math, $window) {
+angular.module('a8m.math.percent', [])
+  .filter('percent', function () {
     return function (input, divided, round) {
 
-      var divider = isString(input) ? $window.Number(input) : input;
+      var divider = isString(input) ? Number(input) : input;
       divided = divided || 100;
       round = round || false;
 
-      if (!isNumber(divider) || $window.isNaN(divider)) return input;
+      if (!isNumber(divider) || isNaN(divider)) return input;
 
       return round
-        ? $math.round((divider / divided) * 100)
+        ? Math.round((divider / divided) * 100)
         : (divider / divided) * 100;
     }
-  }]);
+  });
 
 /**
  * @ngdoc filter
@@ -1523,19 +1524,19 @@ angular.module('a8m.math.percent', ['a8m.math'])
  * @description
  * Convert angle from degrees to radians
  */
-angular.module('a8m.math.radians', ['a8m.math'])
-  .filter('radians', ['$math', function ($math) {
+angular.module('a8m.math.radians', [])
+  .filter('radians', function() {
     return function (degrees, decimal) {
       // if decimal is not an integer greater than -1, we cannot do. quit with error "NaN"
       // if degrees is not a real number, we cannot do also. quit with error "NaN"
       if(isNumber(decimal) && isFinite(decimal) && decimal%1===0 && decimal >= 0 &&
         isNumber(degrees) && isFinite(degrees)) {
         var radians = (degrees * 3.14159265359) / 180;
-        return $math.round(radians * $math.pow(10,decimal)) / ($math.pow(10,decimal));
+        return Math.round(radians * Math.pow(10,decimal)) / (Math.pow(10,decimal));
       }
-      return "NaN";
+      return 'NaN';
     }
-  }]);
+  });
 
  
  
@@ -1570,25 +1571,25 @@ angular.module('a8m.math.radix', [])
  * i.e: K for one thousand, M for Million, B for billion
  * e.g: number of users:235,221, decimal:1 => 235.2 K
  */
-angular.module('a8m.math.shortFmt', ['a8m.math'])
-  .filter('shortFmt', ['$math', function ($math) {
+angular.module('a8m.math.shortFmt', [])
+  .filter('shortFmt', function () {
     return function (number, decimal) {
       if(isNumber(decimal) && isFinite(decimal) && decimal%1===0 && decimal >= 0 &&
         isNumber(number) && isFinite(number)){
         if(number < 1e3) {
-          return number;
+          return '' + number;  // Coerce to string
         } else if(number < 1e6) {
-          return convertToDecimal((number / 1e3), decimal, $math) + ' K';
+          return convertToDecimal((number / 1e3), decimal) + ' K';
         } else if(number < 1e9){
-          return convertToDecimal((number / 1e6), decimal, $math) + ' M';
+          return convertToDecimal((number / 1e6), decimal) + ' M';
         } else {
-          return convertToDecimal((number / 1e9), decimal, $math) + ' B';
+          return convertToDecimal((number / 1e9), decimal) + ' B';
         }
 
       }
-      return "NaN";
+      return 'NaN';
     }
-  }]);
+  });
 /**
  * @ngdoc filter
  * @name sum
@@ -2279,10 +2280,10 @@ angular.module('angular.filter', [
   'a8m.flatten',
   'a8m.join',
   'a8m.range',
-  
-  'a8m.math',
+
   'a8m.math.max',
   'a8m.math.min',
+  'a8m.math.abs',
   'a8m.math.percent',
   'a8m.math.radix',
   'a8m.math.sum',
@@ -17718,7 +17719,7 @@ angular.module('ualib.musicSearch')
 
 
 
-angular.module('oneSearch.templates', ['bento/bento.tpl.html', 'common/directives/suggest/suggest.tpl.html', 'common/engines/acumen/acumen.tpl.html', 'common/engines/catalog/catalog.tpl.html', 'common/engines/databases/databases.tpl.html', 'common/engines/ejournals/ejournals.tpl.html', 'common/engines/google-cs/google-cs.tpl.html', 'common/engines/recommend/recommend.tpl.html', 'common/engines/scout/scout.tpl.html']);
+angular.module('oneSearch.templates', ['bento/bento.tpl.html', 'common/directives/suggest/suggest.tpl.html', 'common/engines/acumen/acumen.tpl.html', 'common/engines/catalog/catalog.tpl.html', 'common/engines/databases/databases.tpl.html', 'common/engines/ejournals/ejournals.tpl.html', 'common/engines/google-cs/google-cs.tpl.html', 'common/engines/recommend/recommend.tpl.html', 'common/engines/scout/scout.tpl.html', 'common/engines/staff-directory/staff-directory.tpl.html']);
 
 angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("bento/bento.tpl.html",
@@ -17748,7 +17749,7 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "                </h2>\n" +
     "            </div>\n" +
     "        </div>\n" +
-    "        <div class=\"col-sm-12 col-md-4\">\n" +
+    "        <div class=\"col-md-4\">\n" +
     "            <div class=\"bento-box\" bento-box=\"journals\">\n" +
     "                <h2>\n" +
     "                    Journals\n" +
@@ -17756,6 +17757,32 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "                        <span class=\"fa fa-info-circle\"\n" +
     "                              tooltip-placement=\"right\"\n" +
     "                              tooltip=\"Keyword search in journal titles and journal collections, in both Scout and our E-Resources.\"></span>\n" +
+    "                    </small>\n" +
+    "                </h2>\n" +
+    "            </div>\n" +
+    "        </div><!--\n" +
+    "        <div class=\"col-sm-12 col-md-4\">\n" +
+    "            <div class=\"bento-box\" bento-box=\"staffdirectory\">\n" +
+    "                <h2>\n" +
+    "                    Research Help\n" +
+    "                    <small>\n" +
+    "                        <span class=\"fa fa-info-circle\"\n" +
+    "                              tooltip-placement=\"right\"\n" +
+    "                              tooltip=\"Contact a librarian directly for help with your research.\"></span>\n" +
+    "                    </small>\n" +
+    "                </h2>\n" +
+    "            </div>\n" +
+    "        </div>-->\n" +
+    "    </div>\n" +
+    "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-12\">\n" +
+    "            <div class=\"bento-box\" hide-if-empty=\"true\" bento-box=\"staffdirectory\" style=\"min-height:0px; margin-bottom: 15px;\">\n" +
+    "                <h2>\n" +
+    "                    Research Help\n" +
+    "                    <small>\n" +
+    "                            <span class=\"fa fa-info-circle\"\n" +
+    "                                  tooltip-placement=\"right\"\n" +
+    "                                  tooltip=\"Contact a librarian directly for help with your research.\"></span>\n" +
     "                    </small>\n" +
     "                </h2>\n" +
     "            </div>\n" +
@@ -17788,16 +17815,17 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "        </div>\n" +
     "        <div class=\"col-md-4\">\n" +
     "            <div class=\"bento-box\" bento-box=\"acumen\">\n" +
-    "                <h2 id=\"acumen\">\n" +
-    "                    Acumen <small>Digital Archives</small>\n" +
+    "                <h2>\n" +
+    "                    Acumen\n" +
     "                    <small>\n" +
     "                        <span class=\"fa fa-info-circle\"\n" +
     "                              tooltip-placement=\"right\"\n" +
-    "                              tooltip=\"Returns a keyword search in titles and full text of our Special Collections Digital Archive.\"></span>\n" +
+    "                              tooltip=\"Uses Google API to run a keyword search in titles and full text for our research guides.\"></span>\n" +
     "                    </small>\n" +
     "                </h2>\n" +
     "            </div>\n" +
     "        </div>\n" +
+    "\n" +
     "    </div>\n" +
     "    <div class=\"row\">\n" +
     "        <div class=\"col-md-4\">\n" +
@@ -17829,13 +17857,14 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "                <h2>\n" +
     "                    Research Guides\n" +
     "                    <small>\n" +
-    "                        <span class=\"fa fa-info-circle\"\n" +
-    "                              tooltip-placement=\"right\"\n" +
-    "                              tooltip=\"Uses Google API to run a keyword search in titles and full text for our research guides.\"></span>\n" +
+    "                            <span class=\"fa fa-info-circle\"\n" +
+    "                                  tooltip-placement=\"right\"\n" +
+    "                                  tooltip=\"Uses Google API to run a keyword search in titles and full text for our research guides.\"></span>\n" +
     "                    </small>\n" +
     "                </h2>\n" +
     "            </div>\n" +
     "        </div>\n" +
+    "    </div>\n" +
     "    </div>\n" +
     "    <div class=\"row\">\n" +
     "        <div class=\"col-md-12\">\n" +
@@ -18101,6 +18130,39 @@ angular.module("common/engines/scout/scout.tpl.html", []).run(["$templateCache",
     "\n" +
     "    </div>\n" +
     "</div>");
+}]);
+
+angular.module("common/engines/staff-directory/staff-directory.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("common/engines/staff-directory/staff-directory.tpl.html",
+    "<div class=\"col-md-4\">\n" +
+    "    <div class=\"media\">\n" +
+    "        <div class=\"media-left\">\n" +
+    "            <a href=\"#\">\n" +
+    "                <img class=\"media-object\" style=\"width: 128px;\" src='https://wwwdev2.lib.ua.edu/staffDir/staffImages/{{item.photo}}' >\n" +
+    "            </a>\n" +
+    "        </div>\n" +
+    "        <div class=\"media-body\">\n" +
+    "            <div class=\"media-heading\">\n" +
+    "                <ul class=\"list-unstyled\">\n" +
+    "                    <li><a ng-href=\"#/staffdir/{{item.emailPrefix}}\" ng-if=\"item.profile\">\n" +
+    "                        {{item.firstName}} {{item.lastName}}\n" +
+    "                    </a></li>\n" +
+    "                    <li ng-if=\"!item.profile\">{{item.firstName}} {{item.lastName}} </li>\n" +
+    "                    <li>{{item.subject}}</li>\n" +
+    "\n" +
+    "                    <li>{{item.title}}</li>\n" +
+    "                    <!--<div class=\"media-heading\">{{item.department}}</div>-->\n" +
+    "                    <li><a href=\"mailto:{{item.email}}\">{{item.email}}</a></li>\n" +
+    "                </ul>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "\n" +
+    "\n" +
+    "\n" +
+    "\n" +
+    "");
 }]);
 
 /**
@@ -18370,7 +18432,6 @@ angular.module('oneSearch.bento', [])
                     if ((box == 'articles') || (box == 'databases')){
                         self.boxes[box].resultLimit = 6;
                     }
-
                     else if (box == 'journals'){
                         if (expecting < 2 && self.boxes[box].resultLimit == 3){
                             self.boxes[box].resultLimit = 6;
@@ -18796,7 +18857,7 @@ angular.module('oneSearch.common')
                 model: '=',
                 search: '='
             },
-            controller: ['$scope', '$window', '$timeout', '$document', 'dataFactory', 'Bento', function($scope, $window, $timeout, $document,  dataFactory, Bento){
+            controller: function($scope, $window, $timeout, $document,  dataFactory, Bento){
                 $scope.items = {};
                 $scope.filteredItems = [];
                 $scope.model = "";
@@ -18920,8 +18981,7 @@ angular.module('oneSearch.common')
                 };
 
 
-
-            }],
+            },
             link: function(scope, elem, attrs) {
                 scope.showSuggestions = false;
                 var suggestWatcher = scope.$watch('items', function(newVal, oldVal){
@@ -19074,7 +19134,7 @@ angular.module('engines.acumen', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('AcumenCtrl', ['$scope', '$filter', function($scope, $filter){
+    .controller('AcumenCtrl', function($scope, $filter){
         var items = $scope.items;
 
         for (var i = 0, len = items.length; i < len; i++) {
@@ -19084,7 +19144,7 @@ angular.module('engines.acumen', [])
                 else items[i].type = items[i].type.sort().shift();
             }
         }
-    }]);
+    });
 angular.module('engines.catalog', [])
 
     /**
@@ -19145,7 +19205,7 @@ angular.module('engines.catalog', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('CatalogCtrl', ['$scope', '$filter', function($scope, $filter){
+    .controller('CatalogCtrl', function($scope, $filter){
         var types = {
             bc: "Archive/Manuscript",
             cm: "Music Score",
@@ -19187,7 +19247,7 @@ angular.module('engines.catalog', [])
         }
 
         $scope.items = items;
-    }]);
+    });
 
 angular.module('engines.databases', [])
 
@@ -19271,7 +19331,7 @@ angular.module('engines.ejournals', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('EjouralsCtrl', ['$scope', function($scope){
+    .controller('EjouralsCtrl', function($scope){
 
         var param;
         switch ($scope.mediaType){
@@ -19288,7 +19348,7 @@ angular.module('engines.ejournals', [])
         if (param){
             $scope.resourceLink = $scope.resourceLink.replace('SS_searchTypeAll=yes&SS_searchTypeBook=yes&SS_searchTypeJournal=yes&SS_searchTypeOther=yes', param);
         }
-    }]);
+    });
 /**
  * @ngdoc overview
  * @name engines
@@ -19357,7 +19417,8 @@ angular.module('common.engines', [
     'engines.faq',
     'engines.libguides',
     'engines.ejournals',
-    'engines.recommend'
+    'engines.recommend',
+    'engines.staffdirectory'
 ])
 /**
  * @Service enginesTemplateFactory
@@ -19636,7 +19697,7 @@ angular.module('engines.scout', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('ScoutCtrl', ['$scope', function($scope){
+    .controller('ScoutCtrl', function($scope){
         var title; // Title variable to bind to $scope. ".BibRelationships.IsPartOfRelationships" title is used if no item title is present.
         var items = $scope.items;
         for (var i = 0; i < items.length; i++){
@@ -19710,7 +19771,51 @@ angular.module('engines.scout', [])
         }
 
         $scope.resourceLink = angular.copy(link);
-    }]);
+    });
+/**
+ * @ngdoc object
+ * @name engines.type:ENGIEN_NAME
+ *
+ * @description
+ * Engine config properties
+ *
+ * | property | value |
+ * |----------|-------|
+ * | id       | 128      |
+ * | priority | 5      |
+ * | resultsPath | StaffDirectory     |
+ * | templateUrl | common/engines/recommend/staff-directory.tpl.html|
+ * | controller |  N/A  |
+ *
+ * @requires oneSearchProvider
+ */
+
+angular.module('engines.staffdirectory', [])
+    .config(['oneSearchProvider', function(oneSearchProvider){
+        oneSearchProvider.engine('staffdirectory', {
+            id: 128,
+            priority: 5,
+            resultsPath: 'staffDir',
+            templateUrl: 'common/engines/staff-directory/staff-directory.tpl.html',
+            controller: 'StaffDirectoryCtrl'
+        })
+    }])
+.controller('StaffDirectoryCtrl', function($scope){
+
+    var items = $scope.items;
+
+    for (var i = 0, len = items.length; i < len; i++) {
+
+        if (items[i].email) {
+            //console.log(items[i].type);
+            var rx = /^([\w-]+(?:\.[\w-]+)*)/;
+            var prefix = items[i].email.match(rx);
+            if (prefix !== null) {
+                items[i].emailPrefix = prefix[0];
+            }
+        }
+    }
+});
 angular.module('filters.nameFilter', [])
 
     .filter('nameFilter', ['$filter', function($filter){
@@ -20533,13 +20638,13 @@ angular.module('common.oneSearch', [])
              * The $scope model for the search string, bound to the input text box.
              */
 
+
             //Redirect to Scout if "Only search Scout" is checked
             var checkbox = $scope.scoutCheckbox;
             var searchtext = $scope.searchText;
 
-
             if ((checkbox == true) && (searchtext !== '')) {
-                ga('send', 'event', 'oneSearch', 'scout_checkbox_click');
+                //ga('send', 'event', 'oneSearch', 'scout_checkbox_click');
                 window.location = 'http://search.ebscohost.com/login.aspx?direct=true&site=eds-live&;scope=site&type=0&custid=s4594951&groupid=main&profid=eds&mode=and&authtype=ip,guest&bquery=' + searchtext;
             }
             else {
@@ -24920,7 +25025,7 @@ angular.module('hours.list', [])
         }
     }]);
 /**
- * @license AngularJS v1.5.9
+ * @license AngularJS v1.6.1
  * (c) 2010-2016 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -25242,16 +25347,15 @@ ngTouch.factory('$swipe', [function() {
  * @ngdoc directive
  * @name ngClick
  * @deprecated
- *
- * @description
- * <div class="alert alert-danger">
- * **DEPRECATION NOTICE**: Beginning with Angular 1.5, this directive is deprecated and by default **disabled**.
+ * sinceVersion="v1.5.0"
+ * This directive is deprecated and **disabled** by default.
  * The directive will receive no further support and might be removed from future releases.
  * If you need the directive, you can enable it with the {@link ngTouch.$touchProvider $touchProvider#ngClickOverrideEnabled}
  * function. We also recommend that you migrate to [FastClick](https://github.com/ftlabs/fastclick).
  * To learn more about the 300ms delay, this [Telerik article](http://developer.telerik.com/featured/300-ms-click-delay-ios-8/)
  * gives a good overview.
- * </div>
+ *
+ * @description
  * A more powerful replacement for the default ngClick designed to be used on touchscreen
  * devices. Most mobile browsers wait about 300ms after a tap-and-release before sending
  * the click event. This version handles them immediately, and then prevents the
@@ -27929,7 +28033,7 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "                <div class=\"col-sm-5\">\n" +
     "                    <div class=\"well\">\n" +
     "                        <p class=\"lead\">Looking for upcoming events in the University Libraries?</p>\n" +
-    "                        <a href=\"http://events.ua.edu/category/22/\" class=\"btn btn-primary\" target=\"_new\">View event calendar <span class=\"fa fa-external-link\"></span></a>\n" +
+    "                        <a href=\"https://www.ua.edu/events/category/22/\" class=\"btn btn-primary\" target=\"_new\">View event calendar <span class=\"fa fa-external-link\"></span></a>\n" +
     "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
