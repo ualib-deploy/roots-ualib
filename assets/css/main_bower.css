@@ -282,6 +282,14 @@
   margin: 0 auto;
 }
 /*# sourceMappingURL=dist/oneSearch-ui.css.map */
+.staffdirectory li,
+.staffdirectory dd {
+  margin-bottom: 3px;
+}
+.staffdirectory dt {
+  display: none;
+}
+/*# sourceMappingURL=dist/oneSearch-ui.css.map */
 .details-context {
   color: #498249;
   font-size: .85em;
