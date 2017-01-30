@@ -9,7 +9,7 @@
             <li><a href="/#/hours">Maps and Contact Information</a></li>
             <li><a href="http://ask.lib.ua.edu">Ask A Librarian</a></li>
             <li><a href="/using-the-library/accessibility/">Accessibility</a></li>
-            <li><a href="/about/libraries-policies/">Libraries' Policies</a></li>
+            <li><a href="/about/libraries-policies/code-of-conduct/">Code of Conduct</a></li>
             <li><a href="/about/mission-statement/">Mission Statement</a></li>
             <li><a href="/site-map">Site Map</a></li>
             <li><a href="/about/support-ua-libraries/">Support UA Libraries</a></li>
