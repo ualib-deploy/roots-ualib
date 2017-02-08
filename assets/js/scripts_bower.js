@@ -12969,7 +12969,7 @@ angular.module('common.manage', [])
     .factory('wpUsersFactory', ['$http', 'API', function wpUsersFactory($http, API){
         return {
             getAllUsersWP : function(){
-                return $http.get(API + 'users');
+                return $http.get(API + 'users?per_page=100');
             }
         };
     }])
@@ -13055,6 +13055,8 @@ angular.module('manage.manageAlerts', [])
         $scope.perPage = 20;
 
         $scope.hasAccess = false;
+        console.log('USER INFO IS');
+        console.log(userInfo)
         if (angular.isDefined($scope.userInfo.group)) {
             if ((parseInt($scope.userInfo.group) & ALERTS_GROUP) === ALERTS_GROUP) {
                 $scope.hasAccess = true;
@@ -25017,8 +25019,8 @@ angular.module('hours.list', [])
         }
     }]);
 /**
- * @license AngularJS v1.6.1
- * (c) 2010-2016 Google, Inc. http://angularjs.org
+ * @license AngularJS v1.6.2
+ * (c) 2010-2017 Google, Inc. http://angularjs.org
  * License: MIT
  */
 (function(window, angular) {'use strict';
