@@ -19,7 +19,7 @@
     "ualib-ui": "https://github.com/ualibweb/ui-components.git",
     "onesearch": "https://github.com/ualibweb/oneSearch_ui.git#master",
     "ualib-hours": "https://github.com/ualibweb/hours_ui.git#master",
-    "manage": "https://github.com/ualibweb/manage_ui.git#apiChange",
+    "manage": "https://github.com/ualibweb/manage_ui.git#master",
     "databases": "https://github.com/ualibweb/databases_ui.git#master",
     "musicSearch": "https://github.com/ualibweb/musicSearch_ui.git#master",
     "ualib_staffdir": "https://github.com/ualibweb/staffdir_ui.git#master",
