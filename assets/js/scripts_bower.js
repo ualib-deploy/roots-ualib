@@ -13055,8 +13055,7 @@ angular.module('manage.manageAlerts', [])
         $scope.perPage = 20;
 
         $scope.hasAccess = false;
-        console.log('USER INFO IS');
-        console.log(userInfo)
+
         if (angular.isDefined($scope.userInfo.group)) {
             if ((parseInt($scope.userInfo.group) & ALERTS_GROUP) === ALERTS_GROUP) {
                 $scope.hasAccess = true;
