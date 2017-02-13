@@ -83,7 +83,7 @@ add_action( 'rest_api_init', function() {
 
         }
     ) );
-    //Make username field viewable via context part of schema
+    //Make nickname field viewable via context part of schema
     register_rest_field( 'user', 'nickname', array(
         'get_callback' => function( $user ) {
             $nickname = $user["nickname"];
