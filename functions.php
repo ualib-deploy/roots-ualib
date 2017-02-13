@@ -10,6 +10,8 @@
  * @link https://github.com/roots/roots/pull/1042
  */
 require_once( get_stylesheet_directory() . '/functions-ualib.php' );
+
+//Include our JWT functions
 require_once "/srv/web/www/webapps/superGlobalPHP/constants.php";
 require_once "/srv/web/www/webapps/superGlobalPHP/functions.php";
 require_once "/srv/web/www/webapps/superGlobalPHP/keys/jwt.php";
@@ -42,12 +44,26 @@ function createToken($userData){
     return gCreateTokenJWT($userData);
 }
 
+//Prevent API calls to non-logged in users
+add_filter( 'rest_authentication_errors', function( $result ) {
+    if ( ! empty( $result ) ) {
+        return $result;
+    }
+    if ( ! is_user_logged_in() ) {
+        return new WP_Error( 'rest_not_logged_in', 'You are not currently logged in.', array( 'status' => 401 ) );
+    }
+    return $result;
+});
+
+//Add fields to users API responses
 add_action( 'rest_api_init', function() {
     register_rest_field( 'user', 'token', array(
         'get_callback' => function( $user ) {
             global $wp;
             $request = $wp->request;
-            $specificUserAPIPath = preg_match('/\/users\/\d+/', $request);
+
+            //Match the users/$id and users/me API endpoints.  Calling it elsewhere will trigger an error
+            $specificUserAPIPath = preg_match('/\/users\/(me|\d+)/', $request);
 
             if ($specificUserAPIPath){
 
@@ -63,11 +79,26 @@ add_action( 'rest_api_init', function() {
             }
 
             return '';
-            //$data = array();
-            //return gCreateTokenJWT($userData); 
-            /*return "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0ODU5MDEzNjksInVzZXIiOnsibG9naW4iOiJhbXBhcmtlcjgiLCJuYW1lIjoiQW5kcmV3IFBhcmtlciIsImVtYWlsIjoiYW1wYXJrZXI4QHVhLmVkdSIsInJvbGVzIjpbImFkbWluaXN0cmF0b3IiXSwiZ3JvdXAiOjIwNDcsImlwIjoiMTAuMTE1LjQwLjE0NyIsImhvdXJzIjp7ImxpZCI6WzIsOCw3LDUsNCwzLDFdLCJhZG1pbiI6dHJ1ZX0sIm5ld3MiOnsiYWRtaW4iOmZhbHNlfSwibXlBcHBzIjpbeyJhaWQiOjAsImFwcE5hbWUiOiJBZG1pbmlzdHJhdG9yIiwibGluayI6IlwvI1wvbWFuYWdlLXVzZXItZ3JvdXBzIn0seyJhaWQiOiIxIiwiYXBwTmFtZSI6IkhvdXJzIiwibGluayI6IlwvI1wvbWFuYWdlLWhvdXJzXC8ifSx7ImFpZCI6IjIiLCJhcHBOYW1lIjoiT25lU2VhcmNoIiwibGluayI6IlwvI1wvbWFuYWdlLW9uZXNlYXJjaFwvIn0seyJhaWQiOiIzIiwiYXBwTmFtZSI6IlN0YWZmIERpcmVjdG9yeSIsImxpbmsiOiJcLyNcL3N0YWZmLWRpcmVjdG9yeVwvIn0seyJhaWQiOiI0IiwiYXBwTmFtZSI6IkZlZWRiYWNrIiwibGluayI6IlwvI1wvc2l0ZS1mZWVkYmFja1wvIn0seyJhaWQiOiI1IiwiYXBwTmFtZSI6IkRhdGFiYXNlcyIsImxpbmsiOiJcLyNcL21hbmFnZS1kYXRhYmFzZXNcLyJ9LHsiYWlkIjoiNiIsImFwcE5hbWUiOiJTb2Z0d2FyZVwvQ29tcHV0ZXJzIiwibGluayI6IlwvI1wvbWFuYWdlLXNvZnR3YXJlXC8ifSx7ImFpZCI6IjciLCJhcHBOYW1lIjoiRm9ybXMiLCJsaW5rIjoiXC8jXC9zdWJtaXR0ZWQtZm9ybXNcLyJ9LHsiYWlkIjoiOCIsImFwcE5hbWUiOiJOZXdzIiwibGluayI6IlwvI1wvbmV3cy1hbmQtZXhoaWJpdGlvbnNcLyJ9LHsiYWlkIjoiOSIsImFwcE5hbWUiOiJBbGVydHMiLCJsaW5rIjoiXC8jXC9tYW5hZ2UtYWxlcnRzIn0seyJhaWQiOiIxMCIsImFwcE5hbWUiOiJFUiBDYXJvdXNlbCIsImxpbmsiOiJcLyNcL21hbmFnZS1lcmMifV19fQ.JrBlwc-kUPdL_7ng_IiyB43AzBJeO2p5bmAyY6bMYHI";
-            return $data;*/
+
 
         }
     ) );
+    //Make username field viewable via context part of schema
+    register_rest_field( 'user', 'nickname', array(
+        'get_callback' => function( $user ) {
+            $nickname = $user["nickname"];
+            return $nickname;
+        },
+        'update_callback' => null,
+        'schema'          => array (
+            'description' => __( 'Nickname.' ),
+            'type'        => 'string',
+            'context'     => array ( 'view' ), // Adding `embed` and `view`
+            'arg_options' => array (
+                'sanitize_callback' => 'sanitize_text_field',
+            ),
+        ),
+    ) );
 } );
+
+
