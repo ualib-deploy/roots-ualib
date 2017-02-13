@@ -12969,7 +12969,7 @@ angular.module('common.manage', [])
     .factory('wpUsersFactory', ['$http', 'API', function wpUsersFactory($http, API){
         return {
             getAllUsersWP : function(){
-                return $http.get(API + 'users');
+                return $http.get(API + 'users?per_page=100');
             }
         };
     }])
@@ -13055,6 +13055,7 @@ angular.module('manage.manageAlerts', [])
         $scope.perPage = 20;
 
         $scope.hasAccess = false;
+
         if (angular.isDefined($scope.userInfo.group)) {
             if ((parseInt($scope.userInfo.group) & ALERTS_GROUP) === ALERTS_GROUP) {
                 $scope.hasAccess = true;
@@ -14255,13 +14256,12 @@ angular.module('manage.manageHoursUsers', [])
             wpUsersFactory.getAllUsersWP()
                 .success(function(data) {
                     //remove admin accounts
-                    for (var i = 0; i < data.length; i++) {
-                        if (data[i].last_name.length < 1) {
-                            data.splice(i, 1);
-                        }
-                    }
+
                     for (i = 0; i < data.length; i++) {
-                        data[i].fullName = data[i].last_name + ", " + data[i].first_name + " (" + data[i].nickname + ")";
+                        nameArray = data[i].name.split(' ');
+                        if (nameArray.length > 1) {
+                            data[i].fullName = data[i].name;
+                        }
                     }
                     $scope.wpUsers = data;
                     $scope.newUser = $scope.wpUsers[0];
@@ -16073,15 +16073,13 @@ angular.module('manage.manageUserGroups', [])
         wpUsersFactory.getAllUsersWP()
             .success(function(data) {
                 //remove admin accounts
-                for (var i = 0; i < data.length; i++) {
-                    if (data[i].last_name.length < 1) {
-                        data.splice(i, 1);
+                for (i = 0; i < data.length; i++) {
+                    nameArray = data[i].name.split(' ');
+                    if (nameArray.length > 1) {
+                        data[i].fullName = data[i].name;
                     }
                 }
 
-                for (i = 0; i < data.length; i++) {
-                    data[i].fullName = data[i].last_name + ", " + data[i].first_name + " (" + data[i].nickname + ")";
-                }
                 $scope.wpUsers = data;
                 $scope.newUser = $scope.wpUsers[0];
                 console.log("WP user list received:");
@@ -25017,8 +25015,8 @@ angular.module('hours.list', [])
         }
     }]);
 /**
- * @license AngularJS v1.6.1
- * (c) 2010-2016 Google, Inc. http://angularjs.org
+ * @license AngularJS v1.6.2
+ * (c) 2010-2017 Google, Inc. http://angularjs.org
  * License: MIT
  */
 (function(window, angular) {'use strict';
