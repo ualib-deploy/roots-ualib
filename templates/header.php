@@ -353,11 +353,14 @@
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="/about/about-the-libraries/">
+                                            <div class="service-list">
                                                 <span class="fa fa-university"></span>
                                                 <h4>About the Libraries</h4>
-                                                <p>Information about each of our branch libraries</p>
-                                            </a>
+                                                <ul>
+                                                    <li><a href="/about/about-the-libraries/">Branch libraries information</a></li>
+                                                    <li><a href="/wp-content/uploads/2017/04/Strategic-Plan-11162016-FINAL.pdf">UA Libraries Strategic Plan</a></li>
+                                                 </ul>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="row">
