@@ -25984,7 +25984,7 @@ makeSwipeDirective('ngSwipeRight', 1, 'swiperight');
 
 /**
  * Angular Carousel - Mobile friendly touch carousel for AngularJS
- * @version v1.0.2 - 2016-11-25
+ * @version v0.3.12 - 2015-06-11
  * @link http://revolunet.github.com/angular-carousel
  * @author Julien Bouquillon <julien@revolunet.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -26291,14 +26291,7 @@ angular.module('angular-carousel').run(['$templateCache', function($templateCach
                         }
 
                         function getSlidesDOM() {
-                            var nodes = iElement[0].childNodes;
-                            var slides = [];
-                            for(var i=0; i<nodes.length ;i++){
-                                if(nodes[i].tagName === "LI"){
-                                    slides.push(nodes[i]);
-                                }
-                            }
-                            return slides;
+                            return iElement[0].querySelectorAll('ul[rn-carousel] > li');
                         }
 
                         function documentMouseUpEvent(event) {
@@ -26365,9 +26358,7 @@ angular.module('angular-carousel').run(['$templateCache', function($templateCach
                                 duration: options.transitionDuration,
                                 easing: options.transitionEasing,
                                 step: function(state) {
-                                    if (isFinite(state.x)) {
-                                      updateSlidesPosition(state.x);
-                                    }
+                                    updateSlidesPosition(state.x);
                                 },
                                 finish: function() {
                                     scope.$apply(function() {
@@ -26446,11 +26437,10 @@ angular.module('angular-carousel').run(['$templateCache', function($templateCach
 
                         if (iAttributes.rnCarouselControls!==undefined) {
                             // dont use a directive for this
-                            var canloop = ((isRepeatBased ? scope.$eval(repeatCollection.replace('::', '')).length : currentSlides.length) > 1) ? angular.isDefined(tAttributes['rnCarouselControlsAllowLoop']) : false;
-                            var nextSlideIndexCompareValue = isRepeatBased ? '(' + repeatCollection.replace('::', '') + ').length - 1' : currentSlides.length - 1;
+                            var nextSlideIndexCompareValue = isRepeatBased ? repeatCollection.replace('::', '') + '.length - 1' : currentSlides.length - 1;
                             var tpl = '<div class="rn-carousel-controls">\n' +
-                                '  <span class="rn-carousel-control rn-carousel-control-prev" ng-click="prevSlide()" ng-if="carouselIndex > 0 || ' + canloop + '"></span>\n' +
-                                '  <span class="rn-carousel-control rn-carousel-control-next" ng-click="nextSlide()" ng-if="carouselIndex < ' + nextSlideIndexCompareValue + ' || ' + canloop + '"></span>\n' +
+                                '  <span class="rn-carousel-control rn-carousel-control-prev" ng-click="prevSlide()" ng-if="carouselIndex > 0"></span>\n' +
+                                '  <span class="rn-carousel-control rn-carousel-control-next" ng-click="nextSlide()" ng-if="carouselIndex < ' + nextSlideIndexCompareValue + '"></span>\n' +
                                 '</div>';
                             iElement.parent().append($compile(angular.element(tpl))(scope));
                         }
@@ -26543,9 +26533,6 @@ angular.module('angular-carousel').run(['$templateCache', function($templateCach
                                 //console.log('repeatCollection', currentSlides);
                                 currentSlides = newValue;
                                 // if deepWatch ON ,manually compare objects to guess the new position
-                                if (!angular.isArray(currentSlides)) {
-                                  throw Error('the slides collection must be an Array');
-                                }
                                 if (deepWatch && angular.isArray(newValue)) {
                                     var activeElement = oldValue[scope.carouselIndex];
                                     var newIndex = getItemIndex(newValue, activeElement, scope.carouselIndex);
