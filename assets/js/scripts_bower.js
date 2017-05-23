@@ -1,6 +1,6 @@
 /**
  * Bunch of useful filters for angularJS(with no external dependencies!)
- * @version v0.5.14 - 2016-12-06 * @link https://github.com/a8m/angular-filter
+ * @version v0.5.16 - 2017-04-07 * @link https://github.com/a8m/angular-filter
  * @author Ariel Mashraki <ariel@mashraki.co.il>
  * @license MIT License, http://www.opensource.org/licenses/MIT
  */
@@ -1800,6 +1800,23 @@ angular.module('a8m.match', [])
 
 /**
  * @ngdoc filter
+ * @name phone-us
+ * @kind function
+ *
+ * @description
+ * format a string or a number into a us-style
+ * phone number in the form (***) ***-****
+ */
+angular.module('a8m.phoneUS', [])
+  .filter('phoneUS', function () {
+    return function(num) {
+      num += '';
+      return '(' + num.slice(0, 3) + ') ' + num.slice(3, 6) + '-' + num.slice(6);
+    }
+  });
+
+/**
+ * @ngdoc filter
  * @name repeat
  * @kind function
  *
@@ -1874,6 +1891,47 @@ angular.module('a8m.slugify', [])
         : input;
     }
   }]);
+
+/**
+ * @ngdoc filter
+ * @name split
+ * @kind function
+ *
+ * @description
+ * split a string by a provided delimiter (none '' by default) and skip first n-delimiters
+ */
+angular.module('a8m.split', [])
+  .filter('split', function () {
+    function escapeRegExp(str) {
+      return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+    }
+
+    return function (input, delimiter, skip) {
+      var _regexp, _matches, _splitted, _temp;
+
+      if (isUndefined(input) || !isString(input)) {
+        return null;
+      }
+      if (isUndefined(delimiter)) delimiter = '';
+      if (isNaN(skip)) skip = 0;
+
+      _regexp = new RegExp(escapeRegExp(delimiter), 'g');
+      _matches = input.match(_regexp);
+      
+      if (isNull(_matches) || skip >= _matches.length) {
+        return [input];
+      }
+
+      if (skip === 0) return input.split(delimiter);
+      
+      _splitted = input.split(delimiter);
+      _temp = _splitted.splice(0, skip + 1);
+      _splitted.unshift(_temp.join(delimiter));
+    
+      return _splitted;
+    };
+  })
+;
 
 /**
  * @ngdoc filter
@@ -2009,18 +2067,23 @@ angular.module('a8m.truncate', [])
  * ucfirst
  */
 angular.module('a8m.ucfirst', [])
-  .filter('ucfirst', [function() {
-    return function(input) {
-      return isString(input)
-        ? input
-            .split(' ')
-            .map(function (ch) {
-              return ch.charAt(0).toUpperCase() + ch.substring(1);
-            })
-            .join(' ')
-        : input;
-    }
-  }]);
+  .filter({
+    ucfirst: ucfirstFilter,
+    titleize: ucfirstFilter
+  });
+
+function ucfirstFilter() {
+  return function (input) {
+    return isString(input)
+      ? input
+      .split(' ')
+      .map(function (ch) {
+        return ch.charAt(0).toUpperCase() + ch.substring(1);
+      })
+      .join(' ')
+      : input;
+  }
+}
 
 /**
  * @ngdoc filter
@@ -2248,6 +2311,8 @@ angular.module('angular.filter', [
   'a8m.repeat',
   'a8m.test',
   'a8m.match',
+  'a8m.split',
+  'a8m.phoneUS',
 
   'a8m.to-array',
   'a8m.concat',
@@ -2323,6 +2388,9 @@ var duScroll = angular.module('duScroll', [
   .value('duScrollDuration', 350)
   //Scrollspy debounce interval, set to 0 to disable
   .value('duScrollSpyWait', 100)
+  //Scrollspy forced refresh interval, use if your content changes or reflows without scrolling.
+  //0 to disable
+  .value('duScrollSpyRefreshInterval', 0)
   //Wether or not multiple scrollspies can be active at once
   .value('duScrollGreedy', false)
   //Default offset for smoothScroll directive
@@ -2556,7 +2624,7 @@ angular.module('duScroll.requestAnimation', ['duScroll.polyfill'])
 
 
 angular.module('duScroll.spyAPI', ['duScroll.scrollContainerAPI'])
-.factory('spyAPI', ["$rootScope", "$timeout", "$window", "$document", "scrollContainerAPI", "duScrollGreedy", "duScrollSpyWait", "duScrollBottomSpy", "duScrollActiveClass", function($rootScope, $timeout, $window, $document, scrollContainerAPI, duScrollGreedy, duScrollSpyWait, duScrollBottomSpy, duScrollActiveClass) {
+.factory('spyAPI', ["$rootScope", "$timeout", "$interval", "$window", "$document", "scrollContainerAPI", "duScrollGreedy", "duScrollSpyWait", "duScrollSpyRefreshInterval", "duScrollBottomSpy", "duScrollActiveClass", function($rootScope, $timeout, $interval, $window, $document, scrollContainerAPI, duScrollGreedy, duScrollSpyWait, duScrollSpyRefreshInterval, duScrollBottomSpy, duScrollActiveClass) {
   'use strict';
 
   var createScrollHandler = function(context) {
@@ -2585,7 +2653,7 @@ angular.module('duScroll.spyAPI', ['duScroll.scrollContainerAPI'])
       for(i = 0; i < spies.length; i++) {
         spy = spies[i];
         pos = spy.getTargetPosition();
-        if (!pos) continue;
+        if (!pos || !spy.$element) continue;
 
         if((duScrollBottomSpy && bottomReached) || (pos.top + spy.offset - containerOffset < 20 && (duScrollGreedy || pos.top*-1 + containerOffset) < pos.height)) {
           //Find the one closest the viewport top or the page bottom if it's reached
@@ -2602,7 +2670,7 @@ angular.module('duScroll.spyAPI', ['duScroll.scrollContainerAPI'])
         toBeActive = toBeActive.spy;
       }
       if(currentlyActive === toBeActive || (duScrollGreedy && !toBeActive)) return;
-      if(currentlyActive) {
+      if(currentlyActive && currentlyActive.$element) {
         currentlyActive.$element.removeClass(duScrollActiveClass);
         $rootScope.$broadcast(
           'duScrollspy:becameInactive',
@@ -2662,6 +2730,9 @@ angular.module('duScroll.spyAPI', ['duScroll.scrollContainerAPI'])
   var destroyContext = function($scope) {
     var id = $scope.$id;
     var context = contexts[id], container = context.container;
+    if(context.intervalPromise) {
+      $interval.cancel(context.intervalPromise);
+    }
     if(container) {
       container.off('scroll', context.handler);
     }
@@ -2713,6 +2784,9 @@ angular.module('duScroll.spyAPI', ['duScroll.scrollContainerAPI'])
         context.container.off('scroll', context.handler);
       }
       context.container = scrollContainerAPI.getContainer(spy.$scope);
+      if (duScrollSpyRefreshInterval && !context.intervalPromise) {
+        context.intervalPromise = $interval(context.handler, duScrollSpyRefreshInterval, 0, false);
+      }
       context.container.on('scroll', context.handler).triggerHandler('scroll');
     }
   };
@@ -18121,7 +18195,8 @@ angular.module("common/engines/staff-directory/staff-directory.tpl.html", []).ru
     "<div class=\"col-md-4\">\n" +
     "    <div class=\"media\">\n" +
     "        <div class=\"media-left\">\n" +
-    "                <img class=\"media-object\" style=\"width: 128px;\" src='https://wwwdev2.lib.ua.edu/staffDir/staffImages/{{item.photo}}' >\n" +
+    "                <img ng-if=\"item.photo\" class=\"media-object\" style=\"width: 128px;\" src='https://wwwdev2.lib.ua.edu/staffDir/staffImages/{{item.photo}}' alt=\"Staff Directory Image of {{item.firstName}} {{item.lastName}}\" />\n" +
+    "                <img ng-if=\"!item.photo\" class=\"media-object\" style=\"width: 128px;\" src=\"https://www.lib.ua.edu/wp-content/themes/roots-ualib/assets/img/user-profile.png\" alt=\"Staff Directory Image of {{item.firstName}} {{item.lastName}}\" />\n" +
     "        </div>\n" +
     "        <div class=\"media-body\">\n" +
     "            <div class=\"media-heading\">\n" +
@@ -18846,7 +18921,7 @@ angular.module('oneSearch.common')
                 model: '=',
                 search: '='
             },
-            controller: ['$scope', '$window', '$timeout', '$document', 'dataFactory', 'Bento', function($scope, $window, $timeout, $document,  dataFactory, Bento){
+            controller: function($scope, $window, $timeout, $document,  dataFactory, Bento){
                 $scope.items = {};
                 $scope.filteredItems = [];
                 $scope.model = "";
@@ -18971,7 +19046,7 @@ angular.module('oneSearch.common')
 
 
 
-            }],
+            },
             link: function(scope, elem, attrs) {
                 scope.showSuggestions = false;
                 var suggestWatcher = scope.$watch('items', function(newVal, oldVal){
@@ -19124,7 +19199,7 @@ angular.module('engines.acumen', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('AcumenCtrl', ['$scope', '$filter', function($scope, $filter){
+    .controller('AcumenCtrl', function($scope, $filter){
         var items = $scope.items;
 
         for (var i = 0, len = items.length; i < len; i++) {
@@ -19134,7 +19209,7 @@ angular.module('engines.acumen', [])
                 else items[i].type = items[i].type.sort().shift();
             }
         }
-    }]);
+    });
 angular.module('engines.catalog', [])
 
     /**
@@ -19195,7 +19270,7 @@ angular.module('engines.catalog', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('CatalogCtrl', ['$scope', '$filter', function($scope, $filter){
+    .controller('CatalogCtrl', function($scope, $filter){
         var types = {
             bc: "Archive/Manuscript",
             cm: "Music Score",
@@ -19237,7 +19312,7 @@ angular.module('engines.catalog', [])
         }
 
         $scope.items = items;
-    }]);
+    });
 
 angular.module('engines.databases', [])
 
@@ -19321,7 +19396,7 @@ angular.module('engines.ejournals', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('EjouralsCtrl', ['$scope', function($scope){
+    .controller('EjouralsCtrl', function($scope){
 
         var param;
         switch ($scope.mediaType){
@@ -19338,7 +19413,7 @@ angular.module('engines.ejournals', [])
         if (param){
             $scope.resourceLink = $scope.resourceLink.replace('SS_searchTypeAll=yes&SS_searchTypeBook=yes&SS_searchTypeJournal=yes&SS_searchTypeOther=yes', param);
         }
-    }]);
+    });
 /**
  * @ngdoc overview
  * @name engines
@@ -19687,7 +19762,7 @@ angular.module('engines.scout', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('ScoutCtrl', ['$scope', function($scope){
+    .controller('ScoutCtrl', function($scope){
         var title; // Title variable to bind to $scope. ".BibRelationships.IsPartOfRelationships" title is used if no item title is present.
         var items = $scope.items;
         for (var i = 0; i < items.length; i++){
@@ -19761,7 +19836,7 @@ angular.module('engines.scout', [])
         }
 
         $scope.resourceLink = angular.copy(link);
-    }]);
+    });
 /**
  * @ngdoc object
  * @name engines.type:ENGIEN_NAME
@@ -19790,7 +19865,7 @@ angular.module('engines.staffdirectory', [])
             controller: 'StaffDirectoryCtrl'
         })
     }])
-    .controller('StaffDirectoryCtrl', ['$scope', function($scope){
+    .controller('StaffDirectoryCtrl', function($scope){
 
         var items = $scope.items;
 
@@ -19805,7 +19880,7 @@ angular.module('engines.staffdirectory', [])
                 }
             }
         }
-    }]);
+    });
 angular.module('filters.nameFilter', [])
 
     .filter('nameFilter', ['$filter', function($filter){
@@ -20988,7 +21063,7 @@ factory(root.angular);
 }
 }(this, function(angular) {
 /**
- * AngularJS Google Maps Ver. 1.17.7
+ * AngularJS Google Maps Ver. 1.18.3
  *
  * The MIT License (MIT)
  * 
@@ -21022,10 +21097,12 @@ angular.module('ngMap', []);
   var Attr2MapOptions;
 
   var __MapController = function(
-      $scope, $element, $attrs, $parse, _Attr2MapOptions_, NgMap, NgMapPool
+      $scope, $element, $attrs, $parse, $interpolate, _Attr2MapOptions_, NgMap, NgMapPool, escapeRegExp
     ) {
     Attr2MapOptions = _Attr2MapOptions_;
     var vm = this;
+    var exprStartSymbol = $interpolate.startSymbol();
+    var exprEndSymbol = $interpolate.endSymbol();
 
     vm.mapOptions; /** @memberof __MapController */
     vm.mapEvents;  /** @memberof __MapController */
@@ -21185,12 +21262,16 @@ angular.module('ngMap', []);
       // set options
       mapOptions.zoom = mapOptions.zoom || 15;
       var center = mapOptions.center;
+      var exprRegExp = new RegExp(escapeRegExp(exprStartSymbol) + '.*' + escapeRegExp(exprEndSymbol));
+
       if (!mapOptions.center ||
-        ((typeof center === 'string') && center.match(/\{\{.*\}\}/))
+        ((typeof center === 'string') && center.match(exprRegExp))
       ) {
         mapOptions.center = new google.maps.LatLng(0, 0);
-      } else if( (typeof center === 'string') && center.match(/[0-9.-]*,[0-9.-]*/) ){
-           mapOptions.center = new google.maps.LatLng(center);
+      } else if( (typeof center === 'string') && center.match(/^[0-9.-]*,[0-9.-]*$/) ){
+        var lat = parseFloat(center.split(',')[0]);
+        var lng = parseFloat(center.split(',')[1]);
+        mapOptions.center = new google.maps.LatLng(lat, lng);
       } else if (!(center instanceof google.maps.LatLng)) {
         var geoCenter = mapOptions.center;
         delete mapOptions.center;
@@ -21234,14 +21315,14 @@ angular.module('ngMap', []);
           $parse($attrs.mapInitialized)($scope, {map: vm.map});
         }
       });
-	  
+
 	  //add maximum zoom listeners if zoom-to-include-markers and and maximum-zoom are valid attributes
 	  if (mapOptions.zoomToIncludeMarkers && mapOptions.maximumZoom) {
 	    google.maps.event.addListener(vm.map, 'zoom_changed', function() {
           if (vm.enableMaximumZoomCheck == true) {
 			vm.enableMaximumZoomCheck = false;
-	        google.maps.event.addListenerOnce(vm.map, 'bounds_changed', function() { 
-		      vm.map.setZoom(Math.min(mapOptions.maximumZoom, vm.map.getZoom())); 
+	        google.maps.event.addListenerOnce(vm.map, 'bounds_changed', function() {
+		      vm.map.setZoom(Math.min(mapOptions.maximumZoom, vm.map.getZoom()));
 		    });
 	  	  }
 	    });
@@ -21268,11 +21349,11 @@ angular.module('ngMap', []);
 
     if (options.lazyInit) { // allows controlled initialization
       // parse angular expression for dynamic ids
-      if (!!$attrs.id && 
+      if (!!$attrs.id &&
       	  // starts with, at position 0
-	  $attrs.id.indexOf("{{", 0) === 0 &&
+	  $attrs.id.indexOf(exprStartSymbol, 0) === 0 &&
 	  // ends with
-	  $attrs.id.indexOf("}}", $attrs.id.length - "}}".length) !== -1) {
+	  $attrs.id.indexOf(exprEndSymbol, $attrs.id.length - exprEndSymbol.length) !== -1) {
         var idExpression = $attrs.id.slice(2,-2);
         var mapId = $parse(idExpression)($scope);
       } else {
@@ -21296,7 +21377,7 @@ angular.module('ngMap', []);
   }; // __MapController
 
   __MapController.$inject = [
-    '$scope', '$element', '$attrs', '$parse', 'Attr2MapOptions', 'NgMap', 'NgMapPool'
+    '$scope', '$element', '$attrs', '$parse', '$interpolate', 'Attr2MapOptions', 'NgMap', 'NgMapPool', 'escapeRegexpFilter'
   ];
   angular.module('ngMap').controller('__MapController', __MapController);
 })();
@@ -21305,7 +21386,7 @@ angular.module('ngMap', []);
  * @ngdoc directive
  * @name bicycling-layer
  * @param Attr2Options {service}
- *   convert html attribute to Gogole map api options
+ *   convert html attribute to Google map api options
  * @description
  *   Requires:  map directive
  *   Restrict To:  Element
@@ -21361,7 +21442,7 @@ angular.module('ngMap', []);
 /**
  * @ngdoc directive
  * @name custom-control
- * @param Attr2Options {service} convert html attribute to Gogole map api options
+ * @param Attr2Options {service} convert html attribute to Google map api options
  * @param $compile {service} AngularJS $compile service
  * @description
  *   Build custom control and set to the map with position
@@ -21387,9 +21468,9 @@ angular.module('ngMap', []);
  */
 (function() {
   'use strict';
-  var parser, $compile, NgMap;
+  var parser, NgMap;
 
-  var linkFunc = function(scope, element, attrs, mapController) {
+  var linkFunc = function(scope, element, attrs, mapController, $transclude) {
     mapController = mapController[0]||mapController[1];
     var filtered = parser.filter(attrs);
     var options = parser.getOptions(filtered, {scope: scope});
@@ -21399,7 +21480,8 @@ angular.module('ngMap', []);
      * build a custom control element
      */
     var customControlEl = element[0].parentElement.removeChild(element[0]);
-    $compile(customControlEl.innerHTML.trim())(scope);
+    var content = $transclude();
+    angular.element(customControlEl).append(content);
 
     /**
      * set events
@@ -21417,16 +21499,17 @@ angular.module('ngMap', []);
     });
   };
 
-  var customControl =  function(Attr2MapOptions, _$compile_, _NgMap_)  {
-    parser = Attr2MapOptions, $compile = _$compile_, NgMap = _NgMap_;
+  var customControl =  function(Attr2MapOptions, _NgMap_)  {
+    parser = Attr2MapOptions, NgMap = _NgMap_;
 
     return {
       restrict: 'E',
       require: ['?^map','?^ngMap'],
-      link: linkFunc
+      link: linkFunc,
+      transclude: true
     }; // return
   };
-  customControl.$inject = ['Attr2MapOptions', '$compile', 'NgMap'];
+  customControl.$inject = ['Attr2MapOptions', 'NgMap'];
 
   angular.module('ngMap').directive('customControl', customControl);
 })();
@@ -21435,7 +21518,7 @@ angular.module('ngMap', []);
  * @ngdoc directive
  * @memberof ngmap
  * @name custom-marker
- * @param Attr2Options {service} convert html attribute to Gogole map api options
+ * @param Attr2Options {service} convert html attribute to Google map api options
  * @param $timeout {service} AngularJS $timeout
  * @description
  *   Marker with html
@@ -21500,10 +21583,11 @@ angular.module('ngMap', []);
 
     CustomMarker.prototype.setPosition = function(position) {
       position && (this.position = position); /* jshint ignore:line */
-
+      var _this = this;
       if (this.getProjection() && typeof this.position.lng == 'function') {
-        var _this = this;
+        void 0;
         var setPosition = function() {
+          if (!_this.getProjection()) { return; }
           var posPixel = _this.getProjection().fromLatLngToDivPixel(_this.position);
           var x = Math.round(posPixel.x - (_this.el.offsetWidth/2));
           var y = Math.round(posPixel.y - _this.el.offsetHeight - 10); // 10px for anchor
@@ -21511,7 +21595,7 @@ angular.module('ngMap', []);
           _this.el.style.top = y + "px";
           _this.el.style.visibility = "visible";
         };
-        if (_this.el.offsetWidth && _this.el.offsetHeight) { 
+        if (_this.el.offsetWidth && _this.el.offsetHeight) {
           setPosition();
         } else {
           //delayed left/top calculation when width/height are not set instantly
@@ -21623,12 +21707,16 @@ angular.module('ngMap', []);
 
 
   var customMarkerDirective = function(
-      _$timeout_, _$compile_, Attr2MapOptions, _NgMap_
+      _$timeout_, _$compile_, $interpolate, Attr2MapOptions, _NgMap_, escapeRegExp
     )  {
     parser = Attr2MapOptions;
     $timeout = _$timeout_;
     $compile = _$compile_;
     NgMap = _NgMap_;
+
+    var exprStartSymbol = $interpolate.startSymbol();
+    var exprEndSymbol = $interpolate.endSymbol();
+    var exprRegExp = new RegExp(escapeRegExp(exprStartSymbol) + '([^' + exprEndSymbol.substring(0, 1) + ']+)' + escapeRegExp(exprEndSymbol), 'g');
 
     return {
       restrict: 'E',
@@ -21637,15 +21725,15 @@ angular.module('ngMap', []);
         setCustomMarker();
         element[0].style.display ='none';
         var orgHtml = element.html();
-        var matches = orgHtml.match(/{{([^}]+)}}/g);
+        var matches = orgHtml.match(exprRegExp);
         var varsToWatch = [];
         //filter out that contains '::', 'this.'
         (matches || []).forEach(function(match) {
-          var toWatch = match.replace('{{','').replace('}}','');
+          var toWatch = match.replace(exprStartSymbol,'').replace(exprEndSymbol,'');
           if (match.indexOf('::') == -1 &&
             match.indexOf('this.') == -1 &&
             varsToWatch.indexOf(toWatch) == -1) {
-            varsToWatch.push(match.replace('{{','').replace('}}',''));
+            varsToWatch.push(match.replace(exprStartSymbol,'').replace(exprEndSymbol,''));
           }
         });
 
@@ -21654,7 +21742,7 @@ angular.module('ngMap', []);
     }; // return
   };// function
   customMarkerDirective.$inject =
-    ['$timeout', '$compile', 'Attr2MapOptions', 'NgMap'];
+    ['$timeout', '$compile', '$interpolate', 'Attr2MapOptions', 'NgMap', 'escapeRegexpFilter'];
 
   angular.module('ngMap').directive('customMarker', customMarkerDirective);
 })();
@@ -21815,7 +21903,7 @@ angular.module('ngMap', []);
 /**
  * @ngdoc directive
  * @name drawing-manager
- * @param Attr2Options {service} convert html attribute to Gogole map api options
+ * @param Attr2Options {service} convert html attribute to Google map api options
  * @description
  *   Requires:  map directive
  *   Restrict To:  Element
@@ -21992,6 +22080,9 @@ angular.module('ngMap', []);
 
         var layer = getLayer(options, events);
         mapController.addObject('fusionTablesLayers', layer);
+        element.bind('$destroy', function() {
+          mapController.deleteObject('fusionTablesLayers', layer);
+        });
       }
      }; // return
   }]);
@@ -22000,7 +22091,7 @@ angular.module('ngMap', []);
 /**
  * @ngdoc directive
  * @name heatmap-layer
- * @param Attr2Options {service} convert html attribute to Gogole map api options
+ * @param Attr2Options {service} convert html attribute to Google map api options
  * @description
  *   Requires:  map directive
  *   Restrict To:  Element
@@ -22054,7 +22145,7 @@ angular.module('ngMap', []);
  * @ngdoc directive
  * @name info-window
  * @param Attr2MapOptions {service}
- *   convert html attribute to Gogole map api options
+ *   convert html attribute to Google map api options
  * @param $compile {service} $compile service
  * @description
  *  Defines infoWindow and provides compile method
@@ -22206,14 +22297,15 @@ angular.module('ngMap', []);
           var marker = typeof p1 == 'string' ? p2 : p3;
           if (typeof marker == 'string') {
             //Check if markers if defined to avoid odd 'undefined' errors
-            if (typeof mapController.map.markers != "undefined"
-                && typeof mapController.map.markers[marker] != "undefined") {
-              marker = mapController.map.markers[marker];
+            if (
+              typeof mapController.map.markers != "undefined"
+              && typeof mapController.map.markers[marker] != "undefined") {
+                marker = mapController.map.markers[marker];
             } else if (
-                //additionally check if that marker is a custom marker
-            typeof mapController.map.customMarkers
-            && typeof mapController.map.customMarkers[marker] != "undefined") {
-              marker = mapController.map.customMarkers[marker];
+              //additionally check if that marker is a custom marker
+              typeof mapController.map.customMarkers !== "undefined"
+              && typeof mapController.map.customMarkers[marker] !== "undefined") {
+                marker = mapController.map.customMarkers[marker];
             } else {
               //Better error output if marker with that id is not defined
               throw new Error("Cant open info window for id " + marker + ". Marker or CustomMarker is not defined")
@@ -22270,7 +22362,7 @@ angular.module('ngMap', []);
 /**
  * @ngdoc directive
  * @name kml-layer
- * @param Attr2MapOptions {service} convert html attribute to Gogole map api options
+ * @param Attr2MapOptions {service} convert html attribute to Google map api options
  * @description
  *   renders Kml layer on a map
  *   Requires:  map directive
@@ -22337,7 +22429,7 @@ angular.module('ngMap', []);
  * @ngdoc directive
  * @name map-data
  * @param Attr2MapOptions {service}
- *   convert html attribute to Gogole map api options
+ *   convert html attribute to Google map api options
  * @description
  *   set map data
  *   Requires:  map directive
@@ -22361,13 +22453,14 @@ angular.module('ngMap', []);
       restrict: 'E',
       require: ['?^map','?^ngMap'],
 
-      link: function(scope, element, attrs) {
+      link: function(scope, element, attrs, mapController) {
+        mapController = mapController[0] || mapController[1];
         var filtered = parser.filter(attrs);
         var options = parser.getOptions(filtered, {scope: scope});
         var events = parser.getEvents(scope, filtered, events);
 
         void 0;
-        NgMap.getMap().then(function(map) {
+        NgMap.getMap(mapController.map.id).then(function(map) {
           //options
           for (var key in options) {
             var val = options[key];
@@ -22391,7 +22484,7 @@ angular.module('ngMap', []);
 /**
  * @ngdoc directive
  * @name map-lazy-load
- * @param Attr2Options {service} convert html attribute to Gogole map api options
+ * @param Attr2Options {service} convert html attribute to Google map api options
  * @description
  *  Requires: Delay the initialization of map directive
  *    until the map is ready to be rendered
@@ -22547,7 +22640,7 @@ angular.module('ngMap', []);
  * @memberof ngMap
  * @name ng-map
  * @param Attr2Options {service}
- *  convert html attribute to Gogole map api options
+ *  convert html attribute to Google map api options
  * @description
  * Implementation of {@link __MapController}
  * Initialize a Google map within a `<div>` tag
@@ -22662,7 +22755,7 @@ angular.module('ngMap', []);
 /**
  * @ngdoc directive
  * @name marker
- * @param Attr2Options {service} convert html attribute to Gogole map api options
+ * @param Attr2Options {service} convert html attribute to Google map api options
  * @param NavigatorGeolocation It is used to find the current location
  * @description
  *  Draw a Google map marker on a map with given options and register events
@@ -22790,7 +22883,7 @@ angular.module('ngMap', []);
 /**
  * @ngdoc directive
  * @name overlay-map-type
- * @param Attr2MapOptions {service} convert html attribute to Gogole map api options
+ * @param Attr2MapOptions {service} convert html attribute to Google map api options
  * @param $window {service}
  * @description
  *   Requires:  map directive
@@ -22836,7 +22929,7 @@ angular.module('ngMap', []);
 /**
  * @ngdoc directive
  * @name places-auto-complete
- * @param Attr2MapOptions {service} convert html attribute to Gogole map api options
+ * @param Attr2MapOptions {service} convert html attribute to Google map api options
  * @description
  *   Provides address auto complete feature to an input element
  *   Requires: input tag
@@ -22905,7 +22998,7 @@ angular.module('ngMap', []);
 /**
  * @ngdoc directive
  * @name shape
- * @param Attr2MapOptions {service} convert html attribute to Gogole map api options
+ * @param Attr2MapOptions {service} convert html attribute to Google map api options
  * @description
  *   Initialize a Google map shape in map with given options and register events
  *   The shapes are:
@@ -23076,7 +23169,7 @@ angular.module('ngMap', []);
 /**
  * @ngdoc directive
  * @name streetview-panorama
- * @param Attr2MapOptions {service} convert html attribute to Gogole map api options
+ * @param Attr2MapOptions {service} convert html attribute to Google map api options
  * @description
  *   Requires:  map directive
  *   Restrict To:  Element
@@ -23173,7 +23266,7 @@ angular.module('ngMap', []);
 /**
  * @ngdoc directive
  * @name traffic-layer
- * @param Attr2MapOptions {service} convert html attribute to Gogole map api options
+ * @param Attr2MapOptions {service} convert html attribute to Google map api options
  * @description
  *   Requires:  map directive
  *   Restrict To:  Element
@@ -23227,7 +23320,7 @@ angular.module('ngMap', []);
 /**
  * @ngdoc directive
  * @name transit-layer
- * @param Attr2MapOptions {service} convert html attribute to Gogole map api options
+ * @param Attr2MapOptions {service} convert html attribute to Google map api options
  * @description
  *   Requires:  map directive
  *   Restrict To:  Element
@@ -23306,6 +23399,26 @@ angular.module('ngMap', []);
 
 /**
  * @ngdoc filter
+ * @name escape-regex
+ * @description
+ *   Escapes all regex special characters in a string
+ */
+(function() {
+  'use strict';
+
+
+
+  var escapeRegexpFilter = function() {
+    return function(string) {
+			return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+		};
+  };
+
+  angular.module('ngMap').filter('escapeRegexp', escapeRegexpFilter);
+})();
+
+/**
+ * @ngdoc filter
  * @name jsonize
  * @description
  *   Converts json-like string to json string
@@ -23331,7 +23444,8 @@ angular.module('ngMap', []);
             function(_, $1) {
               return '"'+$1+'"';
             }
-          );
+          )
+          .replace(/''/g, '""');
       }
     };
   };
@@ -23354,9 +23468,12 @@ angular.module('ngMap', []);
     /^(\d{4}\-\d\d\-\d\d([tT][\d:\.]*)?)([zZ]|([+\-])(\d\d):?(\d\d))?$/;
 
   var Attr2MapOptions = function(
-      $parse, $timeout, $log, NavigatorGeolocation, GeoCoder,
-      camelCaseFilter, jsonizeFilter
+      $parse, $timeout, $log, $interpolate, NavigatorGeolocation, GeoCoder,
+      camelCaseFilter, jsonizeFilter, escapeRegExp
     ) {
+
+    var exprStartSymbol = $interpolate.startSymbol();
+    var exprEndSymbol = $interpolate.endSymbol();
 
     /**
      * Returns the attributes of an element as hash
@@ -23381,14 +23498,26 @@ angular.module('ngMap', []);
       }
       return JSON.parse(jsonizeFilter(input));
     };
-
+    
     var getLatLng = function(input) {
       var output = input;
-      if (input[0].constructor == Array) { // [[1,2],[3,4]]
-        output = input.map(function(el) {
-          return new google.maps.LatLng(el[0], el[1]);
-        });
-      } else if(!isNaN(parseFloat(input[0])) && isFinite(input[0])) {
+      if (input[0].constructor == Array) { 
+        if ((input[0][0].constructor == Array && input[0][0].length == 2) || input[0][0].constructor == Object) {
+            var preoutput;
+            var outputArray = [];
+            for (var i = 0; i < input.length; i++) {
+                preoutput = input[i].map(function(el){
+                    return new google.maps.LatLng(el[0], el[1]);
+                });
+                outputArray.push(preoutput);
+            }
+            output = outputArray;
+        } else {
+            output = input.map(function(el) {
+                return new google.maps.LatLng(el[0], el[1]);
+            });
+        }
+      } else if (!isNaN(parseFloat(input[0])) && isFinite(input[0])) {
         output = new google.maps.LatLng(output[0], output[1]);
       }
       return output;
@@ -23402,11 +23531,16 @@ angular.module('ngMap', []);
         try { // 2. JSON?
           var output = getJSON(input);
           if (output instanceof Array) {
-            // [{a:1}] : not lat/lng ones
             if (output[0].constructor == Object) {
               output = output;
-            } else { // [[1,2],[3,4]] or [1,2]
-              output = getLatLng(output);
+            } else if (output[0] instanceof Array) {
+              if (output[0][0].constructor == Object) {
+                output = output;
+              } else {
+                output = getLatLng(output);
+              }
+            } else {
+                output = getLatLng(output);
             }
           }
           // JSON is an object (not array or null)
@@ -23455,9 +23589,9 @@ angular.module('ngMap', []);
               output = input;
             }
           // 7. evaluate dynamically bound values
-          } else if (input.match(/^{/) && options.scope) {
+        } else if (input.match(new RegExp('^' + escapeRegExp(exprStartSymbol))) && options.scope) {
             try {
-              var expr = input.replace(/{{/,'').replace(/}}/g,'');
+              var expr = input.replace(new RegExp(escapeRegExp(exprStartSymbol)),'').replace(new RegExp(escapeRegExp(exprEndSymbol), 'g'),'');
               output = options.scope.$eval(expr);
             } catch (err) {
               output = input;
@@ -23512,11 +23646,12 @@ angular.module('ngMap', []);
 
     var getAttrsToObserve = function(attrs) {
       var attrsToObserve = [];
+      var exprRegExp = new RegExp(escapeRegExp(exprStartSymbol) + '.*' + escapeRegExp(exprEndSymbol), 'g');
 
       if (!attrs.noWatcher) {
         for (var attrName in attrs) { //jshint ignore:line
           var attrValue = attrs[attrName];
-          if (attrValue && attrValue.match(/\{\{.*\}\}/)) { // if attr value is {{..}}
+          if (attrValue && attrValue.match(exprRegExp)) { // if attr value is {{..}}
             attrsToObserve.push(camelCaseFilter(attrName));
           }
         }
@@ -23588,7 +23723,7 @@ angular.module('ngMap', []);
     };
 
     /**
-     * converts attributes hash to scope-specific event function 
+     * converts attributes hash to scope-specific event function
      * @memberof Attr2MapOptions
      * @param {scope} scope angularjs scope
      * @param {Hash} attrs tag attributes
@@ -23712,8 +23847,8 @@ angular.module('ngMap', []);
 
   };
   Attr2MapOptions.$inject= [
-    '$parse', '$timeout', '$log', 'NavigatorGeolocation', 'GeoCoder',
-    'camelCaseFilter', 'jsonizeFilter'
+    '$parse', '$timeout', '$log', '$interpolate', 'NavigatorGeolocation', 'GeoCoder',
+    'camelCaseFilter', 'jsonizeFilter', 'escapeRegexpFilter'
   ];
 
   angular.module('ngMap').service('Attr2MapOptions', Attr2MapOptions);
@@ -23764,6 +23899,68 @@ angular.module('ngMap', []);
 
   angular.module('ngMap').service('GeoCoder', GeoCoder);
 })();
+
+/**
+ * @ngdoc service
+ * @name GoogleMapsApi
+ * @description
+ *   Load Google Maps API Service
+ */
+(function() {
+  'use strict';
+  var $q;
+  var $timeout;
+
+  var GoogleMapsApi = function(_$q_, _$timeout_) {
+    $q = _$q_;
+    $timeout = _$timeout_;
+
+    return {
+
+      /**
+       * Load google maps into document by creating a script tag
+       * @memberof GoogleMapsApi
+       * @param {string} mapsUrl
+       * @example
+       *   GoogleMapsApi.load(myUrl).then(function() {
+       *     console.log('google map has been loaded')
+       *   });
+       */
+      load: function (mapsUrl) {
+
+        var deferred = $q.defer();
+
+        if (window.google === undefined || window.google.maps === undefined) {
+
+          window.lazyLoadCallback = function() {
+            $timeout(function() { /* give some time to load */
+              deferred.resolve(window.google)
+            }, 100);
+          };
+
+          var scriptEl = document.createElement('script');
+          scriptEl.src = mapsUrl +
+            (mapsUrl.indexOf('?') > -1 ? '&' : '?') +
+            'callback=lazyLoadCallback';
+
+          if (!document.querySelector('script[src="' + scriptEl.src + '"]')) {
+            document.body.appendChild(scriptEl);
+          }
+        } else {
+          deferred.resolve(window.google)
+        }
+
+        return deferred.promise;
+      }
+
+    }
+  }
+  GoogleMapsApi.$inject = ['$q', '$timeout'];
+
+  angular.module('ngMap').service('GoogleMapsApi', GoogleMapsApi);
+})();
+
+
 
 /**
  * @ngdoc service
@@ -23931,6 +24128,20 @@ angular.module('ngMap', []);
     }
     mapInstances = [];
   };
+  
+  /**
+   * @memberof NgMapPool
+   * @function deleteMapInstance
+   * @desc delete a mapInstance
+   */
+  var deleteMapInstance= function(mapId) {
+	  for( var i=0; i<mapInstances.length; i++ ) {
+		  if( (mapInstances[i] !== null) && (mapInstances[i].id == mapId)) {
+			  mapInstances[i]= null;
+			  mapInstances.splice( i, 1 );
+		  }
+	  }
+  };
 
   var NgMapPool = function(_$document_, _$window_, _$timeout_) {
     $document = _$document_[0], $window = _$window_, $timeout = _$timeout_;
@@ -23939,9 +24150,11 @@ angular.module('ngMap', []);
 	  mapInstances: mapInstances,
       resetMapInstances: resetMapInstances,
       getMapInstance: getMapInstance,
-      returnMapInstance: returnMapInstance
+      returnMapInstance: returnMapInstance,
+      deleteMapInstance: deleteMapInstance
     };
   };
+
   NgMapPool.$inject = [ '$document', '$window', '$timeout'];
 
   angular.module('ngMap').factory('NgMapPool', NgMapPool);
@@ -23957,7 +24170,7 @@ angular.module('ngMap', []);
 (function() {
   'use strict';
   var $window, $document, $q;
-  var NavigatorGeolocation, Attr2MapOptions, GeoCoder, camelCaseFilter;
+  var NavigatorGeolocation, Attr2MapOptions, GeoCoder, camelCaseFilter, NgMapPool;
 
   var mapControllers = {};
 
@@ -23994,16 +24207,20 @@ angular.module('ngMap', []);
    * @param {String} optional, id e.g., 'foo'
    * @returns promise
    */
-  var getMap = function(id) {
+  var getMap = function(id, options) {
+    options = options || {};
     id = typeof id === 'object' ? id.id : id;
-    id = id || 0;
 
     var deferred = $q.defer();
-    var timeout = 2000;
+    var timeout = options.timeout || 10000;
 
     function waitForMap(timeElapsed){
-      if(mapControllers[id]){
+      var keys = Object.keys(mapControllers);
+      var theFirstController = mapControllers[keys[0]];
+      if(id && mapControllers[id]){
         deferred.resolve(mapControllers[id].map);
+      } else if (!id && theFirstController && theFirstController.map) {
+        deferred.resolve(theFirstController.map);
       } else if (timeElapsed > timeout) {
         deferred.reject('could not find map');
       } else {
@@ -24057,6 +24274,8 @@ angular.module('ngMap', []);
         mapCtrl.deleteObject('heatmapLayers', mapCtrl.map.heatmapLayers[layer]);
       });
     }
+
+    NgMapPool.deleteMapInstance(mapId);
 
     delete mapControllers[mapId];
   };
@@ -24178,7 +24397,7 @@ angular.module('ngMap', []);
     var NgMap = function(
         _$window_, _$document_, _$q_,
         _NavigatorGeolocation_, _Attr2MapOptions_,
-        _GeoCoder_, _camelCaseFilter_
+        _GeoCoder_, _camelCaseFilter_, _NgMapPool_
       ) {
       $window = _$window_;
       $document = _$document_[0];
@@ -24187,6 +24406,7 @@ angular.module('ngMap', []);
       Attr2MapOptions = _Attr2MapOptions_;
       GeoCoder = _GeoCoder_;
       camelCaseFilter = _camelCaseFilter_;
+      NgMapPool = _NgMapPool_;
 
       return {
         defaultOptions: defaultOptions,
@@ -24202,7 +24422,7 @@ angular.module('ngMap', []);
     NgMap.$inject = [
       '$window', '$document', '$q',
       'NavigatorGeolocation', 'Attr2MapOptions',
-      'GeoCoder', 'camelCaseFilter'
+      'GeoCoder', 'camelCaseFilter', 'NgMapPool'
     ];
 
     this.$get = NgMap;
@@ -25764,7 +25984,7 @@ makeSwipeDirective('ngSwipeRight', 1, 'swiperight');
 
 /**
  * Angular Carousel - Mobile friendly touch carousel for AngularJS
- * @version v0.3.12 - 2015-06-11
+ * @version v1.0.2 - 2016-11-25
  * @link http://revolunet.github.com/angular-carousel
  * @author Julien Bouquillon <julien@revolunet.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -26071,7 +26291,14 @@ angular.module('angular-carousel').run(['$templateCache', function($templateCach
                         }
 
                         function getSlidesDOM() {
-                            return iElement[0].querySelectorAll('ul[rn-carousel] > li');
+                            var nodes = iElement[0].childNodes;
+                            var slides = [];
+                            for(var i=0; i<nodes.length ;i++){
+                                if(nodes[i].tagName === "LI"){
+                                    slides.push(nodes[i]);
+                                }
+                            }
+                            return slides;
                         }
 
                         function documentMouseUpEvent(event) {
@@ -26138,7 +26365,9 @@ angular.module('angular-carousel').run(['$templateCache', function($templateCach
                                 duration: options.transitionDuration,
                                 easing: options.transitionEasing,
                                 step: function(state) {
-                                    updateSlidesPosition(state.x);
+                                    if (isFinite(state.x)) {
+                                      updateSlidesPosition(state.x);
+                                    }
                                 },
                                 finish: function() {
                                     scope.$apply(function() {
@@ -26217,10 +26446,11 @@ angular.module('angular-carousel').run(['$templateCache', function($templateCach
 
                         if (iAttributes.rnCarouselControls!==undefined) {
                             // dont use a directive for this
-                            var nextSlideIndexCompareValue = isRepeatBased ? repeatCollection.replace('::', '') + '.length - 1' : currentSlides.length - 1;
+                            var canloop = ((isRepeatBased ? scope.$eval(repeatCollection.replace('::', '')).length : currentSlides.length) > 1) ? angular.isDefined(tAttributes['rnCarouselControlsAllowLoop']) : false;
+                            var nextSlideIndexCompareValue = isRepeatBased ? '(' + repeatCollection.replace('::', '') + ').length - 1' : currentSlides.length - 1;
                             var tpl = '<div class="rn-carousel-controls">\n' +
-                                '  <span class="rn-carousel-control rn-carousel-control-prev" ng-click="prevSlide()" ng-if="carouselIndex > 0"></span>\n' +
-                                '  <span class="rn-carousel-control rn-carousel-control-next" ng-click="nextSlide()" ng-if="carouselIndex < ' + nextSlideIndexCompareValue + '"></span>\n' +
+                                '  <span class="rn-carousel-control rn-carousel-control-prev" ng-click="prevSlide()" ng-if="carouselIndex > 0 || ' + canloop + '"></span>\n' +
+                                '  <span class="rn-carousel-control rn-carousel-control-next" ng-click="nextSlide()" ng-if="carouselIndex < ' + nextSlideIndexCompareValue + ' || ' + canloop + '"></span>\n' +
                                 '</div>';
                             iElement.parent().append($compile(angular.element(tpl))(scope));
                         }
@@ -26313,6 +26543,9 @@ angular.module('angular-carousel').run(['$templateCache', function($templateCach
                                 //console.log('repeatCollection', currentSlides);
                                 currentSlides = newValue;
                                 // if deepWatch ON ,manually compare objects to guess the new position
+                                if (!angular.isArray(currentSlides)) {
+                                  throw Error('the slides collection must be an Array');
+                                }
                                 if (deepWatch && angular.isArray(newValue)) {
                                     var activeElement = oldValue[scope.carouselIndex];
                                     var newIndex = getItemIndex(newValue, activeElement, scope.carouselIndex);
