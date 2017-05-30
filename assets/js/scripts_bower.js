@@ -17730,7 +17730,7 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "                    <small>\n" +
     "                        <span class=\"fa fa-info-circle\"\n" +
     "                              tooltip-placement=\"right\"\n" +
-    "                              tooltip=\"Keyword search in journal titles, and full text article content in Scout.\"></span>\n" +
+    "                              tooltip=\"Keyword search in journal titles and full text article content in Scout.\"></span>\n" +
     "                    </small>\n" +
     "                </h2>\n" +
     "            </div>\n" +
