@@ -17856,7 +17856,7 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "                    <small>\n" +
     "                        <span class=\"fa fa-info-circle\"\n" +
     "                              tooltip-placement=\"right\"\n" +
-    "                              tooltip=\"Keyword search in titles and databases descriptions from our own Databases Page.\"></span>\n" +
+    "                              tooltip=\"Keyword search in titles and databases descriptions from our own Databases page.\"></span>\n" +
     "                    </small>\n" +
     "                </h2>\n" +
     "            </div>\n" +
