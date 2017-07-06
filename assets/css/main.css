@@ -9519,18 +9519,18 @@ footer > .sub-footer {
 .ualib-image-carousel ul,
 .ualib-image-carousel .slide-image {
   width: auto;
-  height: 276px;
+  height: 316px;
 }
 @media (min-width: 992px) {
   .ualib-image-carousel ul,
   .ualib-image-carousel .slide-image {
-    height: 170px;
+    height: 194px;
   }
 }
 @media (min-width: 1200px) {
   .ualib-image-carousel ul,
   .ualib-image-carousel .slide-image {
-    height: 210px;
+    height: 240px;
   }
 }
 .ualib-image-carousel .layer {
@@ -9552,7 +9552,7 @@ footer > .sub-footer {
   position: absolute;
   bottom: 0;
   padding: 15px;
-  background-color: rgba(0, 0, 0, 0.75);
+  background-color: rgba(0, 0, 0, 0.5);
 }
 .ualib-image-carousel .rn-carousel-control {
   opacity: 0.75;
@@ -9574,6 +9574,12 @@ footer > .sub-footer {
 }
 .ualib-image-carousel .rn-carousel-indicator {
   font-size: 20px;
+}
+.ualib-image-carousel .card-body {
+  padding-bottom: 0px;
+}
+.ualib-image-carousel ul {
+  margin-bottom: 0px;
 }
 /**
  * Your styles here
