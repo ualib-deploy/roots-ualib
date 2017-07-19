@@ -173,7 +173,6 @@
                                                 <span class="fa fa-music"></span>
                                                 <h4>Music Library</h4>
                                                 <ul>
-                                                    <li class="menu-video-database-search"><a href="/#/videos">Video Database Search</a></li>
                                                     <li class="menu-research-guides"><a href="http://guides.lib.ua.edu/visualperformingarts">Research Guides</a></li>
                                                     <li class="menu-home"><a href="/libraries/music/">Music Library Home</a></li>
                                                 </ul>
