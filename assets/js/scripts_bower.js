@@ -24438,7 +24438,6 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
     "                <ul class=\"nav nav-pills nav-stacked hours-locations-menu\">\n" +
     "                    <li><a href=\"#\" hours-href=\"{library: 'gorgas', month: 0}\">Gorgas</a>\n" +
     "                        <ul class=\"nav nav-pills nav-stacked\">\n" +
-    "                            <li><a href=\"#\" hours-href=\"{library: 'music', month: 0}\">Music Library</a></li>\n" +
     "                            <li><a href=\"#\" hours-href=\"{library: 'media', month: 0}\">Sanford Media Center</a></li>\n" +
     "                            <li><a href=\"#\" hours-href=\"{library: 'williams', month: 0}\">Williams Americana Collection</a></li>\n" +
     "                        </ul>\n" +
