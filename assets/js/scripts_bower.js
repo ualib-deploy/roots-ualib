@@ -12471,8 +12471,8 @@ angular.module("staffDirectory/staffDirectoryPeople.tpl.html", []).run(["$templa
     "                        <div class=\"col-md-8\" style=\"display: none;\">\n" +
     "                            <label for=\"{{person.id}}_addType\">Select Subject Type</label>\n" +
     "                            <select class=\"form-control\" id=\"{{person.id}}_addType\" ng-model=\"person.selType\"\n" +
-    "                                    <option value=\"1\" selected=\"selected\"></option>\n" +
-    "                                    <option value=\"2\" selected=\"selected\"></option>\n" +
+    "                                    <option value=\"1\"></option>\n" +
+    "                                    <option value=\"2\"></option>\n" +
     "                                    <option value=\"3\" selected=\"selected\"></option>\n" +
     "                            </select>\n" +
     "                        </div>\n" +
