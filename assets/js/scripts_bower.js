@@ -12468,6 +12468,14 @@ angular.module("staffDirectory/staffDirectoryPeople.tpl.html", []).run(["$templa
     "                        </select>\n" +
     "                    </div>\n" +
     "                    <div class=\"row form-group\" ng-show=\"person.show\">\n" +
+    "                        <div class=\"col-md-8\" style=\"display: none;\">\n" +
+    "                            <label for=\"{{person.id}}_addType\">Select Subject Type</label>\n" +
+    "                            <select class=\"form-control\" id=\"{{person.id}}_addType\" ng-model=\"person.selType\">\n" +
+    "                                    <option value=\"1\"></option>\n" +
+    "                                    <option value=\"2\"></option>\n" +
+    "                                    <option value=\"3\" selected=\"selected\"></option>\n" +
+    "                            </select>\n" +
+    "                        </div>\n" +
     "                        <div class=\"col-md-4\">\n" +
     "                            <label>Add</label>\n" +
     "                            <button type=\"button\" class=\"btn btn-success\" ng-click=\"addSubject(person)\">\n" +
@@ -16800,7 +16808,9 @@ angular.module('manage.staffDirectory', ['oc.lazyLoad', 'ui.tinymce'])
                     newSubj.sid = person.selSubj.sid;
                     newSubj.subject = person.selSubj.subject;
                     newSubj.link = person.selSubj.link;
-                    newSubj.type = 3;
+
+                    //This is set to "both" becuase the selector / instructor distinction no longer exists.  It has been replaced with the liaison program as of Summer 2017.
+                    newSubj.type = person.selType.value;
                     $scope.Directory.list[$scope.Directory.list.indexOf(person)].subjects.push(newSubj);
                 }
             };
