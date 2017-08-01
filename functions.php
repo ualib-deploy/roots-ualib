@@ -11,7 +11,7 @@
  */
 require_once( get_stylesheet_directory() . '/functions-ualib.php' );
 
-//Include our JWT functions
+//Include our JWT functions.
 require_once "/srv/web/www/webapps/superGlobalPHP/constants.php";
 require_once "/srv/web/www/webapps/superGlobalPHP/functions.php";
 require_once "/srv/web/www/webapps/superGlobalPHP/keys/jwt.php";
