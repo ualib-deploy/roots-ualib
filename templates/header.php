@@ -415,8 +415,8 @@
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="/#/staffdir?liaison=1">
                                                 <span class="fa fa-comment-o"></span>
-                                                <h4>Subject Specialists</h4>
-                                                <p>Need research help? Reach out to your subject librarian</p>
+                                                <h4>Liaisons</h4>
+                                                <p>Need research help? Reach out to your liaison</p>
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
