@@ -54,8 +54,7 @@
                             </li>
                         </ul>
                     </li>
-                    <li class="dropdown yamm-fw static" ng-class="{
-                                                                  dropdown-static': (appClass == 'webapp home-webapp' || appClass == 'webapp bento-webapp')}" dropdown-sticky>
+                    <li class="dropdown yamm-fw static" ng-class="{dropdown-static': (appClass == 'webapp home-webapp' || appClass == 'webapp bento-webapp')}" dropdown-sticky>
                         <a href="#" class="dropdown-toggle icon-only" ng-click="mainNavbarCollapsed = false;">
                             <span class="fa fa-search"></span>
                         </a>
