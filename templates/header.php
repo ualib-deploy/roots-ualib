@@ -200,14 +200,18 @@
                                                 </ul>
                                             </div>
                                         </div>
-                                        <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="http://guides.lib.ua.edu/rdmp">
+                                      
+                                       <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <div class="service-list">
                                                 <span class="fa fa-archive"></span>
                                                 <h4>Research Data Services</h4>
                                                 <p>Research data management and curation resources available at the University of Alabama</p>
-                                            </a>
+                                                <ul>
+                                                    <li class="menu-rdmc"><a href="http://guides.lib.ua.edu/rdmp">Research Data Management & Curation</a></li>
+                                                    <li class="menu-ir"><a href="https://ir.ua.edu/">UA Institutional Repository</a></li>
+                                                </ul>
+                                            </div>
                                         </div>
-
                                     </div>
                                 </div>
                             </li>
