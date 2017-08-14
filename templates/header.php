@@ -114,8 +114,8 @@
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="http://library.ua.edu/vwebv/searchBasic">
                                                 <span class="fa fa-search"></span>
-                                                <h4>Libraries' Catalog</h4>
-                                                <p>Search the libraries' classic catalog</p>
+                                                <h4>Libraries Catalog</h4>
+                                                <p>Search the libraries classic catalog</p>
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
@@ -149,7 +149,7 @@
                                             <a class="service-card" href="/research-help/e-resources/">
                                                 <span class="fa fa-bolt"></span>
                                                 <h4>E-Books & E-Journals</h4>
-                                                <p>Explore the libraries' electronic resource collections and more </p>
+                                                <p>Explore the libraries electronic resource collections and more </p>
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
@@ -200,14 +200,18 @@
                                                 </ul>
                                             </div>
                                         </div>
-                                        <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="http://guides.lib.ua.edu/rdmp">
+                                      
+                                       <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <div class="service-list">
                                                 <span class="fa fa-archive"></span>
                                                 <h4>Research Data Services</h4>
                                                 <p>Research data management and curation resources available at the University of Alabama</p>
-                                            </a>
+                                                <ul>
+                                                    <li class="menu-rdmc"><a href="http://guides.lib.ua.edu/rdmp">Research Data Management & Curation</a></li>
+                                                    <li class="menu-ir"><a href="https://ir.ua.edu/">UA Institutional Repository</a></li>
+                                                </ul>
+                                            </div>
                                         </div>
-
                                     </div>
                                 </div>
                             </li>
@@ -366,7 +370,7 @@
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="/about/library-annex/">
                                                 <span class="fa fa-building"></span>
-                                                <h4>Libraries' Annex</h4>
+                                                <h4>Libraries Annex</h4>
                                                 <p>Library collections located off campus</p>
                                             </a>
                                         </div>
@@ -374,21 +378,21 @@
                                             <a class="service-card" href="/about/libraries-policies/">
                                                 <span class="fa fa-sitemap"></span>
                                                 <h4>Policies</h4>
-                                                <p>Learn about libraries' policies and procedures</p>
+                                                <p>Learn about libraries policies and procedures</p>
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="/about/social-media/">
                                                 <span class="fa fa-share-alt"></span>
                                                 <h4>Social Media</h4>
-                                                <p>Explore the libraries' multiple social media outlets </p>
+                                                <p>Explore the libraries multiple social media outlets </p>
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="/about/support-ua-libraries/">
                                                 <span class="fa fa-gift"></span>
                                                 <h4>Support UA Libraries</h4>
-                                                <p>Help strengthen the libraries' collections, services, and resources </p>
+                                                <p>Help strengthen the libraries collections, services, and resources </p>
                                             </a>
                                         </div>
                                     </div>
@@ -430,7 +434,7 @@
                                             <a class="service-card" href="/library-help/connect-to-a-wireless-network/">
                                                 <span class="fa fa-wifi"></span>
                                                 <h4>Connect to a Wireless Network</h4>
-                                                <p>Access the Libraries' internet using a wireless connection</p>
+                                                <p>Access the Libraries internet using a wireless connection</p>
                                             </a>
                                         </div>
                                     </div>
