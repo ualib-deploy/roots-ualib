@@ -19411,7 +19411,6 @@ angular.module('common.engines', [
     'engines.googleCS',
     'engines.faq',
     'engines.libguides',
-    'engines.ejournals',
     'engines.recommend',
     'engines.staffdirectory'
 ])
