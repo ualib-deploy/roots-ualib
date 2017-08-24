@@ -423,17 +423,12 @@
                                                 <p>Need research help? Reach out to your liaison</p>
                                             </a>
                                         </div>
-                                        <!-- new tutorials service-list -->
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <div class="service-list">
-                                                <span class="fa fa-question-circle"></span>
-                                                <h4>Tutorials and Instructional Videos</h4>
-                                                <p>Brief tutorials designed to help you use library services and resources</p>
-                                                <ul>
-                                                    <li><a href="https://www.lib.ua.edu/library-help/tutorials/">Tutorials and Instructional Videos Page</a></li>
-                                                    <li><a href="http://apps.lib.ua.edu/blogs/rolltideresearch/ ">Roll Tide Research</a></li>
-                                                </ul>
-                                            </div>
+                                            <a class="service-card" href="/library-help/kacecontact-form/">
+                                                <span class="fa fa-envelope"></span>
+                                                <h4>Run into Website Issues?</h4>
+                                                <p>Please contact Web Services for help </p>
+                                            </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="/library-help/connect-to-a-wireless-network/">
@@ -458,13 +453,19 @@
                                                 <p>Unable to access online resources?  Report the problem</p>
                                             </a>
                                         </div>
+                                      <!-- new tutorials service-list -->
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="/library-help/kacecontact-form/">
-                                                <span class="fa fa-envelope"></span>
-                                                <h4>Run into Website Issues?</h4>
-                                                <p>Please contact Web Services for help </p>
-                                            </a>
+                                            <div class="service-list">
+                                                <span class="fa fa-question-circle"></span>
+                                                <h4>Tutorials and Instructional Videos</h4>
+                                                <p>Brief tutorials designed to help you use library services and resources</p>
+                                                <ul>
+                                                    <li><a href="https://www.lib.ua.edu/library-help/tutorials/">Tutorials and Instructional Videos Page</a></li>
+                                                    <li><a href="http://apps.lib.ua.edu/blogs/rolltideresearch/ ">Roll Tide Research</a></li>
+                                                </ul>
+                                            </div>
                                         </div>
+                                      
                                     </div>
                                 </div>
                             </li>
