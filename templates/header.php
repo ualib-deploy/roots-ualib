@@ -55,21 +55,7 @@
                                                 <h4>Blackboard Learn</h4>
                                             </a>
                                         </div>
-										<div class="col-xs-12 col-sm-6 col-md-4">
-                                            <a class="service-card" href="http://mail.crimson.ua.edu/">
-                                               <span class="fa fa-envelope-o" aria-hidden="true"></span>
-                                                <h4>Crimson Mail</h4>
-                                            </a>
-                                        </div>
                                     </div>
-									<div class="row">
-										<div class="col-xs-12 col-sm-6 col-md-4">
-                                            <a class="service-card" href="http://degreeworks.ua.edu/">
-                                            <span class="fa fa-graduation-cap" aria-hidden="true"></span>
-                                                <h4>Degree Works</h4>
-                                            </a>
-                                        </div>
-									</div>
                                 </div>
                             </li>
                         </ul>
