@@ -34,7 +34,7 @@
                                         </div>
                 						
                                            <div class="col-xs-12 col-sm-6 col-md-4">
-                                            <a class="service-card" href="http://refworks.ua.edu">
+                                            <a class="service-card" href="/research-tools/refworks/">
 												<span class="fa fa-file-text-o" aria-hidden="true"></span>
                                                 <h4>RefWorks</h4>
                                             </a>
