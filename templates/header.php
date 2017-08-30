@@ -154,7 +154,7 @@
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="/research-help/e-resources/">
                                                 <span class="fa fa-bolt" aria-hidden="true"></span>
-                                                <h4>E-Books & E-Journals</h4>
+                                                <h4>E-Journals</h4>
                                                 <p>Explore the libraries electronic resource collections and more </p>
                                             </a>
                                         </div>
