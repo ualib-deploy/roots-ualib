@@ -21,37 +21,37 @@
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-4">
                                             <a class="service-card" href="http://library.ua.edu/vwebv/myAccount">
-												<span class="fa fa-search" aria-hidden="true"></span>
+                                                <span class="fa fa-search" aria-hidden="true"></span>
                                                 <h4>My Library (Catalog)</h4>
                                             </a>
                                         </div>
 
                                         <div class="col-xs-12 col-sm-6 col-md-4">
                                             <a class="service-card" href="https://ua.illiad.oclc.org/illiad/">
-                                               <span class="fa fa-exchange" aria-hidden="true"></span>
+                                                <span class="fa fa-exchange" aria-hidden="true"></span>
                                                 <h4>Interlibrary Loan (ILLiad)</h4>
                                             </a>
                                         </div>
-                						
-                                           <div class="col-xs-12 col-sm-6 col-md-4">
+
+                                        <div class="col-xs-12 col-sm-6 col-md-4">
                                             <a class="service-card" href="/research-tools/refworks/">
-												<span class="fa fa-file-text-o" aria-hidden="true"></span>
+                                                <span class="fa fa-file-text-o" aria-hidden="true"></span>
                                                 <h4>RefWorks</h4>
                                             </a>
                                         </div>
-                                      
+
                                     </div>
                                     <div class="row">
-                        
+
                                         <div class="col-xs-12 col-sm-6 col-md-4">
                                             <a class="service-card" href="https://mybama.ua.edu/">
-                                              	<span class="fa fa-university" aria-hidden="true"></span>
+                                                <span class="fa fa-university" aria-hidden="true"></span>
                                                 <h4>myBama</h4>
                                             </a>
                                         </div>
-                                          <div class="col-xs-12 col-sm-6 col-md-4">
+                                        <div class="col-xs-12 col-sm-6 col-md-4">
                                             <a class="service-card" href="https://ualearn.blackboard.com/webapps/login/">
-                                               	<span class="fa fa-clipboard" aria-hidden="true"></span>
+                                                <span class="fa fa-clipboard" aria-hidden="true"></span>
                                                 <h4>Blackboard Learn</h4>
                                             </a>
                                         </div>
@@ -206,8 +206,8 @@
                                                 </ul>
                                             </div>
                                         </div>
-                                      
-                                       <div class="col-xs-12 col-sm-6 col-md-3">
+
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
                                             <div class="service-list">
                                                 <span class="fa fa-archive" aria-hidden="true"></span>
                                                 <h4>Research Data Services</h4>
@@ -228,109 +228,105 @@
                         <ul class="dropdown-menu">
                             <li>
                                 <div class="yamm-content">
+
+
                                     <div class="row">
-                                        <div class="col-sm-12 col-md-6">
-                                            <div class="row">
-                                                <div class="col-xs-12 col-md-6">
-                                                    <div class="service-list">
-                                                        <span class="fa fa-lightbulb-o" aria-hidden="true"></span>
-                                                        <h4>Find a Place to Study</h4>
-                                                        <ul>
-                                                            <li class="menu-computer-availability"><a href="http://www.lib.ua.edu/computers">Computer Availability</a></li>
-                                                            <li><a href="/using-the-library/presentation-practice-rooms/">Presentation Practice Rooms</a></li>
-                                                            <li><a href="https://ua.libcal.com/booking/groupstudy">Group Study Rooms</a></li>
-                                                            <li><a href="/using-the-library/find-a-place-to-study/">Spaces by Library</a></li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                                <div class="col-xs-12 col-md-6">
-                                                    <div class="service-list">
-                                                        <span class="fa fa-book" aria-hidden="true"></span>
-                                                        <h4>Borrow, Renew &amp; Course Reserves</h4>
-                                                        <ul>
-                                                            <li class="menu-reserves"><a href="/using-the-library/course-reserves/">Course Reserves</a></li>
-                                                            <li class="menu-access-reserves"><a href="http://library.ua.edu/vwebv/enterCourseReserve.do">Find and access reserve items</a></li>
-                                                            <li class="menu-borrow"><a href="/using-the-library/circulation-services/borrowing/">Borrow and renew items</a></li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-xs-12 col-md-6">
-                                                    <div class="service-list">
-                                                        <span class="fa fa-desktop" aria-hidden="true"></span>
-                                                        <h4>Computers, Software, &amp; Equipment</h4>
-                                                        <ul>
-                                                            <li><a href="/using-the-library/photocopying/">Print, Scan, Copy</a></li>
-                                                            <li><a href="/using-the-library/3d-print/">3D Printing</a></li>
-                                                            <li class="menu-laptop-computers"><a href="/using-the-library/equipment/">Equipment</a></li>
-                                                            <li class="menu-library-software-list"><a href="/#/software">Library Software List</a></li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                                <div class="col-xs-12 col-md-6">
-                                                    <div class="service-list">
-                                                        <span class="fa fa-exchange" aria-hidden="true"></span>
-                                                        <h4>Interlibrary Loan</h4>
-                                                        <ul>
-                                                            <li><a href="https://ua.illiad.oclc.org/illiad/">ILL- Borrow materials owned by other libraries</a></li>
-                                                            <li class="menu-computer-availability"><a href="/using-the-library/interlibrary-loan/">About Interlibrary Loan - policies & info</a></li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <div class="service-list">
+                                                <span class="fa fa-lightbulb-o" aria-hidden="true"></span>
+                                                <h4>Find a Place to Study</h4>
+                                                <ul>
+                                                    <li class="menu-computer-availability"><a href="http://www.lib.ua.edu/computers">Computer Availability</a></li>
+                                                    <li><a href="/using-the-library/presentation-practice-rooms/">Presentation Practice Rooms</a></li>
+                                                    <li><a href="https://ua.libcal.com/booking/groupstudy">Group Study Rooms</a></li>
+                                                    <li><a href="/using-the-library/find-a-place-to-study/">Spaces by Library</a></li>
+                                                </ul>
                                             </div>
                                         </div>
-                                        <div class="col-sm-12 col-md-6">
-                                            <div class="row">
-                                                <div class="col-xs-12 col-md-6">
-                                                    <a class="service-card" href="/using-the-library/digital-humanities-center/">
-                                                        <span class="fa fa-tachometer" aria-hidden="true"></span>
-                                                        <h4>Digital Humanities Center</h4>
-                                                        <p>Explore the digital humanities with innovative research and teaching projects </p>
-                                                    </a>
-                                                </div>
-                                                <div class="col-xs-12 col-md-6">
-                                                    <a class="service-card" href="/using-the-library/accessibility/">
-                                                        <span class="fa fa-wheelchair" aria-hidden="true"></span>
-                                                        <h4>Accessibility</h4>
-                                                        <p>Library services and access for users with disabilities</p>
-                                                    </a>
-                                                </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <div class="service-list">
+                                                <span class="fa fa-book" aria-hidden="true"></span>
+                                                <h4>Borrow, Renew &amp; Course Reserves</h4>
+                                                <ul>
+                                                    <li class="menu-reserves"><a href="/using-the-library/course-reserves/">Course Reserves</a></li>
+                                                    <li class="menu-access-reserves"><a href="http://library.ua.edu/vwebv/enterCourseReserve.do">Find and access reserve items</a></li>
+                                                    <li class="menu-borrow"><a href="/using-the-library/circulation-services/borrowing/">Borrow and renew items</a></li>
+                                                </ul>
                                             </div>
-                                            <div class="row">
-                                                <div class="col-xs-12 col-md-6">
-                                                    <a class="service-card" href="/using-the-library/sanford-media-center/">
-                                                        <span class="fa fa-cubes" aria-hidden="true"></span>
-                                                        <h4>Sanford Media Center</h4>
-                                                        <p>A leading-edge facility for digital media production </p>
-                                                    </a>
-                                                </div>
-                                                <div class="col-xs-12 col-md-6">
-                                                    <a class="service-card" href="/using-the-library/information-for-faculty/">
-                                                        <span class="fa fa-graduation-cap" aria-hidden="true"></span>
-                                                        <h4>Information for Faculty</h4>
-                                                        <p>Purchases, teaching, and research support</p>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-xs-12 col-md-6">
-                                                    <a class="service-card" href="/using-the-library/library-instruction/">
-                                                        <span class="fa fa-calendar" aria-hidden="true"></span>
-                                                        <h4>Classes and Workshops</h4>
-                                                        <p>Register for instruction sessions and outreach opportunities</p>
-                                                    </a>
-                                                </div>
-                                                <div class="col-xs-12 col-md-6">
-                                                    <a class="service-card" href="/using-the-library/information-for-students/">
-                                                        <span class="fa fa-pencil" aria-hidden="true"></span>
-                                                        <h4>Information for Students</h4>
-                                                        <p>Learn more about the libraries, materials, and our services</p>
-                                                    </a>
-                                                </div>
-                                            </div>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="/using-the-library/digital-humanities-center/">
+                                                <span class="fa fa-tachometer" aria-hidden="true"></span>
+                                                <h4>Digital Humanities Center</h4>
+                                                <p>Explore the digital humanities with innovative research and teaching projects </p>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="/using-the-library/accessibility/">
+                                                <span class="fa fa-wheelchair" aria-hidden="true"></span>
+                                                <h4>Accessibility</h4>
+                                                <p>Library services and access for users with disabilities</p>
+                                            </a>
                                         </div>
                                     </div>
+                                    <div class="row">
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <div class="service-list">
+                                                <span class="fa fa-desktop" aria-hidden="true"></span>
+                                                <h4>Computers, Software, &amp; Equipment</h4>
+                                                <ul>
+                                                    <li><a href="/using-the-library/photocopying/">Print, Scan, Copy</a></li>
+                                                    <li><a href="/using-the-library/3d-print/">3D Printing</a></li>
+                                                    <li class="menu-laptop-computers"><a href="/using-the-library/equipment/">Equipment</a></li>
+                                                    <li class="menu-library-software-list"><a href="/#/software">Library Software List</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <div class="service-list">
+                                                <span class="fa fa-exchange" aria-hidden="true"></span>
+                                                <h4>Interlibrary Loan</h4>
+                                                <ul>
+                                                    <li><a href="https://ua.illiad.oclc.org/illiad/">ILL- Borrow materials owned by other libraries</a></li>
+                                                    <li class="menu-computer-availability"><a href="/using-the-library/interlibrary-loan/">About Interlibrary Loan - policies & info</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="/using-the-library/sanford-media-center/">
+                                                <span class="fa fa-cubes" aria-hidden="true"></span>
+                                                <h4>Sanford Media Center</h4>
+                                                <p>A leading-edge facility for digital media production </p>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="/using-the-library/information-for-faculty/">
+                                                <span class="fa fa-graduation-cap" aria-hidden="true"></span>
+                                                <h4>Information for Faculty</h4>
+                                                <p>Purchases, teaching, and research support</p>
+                                            </a>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="row">
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="/using-the-library/library-instruction/">
+                                                <span class="fa fa-calendar" aria-hidden="true"></span>
+                                                <h4>Classes and Workshops</h4>
+                                                <p>Register for instruction sessions and outreach opportunities</p>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="/using-the-library/information-for-students/">
+                                                <span class="fa fa-pencil" aria-hidden="true"></span>
+                                                <h4>Information for Students</h4>
+                                                <p>Learn more about the libraries, materials, and our services</p>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
                             </li>
                         </ul>
                     </li>
@@ -368,7 +364,7 @@
                                                 <ul>
                                                     <li><a href="/about/about-the-libraries/">Branch libraries information</a></li>
                                                     <li><a href="/wp-content/uploads/2017/04/Strategic-Plan-11162016-FINAL.pdf">UA Libraries Strategic Plan</a></li>
-                                                 </ul>
+                                                </ul>
                                             </div>
                                         </div>
                                     </div>
@@ -459,7 +455,7 @@
                                                 <p>Unable to access online resources?  Report the problem</p>
                                             </a>
                                         </div>
-                                      <!-- new tutorials service-list -->
+                                        <!-- new tutorials service-list -->
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <div class="service-list">
                                                 <span class="fa fa-question-circle" aria-hidden="true"></span>
@@ -471,7 +467,7 @@
                                                 </ul>
                                             </div>
                                         </div>
-                                      
+
                                     </div>
                                 </div>
                             </li>
