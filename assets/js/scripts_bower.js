@@ -18011,41 +18011,26 @@ angular.module("common/engines/ejournals/ejournals.tpl.html", []).run(["$templat
     "<div class=\"media\">\n" +
     "    <div class=\"media-body\">\n" +
     "        <h4 class=\"media-heading\">\n" +
-    "            <a ng-href=\"{{item.links[0].href}}\" title=\"{{item.title}}\" target=\"_ejournals\" ng-click=\"gaPush()\">{{item.title | ltrim | truncate: 50: '...': true}}</a>\n" +
+    "            <a ng-href=\"{{item.PLink}}\"\n" +
+    "               title=\"{{item.Items[0].Data}}\"\n" +
+    "               target=\"_scout\"\n" +
+    "               ng-bind-html=\"item.title | lowercase | ucfirst | truncate: 80: '...': true\" ng-click=\"gaPush()\"></a>\n" +
+    "\n" +
     "        </h4>\n" +
-    "\n" +
     "        <div class=\"details-context\">\n" +
-    "            <span ng-if=\"item.date\" ng-bind-html=\"item.date\"></span>\n" +
-    "            <span ng-if=\"item.links[0]\">\n" +
-    "                <span title=\"{{item.links[0].name}}\">{{item.links[0].name | ltrim | truncate: 45: '...'}}</span>\n" +
-    "            </span>\n" +
-    "        </div>\n" +
-    "\n" +
-    "        <div collapse=\"isCollapsed\">\n" +
-    "            <div class=\"details-container\" ng-if=\"item.authors\">\n" +
-    "                <span class=\"text-muted\">Authors </span>\n" +
-    "                <span class=\"details\" ng-bind-html=\"item.authors\"></span>\n" +
-    "            </div>\n" +
-    "\n" +
-    "            <div class=\"details-container\" ng-if=\"item.links[1]\">\n" +
-    "                <span class=\"text-muted\">Other Sources </span>\n" +
-    "            <span class=\"details\" ng-repeat=\"link in item.links | after: 1\">\n" +
-    "                <a ng-href=\"{{link.href}}\"\n" +
-    "                   title=\"{{link.name}}\"\n" +
-    "                   class=\"source-link\"\n" +
-    "                   ng-bind-html=\"link.name | truncate: 35: '...': true\"></a>\n" +
-    "            </span>\n" +
-    "            </div>\n" +
+    "            <span ng-if=\"item.year\">{{item.year}}</span>\n" +
+    "            <span ng-if=\"item.ISSN\">ISSN: {{item.ISSN}}</span>\n" +
+    "            <span ng-if=\"item.mediaType\">{{item.mediaType}} </span>\n" +
+    "            <span ng-if=\"item.FullText.Text.Availability\">Full Text Online</span>\n" +
     "        </div>\n" +
     "\n" +
     "        <ul class=\"list-inline\">\n" +
-    "            <li ng-show=\"item.links[1]\">\n" +
-    "                <a href=\"\" ng-click=\"isCollapsed = !isCollapsed\">Item details <span class=\"fa\" ng-class=\"{'fa-caret-down': isCollapsed, 'fa-caret-up': !isCollapsed}\"></span></a>\n" +
-    "            </li>\n" +
     "            <li>\n" +
     "                <a ng-href=\"{{resourceLink}}\" class=\"external-link\" ng-if=\"resourceLink\" target=\"_{{engine}}\" ng-click=\"gaMore()\">Results in {{engineName}}</a>\n" +
     "            </li>\n" +
     "        </ul>\n" +
+    "\n" +
+    "\n" +
     "    </div>\n" +
     "</div>");
 }]);
@@ -18851,7 +18836,7 @@ angular.module('oneSearch.common')
                 model: '=',
                 search: '='
             },
-            controller: ['$scope', '$window', '$timeout', '$document', 'dataFactory', 'Bento', function($scope, $window, $timeout, $document,  dataFactory, Bento){
+            controller: function($scope, $window, $timeout, $document,  dataFactory, Bento){
                 $scope.items = {};
                 $scope.filteredItems = [];
                 $scope.model = "";
@@ -18976,7 +18961,7 @@ angular.module('oneSearch.common')
 
 
 
-            }],
+            },
             link: function(scope, elem, attrs) {
                 scope.showSuggestions = false;
                 var suggestWatcher = scope.$watch('items', function(newVal, oldVal){
@@ -19129,7 +19114,7 @@ angular.module('engines.acumen', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('AcumenCtrl', ['$scope', '$filter', function($scope, $filter){
+    .controller('AcumenCtrl', function($scope, $filter){
         var items = $scope.items;
 
         for (var i = 0, len = items.length; i < len; i++) {
@@ -19139,7 +19124,7 @@ angular.module('engines.acumen', [])
                 else items[i].type = items[i].type.sort().shift();
             }
         }
-    }]);
+    });
 angular.module('engines.catalog', [])
 
     /**
@@ -19200,7 +19185,7 @@ angular.module('engines.catalog', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('CatalogCtrl', ['$scope', '$filter', function($scope, $filter){
+    .controller('CatalogCtrl', function($scope, $filter){
         var types = {
             bc: "Archive/Manuscript",
             cm: "Music Score",
@@ -19242,7 +19227,7 @@ angular.module('engines.catalog', [])
         }
 
         $scope.items = items;
-    }]);
+    });
 
 angular.module('engines.databases', [])
 
@@ -19304,13 +19289,13 @@ angular.module('engines.ejournals', [])
         oneSearchProvider.engine('ejournals', {
             id: 4,
             priority: 6,
-            resultsPath: 'eJournals.list',
-            totalsPath: 'eJournals.total',
+            resultsPath: 'eJournals.SearchResult.Data.Records',
+            totalsPath: 'Scout.SearchResult.Statistics.TotalHits',
             mediaTypes: {
-                path: 'type',
+                path: 'Header.ResourceType',
                 types: {
-                    books: 'book',
-                    journals: 'periodical'
+                    books: 'Book',
+                    journals: 'Journal'
                 }
             },
             templateUrl: 'common/engines/ejournals/ejournals.tpl.html',
@@ -19326,24 +19311,83 @@ angular.module('engines.ejournals', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('EjouralsCtrl', ['$scope', function($scope){
+    .controller('EjouralsCtrl', function($scope) {
 
-        var param;
-        switch ($scope.mediaType){
-            case 'books':
-                param = 'SS_searchTypeBook=yes';
-                break;
-            case 'journals':
-                param = 'SS_searchTypeJournal=yes';
-                break;
-            case 'other':
-                param = 'SS_searchTypeOther=yes'
+        var title; // Title variable to bind to $scope. ".BibRelationships.IsPartOfRelationships" title is used if no item title is present.
+        var ISSN;
+        var items = $scope.items;
+        var year;
+
+        for (var i = 0; i < items.length; i++) {
+
+            //Reset title, ISSN, year
+            title = '';
+            ISSN = '';
+            year = '';
+
+            //Check if item has a title
+            if (items[i].RecordInfo.BibRecord.BibEntity.Titles) {
+                title = items[i].RecordInfo.BibRecord.BibEntity.Titles[0].TitleFull;
+
+                //Set item title
+                if (title) {
+                    items[i].title = title;
+                }
+
+            }
+
+            //Check if item has an ISSN
+            if (items[i].RecordInfo.BibRecord.BibEntity.Identifiers) {
+
+                for (j = 0; j < items[i].RecordInfo.BibRecord.BibEntity.Identifiers.length; j++) {
+                    var ISSNType = items[i].RecordInfo.BibRecord.BibEntity.Identifiers[j]['Type'];
+                    if (ISSNType == 'issn-online') {
+                        ISSN = items[i].RecordInfo.BibRecord.BibEntity.Identifiers[j]['Value'];
+                        ISSN = ISSN.slice(0, 4) + '-' + ISSN.slice(4, 8);
+                        break;
+                    }
+                    else if (ISSNType == 'issn-print') {
+                        ISSN = items[i].RecordInfo.BibRecord.BibEntity.Identifiers[j]['Value'];
+                        ISSN = ISSN.slice(0, 4) + '-' + ISSN.slice(4, 8);
+                    }
+
+                }
+
+                //Set ISSN
+                if (ISSN) {
+                    items[i].ISSN = ISSN
+                }
+
+            }
+
+            //Check if item has a year.  Display the earliest available year for full text holdings
+            if (typeof(items[i].FullTextHoldings !== 'undefined')) {
+                for (j = 0; j < items[i].FullTextHoldings.length; j++) {
+                    var currentYear = items[i].FullTextHoldings[j].CoverageDates[0].StartDate;
+
+                    currentYear = parseInt(currentYear.slice(0,4));
+                    if (year !== ''){
+                        if (currentYear < year){
+                            year = currentYear;
+                        }
+                    }
+                    else {
+                        year = parseInt(currentYear);
+                    }
+
+                }
+            }
+
+            //Set year
+            if (year) {
+                items[i].year = year;
+            }
+
+
         }
 
-        if (param){
-            $scope.resourceLink = $scope.resourceLink.replace('SS_searchTypeAll=yes&SS_searchTypeBook=yes&SS_searchTypeJournal=yes&SS_searchTypeOther=yes', param);
-        }
-    }]);
+        $scope.items = items;
+    });
 /**
  * @ngdoc overview
  * @name engines
@@ -19411,6 +19455,7 @@ angular.module('common.engines', [
     'engines.googleCS',
     'engines.faq',
     'engines.libguides',
+    'engines.ejournals',
     'engines.recommend',
     'engines.staffdirectory'
 ])
@@ -19691,7 +19736,7 @@ angular.module('engines.scout', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('ScoutCtrl', ['$scope', function($scope){
+    .controller('ScoutCtrl', function($scope){
         var title; // Title variable to bind to $scope. ".BibRelationships.IsPartOfRelationships" title is used if no item title is present.
         var items = $scope.items;
         for (var i = 0; i < items.length; i++){
@@ -19765,7 +19810,7 @@ angular.module('engines.scout', [])
         }
 
         $scope.resourceLink = angular.copy(link);
-    }]);
+    });
 /**
  * @ngdoc object
  * @name engines.type:ENGIEN_NAME
@@ -19794,7 +19839,7 @@ angular.module('engines.staffdirectory', [])
             controller: 'StaffDirectoryCtrl'
         })
     }])
-    .controller('StaffDirectoryCtrl', ['$scope', function($scope){
+    .controller('StaffDirectoryCtrl', function($scope){
 
         var items = $scope.items;
 
@@ -19809,7 +19854,7 @@ angular.module('engines.staffdirectory', [])
                 }
             }
         }
-    }]);
+    });
 angular.module('filters.nameFilter', [])
 
     .filter('nameFilter', ['$filter', function($filter){
