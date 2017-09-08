@@ -374,15 +374,11 @@
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <div class="service-list">
-                                                <span class="fa fa-university" aria-hidden="true"></span>
-                                                <h4>About the Libraries</h4>
-                                                <ul>
-                                                    <li><a href="/about/about-the-libraries/">Branch libraries information</a></li>
-                                                    <li><a href="/wp-content/uploads/2017/04/Strategic-Plan-11162016-FINAL.pdf">UA Libraries Strategic Plan</a></li>
-                                                    <li><a href="/wp-content/uploads/2017/09/top-level-organizational-chart-sept2017.pdf">UA Libraries Organizational Chart</a></li>
-                                                </ul>
-                                            </div>
+                                            <a class="service-card" href="/about/support-ua-libraries/">
+                                                <span class="fa fa-gift" aria-hidden="true"></span>
+                                                <h4>Support UA Libraries</h4>
+                                                <p>Help strengthen the libraries collections, services, and resources </p>
+                                            </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="/about/social-media/">
@@ -392,11 +388,15 @@
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="/about/support-ua-libraries/">
-                                                <span class="fa fa-gift" aria-hidden="true"></span>
-                                                <h4>Support UA Libraries</h4>
-                                                <p>Help strengthen the libraries collections, services, and resources </p>
-                                            </a>
+                                            <div class="service-list">
+                                                <span class="fa fa-university" aria-hidden="true"></span>
+                                                <h4>About the Libraries</h4>
+                                                <ul>
+                                                    <li><a href="/about/about-the-libraries/">Branch libraries information</a></li>
+                                                    <li><a href="/wp-content/uploads/2017/04/Strategic-Plan-11162016-FINAL.pdf">UA Libraries Strategic Plan</a></li>
+                                                    <li><a href="/wp-content/uploads/2017/09/top-level-organizational-chart-sept2017.pdf">UA Libraries Organizational Chart</a></li>
+                                                </ul>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
