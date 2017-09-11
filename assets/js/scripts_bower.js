@@ -19436,20 +19436,28 @@ angular.module('engines.ejournals', [])
             }
 
             //Check if item has a year.  Display the earliest available year for full text holdings
+
             if (typeof(items[i].FullTextHoldings !== 'undefined')) {
                 for (j = 0; j < items[i].FullTextHoldings.length; j++) {
-                    var currentYear = items[i].FullTextHoldings[j].CoverageDates[0].StartDate;
 
-                    currentYear = parseInt(currentYear.slice(0,4));
-                    if (year !== ''){
-                        if (currentYear < year){
-                            year = currentYear;
+                    //console.log(items[i].FullTextHoldings[j].CoverageDates);
+                    //console.log("TYPE IS " + typeof(items[i].FullTextHoldings[j].CoverageDates) + " END");
+                    //console.log("IS IT UNDEFINED");
+                    //console.log(typeof(items[i].FullTextHoldings[j].CoverageDates) == "undefined");
+                    if (typeof(items[i].FullTextHoldings[j].CoverageDates) !== "undefined") {
+
+                        var currentYear = items[i].FullTextHoldings[j].CoverageDates[0].StartDate;
+
+                        currentYear = parseInt(currentYear.slice(0, 4));
+                        if (year !== '') {
+                            if (currentYear < year) {
+                                year = currentYear;
+                            }
+                        }
+                        else {
+                            year = parseInt(currentYear);
                         }
                     }
-                    else {
-                        year = parseInt(currentYear);
-                    }
-
                 }
             }
 
