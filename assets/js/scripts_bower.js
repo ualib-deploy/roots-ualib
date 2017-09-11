@@ -18086,7 +18086,6 @@ angular.module("common/engines/ejournals/ejournals.tpl.html", []).run(["$templat
     "    <div class=\"media-body\">\n" +
     "        <h4 class=\"media-heading\">\n" +
     "            <a ng-href=\"{{item.PLink}}\"\n" +
-    "               title=\"{{item.Items[0].Data}}\"\n" +
     "               target=\"_scout\"\n" +
     "               ng-bind-html=\"item.title | lowercase | ucfirst | truncate: 80: '...': true\" ng-click=\"gaPush()\"></a>\n" +
     "\n" +
