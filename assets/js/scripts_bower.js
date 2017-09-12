@@ -18012,7 +18012,6 @@ angular.module("common/engines/ejournals/ejournals.tpl.html", []).run(["$templat
     "    <div class=\"media-body\">\n" +
     "        <h4 class=\"media-heading\">\n" +
     "            <a ng-href=\"{{item.PLink}}\"\n" +
-    "               title=\"{{item.Items[0].Data}}\"\n" +
     "               target=\"_scout\"\n" +
     "               ng-bind-html=\"item.title | lowercase | ucfirst | truncate: 80: '...': true\" ng-click=\"gaPush()\"></a>\n" +
     "\n" +
@@ -19361,20 +19360,28 @@ angular.module('engines.ejournals', [])
             }
 
             //Check if item has a year.  Display the earliest available year for full text holdings
+
             if (typeof(items[i].FullTextHoldings !== 'undefined')) {
                 for (j = 0; j < items[i].FullTextHoldings.length; j++) {
-                    var currentYear = items[i].FullTextHoldings[j].CoverageDates[0].StartDate;
 
-                    currentYear = parseInt(currentYear.slice(0,4));
-                    if (year !== ''){
-                        if (currentYear < year){
-                            year = currentYear;
+                    //console.log(items[i].FullTextHoldings[j].CoverageDates);
+                    //console.log("TYPE IS " + typeof(items[i].FullTextHoldings[j].CoverageDates) + " END");
+                    //console.log("IS IT UNDEFINED");
+                    //console.log(typeof(items[i].FullTextHoldings[j].CoverageDates) == "undefined");
+                    if (typeof(items[i].FullTextHoldings[j].CoverageDates) !== "undefined") {
+
+                        var currentYear = items[i].FullTextHoldings[j].CoverageDates[0].StartDate;
+
+                        currentYear = parseInt(currentYear.slice(0, 4));
+                        if (year !== '') {
+                            if (currentYear < year) {
+                                year = currentYear;
+                            }
+                        }
+                        else {
+                            year = parseInt(currentYear);
                         }
                     }
-                    else {
-                        year = parseInt(currentYear);
-                    }
-
                 }
             }
 
