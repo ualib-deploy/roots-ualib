@@ -34,7 +34,7 @@
       <div class="content">
         <main class="main" role="main">
             <?php if (!is_front_page()): ?>
-            <div class="container">
+            <div class="container" id="mainContent">
                 <?php
                 if(isset($fields['multipage_menu']) && $fields['multipage_menu'] !== false){
                     set_query_var('multipage_menu', wp_get_nav_menu_items($fields['multipage_menu']));
