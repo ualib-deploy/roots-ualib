@@ -110,4 +110,15 @@ angular.module('ualib', [
                 //$rootScope.appClass += ' webapp';
             });
 
+        }])
+
+        .directive('skipLink', [ function() {
+            return {
+                restrict: 'AC',
+                link: function(scope, elm, attrs){
+                    elm.on('click', function(){
+                        document.getElementById('#mainContent').focus()
+                    })
+                }
+            };
         }]);

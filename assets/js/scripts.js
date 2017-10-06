@@ -119,6 +119,17 @@ angular.module("_ualib-home.tpl.html", []).run(["$templateCache", function($temp
                 //$rootScope.appClass += ' webapp';
             });
 
+        }])
+
+        .directive('skipLink', [ function() {
+            return {
+                restrict: 'AC',
+                link: function(scope, elm, attrs){
+                    elm.on('click', function(){
+                        document.getElementById('#mainContent').focus()
+                    })
+                }
+            };
         }]);
 ;angular.module('ualib.alerts', [])
     .constant('VIEW_ALERTS_URL', '//wwwdev2.lib.ua.edu/alerts/api/today')

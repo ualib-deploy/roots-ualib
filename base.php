@@ -34,7 +34,7 @@
       <div class="content">
         <main class="main" role="main">
             <?php if (!is_front_page()): ?>
-            <div class="container" id="mainContent">
+            <div class="container" id="#mainContent" tabindex="-1">
                 <?php
                 if(isset($fields['multipage_menu']) && $fields['multipage_menu'] !== false){
                     set_query_var('multipage_menu', wp_get_nav_menu_items($fields['multipage_menu']));
@@ -46,7 +46,7 @@
                 ?>
             </div>
             <?php else: ?>
-                <div ng-view></div>
+                <div id="#mainContent" tabindex="-1" ng-view></div>
             <?php endif; ?>
         </main><!-- /.main -->
           <?php if (roots_display_sidebar()) : ?>

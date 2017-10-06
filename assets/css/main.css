@@ -6379,6 +6379,20 @@ fieldset[disabled] .navbar-mega .btn-link:focus {
     max-width: 217px;
   }
 }
+.navbar-mega .navbar-header #skip a {
+  color: white;
+  position: absolute;
+  left: -1000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.navbar-mega .navbar-header #skip a:focus {
+  position: static;
+  width: auto;
+  height: auto;
+}
 .navbar-mega .navbar-toggle {
   font-size: 16px;
   padding: 30px;
@@ -6643,6 +6657,20 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
     padding-bottom: 21px;
     max-width: 217px;
   }
+}
+.navbar-mega-inverse .navbar-header #skip a {
+  color: white;
+  position: absolute;
+  left: -1000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.navbar-mega-inverse .navbar-header #skip a:focus {
+  position: static;
+  width: auto;
+  height: auto;
 }
 .navbar-mega-inverse .navbar-toggle {
   font-size: 16px;
