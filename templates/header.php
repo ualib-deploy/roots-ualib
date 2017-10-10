@@ -288,8 +288,9 @@
                                                 <span class="fa fa-exchange" aria-hidden="true"></span>
                                                 <h4>Interlibrary Loan</h4>
                                                 <ul>
-                                                    <li><a href="https://ua.illiad.oclc.org/illiad/">ILL- Borrow materials owned by other libraries</a></li>
-                                                    <li class="menu-computer-availability"><a href="/using-the-library/interlibrary-loan/">About Interlibrary Loan - policies & info</a></li>
+                                                    <li class="menu-ill"><a href="https://ua.illiad.oclc.org/illiad/">ILLiad</a></li>
+                                                    <li class="menu-ill"><a href="/using-the-library/interlibrary-loan/">About Interlibrary Loan</a></li>
+                                                    <li class="menu-ill"><a href="/using-the-library/interlibrary-loan/document-delivery/">About Document Deliver</a></li>
                                                 </ul>
                                             </div>
                                         </div>
