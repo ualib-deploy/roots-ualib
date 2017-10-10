@@ -290,7 +290,7 @@
                                                 <ul>
                                                     <li class="menu-ill"><a href="https://ua.illiad.oclc.org/illiad/">ILLiad</a></li>
                                                     <li class="menu-ill"><a href="/using-the-library/interlibrary-loan/">About Interlibrary Loan</a></li>
-                                                    <li class="menu-ill"><a href="/using-the-library/interlibrary-loan/document-delivery/">About Document Deliver</a></li>
+                                                    <li class="menu-ill"><a href="/using-the-library/interlibrary-loan/document-delivery/">About Document Delivery</a></li>
                                                 </ul>
                                             </div>
                                         </div>
