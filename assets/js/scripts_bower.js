@@ -29376,7 +29376,7 @@ angular.module("staff-card/staff-card-md.tpl.html", []).run(["$templateCache", f
 
 angular.module("staff-directory/staff-directory-facets.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staff-directory/staff-directory-facets.tpl.html",
-    "<form class=facets-form><div class=form-group><h4>Filters</h4></div><div class=form-group><div class=facet-group><input class=form-control id=directorySearch name=directorySearch ng-model=staffdir.facet.search placeholder=\"Keyword Search...\" ng-keyup=\"staffdir.changeFacet('search')\"></div></div><div class=form-group><h5>Sort by</h5><div class=facet-group><div class=\"btn-group btn-group-justified\"><label class=\"btn btn-default\" ng-model=staffdir.facet.sortBy btn-radio=\"'lastname'\" ng-change=\"staffdir.changeFacet('sortBy')\">Last name</label><label class=\"btn btn-default\" ng-model=staffdir.facet.sortBy btn-radio=\"'firstname'\" ng-change=\"staffdir.changeFacet('sortBy')\">First name</label></div></div></div><div class=\"form-group hidden-xs hidden-sm\"><h5>Liaison area</h5><div class=facet-group><select class=form-control ng-model=staffdir.facet.subject name=subject ng-options=\"subject for subject in facets.subjects\" ng-change=\"staffdir.changeFacet('subject')\"><option value=\"\">-- Select Subject --</option></select><label class=checkbox-inline><input type=checkbox id=liaison ng-true-value=1 ng-model=staffdir.facet.liaison ng-change=\"staffdir.changeFacet('liaison')\">Limit to liaisons</label></div></div><div class=\"form-group hidden-xs hidden-sm\"><h5>Department</h5><div class=facet-group><select class=form-control ng-model=staffdir.facet.department name=department ng-options=\"department for department in facets.departments\" ng-change=\"staffdir.changeFacet('department')\"><option value=\"\">-- Select Department --</option></select></div></div><div class=\"form-group hidden-xs hidden-sm\"><h5>Library Location</h5><div class=facet-group><div class=radio><label><input type=radio ng-model=staffdir.facet.library ng-checked=!staffdir.facet.library ng-change=\"staffdir.changeFacet('library')\"> All</label></div><div class=radio ng-repeat=\"library in facets.libraries\"><label><input type=radio ng-model=staffdir.facet.library value={{library}} ng-change=\"staffdir.changeFacet('library')\"> {{library}}</label></div></div></div><div class=\"form-group hidden-xs hidden-sm\"><button class=\"btn btn-primary btn-block\" type=button ng-click=staffdir.clearFacets()><span class=\"fa fa-fw fa-refresh\"></span> Reset Filters</button></div></form>");
+    "<form class=facets-form><div class=form-group><h4>Filters</h4></div><div class=form-group><div class=facet-group><input class=form-control id=directorySearch name=directorySearch ng-model=staffdir.facet.search placeholder=\"Keyword Search...\" ng-keyup=\"staffdir.changeFacet('search')\"></div></div><div class=form-group><h5>Sort by</h5><div class=facet-group><div class=\"btn-group btn-group-justified\"><label class=\"btn btn-default\" ng-model=staffdir.facet.sortBy btn-radio=\"'lastname'\" ng-change=\"staffdir.changeFacet('sortBy')\">Last name</label><label class=\"btn btn-default\" ng-model=staffdir.facet.sortBy btn-radio=\"'firstname'\" ng-change=\"staffdir.changeFacet('sortBy')\">First name</label></div></div></div><div class=\"form-group hidden-xs hidden-sm\"><h5>Liaison area</h5><div class=facet-group><select class=form-control ng-model=staffdir.facet.subject name=subject ng-options=\"subject for subject in facets.subjects\" ng-change=\"staffdir.changeFacet('subject')\"><option value=\"\">-- Select Subject --</option></select><label class=checkbox-inline><input type=checkbox ng-true-value=1 ng-model=staffdir.facet.liaison ng-change=\"staffdir.changeFacet('liaison')\">Limit to liaisons</label></div></div><div class=\"form-group hidden-xs hidden-sm\"><h5>Department</h5><div class=facet-group><select class=form-control ng-model=staffdir.facet.department name=department ng-options=\"department for department in facets.departments\" ng-change=\"staffdir.changeFacet('department')\"><option value=\"\">-- Select Department --</option></select></div></div><div class=\"form-group hidden-xs hidden-sm\"><h5>Library Location</h5><div class=facet-group><div class=radio><label><input type=radio ng-model=staffdir.facet.library ng-checked=!staffdir.facet.library ng-change=\"staffdir.changeFacet('library')\"> All</label></div><div class=radio ng-repeat=\"library in facets.libraries\"><label><input type=radio ng-model=staffdir.facet.library value={{library}} ng-change=\"staffdir.changeFacet('library')\"> {{library}}</label></div></div></div><div class=\"form-group hidden-xs hidden-sm\"><button class=\"btn btn-primary btn-block\" type=button ng-click=staffdir.clearFacets()><span class=\"fa fa-fw fa-refresh\"></span> Reset Filters</button></div></form>");
 }]);
 
 angular.module("staff-directory/staff-directory-listing.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -29778,7 +29778,7 @@ angular.module('staffdir', ['ualib.staffdir']);
         return {
             restrict: 'AC',
             templateUrl: 'staff-card/staff-card-list.tpl.html',
-            controller: ['$scope', function($scope){
+            controller: function($scope){
                 $scope.staffdir = {};
 
                 StaffFactory.directory().get()
@@ -29789,7 +29789,7 @@ angular.module('staffdir', ['ualib.staffdir']);
                     }, function(){
                         console.log('Staffdir Error -- Come on, put in proper error handling already');
                     });
-            }]
+            }
         };
     }])
 
@@ -30001,7 +30001,7 @@ angular.module('staffdir', ['ualib.staffdir']);
                 login: '@email'
             },
             templateUrl: 'staff-profile/staff-profile.tpl.html',
-            controller: ['$scope', function($scope){
+            controller: function($scope){
                 $scope.userProfile = {};
 
                 //console.log("Login: " + $scope.login);
@@ -30047,7 +30047,7 @@ angular.module('staffdir', ['ualib.staffdir']);
                     }, function(data){
                         console.log('Error: cold not get profile! ' + data);
                     });
-            }]
+            }
         };
     }]);
 
