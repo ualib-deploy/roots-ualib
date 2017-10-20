@@ -127,7 +127,7 @@ angular.module("_ualib-home.tpl.html", []).run(["$templateCache", function($temp
                 link: function(scope, elm, attrs){
                     elm.on('click', function(){
                         document.getElementById('#mainContent').focus();
-                    })
+                    });
                 }
             };
         }]);
