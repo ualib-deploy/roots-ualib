@@ -117,8 +117,8 @@ angular.module('ualib', [
                 restrict: 'AC',
                 link: function(scope, elm, attrs){
                     elm.on('click', function(){
-                        document.getElementById('#mainContent').focus()
-                    })
+                        document.getElementById('#mainContent').focus();
+                    });
                 }
             };
         }]);
