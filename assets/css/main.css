@@ -2242,10 +2242,19 @@ img.media-object {
   padding-right: 5px;
 }
 a:focus,
-input:focus {
+input:focus,
+button:focus,
+textarea:focus,
+td:focus {
   -webkit-box-shadow: 0 0 5px #51cbee;
           box-shadow: 0 0 5px #51cbee;
   border: 2px solid #51cbee;
+}
+a.btn:focus,
+a.comment-form input[type="submit"]:focus {
+  -webkit-box-shadow: 0 0 5px #ffffff;
+          box-shadow: 0 0 5px #ffffff;
+  border: 2px solid #ffffff;
 }
 h1,
 h2,

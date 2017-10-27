@@ -18015,13 +18015,13 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
 angular.module("common/engines/acumen/acumen.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("common/engines/acumen/acumen.tpl.html",
     "<div class=\"media\">\n" +
-    "    <a class=\"pull-left\" ng-href=\"http://acumen.lib.ua.edu/{{item.link}}\" title=\"{{item.title}}\" target=\"_acumen\">\n" +
+    "    <a class=\"pull-left\" ng-href=\"http://acumen.lib.ua.edu/{{item.link}}\"  target=\"_acumen\">\n" +
     "        <img ng-src=\"{{item.thumb_path}}\" alt=\"{{item.title}}\">\n" +
     "    </a>\n" +
     "    <div class=\"media-body\">\n" +
-    "        <h4 class=\"media-heading\">\n" +
-    "            <a ng-href=\"http://acumen.lib.ua.edu/{{item.link}}\" target=\"_acumen\" title=\"{{item.title}}\" ng-click=\"gaPush()\">{{item.title | truncate: 40: '...': true}}</a>\n" +
-    "        </h4>\n" +
+    "        <h3 class=\"h4 media-heading\">\n" +
+    "            <a ng-href=\"http://acumen.lib.ua.edu/{{item.link}}\" target=\"_acumen\"  ng-click=\"gaPush()\">{{item.title | truncate: 40: '...': true}}</a>\n" +
+    "        </h3>\n" +
     "        <div class=\"details-context\">\n" +
     "            <span ng-if=\"item.date\" ng-bind-html=\"item.date\"></span>\n" +
     "            <span ng-if=\"item.type\" ng-bind-html=\"item.type | ucfirst\"></span>\n" +
@@ -18040,11 +18040,10 @@ angular.module("common/engines/catalog/catalog.tpl.html", []).run(["$templateCac
   $templateCache.put("common/engines/catalog/catalog.tpl.html",
     "<div class=\"media\">\n" +
     "    <div class=\"media-body\">\n" +
-    "        <h4 class=\"media-heading\">\n" +
+    "        <h3 class=\"h4 media-heading\">\n" +
     "            <a ng-href=\"{{item.href}}\"\n" +
-    "               title=\"{{item.title}}\"\n" +
     "               ng-bind-html=\"item.title | truncate: 50: '...': true\" target=\"_catalog\" ng-click=\"gaPush()\"></a>\n" +
-    "        </h4>\n" +
+    "        </h3>\n" +
     "        <div class=\"details-context\">\n" +
     "            <span ng-if=\"item.year && item.year | number\" ng-bind-html=\"item.year\"></span>\n" +
     "            <span ng-if=\"item.mediaType\" ng-bind-html=\"item.mediaType\"></span>\n" +
@@ -18072,9 +18071,9 @@ angular.module("common/engines/databases/databases.tpl.html", []).run(["$templat
   $templateCache.put("common/engines/databases/databases.tpl.html",
     "<div class=\"media\">\n" +
     "    <div class=\"media-body\">\n" +
-    "        <h4 class=\"media-heading\">\n" +
+    "        <h3 class=\"h4 media-heading\">\n" +
     "            <a ng-href=\"{{item.url}}\" title=\"{{item.title}}\" target=\"_databases\" ng-click=\"gaPush()\">{{item.title | truncate: 40: '...': true}}</a>\n" +
-    "        </h4>\n" +
+    "        </h3>\n" +
     "        <div class=\"details-context\">\n" +
     "            <span ng-if=\"item.coverage\" ng-bind-html=\"item.coverage\"></span>\n" +
     "        </div>\n" +
@@ -18090,12 +18089,12 @@ angular.module("common/engines/ejournals/ejournals.tpl.html", []).run(["$templat
   $templateCache.put("common/engines/ejournals/ejournals.tpl.html",
     "<div class=\"media\">\n" +
     "    <div class=\"media-body\">\n" +
-    "        <h4 class=\"media-heading\">\n" +
+    "        <h3 class=\"h4 media-heading\">\n" +
     "            <a ng-href=\"{{item.PLink}}\"\n" +
     "               target=\"_scout\"\n" +
     "               ng-bind-html=\"item.title | lowercase | ucfirst | truncate: 80: '...': true\" ng-click=\"gaPush()\"></a>\n" +
     "\n" +
-    "        </h4>\n" +
+    "        </h3>\n" +
     "        <div class=\"details-context\">\n" +
     "            <span ng-if=\"item.year\">{{item.year}}</span>\n" +
     "            <span ng-if=\"item.ISSN\">ISSN: {{item.ISSN}}</span>\n" +
@@ -18118,7 +18117,7 @@ angular.module("common/engines/google-cs/google-cs.tpl.html", []).run(["$templat
   $templateCache.put("common/engines/google-cs/google-cs.tpl.html",
     "<div class=\"media\">\n" +
     "    <div class=\"media-body\">\n" +
-    "        <h4 class=\"media-heading\"><a ng-href=\"{{item.link}}\" title=\"{{item.title}}\" target=\"_googlecs\" ng-click=\"gaPush()\">{{item.title | truncate: 40: '...': true}}</a></h4>\n" +
+    "        <h3 class=\"h4 media-heading\"><a ng-href=\"{{item.link}}\" title=\"{{item.title}}\" target=\"_googlecs\" ng-click=\"gaPush()\">{{item.title | truncate: 40: '...': true}}</a></h3>\n" +
     "        <p ng-bind-html=\"item.snippet | truncate: 100: '...': true\"></p>\n" +
     "        <ul class=\"list-inline\">\n" +
     "            <li>\n" +
@@ -18139,12 +18138,12 @@ angular.module("common/engines/scout/scout.tpl.html", []).run(["$templateCache",
   $templateCache.put("common/engines/scout/scout.tpl.html",
     "<div class=\"media\">\n" +
     "    <div class=\"media-body\">\n" +
-    "        <h4 class=\"media-heading\">\n" +
+    "        <h3 class=\"h4 media-heading\">\n" +
     "            <a ng-href=\"{{item.PLink}}\"\n" +
     "               title=\"{{item.Items[0].Data}}\"\n" +
     "               target=\"_scout\"\n" +
     "               ng-bind-html=\"item.title | lowercase | ucfirst | truncate: 80: '...': true\" ng-click=\"gaPush()\"></a>\n" +
-    "        </h4>\n" +
+    "        </h3>\n" +
     "        <div class=\"details-context\">\n" +
     "            <span ng-if=\"item.RecordInfo.BibRecord.BibRelationships.IsPartOfRelationships[0].BibEntity.Dates[0]\">{{item.RecordInfo.BibRecord.BibRelationships.IsPartOfRelationships[0].BibEntity.Dates[0].Y}} </span>\n" +
     "            <span ng-if=\"item.mediaType\">{{item.mediaType}} </span>\n" +
@@ -28322,21 +28321,21 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "                                                                  | filter:newsFilters.search\n" +
     "                                                                  | orderBy:['-sticky','-created']\">\n" +
     "                <div class=\"media-left hidden-sm hidden-xs\">\n" +
-    "                    <a ng-href=\"#/news-exhibits/{{item.link}}\" class=\"news-list-tb\" ng-class=\"{img: item.tb}\">\n" +
+    "                    <span class=\"news-list-tb\" ng-class=\"{img: item.tb}\">\n" +
     "                        <img class=\"media-object\" ng-src=\"{{item.tb}}\" ng-if=\"item.tb\" />\n" +
     "                        <span class=\"media-object\"\n" +
     "                          ng-if=\"item.type == 0 && !item.tb\"><span class=\"fa fa-newspaper-o\"></span></span>\n" +
     "                        <span class=\"media-object\"\n" +
     "                          ng-if=\"item.type == 1 && !item.tb\"><span class=\"fa fa-calendar\"></span></span>\n" +
-    "                    </a>\n" +
+    "                    </span>\n" +
     "                </div>\n" +
     "                <div class=\"media-body\">\n" +
-    "                    <h3 class=\"media-heading\">\n" +
+    "                    <h2 class=\"h3 media-heading\">\n" +
     "                        <a ng-href=\"#/news-exhibits/{{item.link}}\" ng-bind-html=\"item.title | highlight:newsFilters.search\"></a>\n" +
-    "                    </h3>\n" +
+    "                    </h2>\n" +
     "\n" +
-    "                    <h5 class=\"text-muted\" ng-if=\"item.type > 0\">Exhibit {{item.activeFrom | date:mediumDate}} - {{item.activeUntil | date:mediumDate}}</h5>\n" +
-    "                    <h5 class=\"text-muted\" ng-if=\"item.type < 1\">Created on {{item.created | date:mediumDate}}</h5>\n" +
+    "                    <h3 class=\"h5 text-muted\" ng-if=\"item.type > 0\">Exhibit {{item.activeFrom | date:mediumDate}} - {{item.activeUntil | date:mediumDate}}</h5>\n" +
+    "                    <h3 class=\"h5 text-muted\" ng-if=\"item.type < 1\">Created on {{item.created | date:mediumDate}}</h5>\n" +
     "                    <p class=\"text-justify\">\n" +
     "                    <span ng-bind-html=\"item.blurb | highlight:newsFilters.search\">\n" +
     "                    </span>\n" +
@@ -28349,13 +28348,13 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "            </div>\n" +
     "\n" +
     "            <div class=\"alert alert-warning text-center\" role=\"alert\" ng-show=\"news.length < 1\">\n" +
-    "                <h2>\n" +
+    "                <span class=\"h2\">\n" +
     "                    No\n" +
     "                    <span ng-show=\"newsFilters.type == ''\">News or Exhibits</span>\n" +
     "                    <span ng-show=\"newsFilters.type == '0'\">News</span>\n" +
     "                    <span ng-show=\"newsFilters.type == '1'\">Exhibits</span>\n" +
     "                    match the search \"<strong>{{newsFilters.search}}</strong>\"</span>\n" +
-    "                </h2>\n" +
+    "                </span>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "\n" +
@@ -29072,24 +29071,26 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
     "<div class=\"container\">\n" +
     "    <div class=\"row\">\n" +
     "        <div class=\"col-md-3 col-md-push-9\">\n" +
-    "            <form>\n" +
+    "            <form class=\"software-list-facets\">\n" +
     "                <div class=\"form-group\">\n" +
     "                <span class=\"page-header\">\n" +
-    "                    <h4>Filter Software List By</h4>\n" +
+    "                    <h2 class=\"h4\">Filter Software List By</h2>\n" +
     "                </span>\n" +
     "                </div>\n" +
     "                <div class=\"form-group\">\n" +
-    "                    <input type=\"text\" class=\"form-control\" ng-model=\"soft.search\" placeholder=\"Search software, locations, etc...\">\n" +
+    "\n" +
+    "                    <input type=\"text\" class=\"form-control\" ng-model=\"soft.search\" placeholder=\"Search software, locations, etc...\" aria-label=\"Search our software list\">\n" +
+    "\n" +
     "                </div>\n" +
     "                <div class=\"form-group\">\n" +
     "                    <div class=\"btn-group btn-group-justified\">\n" +
-    "                        <label class=\"btn btn-default active\" ng-model=\"soft.os\" btn-radio=\"''\" uncheckable>All</label>\n" +
-    "                        <label class=\"btn btn-default\" ng-model=\"soft.os\" btn-radio=\"'1'\" uncheckable><span class=\"fa fa-fw fa-windows\"></span></label>\n" +
-    "                        <label class=\"btn btn-default\" ng-model=\"soft.os\" btn-radio=\"'2'\" uncheckable><span class=\"fa fa-fw fa-apple\"></span></label>\n" +
+    "                        <button class=\"btn btn-default active\" ng-model=\"soft.os\" btn-radio=\"''\" uncheckable>All</button>\n" +
+    "                        <button class=\"btn btn-default\" ng-model=\"soft.os\" btn-radio=\"'1'\" uncheckable><span class=\"fa fa-fw fa-windows\"></span><span class=\"sr-only\">Windows</span></button>\n" +
+    "                        <button class=\"btn btn-default\" ng-model=\"soft.os\" btn-radio=\"'2'\" uncheckable><span class=\"fa fa-fw fa-apple\"></span><span class=\"sr-only\">Mac</span></button>\n" +
     "                    </div>\n" +
     "                </div>\n" +
     "                <div class=\"form-group hidden-xs\">\n" +
-    "                    <h5>Locations</h5>\n" +
+    "                    <h3 class=\"h5\">Locations</h3>\n" +
     "                    <div class=\"radio\">\n" +
     "                        <label>\n" +
     "                            <input type=\"radio\" value=\"\" ng-model=\"soft.loc\" checked>\n" +
@@ -29104,7 +29105,7 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
     "                    </div>\n" +
     "                </div>\n" +
     "                <div class=\"form-group hidden-xs\">\n" +
-    "                    <h5>Categories</h5>\n" +
+    "                    <h3 class=\"h5\">Categories</h3>\n" +
     "                    <div class=\"radio\">\n" +
     "                        <label>\n" +
     "                            <input type=\"radio\" value=\"\" ng-model=\"soft.cat\">\n" +
@@ -29124,9 +29125,9 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
     "            </form>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-9 col-md-pull-3 software-list-container\">\n" +
-    "            <h4 class=\"text-right\" ng-show=\"pager.totalItems > 0\">\n" +
+    "            <span class=\"h4 text-right\" ng-show=\"pager.totalItems > 0\">\n" +
     "                Showing {{pager.firstItem}}-{{pager.lastItem}} of {{pager.totalItems}} results\n" +
-    "            </h4>\n" +
+    "            </span>\n" +
     "\n" +
     "            <div ng-if=\"(soft.cat || soft.os || soft.loc)\">\n" +
     "\n" +
@@ -29141,7 +29142,7 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
     "\n" +
     "            <div class=\"media software-item animate-repeat\" ng-repeat=\"item in filteredSoft | after:(pager.page-1)*pager.perPage | limitTo:20\">\n" +
     "                <div class=\"media-left\">\n" +
-    "                    <img class=\"media-object\" ng-src=\"{{item.icon}}\" alt=\"{{item.title}}\" title=\"{{item.title}}\">\n" +
+    "                    <img class=\"media-object\" ng-src=\"{{item.icon}}\" alt=\"{{item.title}}\">\n" +
     "                </div>\n" +
     "                <div class=\"media-body\">\n" +
     "                    <h3 class=\"media-heading\" ng-bind-html=\"item.title | highlight:soft.search\">\n" +
@@ -29222,7 +29223,7 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
             .when('/software', {
                 reloadOnSearch: false,
                 resolve: {
-                    software: ['$filter', 'softwareFactory', function($filter, softwareFactory){
+                    software: function($filter, softwareFactory){
                         return softwareFactory.get({software: 'all'}, function(data){
 
                             for (var i = 0, len = data.software.length; i < len; i++){
@@ -29257,7 +29258,7 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
                                 config: config
                             });
                         });
-                    }]
+                    }
                 },
                 templateUrl: 'software-list/software-list.tpl.html',
                 controller: 'SoftwareListCtrl'
