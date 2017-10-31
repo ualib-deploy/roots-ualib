@@ -186,7 +186,7 @@
   line-height: 1.1;
 }
 .bento-box-item p {
-  text-align: justify;
+  text-align: left;
   margin-bottom: 0;
 }
 .bento-box-item .list-inline {
@@ -515,7 +515,7 @@
   }
 }
 /*# sourceMappingURL=dist/oneSearch-ui.css.map */
-.calendar table > thead > tr > td {
+.calendar table > thead > tr > th {
   color: #31708f;
   text-align: center;
   background-color: #d9edf7;
@@ -991,6 +991,9 @@ div.rn-carousel-indicator span.active {
 .software-list-container .details ul {
   list-style-type: none;
 }
+.software-list-facets .btn-group-justified .btn {
+  width: 33%;
+}
 /*# sourceMappingURL=dist/ualib.softwareList.css.map */
 .thumbnail > img,
 .thumbnail a > img,
@@ -1192,6 +1195,9 @@ div.rn-carousel-indicator span.active {
 .staff-directory-listing .subject-specialty {
   margin-top: 15px;
   font-size: .9em;
+}
+.staff-directory-facets .btn-group-justified > .btn {
+  width: 50%;
 }
 .staff-card {
   max-width: 450px;

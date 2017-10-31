@@ -17802,6 +17802,11 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
   $templateCache.put("bento/bento.tpl.html",
     "<div class=\"container bento-box-container\">\n" +
     "    <div class=\"row\">\n" +
+    "        <div class=\"col-md-12\">\n" +
+    "            <h1 class=\"h2\">OneSearch Results</h1>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "    <div class=\"row\">\n" +
     "        <div class=\"col-md-4\">\n" +
     "            <div class=\"bento-box\" bento-box=\"articles\">\n" +
     "                <h2>\n" +
@@ -17944,10 +17949,11 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
 angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("common/directives/suggest/suggest.tpl.html",
     "<div class=\"input-group input-group-lg\">\n" +
+    "    <label class=\"sr-only\" for=\"osTextField\">Search terms</label>\n" +
     "    <input type=\"text\" name=\"search\" class=\"form-control onesearch-text\" placeholder=\"{{prompt}}\" id=\"osTextField\"\n" +
     "           ng-model=\"model\" ng-change=\"onChange()\" ng-trim=\"false\" autocomplete=\"off\" />\n" +
     "    <div class=\"input-group-btn\">\n" +
-    "        <button type=\"submit\" class=\"btn btn-onesearch btn-primary\"><span class=\"fa fa-search\"></span></button>\n" +
+    "        <button type=\"submit\" class=\"btn btn-onesearch btn-primary\"><span class=\"fa fa-search\" aria-hidden=\"true\"></span><span class=\"sr-only\">Search OneSearch</span></button>\n" +
     "\n" +
     "    </div>\n" +
     "\n" +
@@ -18009,13 +18015,13 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
 angular.module("common/engines/acumen/acumen.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("common/engines/acumen/acumen.tpl.html",
     "<div class=\"media\">\n" +
-    "    <a class=\"pull-left\" ng-href=\"http://acumen.lib.ua.edu/{{item.link}}\" title=\"{{item.title}}\" target=\"_acumen\">\n" +
+    "    <a class=\"pull-left\" ng-href=\"http://acumen.lib.ua.edu/{{item.link}}\"  target=\"_acumen\">\n" +
     "        <img ng-src=\"{{item.thumb_path}}\" alt=\"{{item.title}}\">\n" +
     "    </a>\n" +
     "    <div class=\"media-body\">\n" +
-    "        <h4 class=\"media-heading\">\n" +
-    "            <a ng-href=\"http://acumen.lib.ua.edu/{{item.link}}\" target=\"_acumen\" title=\"{{item.title}}\" ng-click=\"gaPush()\">{{item.title | truncate: 40: '...': true}}</a>\n" +
-    "        </h4>\n" +
+    "        <h3 class=\"h4 media-heading\">\n" +
+    "            <a ng-href=\"http://acumen.lib.ua.edu/{{item.link}}\" target=\"_acumen\"  ng-click=\"gaPush()\">{{item.title | truncate: 40: '...': true}}</a>\n" +
+    "        </h3>\n" +
     "        <div class=\"details-context\">\n" +
     "            <span ng-if=\"item.date\" ng-bind-html=\"item.date\"></span>\n" +
     "            <span ng-if=\"item.type\" ng-bind-html=\"item.type | ucfirst\"></span>\n" +
@@ -18034,11 +18040,10 @@ angular.module("common/engines/catalog/catalog.tpl.html", []).run(["$templateCac
   $templateCache.put("common/engines/catalog/catalog.tpl.html",
     "<div class=\"media\">\n" +
     "    <div class=\"media-body\">\n" +
-    "        <h4 class=\"media-heading\">\n" +
+    "        <h3 class=\"h4 media-heading\">\n" +
     "            <a ng-href=\"{{item.href}}\"\n" +
-    "               title=\"{{item.title}}\"\n" +
     "               ng-bind-html=\"item.title | truncate: 50: '...': true\" target=\"_catalog\" ng-click=\"gaPush()\"></a>\n" +
-    "        </h4>\n" +
+    "        </h3>\n" +
     "        <div class=\"details-context\">\n" +
     "            <span ng-if=\"item.year && item.year | number\" ng-bind-html=\"item.year\"></span>\n" +
     "            <span ng-if=\"item.mediaType\" ng-bind-html=\"item.mediaType\"></span>\n" +
@@ -18066,9 +18071,9 @@ angular.module("common/engines/databases/databases.tpl.html", []).run(["$templat
   $templateCache.put("common/engines/databases/databases.tpl.html",
     "<div class=\"media\">\n" +
     "    <div class=\"media-body\">\n" +
-    "        <h4 class=\"media-heading\">\n" +
+    "        <h3 class=\"h4 media-heading\">\n" +
     "            <a ng-href=\"{{item.url}}\" title=\"{{item.title}}\" target=\"_databases\" ng-click=\"gaPush()\">{{item.title | truncate: 40: '...': true}}</a>\n" +
-    "        </h4>\n" +
+    "        </h3>\n" +
     "        <div class=\"details-context\">\n" +
     "            <span ng-if=\"item.coverage\" ng-bind-html=\"item.coverage\"></span>\n" +
     "        </div>\n" +
@@ -18084,12 +18089,12 @@ angular.module("common/engines/ejournals/ejournals.tpl.html", []).run(["$templat
   $templateCache.put("common/engines/ejournals/ejournals.tpl.html",
     "<div class=\"media\">\n" +
     "    <div class=\"media-body\">\n" +
-    "        <h4 class=\"media-heading\">\n" +
+    "        <h3 class=\"h4 media-heading\">\n" +
     "            <a ng-href=\"{{item.PLink}}\"\n" +
     "               target=\"_scout\"\n" +
     "               ng-bind-html=\"item.title | lowercase | ucfirst | truncate: 80: '...': true\" ng-click=\"gaPush()\"></a>\n" +
     "\n" +
-    "        </h4>\n" +
+    "        </h3>\n" +
     "        <div class=\"details-context\">\n" +
     "            <span ng-if=\"item.year\">{{item.year}}</span>\n" +
     "            <span ng-if=\"item.ISSN\">ISSN: {{item.ISSN}}</span>\n" +
@@ -18112,7 +18117,7 @@ angular.module("common/engines/google-cs/google-cs.tpl.html", []).run(["$templat
   $templateCache.put("common/engines/google-cs/google-cs.tpl.html",
     "<div class=\"media\">\n" +
     "    <div class=\"media-body\">\n" +
-    "        <h4 class=\"media-heading\"><a ng-href=\"{{item.link}}\" title=\"{{item.title}}\" target=\"_googlecs\" ng-click=\"gaPush()\">{{item.title | truncate: 40: '...': true}}</a></h4>\n" +
+    "        <h3 class=\"h4 media-heading\"><a ng-href=\"{{item.link}}\" title=\"{{item.title}}\" target=\"_googlecs\" ng-click=\"gaPush()\">{{item.title | truncate: 40: '...': true}}</a></h3>\n" +
     "        <p ng-bind-html=\"item.snippet | truncate: 100: '...': true\"></p>\n" +
     "        <ul class=\"list-inline\">\n" +
     "            <li>\n" +
@@ -18133,12 +18138,12 @@ angular.module("common/engines/scout/scout.tpl.html", []).run(["$templateCache",
   $templateCache.put("common/engines/scout/scout.tpl.html",
     "<div class=\"media\">\n" +
     "    <div class=\"media-body\">\n" +
-    "        <h4 class=\"media-heading\">\n" +
+    "        <h3 class=\"h4 media-heading\">\n" +
     "            <a ng-href=\"{{item.PLink}}\"\n" +
     "               title=\"{{item.Items[0].Data}}\"\n" +
     "               target=\"_scout\"\n" +
     "               ng-bind-html=\"item.title | lowercase | ucfirst | truncate: 80: '...': true\" ng-click=\"gaPush()\"></a>\n" +
-    "        </h4>\n" +
+    "        </h3>\n" +
     "        <div class=\"details-context\">\n" +
     "            <span ng-if=\"item.RecordInfo.BibRecord.BibRelationships.IsPartOfRelationships[0].BibEntity.Dates[0]\">{{item.RecordInfo.BibRecord.BibRelationships.IsPartOfRelationships[0].BibEntity.Dates[0].Y}} </span>\n" +
     "            <span ng-if=\"item.mediaType\">{{item.mediaType}} </span>\n" +
@@ -18910,7 +18915,7 @@ angular.module('oneSearch.common')
                 model: '=',
                 search: '='
             },
-            controller: ['$scope', '$window', '$timeout', '$document', 'dataFactory', 'Bento', function($scope, $window, $timeout, $document,  dataFactory, Bento){
+            controller: function($scope, $window, $timeout, $document,  dataFactory, Bento){
                 $scope.items = {};
                 $scope.filteredItems = [];
                 $scope.model = "";
@@ -19035,7 +19040,7 @@ angular.module('oneSearch.common')
 
 
 
-            }],
+            },
             link: function(scope, elem, attrs) {
                 scope.showSuggestions = false;
                 var suggestWatcher = scope.$watch('items', function(newVal, oldVal){
@@ -19188,7 +19193,7 @@ angular.module('engines.acumen', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('AcumenCtrl', ['$scope', '$filter', function($scope, $filter){
+    .controller('AcumenCtrl', function($scope, $filter){
         var items = $scope.items;
 
         for (var i = 0, len = items.length; i < len; i++) {
@@ -19198,7 +19203,7 @@ angular.module('engines.acumen', [])
                 else items[i].type = items[i].type.sort().shift();
             }
         }
-    }]);
+    });
 angular.module('engines.catalog', [])
 
     /**
@@ -19259,7 +19264,7 @@ angular.module('engines.catalog', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('CatalogCtrl', ['$scope', '$filter', function($scope, $filter){
+    .controller('CatalogCtrl', function($scope, $filter){
         var types = {
             bc: "Archive/Manuscript",
             cm: "Music Score",
@@ -19301,7 +19306,7 @@ angular.module('engines.catalog', [])
         }
 
         $scope.items = items;
-    }]);
+    });
 
 angular.module('engines.databases', [])
 
@@ -19385,7 +19390,7 @@ angular.module('engines.ejournals', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('EjouralsCtrl', ['$scope', function($scope) {
+    .controller('EjouralsCtrl', function($scope) {
 
         var title; // Title variable to bind to $scope. ".BibRelationships.IsPartOfRelationships" title is used if no item title is present.
         var ISSN;
@@ -19469,7 +19474,7 @@ angular.module('engines.ejournals', [])
         }
 
         $scope.items = items;
-    }]);
+    });
 /**
  * @ngdoc overview
  * @name engines
@@ -19818,7 +19823,7 @@ angular.module('engines.scout', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('ScoutCtrl', ['$scope', function($scope){
+    .controller('ScoutCtrl', function($scope){
         var title; // Title variable to bind to $scope. ".BibRelationships.IsPartOfRelationships" title is used if no item title is present.
         var items = $scope.items;
         for (var i = 0; i < items.length; i++){
@@ -19892,7 +19897,7 @@ angular.module('engines.scout', [])
         }
 
         $scope.resourceLink = angular.copy(link);
-    }]);
+    });
 /**
  * @ngdoc object
  * @name engines.type:ENGIEN_NAME
@@ -19921,7 +19926,7 @@ angular.module('engines.staffdirectory', [])
             controller: 'StaffDirectoryCtrl'
         })
     }])
-    .controller('StaffDirectoryCtrl', ['$scope', function($scope){
+    .controller('StaffDirectoryCtrl', function($scope){
 
         var items = $scope.items;
 
@@ -19936,7 +19941,7 @@ angular.module('engines.staffdirectory', [])
                 }
             }
         }
-    }]);
+    });
 angular.module('filters.nameFilter', [])
 
     .filter('nameFilter', ['$filter', function($filter){
@@ -24565,8 +24570,8 @@ angular.module("calendar/calendar.tpl.html", []).run(["$templateCache", function
     "<div class=\"calendar\">\n" +
     "    <div class=\"form-group\">\n" +
     "        <div class=\"btn-group\">\n" +
-    "            <label class=\"btn btn-default\" ng-model=\"calView\" btn-radio=\"\">Typical Schedule</label>\n" +
-    "            <label class=\"btn btn-default\" ng-model=\"calView\" btn-radio=\"1\">Calendar &amp; Exceptions</label>\n" +
+    "            <button class=\"btn btn-default\" ng-model=\"calView\" btn-radio=\"\">Typical Schedule</button>\n" +
+    "            <button class=\"btn btn-default\" ng-model=\"calView\" btn-radio=\"1\">Calendar &amp; Exceptions</button>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "    <div ng-show=\"!calView\">\n" +
@@ -24575,21 +24580,22 @@ angular.module("calendar/calendar.tpl.html", []).run(["$templateCache", function
     "        </div>\n" +
     "        <table class=\"table table-bordered table-condensed\">\n" +
     "            <thead>\n" +
-    "            <tr>\n" +
-    "                <td>Sun</td>\n" +
-    "                <td>Mon</td>\n" +
-    "                <td>Tue</td>\n" +
-    "                <td>Wed</td>\n" +
-    "                <td>Thur</td>\n" +
-    "                <td>Fri</td>\n" +
-    "                <td>Sat</td>\n" +
-    "            </tr>\n" +
+    "                <tr>\n" +
+    "                    <th scope=\"col\" aria-label=\"Sunday\">Sun</th>\n" +
+    "                    <th scope=\"col\" aria-label=\"Monday\">Mon</th>\n" +
+    "                    <th scope=\"col\" aria-label=\"Tuesday\">Tues</th>\n" +
+    "                    <th scope=\"col\" aria-label=\"Wednesday\">Wed</th>\n" +
+    "                    <th scope=\"col\" aria-label=\"Thursday\">Thurs</th>\n" +
+    "                    <th scope=\"col\" aria-label=\"Friday\">Fri</th>\n" +
+    "                    <th scope=\"col\" aria-label=\"Saturday\">Sat</th>\n" +
+    "                </tr>\n" +
     "            </thead>\n" +
     "            <tbody>\n" +
     "            <tr>\n" +
-    "                <td ng-repeat=\"day in defHours[0].hours\">\n" +
+    "\n" +
+    "                <td ng-repeat=\"day in defHours[0].hours\" tabindex=\"0\">\n" +
     "                    <div class=\"hours\">\n" +
-    "                        {{day.hoursFrom}}\n" +
+    "                        {{day.hoursFrom}} to\n" +
     "                    <span ng-show=\"day.hoursFrom != day.hoursTo\">\n" +
     "                        <br>{{day.hoursTo}}\n" +
     "                    </span>\n" +
@@ -28309,27 +28315,36 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "\n" +
     "<div class=\"container\">\n" +
     "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-9\">\n" +
+    "        <div class=\"col-md-3 col-md-push-9 hidden-xs\">\n" +
+    "            <h2 class=\"h4\">Filters</h2>\n" +
+    "            <form class=\"facets-form\">\n" +
+    "                <div class=\"form-group\">\n" +
+    "                    <h3 class=\"h5\" id=\"filterNews\">Search news and exhibits</h3>\n" +
+    "                    <input type=\"text\" aria-labelledby=\"filterNews\" class=\"form-control\" ng-model=\"newsFilters.search\" placeholder=\"Keyword search\">\n" +
+    "                </div>\n" +
+    "            </form>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-9 col-md-pull-3\">\n" +
     "\n" +
     "            <div class=\"media animate-repeat\" ng-repeat=\"item in news | filter:{type: newsFilters.type}\n" +
     "                                                                  | filter:newsFilters.search\n" +
     "                                                                  | orderBy:['-sticky','-created']\">\n" +
     "                <div class=\"media-left hidden-sm hidden-xs\">\n" +
-    "                    <a ng-href=\"#/news-exhibits/{{item.link}}\" class=\"news-list-tb\" ng-class=\"{img: item.tb}\">\n" +
+    "                    <span class=\"news-list-tb\" ng-class=\"{img: item.tb}\">\n" +
     "                        <img class=\"media-object\" ng-src=\"{{item.tb}}\" ng-if=\"item.tb\" />\n" +
     "                        <span class=\"media-object\"\n" +
     "                          ng-if=\"item.type == 0 && !item.tb\"><span class=\"fa fa-newspaper-o\"></span></span>\n" +
     "                        <span class=\"media-object\"\n" +
     "                          ng-if=\"item.type == 1 && !item.tb\"><span class=\"fa fa-calendar\"></span></span>\n" +
-    "                    </a>\n" +
+    "                    </span>\n" +
     "                </div>\n" +
     "                <div class=\"media-body\">\n" +
-    "                    <h3 class=\"media-heading\">\n" +
+    "                    <h2 class=\"h3 media-heading\">\n" +
     "                        <a ng-href=\"#/news-exhibits/{{item.link}}\" ng-bind-html=\"item.title | highlight:newsFilters.search\"></a>\n" +
-    "                    </h3>\n" +
+    "                    </h2>\n" +
     "\n" +
-    "                    <h5 class=\"text-muted\" ng-if=\"item.type > 0\">Exhibit {{item.activeFrom | date:mediumDate}} - {{item.activeUntil | date:mediumDate}}</h5>\n" +
-    "                    <h5 class=\"text-muted\" ng-if=\"item.type < 1\">Created on {{item.created | date:mediumDate}}</h5>\n" +
+    "                    <h3 class=\"h5 text-muted\" ng-if=\"item.type > 0\">Exhibit {{item.activeFrom | date:mediumDate}} - {{item.activeUntil | date:mediumDate}}</h5>\n" +
+    "                    <h3 class=\"h5 text-muted\" ng-if=\"item.type < 1\">Created on {{item.created | date:mediumDate}}</h5>\n" +
     "                    <p class=\"text-justify\">\n" +
     "                    <span ng-bind-html=\"item.blurb | highlight:newsFilters.search\">\n" +
     "                    </span>\n" +
@@ -28342,24 +28357,17 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "            </div>\n" +
     "\n" +
     "            <div class=\"alert alert-warning text-center\" role=\"alert\" ng-show=\"news.length < 1\">\n" +
-    "                <h2>\n" +
+    "                <span class=\"h2\">\n" +
     "                    No\n" +
     "                    <span ng-show=\"newsFilters.type == ''\">News or Exhibits</span>\n" +
     "                    <span ng-show=\"newsFilters.type == '0'\">News</span>\n" +
     "                    <span ng-show=\"newsFilters.type == '1'\">Exhibits</span>\n" +
     "                    match the search \"<strong>{{newsFilters.search}}</strong>\"</span>\n" +
-    "                </h2>\n" +
+    "                </span>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "\n" +
-    "        <div class=\"col-md-3 hidden-xs\">\n" +
-    "            <h4>Filters</h4>\n" +
-    "            <form class=\"facets-form\">\n" +
-    "                <div class=\"form-group\">\n" +
-    "                    <input type=\"text\" class=\"form-control\" ng-model=\"newsFilters.search\" placeholder=\"Keyword search\">\n" +
-    "                </div>\n" +
-    "            </form>\n" +
-    "        </div>\n" +
+    "\n" +
     "\n" +
     "    </div>\n" +
     "</div>");
@@ -29065,24 +29073,26 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
     "<div class=\"container\">\n" +
     "    <div class=\"row\">\n" +
     "        <div class=\"col-md-3 col-md-push-9\">\n" +
-    "            <form>\n" +
+    "            <form class=\"software-list-facets\">\n" +
     "                <div class=\"form-group\">\n" +
     "                <span class=\"page-header\">\n" +
-    "                    <h4>Filter Software List By</h4>\n" +
+    "                    <h2 class=\"h4\">Filter Software List By</h2>\n" +
     "                </span>\n" +
     "                </div>\n" +
     "                <div class=\"form-group\">\n" +
-    "                    <input type=\"text\" class=\"form-control\" ng-model=\"soft.search\" placeholder=\"Search software, locations, etc...\">\n" +
+    "\n" +
+    "                    <input type=\"text\" class=\"form-control\" ng-model=\"soft.search\" placeholder=\"Search software, locations, etc...\" aria-label=\"Search our software list\">\n" +
+    "\n" +
     "                </div>\n" +
     "                <div class=\"form-group\">\n" +
     "                    <div class=\"btn-group btn-group-justified\">\n" +
-    "                        <label class=\"btn btn-default active\" ng-model=\"soft.os\" btn-radio=\"''\" uncheckable>All</label>\n" +
-    "                        <label class=\"btn btn-default\" ng-model=\"soft.os\" btn-radio=\"'1'\" uncheckable><span class=\"fa fa-fw fa-windows\"></span></label>\n" +
-    "                        <label class=\"btn btn-default\" ng-model=\"soft.os\" btn-radio=\"'2'\" uncheckable><span class=\"fa fa-fw fa-apple\"></span></label>\n" +
+    "                        <button class=\"btn btn-default active\" ng-model=\"soft.os\" btn-radio=\"''\" uncheckable>All</button>\n" +
+    "                        <button class=\"btn btn-default\" ng-model=\"soft.os\" btn-radio=\"'1'\" uncheckable><span class=\"fa fa-fw fa-windows\"></span><span class=\"sr-only\">Windows</span></button>\n" +
+    "                        <button class=\"btn btn-default\" ng-model=\"soft.os\" btn-radio=\"'2'\" uncheckable><span class=\"fa fa-fw fa-apple\"></span><span class=\"sr-only\">Mac</span></button>\n" +
     "                    </div>\n" +
     "                </div>\n" +
     "                <div class=\"form-group hidden-xs\">\n" +
-    "                    <h5>Locations</h5>\n" +
+    "                    <h3 class=\"h5\">Locations</h3>\n" +
     "                    <div class=\"radio\">\n" +
     "                        <label>\n" +
     "                            <input type=\"radio\" value=\"\" ng-model=\"soft.loc\" checked>\n" +
@@ -29097,7 +29107,7 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
     "                    </div>\n" +
     "                </div>\n" +
     "                <div class=\"form-group hidden-xs\">\n" +
-    "                    <h5>Categories</h5>\n" +
+    "                    <h3 class=\"h5\">Categories</h3>\n" +
     "                    <div class=\"radio\">\n" +
     "                        <label>\n" +
     "                            <input type=\"radio\" value=\"\" ng-model=\"soft.cat\">\n" +
@@ -29117,9 +29127,9 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
     "            </form>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-9 col-md-pull-3 software-list-container\">\n" +
-    "            <h4 class=\"text-right\" ng-show=\"pager.totalItems > 0\">\n" +
+    "            <span class=\"h4 text-right\" ng-show=\"pager.totalItems > 0\">\n" +
     "                Showing {{pager.firstItem}}-{{pager.lastItem}} of {{pager.totalItems}} results\n" +
-    "            </h4>\n" +
+    "            </span>\n" +
     "\n" +
     "            <div ng-if=\"(soft.cat || soft.os || soft.loc)\">\n" +
     "\n" +
@@ -29134,7 +29144,7 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
     "\n" +
     "            <div class=\"media software-item animate-repeat\" ng-repeat=\"item in filteredSoft | after:(pager.page-1)*pager.perPage | limitTo:20\">\n" +
     "                <div class=\"media-left\">\n" +
-    "                    <img class=\"media-object\" ng-src=\"{{item.icon}}\" alt=\"{{item.title}}\" title=\"{{item.title}}\">\n" +
+    "                    <img class=\"media-object\" ng-src=\"{{item.icon}}\" alt=\"{{item.title}}\">\n" +
     "                </div>\n" +
     "                <div class=\"media-body\">\n" +
     "                    <h3 class=\"media-heading\" ng-bind-html=\"item.title | highlight:soft.search\">\n" +
@@ -29215,7 +29225,7 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
             .when('/software', {
                 reloadOnSearch: false,
                 resolve: {
-                    software: ['$filter', 'softwareFactory', function($filter, softwareFactory){
+                    software: function($filter, softwareFactory){
                         return softwareFactory.get({software: 'all'}, function(data){
 
                             for (var i = 0, len = data.software.length; i < len; i++){
@@ -29250,7 +29260,7 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
                                 config: config
                             });
                         });
-                    }]
+                    }
                 },
                 templateUrl: 'software-list/software-list.tpl.html',
                 controller: 'SoftwareListCtrl'
@@ -29366,7 +29376,7 @@ angular.module('ualib.staffdir.templates', ['staff-card/staff-card-list.tpl.html
 
 angular.module("staff-card/staff-card-list.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staff-card/staff-card-list.tpl.html",
-    "<div ng-repeat=\"person in filteredList | after:(staffdir.pager.page-1)*staffdir.pager.perPage | limitTo:staffdir.pager.perPage\"><div class=page-slice><div class=row><div class=\"hidden-xs col-sm-3\"><img class=\"staff-portrait thumbnail\" ng-src=\"{{person.photo}}\"></div><div class=\"col-xs-12 col-sm-7\"><div class=row><div class=\"col-xs-12 col-sm-7 name-plate\"><h3 class=name><small ng-if=person.rank>{{person.rank}}</small> <a ng-href=#/staffdir/{{person.emailPrefix}} ng-if=person.profile><span ng-class=\"{'sorting-by': staffdir.facet.sortBy == 'firstname'}\" ng-bind-html=\"person.firstname | highlight:staffdir.facet.search\"></span> <span ng-class=\"{'sorting-by': staffdir.facet.sortBy == 'lastname'}\" ng-bind-html=\"person.lastname | highlight:staffdir.facet.search\"></span></a> <span ng-if=!person.profile><span ng-class=\"{'sorting-by': staffdir.facet.sortBy == 'firstname'}\" ng-bind-html=\"person.firstname | highlight:staffdir.facet.search\"></span> <span ng-class=\"{'sorting-by': staffdir.facet.sortBy == 'lastname'}\" ng-bind-html=\"person.lastname | highlight:staffdir.facet.search\"></span></span></h3><h4 class=title><span ng-bind-html=\"person.title | highlight:staffdir.facet.search\"></span></h4><h5 class=hidden-xs><span ng-bind-html=\"person.department | highlight:staffdir.facet.search\"></span></h5></div><div class=\"col-xs-12 col-sm-5\"><ul class=fa-ul><li ng-if=person.phone><span class=\"fa fa-phone fa-li\"></span><a ng-href=tel:+1{{person.phone}}>{{person.phone}}</a></li><li class=hidden-xs ng-if=person.fax><span class=\"fa fa-fax fa-li\"></span>{{person.fax}}</li><li ng-if=person.email><span class=\"fa fa-envelope fa-li\"></span><a ng-href=mailto:{{person.email}} title=\"Email {{person.firstname}} {{person.lastname}}\">{{person.email}}</a></li></ul></div><div class=\"col-sm-12 subject-specialty hidden-xs\" ng-if=person.subjects><table class=\"table table-condensed\"><thead><tr><th>Liaison</th></tr></thead><tbody><tr ng-repeat=\"subject in person.subjects | orderBy:'subject'\"><td><a ng-href={{subject.link}} title={{subject.subject}} ng-if=subject.link ng-bind-html=\"subject.subject | highlight:staffdir.facet.search\"></a> <span ng-if=!subject.link ng-bind-html=\"subject.subject | highlight:staffdir.facet.search\">{{subject.subject}}</span></td></tr></tbody></table></div></div></div></div></div></div><div class=\"alert alert-warning text-center\" role=alert ng-if=\"filteredList.length < 1\"><h2>No staff members found <span ng-if=staffdir.facet.library>in {{staffdir.facet.library}}</span> <span ng-if=staffdir.facet.liaison>that are liaisons</span> <span ng-if=staffdir.facet.subject><span ng-if=staffdir.facet.liaison>for</span> <span ng-if=!staffdir.facet.liaison>with a specialty in</span> {{staffdir.facet.subject}}</span></h2></div>");
+    "<div ng-repeat=\"person in filteredList | after:(staffdir.pager.page-1)*staffdir.pager.perPage | limitTo:staffdir.pager.perPage\"><div class=page-slice><div class=row><div class=\"hidden-xs col-sm-3\"><img class=\"staff-portrait thumbnail\" ng-if=person.photo ng-src={{person.photo}} alt=\"{{person.firstname}} {{person.lastname}}\"> <img class=\"staff-portrait thumbnail\" ng-if=!person.photo ng-src=https://www.lib.ua.edu/wp-content/themes/roots-ualib/assets/img/user-profile.png alt=\"\"></div><div class=\"col-xs-12 col-sm-7\"><div class=row><div class=\"col-xs-12 col-sm-7 name-plate\"><h3 class=name><small ng-if=person.rank>{{person.rank}}</small> <a ng-href=#/staffdir/{{person.emailPrefix}} ng-if=person.profile><span ng-class=\"{'sorting-by': staffdir.facet.sortBy == 'firstname'}\" ng-bind-html=\"person.firstname | highlight:staffdir.facet.search\"></span> <span ng-class=\"{'sorting-by': staffdir.facet.sortBy == 'lastname'}\" ng-bind-html=\"person.lastname | highlight:staffdir.facet.search\"></span></a> <span ng-if=!person.profile><span ng-class=\"{'sorting-by': staffdir.facet.sortBy == 'firstname'}\" ng-bind-html=\"person.firstname | highlight:staffdir.facet.search\"></span> <span ng-class=\"{'sorting-by': staffdir.facet.sortBy == 'lastname'}\" ng-bind-html=\"person.lastname | highlight:staffdir.facet.search\"></span></span></h3><h4 class=title><span ng-bind-html=\"person.title | highlight:staffdir.facet.search\"></span></h4><h5 class=hidden-xs><span ng-bind-html=\"person.department | highlight:staffdir.facet.search\"></span></h5></div><div class=\"col-xs-12 col-sm-5\"><ul class=fa-ul><li ng-if=person.phone><span class=\"fa fa-phone fa-li\"></span><a ng-href=tel:+1{{person.phone}}>{{person.phone}}</a></li><li class=hidden-xs ng-if=person.fax><span class=\"fa fa-fax fa-li\"></span>{{person.fax}}</li><li ng-if=person.email><span class=\"fa fa-envelope fa-li\"></span><a ng-href=mailto:{{person.email}} title=\"Email {{person.firstname}} {{person.lastname}}\">{{person.email}}</a></li></ul></div><div class=\"col-sm-12 subject-specialty hidden-xs\" ng-if=person.subjects><table class=\"table table-condensed\"><thead><tr><th>Liaison</th></tr></thead><tbody><tr ng-repeat=\"subject in person.subjects | orderBy:'subject'\"><td><a ng-href={{subject.link}} title={{subject.subject}} ng-if=subject.link ng-bind-html=\"subject.subject | highlight:staffdir.facet.search\"></a> <span ng-if=!subject.link ng-bind-html=\"subject.subject | highlight:staffdir.facet.search\">{{subject.subject}}</span></td></tr></tbody></table></div></div></div></div></div></div><div class=\"alert alert-warning text-center\" role=alert ng-if=\"filteredList.length < 1\"><h2>No staff members found <span ng-if=staffdir.facet.library>in {{staffdir.facet.library}}</span> <span ng-if=staffdir.facet.liaison>that are liaisons</span> <span ng-if=staffdir.facet.subject><span ng-if=staffdir.facet.liaison>for</span> <span ng-if=!staffdir.facet.liaison>with a specialty in</span> {{staffdir.facet.subject}}</span></h2></div>");
 }]);
 
 angular.module("staff-card/staff-card-md.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -29376,7 +29386,7 @@ angular.module("staff-card/staff-card-md.tpl.html", []).run(["$templateCache", f
 
 angular.module("staff-directory/staff-directory-facets.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staff-directory/staff-directory-facets.tpl.html",
-    "<form class=facets-form><div class=form-group><h4>Filters</h4></div><div class=form-group><div class=facet-group><input class=form-control id=directorySearch name=directorySearch ng-model=staffdir.facet.search placeholder=\"Keyword Search...\" ng-keyup=\"staffdir.changeFacet('search')\"></div></div><div class=form-group><h5>Sort by</h5><div class=facet-group><div class=\"btn-group btn-group-justified\"><label class=\"btn btn-default\" ng-model=staffdir.facet.sortBy btn-radio=\"'lastname'\" ng-change=\"staffdir.changeFacet('sortBy')\">Last name</label><label class=\"btn btn-default\" ng-model=staffdir.facet.sortBy btn-radio=\"'firstname'\" ng-change=\"staffdir.changeFacet('sortBy')\">First name</label></div></div></div><div class=\"form-group hidden-xs hidden-sm\"><h5>Liaison area</h5><div class=facet-group><select class=form-control ng-model=staffdir.facet.subject name=subject ng-options=\"subject for subject in facets.subjects\" ng-change=\"staffdir.changeFacet('subject')\"><option value=\"\">-- Select Subject --</option></select><label class=checkbox-inline><input type=checkbox ng-true-value=1 ng-model=staffdir.facet.liaison ng-change=\"staffdir.changeFacet('liaison')\">Limit to liaisons</label></div></div><div class=\"form-group hidden-xs hidden-sm\"><h5>Department</h5><div class=facet-group><select class=form-control ng-model=staffdir.facet.department name=department ng-options=\"department for department in facets.departments\" ng-change=\"staffdir.changeFacet('department')\"><option value=\"\">-- Select Department --</option></select></div></div><div class=\"form-group hidden-xs hidden-sm\"><h5>Library Location</h5><div class=facet-group><div class=radio><label><input type=radio ng-model=staffdir.facet.library ng-checked=!staffdir.facet.library ng-change=\"staffdir.changeFacet('library')\"> All</label></div><div class=radio ng-repeat=\"library in facets.libraries\"><label><input type=radio ng-model=staffdir.facet.library value={{library}} ng-change=\"staffdir.changeFacet('library')\"> {{library}}</label></div></div></div><div class=\"form-group hidden-xs hidden-sm\"><button class=\"btn btn-primary btn-block\" type=button ng-click=staffdir.clearFacets()><span class=\"fa fa-fw fa-refresh\"></span> Reset Filters</button></div></form>");
+    "<form class=facets-form><div class=form-group><h4>Filters</h4></div><div class=form-group><div class=facet-group><h5 id=searchStaffDirectory>Search staff directory</h5><input class=form-control id=directorySearch aria-labelledby=searchStaffDirectory name=directorySearch ng-model=staffdir.facet.search placeholder=\"Keyword Search...\" ng-keyup=\"staffdir.changeFacet('search')\"></div></div><div class=form-group><h5>Sort by</h5><div class=facet-group><div class=\"btn-group btn-group-justified\"><button class=\"btn btn-default\" ng-model=staffdir.facet.sortBy btn-radio=\"'lastname'\" ng-change=\"staffdir.changeFacet('sortBy')\">Last name</button> <button class=\"btn btn-default\" ng-model=staffdir.facet.sortBy btn-radio=\"'firstname'\" ng-change=\"staffdir.changeFacet('sortBy')\">First name</button></div></div></div><div class=\"form-group hidden-xs hidden-sm\"><h5>Liaison area</h5><div class=facet-group><select class=form-control ng-model=staffdir.facet.subject name=subject ng-options=\"subject for subject in facets.subjects\" ng-change=\"staffdir.changeFacet('subject')\"><option value=\"\">-- Select Subject --</option></select><label class=checkbox-inline><input type=checkbox ng-true-value=1 ng-model=staffdir.facet.liaison ng-change=\"staffdir.changeFacet('liaison')\">Limit to liaisons</label></div></div><div class=\"form-group hidden-xs hidden-sm\"><h5>Department</h5><div class=facet-group><select class=form-control ng-model=staffdir.facet.department name=department ng-options=\"department for department in facets.departments\" ng-change=\"staffdir.changeFacet('department')\"><option value=\"\">-- Select Department --</option></select></div></div><div class=\"form-group hidden-xs hidden-sm\"><h5>Library Location</h5><div class=facet-group><div class=radio><label><input type=radio ng-model=staffdir.facet.library ng-checked=!staffdir.facet.library ng-change=\"staffdir.changeFacet('library')\"> All</label></div><div class=radio ng-repeat=\"library in facets.libraries\"><label><input type=radio ng-model=staffdir.facet.library value={{library}} ng-change=\"staffdir.changeFacet('library')\"> {{library}}</label></div></div></div><div class=\"form-group hidden-xs hidden-sm\"><button class=\"btn btn-primary btn-block\" type=button ng-click=staffdir.clearFacets()><span class=\"fa fa-fw fa-refresh\"></span> Reset Filters</button></div></form>");
 }]);
 
 angular.module("staff-directory/staff-directory-listing.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -29391,7 +29401,7 @@ angular.module("staff-directory/staff-directory.tpl.html", []).run(["$templateCa
 
 angular.module("staff-profile/staff-profile.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("staff-profile/staff-profile.tpl.html",
-    "<div class=container><ol class=breadcrumb typeof=BreadcrumbList vocab=\"http://schema.org/\"><li><a title=\"Go to The University of Alabama Libraries.\" href=/#/home class=home>The University of Alabama Libraries</a></li><li><a title=\"Go to the Staff Directory.\" href=/#/staffdir class=home>Staff Directory</a></li><li><a title=\"Go to user profile.\" href=\"\" class=home>{{userProfile.person.firstname}} {{userProfile.person.lastname}}</a></li></ol><div class=page-header><h2>Faculty/Staff Profile</h2></div><div class=\"row staff-profile\"><div class=\"hidden-xs col-md-3\"><img class=\"staff-portrait thumbnail\" ng-src={{userProfile.person.photo}} ng-if=userProfile.person.photo> <img class=\"staff-portrait thumbnail\" ng-src=wp-content/themes/roots-ualib/assets/img/user-profile.png ng-if=!userProfile.person.photo></div><div class=col-md-9><div class=name-plate><h1 class=name><small ng-if=userProfile.person.rank>{{userProfile.person.rank}}</small> <span ng-bind-html=userProfile.person.firstname></span> <span ng-bind-html=userProfile.person.lastname></span></h1><h2 class=title><span ng-bind-html=userProfile.person.title></span></h2><h3 class=hidden-xs><span ng-bind-html=userProfile.person.department></span></h3></div><div class=row><div class=page-slice><div class=col-md-6><ul class=fa-ul><li ng-if=userProfile.person.phone><span class=\"fa fa-phone fa-li\"></span><a ng-href=tel:+1-{{userProfile.person.phone}}>{{userProfile.person.phone}}</a></li><li class=hidden-xs ng-if=userProfile.person.fax><span class=\"fa fa-fax fa-li\"></span>{{userProfile.person.fax}}</li><li ng-if=userProfile.person.email><span class=\"fa fa-envelope fa-li\"></span> <a href=mailto:{{userProfile.person.email}}>{{userProfile.person.email}}</a></li><li ng-if=\"userProfile.person.website.length > 11\"><span class=\"fa fa-external-link-square fa-li\"></span> <a ng-href={{userProfile.person.website}} class=external-link>Personal website</a></li></ul></div><div class=col-md-6><ul class=fa-ul><li ng-if=\"userProfile.person.resume.length > 11\"><span class=\"fa fa-file-text fa-li\"></span> <a ng-href={{userProfile.person.resume}}>Resume / CV</a></li><li ng-if=userProfile.person.social1><span class={{userProfile.person.snClass1}}></span> <a ng-href={{userProfile.person.social1}} class=external-link>{{userProfile.person.snTitle1}}</a></li><li ng-if=userProfile.person.social2><span class={{userProfile.person.snClass2}}></span> <a ng-href={{userProfile.person.social2}} class=external-link>{{userProfile.person.snTitle2}}</a></li><li ng-if=userProfile.person.social3><span class={{userProfile.person.snClass3}}></span> <a ng-href={{userProfile.person.social3}} class=external-link>{{userProfile.person.snTitle3}}</a></li></ul></div></div></div></div></div><div class=row><div class=col-md-12><span ng-bind-html=userProfile.person.profile></span></div></div></div>");
+    "<div class=container><ol class=breadcrumb typeof=BreadcrumbList vocab=\"http://schema.org/\"><li><a title=\"Go to The University of Alabama Libraries.\" href=/#/home class=home>The University of Alabama Libraries</a></li><li><a title=\"Go to the Staff Directory.\" href=/#/staffdir class=home>Staff Directory</a></li><li><a title=\"Go to user profile.\" href=\"\" class=home>{{userProfile.person.firstname}} {{userProfile.person.lastname}}</a></li></ol><div class=page-header><h2>Faculty/Staff Profile</h2></div><div class=\"row staff-profile\"><div class=\"hidden-xs col-md-3\"><img class=\"staff-portrait thumbnail\" ng-src={{userProfile.person.photo}} ng-if=userProfile.person.photo alt=\"{{userProfile.person.firstname}} {{userProfile.person.lastname}}\"> <img class=\"staff-portrait thumbnail\" ng-src=https://www.lib.ua.edu/wp-content/themes/roots-ualib/assets/img/user-profile.png ng-if=!userProfile.person.photo alt=\"\"></div><div class=col-md-9><div class=name-plate><h1 class=name><small ng-if=userProfile.person.rank>{{userProfile.person.rank}}</small> <span ng-bind-html=userProfile.person.firstname></span> <span ng-bind-html=userProfile.person.lastname></span></h1><h2 class=title><span ng-bind-html=userProfile.person.title></span></h2><h3 class=hidden-xs><span ng-bind-html=userProfile.person.department></span></h3></div><div class=row><div class=page-slice><div class=col-md-6><ul class=fa-ul><li ng-if=userProfile.person.phone><span class=\"fa fa-phone fa-li\"></span><a ng-href=tel:+1-{{userProfile.person.phone}}>{{userProfile.person.phone}}</a></li><li class=hidden-xs ng-if=userProfile.person.fax><span class=\"fa fa-fax fa-li\"></span>{{userProfile.person.fax}}</li><li ng-if=userProfile.person.email><span class=\"fa fa-envelope fa-li\"></span> <a href=mailto:{{userProfile.person.email}}>{{userProfile.person.email}}</a></li><li ng-if=\"userProfile.person.website.length > 11\"><span class=\"fa fa-external-link-square fa-li\"></span> <a ng-href={{userProfile.person.website}} class=external-link>Personal website</a></li></ul></div><div class=col-md-6><ul class=fa-ul><li ng-if=\"userProfile.person.resume.length > 11\"><span class=\"fa fa-file-text fa-li\"></span> <a ng-href={{userProfile.person.resume}}>Resume / CV</a></li><li ng-if=userProfile.person.social1><span class={{userProfile.person.snClass1}}></span> <a ng-href={{userProfile.person.social1}} class=external-link>{{userProfile.person.snTitle1}}</a></li><li ng-if=userProfile.person.social2><span class={{userProfile.person.snClass2}}></span> <a ng-href={{userProfile.person.social2}} class=external-link>{{userProfile.person.snTitle2}}</a></li><li ng-if=userProfile.person.social3><span class={{userProfile.person.snClass3}}></span> <a ng-href={{userProfile.person.social3}} class=external-link>{{userProfile.person.snTitle3}}</a></li></ul></div></div></div></div></div><div class=row><div class=col-md-12><span ng-bind-html=userProfile.person.profile></span></div></div></div>");
 }]);
 ;/**
  * @ngdoc overview
@@ -29604,7 +29614,7 @@ angular.module('staffdir', ['ualib.staffdir']);
                                 }
                                 val = newVal;
 
-                                val.photo = val.photo || "https://www.lib.ua.edu/wp-content/themes/roots-ualib/assets/img/user-profile.png";
+                                val.photo = val.photo || "";
                                 //Overwrite "profile" text so its not searchable, set it as a boolean so the tpl knows if to link to a profile
                                 if (val.profile){
                                     val.profile = true;

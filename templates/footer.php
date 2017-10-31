@@ -53,7 +53,7 @@
                 </div>
                 <div class="col-xs-12 col-sm-3">
                     <a href="/about-ua-libraries/social-media/">
-                        <label class="sr-only">Social Media Page</label>
+                        <span class="sr-only">Social Media Page</span>
                         <ul class="nav nav-pills nav-justified social-icons">
                             <li><span class="fa fa-fw fa-2x fa-twitter"></span></li>
                             <li><span class="fa fa-fw fa-2x fa-instagram"></span></li>

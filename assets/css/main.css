@@ -2241,6 +2241,21 @@ img.media-object {
   font-size: inherit;
   padding-right: 5px;
 }
+a:focus,
+input:focus,
+button:focus,
+textarea:focus,
+td:focus {
+  -webkit-box-shadow: 0 0 5px #51cbee;
+          box-shadow: 0 0 5px #51cbee;
+  border: 2px solid #51cbee;
+}
+a.btn:focus,
+a.comment-form input[type="submit"]:focus {
+  -webkit-box-shadow: 0 0 5px #ffffff;
+          box-shadow: 0 0 5px #ffffff;
+  border: 2px solid #ffffff;
+}
 h1,
 h2,
 h3,
@@ -2404,7 +2419,7 @@ mark,
   text-transform: capitalize;
 }
 .text-muted {
-  color: #999999;
+  color: #757575;
 }
 .text-primary {
   color: #993333;
@@ -2595,7 +2610,7 @@ mark,
   padding: 0;
 }
 .text-muted {
-  color: #999999;
+  color: #757575;
 }
 .text-primary {
   color: #993333;
@@ -2660,6 +2675,32 @@ a.bg-warning:hover {
 }
 a.bg-danger:hover {
   background-color: #e4b9b9;
+}
+h1 small,
+h2 small,
+h3 small,
+h4 small,
+h5 small,
+h6 small,
+.h1 small,
+.h2 small,
+.h3 small,
+.h4 small,
+.h5 small,
+.h6 small,
+h1 .small,
+h2 .small,
+h3 .small,
+h4 .small,
+h5 .small,
+h6 .small,
+.h1 .small,
+.h2 .small,
+.h3 .small,
+.h4 .small,
+.h5 .small,
+.h6 .small {
+  color: #757575;
 }
 code,
 kbd,
@@ -3388,7 +3429,7 @@ table {
 caption {
   padding-top: 8px;
   padding-bottom: 8px;
-  color: #999999;
+  color: #757575;
   text-align: left;
 }
 th {

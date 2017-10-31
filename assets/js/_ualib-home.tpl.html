@@ -5,6 +5,7 @@
         </div>
     </div>
     <div ng-controller="NewsTodayCtrl" class="animate">
+        <h1 class="sr-only">University of Alabama Libraries Homepage</h1>
         <div class="home-slice">
             <div class="row">
                 <div class="col-md-6">
@@ -136,7 +137,7 @@
                                 <ul rn-carousel rn-carousel-auto-slide="6" rn-carousel-buffered rn-carousel-pause-on-hover
                                     rn-carousel-index="curImage" rn-carousel-locked="isLocked">
                                     <li ng-repeat="slide in slides track by $index">
-                                        <a ng-href="{{slide.url}}" class="layer text-center" title="{{slide.title}}">
+                                        <a ng-href="{{slide.url}}" class="layer text-center">
                                             <div class="slide-image" ng-style="{'background-image':slide.styles}">
                                                 <div class="slide-title">
                                                     {{slide.title}}
