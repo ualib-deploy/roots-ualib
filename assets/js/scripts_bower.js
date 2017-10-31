@@ -28319,7 +28319,7 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "            <h2 class=\"h4\">Filters</h2>\n" +
     "            <form class=\"facets-form\">\n" +
     "                <div class=\"form-group\">\n" +
-    "                    <h3 class=\"h5\" id=\"filterNews\">Search news and events</h3>\n" +
+    "                    <h3 class=\"h5\" id=\"filterNews\">Search news and exhibits</h3>\n" +
     "                    <input type=\"text\" aria-labelledby=\"filterNews\" class=\"form-control\" ng-model=\"newsFilters.search\" placeholder=\"Keyword search\">\n" +
     "                </div>\n" +
     "            </form>\n" +
