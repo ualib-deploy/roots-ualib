@@ -8,7 +8,7 @@
   },
   "assets/css/main_bower.min.css": {
     "path": "assets/css/main_bower.min.css",
-    "hash": "9ee739ddf9ee86bcad49c767a0e4f31a",
+    "hash": "d0071e965d3eb3f77effc2310f3520c5",
     "handle": "roots_css"
   },
   "assets/js/scripts.min.js": {
@@ -18,7 +18,7 @@
   },
   "assets/js/scripts_bower.min.js": {
     "path": "assets/js/scripts_bower.min.js",
-    "hash": "d175ba24acf813c20804d25e5cfd8334",
+    "hash": "de5023845e51078d9cf6d71face98999",
     "handle": "roots_js"
   }
 }
