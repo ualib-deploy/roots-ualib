@@ -28315,7 +28315,16 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "\n" +
     "<div class=\"container\">\n" +
     "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-9\">\n" +
+    "        <div class=\"col-md-3 col-md-push-9 hidden-xs\">\n" +
+    "            <h2 class=\"h4\">Filters</h2>\n" +
+    "            <form class=\"facets-form\">\n" +
+    "                <div class=\"form-group\">\n" +
+    "                    <h3 class=\"h5\" id=\"filterNews\">Search news and events</h3>\n" +
+    "                    <input type=\"text\" aria-labelledby=\"filterNews\" class=\"form-control\" ng-model=\"newsFilters.search\" placeholder=\"Keyword search\">\n" +
+    "                </div>\n" +
+    "            </form>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-md-9 col-md-pull-3\">\n" +
     "\n" +
     "            <div class=\"media animate-repeat\" ng-repeat=\"item in news | filter:{type: newsFilters.type}\n" +
     "                                                                  | filter:newsFilters.search\n" +
@@ -28358,14 +28367,7 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "            </div>\n" +
     "        </div>\n" +
     "\n" +
-    "        <div class=\"col-md-3 hidden-xs\">\n" +
-    "            <h4>Filters</h4>\n" +
-    "            <form class=\"facets-form\">\n" +
-    "                <div class=\"form-group\">\n" +
-    "                    <input type=\"text\" class=\"form-control\" ng-model=\"newsFilters.search\" placeholder=\"Keyword search\">\n" +
-    "                </div>\n" +
-    "            </form>\n" +
-    "        </div>\n" +
+    "\n" +
     "\n" +
     "    </div>\n" +
     "</div>");
