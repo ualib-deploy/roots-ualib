@@ -4,7 +4,7 @@
             <?php //dynamic_sidebar('sidebar-footer'); ?>
             <div class="row">
                 <div class="col-sm-3">
-                    <h4>Quick Links</h4>
+                    <h3 class="h4">Quick Links</h3>
                     <ul class="footer-list">
                         <li><a href="/#/hours">Maps and Contact Information</a></li>
                         <li><a href="http://ask.lib.ua.edu">Ask A Librarian</a></li>
@@ -18,7 +18,7 @@
                     </ul>
                 </div>
                 <div class="col-sm-3">
-                    <h4>Libraries</h4>
+                    <h3 class="h4">Libraries</h3>
                     <ul class="footer-list">
                         <li><a href="/libraries/gorgas/">Amelia Gayle Gorgas Library</a></li>
                         <li><a href="/libraries/bruno/">Angelo Bruno Business Library</a></li>
@@ -40,7 +40,7 @@
                     </button>
                 </div>
                 <div class="col-sm-3" >
-                    <h4>Collections</h4>
+                    <h3 class="h4">Collections</h3>
                     <ul class="footer-list">
                         <li><a href="/collections/williams/">A.S. Williams Collection</a></li>
                         <li><a href="/collections/wade-hall-collection/">Wade Hall Collection</a></li>
