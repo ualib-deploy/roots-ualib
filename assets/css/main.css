@@ -2250,6 +2250,10 @@ td:focus {
           box-shadow: 0 0 5px #51cbee;
   border: 2px solid #51cbee;
 }
+header a.dropdown-toggle:focus {
+  outline: 2px solid #51cbee;
+  border: none;
+}
 a.btn:focus,
 a.comment-form input[type="submit"]:focus {
   -webkit-box-shadow: 0 0 5px #ffffff;
