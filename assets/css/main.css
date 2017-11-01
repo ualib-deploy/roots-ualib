@@ -9556,6 +9556,9 @@ footer > .sub-footer {
 .front-page-card h2 {
   padding: 10px;
 }
+.front-page-card h2.quick-link {
+  padding: 0px;
+}
 .front-page-card .service-card {
   border: 1px solid transparent;
 }
