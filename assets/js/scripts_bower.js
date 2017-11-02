@@ -28153,7 +28153,7 @@ angular.module("news-item/event-card.tpl.html", []).run(["$templateCache", funct
     "        </div>\n" +
     "    </div>\n" +
     "    <div class=\"media-body\">\n" +
-    "        <h2 class=\"h4 media-heading\" ng-bind-html=\"newsCard.title | truncate:50:'...':true\"></h2>\n" +
+    "        <h3 class=\"h4 media-heading\" ng-bind-html=\"newsCard.title | truncate:50:'...':true\"></h3>\n" +
     "        <p ng-bind-html=\"newsCard.blurb | truncate:150:'...':true\"></p>\n" +
     "    </div>\n" +
     "</a>");
@@ -28163,9 +28163,9 @@ angular.module("news-item/news-card.tpl.html", []).run(["$templateCache", functi
   $templateCache.put("news-item/news-card.tpl.html",
     "<a ng-href=\"#/news-exhibits/{{newsCard.link}}\" class=\"media news-card\">\n" +
     "    <div class=\"media-body\">\n" +
-    "        <h2 class=\"h4 media-heading\">\n" +
+    "        <h3 class=\"h4 media-heading\">\n" +
     "            <span ng-bind-html=\"newsCard.title | truncate:50:'...':true\"></span>\n" +
-    "        </h2>\n" +
+    "        </h3>\n" +
     "        <div class=\"details-context\" ng-if=\"(newsCard.activeFrom != newsCard.activeUntil && newsCard.type != 0)\">\n" +
     "            {{newsCard.activeFrom | date:mediumDate}} - {{newsCard.activeUntil | date:mediumDate}}\n" +
     "        </div>\n" +
