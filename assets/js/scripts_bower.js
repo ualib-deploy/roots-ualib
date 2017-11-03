@@ -29063,7 +29063,7 @@ angular.module("software-list/software-list.tpl.html", []).run(["$templateCache"
     "            </div>\n" +
     "            <div class=\"row\">\n" +
     "                <div class=\"col-md-12\">\n" +
-    "                    <h1>Libraries Software List</h1>\n" +
+    "                    <h1>University Libraries Software List</h1>\n" +
     "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
