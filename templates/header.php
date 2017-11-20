@@ -18,7 +18,7 @@
                         <ul class="dropdown-menu">
                             <li>
                                 <div class="yamm-content">
-                                    <h3 class="h2">My Accounts</h3>
+                                    <h3 class="h2">University Logins</h3>
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-4">
                                             <a class="service-card" href="http://library.ua.edu/vwebv/myAccount">
