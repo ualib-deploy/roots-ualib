@@ -5,8 +5,8 @@
         <div class="col-md-3 col-md-push-9">
 
 
-            <div class="dropdown multipage-menu visible-xs visible-sm" aria-labelledby="pageNav">
-                <button class="btn btn-default dropdown-toggle" id="pageNav" type="button">
+            <div class="dropdown multipage-menu visible-xs visible-sm">
+                <button class="btn btn-default dropdown-toggle" type="button">
                     Page Navigation
                 </button>
                 <ul class="dropdown-menu" role="menu">
