@@ -1,6 +1,6 @@
 /**
  * Bunch of useful filters for angularJS(with no external dependencies!)
- * @version v0.5.17 - 2017-09-22 * @link https://github.com/a8m/angular-filter
+ * @version v0.5.5 - 2015-08-07 * @link https://github.com/a8m/angular-filter
  * @author Ariel Mashraki <ariel@mashraki.co.il>
  * @license MIT License, http://www.opensource.org/licenses/MIT
  */
@@ -67,23 +67,15 @@ function objectContains(partial, object) {
  * @returns {*}
  */
 function hasApproxPattern(word, pattern) {
-  // cheaper version of indexOf; instead of creating each
-  // iteration new str.
-  function indexOf(word, p, c) {
-    var j = 0;
-    while ((p + j) <= word.length) {
-      if (word.charAt(p + j) == c) return j;
-      j++;
-    }
-    return -1;
-  }
-  var p = 0;
-  for (var i = 0; i <= pattern.length; i++) {
-    var index = indexOf(word, p, pattern.charAt(i));
-    if (index == -1) return false;
-    p += index + 1;
-  }
-  return true
+  if(pattern === '')
+    return word;
+
+  var index = word.indexOf(pattern.charAt(0));
+
+  if(index === -1)
+    return false;
+
+  return hasApproxPattern(word.substr(index+1), pattern.substr(1))
 }
 
 /**
@@ -117,10 +109,11 @@ if (!String.prototype.contains) {
 /**
  * @param num {Number}
  * @param decimal {Number}
+ * @param $math
  * @returns {Number}
  */
-function convertToDecimal(num, decimal){
-  return Math.round(num * Math.pow(10,decimal)) / (Math.pow(10, decimal));
+function convertToDecimal(num, decimal, $math){
+  return $math.round(num * $math.pow(10,decimal)) / ($math.pow(10,decimal));
 }
 
 /**
@@ -423,38 +416,32 @@ angular.module('a8m.before', [])
  * Collect data into fixed-length chunks or blocks
  */
 
-angular.module('a8m.chunk-by', ['a8m.filter-watcher'])
-    .filter('chunkBy', ['filterWatcher', function (filterWatcher) {
-      return function (array, n, fillVal) {
+angular.module('a8m.chunk-by', [])
+  .filter('chunkBy', [function () {
+    /**
+     * @description
+     * Get array with size `n` in `val` inside it.
+     * @param n
+     * @param val
+     * @returns {Array}
+     */
+    function fill(n, val) {
+      var ret = [];
+      while(n--) ret[n] = val;
+      return ret;
+    }
 
-        return filterWatcher.isMemoized('chunkBy', arguments) ||
-            filterWatcher.memoize('chunkBy', arguments, this,
-                _chunkBy(array, n, fillVal));
-        /**
-         * @description
-         * Get array with size `n` in `val` inside it.
-         * @param n
-         * @param val
-         * @returns {Array}
-         */
-        function fill(n, val) {
-          var ret = [];
-          while (n--) ret[n] = val;
-          return ret;
-        }
-
-        function _chunkBy(array, n, fillVal) {
-          if (!isArray(array)) return array;
-          return array.map(function (el, i, self) {
-            i = i * n;
-            el = self.slice(i, i + n);
-            return !isUndefined(fillVal) && el.length < n
-                ? el.concat(fill(n - el.length, fillVal))
-                : el;
-          }).slice(0, Math.ceil(array.length / n));
-        }
-      }
-    }]);
+    return function (array, n, fillVal) {
+      if (!isArray(array)) return array;
+      return array.map(function(el, i, self) {
+        i = i * n;
+        el = self.slice(i, i + n);
+        return !isUndefined(fillVal) && el.length < n
+          ? el.concat(fill(n - el.length, fillVal))
+          : el;
+      }).slice(0, Math.ceil(array.length / n));
+    }
+  }]);
 
 /**
  * @ngdoc filter
@@ -511,7 +498,7 @@ function containsFilter($parse) {
       }
 
       return collection.some(function(elm) {
-        return ((isString(expression) && isObject(elm)) || isFunction(expression))
+        return (isObject(elm) || isFunction(expression))
           ? $parse(expression)(elm)
           : elm === expression;
       });
@@ -629,7 +616,7 @@ angular.module('a8m.every', [])
  */
 angular.module('a8m.filter-by', [])
   .filter('filterBy', ['$parse', function( $parse ) {
-    return function(collection, properties, search, strict) {
+    return function(collection, properties, search) {
       var comparator;
 
       search = (isString(search) || isNumber(search)) ?
@@ -653,19 +640,16 @@ angular.module('a8m.filter-by', [])
           if(!~prop.indexOf('+')) {
             comparator = $parse(prop)(elm)
           } else {
-            var propList = prop.replace(/\s+/g, '').split('+');
-            comparator = propList
-              .map(function(prop) { return $parse(prop)(elm); })
-              .join(' ');
+            var propList = prop.replace(new RegExp('\\s', 'g'), '').split('+');
+            comparator = propList.reduce(function(prev, cur, index) {
+              return (index === 1) ? $parse(prev)(elm) + ' ' + $parse(cur)(elm) :
+                prev + ' ' + $parse(cur)(elm);
+            });
           }
 
-          if (!isString(comparator) && !isNumber(comparator)) {
-            return false;
-          }
-
-          comparator = String(comparator).toLowerCase();
-
-          return strict ? comparator === search : comparator.contains(search);
+          return (isString(comparator) || isNumber(comparator))
+            ? String(comparator).toLowerCase().contains(search)
+            : false;
         });
       });
     }
@@ -866,9 +850,11 @@ angular.module('a8m.group-by', [ 'a8m.filter-watcher' ])
         return collection;
       }
 
+      var getterFn = $parse(property);
+
       return filterWatcher.isMemoized('groupBy', arguments) ||
         filterWatcher.memoize('groupBy', arguments, this,
-          _groupBy(collection, $parse(property)));
+          _groupBy(collection, getterFn));
 
       /**
        * groupBy function
@@ -1062,15 +1048,12 @@ angular.module('a8m.pick', [])
  */
 angular.module('a8m.range', [])
   .filter('range', function () {
-    return function (input, total, start, increment, cb) {
-      start = start || 0;
-      increment = increment || 1;
+    return function (input, total) {
       for (var i = 0; i < parseInt(total); i++) {
-        var j = start + i * increment;
-        input.push(isFunction(cb) ? cb(j) : j);
+        input.push(i);
       }
       return input;
-    };
+	  };
   });
 /**
  * @ngdoc filter
@@ -1333,21 +1316,6 @@ angular.module('a8m.xor', [])
 
 /**
  * @ngdoc filter
- * @name abs
- * @kind function
- *
- * @description
- * Will return the absolute value of a number
- */
-angular.module('a8m.math.abs', [])
-  .filter('abs', function () {
-    return function (input) {
-      return Math.abs(input);
-    }
-  });
-
-/**
- * @ngdoc filter
  * @name formatBytes
  * @kind function
  *
@@ -1355,24 +1323,26 @@ angular.module('a8m.math.abs', [])
  * Convert bytes into appropriate display 
  * 1024 bytes => 1 KB
  */
-angular.module('a8m.math.byteFmt', [])
-  .filter('byteFmt', function () {
-    var compared = [{str: 'B', val: 1024}];
-    ['KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'].forEach(function(el, i) {
-      compared.push({str: el, val: compared[i].val * 1024 });
-    });
+angular.module('a8m.math.byteFmt', ['a8m.math'])
+  .filter('byteFmt', ['$math', function ($math) {
     return function (bytes, decimal) {
+
       if(isNumber(decimal) && isFinite(decimal) && decimal%1===0 && decimal >= 0 &&
         isNumber(bytes) && isFinite(bytes)) {
-        var i = 0;
-        while (i < compared.length-1 && bytes >= compared[i].val) i++;
-        bytes /= i > 0 ? compared[i-1].val : 1;
-        return convertToDecimal(bytes, decimal) + ' ' + compared[i].str;
-      }
-      return 'NaN';
-    }
-  });
+        if(bytes < 1024) { // within 1 KB so B
+          return convertToDecimal(bytes, decimal, $math) + ' B';
+        } else if(bytes < 1048576) { // within 1 MB so KB
+          return convertToDecimal((bytes / 1024), decimal, $math) + ' KB';
+        } else if(bytes < 1073741824){ // within 1 GB so MB
+          return convertToDecimal((bytes / 1048576), decimal, $math) + ' MB';
+        } else { // GB or more
+          return convertToDecimal((bytes / 1073741824), decimal, $math) + ' GB';
+        }
 
+      }
+      return "NaN";
+    }
+  }]);
 /**
  * @ngdoc filter
  * @name degrees
@@ -1381,20 +1351,20 @@ angular.module('a8m.math.byteFmt', [])
  * @description
  * Convert angle from radians to degrees
  */
-angular.module('a8m.math.degrees', [])
-  .filter('degrees', function () {
+angular.module('a8m.math.degrees', ['a8m.math'])
+  .filter('degrees', ['$math', function ($math) {
     return function (radians, decimal) {
       // if decimal is not an integer greater than -1, we cannot do. quit with error "NaN"
       // if degrees is not a real number, we cannot do also. quit with error "NaN"
       if(isNumber(decimal) && isFinite(decimal) && decimal%1===0 && decimal >= 0 &&
         isNumber(radians) && isFinite(radians)) {
-        var degrees = (radians * 180) / Math.PI;
-        return Math.round(degrees * Math.pow(10,decimal)) / (Math.pow(10,decimal));
+        var degrees = (radians * 180) / $math.PI;
+        return $math.round(degrees * $math.pow(10,decimal)) / ($math.pow(10,decimal));
       } else {
-        return 'NaN';
+        return "NaN";
       }
     }
-  });
+  }]);
 
  
  
@@ -1407,23 +1377,34 @@ angular.module('a8m.math.degrees', [])
  * Convert bytes into appropriate display 
  * 1024 kilobytes => 1 MB
  */
-angular.module('a8m.math.kbFmt', [])
-  .filter('kbFmt', function () {
-    var compared = [{str: 'KB', val: 1024}];
-    ['MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'].forEach(function(el, i) {
-      compared.push({str: el, val: compared[i].val * 1024 });
-    });
+angular.module('a8m.math.kbFmt', ['a8m.math'])
+  .filter('kbFmt', ['$math', function ($math) {
     return function (bytes, decimal) {
+
       if(isNumber(decimal) && isFinite(decimal) && decimal%1===0 && decimal >= 0 &&
         isNumber(bytes) && isFinite(bytes)) {
-        var i = 0;
-        while (i < compared.length-1 && bytes >= compared[i].val) i++;
-        bytes /= i > 0 ? compared[i-1].val : 1;
-        return convertToDecimal(bytes, decimal) + ' ' + compared[i].str;
+        if(bytes < 1024) { // within 1 MB so KB
+          return convertToDecimal(bytes, decimal, $math) + ' KB';
+        } else if(bytes < 1048576) { // within 1 GB so MB
+          return convertToDecimal((bytes / 1024), decimal, $math) + ' MB';
+        } else {
+          return convertToDecimal((bytes / 1048576), decimal, $math) + ' GB';
+        }
       }
-      return 'NaN';
+      return "NaN";
     }
-  });
+  }]);
+/**
+ * @ngdoc module
+ * @name math
+ * @description
+ * reference to global Math object
+ */
+angular.module('a8m.math', [])
+  .factory('$math', ['$window', function ($window) {
+    return $window.Math;
+  }]);
+
 /**
  * @ngdoc filter
  * @name max
@@ -1433,15 +1414,15 @@ angular.module('a8m.math.kbFmt', [])
  * Math.max will get an array and return the max value. if an expression
  * is provided, will return max value by expression.
  */
-angular.module('a8m.math.max', [])
-  .filter('max', ['$parse', function ($parse) {
+angular.module('a8m.math.max', ['a8m.math'])
+  .filter('max', ['$math', '$parse', function ($math, $parse) {
     return function (input, expression) {
 
       if(!isArray(input)) {
         return input;
       }
       return isUndefined(expression)
-        ? Math.max.apply(Math, input)
+        ? $math.max.apply($math, input)
         : input[indexByMax(input, expression)];
     };
 
@@ -1455,7 +1436,7 @@ angular.module('a8m.math.max', [])
       var mappedArray = array.map(function(elm){
         return $parse(exp)(elm);
       });
-      return mappedArray.indexOf(Math.max.apply(Math, mappedArray));
+      return mappedArray.indexOf($math.max.apply($math, mappedArray));
     }
   }]);
 /**
@@ -1467,15 +1448,15 @@ angular.module('a8m.math.max', [])
  * Math.min will get an array and return the min value. if an expression
  * is provided, will return min value by expression.
  */
-angular.module('a8m.math.min', [])
-  .filter('min', ['$parse', function ($parse) {
+angular.module('a8m.math.min', ['a8m.math'])
+  .filter('min', ['$math', '$parse', function ($math, $parse) {
     return function (input, expression) {
 
       if(!isArray(input)) {
         return input;
       }
       return isUndefined(expression)
-        ? Math.min.apply(Math, input)
+        ? $math.min.apply($math, input)
         : input[indexByMin(input, expression)];
     };
 
@@ -1489,7 +1470,7 @@ angular.module('a8m.math.min', [])
       var mappedArray = array.map(function(elm){
         return $parse(exp)(elm);
       });
-      return mappedArray.indexOf(Math.min.apply(Math, mappedArray));
+      return mappedArray.indexOf($math.min.apply($math, mappedArray));
     }
   }]);
 /**
@@ -1500,21 +1481,21 @@ angular.module('a8m.math.min', [])
  * @description
  * percentage between two numbers
  */
-angular.module('a8m.math.percent', [])
-  .filter('percent', function () {
+angular.module('a8m.math.percent', ['a8m.math'])
+  .filter('percent', ['$math', '$window', function ($math, $window) {
     return function (input, divided, round) {
 
-      var divider = isString(input) ? Number(input) : input;
+      var divider = isString(input) ? $window.Number(input) : input;
       divided = divided || 100;
       round = round || false;
 
-      if (!isNumber(divider) || isNaN(divider)) return input;
+      if (!isNumber(divider) || $window.isNaN(divider)) return input;
 
       return round
-        ? Math.round((divider / divided) * 100)
+        ? $math.round((divider / divided) * 100)
         : (divider / divided) * 100;
     }
-  });
+  }]);
 
 /**
  * @ngdoc filter
@@ -1524,19 +1505,19 @@ angular.module('a8m.math.percent', [])
  * @description
  * Convert angle from degrees to radians
  */
-angular.module('a8m.math.radians', [])
-  .filter('radians', function() {
+angular.module('a8m.math.radians', ['a8m.math'])
+  .filter('radians', ['$math', function ($math) {
     return function (degrees, decimal) {
       // if decimal is not an integer greater than -1, we cannot do. quit with error "NaN"
       // if degrees is not a real number, we cannot do also. quit with error "NaN"
       if(isNumber(decimal) && isFinite(decimal) && decimal%1===0 && decimal >= 0 &&
         isNumber(degrees) && isFinite(degrees)) {
         var radians = (degrees * 3.14159265359) / 180;
-        return Math.round(radians * Math.pow(10,decimal)) / (Math.pow(10,decimal));
+        return $math.round(radians * $math.pow(10,decimal)) / ($math.pow(10,decimal));
       }
-      return 'NaN';
+      return "NaN";
     }
-  });
+  }]);
 
  
  
@@ -1571,25 +1552,25 @@ angular.module('a8m.math.radix', [])
  * i.e: K for one thousand, M for Million, B for billion
  * e.g: number of users:235,221, decimal:1 => 235.2 K
  */
-angular.module('a8m.math.shortFmt', [])
-  .filter('shortFmt', function () {
+angular.module('a8m.math.shortFmt', ['a8m.math'])
+  .filter('shortFmt', ['$math', function ($math) {
     return function (number, decimal) {
       if(isNumber(decimal) && isFinite(decimal) && decimal%1===0 && decimal >= 0 &&
         isNumber(number) && isFinite(number)){
         if(number < 1e3) {
-          return '' + number;  // Coerce to string
+          return number;
         } else if(number < 1e6) {
-          return convertToDecimal((number / 1e3), decimal) + ' K';
+          return convertToDecimal((number / 1e3), decimal, $math) + ' K';
         } else if(number < 1e9){
-          return convertToDecimal((number / 1e6), decimal) + ' M';
+          return convertToDecimal((number / 1e6), decimal, $math) + ' M';
         } else {
-          return convertToDecimal((number / 1e9), decimal) + ' B';
+          return convertToDecimal((number / 1e9), decimal, $math) + ' B';
         }
 
       }
-      return 'NaN';
+      return "NaN";
     }
-  });
+  }]);
 /**
  * @ngdoc filter
  * @name sum
@@ -1800,23 +1781,6 @@ angular.module('a8m.match', [])
 
 /**
  * @ngdoc filter
- * @name phone-us
- * @kind function
- *
- * @description
- * format a string or a number into a us-style
- * phone number in the form (***) ***-****
- */
-angular.module('a8m.phoneUS', [])
-  .filter('phoneUS', function () {
-    return function(num) {
-      num += '';
-      return '(' + num.slice(0, 3) + ') ' + num.slice(3, 6) + '-' + num.slice(6);
-    }
-  });
-
-/**
- * @ngdoc filter
  * @name repeat
  * @kind function
  *
@@ -1891,47 +1855,6 @@ angular.module('a8m.slugify', [])
         : input;
     }
   }]);
-
-/**
- * @ngdoc filter
- * @name split
- * @kind function
- *
- * @description
- * split a string by a provided delimiter (none '' by default) and skip first n-delimiters
- */
-angular.module('a8m.split', [])
-  .filter('split', function () {
-    function escapeRegExp(str) {
-      return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
-    }
-
-    return function (input, delimiter, skip) {
-      var _regexp, _matches, _splitted, _temp;
-
-      if (isUndefined(input) || !isString(input)) {
-        return null;
-      }
-      if (isUndefined(delimiter)) delimiter = '';
-      if (isNaN(skip)) skip = 0;
-
-      _regexp = new RegExp(escapeRegExp(delimiter), 'g');
-      _matches = input.match(_regexp);
-      
-      if (isNull(_matches) || skip >= _matches.length) {
-        return [input];
-      }
-
-      if (skip === 0) return input.split(delimiter);
-      
-      _splitted = input.split(delimiter);
-      _temp = _splitted.splice(0, skip + 1);
-      _splitted.unshift(_temp.join(delimiter));
-    
-      return _splitted;
-    };
-  })
-;
 
 /**
  * @ngdoc filter
@@ -2067,23 +1990,18 @@ angular.module('a8m.truncate', [])
  * ucfirst
  */
 angular.module('a8m.ucfirst', [])
-  .filter({
-    ucfirst: ucfirstFilter,
-    titleize: ucfirstFilter
-  });
-
-function ucfirstFilter() {
-  return function (input) {
-    return isString(input)
-      ? input
-      .split(' ')
-      .map(function (ch) {
-        return ch.charAt(0).toUpperCase() + ch.substring(1);
-      })
-      .join(' ')
-      : input;
-  }
-}
+  .filter('ucfirst', [function() {
+    return function(input) {
+      return isString(input)
+        ? input
+            .split(' ')
+            .map(function (ch) {
+              return ch.charAt(0).toUpperCase() + ch.substring(1);
+            })
+            .join(' ')
+        : input;
+    }
+  }]);
 
 /**
  * @ngdoc filter
@@ -2179,20 +2097,7 @@ angular.module('a8m.filter-watcher', [])
        * @returns {string}
        */
       function getHashKey(fName, args) {
-        function replacerFactory() {
-          var cache = [];
-          return function(key, val) {
-            if(isObject(val) && !isNull(val)) {
-              if (~cache.indexOf(val)) return '[Circular]';
-              cache.push(val)
-            }
-            if($window == val) return '$WINDOW';
-            if($window.document == val) return '$DOCUMENT';
-            if(isScope(val)) return '$SCOPE';
-            return val;
-          }
-        }
-        return [fName, JSON.stringify(args, replacerFactory())]
+        return [fName, angular.toJson(args)]
           .join('#')
           .replace(/"/g,'');
       }
@@ -2221,7 +2126,7 @@ angular.module('a8m.filter-watcher', [])
         $$timeout(function() {
           if(!$rootScope.$$phase)
             $$cache = {};
-        }, 2000);
+        });
       }
 
       /**
@@ -2281,6 +2186,7 @@ angular.module('a8m.filter-watcher', [])
         isMemoized: $$isMemoized,
         memoize: $$memoize
       }
+
     }];
   });
   
@@ -2311,8 +2217,6 @@ angular.module('angular.filter', [
   'a8m.repeat',
   'a8m.test',
   'a8m.match',
-  'a8m.split',
-  'a8m.phoneUS',
 
   'a8m.to-array',
   'a8m.concat',
@@ -2345,10 +2249,10 @@ angular.module('angular.filter', [
   'a8m.flatten',
   'a8m.join',
   'a8m.range',
-
+  
+  'a8m.math',
   'a8m.math.max',
   'a8m.math.min',
-  'a8m.math.abs',
   'a8m.math.percent',
   'a8m.math.radix',
   'a8m.math.sum',
@@ -25296,13 +25200,11 @@ angular.module('hours.list', [])
         }
     }]);
 /**
- * @license AngularJS v1.6.2
- * (c) 2010-2017 Google, Inc. http://angularjs.org
+ * @license AngularJS v1.2.32
+ * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
-(function(window, angular) {'use strict';
-
-/* global ngTouchClickDirectiveFactory: false */
+(function(window, angular, undefined) {'use strict';
 
 /**
  * @ngdoc module
@@ -25326,110 +25228,6 @@ angular.module('hours.list', [])
 /* global -ngTouch */
 var ngTouch = angular.module('ngTouch', []);
 
-ngTouch.provider('$touch', $TouchProvider);
-
-function nodeName_(element) {
-  return angular.lowercase(element.nodeName || (element[0] && element[0].nodeName));
-}
-
-/**
- * @ngdoc provider
- * @name $touchProvider
- *
- * @description
- * The `$touchProvider` allows enabling / disabling {@link ngTouch.ngClick ngTouch's ngClick directive}.
- */
-$TouchProvider.$inject = ['$provide', '$compileProvider'];
-function $TouchProvider($provide, $compileProvider) {
-
-  /**
-   * @ngdoc method
-   * @name  $touchProvider#ngClickOverrideEnabled
-   *
-   * @param {boolean=} enabled update the ngClickOverrideEnabled state if provided, otherwise just return the
-   * current ngClickOverrideEnabled state
-   * @returns {*} current value if used as getter or itself (chaining) if used as setter
-   *
-   * @kind function
-   *
-   * @description
-   * Call this method to enable/disable {@link ngTouch.ngClick ngTouch's ngClick directive}. If enabled,
-   * the default ngClick directive will be replaced by a version that eliminates the 300ms delay for
-   * click events on browser for touch-devices.
-   *
-   * The default is `false`.
-   *
-   */
-  var ngClickOverrideEnabled = false;
-  var ngClickDirectiveAdded = false;
-  // eslint-disable-next-line no-invalid-this
-  this.ngClickOverrideEnabled = function(enabled) {
-    if (angular.isDefined(enabled)) {
-
-      if (enabled && !ngClickDirectiveAdded) {
-        ngClickDirectiveAdded = true;
-
-        // Use this to identify the correct directive in the delegate
-        ngTouchClickDirectiveFactory.$$moduleName = 'ngTouch';
-        $compileProvider.directive('ngClick', ngTouchClickDirectiveFactory);
-
-        $provide.decorator('ngClickDirective', ['$delegate', function($delegate) {
-          if (ngClickOverrideEnabled) {
-            // drop the default ngClick directive
-            $delegate.shift();
-          } else {
-            // drop the ngTouch ngClick directive if the override has been re-disabled (because
-            // we cannot de-register added directives)
-            var i = $delegate.length - 1;
-            while (i >= 0) {
-              if ($delegate[i].$$moduleName === 'ngTouch') {
-                $delegate.splice(i, 1);
-                break;
-              }
-              i--;
-            }
-          }
-
-          return $delegate;
-        }]);
-      }
-
-      ngClickOverrideEnabled = enabled;
-      return this;
-    }
-
-    return ngClickOverrideEnabled;
-  };
-
-  /**
-  * @ngdoc service
-  * @name $touch
-  * @kind object
-  *
-  * @description
-  * Provides the {@link ngTouch.$touch#ngClickOverrideEnabled `ngClickOverrideEnabled`} method.
-  *
-  */
-  // eslint-disable-next-line no-invalid-this
-  this.$get = function() {
-    return {
-      /**
-       * @ngdoc method
-       * @name  $touch#ngClickOverrideEnabled
-       *
-       * @returns {*} current value of `ngClickOverrideEnabled` set in the {@link ngTouch.$touchProvider $touchProvider},
-       * i.e. if {@link ngTouch.ngClick ngTouch's ngClick} directive is enabled.
-       *
-       * @kind function
-       */
-      ngClickOverrideEnabled: function() {
-        return ngClickOverrideEnabled;
-      }
-    };
-  };
-
-}
-
 /* global ngTouch: false */
 
     /**
@@ -25442,7 +25240,8 @@ function $TouchProvider($provide, $compileProvider) {
      *
      * Requires the {@link ngTouch `ngTouch`} module to be installed.
      *
-     * `$swipe` is used by the `ngSwipeLeft` and `ngSwipeRight` directives in `ngTouch`.
+     * `$swipe` is used by the `ngSwipeLeft` and `ngSwipeRight` directives in `ngTouch`, and by
+     * `ngCarousel` in a separate component.
      *
      * # Usage
      * The `$swipe` service is an object with a single method: `bind`. `bind` takes an element
@@ -25454,46 +25253,17 @@ ngTouch.factory('$swipe', [function() {
   // The total distance in any direction before we make the call on swipe vs. scroll.
   var MOVE_BUFFER_RADIUS = 10;
 
-  var POINTER_EVENTS = {
-    'mouse': {
-      start: 'mousedown',
-      move: 'mousemove',
-      end: 'mouseup'
-    },
-    'touch': {
-      start: 'touchstart',
-      move: 'touchmove',
-      end: 'touchend',
-      cancel: 'touchcancel'
-    },
-    'pointer': {
-      start: 'pointerdown',
-      move: 'pointermove',
-      end: 'pointerup',
-      cancel: 'pointercancel'
-    }
-  };
-
   function getCoordinates(event) {
-    var originalEvent = event.originalEvent || event;
-    var touches = originalEvent.touches && originalEvent.touches.length ? originalEvent.touches : [originalEvent];
-    var e = (originalEvent.changedTouches && originalEvent.changedTouches[0]) || touches[0];
+    var touches = event.touches && event.touches.length ? event.touches : [event];
+    var e = (event.changedTouches && event.changedTouches[0]) ||
+        (event.originalEvent && event.originalEvent.changedTouches &&
+            event.originalEvent.changedTouches[0]) ||
+        touches[0].originalEvent || touches[0];
 
     return {
       x: e.clientX,
       y: e.clientY
     };
-  }
-
-  function getEvents(pointerTypes, eventType) {
-    var res = [];
-    angular.forEach(pointerTypes, function(pointerType) {
-      var eventName = POINTER_EVENTS[pointerType][eventType];
-      if (eventName) {
-        res.push(eventName);
-      }
-    });
-    return res.join(' ');
   }
 
   return {
@@ -25504,16 +25274,12 @@ ngTouch.factory('$swipe', [function() {
      * @description
      * The main method of `$swipe`. It takes an element to be watched for swipe motions, and an
      * object containing event handlers.
-     * The pointer types that should be used can be specified via the optional
-     * third argument, which is an array of strings `'mouse'`, `'touch'` and `'pointer'`. By default,
-     * `$swipe` will listen for `mouse`, `touch` and `pointer` events.
      *
      * The four events are `start`, `move`, `end`, and `cancel`. `start`, `move`, and `end`
-     * receive as a parameter a coordinates object of the form `{ x: 150, y: 310 }` and the raw
-     * `event`. `cancel` receives the raw `event` as its single parameter.
+     * receive as a parameter a coordinates object of the form `{ x: 150, y: 310 }`.
      *
-     * `start` is called on either `mousedown`, `touchstart` or `pointerdown`. After this event, `$swipe` is
-     * watching for `touchmove`, `mousemove` or `pointermove` events. These events are ignored until the total
+     * `start` is called on either `mousedown` or `touchstart`. After this event, `$swipe` is
+     * watching for `touchmove` or `mousemove` events. These events are ignored until the total
      * distance moved in either dimension exceeds a small threshold.
      *
      * Once this threshold is exceeded, either the horizontal or vertical delta is greater.
@@ -25521,16 +25287,16 @@ ngTouch.factory('$swipe', [function() {
      * - If the vertical distance is greater, this is a scroll, and we let the browser take over.
      *   A `cancel` event is sent.
      *
-     * `move` is called on `mousemove`, `touchmove` and `pointermove` after the above logic has determined that
+     * `move` is called on `mousemove` and `touchmove` after the above logic has determined that
      * a swipe is in progress.
      *
-     * `end` is called when a swipe is successfully completed with a `touchend`, `mouseup` or `pointerup`.
+     * `end` is called when a swipe is successfully completed with a `touchend` or `mouseup`.
      *
-     * `cancel` is called either on a `touchcancel` or `pointercancel`  from the browser, or when we begin scrolling
+     * `cancel` is called either on a `touchcancel` from the browser, or when we begin scrolling
      * as described above.
      *
      */
-    bind: function(element, eventHandlers, pointerTypes) {
+    bind: function(element, eventHandlers) {
       // Absolute total movement, used to control swipe vs. scroll.
       var totalX, totalY;
       // Coordinates of the start position.
@@ -25540,28 +25306,21 @@ ngTouch.factory('$swipe', [function() {
       // Whether a swipe is active.
       var active = false;
 
-      pointerTypes = pointerTypes || ['mouse', 'touch', 'pointer'];
-      element.on(getEvents(pointerTypes, 'start'), function(event) {
+      element.on('touchstart mousedown', function(event) {
         startCoords = getCoordinates(event);
         active = true;
         totalX = 0;
         totalY = 0;
         lastPos = startCoords;
-        if (eventHandlers['start']) {
-          eventHandlers['start'](startCoords, event);
-        }
+        eventHandlers['start'] && eventHandlers['start'](startCoords, event);
       });
-      var events = getEvents(pointerTypes, 'cancel');
-      if (events) {
-        element.on(events, function(event) {
-          active = false;
-          if (eventHandlers['cancel']) {
-            eventHandlers['cancel'](event);
-          }
-        });
-      }
 
-      element.on(getEvents(pointerTypes, 'move'), function(event) {
+      element.on('touchcancel', function(event) {
+        active = false;
+        eventHandlers['cancel'] && eventHandlers['cancel'](event);
+      });
+
+      element.on('touchmove mousemove', function(event) {
         if (!active) return;
 
         // Android will send a touchcancel if it thinks we're starting to scroll.
@@ -25586,45 +25345,29 @@ ngTouch.factory('$swipe', [function() {
         if (totalY > totalX) {
           // Allow native scrolling to take over.
           active = false;
-          if (eventHandlers['cancel']) {
-            eventHandlers['cancel'](event);
-          }
+          eventHandlers['cancel'] && eventHandlers['cancel'](event);
           return;
         } else {
           // Prevent the browser from scrolling.
           event.preventDefault();
-          if (eventHandlers['move']) {
-            eventHandlers['move'](coords, event);
-          }
+          eventHandlers['move'] && eventHandlers['move'](coords, event);
         }
       });
 
-      element.on(getEvents(pointerTypes, 'end'), function(event) {
+      element.on('touchend mouseup', function(event) {
         if (!active) return;
         active = false;
-        if (eventHandlers['end']) {
-          eventHandlers['end'](getCoordinates(event), event);
-        }
+        eventHandlers['end'] && eventHandlers['end'](getCoordinates(event), event);
       });
     }
   };
 }]);
 
-/* global ngTouch: false,
-  nodeName_: false
-*/
+/* global ngTouch: false */
 
 /**
  * @ngdoc directive
  * @name ngClick
- * @deprecated
- * sinceVersion="v1.5.0"
- * This directive is deprecated and **disabled** by default.
- * The directive will receive no further support and might be removed from future releases.
- * If you need the directive, you can enable it with the {@link ngTouch.$touchProvider $touchProvider#ngClickOverrideEnabled}
- * function. We also recommend that you migrate to [FastClick](https://github.com/ftlabs/fastclick).
- * To learn more about the 300ms delay, this [Telerik article](http://developer.telerik.com/featured/300-ms-click-delay-ios-8/)
- * gives a good overview.
  *
  * @description
  * A more powerful replacement for the default ngClick designed to be used on touchscreen
@@ -25645,7 +25388,7 @@ ngTouch.factory('$swipe', [function() {
  * upon tap. (Event object is available as `$event`)
  *
  * @example
-    <example module="ngClickExample" deps="angular-touch.js" name="ng-touch-ng-click">
+    <example module="ngClickExample" deps="angular-touch.js">
       <file name="index.html">
         <button ng-click="count = count + 1" ng-init="count=0">
           Increment
@@ -25658,7 +25401,15 @@ ngTouch.factory('$swipe', [function() {
     </example>
  */
 
-var ngTouchClickDirectiveFactory = ['$parse', '$timeout', '$rootElement',
+ngTouch.config(['$provide', function($provide) {
+  $provide.decorator('ngClickDirective', ['$delegate', function($delegate) {
+    // drop the default ngClick directive
+    $delegate.shift();
+    return $delegate;
+  }]);
+}]);
+
+ngTouch.directive('ngClick', ['$parse', '$timeout', '$rootElement',
     function($parse, $timeout, $rootElement) {
   var TAP_DURATION = 750; // Shorter than 750ms is a tap, longer is a taphold or drag.
   var MOVE_TOLERANCE = 12; // 12px seems to work in most mobile browsers.
@@ -25678,7 +25429,7 @@ var ngTouchClickDirectiveFactory = ['$parse', '$timeout', '$rootElement',
   // double-tapping, and then fire a click event.
   //
   // This delay sucks and makes mobile apps feel unresponsive.
-  // So we detect touchstart, touchcancel and touchend ourselves and determine when
+  // So we detect touchstart, touchmove, touchcancel and touchend ourselves and determine when
   // the user has tapped on something.
   //
   // What happens when the browser then generates a click event?
@@ -25690,7 +25441,7 @@ var ngTouchClickDirectiveFactory = ['$parse', '$timeout', '$rootElement',
   // So the sequence for a tap is:
   // - global touchstart: Sets an "allowable region" at the point touched.
   // - element's touchstart: Starts a touch
-  // (- touchcancel ends the touch, no click follows)
+  // (- touchmove or touchcancel ends the touch, no click follows)
   // - element's touchend: Determines if the tap is valid (didn't move too far away, didn't hold
   //   too long) and fires the user's tap handler. The touchend also calls preventGhostClick().
   // - preventGhostClick() removes the allowable region the global touchstart created.
@@ -25720,7 +25471,7 @@ var ngTouchClickDirectiveFactory = ['$parse', '$timeout', '$rootElement',
   // Splices out the allowable region from the list after it has been used.
   function checkAllowableRegions(touchCoordinates, x, y) {
     for (var i = 0; i < touchCoordinates.length; i += 2) {
-      if (hit(touchCoordinates[i], touchCoordinates[i + 1], x, y)) {
+      if (hit(touchCoordinates[i], touchCoordinates[i+1], x, y)) {
         touchCoordinates.splice(i, i + 2);
         return true; // allowable region
       }
@@ -25754,7 +25505,7 @@ var ngTouchClickDirectiveFactory = ['$parse', '$timeout', '$rootElement',
       lastLabelClickCoordinates = null;
     }
     // remember label click coordinates to prevent click busting of trigger click event on input
-    if (nodeName_(event.target) === 'label') {
+    if (event.target.tagName.toLowerCase() === 'label') {
       lastLabelClickCoordinates = [x, y];
     }
 
@@ -25770,9 +25521,7 @@ var ngTouchClickDirectiveFactory = ['$parse', '$timeout', '$rootElement',
     event.preventDefault();
 
     // Blur focused form elements
-    if (event.target && event.target.blur) {
-      event.target.blur();
-    }
+    event.target && event.target.blur();
   }
 
 
@@ -25787,7 +25536,7 @@ var ngTouchClickDirectiveFactory = ['$parse', '$timeout', '$rootElement',
     $timeout(function() {
       // Remove the allowable region.
       for (var i = 0; i < touchCoordinates.length; i += 2) {
-        if (touchCoordinates[i] === x && touchCoordinates[i + 1] === y) {
+        if (touchCoordinates[i] == x && touchCoordinates[i+1] == y) {
           touchCoordinates.splice(i, i + 2);
           return;
         }
@@ -25827,7 +25576,7 @@ var ngTouchClickDirectiveFactory = ['$parse', '$timeout', '$rootElement',
       tapping = true;
       tapElement = event.target ? event.target : event.srcElement; // IE uses srcElement.
       // Hack for Safari, which can target text nodes instead of containers.
-      if (tapElement.nodeType === 3) {
+      if(tapElement.nodeType == 3) {
         tapElement = tapElement.parentNode;
       }
 
@@ -25835,12 +25584,14 @@ var ngTouchClickDirectiveFactory = ['$parse', '$timeout', '$rootElement',
 
       startTime = Date.now();
 
-      // Use jQuery originalEvent
-      var originalEvent = event.originalEvent || event;
-      var touches = originalEvent.touches && originalEvent.touches.length ? originalEvent.touches : [originalEvent];
-      var e = touches[0];
+      var touches = event.touches && event.touches.length ? event.touches : [event];
+      var e = touches[0].originalEvent || touches[0];
       touchStartX = e.clientX;
       touchStartY = e.clientY;
+    });
+
+    element.on('touchmove', function(event) {
+      resetState();
     });
 
     element.on('touchcancel', function(event) {
@@ -25850,15 +25601,12 @@ var ngTouchClickDirectiveFactory = ['$parse', '$timeout', '$rootElement',
     element.on('touchend', function(event) {
       var diff = Date.now() - startTime;
 
-      // Use jQuery originalEvent
-      var originalEvent = event.originalEvent || event;
-      var touches = (originalEvent.changedTouches && originalEvent.changedTouches.length) ?
-          originalEvent.changedTouches :
-          ((originalEvent.touches && originalEvent.touches.length) ? originalEvent.touches : [originalEvent]);
-      var e = touches[0];
+      var touches = (event.changedTouches && event.changedTouches.length) ? event.changedTouches :
+          ((event.touches && event.touches.length) ? event.touches : [event]);
+      var e = touches[0].originalEvent || touches[0];
       var x = e.clientX;
       var y = e.clientY;
-      var dist = Math.sqrt(Math.pow(x - touchStartX, 2) + Math.pow(y - touchStartY, 2));
+      var dist = Math.sqrt( Math.pow(x - touchStartX, 2) + Math.pow(y - touchStartY, 2) );
 
       if (tapping && diff < TAP_DURATION && dist < MOVE_TOLERANCE) {
         // Call preventGhostClick so the clickbuster will catch the corresponding click.
@@ -25904,7 +25652,7 @@ var ngTouchClickDirectiveFactory = ['$parse', '$timeout', '$rootElement',
     });
 
   };
-}];
+}]);
 
 /* global ngTouch: false */
 
@@ -25918,9 +25666,6 @@ var ngTouchClickDirectiveFactory = ['$parse', '$timeout', '$rootElement',
  * Though ngSwipeLeft is designed for touch-based devices, it will work with a mouse click and drag
  * too.
  *
- * To disable the mouse click and drag functionality, add `ng-swipe-disable-mouse` to
- * the `ng-swipe-left` or `ng-swipe-right` DOM Element.
- *
  * Requires the {@link ngTouch `ngTouch`} module to be installed.
  *
  * @element ANY
@@ -25928,7 +25673,7 @@ var ngTouchClickDirectiveFactory = ['$parse', '$timeout', '$rootElement',
  * upon left swipe. (Event object is available as `$event`)
  *
  * @example
-    <example module="ngSwipeLeftExample" deps="angular-touch.js" name="ng-swipe-left">
+    <example module="ngSwipeLeftExample" deps="angular-touch.js">
       <file name="index.html">
         <div ng-show="!showActions" ng-swipe-left="showActions = true">
           Some list content, like an email in the inbox
@@ -25961,7 +25706,7 @@ var ngTouchClickDirectiveFactory = ['$parse', '$timeout', '$rootElement',
  * upon right swipe. (Event object is available as `$event`)
  *
  * @example
-    <example module="ngSwipeRightExample" deps="angular-touch.js" name="ng-swipe-right">
+    <example module="ngSwipeRightExample" deps="angular-touch.js">
       <file name="index.html">
         <div ng-show="!showActions" ng-swipe-left="showActions = true">
           Some list content, like an email in the inbox
@@ -26010,10 +25755,6 @@ function makeSwipeDirective(directiveName, direction, eventName) {
             deltaY / deltaX < MAX_VERTICAL_RATIO;
       }
 
-      var pointerTypes = ['touch'];
-      if (!angular.isDefined(attr['ngSwipeDisableMouse'])) {
-        pointerTypes.push('mouse');
-      }
       $swipe.bind(element, {
         'start': function(coords, event) {
           startCoords = coords;
@@ -26030,7 +25771,7 @@ function makeSwipeDirective(directiveName, direction, eventName) {
             });
           }
         }
-      }, pointerTypes);
+      });
     };
   }]);
 }
@@ -26045,7 +25786,7 @@ makeSwipeDirective('ngSwipeRight', 1, 'swiperight');
 
 /**
  * Angular Carousel - Mobile friendly touch carousel for AngularJS
- * @version v0.3.12 - 2015-06-11
+ * @version v0.3.12 - 2017-11-17
  * @link http://revolunet.github.com/angular-carousel
  * @author Julien Bouquillon <julien@revolunet.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -26500,8 +26241,8 @@ angular.module('angular-carousel').run(['$templateCache', function($templateCach
                             // dont use a directive for this
                             var nextSlideIndexCompareValue = isRepeatBased ? repeatCollection.replace('::', '') + '.length - 1' : currentSlides.length - 1;
                             var tpl = '<div class="rn-carousel-controls">\n' +
-                                '  <span class="rn-carousel-control rn-carousel-control-prev" ng-click="prevSlide()" ng-if="carouselIndex > 0"></span>\n' +
-                                '  <span class="rn-carousel-control rn-carousel-control-next" ng-click="nextSlide()" ng-if="carouselIndex < ' + nextSlideIndexCompareValue + '"></span>\n' +
+                                '  <span class="rn-carousel-control rn-carousel-control-prev" ng-keyup="$event.keyCode == 13 && prevSlide()" ng-click="prevSlide()" role="button" tabindex="0" ng-if="carouselIndex > 0"></span>\n' +
+                                '  <span class="rn-carousel-control rn-carousel-control-next" ng-keyup="$event.keyCode == 13 && nextSlide()" ng-click="nextSlide()" role="button" tabindex="0" ng-if="carouselIndex < ' + nextSlideIndexCompareValue + '"></span>\n' +
                                 '</div>';
                             iElement.parent().append($compile(angular.element(tpl))(scope));
                         }

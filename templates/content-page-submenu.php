@@ -6,10 +6,10 @@
 
 
             <div class="dropdown multipage-menu visible-xs visible-sm">
-                <button class="btn btn-default dropdown-toggle"  type="button">
-                    Inner Navigation
+                <button class="btn btn-default dropdown-toggle" type="button">
+                    Page Navigation
                 </button>
-                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                <ul class="dropdown-menu" role="menu">
                     <?php foreach ($multipage_menu as $item): ?>
                         <li role="presentation" <?php if ($item->object_id == $pageId) print 'class="active"'; ?>>
                             <?php if ((int)$item->menu_item_parent): ?>
