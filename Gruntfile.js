@@ -25,7 +25,8 @@ module.exports = function(grunt) {
         bower: grunt.file.readJSON('.bowerrc'),
         jshint: {
             options: {
-                jshintrc: '.jshintrc'
+                jshintrc: '.jshintrc',
+                reporterOutput: ""
             },
             all: [
                 'Gruntfile.js',
