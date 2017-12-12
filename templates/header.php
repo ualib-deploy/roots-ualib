@@ -46,7 +46,7 @@
                                         <div class="col-xs-12 col-sm-6 col-md-4">
                                             <a class="service-card" href="https://ualearn.blackboard.com/webapps/login/">
                                                 <span class="fa fa-clipboard" aria-hidden="true"></span>
-                                                <h4>Blackboard Learn.</h4>
+                                                <h4>Blackboard Learn</h4>
                                             </a>
                                         </div>
                                     </div>
@@ -499,7 +499,7 @@
                                         <div class="col-xs-12 col-sm-6 col-md-4">
                                             <a class="service-card" href="https://ualearn.blackboard.com/webapps/login/">
                                                 <span class="fa fa-clipboard" aria-hidden="true"></span>
-                                                <h4>Blackboard Learn.</h4>
+                                                <h4>Blackboard Learn</h4>
                                             </a>
                                         </div>
                                     </div>
