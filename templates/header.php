@@ -9,7 +9,7 @@
                 </a>
                 <ul class="nav navbar-nav navbar-right hidden-lg hidden-md">
                     <li class="dropdown yamm-fw hidden-md hidden-lg" dropdown-sticky>
-                        <a href="#" class="dropdown-toggle icon-only" title="My Accounts" aria-label="My Accounts" ng-click="mainNavbarCollapsed = false;">
+                        <a href="#" class="dropdown-toggle icon-only" title="University Logins" aria-label="University Logins" ng-click="mainNavbarCollapsed = false;">
                             <span class="fa fa-user" aria-hidden="true"></span>
                         </a>
                         <ul class="dropdown-menu">
@@ -462,13 +462,13 @@
                         </ul>
                     </li>
                     <li class="dropdown yamm-fw hidden-sm hidden-xs" dropdown-sticky>
-                        <a href="#" class="dropdown-toggle icon-only" title="My Accounts" aria-label="My Accounts" ng-click="mainNavbarCollapsed = false;">
+                        <a href="#" class="dropdown-toggle icon-only" title="University Logins" aria-label="University Logins" ng-click="mainNavbarCollapsed = false;">
                             <span class="fa fa-user" aria-hidden="true"></span>
                         </a>
                         <ul class="dropdown-menu">
                             <li>
                                 <div class="yamm-content">
-                                    <h3 class="h2">My Accounts</h3>
+                                    <h3 class="h2">University Logins</h3>
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-4">
                                             <a class="service-card" href="http://library.ua.edu/vwebv/myAccount">
