@@ -7,23 +7,36 @@
                     <img src="/wp-content/themes/roots-ualib/assets/img/new-ualib-logo.png" class="hidden-xs" rel="home" alt="University of Alabama Libraries"/>
                     <span class="visible-xs">UA Libraries</span>
                 </a>
-            </div>
-            <div>
-                <ul class="nav navbar-nav navbar-right">
 
-                    <li class="dropdown yamm-fw">
+
+
+
+
+
+
+
+
+
+
+
+                <ul class="nav navbar-nav navbar-right hidden-lg hidden-md">
+
+
+
+
+                    <li class="dropdown yamm-fw hidden-md hidden-lg" dropdown-sticky>
                         <a href="#" class="dropdown-toggle icon-only" title="My Accounts" aria-label="My Accounts" ng-click="mainNavbarCollapsed = false;">
                             <span class="fa fa-user" aria-hidden="true"></span>
                         </a>
                         <ul class="dropdown-menu">
                             <li>
                                 <div class="yamm-content">
-                                    <h3 class="h2">University Logins</h3>
+                                    <h2>University Logins</h2>
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-4">
                                             <a class="service-card" href="http://library.ua.edu/vwebv/myAccount">
                                                 <span class="fa fa-search" aria-hidden="true"></span>
-                                                <h4>My Account (Catalog)</h4>
+                                                <h4>My Library (Catalog)</h4>
                                             </a>
                                         </div>
 
@@ -53,7 +66,7 @@
                                         <div class="col-xs-12 col-sm-6 col-md-4">
                                             <a class="service-card" href="https://ualearn.blackboard.com/webapps/login/">
                                                 <span class="fa fa-clipboard" aria-hidden="true"></span>
-                                                <h4>Blackboard Learn</h4>
+                                                <h4>Blackboard Learn.</h4>
                                             </a>
                                         </div>
                                     </div>
@@ -61,6 +74,10 @@
                             </li>
                         </ul>
                     </li>
+
+
+
+
                     <li class="dropdown yamm-fw static" ng-class="{'dropdown-static': (appClass == 'webapp home-webapp' || appClass == 'webapp bento-webapp')}" dropdown-sticky>
                         <a href="#" aria-label="Search library resources" class="dropdown-toggle icon-only" ng-click="mainNavbarCollapsed = false;">
                             <span class="fa fa-search" aria-hidden="true"></span>
@@ -102,7 +119,34 @@
                         </button>
                     </li>
                 </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             </div>
+
             <div class="collapse navbar-collapse" collapse="!mainNavbarCollapsed">
                 <ul class="nav navbar-nav navbar-right navbar-main">
                     <li class="dropdown yamm-fw">
@@ -328,7 +372,6 @@
                                         </div>
                                     </div>
                                 </div>
-
                             </li>
                         </ul>
                     </li>
@@ -360,11 +403,14 @@
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="/about/libraries-policies/">
-                                                <span class="fa fa-sitemap" aria-hidden="true"></span>
-                                                <h4>Policies</h4>
-                                                <p>Learn about libraries policies and procedures</p>
-                                            </a>
+                                            <div class="service-list">
+                                                <span class="fa fa-university" aria-hidden="true"></span>
+                                                <h4>About the Libraries</h4>
+                                                <ul>
+                                                    <li><a href="/about/about-the-libraries/">Branch libraries information</a></li>
+                                                    <li><a href="/wp-content/uploads/2017/04/Strategic-Plan-11162016-FINAL.pdf">UA Libraries Strategic Plan</a></li>
+                                                </ul>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -376,10 +422,10 @@
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="/about/support-ua-libraries/">
-                                                <span class="fa fa-gift" aria-hidden="true"></span>
-                                                <h4>Support UA Libraries</h4>
-                                                <p>Help strengthen the libraries collections, services, and resources </p>
+                                            <a class="service-card" href="/about/libraries-policies/">
+                                                <span class="fa fa-sitemap" aria-hidden="true"></span>
+                                                <h4>Policies</h4>
+                                                <p>Learn about libraries policies and procedures</p>
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
@@ -390,15 +436,11 @@
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <div class="service-list">
-                                                <span class="fa fa-university" aria-hidden="true"></span>
-                                                <h4>About the Libraries</h4>
-                                                <ul>
-                                                    <li><a href="/about/about-the-libraries/">Branch libraries information</a></li>
-                                                    <li><a href="/wp-content/uploads/2017/04/Strategic-Plan-11162016-FINAL.pdf">UA Libraries Strategic Plan (PDF)</a></li>
-                                                    <li><a href="/wp-content/uploads/2017/09/top-level-organizational-chart-sept2017.pdf">UA Libraries Organizational Chart (PDF)</a></li>
-                                                </ul>
-                                            </div>
+                                            <a class="service-card" href="/about/support-ua-libraries/">
+                                                <span class="fa fa-gift" aria-hidden="true"></span>
+                                                <h4>Support UA Libraries</h4>
+                                                <p>Help strengthen the libraries collections, services, and resources </p>
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
@@ -476,8 +518,157 @@
                             </li>
                         </ul>
                     </li>
+
+
+
+
+
+                    <li class="dropdown yamm-fw hidden-sm hidden-xs" dropdown-sticky>
+                        <a href="#" class="dropdown-toggle icon-only" title="My Accounts" aria-label="My Accounts" ng-click="mainNavbarCollapsed = false;">
+                            <span class="fa fa-user" aria-hidden="true"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <div class="yamm-content">
+                                    <h3 class="h2">My Accounts</h3>
+                                    <div class="row">
+                                        <div class="col-xs-12 col-sm-6 col-md-4">
+                                            <a class="service-card" href="http://library.ua.edu/vwebv/myAccount">
+                                                <span class="fa fa-search" aria-hidden="true"></span>
+                                                <h4>My Account (Catalog)</h4>
+                                            </a>
+                                        </div>
+
+                                        <div class="col-xs-12 col-sm-6 col-md-4">
+                                            <a class="service-card" href="https://ua.illiad.oclc.org/illiad/">
+                                                <span class="fa fa-exchange" aria-hidden="true"></span>
+                                                <h4>Interlibrary Loan (ILLiad)</h4>
+                                            </a>
+                                        </div>
+
+                                        <div class="col-xs-12 col-sm-6 col-md-4">
+                                            <a class="service-card" href="/research-tools/refworks/">
+                                                <span class="fa fa-file-text-o" aria-hidden="true"></span>
+                                                <h4>RefWorks</h4>
+                                            </a>
+                                        </div>
+
+                                    </div>
+                                    <div class="row">
+
+                                        <div class="col-xs-12 col-sm-6 col-md-4">
+                                            <a class="service-card" href="https://mybama.ua.edu/">
+                                                <span class="fa fa-university" aria-hidden="true"></span>
+                                                <h4>myBama</h4>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-4">
+                                            <a class="service-card" href="https://ualearn.blackboard.com/webapps/login/">
+                                                <span class="fa fa-clipboard" aria-hidden="true"></span>
+                                                <h4>Blackboard Learn.</h4>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 </ul>
             </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div>
+
+                <ul class="nav navbar-nav navbar-right">
+
+
+
+
+
+                    <li class="dropdown yamm-fw static" ng-class="{'dropdown-static': (appClass == 'webapp home-webapp' || appClass == 'webapp bento-webapp')}" dropdown-sticky>
+                       <!-- <a href="#" aria-label="Search library resources" class="dropdown-toggle icon-only hidden-sm hidden-xs" ng-click="mainNavbarCollapsed = false;">
+                            <span class="fa fa-search" aria-hidden="true"></span>
+                        </a>-->
+                        <ul class="dropdown-menu onesearch-box">
+                            <li>
+                                <div class="yamm-content" ng-controller="OneSearchCtrl">
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <form ng-submit="search()" class="onesearch-form">
+
+                                                    <suggest-one-search prompt="Search journals, articles, books, website & more" model="searchText" search="search"></suggest-one-search>
+
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <a href="http://guides.lib.ua.edu/onesearch-howto" class="what-is-link" id="whatAmISearching" title="What am I searching?"><span class="fa fa-info-circle" aria-hidden="true"></span>  What am I searching?</a>
+                                                <div class="checkbox scout-checkbox" style="float: right;">
+                                                    <a href="http://search.ebscohost.com/login.aspx?groupid=main&amp;profid=eds&amp;direct=true&amp;setup=1" class="what-is-link" style="margin-top: 0px;"><span class="fa fa-binoculars" aria-hidden="true"></span> Scout advanced search</a>
+                                                    <label ng-click="gaScoutOnly()" style="margin-right: 15px;">
+                                                        Only search Scout
+                                                        <input type="checkbox" ng-model="scoutCheckbox">
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         </div>
     </nav>
 </header>

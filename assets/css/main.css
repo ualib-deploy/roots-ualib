@@ -6409,6 +6409,11 @@ fieldset[disabled] .navbar-mega .btn-link:focus {
 .navbar-mega .navbar-header {
   float: left;
 }
+@media (min-width: 480px) and (max-width: 991px) {
+  .navbar-mega .navbar-header {
+    width: 100%;
+  }
+}
 .navbar-mega .navbar-header .navbar-brand {
   padding: 15px 5px;
   padding-top: 13.19px;
@@ -6693,6 +6698,11 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
 }
 .navbar-mega-inverse .navbar-header {
   float: left;
+}
+@media (min-width: 480px) and (max-width: 991px) {
+  .navbar-mega-inverse .navbar-header {
+    width: 100%;
+  }
 }
 .navbar-mega-inverse .navbar-header .navbar-brand {
   padding: 15px 5px;
