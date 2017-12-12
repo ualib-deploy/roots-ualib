@@ -7,23 +7,7 @@
                     <img src="/wp-content/themes/roots-ualib/assets/img/new-ualib-logo.png" class="hidden-xs" rel="home" alt="University of Alabama Libraries"/>
                     <span class="visible-xs">UA Libraries</span>
                 </a>
-
-
-
-
-
-
-
-
-
-
-
-
                 <ul class="nav navbar-nav navbar-right hidden-lg hidden-md">
-
-
-
-
                     <li class="dropdown yamm-fw hidden-md hidden-lg" dropdown-sticky>
                         <a href="#" class="dropdown-toggle icon-only" title="My Accounts" aria-label="My Accounts" ng-click="mainNavbarCollapsed = false;">
                             <span class="fa fa-user" aria-hidden="true"></span>
@@ -39,24 +23,20 @@
                                                 <h4>My Library (Catalog)</h4>
                                             </a>
                                         </div>
-
                                         <div class="col-xs-12 col-sm-6 col-md-4">
                                             <a class="service-card" href="https://ua.illiad.oclc.org/illiad/">
                                                 <span class="fa fa-exchange" aria-hidden="true"></span>
                                                 <h4>Interlibrary Loan (ILLiad)</h4>
                                             </a>
                                         </div>
-
                                         <div class="col-xs-12 col-sm-6 col-md-4">
                                             <a class="service-card" href="/research-tools/refworks/">
                                                 <span class="fa fa-file-text-o" aria-hidden="true"></span>
                                                 <h4>RefWorks</h4>
                                             </a>
                                         </div>
-
                                     </div>
                                     <div class="row">
-
                                         <div class="col-xs-12 col-sm-6 col-md-4">
                                             <a class="service-card" href="https://mybama.ua.edu/">
                                                 <span class="fa fa-university" aria-hidden="true"></span>
@@ -74,10 +54,6 @@
                             </li>
                         </ul>
                     </li>
-
-
-
-
                     <li class="dropdown yamm-fw static" ng-class="{'dropdown-static': (appClass == 'webapp home-webapp' || appClass == 'webapp bento-webapp')}" dropdown-sticky>
                         <a href="#" aria-label="Search library resources" class="dropdown-toggle icon-only" ng-click="mainNavbarCollapsed = false;">
                             <span class="fa fa-search" aria-hidden="true"></span>
@@ -89,9 +65,7 @@
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <form ng-submit="search()" class="onesearch-form">
-
                                                     <suggest-one-search prompt="Search journals, articles, books, website & more" model="searchText" search="search"></suggest-one-search>
-
                                                 </form>
                                             </div>
                                         </div>
@@ -119,34 +93,7 @@
                         </button>
                     </li>
                 </ul>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             </div>
-
             <div class="collapse navbar-collapse" collapse="!mainNavbarCollapsed">
                 <ul class="nav navbar-nav navbar-right navbar-main">
                     <li class="dropdown yamm-fw">
@@ -273,8 +220,6 @@
                         <ul class="dropdown-menu">
                             <li>
                                 <div class="yamm-content">
-
-
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <div class="service-list">
@@ -353,8 +298,6 @@
                                             </a>
                                         </div>
                                     </div>
-
-
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="/using-the-library/library-instruction/">
@@ -513,17 +456,11 @@
                                                 </ul>
                                             </div>
                                         </div>
-
                                     </div>
                                 </div>
                             </li>
                         </ul>
                     </li>
-
-
-
-
-
                     <li class="dropdown yamm-fw hidden-sm hidden-xs" dropdown-sticky>
                         <a href="#" class="dropdown-toggle icon-only" title="My Accounts" aria-label="My Accounts" ng-click="mainNavbarCollapsed = false;">
                             <span class="fa fa-user" aria-hidden="true"></span>
@@ -539,24 +476,20 @@
                                                 <h4>My Account (Catalog)</h4>
                                             </a>
                                         </div>
-
                                         <div class="col-xs-12 col-sm-6 col-md-4">
                                             <a class="service-card" href="https://ua.illiad.oclc.org/illiad/">
                                                 <span class="fa fa-exchange" aria-hidden="true"></span>
                                                 <h4>Interlibrary Loan (ILLiad)</h4>
                                             </a>
                                         </div>
-
                                         <div class="col-xs-12 col-sm-6 col-md-4">
                                             <a class="service-card" href="/research-tools/refworks/">
                                                 <span class="fa fa-file-text-o" aria-hidden="true"></span>
                                                 <h4>RefWorks</h4>
                                             </a>
                                         </div>
-
                                     </div>
                                     <div class="row">
-
                                         <div class="col-xs-12 col-sm-6 col-md-4">
                                             <a class="service-card" href="https://mybama.ua.edu/">
                                                 <span class="fa fa-university" aria-hidden="true"></span>
@@ -574,53 +507,11 @@
                             </li>
                         </ul>
                     </li>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 </ul>
             </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             <div>
-
                 <ul class="nav navbar-nav navbar-right">
-
-
-
-
-
                     <li class="dropdown yamm-fw static" ng-class="{'dropdown-static': (appClass == 'webapp home-webapp' || appClass == 'webapp bento-webapp')}" dropdown-sticky>
-                       <!-- <a href="#" aria-label="Search library resources" class="dropdown-toggle icon-only hidden-sm hidden-xs" ng-click="mainNavbarCollapsed = false;">
-                            <span class="fa fa-search" aria-hidden="true"></span>
-                        </a>-->
                         <ul class="dropdown-menu onesearch-box">
                             <li>
                                 <div class="yamm-content" ng-controller="OneSearchCtrl">
@@ -628,9 +519,7 @@
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <form ng-submit="search()" class="onesearch-form">
-
                                                     <suggest-one-search prompt="Search journals, articles, books, website & more" model="searchText" search="search"></suggest-one-search>
-
                                                 </form>
                                             </div>
                                         </div>
@@ -653,23 +542,6 @@
                     </li>
                 </ul>
             </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </div>
     </nav>
 </header>
