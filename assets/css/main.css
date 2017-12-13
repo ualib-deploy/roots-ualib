@@ -9665,11 +9665,13 @@ footer > .sub-footer {
   position: absolute;
   bottom: 0;
   padding: 15px;
+  padding-left: 30px;
+  padding-right: 30px;
   background-color: rgba(0, 0, 0, 0.5);
 }
 .ualib-image-carousel .rn-carousel-control {
-  opacity: 0.75;
-  background-color: rgba(0, 0, 0, 0.75);
+  opacity: 1;
+  background-color: #428bca;
   padding: 15px;
   border-radius: 4px;
   -webkit-transition: opacity 0.2s ease-out;
