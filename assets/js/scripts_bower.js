@@ -25786,7 +25786,7 @@ makeSwipeDirective('ngSwipeRight', 1, 'swiperight');
 
 /**
  * Angular Carousel - Mobile friendly touch carousel for AngularJS
- * @version v0.3.12 - 2017-11-17
+ * @version v0.3.12 - 2017-12-13
  * @link http://revolunet.github.com/angular-carousel
  * @author Julien Bouquillon <julien@revolunet.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -25925,8 +25925,15 @@ angular.module('angular-carousel').run(['$templateCache', function($templateCach
     .service('computeCarouselSlideStyle', ["DeviceCapabilities", function(DeviceCapabilities) {
         // compute transition transform properties for a given slide and global offset
         return function(slideIndex, offset, transitionType) {
+
+            var curDisplayType = 'none';
+            var testIndex = (slideIndex * 100) + offset;
+            if (testIndex == 0){
+                curDisplayType = 'inline-block';
+            }
+
             var style = {
-                    display: 'inline-block'
+                    display: curDisplayType
                 },
                 opacity,
                 absoluteLeft = (slideIndex * 100) + offset,
@@ -26241,8 +26248,8 @@ angular.module('angular-carousel').run(['$templateCache', function($templateCach
                             // dont use a directive for this
                             var nextSlideIndexCompareValue = isRepeatBased ? repeatCollection.replace('::', '') + '.length - 1' : currentSlides.length - 1;
                             var tpl = '<div class="rn-carousel-controls">\n' +
-                                '  <span class="rn-carousel-control rn-carousel-control-prev" ng-keyup="$event.keyCode == 13 && prevSlide()" ng-click="prevSlide()" role="button" tabindex="0" ng-if="carouselIndex > 0"></span>\n' +
-                                '  <span class="rn-carousel-control rn-carousel-control-next" ng-keyup="$event.keyCode == 13 && nextSlide()" ng-click="nextSlide()" role="button" tabindex="0" ng-if="carouselIndex < ' + nextSlideIndexCompareValue + '"></span>\n' +
+                                '  <span class="rn-carousel-control rn-carousel-control-prev" aria-label="Previous slide" ng-keyup="$event.keyCode == 13 && prevSlide()" ng-click="prevSlide()" role="button" tabindex="0" ng-if="carouselIndex > 0"></span>\n' +
+                                '  <span class="rn-carousel-control rn-carousel-control-next" aria-label="Next slide" ng-keyup="$event.keyCode == 13 && nextSlide()" ng-click="nextSlide()" role="button" tabindex="0" ng-if="carouselIndex < ' + nextSlideIndexCompareValue + '"></span>\n' +
                                 '</div>';
                             iElement.parent().append($compile(angular.element(tpl))(scope));
                         }
