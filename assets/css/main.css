@@ -9683,6 +9683,9 @@ footer > .sub-footer {
   bottom: 0;
   cursor: pointer;
 }
+.ualib-image-carousel .rn-carousel-control:focus {
+  border-width: 3px;
+}
 @media (max-width: 991px) {
   .ualib-image-carousel .rn-carousel-controls {
     display: block;
