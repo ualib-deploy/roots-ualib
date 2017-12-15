@@ -9683,6 +9683,11 @@ footer > .sub-footer {
   bottom: 0;
   cursor: pointer;
 }
+@media (max-width: 991px) {
+  .ualib-image-carousel .rn-carousel-controls {
+    display: block;
+  }
+}
 .ualib-image-carousel .pause-play {
   position: absolute;
   bottom: 10px;
