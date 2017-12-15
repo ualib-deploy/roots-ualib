@@ -35,12 +35,15 @@
     position: absolute;
     bottom: 0;
     padding: 15px;
+    padding-left: 30px;
+    padding-right: 30px;
     background-color: rgba(0,0,0,.5);
   }
 
   .rn-carousel-control {
-    opacity: 0.75;
-    background-color: rgba(0, 0, 0, 0.75);
+    opacity: 1;
+    border-width: 0px;
+    background-color: #428bca;
     padding: 15px;
     border-radius: 4px;
     -webkit-transition: opacity 0.2s ease-out;
@@ -49,6 +52,16 @@
     position: absolute;
     bottom: 0;
     cursor: pointer;
+
+    &:focus {
+      border-width: 3px;
+    }
+  }
+
+  .rn-carousel-controls{
+    @media (max-width: @screen-sm-max){
+      display: block;
+    }
   }
 
   .pause-play {
