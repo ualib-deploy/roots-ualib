@@ -9673,23 +9673,35 @@ footer > .sub-footer {
   opacity: 1;
   border-width: 0px;
   background-color: #428bca;
-  padding: 15px;
-  border-radius: 4px;
+  padding: 2em;
+  border-radius: 0px;
   -webkit-transition: opacity 0.2s ease-out;
   -o-transition: opacity 0.2s ease-out;
      transition: opacity 0.2s ease-out;
   font-size: .3em;
   position: absolute;
+  top: 90%;
   bottom: 0;
   cursor: pointer;
+}
+@media (min-width: 992px) and (max-width: 1199px) {
+  .ualib-image-carousel .rn-carousel-control {
+    top: 88%;
+  }
+}
+@media (min-width: 480px) and (max-width: 991px) {
+  .ualib-image-carousel .rn-carousel-control {
+    top: 92%;
+  }
 }
 .ualib-image-carousel .rn-carousel-control:focus {
   border-width: 3px;
 }
-@media (max-width: 991px) {
-  .ualib-image-carousel .rn-carousel-controls {
-    display: block;
-  }
+.ualib-image-carousel .rn-carousel-control-prev {
+  left: 0;
+}
+.ualib-image-carousel .rn-carousel-control-next {
+  right: 0;
 }
 .ualib-image-carousel .pause-play {
   position: absolute;
