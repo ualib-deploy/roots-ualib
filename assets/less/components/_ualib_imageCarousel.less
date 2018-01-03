@@ -44,25 +44,47 @@
     opacity: 1;
     border-width: 0px;
     background-color: #428bca;
-    padding: 15px;
-    border-radius: 4px;
+    padding: 2em;
+    border-radius: 0px;
     -webkit-transition: opacity 0.2s ease-out;
     transition: opacity 0.2s ease-out;
     font-size: .3em;
     position: absolute;
+    top: 90%;
     bottom: 0;
     cursor: pointer;
+
+    @media (min-width: @screen-md-min) and (max-width: @screen-md-max){
+      top: 88%;
+    }
+    @media (max-width: @screen-sm-max){
+      top: 92%;
+    }
+
 
     &:focus {
       border-width: 3px;
     }
   }
 
-  .rn-carousel-controls{
-    @media (max-width: @screen-sm-max){
+  .rn-carousel-controls {
+    @media (max-width: @screen-sm-max) {
       display: block;
     }
   }
+
+  .rn-carousel-control-prev {
+    left: 0;
+  }
+
+  .rn-carousel-control-next {
+    right: 0;
+  }
+
+
+
+
+
 
   .pause-play {
     position: absolute;
