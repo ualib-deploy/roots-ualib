@@ -57,7 +57,7 @@
     @media (min-width: @screen-md-min) and (max-width: @screen-md-max){
       top: 88%;
     }
-    @media (min-width: @screen-xs-min) and (max-width: @screen-sm-max){
+    @media (max-width: @screen-sm-max){
       top: 92%;
     }
 
@@ -65,9 +65,12 @@
     &:focus {
       border-width: 3px;
     }
+  }
 
-
-
+  .rn-carousel-controls {
+    @media (max-width: @screen-sm-max) {
+      display: block;
+    }
   }
 
   .rn-carousel-control-prev {
