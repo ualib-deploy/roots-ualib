@@ -263,12 +263,12 @@
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <div class="service-list">
                                                 <span class="fa fa-desktop" aria-hidden="true"></span>
-                                                <h4>Computers, Software, &amp; Equipment</h4>
+                                                <h4>Computers and Equipment</h4>
                                                 <ul>
                                                     <li><a href="/using-the-library/photocopying/">Print, Scan, Copy</a></li>
                                                     <li><a href="/using-the-library/3d-print/">3D Printing</a></li>
                                                     <li class="menu-laptop-computers"><a href="/using-the-library/equipment/">Equipment</a></li>
-                                                    <li class="menu-library-software-list"><a href="/#/software">Library Software List</a></li>
+                                                    <li><a href="/using-the-library/equipment/whisper-booths">Whisper Booths</a></li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -311,6 +311,13 @@
                                                 <span class="fa fa-pencil" aria-hidden="true"></span>
                                                 <h4>Information for Students</h4>
                                                 <p>Learn more about the libraries, materials, and our services</p>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="/#/software">
+                                                <span class="fa fa-pencil" aria-hidden="true"></span>
+                                                <h4>Library Software</h4>
+                                                <p>Browse a list of the software available on library computers</p>
                                             </a>
                                         </div>
                                     </div>
