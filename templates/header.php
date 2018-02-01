@@ -514,7 +514,7 @@
                             </li>
                         </ul>
                     </li>
-                    <li class="dropdown yamm-fw static" ng-class="{'dropdown-static': (appClass == 'webapp home-webapp' || appClass == 'webapp bento-webapp')}" dropdown-sticky>
+                    <li class="dropdown yamm-fw static hidden-xs hidden-sm" ng-class="{'dropdown-static': (appClass == 'webapp home-webapp' || appClass == 'webapp bento-webapp')}" dropdown-sticky>
                         <a href="#" aria-label="Search library resources" class="dropdown-toggle icon-only" ng-click="mainNavbarCollapsed = false;">
                             <span class="fa fa-search" aria-hidden="true"></span>
                         </a>
