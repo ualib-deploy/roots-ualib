@@ -549,39 +549,6 @@
                     </li>
                 </ul>
             </div>
-            <div>
-                <ul class="nav navbar-nav navbar-right">
-                    <li class="dropdown yamm-fw static" ng-class="{'dropdown-static': (appClass == 'webapp home-webapp' || appClass == 'webapp bento-webapp')}" dropdown-sticky>
-                        <ul class="dropdown-menu onesearch-box">
-                            <li>
-                                <div class="yamm-content" ng-controller="OneSearchCtrl">
-                                    <div class="container">
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <form ng-submit="search()" class="onesearch-form">
-                                                    <suggest-one-search prompt="Search journals, articles, books, website & more" model="searchText" search="search"></suggest-one-search>
-                                                </form>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <a href="http://guides.lib.ua.edu/onesearch-howto" class="what-is-link" id="whatAmISearching" title="What am I searching?"><span class="fa fa-info-circle" aria-hidden="true"></span>  What am I searching?</a>
-                                                <div class="checkbox scout-checkbox" style="float: right;">
-                                                    <a href="http://search.ebscohost.com/login.aspx?groupid=main&amp;profid=eds&amp;direct=true&amp;setup=1" class="what-is-link" style="margin-top: 0px;"><span class="fa fa-binoculars" aria-hidden="true"></span> Scout advanced search</a>
-                                                    <label ng-click="gaScoutOnly()" style="margin-right: 15px;">
-                                                        Only search Scout
-                                                        <input type="checkbox" ng-model="scoutCheckbox">
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
         </div>
     </nav>
 </header>
