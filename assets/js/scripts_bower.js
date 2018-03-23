@@ -27985,14 +27985,17 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "                    class=\"image news-carousel-small\">\n" +
     "                    <li ng-repeat=\"img in newsItem.images track by $index\">\n" +
     "                        <div class=\"layer text-center\">\n" +
-    "                            <div class=\"news-carousel-image-small\"\n" +
+    "                            <div id=\"newsImage\" class=\"news-carousel-image-small\"\n" +
     "                                 ng-style=\"{'background-image':img.styles}\"\n" +
     "                                 ng-class=\"{portrait: img.isPortrait}\"\n" +
     "                                 ng-click=\"enlargeImages(true, $index)\">\n" +
     "                            </div>\n" +
+    "\n" +
     "                        </div>\n" +
+    "\n" +
     "                    </li>\n" +
     "                </ul>\n" +
+    "                <label for=\"newsImage\">{{newsItem.altText}}</label>\n" +
     "                <div rn-carousel-indicators ng-if=\"newsItem.images.length > 1\" slides=\"newsItem.images\" rn-carousel-index=\"curImage\">\n" +
     "                </div>\n" +
     "            </div>\n" +
@@ -28087,7 +28090,7 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "                                                                  | orderBy:['-sticky','-created']\">\n" +
     "                <div class=\"media-left hidden-sm hidden-xs\">\n" +
     "                    <span class=\"news-list-tb\" ng-class=\"{img: item.tb}\">\n" +
-    "                        <img class=\"media-object\" ng-src=\"{{item.tb}}\" ng-if=\"item.tb\" />\n" +
+    "                        <img class=\"media-object\" ng-src=\"{{item.tb}}\" alt={{item.altText}} ng-if=\"item.tb\" />\n" +
     "                        <span class=\"media-object\"\n" +
     "                          ng-if=\"item.type == 0 && !item.tb\"><span class=\"fa fa-newspaper-o\"></span></span>\n" +
     "                        <span class=\"media-object\"\n" +
@@ -28484,8 +28487,10 @@ angular.module('ualib.news', [
             image.onload = function(){
                 this.styles = 'url('+this.src+')';
 
+
                 if (this.width/this.height < 1.3){
                     this.isPortrait = true;
+                    console.log("PORTRAIT TRUE!");
                 }
                 item.images[i] = this;
 
