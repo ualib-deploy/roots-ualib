@@ -10729,7 +10729,7 @@ angular.module("manageNews/manageNewsItemFields.tpl.html", []).run(["$templateCa
     "    <div class=\"col-md-6 form-group\">\n" +
     "        <label for=\"altText\">Alternative text (note: required for accessibliity)</label>\n" +
     "        <div id=\"altText\">\n" +
-    "            <input ng-model=\"news.altText\" style=\"width: 100%;\"></input>\n" +
+    "            <input ng-model=\"news.altText\" required style=\"width: 100%;\"></input>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
@@ -27989,40 +27989,6 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "            </h5>\n" +
     "            <p class=\"text-justify\" ng-bind-html=\"newsItem.description\"></p>\n" +
     "        </div>\n" +
-    "    </div>\n" +
-    "    <div ng-show=\"showEnlarged\">\n" +
-    "        <div class=\"carousel-lg\" ng-click=\"enlargeImages(false)\">\n" +
-    "            <button type=\"button\" class=\"close\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n" +
-    "            <ul rn-carousel rn-carousel-controls rn-carousel-index=\"curEnlImage\" class=\"image\">\n" +
-    "                <li ng-repeat=\"img in newsItem.images\">\n" +
-    "                    <div class=\"layer\"><img class=\"fullsize-img\" ng-src=\"{{img.src}}\" ng-click=\"nextSlide()\"/></div>\n" +
-    "                </li>\n" +
-    "            </ul>\n" +
-    "            <div class=\"text-center\" rn-carousel-indicators ng-if=\"newsItem.images.length > 1\" slides=\"newsItem.images\" rn-carousel-index=\"curEnlImage\"></div>\n" +
-    "\n" +
-    "        </div>\n" +
-    "\n" +
-    "        <!--<div class=\"news-carousel-container-large\">-->\n" +
-    "        <!--<ul rn-carousel rn-carousel-controls rn-carousel-buffered-->\n" +
-    "        <!--rn-carousel-index=\"curEnlImage\" rn-carousel-transition=\"none\"-->\n" +
-    "        <!--class=\"image news-carousel-large\" rn-carousel-controls-allow-loop>-->\n" +
-    "        <!--<li ng-repeat=\"img in newsItem.images\">-->\n" +
-    "        <!--<div class=\"layer text-center\">-->\n" +
-    "        <!--<div class=\"news-carousel-image-large\"-->\n" +
-    "        <!--ng-style=\"{'background-image':'url('+img+')'}\" ng-click=\"setCurEnlImage($event, $index)\">-->\n" +
-    "        <!--</div>-->\n" +
-    "        <!--</div>-->\n" +
-    "        <!--</li>-->\n" +
-    "        <!--</ul>-->\n" +
-    "        <!--<div rn-carousel-indicators ng-if=\"newsItem.images.length > 1\" slides=\"newsItem.images\" rn-carousel-index=\"curEnlImage\">-->\n" +
-    "        <!--&lt;!&ndash;<div class=\"news-carousel-large-indicators text-center\" ng-if=\"newsItem.images.length > 1\">&ndash;&gt;-->\n" +
-    "        <!--&lt;!&ndash;<span ng-repeat=\"img in newsItem.images\" class=\"clickable-item\"&ndash;&gt;-->\n" +
-    "        <!--&lt;!&ndash;ng-click=\"setCurEnlImage($event, $index)\">&ndash;&gt;-->\n" +
-    "        <!--&lt;!&ndash;<span class=\"fa fa-2x fa-circle-o\" ng-class=\"{'fa-3x': $index == $parent.curEnlImage}\">&ndash;&gt;-->\n" +
-    "        <!--&lt;!&ndash;</span>&ndash;&gt;-->\n" +
-    "        <!--&lt;!&ndash;</span>&ndash;&gt;-->\n" +
-    "        <!--&lt;!&ndash;</div>&ndash;&gt;-->\n" +
-    "        <!--</div>-->\n" +
     "    </div>\n" +
     "</div>\n" +
     "");

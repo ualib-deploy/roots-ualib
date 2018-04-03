@@ -716,15 +716,18 @@ div.rn-carousel-indicator span {
 }
 /*# sourceMappingURL=dist/ualib.news.css.map */
 .news-carousel-container-small .news-image {
-  box-shadow: 0 0 5px 5px rgba(0, 0, 0, 0.45);
+  border: 1px solid #ccc;
+  border-top-width: 0;
+  /*Keeps "View Fuil Image" in alignment w/ top edge*/
   margin: auto;
   max-height: 500px;
-  max-width: 748px;
   margin-bottom: 20px;
+  margin-top: 10px;
 }
 .news-carousel-container-small .image-holder:before {
   content: 'View Full Image';
   margin: auto;
+  margin-top: 10px;
   width: 400px;
   position: absolute;
   z-index: 2000;
@@ -748,7 +751,6 @@ div.rn-carousel-indicator span {
   height: 275px;
   margin: auto;
   background-color: #999;
-  border: 1px solid #ccc;
 }
 div.rn-carousel-indicator span {
   color: #aaa;
@@ -764,7 +766,7 @@ div.rn-carousel-indicator span.active {
   background-position: 50% 20%;
   background-repeat: no-repeat;
   background-size: cover;
-  box-shadow: 0 0 35px 10px rgba(0, 0, 0, 0.45);
+  border: 1px solid;
 }
 .news-carousel-image-small.portrait {
   background: no-repeat 50% 25%;
