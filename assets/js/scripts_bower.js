@@ -10701,16 +10701,16 @@ angular.module("manageNews/manageNewsItemFields.tpl.html", []).run(["$templateCa
     "</div>\n" +
     "<div class=\"row\">\n" +
     "    <div class=\"col-md-2 form-group\">\n" +
-    "        <label for=\"browse\">Select Images</label>\n" +
+    "        <label for=\"browse\">Select Image</label>\n" +
     "        <div id=\"browse\">\n" +
-    "            <button type=\"file\" ngf-select=\"\" ng-model=\"news.picFile\" accept=\"image/*\" ngf-multiple=\"true\"\n" +
+    "            <button type=\"file\" ngf-select=\"\" ng-model=\"news.picFile\" ngf-multiple=\"false\" accept=\"image/*\"\n" +
     "                    ngf-change=\"generateThumb($files, news)\" class=\"btn btn-success\">\n" +
     "                <span class=\"fa fa-fw fa-plus\"></span>Browse\n" +
     "            </button>\n" +
     "        </div>\n" +
     "    </div>\n" +
-    "    <div class=\"col-md-10 form-group\">\n" +
-    "        <label for=\"selected\">Selected Images</label>\n" +
+    "    <div class=\"col-md-4 form-group\">\n" +
+    "        <label for=\"selected\">Selected Image</label>\n" +
     "        <div id=\"selected\">\n" +
     "            <div class=\"col-md-3\" ng-repeat=\"img in news.images\">\n" +
     "                <img ng-src=\"{{img.image}}\" width=\"150px\" height=\"100px\">\n" +
@@ -10724,6 +10724,12 @@ angular.module("manageNews/manageNewsItemFields.tpl.html", []).run(["$templateCa
     "                    <span class=\"fa fa-fw fa-close\"></span>\n" +
     "                </button>\n" +
     "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-6 form-group\">\n" +
+    "        <label for=\"altText\">Alternative text (note: required for accessibliity)</label>\n" +
+    "        <div id=\"altText\">\n" +
+    "            <input ng-model=\"news.altText\" required style=\"width: 100%;\"></input>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
@@ -14685,6 +14691,7 @@ angular.module('manage.manageNews', ['ngFileUpload', 'oc.lazyLoad', 'ui.tinymce'
                                 var newNews = {};
                                 newNews.nid = data.id;
                                 newNews.images = angular.copy(data.images);
+                                newNews.altText = $scope.newNews.altText
                                 newNews.title = $scope.newNews.title;
                                 newNews.description = $scope.newNews.description;
                                 if ($scope.newNews.activeFrom > 0)
@@ -14742,6 +14749,7 @@ angular.module('manage.manageNews', ['ngFileUpload', 'oc.lazyLoad', 'ui.tinymce'
                                 var newNews = {};
                                 newNews.nid = response.data.id;
                                 newNews.images = angular.copy(response.data.images);
+                                newNews.altText = $scope.newNews.altText;
                                 newNews.title = $scope.newNews.title;
                                 newNews.description = $scope.newNews.description;
                                 if ($scope.newNews.activeFrom > 0)
@@ -27972,20 +27980,8 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "        </div>\n" +
     "        <div class=\"col-md-8 col-md-pull-4\">\n" +
     "            <div class=\"text-center news-carousel-container-small\" ng-if=\"newsItem.images.length > 0\">\n" +
-    "                <ul rn-carousel rn-carousel-auto-slide rn-carousel-buffered\n" +
-    "                    rn-carousel-index=\"curImage\" rn-carousel-locked=\"isLocked\"\n" +
-    "                    class=\"image news-carousel-small\">\n" +
-    "                    <li ng-repeat=\"img in newsItem.images track by $index\">\n" +
-    "                        <div class=\"layer text-center\">\n" +
-    "                            <div class=\"news-carousel-image-small\"\n" +
-    "                                 ng-style=\"{'background-image':img.styles}\"\n" +
-    "                                 ng-class=\"{portrait: img.isPortrait}\"\n" +
-    "                                 ng-click=\"enlargeImages(true, $index)\">\n" +
-    "                            </div>\n" +
-    "                        </div>\n" +
-    "                    </li>\n" +
-    "                </ul>\n" +
-    "                <div rn-carousel-indicators ng-if=\"newsItem.images.length > 1\" slides=\"newsItem.images\" rn-carousel-index=\"curImage\">\n" +
+    "                <div class=\"layer text-center image-holder\" ng-repeat=\"img in newsItem.images track by $index\">\n" +
+    "                    <img class=\"news-image\" ng-src=\"{{img.src}}\" ng-click=\"enlargeImages(true, $index)\" alt=\"{{newsItem.altText}}\"/>\n" +
     "                </div>\n" +
     "            </div>\n" +
     "            <h5 class=\"text-muted\">\n" +
@@ -27993,40 +27989,6 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "            </h5>\n" +
     "            <p class=\"text-justify\" ng-bind-html=\"newsItem.description\"></p>\n" +
     "        </div>\n" +
-    "    </div>\n" +
-    "    <div ng-show=\"showEnlarged\">\n" +
-    "        <div class=\"carousel-lg\" ng-click=\"enlargeImages(false)\">\n" +
-    "            <button type=\"button\" class=\"close\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n" +
-    "            <ul rn-carousel rn-carousel-controls rn-carousel-index=\"curEnlImage\" class=\"image\">\n" +
-    "                <li ng-repeat=\"img in newsItem.images\">\n" +
-    "                    <div class=\"layer\"><img class=\"fullsize-img\" ng-src=\"{{img.src}}\" ng-click=\"nextSlide()\"/></div>\n" +
-    "                </li>\n" +
-    "            </ul>\n" +
-    "            <div class=\"text-center\" rn-carousel-indicators ng-if=\"newsItem.images.length > 1\" slides=\"newsItem.images\" rn-carousel-index=\"curEnlImage\"></div>\n" +
-    "\n" +
-    "        </div>\n" +
-    "\n" +
-    "        <!--<div class=\"news-carousel-container-large\">-->\n" +
-    "        <!--<ul rn-carousel rn-carousel-controls rn-carousel-buffered-->\n" +
-    "        <!--rn-carousel-index=\"curEnlImage\" rn-carousel-transition=\"none\"-->\n" +
-    "        <!--class=\"image news-carousel-large\" rn-carousel-controls-allow-loop>-->\n" +
-    "        <!--<li ng-repeat=\"img in newsItem.images\">-->\n" +
-    "        <!--<div class=\"layer text-center\">-->\n" +
-    "        <!--<div class=\"news-carousel-image-large\"-->\n" +
-    "        <!--ng-style=\"{'background-image':'url('+img+')'}\" ng-click=\"setCurEnlImage($event, $index)\">-->\n" +
-    "        <!--</div>-->\n" +
-    "        <!--</div>-->\n" +
-    "        <!--</li>-->\n" +
-    "        <!--</ul>-->\n" +
-    "        <!--<div rn-carousel-indicators ng-if=\"newsItem.images.length > 1\" slides=\"newsItem.images\" rn-carousel-index=\"curEnlImage\">-->\n" +
-    "        <!--&lt;!&ndash;<div class=\"news-carousel-large-indicators text-center\" ng-if=\"newsItem.images.length > 1\">&ndash;&gt;-->\n" +
-    "        <!--&lt;!&ndash;<span ng-repeat=\"img in newsItem.images\" class=\"clickable-item\"&ndash;&gt;-->\n" +
-    "        <!--&lt;!&ndash;ng-click=\"setCurEnlImage($event, $index)\">&ndash;&gt;-->\n" +
-    "        <!--&lt;!&ndash;<span class=\"fa fa-2x fa-circle-o\" ng-class=\"{'fa-3x': $index == $parent.curEnlImage}\">&ndash;&gt;-->\n" +
-    "        <!--&lt;!&ndash;</span>&ndash;&gt;-->\n" +
-    "        <!--&lt;!&ndash;</span>&ndash;&gt;-->\n" +
-    "        <!--&lt;!&ndash;</div>&ndash;&gt;-->\n" +
-    "        <!--</div>-->\n" +
     "    </div>\n" +
     "</div>\n" +
     "");
@@ -28079,7 +28041,7 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "                                                                  | orderBy:['-sticky','-created']\">\n" +
     "                <div class=\"media-left hidden-sm hidden-xs\">\n" +
     "                    <span class=\"news-list-tb\" ng-class=\"{img: item.tb}\">\n" +
-    "                        <img class=\"media-object\" ng-src=\"{{item.tb}}\" ng-if=\"item.tb\" />\n" +
+    "                        <img class=\"media-object\" ng-src=\"{{item.tb}}\" alt={{item.altText}} ng-if=\"item.tb\" />\n" +
     "                        <span class=\"media-object\"\n" +
     "                          ng-if=\"item.type == 0 && !item.tb\"><span class=\"fa fa-newspaper-o\"></span></span>\n" +
     "                        <span class=\"media-object\"\n" +
@@ -28476,8 +28438,10 @@ angular.module('ualib.news', [
             image.onload = function(){
                 this.styles = 'url('+this.src+')';
 
+
                 if (this.width/this.height < 1.3){
                     this.isPortrait = true;
+                    console.log("PORTRAIT TRUE!");
                 }
                 item.images[i] = this;
 

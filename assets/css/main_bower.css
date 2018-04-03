@@ -715,15 +715,20 @@ div.rn-carousel-indicator span {
   color: #428bca;
 }
 /*# sourceMappingURL=dist/ualib.news.css.map */
-.news-carousel-container-small .news-carousel-small {
-  width: auto;
-  height: 275px;
-  margin: auto;
-  background-color: #999;
+.news-carousel-container-small .news-image {
   border: 1px solid #ccc;
+  border-top-width: 0;
+  /*Keeps "View Fuil Image" in alignment w/ top edge*/
+  margin: auto;
+  max-height: 500px;
+  margin-bottom: 20px;
+  margin-top: 10px;
 }
-.news-carousel-container-small .news-carousel-small:before {
+.news-carousel-container-small .image-holder:before {
   content: 'View Full Image';
+  margin: auto;
+  margin-top: 10px;
+  width: 400px;
   position: absolute;
   z-index: 2000;
   top: -100%;
@@ -737,9 +742,15 @@ div.rn-carousel-indicator span {
   -o-transition: opacity .2s;
   transition: opacity .2s;
 }
-.news-carousel-container-small .news-carousel-small:hover:before {
+.news-carousel-container-small .image-holder:hover:before {
   top: 0;
   opacity: 0.65;
+}
+.news-carousel-container-small .news-carousel-small {
+  width: auto;
+  height: 275px;
+  margin: auto;
+  background-color: #999;
 }
 div.rn-carousel-indicator span {
   color: #aaa;
@@ -748,32 +759,20 @@ div.rn-carousel-indicator span.active {
   color: #993333;
 }
 .news-carousel-image-small {
-  width: 100%;
   height: 275px;
+  width: auto;
+  margin: auto;
   cursor: pointer;
   background-position: 50% 20%;
   background-repeat: no-repeat;
   background-size: cover;
-  box-shadow: inset 0 0 30px -8px #000000;
+  border: 1px solid;
 }
 .news-carousel-image-small.portrait {
   background: no-repeat 50% 25%;
   background-size: 45%;
-}
-.news-carousel-image-small.portrait:before {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  z-index: -1;
-  display: block;
-  position: absolute;
-  content: ' ';
-  -webkit-filter: blur(5px);
-  filter: blur(5px);
-  background-position: 50% 20%;
-  background-repeat: repeat-y;
-  background-size: 46%;
-  background-image: linear-gradient(to right, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.45) 100%);
+  width: 45%;
+  height: 45%;
 }
 .carousel-lg {
   height: 100%;
