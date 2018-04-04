@@ -10729,7 +10729,7 @@ angular.module("manageNews/manageNewsItemFields.tpl.html", []).run(["$templateCa
     "    <div class=\"col-md-6 form-group\">\n" +
     "        <label for=\"altText\">Alternative text (note: required for accessibliity)</label>\n" +
     "        <div id=\"altText\">\n" +
-    "            <input ng-model=\"news.altText\" required style=\"width: 100%;\"></input>\n" +
+    "            <input ng-model=\"news.altText\" style=\"width: 100%;\"></input>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
@@ -27981,7 +27981,8 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "        <div class=\"col-md-8 col-md-pull-4\">\n" +
     "            <div class=\"text-center news-carousel-container-small\" ng-if=\"newsItem.images.length > 0\">\n" +
     "                <div class=\"layer text-center image-holder\" ng-repeat=\"img in newsItem.images track by $index\">\n" +
-    "                    <img class=\"news-image\" ng-src=\"{{img.src}}\" ng-click=\"enlargeImages(true, $index)\" alt=\"{{newsItem.altText}}\"/>\n" +
+    "                    <img class=\"news-image\" ng-src=\"{{img.src}}\" ng-click=\"enlargeImages(true, $index)\" ng-if=\"newsItem.altText != null\" ng-attr-alt=\"{{newsItem.altText}}\" />\n" +
+    "                    <img class=\"news-image\" ng-src=\"{{img.src}}\" ng-click=\"enlargeImages(true, $index)\" ng-if=\"newsItem.altText == null\" />\n" +
     "                </div>\n" +
     "            </div>\n" +
     "            <h5 class=\"text-muted\">\n" +
@@ -28512,8 +28513,18 @@ angular.module('ualib.news', [
                }
            }
 
+
+
            loadImages(item).then(function(newsItem){
                $scope.newsItem = newsItem;
+
+               if ($scope.newsItem.altText === ''){
+                   console.log("Alt text empty!");
+                   console.log($scope.newsItem);
+               }
+               else {
+                   console.log($scope.newsItem);
+               }
            });
        });
 
