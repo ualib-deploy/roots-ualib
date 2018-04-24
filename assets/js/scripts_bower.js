@@ -18034,12 +18034,7 @@ angular.module("common/engines/faq/faq.tpl.html", []).run(["$templateCache", fun
   $templateCache.put("common/engines/faq/faq.tpl.html",
     "<div class=\"media\">\n" +
     "    <div class=\"media-body\">\n" +
-    "        <h3 class=\"h4 media-heading\"><a ng-href=\"{{item.link}}\" target=\"_libguides\" ng-click=\"gaPush()\">{{item.question | truncate: 40: '...': true}}</a></h3>\n" +
-    "        <ul class=\"list-inline\">\n" +
-    "            <li>\n" +
-    "                <a ng-href=\"{{resourceLink}}\" class=\"external-link\" ng-if=\"resourceLink\" target=\"_{{engine}}\" ng-click=\"gaMore()\">Results in {{engineName}}</a>\n" +
-    "            </li>\n" +
-    "        </ul>\n" +
+    "        <h3 class=\"h4 media-heading\"><a ng-href=\"{{item.url}}\" target=\"_libguides\" ng-click=\"gaPush()\">{{item.question | truncate: 40: '...': true}}</a></h3>\n" +
     "    </div>\n" +
     "</div>\n" +
     "\n" +
@@ -18067,7 +18062,7 @@ angular.module("common/engines/libguides/libguides.tpl.html", []).run(["$templat
   $templateCache.put("common/engines/libguides/libguides.tpl.html",
     "<div class=\"media\">\n" +
     "    <div class=\"media-body\">\n" +
-    "        <h3 class=\"h4 media-heading\"><a ng-href=\"{{item.link}}\"  target=\"_libguides\" ng-click=\"gaPush()\">{{item.name | truncate: 40: '...': true}}</a></h3>\n" +
+    "        <h3 class=\"h4 media-heading\"><a ng-href=\"{{item.url}}\"  target=\"_libguides\" ng-click=\"gaPush()\">{{item.name | truncate: 40: '...': true}}</a></h3>\n" +
     "        <p ng-bind-html=\"item.description | truncate: 100: '...': true\"></p>\n" +
     "        <ul class=\"list-inline\">\n" +
     "            <li>\n" +
@@ -19593,10 +19588,9 @@ angular.module('engines.faq', [])
     .config(['oneSearchProvider', function(oneSearchProvider){
         oneSearchProvider.engine('faq', {
             id: 1024,
+            title: 'LibAnswers',
             priority: 2,
             resultsPath: 'LibAnswers.query.results',
-            totalsPath: 'GoogleCS.searchInformation.totalResults',
-            filterQuery: 'site:ask.lib.ua.edu',
             templateUrl: 'common/engines/faq/faq.tpl.html'
         })
     }])
@@ -19664,7 +19658,6 @@ angular.module('engines.libguides', [])
             title: 'Research Guides',
             priority: 2,
             resultsPath: 'LibGuides',
-            totalsPath: '',
             templateUrl: 'common/engines/libguides/libguides.tpl.html'
         })
     }])
