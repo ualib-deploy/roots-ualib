@@ -17708,7 +17708,7 @@ angular.module('ualib.musicSearch')
 
 
 
-angular.module('oneSearch.templates', ['bento/bento.tpl.html', 'common/directives/suggest/suggest.tpl.html', 'common/engines/acumen/acumen.tpl.html', 'common/engines/catalog/catalog.tpl.html', 'common/engines/databases/databases.tpl.html', 'common/engines/ejournals/ejournals.tpl.html', 'common/engines/google-cs/google-cs.tpl.html', 'common/engines/recommend/recommend.tpl.html', 'common/engines/scout/scout.tpl.html', 'common/engines/staff-directory/staff-directory.tpl.html']);
+angular.module('oneSearch.templates', ['bento/bento.tpl.html', 'common/directives/suggest/suggest.tpl.html', 'common/engines/acumen/acumen.tpl.html', 'common/engines/catalog/catalog.tpl.html', 'common/engines/databases/databases.tpl.html', 'common/engines/ejournals/ejournals.tpl.html', 'common/engines/google-cs/google-cs.tpl.html', 'common/engines/libguides/libguides.tpl.html', 'common/engines/recommend/recommend.tpl.html', 'common/engines/scout/scout.tpl.html', 'common/engines/staff-directory/staff-directory.tpl.html']);
 
 angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("bento/bento.tpl.html",
@@ -18038,6 +18038,25 @@ angular.module("common/engines/google-cs/google-cs.tpl.html", []).run(["$templat
     "        </ul>\n" +
     "    </div>\n" +
     "</div>");
+}]);
+
+angular.module("common/engines/libguides/libguides.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("common/engines/libguides/libguides.tpl.html",
+    "<div class=\"media\">\n" +
+    "    <div class=\"media-body\">\n" +
+    "        <h3 class=\"h4 media-heading\"><a ng-href=\"{{item.url}}\"  target=\"_libguides\" ng-click=\"gaPush()\">{{item.name | truncate: 40: '...': true}}</a></h3>\n" +
+    "        <p ng-bind-html=\"item.description | truncate: 100: '...': true\"></p>\n" +
+    "        <ul class=\"list-inline\">\n" +
+    "            <li>\n" +
+    "                <a ng-href=\"{{resourceLink}}\" class=\"external-link\" ng-if=\"resourceLink\" target=\"_{{engine}}\" ng-click=\"gaMore()\">Results in {{engineName}}</a>\n" +
+    "            </li>\n" +
+    "        </ul>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "\n" +
+    "\n" +
+    "\n" +
+    "");
 }]);
 
 angular.module("common/engines/recommend/recommend.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -19618,13 +19637,11 @@ angular.module('engines.libguides', [])
 
     .config(['oneSearchProvider', function(oneSearchProvider){
         oneSearchProvider.engine('libguides', {
-            id: 16,
+            id: 256,
             title: 'Research Guides',
             priority: 2,
-            resultsPath: 'GoogleCS.items',
-            totalsPath: 'GoogleCS.searchInformation.totalResults',
-            filterQuery: 'site:guides.lib.ua.edu',
-            templateUrl: 'common/engines/google-cs/google-cs.tpl.html'
+            resultsPath: 'LibGuides',
+            templateUrl: 'common/engines/libguides/libguides.tpl.html'
         })
     }])
 angular.module('engines.recommend', [])
