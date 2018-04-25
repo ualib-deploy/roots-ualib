@@ -17993,11 +17993,6 @@ angular.module("common/engines/databases/databases.tpl.html", []).run(["$templat
     "            <span class=\"text-muted\">Subjects: </span>\n" +
     "            <span class=\"detail\" ng-repeat=\"subj in item.subjects\">{{subj.subject}}{{$last ? '' : ', '}}</span>\n" +
     "        </div>\n" +
-    "        <ul class=\"list-inline\">\n" +
-    "            <li>\n" +
-    "                <a ng-href=\"{{resourceLink}}\" class=\"external-link\" ng-if=\"resourceLink\" target=\"_{{engine}}\" ng-click=\"gaMore()\">Results in {{engineName}}</a>\n" +
-    "            </li>\n" +
-    "        </ul>\n" +
     "    </div>\n" +
     "</div>");
 }]);
