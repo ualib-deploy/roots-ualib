@@ -17708,7 +17708,7 @@ angular.module('ualib.musicSearch')
 
 
 
-angular.module('oneSearch.templates', ['bento/bento.tpl.html', 'common/directives/suggest/suggest.tpl.html', 'common/engines/acumen/acumen.tpl.html', 'common/engines/catalog/catalog.tpl.html', 'common/engines/databases/databases.tpl.html', 'common/engines/ejournals/ejournals.tpl.html', 'common/engines/faq/faq.tpl.html', 'common/engines/google-cs/google-cs.tpl.html', 'common/engines/libguides/libguides.tpl.html', 'common/engines/recommend/recommend.tpl.html', 'common/engines/scout/scout.tpl.html', 'common/engines/staff-directory/staff-directory.tpl.html']);
+angular.module('oneSearch.templates', ['bento/bento.tpl.html', 'common/directives/suggest/suggest.tpl.html', 'common/engines/acumen/acumen.tpl.html', 'common/engines/catalog/catalog.tpl.html', 'common/engines/databases/databases.tpl.html', 'common/engines/ejournals/ejournals.tpl.html', 'common/engines/google-cs/google-cs.tpl.html', 'common/engines/libguides/libguides.tpl.html', 'common/engines/recommend/recommend.tpl.html', 'common/engines/scout/scout.tpl.html', 'common/engines/staff-directory/staff-directory.tpl.html']);
 
 angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("bento/bento.tpl.html",
@@ -18028,19 +18028,6 @@ angular.module("common/engines/ejournals/ejournals.tpl.html", []).run(["$templat
     "\n" +
     "    </div>\n" +
     "</div>");
-}]);
-
-angular.module("common/engines/faq/faq.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("common/engines/faq/faq.tpl.html",
-    "<div class=\"media\">\n" +
-    "    <div class=\"media-body\">\n" +
-    "        <h3 class=\"h4 media-heading\"><a ng-href=\"{{item.url}}\" target=\"_libguides\" ng-click=\"gaPush()\">{{item.question | truncate: 40: '...': true}}</a></h3>\n" +
-    "    </div>\n" +
-    "</div>\n" +
-    "\n" +
-    "\n" +
-    "\n" +
-    "");
 }]);
 
 angular.module("common/engines/google-cs/google-cs.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -19587,11 +19574,12 @@ angular.module('engines.faq', [])
      */
     .config(['oneSearchProvider', function(oneSearchProvider){
         oneSearchProvider.engine('faq', {
-            id: 1024,
-            title: 'LibAnswers',
+            id: 16,
             priority: 2,
-            resultsPath: 'LibAnswers.query.results',
-            templateUrl: 'common/engines/faq/faq.tpl.html'
+            resultsPath: 'GoogleCS.items',
+            totalsPath: 'GoogleCS.searchInformation.totalResults',
+            filterQuery: 'site:ask.lib.ua.edu',
+            templateUrl: 'common/engines/google-cs/google-cs.tpl.html'
         })
     }])
 angular.module('engines.googleCS', [])
