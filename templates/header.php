@@ -117,14 +117,11 @@
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <div class="service-list">
+                                            <a class="service-card" href="http://guides.lib.ua.edu/az.php">
                                                 <span class="fa fa-database" aria-hidden="true"></span>
                                                 <h4>Databases</h4>
-                                                <ul>
-                                                    <li class="menu-databases-new"><a href="http://guides.lib.ua.edu/az.php">Current Databases Listing</a></li>
-                                                    <li class="menu-databases-old"><a href="/#/databases">(legacy, not updated) Databases</a></li>
-                                                </ul>
-                                            </div>
+                                                <p>Find the best library databases for your research</p>
+                                            </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="/research-help/google-scholar/">
