@@ -49,6 +49,9 @@ angular.module('ualib', [
                     $rootScope.appStyle = {"background-image": "url('wp-content/themes/roots-ualib/assets/img/quad-sunset-lg_" + bgNum + ".jpg')"};
                 }]
             })
+            .when('/databases', {redirectTo: function(){
+                window.location = 'http://guides.lib.ua.edu/az.php';
+            }})
             .otherwise({redirectTo:'/home'});
 
         // Extend $compileProvider to allow mailto/file/ftp in ng-href - without this, links render as "unsafe:mailto:..."
