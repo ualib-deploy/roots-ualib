@@ -17760,7 +17760,7 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "        <div class=\"col-md-12\">\n" +
     "            <div class=\"bento-box\" hide-if-empty=\"true\" bento-box=\"staffdirectory\" style=\"min-height:0px; margin-bottom: 15px;\">\n" +
     "                <h2>\n" +
-    "                    Research Help\n" +
+    "                    Staff Directory\n" +
     "                    <small>\n" +
     "                            <span class=\"fa fa-info-circle\"\n" +
     "                                  tooltip-placement=\"right\"\n" +
