@@ -384,7 +384,7 @@
                                                 <span class="fa fa-university" aria-hidden="true"></span>
                                                 <h4>About the Libraries</h4>
                                                 <ul>
-                                                  <li><a href="/wp-content/uploads/134450-Library-Annual-Report.pdf">2017 Annual Report</a></li>  
+                                                  <li><a href="/wp-content/uploads/134450-Library-Annual-Report.pdf">2017 Annual Report</a></li>
                                                   <li><a href="/about/about-the-libraries/">Branch libraries information</a></li>
                                                     <li><a href="/wp-content/uploads/2017/04/Strategic-Plan-11162016-FINAL.pdf">UA Libraries Strategic Plan</a></li>
                                                     <li><a href="/wp-content/uploads/2017/09/top-level-organizational-chart-sept2017.pdf">UA Libraries Organizational Chart</a></li>
@@ -403,14 +403,11 @@
                                 <div class="yamm-content">
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <div class="service-list">
+                                            <a class="service-card" href="http://ask.lib.ua.edu">
                                                 <span class="fa fa-question-circle" aria-hidden="true"></span>
-                                                <h4>How Do I...</h4>
-                                                <ul>
-                                                    <li><a href="http://ask.lib.ua.edu/">Ask A Librarian: FAQs</a></li>
-                                                    <li><a href="/forms/reference-request/">Ask A Librarian: Reference Questions</a></li>
-                                                </ul>
-                                            </div>
+                                                <h4>Ask A Librarian</h4>
+                                                <p>Read our FAQs or ask us your question now</p>
+                                            </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="/#/staffdir?liaison=1">
