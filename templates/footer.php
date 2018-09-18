@@ -43,10 +43,8 @@
                     <h3 class="h4">Collections</h3>
                     <ul class="footer-list">
                         <li><a href="/collections/williams/">A.S. Williams Collection</a></li>
-                        <li><a href="/collections/wade-hall-collection/">Wade Hall Collection</a></li>
                         <li><a href="/collections/the-david-walker-lupton-african-american-cookbook-collection/">Lupton Collection</a></li>
                         <li><a href="/collections/map-collections/">Map Collection</a></li>
-                        <li><a href="/collections/rare-book-collection/">Rare Book Collection</a></li>
                         <li><a href="/collections/university-archives/">University Archives and Records Management</a></li>
                         <li><i><a href="/collections/major-collections-summaries/">More Collections...</a></i></li>
                     </ul>

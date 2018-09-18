@@ -366,7 +366,7 @@
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="/about/support-ua-libraries/">
+                                            <a class="service-card" href="/ua-libraries-giving/">
                                                 <span class="fa fa-gift" aria-hidden="true"></span>
                                                 <h4>Support UA Libraries</h4>
                                                 <p>Help strengthen the libraries collections, services, and resources </p>
@@ -384,8 +384,8 @@
                                                 <span class="fa fa-university" aria-hidden="true"></span>
                                                 <h4>About the Libraries</h4>
                                                 <ul>
-                                                  <li><a href="/wp-content/uploads/134450-Library-Annual-Report.pdf">2017 Annual Report</a></li>
-                                                  <li><a href="/about/about-the-libraries/">Branch libraries information</a></li>
+                                                    <li><a href="/wp-content/uploads/134450-Library-Annual-Report.pdf">2017 Annual Report</a></li>
+                                                    <li><a href="/about/about-the-libraries/">Branch libraries information</a></li>
                                                     <li><a href="/wp-content/uploads/2017/04/Strategic-Plan-11162016-FINAL.pdf">UA Libraries Strategic Plan</a></li>
                                                     <li><a href="/wp-content/uploads/2017/09/top-level-organizational-chart-sept2017.pdf">UA Libraries Organizational Chart</a></li>
                                                 </ul>
@@ -462,6 +462,9 @@
                                 </div>
                             </li>
                         </ul>
+                    </li>
+                    <li class="dropdown yamm-fw">
+                        <a href="/ua-libraries-giving/" >Giving</a>
                     </li>
                     <li class="dropdown yamm-fw hidden-sm hidden-xs" dropdown-sticky>
                         <a href="#" class="dropdown-toggle icon-only" title="University Logins" aria-label="University Logins" ng-click="mainNavbarCollapsed = false;">
