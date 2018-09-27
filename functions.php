@@ -19,9 +19,9 @@ function change_graphic_lib($array) {
 }
 
 //Include our JWT functions.
-require_once "/srv/web/www/webapps/superGlobalPHP/constants.php";
+/*require_once "/srv/web/www/webapps/superGlobalPHP/constants.php";
 require_once "/srv/web/www/webapps/superGlobalPHP/functions.php";
-require_once "/srv/web/www/webapps/superGlobalPHP/keys/jwt.php";
+require_once "/srv/web/www/webapps/superGlobalPHP/keys/jwt.php";*/
 
 $roots_includes = array(
     'lib/utils.php',           // Utility functions
