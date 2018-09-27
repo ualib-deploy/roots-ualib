@@ -29699,7 +29699,11 @@ angular.module('staffdir', ['ualib.staffdir']);
                                 list = $filter('orderBy')(list, SDS.facet[facet], SDS.sortReverse);
                                 break;
                             default:
-                                list = $filter('filter')(list, SDS.facet[facet]);
+                                //Search for each parameter separately
+                                var facetArray = SDS.facet[facet].split(' ');
+                                for (i = 0; i < facetArray.length; i++) {
+                                    list = $filter('filter')(list, facetArray[i]);
+                                }
                         }
                     }
                     return list;

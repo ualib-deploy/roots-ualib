@@ -11,10 +11,17 @@
  */
 require_once( get_stylesheet_directory() . '/functions-ualib.php' );
 
+//Change image library to ImageMagick
+add_filter( 'wp_image_editors', 'change_graphic_lib' );
+
+function change_graphic_lib($array) {
+    return array('WP_Image_Editor_Imagick');
+}
+
 //Include our JWT functions.
-require_once "/srv/web/www/webapps/superGlobalPHP/constants.php";
+/*require_once "/srv/web/www/webapps/superGlobalPHP/constants.php";
 require_once "/srv/web/www/webapps/superGlobalPHP/functions.php";
-require_once "/srv/web/www/webapps/superGlobalPHP/keys/jwt.php";
+require_once "/srv/web/www/webapps/superGlobalPHP/keys/jwt.php";*/
 
 $roots_includes = array(
     'lib/utils.php',           // Utility functions

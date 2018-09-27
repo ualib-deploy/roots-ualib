@@ -12,7 +12,7 @@
                         <li><a href="/about/libraries-policies/code-of-conduct/">Code of Conduct</a></li>
                         <li><a href="/about/mission-statement/">Mission Statement</a></li>
                         <li><a href="/site-map">Site Map</a></li>
-                        <li><a href="/about/support-ua-libraries/">Support UA Libraries</a></li>
+                        <li><a href="/ua-libraries-giving/">Support UA Libraries</a></li>
                         <li><a href="/about/employment/">Employment</a></li>
                         <li><a href="http://alabamacenterforthebook.lib.ua.edu/">Alabama Center for the Book</a></li>
                     </ul>
