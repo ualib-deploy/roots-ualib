@@ -6688,6 +6688,12 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
     padding-left: 20px;
   }
 }
+@media (max-width: 1140px) {
+  .navbar-mega-inverse .navbar-nav > li > a.not-dropdown {
+    font-size: 15px;
+    padding-left: 20px;
+  }
+}
 @media (min-width: 992px) {
   .navbar-mega-inverse {
     margin-bottom: 0;

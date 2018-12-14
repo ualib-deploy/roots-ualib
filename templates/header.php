@@ -464,7 +464,7 @@
                         </ul>
                     </li>
                     <li class="dropdown yamm-fw">
-                        <a href="/ua-libraries-giving/" >Giving</a>
+                        <a href="/ua-libraries-giving/" class="not-dropdown" >Giving</a>
                     </li>
                     <li class="dropdown yamm-fw hidden-sm hidden-xs" dropdown-sticky>
                         <a href="#" class="dropdown-toggle icon-only" title="University Logins" aria-label="University Logins" ng-click="mainNavbarCollapsed = false;">
