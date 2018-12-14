@@ -242,7 +242,7 @@
                                             </div>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="/using-the-library/digital-humanities-center/">
+                                            <a class="service-card" href="https://adhc.lib.ua.edu/">
                                                 <span class="fa fa-tachometer" aria-hidden="true"></span>
                                                 <h4>Digital Humanities Center</h4>
                                                 <p>Explore the digital humanities with innovative research and teaching projects </p>
