@@ -24524,10 +24524,7 @@ angular.module("calendar/calendar.tpl.html", []).run(["$templateCache", function
     "\n" +
     "                <td ng-repeat=\"day in defHours[0].hours\" tabindex=\"0\">\n" +
     "                    <div class=\"hours\">\n" +
-    "                        {{day.hoursFrom}} to\n" +
-    "                    <span ng-show=\"day.hoursFrom != day.hoursTo\">\n" +
-    "                        <br>{{day.hoursTo}}\n" +
-    "                    </span>\n" +
+    "                        {{day.hoursFrom}}<span ng-show=\"day.hoursFrom != day.hoursTo\"> to <br /> {{day.hoursTo}}</span>\n" +
     "                    </div>\n" +
     "                </td>\n" +
     "            </tr>\n" +
