@@ -145,8 +145,10 @@ module.exports = function(grunt) {
         },
         bower_concat: {
             dev: {
-                dest: 'assets/js/scripts_bower.js',
-                cssDest: 'assets/css/main_bower.css',
+                dest: {
+                  'js': 'assets/js/scripts_bower.js',
+                  'css': 'assets/css/main_bower.css',
+                },
                 exclude: [
                     'angular',
                     'angular-animate',
