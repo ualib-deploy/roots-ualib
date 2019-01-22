@@ -147,7 +147,7 @@ module.exports = function(grunt) {
             dev: {
                 dest: {
                   'js': 'assets/js/scripts_bower.js',
-                  'css': 'assets/css/main_bower.css',
+                  'css': 'assets/css/main_bower.css'
                 },
                 exclude: [
                     'angular',
@@ -179,8 +179,10 @@ module.exports = function(grunt) {
                 }
             },
             build: {
-                dest: 'assets/js/scripts_bower.min.js',
-                cssDest: 'assets/css/main_bower.min.css',
+                dest: {
+                  'js': 'assets/js/scripts_bower.min.js',
+                  'css': 'assets/css/main_bower.min.css'
+                },
                 exclude: [
                     'angular',
                     'angular-animate',
