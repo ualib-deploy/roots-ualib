@@ -10955,7 +10955,7 @@ angular.module("manageOneSearch/manageOneSearch.tpl.html", []).run(["$templateCa
     "    </div>\n" +
     "</div>\n" +
     "\n" +
-    "<div class=\"table-responsive\">\n" +
+    "<div id=\"onesearch-recommended-links-table-wrapper\" class=\"table-responsive\">\n" +
     "    <table class=\"table table-condensed table-hover\">\n" +
     "        <thead>\n" +
     "        <tr>\n" +
