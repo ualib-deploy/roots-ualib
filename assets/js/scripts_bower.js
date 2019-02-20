@@ -24614,7 +24614,7 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
     "                            <li><a href=\"#\" hours-href=\"{library: 'mclure', month: 0}\">McLure</a></li>\n" +
     "                            <li><a href=\"#\" hours-href=\"{library: 'hoole', month: 0}\">Hoole</a></li>\n" +
     "                            <li><a href=\"#\" hours-href=\"{library: 'bruno', month: 0}\">Bruno</a></li>\n" +
-    "                        </ul>\n" +
+    "                        </ul> \n" +
     "                    </div>\n" +
     "                    <ul class=\"list-unstyled fa-ul\" ng-if=\"contact\">\n" +
     "                        <li ng-if=\"contact.email\"><span class=\"fa fa-li fa-envelope\"></span> <a ng-href=\"mailto:{{contact.email}}\">{{contact.email}}</a></li>\n" +
@@ -24631,7 +24631,7 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
     "                </div>\n" +
     "                <div class=\"col-sm-4\">\n" +
     "                    <div class=\"well\">\n" +
-    "                        <p class=\"lead\">What can {{library}} do for you?</p>\n" +
+    "                            <p class=\"lead\">What can {{library}} do for you?</p>\n" +
     "                        <a ng-href=\"{{moreLink}}\" class=\"btn btn-primary\">Learn more <span class=\"fa fa-fw fa-info-circle\"></span></a>\n" +
     "                    </div>\n" +
     "                </div>\n" +
@@ -24647,7 +24647,6 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
     "                    <li><a href=\"#\" hours-href=\"{library: 'gorgas', month: 0}\">Gorgas</a>\n" +
     "                        <ul class=\"nav nav-pills nav-stacked\">\n" +
     "                            <li><a href=\"#\" hours-href=\"{library: 'media', month: 0}\">Sanford Media Center</a></li>\n" +
-    "                            <li><a href=\"#\" hours-href=\"{library: 'williams', month: 0}\">Williams Americana Collection</a></li>\n" +
     "                        </ul>\n" +
     "                    </li>\n" +
     "                    <li><a href=\"#\" hours-href=\"{library: 'rodgers', month: 0}\">Rodgers</a></li>\n" +
@@ -24665,8 +24664,8 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
     "                </div>\n" +
     "            </div>\n" +
     "\n" +
-    "\n" +
-    "            <div class=\"row\">\n" +
+    " \n" +
+    "             <div class=\"row\">\n" +
     "                <div class=\"col-md-12\">\n" +
     "                    <div class=\"panel panel-default\">\n" +
     "                        <div class=\"panel-body\">\n" +
@@ -24694,7 +24693,7 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
     "                        </div>\n" +
     "                    </div>\n" +
     "                </div>\n" +
-    "            </div>\n" +
+    "            </div>  \n" +
     "\n" +
     "        </div>\n" +
     "    </div>\n" +
@@ -24733,17 +24732,25 @@ angular.module("list/list.tpl.html", []).run(["$templateCache", function($templa
     "        <span class=\"fa fa-lg fa-info-circle\" ng-if=\"lib.description\" tooltip=\"{{lib.description}}\"></span>\n" +
     "      </td>\n" +
     "    </tr>\n" +
-    "    <tr class=\"hours-list-child\" ng-repeat=\"child in lib.children track by $index\" ng-click=\"selectLib(child)\">\n" +
-    "      <td><a ng-href=\"#/hours?library={{child.name}}\">{{child.name}}</a></td>\n" +
-    "      <td>{{child.hours}}</td>\n" +
-    "      <td><span ng-class=\"child.status.css\">{{child.status.text}}</span></td>\n" +
-    "      <td>\n" +
-    "        <span class=\"fa fa-lg fa-info-circle\" ng-if=\"child.description\" tooltip=\"{{child.description}}\"></span>\n" +
-    "      </td>\n" +
+    "        <tr class=\"hours-list-child\" ng-repeat=\"child in lib.children track by $index\" ng-click=\"selectLib(child)\">\n" +
+    "          <td><a ng-href=\"#/hours?library={{child.name}}\">{{child.name}}</a></td>\n" +
+    "          <td>{{child.hours}}</td>\n" +
+    "          <td><span ng-class=\"child.status.css\">{{child.status.text}}</span></td>\n" +
+    "          <td>\n" +
+    "            <span class=\"fa fa-lg fa-info-circle\" ng-if=\"child.description\" tooltip=\"{{child.description}}\"></span>\n" +
+    "          </td>\n" +
+    "        </tr>\n" +
+    "        <!-- Williams Collection data is removed from the Database; therefore the data is hardcoded !-->\n" +
+    "       <tr ng-if=\"lib.name == 'Gorgas Library'\" class=\"hours-list-child\">\n" +
+    "            <td><a ng-href=\"https://www.lib.ua.edu/collections/williams/\"> Williams Collection</a></td>\n" +
+    "            <td> Call for appt.</td>\n" +
+    "            <td> (205) 348-0500 </td>\n" +
+    "        </tr>\n" +
     "    </tr>\n" +
     "    </tbody>\n" +
     "  </table>\n" +
-    "</div>");
+    "</div>\n" +
+    "");
 }]);
 
 angular.module('ualib.hours', [
@@ -25013,19 +25020,6 @@ angular.module('ualib.hours')
                     }]
                 },
                 link: '/using-the-library/sanford-media-center/'
-            },
-            {
-                id: 8,
-                name: "Williams Collection",
-                latitude: 33.211803,
-                longitude: -87.546032,
-                icon: 'https://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
-                contact: {
-                    phone: [{
-                        number: '(205) 358-1489'
-                    }]
-                },
-                link: '/collections/williams/'
             }
         ];
 
