@@ -27907,7 +27907,7 @@ angular.module('angular-carousel.shifty', [])
 
 angular.module('ualib.news.templates', ['news-item/event-card.tpl.html', 'news-item/news-card.tpl.html', 'news-item/news-item.tpl.html', 'news/news-list.tpl.html', 'today/news-today.tpl.html']);
 
-angular.module("news-item/event-card.tpl.html", []).run(["$templateCache", function($templateCache) {
+angular.module("news-item/event-card.tpl.html", []).run(["$templateCache", function ($templateCache) {
   $templateCache.put("news-item/event-card.tpl.html",
     "<a ng-href=\"{{newsCard.link}}\" target=\"_new\" class=\"media news-card\">\n" +
     "    <div class=\"media-left\">\n" +
@@ -27920,10 +27920,11 @@ angular.module("news-item/event-card.tpl.html", []).run(["$templateCache", funct
     "        <h3 class=\"h4 media-heading\" ng-bind-html=\"newsCard.title | truncate:50:'...':true\"></h3>\n" +
     "        <p ng-bind-html=\"newsCard.blurb | truncate:150:'...':true\"></p>\n" +
     "    </div>\n" +
-    "</a>");
+    "</a>\n" +
+    "");
 }]);
 
-angular.module("news-item/news-card.tpl.html", []).run(["$templateCache", function($templateCache) {
+angular.module("news-item/news-card.tpl.html", []).run(["$templateCache", function ($templateCache) {
   $templateCache.put("news-item/news-card.tpl.html",
     "<a ng-href=\"#/news-exhibits/{{newsCard.link}}\" class=\"media news-card\">\n" +
     "    <div class=\"media-body\">\n" +
@@ -27941,7 +27942,7 @@ angular.module("news-item/news-card.tpl.html", []).run(["$templateCache", functi
     "</a>");
 }]);
 
-angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", function($templateCache) {
+angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", function ($templateCache) {
   $templateCache.put("news-item/news-item.tpl.html",
     "<div class=\"jumbotron-header\">\n" +
     "    <div class=\"jumbotron\">\n" +
@@ -28003,7 +28004,7 @@ angular.module("news-item/news-item.tpl.html", []).run(["$templateCache", functi
     "");
 }]);
 
-angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($templateCache) {
+angular.module("news/news-list.tpl.html", []).run(["$templateCache", function ($templateCache) {
   $templateCache.put("news/news-list.tpl.html",
     "<div class=\"jumbotron-header\">\n" +
     "    <div class=\"jumbotron\">\n" +
@@ -28092,7 +28093,7 @@ angular.module("news/news-list.tpl.html", []).run(["$templateCache", function($t
     "</div>");
 }]);
 
-angular.module("today/news-today.tpl.html", []).run(["$templateCache", function($templateCache) {
+angular.module("today/news-today.tpl.html", []).run(["$templateCache", function ($templateCache) {
   $templateCache.put("today/news-today.tpl.html",
     "<div class=\"row\" ng-controller=\"NewsTodayCtrl\">\n" +
     "\n" +
@@ -28202,7 +28203,35 @@ angular.module('ualib.news', [
     'angular-carousel',
     'ualib.ui',
     'ualib.news.templates'
-]);;angular.module('ualib.news')
+]);;/*
+ * The times returned by the API are the number of seconds since
+ * the Unix epoch in Central Time (Unix Time minus 6 hours). The
+ * constructor for JavaScript's Date object used here expects times to
+ * be the number of milliseconds since the Unix epoch in UTC.
+ */
+function apiToJsTime(apiTime) {
+  var jsTime;
+
+  // Convert from Central Time to UTC.
+  jsTime = apiTime + (6 * 60 * 60);
+
+  // Convert from seconds to milliseconds.
+  jsTime *= 1000;
+
+  return jsTime;
+}
+;/*
+ * Correct the given event time so that it will always be displayed in
+ * Central Time by Angular's date filter. Returns the corrected date in
+ * JavaScript time (the # of milliseconds since the Unix epoch).
+ */
+function correctEventTime(apiEventTime) {
+  const CURRENT_LOCALE_OFFSET_MILLISECONDS = (new Date()).getTimezoneOffset() * 60 * 1000;
+  const CENTRAL_TIME_OFFSET_MILLISECONDS = 6 * 60 * 60 * 1000;
+
+  return apiToJsTime(apiEventTime) + CURRENT_LOCALE_OFFSET_MILLISECONDS - CENTRAL_TIME_OFFSET_MILLISECONDS;
+}
+;angular.module('ualib.news')
 
     /**
      * @ngdoc service
@@ -28224,12 +28253,13 @@ angular.module('ualib.news', [
 
                 // Convert timestamps into JS millisecond standard
                 if (item.activeFrom !== null) {
-                    n.activeFrom = new Date(item.activeFrom * 1000);
+                    n.activeFrom = new Date(correctEventTime(item.activeFrom));
+                    console.log(n.activeFrom);
                 } else {
                     n.activeFrom = null;
                 }
                 if (item.activeUntil !== null) {
-                    n.activeUntil = new Date(item.activeUntil * 1000);
+                    n.activeUntil = new Date(correctEventTime(item.activeUntil));
                 } else {
                     n.activeUntil = null;
                 }
@@ -28257,7 +28287,7 @@ angular.module('ualib.news', [
 
         //TODO: centralize this function so it can be used with all apps
         // Extend the default responseTransform array - Straight from Angular 1.2.8 API docs - https://docs.angularjs.org/api/ng/service/$http#overriding-the-default-transformations-per-request
-        
+
         /**
          * @ngdoc function
          * @name news.ualibNewsFactory#appendTransform
@@ -28364,7 +28394,8 @@ angular.module('ualib.news', [
                 })
             }
         });
-    }]);;angular.module('ualib.news')
+    }]);
+;angular.module('ualib.news')
 
     /**
      * @ngdoc interface
