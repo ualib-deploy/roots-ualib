@@ -24,7 +24,7 @@
     "musicSearch": "https://github.com/ualibweb/musicSearch_ui.git#master",
     "ualib_staffdir": "https://github.com/ualibweb/staffdir_ui.git#master",
     "ualib-softwareList": "https://github.com/ualibweb/softwareList_ui.git#master",
-    "ualib-news": "https://github.com/ualibweb/news_ui.git",
+    "ualib-news": "https://github.com/ualibweb/news_ui.git#master",
     "compfinder": "https://github.com/ualibweb/CompFinder.git#master"
   },
   "devDependencies": {
