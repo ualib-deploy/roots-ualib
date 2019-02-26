@@ -81,4 +81,15 @@
 //
 // Styleguide style.buttons.modifiers.sizes
 
+// Override Bootstrap's default button colors in order to increase constrast.
+.btn-primary-dark {
+  background-color: #3174af;
+  border-color: #306fa5;
 
+  &:focus,
+  &:hover,
+  &.active {
+    background-color: #265d8e;
+    border-color: #21527d;
+  }
+}
