@@ -24614,7 +24614,7 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
     "                            <li><a href=\"#\" hours-href=\"{library: 'mclure', month: 0}\">McLure</a></li>\n" +
     "                            <li><a href=\"#\" hours-href=\"{library: 'hoole', month: 0}\">Hoole</a></li>\n" +
     "                            <li><a href=\"#\" hours-href=\"{library: 'bruno', month: 0}\">Bruno</a></li>\n" +
-    "                        </ul>\n" +
+    "                        </ul> \n" +
     "                    </div>\n" +
     "                    <ul class=\"list-unstyled fa-ul\" ng-if=\"contact\">\n" +
     "                        <li ng-if=\"contact.email\"><span class=\"fa fa-li fa-envelope\"></span> <a ng-href=\"mailto:{{contact.email}}\">{{contact.email}}</a></li>\n" +
@@ -24647,7 +24647,6 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
     "                    <li><a href=\"#\" hours-href=\"{library: 'gorgas', month: 0}\">Gorgas</a>\n" +
     "                        <ul class=\"nav nav-pills nav-stacked\">\n" +
     "                            <li><a href=\"#\" hours-href=\"{library: 'media', month: 0}\">Sanford Media Center</a></li>\n" +
-    "                            <li><a href=\"#\" hours-href=\"{library: 'williams', month: 0}\">Williams Americana Collection</a></li>\n" +
     "                        </ul>\n" +
     "                    </li>\n" +
     "                    <li><a href=\"#\" hours-href=\"{library: 'rodgers', month: 0}\">Rodgers</a></li>\n" +
@@ -24665,8 +24664,8 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
     "                </div>\n" +
     "            </div>\n" +
     "\n" +
-    "\n" +
-    "            <div class=\"row\">\n" +
+    " \n" +
+    "             <div class=\"row\">\n" +
     "                <div class=\"col-md-12\">\n" +
     "                    <div class=\"panel panel-default\">\n" +
     "                        <div class=\"panel-body\">\n" +
@@ -24694,7 +24693,7 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
     "                        </div>\n" +
     "                    </div>\n" +
     "                </div>\n" +
-    "            </div>\n" +
+    "            </div>  \n" +
     "\n" +
     "        </div>\n" +
     "    </div>\n" +
@@ -24733,17 +24732,25 @@ angular.module("list/list.tpl.html", []).run(["$templateCache", function($templa
     "        <span class=\"fa fa-lg fa-info-circle\" ng-if=\"lib.description\" tooltip=\"{{lib.description}}\"></span>\n" +
     "      </td>\n" +
     "    </tr>\n" +
-    "    <tr class=\"hours-list-child\" ng-repeat=\"child in lib.children track by $index\" ng-click=\"selectLib(child)\">\n" +
-    "      <td><a ng-href=\"#/hours?library={{child.name}}\">{{child.name}}</a></td>\n" +
-    "      <td>{{child.hours}}</td>\n" +
-    "      <td><span ng-class=\"child.status.css\">{{child.status.text}}</span></td>\n" +
-    "      <td>\n" +
-    "        <span class=\"fa fa-lg fa-info-circle\" ng-if=\"child.description\" tooltip=\"{{child.description}}\"></span>\n" +
-    "      </td>\n" +
+    "        <tr class=\"hours-list-child\" ng-repeat=\"child in lib.children track by $index\" ng-click=\"selectLib(child)\">\n" +
+    "          <td><a ng-href=\"#/hours?library={{child.name}}\">{{child.name}}</a></td>\n" +
+    "          <td>{{child.hours}}</td>\n" +
+    "          <td><span ng-class=\"child.status.css\">{{child.status.text}}</span></td>\n" +
+    "          <td>\n" +
+    "            <span class=\"fa fa-lg fa-info-circle\" ng-if=\"child.description\" tooltip=\"{{child.description}}\"></span>\n" +
+    "          </td>\n" +
+    "        </tr>\n" +
+    "        <!-- Williams Collection data is removed from the Database; therefore the data is hardcoded !-->\n" +
+    "       <tr ng-if=\"lib.name == 'Gorgas Library'\" class=\"hours-list-child\">\n" +
+    "            <td><a ng-href=\"https://www.lib.ua.edu/collections/williams/\"> Williams Collection</a></td>\n" +
+    "            <td> Call for appt.</td>\n" +
+    "            <td> (205) 348-0500 </td>\n" +
+    "        </tr>\n" +
     "    </tr>\n" +
     "    </tbody>\n" +
     "  </table>\n" +
-    "</div>");
+    "</div>\n" +
+    "");
 }]);
 
 angular.module('ualib.hours', [
@@ -25013,19 +25020,6 @@ angular.module('ualib.hours')
                     }]
                 },
                 link: '/using-the-library/sanford-media-center/'
-            },
-            {
-                id: 8,
-                name: "Williams Collection",
-                latitude: 33.211803,
-                longitude: -87.546032,
-                icon: 'https://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
-                contact: {
-                    phone: [{
-                        number: '(205) 358-1489'
-                    }]
-                },
-                link: '/collections/williams/'
             }
         ];
 
@@ -25221,6 +25215,7 @@ angular.module('hours.list', [])
             controller: 'ListCtrl'
         }
     }]);
+
 /**
  * @license AngularJS v1.2.32
  * (c) 2010-2014 Google, Inc. http://angularjs.org
@@ -27926,7 +27921,8 @@ angular.module("news-item/event-card.tpl.html", []).run(["$templateCache", funct
     "        <h3 class=\"h4 media-heading\" ng-bind-html=\"newsCard.title | truncate:50:'...':true\"></h3>\n" +
     "        <p ng-bind-html=\"newsCard.blurb | truncate:150:'...':true\"></p>\n" +
     "    </div>\n" +
-    "</a>");
+    "</a>\n" +
+    "");
 }]);
 
 angular.module("news-item/news-card.tpl.html", []).run(["$templateCache", function ($templateCache) {
@@ -28208,7 +28204,35 @@ angular.module('ualib.news', [
     'angular-carousel',
     'ualib.ui',
     'ualib.news.templates'
-]);;angular.module('ualib.news')
+]);;/*
+ * The times returned by the API are the number of seconds since
+ * the Unix epoch in Central Time (Unix Time minus 6 hours). The
+ * constructor for JavaScript's Date object used here expects times to
+ * be the number of milliseconds since the Unix epoch in UTC.
+ */
+function apiToJsTime(apiTime) {
+  var jsTime;
+
+  // Convert from Central Time to UTC.
+  jsTime = apiTime + (6 * 60 * 60);
+
+  // Convert from seconds to milliseconds.
+  jsTime *= 1000;
+
+  return jsTime;
+}
+;/*
+ * Correct the given event time so that it will always be displayed in
+ * Central Time by Angular's date filter. Returns the corrected date in
+ * JavaScript time (the # of milliseconds since the Unix epoch).
+ */
+function correctEventTime(apiEventTime) {
+  const CURRENT_LOCALE_OFFSET_MILLISECONDS = (new Date()).getTimezoneOffset() * 60 * 1000;
+  const CENTRAL_TIME_OFFSET_MILLISECONDS = 6 * 60 * 60 * 1000;
+
+  return apiToJsTime(apiEventTime) + CURRENT_LOCALE_OFFSET_MILLISECONDS - CENTRAL_TIME_OFFSET_MILLISECONDS;
+}
+;angular.module('ualib.news')
 
     /**
      * @ngdoc service
@@ -28230,12 +28254,13 @@ angular.module('ualib.news', [
 
                 // Convert timestamps into JS millisecond standard
                 if (item.activeFrom !== null) {
-                    n.activeFrom = new Date(item.activeFrom * 1000);
+                    n.activeFrom = new Date(correctEventTime(item.activeFrom));
+                    console.log(n.activeFrom);
                 } else {
                     n.activeFrom = null;
                 }
                 if (item.activeUntil !== null) {
-                    n.activeUntil = new Date(item.activeUntil * 1000);
+                    n.activeUntil = new Date(correctEventTime(item.activeUntil));
                 } else {
                     n.activeUntil = null;
                 }
@@ -28263,7 +28288,7 @@ angular.module('ualib.news', [
 
         //TODO: centralize this function so it can be used with all apps
         // Extend the default responseTransform array - Straight from Angular 1.2.8 API docs - https://docs.angularjs.org/api/ng/service/$http#overriding-the-default-transformations-per-request
-        
+
         /**
          * @ngdoc function
          * @name news.ualibNewsFactory#appendTransform
@@ -28370,7 +28395,8 @@ angular.module('ualib.news', [
                 })
             }
         });
-    }]);;angular.module('ualib.news')
+    }]);
+;angular.module('ualib.news')
 
     /**
      * @ngdoc interface
