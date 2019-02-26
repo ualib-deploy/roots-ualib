@@ -15,12 +15,13 @@
                         <ul class="dropdown-menu">
                             <li>
                                 <div class="yamm-content">
-                                    <h2>University Logins</h2>
+                                    <h3 class="h2">University Logins</h3>
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-4">
                                             <a class="service-card" href="http://library.ua.edu/vwebv/myAccount">
                                                 <span class="fa fa-search" aria-hidden="true"></span>
                                                 <h4>My Library (Catalog)</h4>
+                                                
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-4">
@@ -176,9 +177,10 @@
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <div class="service-list">
                                                 <span class="fa fa-search-plus" aria-hidden="true"></span>
-                                                <h4>Division of Special Collections</h4>
+                                                <h4>Special Collections</h4>
                                                 <ul>
                                                     <li class="menu-acumen"><a href="http://acumen.lib.ua.edu/home">Acumen Digital Archives</a></li>
+                                                    <li class="menu-acumen"><a href="https://archives.lib.ua.edu/">Archival Collections</a></li>
                                                     <li class="menu-hoole"><a href="/libraries/hoole/">Hoole Special Collections</a></li>
                                                     <li class="menu-williams"><a href="/collections/williams/">Williams Collection</a></li>
                                                 </ul>
@@ -448,6 +450,15 @@
                                                 <p>Unable to access online resources?  Report the problem</p>
                                             </a>
                                         </div>
+                                        <!-- Haley Shah adding new mock data.. Ignore it -->
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="/forms/login-problem-report-form/">
+                                                <span class="fa fa-sign-in" aria-hidden="true"></span>
+                                                <h4>Report a Login Problem -- Haley Shah </h4>
+                                                <p>Unable to access online resources?  Report the problem</p>
+                                            </a>
+                                        </div>
+                                        
                                         <!-- new tutorials service-list -->
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <div class="service-list">
@@ -461,6 +472,28 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    <!-- Haley shah is adding new row for testing.. Remove it later on -->
+                                    <div class="row">
+                                    <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <div class="service-list">
+                                                <span class="fa fa-question-circle" aria-hidden="true"></span>
+                                                <h4>Added a new row and a new component</h4>
+                                                <p>Brief tutorials designed to help you use library services and resources</p>
+                                                <ul>
+                                                    <li><a href="https://www.lib.ua.edu/library-help/tutorials/">Tutorials and Instructional Videos Page</a></li>
+                                                    <li><a href="http://apps.lib.ua.edu/blogs/rolltideresearch/ ">Roll Tide Research</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+
+
+
+
                                 </div>
                             </li>
                         </ul>

@@ -4744,6 +4744,16 @@ input[type="reset"].btn-block,
 input[type="button"].btn-block {
   width: 100%;
 }
+.btn-primary-dark {
+  background-color: #3174af;
+  border-color: #306fa5;
+}
+.btn-primary-dark:focus,
+.btn-primary-dark:hover,
+.btn-primary-dark.active {
+  background-color: #265d8e;
+  border-color: #21527d;
+}
 .fade {
   opacity: 0;
   -webkit-transition: opacity 0.15s linear;
@@ -6434,12 +6444,12 @@ fieldset[disabled] .navbar-mega .btn-link:focus {
   left: -1000px;
   top: auto;
   overflow: hidden;
-  border-color: #1a7ab9;
-  background-color: #1d89cf;
-  background-image: -webkit-gradient(linear, left top, left bottom, from(#1e8cd3), to(#1a7ab9));
-  background-image: -webkit-linear-gradient(#1e8cd3, #1a7ab9);
-  background-image: -o-linear-gradient(#1e8cd3, #1a7ab9);
-  background-image: linear-gradient(#1e8cd3, #1a7ab9);
+  border-color: #306fa5;
+  background-color: #3174af;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#3174af), to(#306fa5));
+  background-image: -webkit-linear-gradient(#3174af, #306fa5);
+  background-image: -o-linear-gradient(#3174af, #306fa5);
+  background-image: linear-gradient(#3174af, #306fa5);
   border-radius: 2px;
   font-size: 18px;
   padding: 9px 18px;
@@ -6567,7 +6577,7 @@ fieldset[disabled] .navbar-mega .btn-link:focus {
           }
         }*/
 }
-.navbar-mega .navbar-nav .dropdown-menu .yamm-content > h2:first-child {
+.navbar-mega .navbar-nav .dropdown-menu .yamm-content > h3:first-child {
   margin-top: 0;
   margin-bottom: 15px;
   border-bottom: 1px solid #dfdfdf;
@@ -6730,12 +6740,12 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
   left: -1000px;
   top: auto;
   overflow: hidden;
-  border-color: #1a7ab9;
-  background-color: #1d89cf;
-  background-image: -webkit-gradient(linear, left top, left bottom, from(#1e8cd3), to(#1a7ab9));
-  background-image: -webkit-linear-gradient(#1e8cd3, #1a7ab9);
-  background-image: -o-linear-gradient(#1e8cd3, #1a7ab9);
-  background-image: linear-gradient(#1e8cd3, #1a7ab9);
+  border-color: #306fa5;
+  background-color: #3174af;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#3174af), to(#306fa5));
+  background-image: -webkit-linear-gradient(#3174af, #306fa5);
+  background-image: -o-linear-gradient(#3174af, #306fa5);
+  background-image: linear-gradient(#3174af, #306fa5);
   border-radius: 2px;
   font-size: 18px;
   padding: 9px 18px;
@@ -6863,7 +6873,7 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
           }
         }*/
 }
-.navbar-mega-inverse .navbar-nav .dropdown-menu .yamm-content > h2:first-child {
+.navbar-mega-inverse .navbar-nav .dropdown-menu .yamm-content > h3:first-child {
   margin-top: 0;
   margin-bottom: 15px;
   border-bottom: 1px solid #dfdfdf;
@@ -9556,7 +9566,7 @@ footer > .sub-footer {
   text-align: center;
   font-size: 1.45em;
   padding: 5px;
-  color: #996060;
+  color: #993333;
   border: 1px solid transparent;
 }
 .card > .card-footer > a:hover,
@@ -9599,6 +9609,9 @@ footer > .sub-footer {
   background-color: #fff;
   border-radius: 4px;
   border-color: #993333;
+}
+.front-page-card .details-context {
+  color: #416d41;
 }
 .jumbotron-header {
   background-image: url('../img/jumbotron-header-bg.jpg');
@@ -9675,7 +9688,7 @@ footer > .sub-footer {
   padding: 15px;
   padding-left: 30px;
   padding-right: 30px;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.6);
 }
 .ualib-image-carousel .rn-carousel-control {
   opacity: 1;
@@ -9723,6 +9736,9 @@ footer > .sub-footer {
 }
 .ualib-image-carousel .rn-carousel-indicator {
   font-size: 20px;
+}
+.ualib-image-carousel .rn-carousel-indicator span {
+  color: #666;
 }
 .ualib-image-carousel .card-body {
   padding-bottom: 0px;
@@ -9814,7 +9830,7 @@ main > p {
   display: block;
   width: 37px;
   height: 37px;
-  background-color: #ccc;
+  background-color: #919191;
   text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.25);
   border-radius: 50%;
   -webkit-box-shadow: -1px -1px 0 0 rgba(0, 0, 0, 0.25), 1px 1px 0 0 rgba(255, 255, 255, 0.95);
