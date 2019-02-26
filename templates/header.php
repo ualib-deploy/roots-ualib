@@ -176,9 +176,10 @@
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <div class="service-list">
                                                 <span class="fa fa-search-plus" aria-hidden="true"></span>
-                                                <h4>Division of Special Collections</h4>
+                                                <h4>Special Collections</h4>
                                                 <ul>
                                                     <li class="menu-acumen"><a href="http://acumen.lib.ua.edu/home">Acumen Digital Archives</a></li>
+                                                    <li class="menu-acumen"><a href="https://archives.lib.ua.edu/">Archival Collections</a></li>
                                                     <li class="menu-hoole"><a href="/libraries/hoole/">Hoole Special Collections</a></li>
                                                     <li class="menu-williams"><a href="/collections/williams/">Williams Collection</a></li>
                                                 </ul>
