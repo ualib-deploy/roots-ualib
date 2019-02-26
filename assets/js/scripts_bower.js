@@ -24614,7 +24614,7 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
     "                            <li><a href=\"#\" hours-href=\"{library: 'mclure', month: 0}\">McLure</a></li>\n" +
     "                            <li><a href=\"#\" hours-href=\"{library: 'hoole', month: 0}\">Hoole</a></li>\n" +
     "                            <li><a href=\"#\" hours-href=\"{library: 'bruno', month: 0}\">Bruno</a></li>\n" +
-    "                        </ul> \n" +
+    "                        </ul>\n" +
     "                    </div>\n" +
     "                    <ul class=\"list-unstyled fa-ul\" ng-if=\"contact\">\n" +
     "                        <li ng-if=\"contact.email\"><span class=\"fa fa-li fa-envelope\"></span> <a ng-href=\"mailto:{{contact.email}}\">{{contact.email}}</a></li>\n" +
@@ -24664,7 +24664,7 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
     "                </div>\n" +
     "            </div>\n" +
     "\n" +
-    " \n" +
+    "\n" +
     "             <div class=\"row\">\n" +
     "                <div class=\"col-md-12\">\n" +
     "                    <div class=\"panel panel-default\">\n" +
@@ -24693,7 +24693,7 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
     "                        </div>\n" +
     "                    </div>\n" +
     "                </div>\n" +
-    "            </div>  \n" +
+    "            </div>\n" +
     "\n" +
     "        </div>\n" +
     "    </div>\n" +
@@ -25215,7 +25215,6 @@ angular.module('hours.list', [])
             controller: 'ListCtrl'
         }
     }]);
-
 /**
  * @license AngularJS v1.2.32
  * (c) 2010-2014 Google, Inc. http://angularjs.org
@@ -29551,7 +29550,7 @@ angular.module('staffdir', ['ualib.staffdir']);
         return {
             restrict: 'AC',
             templateUrl: 'staff-card/staff-card-list.tpl.html',
-            controller: function($scope){
+            controller: ['$scope', function($scope){
                 $scope.staffdir = {};
 
                 StaffFactory.directory().get()
@@ -29562,7 +29561,7 @@ angular.module('staffdir', ['ualib.staffdir']);
                     }, function(){
                         console.log('Staffdir Error -- Come on, put in proper error handling already');
                     });
-            }
+            }]
         };
     }])
 
@@ -29778,7 +29777,7 @@ angular.module('staffdir', ['ualib.staffdir']);
                 login: '@email'
             },
             templateUrl: 'staff-profile/staff-profile.tpl.html',
-            controller: function($scope){
+            controller: ['$scope', function($scope){
                 $scope.userProfile = {};
 
                 //console.log("Login: " + $scope.login);
@@ -29824,7 +29823,7 @@ angular.module('staffdir', ['ualib.staffdir']);
                     }, function(data){
                         console.log('Error: cold not get profile! ' + data);
                     });
-            }
+            }]
         };
     }]);
 
