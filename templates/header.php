@@ -450,15 +450,6 @@
                                                 <p>Unable to access online resources?  Report the problem</p>
                                             </a>
                                         </div>
-                                        <!-- Haley Shah adding new mock data.. Ignore it -->
-                                        <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="/forms/login-problem-report-form/">
-                                                <span class="fa fa-sign-in" aria-hidden="true"></span>
-                                                <h4>Report a Login Problem -- Haley Shah </h4>
-                                                <p>Unable to access online resources?  Report the problem</p>
-                                            </a>
-                                        </div>
-                                        
                                         <!-- new tutorials service-list -->
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <div class="service-list">
