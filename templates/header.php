@@ -450,15 +450,6 @@
                                                 <p>Unable to access online resources?  Report the problem</p>
                                             </a>
                                         </div>
-                                        <!-- Haley Shah adding new mock data.. Ignore it -->
-                                        <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="/forms/login-problem-report-form/">
-                                                <span class="fa fa-sign-in" aria-hidden="true"></span>
-                                                <h4>Report a Login Problem -- Haley Shah </h4>
-                                                <p>Unable to access online resources?  Report the problem</p>
-                                            </a>
-                                        </div>
-                                        
                                         <!-- new tutorials service-list -->
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <div class="service-list">
@@ -472,28 +463,6 @@
                                             </div>
                                         </div>
                                     </div>
-
-                                    <!-- Haley shah is adding new row for testing.. Remove it later on -->
-                                    <div class="row">
-                                    <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <div class="service-list">
-                                                <span class="fa fa-question-circle" aria-hidden="true"></span>
-                                                <h4>Added a new row and a new component</h4>
-                                                <p>Brief tutorials designed to help you use library services and resources</p>
-                                                <ul>
-                                                    <li><a href="https://www.lib.ua.edu/library-help/tutorials/">Tutorials and Instructional Videos Page</a></li>
-                                                    <li><a href="http://apps.lib.ua.edu/blogs/rolltideresearch/ ">Roll Tide Research</a></li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-
-
-
-
-
                                 </div>
                             </li>
                         </ul>
