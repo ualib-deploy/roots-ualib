@@ -264,7 +264,7 @@ module.exports = function(grunt) {
                     mangle: true
                 },
                 files: [{
-                    'tmp/assets/js/header-footer-export.min.js': ['tmp/assets/js/header-footer-export.js']
+                    'assets/js/header-footer-export.min.js': ['tmp/assets/js/header-footer-export.js']
                 }]
             }
         },
