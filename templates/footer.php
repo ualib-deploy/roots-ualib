@@ -8,7 +8,7 @@
                     <ul class="footer-list">
                         <li><a href="/#/hours">Maps and Contact Information</a></li>
                         <li><a href="http://ask.lib.ua.edu">Ask A Librarian</a></li>
-                        <li><a href="/using-the-library/accessibility/">Accessibility</a></li>
+                        <li><a href="/using-the-library/accessibility/">Library Accessibility</a></li>
                         <li><a href="/about/libraries-policies/code-of-conduct/">Code of Conduct</a></li>
                         <li><a href="/about/mission-statement/">Mission Statement</a></li>
                         <li><a href="/site-map">Site Map</a></li>
@@ -85,6 +85,8 @@
                 <a href="http://www.ua.edu/">University of Alabama</a>
                 •
                 <a href="http://www.lib.ua.edu/">University Libraries</a>
+                •
+                <a href="https://accessibility.ua.edu/">Accessibility</a>
                 •
                 <a href="http://www.ua.edu/disclaimer.html">Disclaimer</a>
                 •
