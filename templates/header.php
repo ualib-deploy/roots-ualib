@@ -429,7 +429,7 @@
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="/library-help/connect-to-a-wireless-network/">
+                                            <a class="service-card" href="https://oit.ua.edu/service/wifi/">
                                                 <span class="fa fa-wifi" aria-hidden="true"></span>
                                                 <h4>Connect to a Wireless Network</h4>
                                                 <p>Access the Libraries internet using a wireless connection</p>
