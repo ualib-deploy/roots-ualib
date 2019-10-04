@@ -632,6 +632,9 @@
 .hours-list-child > td:first-of-type {
   padding-left: 30px !important;
 }
+table thead {
+  display: none;
+}
 
 input[type=range] {
   width: 300px; }
