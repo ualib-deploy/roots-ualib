@@ -24729,7 +24729,7 @@ angular.module("list/list.tpl.html", []).run(["$templateCache", function($templa
   $templateCache.put("list/list.tpl.html",
     "<div class=\"responsive-table\">\n" +
     "  <table class=\"table table-hover\">\n" +
-    "    <thead>\n" +
+    "    <thead class=\"visually-hidden\">\n" +
     "      <tr>\n" +
     "        <th>Library</th>\n" +
     "        <th>Hours</th>\n" +
