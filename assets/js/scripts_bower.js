@@ -24729,6 +24729,7 @@ angular.module("list/list.tpl.html", []).run(["$templateCache", function($templa
   $templateCache.put("list/list.tpl.html",
     "<div class=\"responsive-table\">\n" +
     "  <table class=\"table table-hover\">\n" +
+    "    <caption class=\"visually-hidden\">A listing of hours for all library locations across campus, sorted alphabetically by library name</caption>\n" +
     "    <thead class=\"visually-hidden\">\n" +
     "      <tr>\n" +
     "        <th>Library</th>\n" +
