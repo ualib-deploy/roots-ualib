@@ -17714,7 +17714,7 @@ angular.module('ualib.musicSearch')
 
 
 
-angular.module('oneSearch.templates', ['bento/bento.tpl.html', 'common/directives/suggest/suggest.tpl.html', 'common/engines/acumen/acumen.tpl.html', 'common/engines/catalog/catalog.tpl.html', 'common/engines/databases/databases.tpl.html', 'common/engines/ejournals/ejournals.tpl.html', 'common/engines/google-cs/google-cs.tpl.html', 'common/engines/libguides/libguides.tpl.html', 'common/engines/recommend/recommend.tpl.html', 'common/engines/scout/scout.tpl.html', 'common/engines/staff-directory/staff-directory.tpl.html']);
+angular.module('oneSearch.templates', ['bento/bento.tpl.html', 'common/directives/suggest/suggest.tpl.html', 'common/engines/catalog/catalog.tpl.html', 'common/engines/databases/databases.tpl.html', 'common/engines/digital-collections/digital-collections.tpl.html', 'common/engines/ejournals/ejournals.tpl.html', 'common/engines/google-cs/google-cs.tpl.html', 'common/engines/ir/ir.tpl.html', 'common/engines/libguides/libguides.tpl.html', 'common/engines/recommend/recommend.tpl.html', 'common/engines/scout/scout.tpl.html', 'common/engines/staff-directory/staff-directory.tpl.html']);
 
 angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("bento/bento.tpl.html",
@@ -17802,13 +17802,13 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "            </div>\n" +
     "        </div>\n" +
     "        <div class=\"col-md-4\">\n" +
-    "            <div class=\"bento-box\" bento-box=\"acumen\">\n" +
-    "                <h2 id=\"acumen\">\n" +
-    "                    Acumen <small>Digital Archives</small>\n" +
+    "            <div class=\"bento-box\" bento-box=\"digitalcollections\">\n" +
+    "                <h2 id=\"digitalcollections\">\n" +
+    "                    Digital Collections\n" +
     "                    <small>\n" +
     "                        <span class=\"fa fa-info-circle\"\n" +
     "                              tooltip-placement=\"right\"\n" +
-    "                              tooltip=\"Returns a keyword search in titles and full text of our Special Collections Digital Archive.\"></span>\n" +
+    "                              tooltip=\"Returns a keyword search in titles and full text of our digital collections.\"></span>\n" +
     "                    </small>\n" +
     "                </h2>\n" +
     "            </div>\n" +
@@ -17861,7 +17861,8 @@ angular.module("bento/bento.tpl.html", []).run(["$templateCache", function($temp
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
-    "</div>");
+    "</div>\n" +
+    "");
 }]);
 
 angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -17930,30 +17931,6 @@ angular.module("common/directives/suggest/suggest.tpl.html", []).run(["$template
     "</div>");
 }]);
 
-angular.module("common/engines/acumen/acumen.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("common/engines/acumen/acumen.tpl.html",
-    "<div class=\"media\">\n" +
-    "    <a class=\"pull-left\" ng-href=\"http://acumen.lib.ua.edu/{{item.link}}\"  target=\"_acumen\">\n" +
-    "        <img ng-src=\"{{item.thumb_path}}\" alt=\"{{item.title}}\">\n" +
-    "    </a>\n" +
-    "    <div class=\"media-body\">\n" +
-    "        <h3 class=\"h4 media-heading\">\n" +
-    "            <a ng-href=\"http://acumen.lib.ua.edu/{{item.link}}\" target=\"_acumen\"  ng-click=\"gaPush()\">{{item.title | truncate: 40: '...': true}}</a>\n" +
-    "        </h3>\n" +
-    "        <div class=\"details-context\">\n" +
-    "            <span ng-if=\"item.date\" ng-bind-html=\"item.date\"></span>\n" +
-    "            <span ng-if=\"item.type\" ng-bind-html=\"item.type | ucfirst\"></span>\n" +
-    "        </div>\n" +
-    "        <p>{{item.description | truncate: 100: '...': true}}</p>\n" +
-    "        <ul class=\"list-inline\">\n" +
-    "            <li>\n" +
-    "                <a ng-href=\"{{resourceLink}}\" class=\"external-link\" ng-if=\"resourceLink\" target=\"_{{engine}}\" ng-click=\"gaMore()\">Results in {{engineName}}</a>\n" +
-    "            </li>\n" +
-    "        </ul>\n" +
-    "    </div>\n" +
-    "</div>");
-}]);
-
 angular.module("common/engines/catalog/catalog.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("common/engines/catalog/catalog.tpl.html",
     "<div class=\"media\">\n" +
@@ -18003,6 +17980,26 @@ angular.module("common/engines/databases/databases.tpl.html", []).run(["$templat
     "</div>");
 }]);
 
+angular.module("common/engines/digital-collections/digital-collections.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("common/engines/digital-collections/digital-collections.tpl.html",
+    "<div class=\"media\">\n" +
+    "    <a class=\"pull-left\" ng-href=\"https://digitalcollections.libraries.ua.edu/digital/collection/{{item.collectionAlias}}/id/{{item.itemId}}/rec/1\"  target=\"_digital-collections\">\n" +
+    "        <img ng-src=\"https://digitalcollections.libraries.ua.edu/digital/{{item.thumbnailUri}}\" alt=\"{{item.title}}\">\n" +
+    "    </a>\n" +
+    "    <div class=\"media-body\">\n" +
+    "        <h3 class=\"h4 media-heading\">\n" +
+    "            <a ng-href=\"https://digitalcollections.libraries.ua.edu/digital/collection/{{item.collectionAlias}}/id/{{item.itemId}}/rec/1\" target=\"_digital-collections\"  ng-click=\"gaPush()\">{{item.title | truncate: 40: '...': true}}</a>\n" +
+    "        </h3>\n" +
+    "        <ul class=\"list-inline\">\n" +
+    "            <li>\n" +
+    "                <a ng-href=\"{{resourceLink}}\" class=\"external-link\" ng-if=\"resourceLink\" target=\"_{{engine}}\" ng-click=\"gaMore()\">Results in {{engineName}}</a>\n" +
+    "            </li>\n" +
+    "        </ul>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "");
+}]);
+
 angular.module("common/engines/ejournals/ejournals.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("common/engines/ejournals/ejournals.tpl.html",
     "<div class=\"media\">\n" +
@@ -18044,6 +18041,16 @@ angular.module("common/engines/google-cs/google-cs.tpl.html", []).run(["$templat
     "        </ul>\n" +
     "    </div>\n" +
     "</div>");
+}]);
+
+angular.module("common/engines/ir/ir.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("common/engines/ir/ir.tpl.html",
+    "<div class=\"media\">\n" +
+    "	<div class=\"media-body\">\n" +
+    "		<h3 class=\"h4 media-heading\">{{item.title | truncate: 40: '...': true}}</h3>\n" +
+    "	</div>\n" +
+    "</div>\n" +
+    "");
 }]);
 
 angular.module("common/engines/libguides/libguides.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -18852,7 +18859,7 @@ angular.module('oneSearch.common')
                 model: '=',
                 search: '='
             },
-            controller: ['$scope', '$window', '$timeout', '$document', 'dataFactory', 'Bento', function($scope, $window, $timeout, $document,  dataFactory, Bento){
+            controller: function($scope, $window, $timeout, $document,  dataFactory, Bento){
                 $scope.items = {};
                 $scope.filteredItems = [];
                 $scope.model = "";
@@ -18977,7 +18984,7 @@ angular.module('oneSearch.common')
 
 
 
-            }],
+            },
             link: function(scope, elem, attrs) {
                 scope.showSuggestions = false;
                 var suggestWatcher = scope.$watch('items', function(newVal, oldVal){
@@ -19086,61 +19093,6 @@ angular.module('oneSearch.common')
         };
     }]);
 
-angular.module('engines.acumen', [])
-
-    /**
-     * @ngdoc object
-     * @name engines.type:acumen
-     *
-     * @description
-     * Engine config properties (For more details, see {@link oneSearch.oneSearchProvider#methods_engine oneSearchProvider.engine()} documentation)
-     *
-     * | property | value |
-     * |----------|-------|
-     * | id       | 8     |
-     * | title      | N/A *(defaults to `Acumen`)*    |
-     * | priority | 3     |
-     * | resultsPath | `Acumen.data`     |
-     * | totalsPath | `Acumen.metadata.numFound`     |
-     * | mediaTypes | N/A *(appears as its own box)*    |
-     * | filterQuery | N/A  |
-     * | templateUrl | `common/engines/acumen/acumen.tpl.html` |
-     * | controller | {@link engines.type:acumen:AcumenCtrl AcumenCtrl} |
-     *
-     * @requires oneSearch.oneSearchProvider
-     */
-
-    .config(['oneSearchProvider', function(oneSearchProvider){
-        oneSearchProvider.engine('acumen', {
-            id: 8,
-            priority: 3,
-            resultsPath: 'Acumen.data',
-            totalsPath: 'Acumen.metadata.numFound',
-            templateUrl: 'common/engines/acumen/acumen.tpl.html',
-            controller: 'AcumenCtrl'
-        })
-    }])
-
-    /**
-     * @ngdoc controller
-     * @name engines.type:acumen:AcumenCtrl
-     *
-     * @description
-     * Adds a `type` property to each item to display, from genres that may return with the API results.
-     * <mark>TODO:</mark>   add proper description.
-     */
-
-    .controller('AcumenCtrl', ['$scope', '$filter', function($scope, $filter){
-        var items = $scope.items;
-
-        for (var i = 0, len = items.length; i < len; i++) {
-            if (items[i].type) {
-                //console.log(items[i].type);
-                if (items[i].type[0] == 'text' && items[i].details && items[i].details.genre) items[i].type = items[i].details.genre.sort().shift();
-                else items[i].type = items[i].type.sort().shift();
-            }
-        }
-    }]);
 angular.module('engines.catalog', [])
 
     /**
@@ -19201,7 +19153,7 @@ angular.module('engines.catalog', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('CatalogCtrl', ['$scope', '$filter', function($scope, $filter){
+    .controller('CatalogCtrl', function($scope, $filter){
         var types = {
             bc: "Archive/Manuscript",
             cm: "Music Score",
@@ -19243,7 +19195,7 @@ angular.module('engines.catalog', [])
         }
 
         $scope.items = items;
-    }]);
+    });
 
 angular.module('engines.databases', [])
 
@@ -19278,6 +19230,34 @@ angular.module('engines.databases', [])
             templateUrl: 'common/engines/databases/databases.tpl.html'
         })
     }])
+angular.module('engines.digitalcollections', [])
+
+    /**
+     * @ngdoc object
+     * @name engines.type:digitalCollections
+     *
+     * @description
+     * Engine config properties (For more details, see {@link oneSearch.oneSearchProvider#methods_engine oneSearchProvider.engine()} documentation)
+     *
+     * | property    | value                                                                                 |
+     * |-------------|---------------------------------------------------------------------------------------|
+     * | id          | 8                                                                                     |
+     * | priority    | 3                                                                                     |
+     * | resultsPath | `digitalCollections.items`                                                            |
+     * | templateUrl | `common/engines/digital-collections/digital-collections.tpl.html`                     |
+     *
+     * @requires oneSearch.oneSearchProvider
+     */
+
+    .config(['oneSearchProvider', function(oneSearchProvider) {
+        oneSearchProvider.engine('digitalcollections', {
+            id: 8,
+            priority: 3,
+            resultsPath: 'digitalCollections.items',
+            templateUrl: 'common/engines/digital-collections/digital-collections.tpl.html',
+        })
+    }]);
+
 angular.module('engines.ejournals', [])
     /**
      * @ngdoc object
@@ -19327,7 +19307,7 @@ angular.module('engines.ejournals', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('EjouralsCtrl', ['$scope', function($scope) {
+    .controller('EjouralsCtrl', function($scope) {
 
         var title; // Title variable to bind to $scope. ".BibRelationships.IsPartOfRelationships" title is used if no item title is present.
         var ISSN;
@@ -19411,7 +19391,7 @@ angular.module('engines.ejournals', [])
         }
 
         $scope.items = items;
-    }]);
+    });
 /**
  * @ngdoc overview
  * @name engines
@@ -19472,7 +19452,7 @@ angular.module('engines.ejournals', [])
  *
  */
 angular.module('common.engines', [
-    'engines.acumen',
+    'engines.digitalcollections',
     'engines.catalog',
     'engines.databases',
     'engines.scout',
@@ -19550,6 +19530,7 @@ angular.module('common.engines', [
         };
 
     }])
+
 angular.module('engines.faq', [])
 
     /**
@@ -19617,6 +19598,40 @@ angular.module('engines.googleCS', [])
             templateUrl: 'common/engines/google-cs/google-cs.tpl.html'
         })
     }])
+angular.module('engines.ir', [])
+
+    /**
+     * @ngdoc object
+     * @name engines.type:ir
+     *
+     * @description
+     * Engine config properties (For more details, see {@link oneSearch.oneSearchProvider#methods_engine oneSearchProvider.engine()} documentation)
+     *
+     * | property    | value                           |
+     * |-------------|---------------------------------|
+     * | id          | 2048                            |
+     * | title       | Ir                              |
+     * | priority    | 1                               |
+     * | resultsPath | `Ir.results`                    |
+     * | totalsPath  | `Ir.totals`                     |
+     * | mediaTypes  | N/A *(appears as its own box)*  |
+     * | filterQuery | N/A                             |
+     * | templateUrl | `common/engines/ir/ir.tpl.html` |
+     * | controller  | N/A                             |
+     *
+     * @requires oneSearchProvider
+     */
+
+    .config(['oneSearchProvider', function(oneSearchProvider){
+        oneSearchProvider.engine('ir', {
+            id: 2048,
+            priority: 1,
+            resultsPath: 'Ir.results',
+            totalsPath: 'Ir.totals',
+            templateUrl: 'common/engines/ir/ir.tpl.html'
+        })
+    }])
+
 angular.module('engines.libguides', [])
 
     /**
@@ -19758,7 +19773,7 @@ angular.module('engines.scout', [])
      * <mark>TODO:</mark>   add proper description.
      */
 
-    .controller('ScoutCtrl', ['$scope', function($scope){
+    .controller('ScoutCtrl', function($scope){
         var title; // Title variable to bind to $scope. ".BibRelationships.IsPartOfRelationships" title is used if no item title is present.
         var items = $scope.items;
         for (var i = 0; i < items.length; i++){
@@ -19832,7 +19847,7 @@ angular.module('engines.scout', [])
         }
 
         $scope.resourceLink = angular.copy(link);
-    }]);
+    });
 /**
  * @ngdoc object
  * @name engines.type:ENGIEN_NAME
@@ -19861,7 +19876,7 @@ angular.module('engines.staffdirectory', [])
             controller: 'StaffDirectoryCtrl'
         })
     }])
-    .controller('StaffDirectoryCtrl', ['$scope', function($scope){
+    .controller('StaffDirectoryCtrl', function($scope){
 
         var items = $scope.items;
 
@@ -19876,7 +19891,7 @@ angular.module('engines.staffdirectory', [])
                 }
             }
         }
-    }]);
+    });
 angular.module('filters.nameFilter', [])
 
     .filter('nameFilter', ['$filter', function($filter){
