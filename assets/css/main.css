@@ -4325,7 +4325,6 @@ select[multiple].form-group-lg .comment-form textarea {
   line-height: 1.42857143;
   border-radius: 4px;
   -webkit-user-select: none;
-  -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
 }
