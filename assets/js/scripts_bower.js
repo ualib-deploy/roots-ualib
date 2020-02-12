@@ -24714,13 +24714,11 @@ angular.module("list/list.tpl.html", []).run(["$templateCache", function($templa
     "        <td><a href=\"#\" ng-href=\"#/hours?library={{lib.name}}\">{{lib.name}}</a></td>\n" +
     "        <td>{{lib.hours}}</td>\n" +
     "        <td><span ng-class=\"lib.status.css\">{{lib.status.text}}</span></td>\n" +
-    "        <td><span class=\"fa fa-lg fa-info-circle\" ng-if=\"lib.description\" tooltip=\"{{lib.description}}\"></span></td>\n" +
     "      </tr>\n" +
     "      <tr class=\"hours-list-child\" ng-repeat=\"child in lib.children track by $index\" ng-click=\"selectLib(child)\">\n" +
     "        <td><a ng-href=\"#/hours?library={{child.name}}\">{{child.name}}</a></td>\n" +
     "        <td>{{child.hours}}</td>\n" +
     "        <td><span ng-class=\"child.status.css\">{{child.status.text}}</span></td>\n" +
-    "        <td><span class=\"fa fa-lg fa-info-circle\" ng-if=\"child.description\" tooltip=\"{{child.description}}\"></span></td>\n" +
     "      </tr>\n" +
     "      <!-- Williams Collection data is removed from the Database; therefore the data is hardcoded !-->\n" +
     "      <tr ng-repeat-end ng-if=\"lib.name == 'Gorgas Library'\" class=\"hours-list-child\">\n" +
