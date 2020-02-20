@@ -4,7 +4,7 @@
             <div class="navbar-header">
                 <div id="skip" skip-link><a href="">Skip to content</a></div>
                 <a class="navbar-brand" href="/#/home">
-                    <img src="/wp-content/themes/roots-ualib/assets/img/new-ualib-logo-color.png" class="hidden-xs" rel="home" alt="University of Alabama Libraries"/>
+                    <img src="/wp-content/themes/roots-ualib/assets/img/new-ualib-logo.png" class="hidden-xs" rel="home" alt="University of Alabama Libraries"/>
                     <span class="visible-xs">UA Libraries</span>
                 </a>
                 <ul class="nav navbar-nav navbar-right hidden-lg hidden-md">
