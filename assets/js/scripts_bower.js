@@ -24723,8 +24723,8 @@ angular.module("list/list.tpl.html", []).run(["$templateCache", function($templa
     "      <!-- Williams Collection data is removed from the Database; therefore the data is hardcoded !-->\n" +
     "      <tr ng-repeat-end ng-if=\"lib.name == 'Gorgas Library'\" class=\"hours-list-child\">\n" +
     "        <td><a ng-href=\"https://www.lib.ua.edu/collections/williams/\">Williams Collection</a></td>\n" +
-    "        <td> Call for appt.</td>\n" +
-    "        <td> (205) 348-0500 </td>\n" +
+    "        <td class=\"ng-binding\">Closed</td>\n" +
+    "        <td><span ng-class=\"lib.status.css\" class=\"ng-binding label label-danger\">closed</span></td>\n" +
     "      </tr>\n" +
     "    </tbody>\n" +
     "  </table>\n" +
