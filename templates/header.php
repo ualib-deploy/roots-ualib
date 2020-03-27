@@ -72,7 +72,7 @@
                                         </div>
                                         <div class="row">
                                             <div class="col-md-12">
-                                                <a href="http://guides.lib.ua.edu/onesearch-howto" class="what-is-link" id="whatAmISearching" title="What am I searching?"><span class="fa fa-info-circle" aria-hidden="true"></span>  What am I searching?</a>
+                                                <a href="https://guides.lib.ua.edu/onesearch-howto" class="what-is-link" id="whatAmISearching" title="What am I searching?"><span class="fa fa-info-circle" aria-hidden="true"></span>  What am I searching?</a>
                                                 <div class="checkbox scout-checkbox" style="float: right;">
                                                     <a href="http://search.ebscohost.com/login.aspx?groupid=main&amp;profid=eds&amp;direct=true&amp;setup=1" class="what-is-link" style="margin-top: 0px;"><span class="fa fa-binoculars" aria-hidden="true"></span> Scout advanced search</a>
                                                     <label ng-click="gaScoutOnly()" style="margin-right: 15px;">
@@ -118,7 +118,7 @@
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="http://guides.lib.ua.edu/az.php">
+                                            <a class="service-card" href="https://guides.lib.ua.edu/az.php">
                                                 <span class="fa fa-database" aria-hidden="true"></span>
                                                 <h4>Databases</h4>
                                                 <p>Find the best library databases for your research</p>
@@ -135,7 +135,7 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="http://guides.lib.ua.edu/">
+                                            <a class="service-card" href="https://guides.lib.ua.edu/">
                                                 <span class="fa fa-compass" aria-hidden="true"></span>
                                                 <h4>Research Guides</h4>
                                                 <p>Explore subject and course specific resources in guides curated by UA librarians</p>
@@ -149,7 +149,7 @@
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="http://guides.lib.ua.edu/distance_learning">
+                                            <a class="service-card" href="https://guides.lib.ua.edu/distance_learning">
                                                 <span class="fa fa-globe" aria-hidden="true"></span>
                                                 <h4>Distance Education</h4>
                                                 <p>Information on research, writing, and key resources for distant learners</p>
@@ -169,7 +169,7 @@
                                                 <span class="fa fa-music" aria-hidden="true"></span>
                                                 <h4>Music Library</h4>
                                                 <ul>
-                                                    <li class="menu-research-guides"><a href="http://guides.lib.ua.edu/music">Research Guides</a></li>
+                                                    <li class="menu-research-guides"><a href="https://guides.lib.ua.edu/music">Research Guides</a></li>
                                                     <li class="menu-home"><a href="/libraries/music/">Music Library Home</a></li>
                                                 </ul>
                                             </div>
@@ -205,7 +205,7 @@
                                                 <h4>Research Data Services</h4>
                                                 <p>Research data management and curation resources available at the University of Alabama</p>
                                                 <ul>
-                                                    <li class="menu-rdmc"><a href="http://guides.lib.ua.edu/rdmp">Research Data Management & Curation</a></li>
+                                                    <li class="menu-rdmc"><a href="https://guides.lib.ua.edu/rdmp">Research Data Management & Curation</a></li>
                                                     <li class="menu-ir"><a href="https://ir.ua.edu/">UA Institutional Repository</a></li>
                                                 </ul>
                                             </div>
@@ -534,7 +534,7 @@
                                         </div>
                                         <div class="row">
                                             <div class="col-md-12">
-                                                <a href="http://guides.lib.ua.edu/onesearch-howto" class="what-is-link" id="whatAmISearching" title="What am I searching?"><span class="fa fa-info-circle" aria-hidden="true"></span>  What am I searching?</a>
+                                                <a href="https://guides.lib.ua.edu/onesearch-howto" class="what-is-link" id="whatAmISearching" title="What am I searching?"><span class="fa fa-info-circle" aria-hidden="true"></span>  What am I searching?</a>
                                                 <div class="checkbox scout-checkbox" style="float: right;">
                                                     <a href="http://search.ebscohost.com/login.aspx?groupid=main&amp;profid=eds&amp;direct=true&amp;setup=1" class="what-is-link" style="margin-top: 0px;"><span class="fa fa-binoculars" aria-hidden="true"></span> Scout advanced search</a>
                                                     <label ng-click="gaScoutOnly()" style="margin-right: 15px;">
