@@ -14,6 +14,8 @@
  * - An ID has been defined in config.php
  * - You're not logged in as an administrator
  */
+//wp_enqueue_script( 'libchat_widget', 'https://v2.libanswers.com/load_chat.php?hash=0b2583da7dbf524a3390409cce1fb375', $deps = array(), null, true );
+
 function roots_scripts() {
 
     $CDN = array(
@@ -21,7 +23,8 @@ function roots_scripts() {
         'angular-animate'   => '//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.28/angular-animate.min.js',
         'angular-route'   => '//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.28/angular-route.min.js',
         'angular-resource'   => '//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.28/angular-resource.min.js',
-        'angular-sanitize'   => '//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.28/angular-sanitize.min.js'
+        'angular-sanitize'   => '//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.28/angular-sanitize.min.js',
+        'libchat_widget' => 'https://v2.libanswers.com/load_chat.php?hash=0b2583da7dbf524a3390409cce1fb375'
     );
 
   /**
@@ -37,7 +40,7 @@ function roots_scripts() {
       'js_bower'        => '/assets/js/scripts_bower.js',
       'js'        => $scripts_js,
       'modernizr' => '/assets/vendor/modernizr/modernizr.js',
-      'jquery'    => '//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.js'
+      'jquery'    => '//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.js',
     );
 
   } else {
@@ -84,7 +87,6 @@ function roots_scripts() {
 
     wp_enqueue_script('roots_js_bower', get_template_directory_uri() . $assets['js_bower'], array(), null, true);
     wp_enqueue_script('roots_js', get_template_directory_uri() . $assets['js'], array(), null, true);
-
 }
 add_action('wp_enqueue_scripts', 'roots_scripts', 100);
 
