@@ -36,7 +36,7 @@
             <?php if (!is_front_page()): ?>
             <div class="container" id="#mainContent" tabindex="-1">
                 <?php
-                if(isset($fields['multipage_menu']) && $fields['multipage_menu'] !== false && (count($field['multipage_menu']) > 0)){
+                if(isset($fields['multipage_menu']) && !(empty($fields['multipage_menu'])) ){
                     set_query_var('multipage_menu', wp_get_nav_menu_items($fields['multipage_menu']));
                     get_template_part('templates/content-page-submenu');
                 }
