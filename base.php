@@ -27,7 +27,7 @@
     <div role="document">
       <?php
         $fields = $fields = function_exists('get_fields') ? get_fields() : null;
-        if (is_array($fields['jumbotron_header'])){
+        if ((count($fields['jumbotron_header']) > 0)){
             get_template_part('templates/jumbotron-header');
         }
       ?>
