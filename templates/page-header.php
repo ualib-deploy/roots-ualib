@@ -1,5 +1,5 @@
 <?php $is_jumbortron_header = function_exists('get_fields') ? get_field( "jumbotron_header" ) : null; ?>
-<?php if(!is_front_page() && !is_array($is_jumbortron_header)): ?>
+<?php if(!is_front_page() && (count($is_jumbortron_header) < 1 )): ?>
 
 <ol class="breadcrumb" typeof="BreadcrumbList" vocab="http://schema.org/">
         <?php if(function_exists('bcn_display'))

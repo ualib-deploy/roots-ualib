@@ -27,7 +27,7 @@
     <div role="document">
       <?php
         $fields = $fields = function_exists('get_fields') ? get_fields() : null;
-        if (is_array($fields['jumbotron_header'])){
+        if ((count($fields['jumbotron_header']) > 0)){
             get_template_part('templates/jumbotron-header');
         }
       ?>
@@ -36,7 +36,7 @@
             <?php if (!is_front_page()): ?>
             <div class="container" id="#mainContent" tabindex="-1">
                 <?php
-                if(isset($fields['multipage_menu']) && $fields['multipage_menu'] !== false){
+                if(isset($fields['multipage_menu']) && !(empty($fields['multipage_menu'])) ){
                     set_query_var('multipage_menu', wp_get_nav_menu_items($fields['multipage_menu']));
                     get_template_part('templates/content-page-submenu');
                 }
