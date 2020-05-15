@@ -15,6 +15,12 @@ function roots_ualib_scripts() {
             'nonce' => wp_create_nonce( 'wp_rest' )
         )
     );
+
+    // Added for livereload capability when developing locally
+    if (in_array($_SERVER['REMOTE_ADDR'], array('127.0.0.1', '::1'))) {
+        wp_register_script('livereload', 'http://localhost:35729/livereload.js?snipver=1', null, false, true);
+        wp_enqueue_script('livereload');
+    }
 }
 function add_manage_admin_bar_link() {
     global $wp_admin_bar;
@@ -167,29 +173,23 @@ add_filter('wp_feed_cache_transient_lifetime', 'bweb_feedzy_cache_duration', 10,
 add_filter('bcn_after_fill', 'remove_mm_pages');
 
 function remove_mm_pages($trail) {
-  
+
   $actualTrail = $trail->trail;
-  
+
   $titleArray = array('Research Tools', 'Using the Library', 'About', 'Library Help');
-  
+
   $counter = 0;
-  
+
   foreach($actualTrail as $breadcrumb){
-    
+
     $crumbTitle = $breadcrumb->get_title();
 
     if (in_array($crumbTitle, $titleArray)){
       unset($trail->trail[$counter]);
     }
-    $counter++; 
+    $counter++;
   }
 }
 
 
 add_action( 'wp_enqueue_scripts', 'roots_ualib_scripts' );
-
-// Added for livereload capability when developing locally
-if (in_array($_SERVER['REMOTE_ADDR'], array('127.0.0.1', '::1'))) {
-    wp_register_script('livereload', 'http://localhost:35729/livereload.js?snipver=1', null, false, true);
-    wp_enqueue_script('livereload');
-}
