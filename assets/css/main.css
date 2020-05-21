@@ -4325,7 +4325,6 @@ select[multiple].form-group-lg .comment-form textarea {
   line-height: 1.42857143;
   border-radius: 4px;
   -webkit-user-select: none;
-  -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
 }
@@ -6692,13 +6691,13 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:hover,
 fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
   color: #e5d8d8;
 }
-@media (max-width: 1140px) {
+@media (max-width: 1210px) {
   .navbar-mega-inverse .navbar-nav > li > a.dropdown-toggle {
     font-size: 15px;
     padding-left: 20px;
   }
 }
-@media (max-width: 1140px) {
+@media (max-width: 1210px) {
   .navbar-mega-inverse .navbar-nav > li > a.not-dropdown {
     font-size: 15px;
     padding-left: 20px;
