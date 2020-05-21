@@ -6707,12 +6707,14 @@ fieldset[disabled] .navbar-mega-inverse .btn-link:focus {
   .navbar-mega-inverse .navbar-nav > li > a.not-dropdown {
     font-size: 15px;
     padding-left: 20px;
+    padding-right: 20px!important;
   }
 }
 @media (max-width: 1063px) {
   .navbar-mega-inverse .navbar-nav > li > a.not-dropdown {
     font-size: 14px;
     padding-left: 15px;
+    padding-right: 15px!important;
   }
 }
 @media (min-width: 992px) {
