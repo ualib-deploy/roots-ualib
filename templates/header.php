@@ -74,7 +74,7 @@
                                             <div class="col-md-12">
                                                 <a href="https://guides.lib.ua.edu/onesearch-howto" class="what-is-link" id="whatAmISearching" title="What am I searching?"><span class="fa fa-info-circle" aria-hidden="true"></span>  What am I searching?</a>
                                                 <div class="checkbox scout-checkbox" style="float: right;">
-                                                    <a href="http://www.lib.ua.edu/scout" class="what-is-link" style="margin-top: 0px;"><span class="fa fa-binoculars" aria-hidden="true"></span> Scout advanced search</a>
+                                                    <a href="https://www.lib.ua.edu/scout" class="what-is-link" style="margin-top: 0px;"><span class="fa fa-binoculars" aria-hidden="true"></span> Scout advanced search</a>
                                                     <label ng-click="gaScoutOnly()" style="margin-right: 15px;">
                                                         Only search Scout
                                                         <input type="checkbox" ng-model="scoutCheckbox">
@@ -536,7 +536,7 @@
                                             <div class="col-md-12">
                                                 <a href="https://guides.lib.ua.edu/onesearch-howto" class="what-is-link" id="whatAmISearching" title="What am I searching?"><span class="fa fa-info-circle" aria-hidden="true"></span>  What am I searching?</a>
                                                 <div class="checkbox scout-checkbox" style="float: right;">
-                                                    <a href="http://www.lib.ua.edu/scout" class="what-is-link" style="margin-top: 0px;"><span class="fa fa-binoculars" aria-hidden="true"></span> Scout advanced search</a>
+                                                    <a href="https://www.lib.ua.edu/scout" class="what-is-link" style="margin-top: 0px;"><span class="fa fa-binoculars" aria-hidden="true"></span> Scout advanced search</a>
                                                     <label ng-click="gaScoutOnly()" style="margin-right: 15px;">
                                                         Only search Scout
                                                         <input type="checkbox" ng-model="scoutCheckbox">
