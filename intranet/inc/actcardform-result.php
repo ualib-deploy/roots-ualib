@@ -60,7 +60,7 @@
   }
 
   // Sanitize all fields
-  if (bad_happened == 0) {
+  if ($bad_happened == 0) {
   $_POST['CircDesk'] = filter_var($_POST['CircDesk'], FILTER_SANITIZE_STRING);
   $_POST['CircOperator'] = filter_var($_POST['CircOperator'], FILTER_SANITIZE_STRING);
   $_POST['OperatorEmail'] = filter_var($_POST['OperatorEmail'], FILTER_SANITIZE_STRING);
@@ -73,27 +73,27 @@
   }
 
   // Prepare output
-  if (bad_happened == 0) {
+  if ($bad_happened == 0) {
     $fullemailbody = "*********Action Card Scan Problem Report*********" . PHP_EOL;
     $fullemailbody .= "******************************" . PHP_EOL;
     $fullemailbody .= "Report Submission Details" . PHP_EOL;
     $fullemailbody .= "******************************" . PHP_EOL;
     $fullemailbody .= " DATE/TIME: " . date("F j, Y, g:i a") . PHP_EOL;
-    $fullemailbody .= "  CIRCDESK: " . $_POST[CircDesk] . PHP_EOL;
-    $fullemailbody .= "  OPERATOR: " . $_POST[CircOperator] . PHP_EOL;
-    $fullemailbody .= "OPER EMAIL: " . $_POST[OperatorEmail] . PHP_EOL;
+    $fullemailbody .= "  CIRCDESK: " . $_POST['CircDesk'] . PHP_EOL;
+    $fullemailbody .= "  OPERATOR: " . $_POST['CircOperator'] . PHP_EOL;
+    $fullemailbody .= "OPER EMAIL: " . $_POST['OperatorEmail'] . PHP_EOL;
     $fullemailbody .= "IP ADDRESS: " . $_SERVER['REMOTE_ADDR'] . PHP_EOL;
     $fullemailbody .= "   REFERER: " . $_SERVER['HTTP_REFERER'] . PHP_EOL;
     $fullemailbody .= "USER AGENT: " . $_SERVER['HTTP_USER_AGENT'] . PHP_EOL;
     $fullemailbody .= "******************************" . PHP_EOL;
     $fullemailbody .= "Patron Information" . PHP_EOL;
     $fullemailbody .= "******************************" . PHP_EOL;
-    $fullemailbody .= " PATRON NAME: " . $_POST[PatronName] . PHP_EOL;
-    $fullemailbody .= " PATRON CWID: " . $_POST[PatronCWID] . PHP_EOL;
-    $fullemailbody .= "PATRON EMAIL: " . $_POST[PatronEmail] . PHP_EOL;
-    $fullemailbody .= "PATRON PHONE: " . $_POST[PatronPhone] . PHP_EOL;
-    $fullemailbody .= "CARD READER MESSAGE: " . $_POST[ReaderMSG] . PHP_EOL;
-    $fullemailbody .= "ADDITIONAL INFO: " . $_POST[Info] . PHP_EOL;
+    $fullemailbody .= " PATRON NAME: " . $_POST['PatronName'] . PHP_EOL;
+    $fullemailbody .= " PATRON CWID: " . $_POST['PatronCWID'] . PHP_EOL;
+    $fullemailbody .= "PATRON EMAIL: " . $_POST['PatronEmail'] . PHP_EOL;
+    $fullemailbody .= "PATRON PHONE: " . $_POST['PatronPhone'] . PHP_EOL;
+    $fullemailbody .= "CARD READER MESSAGE: " . $_POST['ReaderMSG'] . PHP_EOL;
+    $fullemailbody .= "ADDITIONAL INFO: " . $_POST['Info'] . PHP_EOL;
     $fullemailbody .= "******************************" . PHP_EOL;
     $fullemailbody .= "OLT Use Only" . PHP_EOL;
     $fullemailbody .= "******************************" . PHP_EOL;
@@ -110,14 +110,14 @@
     $mail = new PHPMailer();
     $mail->IsSMTP();
     $mail->Host = "smtp.ua.edu";
-    $mail->From = $_POST[OperatorEmail];
-    $mail->FromName = $_POST[CircOperator];
+    $mail->From = $_POST['OperatorEmail'];
+    $mail->FromName = $_POST['CircOperator'];
     /* $mail->AddAddress("mpatrick@lib.ua.edu", "Michael Patrick"); */
     $mail->AddAddress("cewyatt@ua.edu", "caryl");
     /* $mail->AddCC("ierm@ua.edu", "ILS & E-Resource Management"); */
     #$mail->AddCC("libsys@bama.ua.edu", "Libsys");
     # $mail->AddAddress("jtillis@ua.edu", "Jennifer Tillis");
-    $mail->Subject = "Action Card Scan Problem Report - " . $_POST[CircDesk] . " Circ Desk";
+    $mail->Subject = "Action Card Scan Problem Report - " . $_POST['CircDesk'] . " Circ Desk";
     $mail->Body    = $fullemailbody;
 
   // Handle Errors and Output Message to User
