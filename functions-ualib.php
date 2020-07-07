@@ -191,5 +191,10 @@ function remove_mm_pages($trail) {
   }
 }
 
+function intranet_forms_scripts() {
+	wp_enqueue_script( 'incidentreport-script', get_stylesheet_directory_uri() . '/inc/incidentreport.js' );
+	wp_enqueue_script( 'voyrequest-script', get_stylesheet_directory_uri() . '/inc/voyrequest.js', array( 'jquery' ) );
+}
+add_action( 'wp_enqueue_scripts', 'intranet_forms_scripts' );
 
 add_action( 'wp_enqueue_scripts', 'roots_ualib_scripts' );
