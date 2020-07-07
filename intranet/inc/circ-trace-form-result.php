@@ -5,10 +5,10 @@
 
 // Set valid referers
   $valid_referers=array(
-  "http://appsdev.lib.ua.edu/blogs/intranet/circ-trace-form",
-  "http://appsdev.lib.ua.edu/blogs/intranet/circ-trace-form/",
-  "https://appsdev.lib.ua.edu/blogs/intranet/circ-trace-form",
-  "https://appsdev.lib.ua.edu/blogs/intranet/circ-trace-form/");
+  "http://lib.ua.edu.local/intranet/circ-trace-form",
+  "http://lib.ua.edu.local/intranet/circ-trace-form/",
+  "https://lib.ua.edu.local/intranet/circ-trace-form",
+  "https://lib.ua.edu.local/intranet/circ-trace-form/");
 
 // Test for required fields and filter email entry fields
   $bad_happened = 0;
