@@ -1,0 +1,115 @@
+30 Day Restricted
+AnnualRep
+Archives
+Atlas
+AV Equipment
+AV Equipment 72 hr
+AV Equipment 72 hr_2200
+Book
+CD
+CDROM
+Census
+Charger
+ComputerStation
+CurrMat
+DigitalEquip_100
+DigitalEquip_1000
+DigitalEquip_1150
+DigitalEquip_1300
+DigitalEquip_1400
+DigitalEquip_150
+DigitalEquip_1500
+DigitalEquip_200
+DigitalEquip_2000
+DigitalEquip_250
+DigitalEquip_350
+DigitalEquip_450
+DigitalEquip_50
+DigitalEquip_500
+DigitalEquip_550
+DigitalEquip_600
+DigitalEquip_650
+DigitalEquip_700
+DigitalEquip_750
+DigitalEquip_800
+DigitalEquip_850
+DigitalEquip_900
+"educ,stor"
+Education Non-book
+ElectronicReserves
+FacDev
+gad
+"gorg,gpnb"
+"gorg,un"
+GovDoc
+GovDocER
+GovDocMicr
+GovDoc-Ref
+GovDocRRef
+Graphics
+HooleSound
+HS Reference
+HSBook
+"hsl,aids"
+"hsl,hr7d"
+"hsl,r7d"
+"hsl,res"
+"hsl,rinb"
+Index
+Journal
+Kindle2
+KindleDX
+l20
+Laptop
+"Laptop,TMP"
+Laptop1300
+Laptop1600
+Laptop1800
+Laptop300
+Manuscript
+Map
+Microform
+MinScore
+Music Periodical - Bound
+MusicRef
+NASA
+Newspaper
+nloc
+Non-book
+Noncirculating
+OnlineRes
+OralHis
+Oversize
+Per-Bound
+Per-Ret
+Photos
+Plat Maps
+Rare Book
+Rare Maps
+RareSound
+ReaderCords
+ReadyRef
+RecordCen
+Reference
+Reference-Retired
+Reserve 1 Day Loan
+Reserve 10 Day Loan
+Reserve 10 Hour Loan
+Reserve 2 Hour Loan
+Reserve 3 Day Loan
+Reserve 4 Hour Loan
+Reserve 7 Day Loan
+Reserve Term Loan
+Review
+Room Key
+School Library Material
+Score
+sel calculator
+Serial
+SheetMusic
+SoundRec
+Systems
+Tax
+TechSer
+Video
+VideoCable
