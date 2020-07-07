@@ -1,11 +1,11 @@
 	<?php
 
   // Set valid referers
-  //$valid_referers=array(
-  //"http://appsdev.lib.ua.edu/blogs/intranet/actcardform",
-  //"http://appsdev.lib.ua.edu/blogs/intranet/actcardform/",
-  //"https://appsdev.lib.ua.edu/blogs/intranet/actcardform",
-  //"https://appsdev.lib.ua.edu/blogs/intranet/actcardform/");
+ $valid_referers=array(
+  "http://lib.ua.edu.local/intranet/actcardform",
+  "http://lib.ua.edu.local/intranet/actcardform/",
+  "https://lib.ua.edu.local/intranet/actcardform",
+  "https://lib.ua.edu.local/intranet/actcardform/");
 
   // Require PHP Mailer
   /* require("sites/intranet.lib.ua.edu/files/incidentreport/class.phpmailer.php"); */
