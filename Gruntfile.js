@@ -342,6 +342,14 @@ module.exports = function(grunt) {
                     to: 'www'
                 }]
             },
+            devToLiveIntranetForms: {
+                src: ['intranet/inc/actcardform-result.php', 'intranet/inc/circ-trace-form-result.php', 'intranet/inc/studentemplyeerequest-result.php', 'intranet/inc/voyager-request-result.php'],
+                dest: 'intranet/inc/dest/',
+                replacements: [{
+                    from: /(wwwdev2?)/g,
+                    to: 'www'
+                }]
+            },
             headerFooterExportJS: {
                 src: ['assets/js/header-footer-export.min.js'],
                 dest: 'assets/js/',
