@@ -1,5 +1,5 @@
   <div class="col-md-12 well">
-    <form action="/blogs/intranet/voyager-request-result" id="MailForm" method="post" name="MailForm">
+    <form action="/intranet/voyager-request-result" id="MailForm" method="post" name="MailForm">
       <div class="row">
           <div class="col-sm-6 form-group">
 							<div class="input-group">
