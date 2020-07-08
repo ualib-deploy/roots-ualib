@@ -307,7 +307,7 @@
 	$incidentemail->Host="smtp.ua.edu";
 	
 	// FROM: Harriet (hdeason@bama.ua.edu)
-	$incidentemail->From="hdeason@bama.ua.edu";
+	$incidentemail->From="hdeason@ua.edu";
 	$incidentemail->FromName="UA Libraries Incident Report Submission";
 	
         // UNCOMMENT FOR TEST MODE ONLY (Email Jennifer)
