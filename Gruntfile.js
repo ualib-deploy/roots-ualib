@@ -343,7 +343,7 @@ module.exports = function(grunt) {
                 }]
             },
             devToLiveIntranetForms: {
-                src: ['intranet/inc/actcardform-result.php', 'intranet/inc/circ-trace-form-result.php', 'intranet/inc/studentemplyeerequest-result.php', 'intranet/inc/voyager-request-result.php'],
+                src: ['intranet/inc/actcardform-result.php', 'intranet/inc/circ-trace-form-result.php', 'intranet/inc/studentemployeerequest-result.php', 'intranet/inc/voyager-request-result.php'],
                 dest: 'intranet/inc/dest/',
                 replacements: [{
                     from: /(wwwdev2?)/g,
