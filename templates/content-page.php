@@ -24,7 +24,6 @@
         require_once get_stylesheet_directory() . '/intranet/inc/voyager-request-result.php';
 
       if(is_page('incidentreport-result')) {
-        /* require_once get_stylesheet_directory() . '/assets/incidentreport/class.inputfilter.php'; */
         require_once get_stylesheet_directory() . '/intranet/inc/incidentreport-result.php';
       }
 
