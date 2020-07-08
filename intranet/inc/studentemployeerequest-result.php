@@ -7,10 +7,10 @@
 
 // Set valid referers
   $valid_referers=array(
-  "http://lib.ua.edu.local/intranet/studentemployeerequest",
-  "http://lib.ua.edu.local/intranet/studentemployeerequest/",
-  "https://lib.ua.edu.local/intranet/studentemployeerequest",
-  "https://lib.ua.edu.local/intranet/studentemployeerequest/");
+  "http://wwwdev2.lib.ua.edu/intranet/studentemployeerequest",
+  "http://wwwdev2.lib.ua.edu/intranet/studentemployeerequest/",
+  "https://wwwdev2.lib.ua.edu/intranet/studentemployeerequest",
+  "https://wwwdev2.lib.ua.edu/intranet/studentemployeerequest/");
 
 // Test for required fields and filter email entry fields
   $bad_happened = 0;

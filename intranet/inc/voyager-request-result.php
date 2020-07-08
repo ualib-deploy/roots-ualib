@@ -2,10 +2,10 @@
 
   // Set valid referers
   $valid_referers=array(
-  "http://lib.ua.edu.local/intranet/voyager-request",
-  "http://lib.ua.edu.local/intranet/voyager-request/",
-  "https://lib.ua.edu.local/intranet/voyager-request",
-  "https:/lib.ua.edu.local/intranet/voyager-request/");
+  "http://wwwdev2.lib.ua.edu/intranet/voyager-request",
+  "http://wwwdev2.lib.ua.edu/intranet/voyager-request/",
+  "https://wwwdev2.lib.ua.edu/intranet/voyager-request",
+  "https:/wwwdev2.lib.ua.edu/intranet/voyager-request/");
 
   // Require PHP Mailer
   /* require("sites/intranet.lib.ua.edu/files/incidentreport/class.phpmailer.php"); */
