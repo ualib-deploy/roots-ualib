@@ -1,6 +1,6 @@
 <?php
 
-define('ILS_PATH', get_stylesheet_directory() . '/inc/voyager-locs/');
+define('ILS_PATH', get_stylesheet_directory() . '/intranet/inc/voyager-locs/');
 
 $g_location = file(ILS_PATH . 'gorg_locations.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 $e_location = file(ILS_PATH . 'educ_locations.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
