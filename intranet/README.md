@@ -21,5 +21,5 @@ Each form has a few components:
 - [ ] test forms on staging
 - [ ] add form and result pages to production wordpress
 - [x] update result scripts with prod referrer urls (can I use `WP_ENV != 'staging'` to have it work on both staging and prod? roots docs indicate that's something I can do, but we don't have a WP_ENV on staging, only on prod!) 
-- [] document the code and grunt file added for dev/prod sites and referrer urls
+- [ ] document the code and grunt file added for dev/prod sites and referrer urls
 - [ ] update all form email submissions in result scripts (most should just be commented out, but i might need to dig into the original drupal files to find who they go to)
