@@ -192,8 +192,13 @@ function remove_mm_pages($trail) {
 }
 
 function intranet_forms_scripts() {
-	wp_enqueue_script( 'incidentreport-script', get_template_directory_uri() . '/intranet/inc/incidentreport.js' );
-	wp_enqueue_script( 'voyrequest-script', get_template_directory_uri() . '/intranet/inc/voyrequest.js', array( 'jquery' ) );
+
+      if(is_page('incidentreport')) {
+        wp_enqueue_script( 'incidentreport-script', get_template_directory_uri() . '/intranet/inc/incidentreport.js' );
+      }
+      if(is_page('voyager-request')) {
+        wp_enqueue_script( 'voyrequest-script', get_template_directory_uri() . '/intranet/inc/voyrequest.js', array( 'jquery' ) );
+      }
 }
 add_action( 'wp_enqueue_scripts', 'intranet_forms_scripts' );
 
