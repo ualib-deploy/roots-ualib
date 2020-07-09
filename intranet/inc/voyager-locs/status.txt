@@ -1,0 +1,25 @@
+At Bindery
+Call Slip Request
+Cataloging Review
+Charged
+Circulation Review
+Claims Returned
+Damaged
+Discharged
+Hold Request
+In Process
+In Transit
+In Transit Discharged
+In Transit On Hold
+Lost--Library Applied
+Lost--System Applied
+Missing
+Not Charged
+On Hold
+Overdue
+Recall Request
+Remote Storage Request
+Renewed
+Scheduled
+Short Loan Request
+Withdrawn
