@@ -114,6 +114,7 @@
     $mail->FromName = $_POST['CircOperator'];
     /* $mail->AddAddress("mpatrick@lib.ua.edu", "Michael Patrick"); */
     $mail->AddAddress("cewyatt@ua.edu", "caryl");
+    $mail->AddAddress("jrmichelich@ua.edu", "james");
     /* $mail->AddCC("ierm@ua.edu", "ILS & E-Resource Management"); */
     #$mail->AddCC("libsys@bama.ua.edu", "Libsys");
     # $mail->AddAddress("jtillis@ua.edu", "Jennifer Tillis");

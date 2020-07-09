@@ -313,6 +313,7 @@
         // UNCOMMENT FOR TEST MODE ONLY (Email Jennifer)
          //$incidentemail->AddAddress("jtillis@ua.edu", "Jennifer Tillis");
          $incidentemail->AddAddress("cewyatt@ua.edu", "caryl");
+         $incidentemail->AddAddress("jrmichelich@ua.edu", "james");
 	
 	// TO: Harriet (hdeason@ua.edu)
 	/* $incidentemail->AddAddress("hdeason@ua.edu", "Harriet Deason"); */
