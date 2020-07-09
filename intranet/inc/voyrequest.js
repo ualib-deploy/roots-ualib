@@ -1,15 +1,19 @@
  jQuery(document).ready(function ($) {
      $("#hide-lib").click(function () {
          $("div#library").hide('slow');
+         $("div#library").removeClass('in');
      });
      $("#show-lib").click(function () {
          $("div#library").show('slow');
+         $("div#library").addClass('in');
      });
      $("#hide-loc").click(function () {
          $("div#location").hide('slow');
+         $("div#location").removeClass('in');
      });
      $("#show-loc").click(function () {
          $("div#location").show('slow');
+         $("div#location").addClass('in');
      });
      $("#hide-type").click(function () {
          $("div#type").hide('slow');
