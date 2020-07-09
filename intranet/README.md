@@ -16,7 +16,7 @@ Each form has a few components:
 
 ## TODO
 
-- [ ] add form and result pages to staging wordpress
+- [x] add form and result pages to staging wordpress
 - [x] update result scripts with correct referrer urls
 - [ ] test forms on staging
 - [ ] add form and result pages to production wordpress
