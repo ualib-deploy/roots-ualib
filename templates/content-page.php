@@ -34,5 +34,8 @@
         require_once get_stylesheet_directory() . '/intranet/inc/incidentreport-result.php';
       }
 
+      if(is_page('security-authorization-form'))
+        require_once get_stylesheet_directory() . '/intranet/acsforms/saForm/index.php';
+
     ?>
 <?php wp_link_pages(array('before' => '<nav class="pagination">', 'after' => '</nav>')); ?>
