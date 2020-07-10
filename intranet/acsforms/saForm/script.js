@@ -1,4 +1,7 @@
 
+   jQuery(document).ready(function($){
+
+
 		// JQuery functions
 		$(function() { 	
 			// Check to see if any Voyager Access has been requested
@@ -34,9 +37,6 @@
 				}
 			});
 		});
-
-   jQuery(document).ready(function($){
-
 		//Mappings JSON object.  The person maintaining department mappings should use Excel to export a CSV file with departments as the first column and department groups associated with that department in subsequent columns.  
 
 		//A tool like http://www.convertcsv.com/csv-to-json.htm can then be used to get a JSON object from that file.  This definitely isn't the most elegant way to do this -- I may give something like http://papaparse.com/ a try if this list ends up needing to be regenerated often
