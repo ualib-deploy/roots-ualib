@@ -200,6 +200,10 @@ function intranet_forms_scripts() {
       if(is_page('voyager-request')) {
         wp_enqueue_script( 'voyrequest-script', get_template_directory_uri() . '/intranet/inc/voyrequest.js', array( 'jquery' ) );
       }
+      if(is_page('security-authorization-form')) {
+        wp_enqueue_script( 'saf-script', get_template_directory_uri() . '/intranet/acsforms/saForm/script.js', array( 'jquery' ));
+        wp_enqueue_style( 'saf-styles', get_stylesheet_directory_uri() . '/intranet/acsforms/saForm/stylesheet.css' );
+      }
 }
 add_action( 'wp_enqueue_scripts', 'intranet_forms_scripts' );
 
