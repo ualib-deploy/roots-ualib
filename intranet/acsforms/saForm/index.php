@@ -18,7 +18,7 @@
 				<div id="loginformprocparams"> 
 					<input type="hidden" name="LanguageParam" value="en-us" />
 					<input type="hidden" name="OBWeb_FinalTargetPage" value="https://intranet.lib.ua.edu/acsforms/saForm/landing.html"/>
-					<input type="hidden" name="OBDocumentType" value="884" /><!-- OBTEST: 755 OBPROD: 884 -->
+					<input type="hidden" name="OBDocumentType" value="755" /><!-- OBTEST: 755 OBPROD: 884 -->
 					<input type="hidden" name="OBWeb_Redirect" value="https://intranet.lib.ua.edu/acsforms/saForm/landing.html"/>
 				</div>
 				<input type="hidden" id="voyager_access_requested" name="OBKey_UL_Voyager_Access_Requested_1" value="NO" />
