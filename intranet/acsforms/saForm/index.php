@@ -1,16 +1,3 @@
-<!--
-// TODO
-// 1. comment out everything that ins't part of the form
-// 2. move scripts to separate file
-// 3. add conditional to content-page.php
-// 4. test!
-
-    
-    <link rel="stylesheet" type="text/css" href="stylesheet.css">     
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-	<script type='text/javascript' src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
-    <script type='text/javascript' src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
--->
 		<div class="container">
 			<img src="https://imageweb.ua-net.ua.edu/AppNet/images/librariesk_black.png" alt="UA Libraries Logo" style="width:150px;height:60px">
             <!--
@@ -21,7 +8,7 @@
 				<h2 class="h3">Network & Voyager Access</h2>
          <hr>
 		
-			<form name="form" action="https://imageweb.ua-net.ua.edu/Public/LoginFormProc.aspx?FromLoginFormProc=true" method="post">
+			<form name="form" action="https://imageweb-test.ua-net.ua.edu/Public/LoginFormProc.aspx?FromLoginFormProc=true" method="post">
             <!--
                OBTEST: https://imageweb-test.ua-net.ua.edu/Public/LoginFormProc.aspx?FromLoginFormProc=true
                OBPROD: https://imageweb.ua-net.ua.edu/Public/LoginFormProc.aspx?FromLoginFormProc=true
