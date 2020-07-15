@@ -37,5 +37,8 @@
       if(is_page('security-authorization-form'))
         require_once get_stylesheet_directory() . '/intranet/acsforms/saForm/index.php';
 
+      if(is_page('security-authorization-form-landing'))
+        require_once get_stylesheet_directory() . '/intranet/acsforms/saForm/landing.php';
+
     ?>
 <?php wp_link_pages(array('before' => '<nav class="pagination">', 'after' => '</nav>')); ?>
