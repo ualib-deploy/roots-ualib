@@ -47,10 +47,10 @@
         require_once get_stylesheet_directory() . '/intranet/inc/delete-form-landing.php';
 
       if(is_page('voyager-only-form'))
-        require_once get_stylesheet_directory() . '/intranet/inc/voyagerOnlyForm/index.php';
+        require_once get_stylesheet_directory() . '/intranet/inc/voyager-only-form.php';
 
       if(is_page('voyager-only-form-landing'))
-        require_once get_stylesheet_directory() . '/intranet/inc/voyagerOnlyForm/landing.php';
+        require_once get_stylesheet_directory() . '/intranet/inc/voyager-only-form-landing.php';
 
     ?>
 <?php wp_link_pages(array('before' => '<nav class="pagination">', 'after' => '</nav>')); ?>
