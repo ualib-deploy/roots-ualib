@@ -5,9 +5,9 @@
 			<!-- Begin Required OnBase Fields -->
 			<div id="loginformprocparams"> 
 				<input type="hidden" name="LanguageParam" value="en-us" />
-				<input type="hidden" name="OBWeb_FinalTargetPage" value="http://lib.ua.edu.local/intranet/voyager-only-form-landing"/>
+				<input type="hidden" name="OBWeb_FinalTargetPage" value="https://wwwdev2.lib.ua.edu/intranet/voyager-only-form-landing"/>
 				<input type="hidden" name="OBDocumentType" value="887" />
-				<input type="hidden" name="OBWeb_Redirect" value="http://lib.ua.edu.local/intranet/voyager-only-form-landing"/>
+				<input type="hidden" name="OBWeb_Redirect" value="https://wwwdev2.lib.ua.edu/intranet/voyager-only-form-landing"/>
 			</div>
 			<!-- End Required OnBase Fields -->	
 	<img src="https://imageweb.ua-net.ua.edu/AppNet/images/librariesk_black.png" alt="UA Libraries Logo" style="width:150px;height:60px"> 
