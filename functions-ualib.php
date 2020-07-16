@@ -200,7 +200,7 @@ function intranet_forms_scripts() {
       if(is_page('voyager-request')) {
         wp_enqueue_script( 'voyrequest-script', get_template_directory_uri() . '/intranet/inc/voyrequest.js', array( 'jquery' ) );
       }
-      if(is_page(array('security-authorization-form', 'security-authorization-form-landing'))) {
+      if(is_page(array('security-authorization-form', 'security-authorization-form-landing', 'delete-form', 'delete-form-landing', 'voyager-only-form', 'voyager-only-form-landing'))) {
         wp_enqueue_script( 'bootstrap-script', 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js', array( 'jquery' ));
         wp_enqueue_style( 'bootstrap-styles', 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css' );
       }
