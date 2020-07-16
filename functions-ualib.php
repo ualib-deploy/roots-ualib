@@ -200,17 +200,19 @@ function intranet_forms_scripts() {
       if(is_page('voyager-request')) {
         wp_enqueue_script( 'voyrequest-script', get_template_directory_uri() . '/intranet/inc/voyrequest.js', array( 'jquery' ) );
       }
-      if(is_page(array('security-authorization-form', 'security-authorization-form-landing', 'delete-form', 'delete-form-landing', 'voyager-only-form', 'voyager-only-form-landing'))) {
+      if(is_page(array('security-authorization-form', 'security-authorization-form-landing'))) {
         wp_enqueue_script( 'bootstrap-script', 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js', array( 'jquery' ));
         wp_enqueue_style( 'bootstrap-styles', 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css' );
       }
       if(is_page('security-authorization-form')) {
         wp_enqueue_script( 'saf-script', get_template_directory_uri() . '/intranet/acsforms/saForm/script.js', array( 'jquery' ));
         wp_enqueue_style( 'saf-styles', get_stylesheet_directory_uri() . '/intranet/acsforms/saForm/stylesheet.css' );
+      }
 
       if(is_page('delete-form')) {
         wp_enqueue_script( 'delete-script', get_template_directory_uri() . '/intranet/acsforms/deleteForm/script.js', array( 'jquery' ));
         wp_enqueue_style( 'delete-styles', get_stylesheet_directory_uri() . '/intranet/acsforms/deleteForm/stylesheet.css' );
+      }
 
       if(is_page('voyager-only-form')) {
         wp_enqueue_script( 'voyager-only-script', get_template_directory_uri() . '/intranet/acsforms/voyagerOnlyForm/script.js', array( 'jquery' ));
