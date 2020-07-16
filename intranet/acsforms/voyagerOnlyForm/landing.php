@@ -1,25 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-    <!-- Security Authorization Form: Voyager Circulation Only: collapse panels-->     
-    <head>
-    <!-- Required meta tags always come first -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    
-    <link rel="stylesheet" type="text/css" href="stylesheet.css">     
-        
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-	
-    <!-- Javascript -->
-    
-	<script type='text/javascript' src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
-    <script type='text/javascript' src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-    <title>Voyager Circulation Only</title>
-	</head>
-	
-	
-	<body> 
 	<div class="container">
 		<div class="row">
 
@@ -31,4 +9,3 @@
 
 		</div>
 	</div>
-</body>
