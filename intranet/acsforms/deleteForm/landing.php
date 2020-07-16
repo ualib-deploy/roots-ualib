@@ -1,5 +1,6 @@
       <div class="container">
-		<form action="https://imageweb.ua.edu/Public/LoginFormProc.aspx?FromLoginFormProc=true" method="post">
+<!-- this clearly isn't a form??		<form action="https://imageweb.ua.edu/Public/LoginFormProc.aspx?FromLoginFormProc=true" method="post">
+-->
 		
 			<!-- Begin Required OnBase Fields -->
       <!-- I don't think this is necessary??? -caryl
