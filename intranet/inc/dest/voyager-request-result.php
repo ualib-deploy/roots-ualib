@@ -240,6 +240,7 @@ if (!empty($_POST['voyfields'])) {
     /* $mail->AddAddress("mpatrick@ua.edu", "Michael Patrick"); */
     /* $mail->AddAddress("ierm@ua.edu", "UA Libraries ILS and E-Resources"); */
     $mail->AddAddress("cewyatt@ua.edu", "caryl");
+    $mail->AddAddress("jrmichelich@ua.edu", "james");
     $mail->AddCC($_POST['RequestorEmail']);
     
     $mail->isHTML(true);
