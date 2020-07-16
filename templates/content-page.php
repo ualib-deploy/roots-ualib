@@ -40,5 +40,17 @@
       if(is_page('security-authorization-form-landing'))
         require_once get_stylesheet_directory() . '/intranet/acsforms/saForm/landing.php';
 
+      if(is_page('delete-form'))
+        require_once get_stylesheet_directory() . '/intranet/acsforms/deleteForm/index.php';
+
+      if(is_page('delete-form-landing'))
+        require_once get_stylesheet_directory() . '/intranet/acsforms/deleteForm/landing.php';
+
+      if(is_page('voyager-only-form'))
+        require_once get_stylesheet_directory() . '/intranet/acsforms/voyagerOnlyForm/index.php';
+
+      if(is_page('voyager-only-form-landing'))
+        require_once get_stylesheet_directory() . '/intranet/acsforms/voyagerOnlyForm/landing.php';
+
     ?>
 <?php wp_link_pages(array('before' => '<nav class="pagination">', 'after' => '</nav>')); ?>
