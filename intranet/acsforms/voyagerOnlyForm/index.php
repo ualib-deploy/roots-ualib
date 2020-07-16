@@ -1,13 +1,13 @@
 	<div class="container">
 	<div class="row">
-	<form action="https://imageweb.ua.edu/Public/LoginFormProc.aspx?FromLoginFormProc=true" method="post">
+	<form action="https://imageweb-test.ua-net.ua.edu/Public/LoginFormProc.aspx?FromLoginFormProc=true" method="post">
 	
 			<!-- Begin Required OnBase Fields -->
 			<div id="loginformprocparams"> 
 				<input type="hidden" name="LanguageParam" value="en-us" />
-				<input type="hidden" name="OBWeb_FinalTargetPage" value="https://intranet.lib.ua.edu/acsforms/voyagerOnlyForm/landing.html"/>
+				<input type="hidden" name="OBWeb_FinalTargetPage" value="http://lib.ua.edu.local/intranet/voyager-only-form-landing"/>
 				<input type="hidden" name="OBDocumentType" value="887" />
-				<input type="hidden" name="OBWeb_Redirect" value="https://intranet.lib.ua.edu/acsforms/voyagerOnlyForm/landing.html"/>
+				<input type="hidden" name="OBWeb_Redirect" value="http://lib.ua.edu.local/intranet/voyager-only-form-landing"/>
 			</div>
 			<!-- End Required OnBase Fields -->	
 	<img src="images/librariesk_black.png" alt="UA Libraries Logo" style="width:150px;height:60px"> 

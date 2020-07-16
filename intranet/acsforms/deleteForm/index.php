@@ -1,14 +1,14 @@
     
         
   <div class="container">
-		<form action="https://imageweb.ua.edu/Public/LoginFormProc.aspx?FromLoginFormProc=true" method="post">
+		<form action="https://imageweb-test.ua-net.ua.edu/Public/LoginFormProc.aspx?FromLoginFormProc=true" method="post">
 		
 			<!-- Begin Required OnBase Fields -->
 			<div id="loginformprocparams"> 
 				<input type="hidden" name="LanguageParam" value="en-us" />
-				<input type="hidden" name="OBWeb_FinalTargetPage" value="https://intranet.lib.ua.edu/acsforms/deleteForm/landing.html"/>
-				<input type="hidden" name="OBDocumentType" value="886" />
-				<input type="hidden" name="OBWeb_Redirect" value="https://intranet.lib.ua.edu/acsforms/deleteForm/landing.html"/>
+				<input type="hidden" name="OBWeb_FinalTargetPage" value="http://lib.ua.edu.local/intranet/delete-form-landing"/>
+				<input type="hidden" name="OBDocumentType" value="775" />
+				<input type="hidden" name="OBWeb_Redirect" value="http://lib.ua.edu.local/intranet/delete-form-landing"/>
 			</div>
 			<!-- End Required OnBase Fields -->
 				
