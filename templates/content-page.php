@@ -35,22 +35,22 @@
       }
 
       if(is_page('security-authorization-form'))
-        require_once get_stylesheet_directory() . '/intranet/acsforms/saForm/index.php';
+        require_once get_stylesheet_directory() . '/intranet/inc/sec-auth-form.php';
 
       if(is_page('security-authorization-form-landing'))
-        require_once get_stylesheet_directory() . '/intranet/acsforms/saForm/landing.php';
+        require_once get_stylesheet_directory() . '/intranet/inc/sec-auth-form-landing.php';
 
       if(is_page('delete-form'))
-        require_once get_stylesheet_directory() . '/intranet/acsforms/deleteForm/index.php';
+        require_once get_stylesheet_directory() . '/intranet/inc/delete-form.php';
 
       if(is_page('delete-form-landing'))
-        require_once get_stylesheet_directory() . '/intranet/acsforms/deleteForm/landing.php';
+        require_once get_stylesheet_directory() . '/intranet/inc/delete-form-landing.php';
 
       if(is_page('voyager-only-form'))
-        require_once get_stylesheet_directory() . '/intranet/acsforms/voyagerOnlyForm/index.php';
+        require_once get_stylesheet_directory() . '/intranet/inc/voyagerOnlyForm/index.php';
 
       if(is_page('voyager-only-form-landing'))
-        require_once get_stylesheet_directory() . '/intranet/acsforms/voyagerOnlyForm/landing.php';
+        require_once get_stylesheet_directory() . '/intranet/inc/voyagerOnlyForm/landing.php';
 
     ?>
 <?php wp_link_pages(array('before' => '<nav class="pagination">', 'after' => '</nav>')); ?>
