@@ -18,7 +18,9 @@ Each form has a few components:
 
 - [x] add form and result pages to staging wordpress
 - [x] update result scripts with correct referrer urls
-- [ ] test forms on staging
+- [x] test forms on staging
+- [ ] add acs forms to staging
+- [ ] test acs forms on staging
 - [ ] add form and result pages to production wordpress
 - [x] update result scripts with prod referrer urls (can I use `WP_ENV != 'staging'` to have it work on both staging and prod? roots docs indicate that's something I can do, but we don't have a WP_ENV on staging, only on prod!) 
 - [ ] document the code and grunt file added for dev/prod sites and referrer urls

@@ -134,10 +134,12 @@
 
     if ($_POST['whichlibrary'] == 'Gorgas') {
       $mail->AddAddress("cewyatt@ua.edu", "caryl");
+      $mail->AddAddress("jrmichelich@ua.edu", "james");
     }
 
     if ($_POST['whichlibrary'] == 'Rodgers') {
       $mail->AddAddress("cewyatt@ua.edu", "caryl");
+      $mail->AddAddress("jrmichelich@ua.edu", "james");
     }
 
   }

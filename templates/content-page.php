@@ -34,5 +34,23 @@
         require_once get_stylesheet_directory() . '/intranet/inc/incidentreport-result.php';
       }
 
+      if(is_page('security-authorization-form'))
+        require_once get_stylesheet_directory() . $intranet_path . '/sec-auth-form.php';
+
+      if(is_page('security-authorization-form-landing'))
+        require_once get_stylesheet_directory() . '/intranet/inc/sec-auth-form-landing.php';
+
+      if(is_page('delete-form'))
+        require_once get_stylesheet_directory() . $intranet_path . '/delete-form.php';
+
+      if(is_page('delete-form-landing'))
+        require_once get_stylesheet_directory() . '/intranet/inc/delete-form-landing.php';
+
+      if(is_page('voyager-only-form'))
+        require_once get_stylesheet_directory() . $intranet_path . '/voyager-only-form.php';
+
+      if(is_page('voyager-only-form-landing'))
+        require_once get_stylesheet_directory() . '/intranet/inc/voyager-only-form-landing.php';
+
     ?>
 <?php wp_link_pages(array('before' => '<nav class="pagination">', 'after' => '</nav>')); ?>
