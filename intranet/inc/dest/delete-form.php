@@ -13,10 +13,6 @@
 			<!-- End Required OnBase Fields -->
 				
 		 
-				<img src="https://imageweb.ua-net.ua.edu/AppNet/images/librariesk_black.png" alt="UA Libraries Logo" style="width:150px;height:60px"> 
-		        <h1 class="h2">Security Authorization Form</h1>
-			    <h2 class="h3">Deleting Network and Voyager Access </h2> 
-				<hr>
 			
 			<div class="row">
 				<div class="col-md-4">

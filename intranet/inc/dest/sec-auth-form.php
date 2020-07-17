@@ -1,12 +1,8 @@
 		<div class="container">
-			<img src="https://imageweb.ua-net.ua.edu/AppNet/images/librariesk_black.png" alt="UA Libraries Logo" style="width:150px;height:60px">
             <!--
                OBTEST: https://imageweb-test.ua-net.ua.edu/AppNet/images/librariesk_black.png
                OBPROD: https://imageweb.ua-net.ua.edu/AppNet/images/librariesk_black.png
             -->
-				<h1 class="h2">Security Authorization Form</h1>
-				<h2 class="h3">Network & Voyager Access</h2>
-         <hr>
 		
 			<form name="form" action="https://imageweb-test.ua-net.ua.edu/Public/LoginFormProc.aspx?FromLoginFormProc=true" method="post">
             <!--
