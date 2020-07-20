@@ -13843,6 +13843,7 @@ angular.module('manage.manageERCarousel', ['ngFileUpload'])
 angular
   .module("manage.manageHours", [])
   .constant("HOURS_FROM", [
+    { name: "By appointment", value: "-3" },
     { name: "TBA", value: "-2" },
     { name: "Closed 24hrs", value: "-1" },
     { name: "Midnight", value: "0" },
