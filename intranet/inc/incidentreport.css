@@ -1,0 +1,56 @@
+form {
+  display:flex;
+  flex-flow:column;
+}
+
+form div {
+  background-color:#EBEBEB;
+  margin-top: 15px;
+  padding: 4px 8px 0 8px;
+}
+
+.style1 {
+	font-size: large;
+	font-weight: bold;
+	background-color: #FFFFFF;
+}
+
+.style2 {color: #990000}
+
+#naturediv {
+  display: flex;
+  flex-flow: row wrap;
+}
+
+#naturediv > * {
+  flex: 1 100%;
+}
+
+#naturediv span, #naturediv strong {
+  /* flex: 1 auto; */
+}
+
+#checkdiv1, #checkdiv2 {
+  flex: 1 auto;
+}
+
+#descriptiondiv2 {
+  display: flex!important;
+  flex-flow:row;
+}
+
+#previncidentdescriptiondiv, #descriptiondiv2, #witnessdiv1, #witnessdiv2, #witnessdiv3, #bottomdiv {
+  margin-top:0;
+}
+
+#descriptionleft, #descriptioncenter {
+  flex:auto;
+}
+
+#descriptionright {
+  flex:1;
+}
+
+input#submit, input#reset {
+  margin:10px;
+}
