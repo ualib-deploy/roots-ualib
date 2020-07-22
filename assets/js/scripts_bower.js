@@ -24806,7 +24806,7 @@ angular.module("lib-hours-today/lib-hours-today.tpl.html", []).run(["$templateCa
     "        <div class=\"media-body\">\n" +
     "            <h3 class=\"media-heading\">Today</h3>\n" +
     "            <h4 class=\"media-heading\">{{today.hours}} <span class=\"fa fa-lg fa-info-circle\" ng-if=\"today.description\" tooltip=\"{{today.description}}\"></span></h4>\n" +
-    "            <span ng-if=\"lib.openFrom !== '-3'\" class=\"label\" ng-class=\"today.status.css\">{{today.status.text}}</span>\n" +
+    "            <span ng-if=\"today.openFrom !== '-3'\" class=\"label\" ng-class=\"today.status.css\">{{today.status.text}}</span>\n" +
     "            <a class=\"btn btn-default btn-xs\" ng-href=\"/#hours?library={{today.name}}\" title=\"All hours {{today.name}}\">See all hours <span class=\"fa fa-fw fa-chevron-right\"></span></a>\n" +
     "        </div>\n" +
     "    </div>\n" +
