@@ -6,10 +6,10 @@ if ( ! function_exists( 'wp_handle_upload' ) ) {
 
 // Set valid referers
   $valid_referers=array(
-  "http://lib.ua.edu.local/intranet/tech-request-form/",
-  "http://lib.ua.edu.local/intranet/tech-request-form/",
-  "https://lib.ua.edu.local/intranet/tech-request-form/",
-  "https://lib.ua.edu.local/intranet/tech-request-form/");
+  "http://wwwdev2.lib.ua.edu/intranet/tech-request-form/",
+  "http://wwwdev2.lib.ua.edu/intranet/tech-request-form/",
+  "https://wwwdev2.lib.ua.edu/intranet/tech-request-form/",
+  "https://wwwdev2.lib.ua.edu/intranet/tech-request-form/");
 
 // Test for required fields and filter email entry fields
   $bad_happened = 0;
@@ -152,7 +152,7 @@ if ( ! function_exists( 'wp_handle_upload' ) ) {
     $mail = new PHPMailer();
     $mail->IsSMTP();
     $mail->Host = "smtp.ua.edu";
-    $mail->From = 'cewyatt@ua.edu';
+    $mail->From = $_POST['email'];
     $mail->FromName = 'Tech Request Form';
      $mail->AddAddress("cewyatt@ua.edu", "Caryl Wyatt");
     // $mail->AddAddress("jtillis@ua.edu", "Jennifer Tillis");
