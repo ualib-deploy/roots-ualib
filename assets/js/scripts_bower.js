@@ -24721,6 +24721,9 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
     "                                </li>\n" +
     "                            </ul>\n" +
     "                        </li>\n" +
+    "                        <li ng-if=\"contact.appointment\">\n" +
+    "                          <span class=\"fa fa-li fa-exclamation-circle\"></span>{{contact.appointment}}\n" +
+    "                        </li>\n" +
     "                    </ul>\n" +
     "                </div>\n" +
     "                <div class=\"col-sm-4\">\n" +
@@ -25082,12 +25085,14 @@ angular
           longitude: -87.543182,
           icon: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
           contact: {
-            phone: [
-              {
-                number: "(205) 348-0500",
-                dept: "Front Desk",
-              },
-            ],
+            // remove phone number in favor of "by appointment" July 2020
+            // phone: [
+            //   {
+            //     number: "(205) 348-0500",
+            //     dept: "Front Desk",
+            //   },
+            // ],
+            appointment: "By appointment only",
             email: "archives@ua.edu",
             alert: [
               {
