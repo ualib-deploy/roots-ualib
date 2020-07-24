@@ -6,10 +6,10 @@ if ( ! function_exists( 'wp_handle_upload' ) ) {
 
 // Set valid referers
   $valid_referers=array(
-  "http://intranet.local/tech-request/",
-  "http://intranet.local/tech-request/",
-  "https://intranet.local/tech-request/",
-  "https://intranet.local/tech-request/");
+  "http://lib.ua.edu.local/intranet/tech-request-form/",
+  "http://lib.ua.edu.local/intranet/tech-request-form/",
+  "https://lib.ua.edu.local/intranet/tech-request-form/",
+  "https://lib.ua.edu.local/intranet/tech-request-form/");
 
 // Test for required fields and filter email entry fields
   $bad_happened = 0;

@@ -15,7 +15,7 @@ if ( ! ( $current_user instanceof WP_User ) ) {
 $user_name = $current_user->user_nicename;
 $user_email = $current_user->user_email;
 ?>
-          <form  class="form-horizontal" action="/tech-request-result" method="post" id="techRequest" enctype="multipart/form-data">
+          <form  class="form-horizontal" action="/intranet/tech-request-result" method="post" id="techRequest" enctype="multipart/form-data">
 <div class="form-group">
   <div class="row">
     <div class="col-md-12">
