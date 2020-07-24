@@ -8,6 +8,8 @@
           $intranet_path = '/intranet/inc/dest';
       }
 
+      $intranet_path = '/intranet/inc';
+
       if(is_page( array('circ-trace-form-result',
 'studentemployeerequest-result', 'incidentreport-result', 'actcardform-result',
 'voyager-request-result', 'tech-request-form-result') ))
