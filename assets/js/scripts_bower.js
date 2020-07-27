@@ -13885,6 +13885,7 @@ angular
     { name: "8:00 pm", value: "2000" },
     { name: "9:00 pm", value: "2100" },
     { name: "10:00 pm", value: "2200" },
+    { name: "10:30 pm", value: "2230" },
     { name: "11:00 pm", value: "2300" },
     { name: "Midnight", value: "2400" },
   ])
