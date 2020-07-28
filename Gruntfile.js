@@ -384,6 +384,7 @@ module.exports = function (grunt) {
           "intranet/inc/circ-trace-form-result.php",
           "intranet/inc/studentemployeerequest-result.php",
           "intranet/inc/voyager-request-result.php",
+          "intranet/inc/tech-request-form-result.php",
           "intranet/inc/sec-auth-form.php",
           "intranet/inc/delete-form.php",
           "intranet/inc/voyager-only-form.php",

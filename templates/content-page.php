@@ -10,7 +10,7 @@
 
       if(is_page( array('circ-trace-form-result',
 'studentemployeerequest-result', 'incidentreport-result', 'actcardform-result',
-'voyager-request-result') ))
+'voyager-request-result', 'tech-request-form-result') ))
         require_once get_stylesheet_directory() . '/intranet/assets/incidentreport/class.phpmailer.php';
 
       if(is_page('circ-trace-form-result'))
@@ -34,6 +34,12 @@
         require_once get_stylesheet_directory() . '/intranet/inc/incidentreport-result.php';
       }
 
+      if(is_page('tech-request-form'))
+        require_once get_stylesheet_directory() . $intranet_path . '/tech-request-form.php';
+
+      if(is_page('tech-request-form-result'))
+        require_once get_stylesheet_directory() . $intranet_path . '/tech-request-form-result.php';
+
       if(is_page('security-authorization-form'))
         require_once get_stylesheet_directory() . $intranet_path . '/sec-auth-form.php';
 
@@ -51,6 +57,7 @@
 
       if(is_page('voyager-only-form-landing'))
         require_once get_stylesheet_directory() . '/intranet/inc/voyager-only-form-landing.php';
+
 
     ?>
 <?php wp_link_pages(array('before' => '<nav class="pagination">', 'after' => '</nav>')); ?>
