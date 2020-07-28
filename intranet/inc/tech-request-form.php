@@ -57,7 +57,7 @@ $user_email = $current_user->user_email;
 <div class="row" style="margin-bottom:10px">
   <div class="col-md-12">
 
-            <label for="description">Description</label>
+            <label for="description">Description and Quantity</label>
             <textarea class="form-control" type="text" id="description" name="description"></textarea>
   </div>
 </div>
