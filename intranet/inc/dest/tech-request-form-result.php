@@ -124,7 +124,9 @@ if ( ! function_exists( 'wp_handle_upload' ) ) {
   $_POST['department'] = filter_var($_POST['department'], FILTER_SANITIZE_STRING);
   $_POST['itemType'] = filter_var($_POST['itemType'], FILTER_SANITIZE_STRING);
   $_POST['description'] = filter_var($_POST['description'], FILTER_SANITIZE_STRING);
+  $_POST['description'] = stripslashes($_POST['description']);
   $_POST['purpose'] = filter_var($_POST['purpose'], FILTER_SANITIZE_STRING);
+  $_POST['purpose'] = stripslashes($_POST['purpose']);
   $_POST['costEstimate'] = filter_var($_POST['costEstimate'], FILTER_SANITIZE_STRING);
   }
 
@@ -140,8 +142,8 @@ if ( ! function_exists( 'wp_handle_upload' ) ) {
     $fullemailbody .= "USER EMAIL: " . $_POST['email'] . PHP_EOL;
     $fullemailbody .= "REQUESTING DEPARTMENT: " . $_POST['department'] . PHP_EOL;
     $fullemailbody .= "REQUEST TYPE: " . $_POST['requestType'] . PHP_EOL;
-    $fullemailbody .= "DESCRIPTION: " . $_POST['description'] . PHP_EOL;
-    $fullemailbody .= "PURPOSE: " . $_POST['purpose'] . PHP_EOL;
+    $fullemailbody .= "DESCRIPTION: " . htmlspecialchars_decode($_POST['description'], ENT_QUOTES) . PHP_EOL;
+    $fullemailbody .= "PURPOSE: " . htmlspecialchars_decode($_POST['purpose'], ENT_QUOTES) . PHP_EOL;
     $fullemailbody .= "COST ESTIMATE: " . $_POST['costEstimate'] . PHP_EOL;
   }
 
@@ -150,6 +152,8 @@ if ( ! function_exists( 'wp_handle_upload' ) ) {
 
   // Setup email using PHP Mailer
     $mail = new PHPMailer();
+    $mail->CharSet = 'UTF-8';
+    $mail->Encoding = 'base64';
     $mail->IsSMTP();
     $mail->Host = "smtp.ua.edu";
     $mail->From = $_POST['email'];
@@ -190,7 +194,7 @@ if ( ! function_exists( 'wp_handle_upload' ) ) {
       // Success message
       print '<h2>Message Sent</h2>';
       print '<p>Your Tech Request Form has been sent to the appropriate persons.<br /><br />';
-      print '<br /><p align="center"><a href="/">Return to Intranet Home</a></p>';
+      print '<br /><p align="center"><a href="/intranet/">Return to Intranet Home</a></p>';
     }
   } 
 
