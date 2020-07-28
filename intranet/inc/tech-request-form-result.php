@@ -9,8 +9,7 @@ if ( ! function_exists( 'wp_handle_upload' ) ) {
   "http://wwwdev2.lib.ua.edu/intranet/tech-request-form/",
   "http://wwwdev2.lib.ua.edu/intranet/tech-request-form/",
   "https://wwwdev2.lib.ua.edu/intranet/tech-request-form/",
-  "https://wwwdev2.lib.ua.edu/intranet/tech-request-form/",
-  "http://lib.ua.edu.local/intranet/tech-request-form/");
+  "https://wwwdev2.lib.ua.edu/intranet/tech-request-form/",);
 
 // Test for required fields and filter email entry fields
   $bad_happened = 0;
