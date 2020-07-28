@@ -12,7 +12,7 @@ if ( ! ( $current_user instanceof WP_User ) ) {
      return;
 }
 
-$user_name = $current_user->user_nicename;
+$user_name = $current_user->display_name;
 $user_email = $current_user->user_email;
 ?>
           <form   action="/intranet/tech-request-form-result" method="post" id="techRequest" enctype="multipart/form-data">
