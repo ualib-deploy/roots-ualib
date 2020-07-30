@@ -180,7 +180,6 @@
                                                 <h4>Special Collections</h4>
                                                 <ul>
                                                     <li class="menu-acumen"><a href="https://digitalcollections.libraries.ua.edu/digital/">Digital Collections</a></li>
-                                                    <li class="menu-acumen"><a href="http://acumen.lib.ua.edu/home">Acumen Digital Archives</a></li>
                                                     <li class="menu-acumen"><a href="https://archives.lib.ua.edu/">Archival Collections</a></li>
                                                     <li class="menu-hoole"><a href="/libraries/hoole/">Hoole Special Collections</a></li>
                                                     <li class="menu-williams"><a href="/collections/williams/">Williams Collection</a></li>
