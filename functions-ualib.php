@@ -218,6 +218,11 @@ function intranet_forms_scripts() {
         wp_enqueue_script( 'voyager-only-script', get_template_directory_uri() . '/intranet/inc/voyager-only-form.js', array( 'jquery' ));
         wp_enqueue_style( 'voyager-only-styles', get_stylesheet_directory_uri() . '/intranet/inc/voyager-only-form.css' );
       }
+
+      if(is_page('covid-counter')) {
+        wp_enqueue_script( 'covid-counter-script', get_template_directory_uri() . '/assets/js/covidCounter.js');
+        /* wp_enqueue_style( 'voyager-only-styles', get_stylesheet_directory_uri() . '/intranet/inc/voyager-only-form.css' ); */
+      }
 }
 add_action( 'wp_enqueue_scripts', 'intranet_forms_scripts' );
 
