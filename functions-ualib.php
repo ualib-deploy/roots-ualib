@@ -219,10 +219,6 @@ function intranet_forms_scripts() {
         wp_enqueue_style( 'voyager-only-styles', get_stylesheet_directory_uri() . '/intranet/inc/voyager-only-form.css' );
       }
 
-      if(is_page(array('covid-counter', 'Gorgas Capacity Counter', 'Bruno Capacity Counter', 'Hoole Capacity Counter', 'McLure Capacity Counter', 'Rodgers Capacity Counter'))) {
-        wp_enqueue_script( 'covid-counter-script', get_template_directory_uri() . '/assets/js/covidCounterNew.js');
-        /* wp_enqueue_style( 'voyager-only-styles', get_stylesheet_directory_uri() . '/intranet/inc/voyager-only-form.css' ); */
-      }
 }
 add_action( 'wp_enqueue_scripts', 'intranet_forms_scripts' );
 
