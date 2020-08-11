@@ -41,6 +41,7 @@ function roots_scripts() {
       'js'        => $scripts_js,
       'modernizr' => '/assets/vendor/modernizr/modernizr.js',
       'jquery'    => '//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.js',
+      'covid_counter' => '/assets/js/covidCounterNew.js',
     );
 
   } else {
@@ -53,7 +54,8 @@ function roots_scripts() {
       'js_bower'        => '/assets/js/scripts_bower.min.js?' . $assets['assets/js/scripts_bower.min.js']['hash'],
       'js'        => '/assets/js/scripts.min.js?' . $assets['assets/js/scripts.min.js']['hash'],
       'modernizr' => '/assets/js/vendor/modernizr.min.js',
-      'jquery'    => '//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js'
+      'jquery'    => '//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js',
+      'covid_counter' => '/assets/js/covidCounterNew.js',
     );
   }
 
@@ -79,6 +81,7 @@ function roots_scripts() {
   }
 
   wp_enqueue_script('modernizr', get_template_directory_uri() . $assets['modernizr'], array(), null, true);
+  wp_enqueue_script('covid_counter', get_template_directory_uri() . $assets['covid_counter'], array(), null, true);
 //  wp_enqueue_script('jquery');
 
     foreach($CDN as $name => $_cnd){
