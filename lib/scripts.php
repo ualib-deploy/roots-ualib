@@ -41,7 +41,7 @@ function roots_scripts() {
       'js'        => $scripts_js,
       'modernizr' => '/assets/vendor/modernizr/modernizr.js',
       'jquery'    => '//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.js',
-      'covid_counter' => '/assets/js/covidCounterNew.js',
+      'covid_counter' => '/assets/js/covidCounter/dev/covidCounter.js',
     );
 
   } else {
@@ -55,7 +55,7 @@ function roots_scripts() {
       'js'        => '/assets/js/scripts.min.js?' . $assets['assets/js/scripts.min.js']['hash'],
       'modernizr' => '/assets/js/vendor/modernizr.min.js',
       'jquery'    => '//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js',
-      'covid_counter' => '/assets/js/covidCounterNew.js',
+      'covid_counter' => '/assets/js/covidCounter/prod/covidCounter.js',
     );
   }
 
