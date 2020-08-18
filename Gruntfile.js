@@ -378,6 +378,16 @@ module.exports = function (grunt) {
           },
         ],
       },
+      devToLiveCovidCounter: {
+        src: "assets/js/covidCounter/dev/covidCounter.js",
+        dest: "assets/js/covidCounter/prod/",
+        replacements: [
+          {
+            from: /(wwwdev2?)/g,
+            to: "www",
+          },
+        ],
+      },
       devToLiveIntranetForms: {
         src: [
           "intranet/inc/actcardform-result.php",
