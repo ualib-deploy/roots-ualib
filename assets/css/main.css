@@ -9604,6 +9604,15 @@ footer > .sub-footer {
   width: 100%;
   padding-bottom: 10px;
 }
+.front-page-card .btn-ualib {
+  background-color: #990000;
+  border-color: #660000;
+}
+.front-page-card .btn-ualib:hover,
+.front-page-card .btn-ualib:focus {
+  color: white;
+  background-color: #7a0000;
+}
 .front-page-card .reno-image img {
   margin: auto;
 }
