@@ -9606,6 +9606,7 @@ footer > .sub-footer {
 }
 .front-page-card .btn-ualib {
   background-color: #990000;
+  color: white;
 }
 .front-page-card .btn-ualib:hover,
 .front-page-card .btn-ualib:focus {
