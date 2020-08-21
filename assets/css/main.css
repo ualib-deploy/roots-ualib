@@ -9606,12 +9606,14 @@ footer > .sub-footer {
 }
 .front-page-card .btn-ualib {
   background-color: #990000;
-  border-color: #660000;
 }
 .front-page-card .btn-ualib:hover,
 .front-page-card .btn-ualib:focus {
   color: white;
   background-color: #7a0000;
+}
+.front-page-card .chat-widget .s-la-widget h2 {
+  color: black !important;
 }
 .front-page-card .reno-image img {
   margin: auto;

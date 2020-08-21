@@ -3,7 +3,7 @@
   "querystring": true,
   "assets/css/main.min.css": {
     "path": "assets/css/main.min.css",
-    "hash": "a5a0faa934da47648df3d38a429096a8",
+    "hash": "6500987023db083c44b73c32eac4217d",
     "handle": "roots_css"
   },
   "assets/css/main_bower.min.css": {
@@ -13,7 +13,7 @@
   },
   "assets/js/scripts.min.js": {
     "path": "assets/js/scripts.min.js",
-    "hash": "d3de217aca012dc5cf82337fc2250d92",
+    "hash": "d59be8cec74fce41591a0a54767d1a45",
     "handle": "roots_js"
   },
   "assets/js/scripts_bower.min.js": {
