@@ -9600,6 +9600,25 @@ footer > .sub-footer {
 .front-page-card h2 small {
   color: black;
 }
+.front-page-card iframe {
+  width: 100%;
+  padding-bottom: 10px;
+}
+.front-page-card .btn-ualib {
+  background-color: #990000;
+  color: white;
+}
+.front-page-card .btn-ualib:hover,
+.front-page-card .btn-ualib:focus {
+  color: white;
+  background-color: #7a0000;
+}
+.front-page-card .chat-widget .s-la-widget h2 {
+  color: black !important;
+}
+.front-page-card .reno-image img {
+  margin: auto;
+}
 .front-page-card .news-card h4,
 .front-page-card .news-card .h4 {
   color: #2e6ca2;
