@@ -28045,7 +28045,7 @@ angular.module('ualib.news.templates', ['news-item/event-card.tpl.html', 'news-i
 
 angular.module("news-item/event-card.tpl.html", []).run(["$templateCache", function ($templateCache) {
   $templateCache.put("news-item/event-card.tpl.html",
-    "<a ng-href=\"{{newsCard.event.url}}\" target=\"_new\" class=\"media news-card\">\n" +
+    "<a ng-href=\"{{newsCard.event.localist_url}}\" target=\"_new\" class=\"media news-card\">\n" +
     "    <div class=\"media-left\">\n" +
     "        <div class=\"cal-icon\">\n" +
     "            <div class=\"cal-month\">{{newsCard.event.first_date | date:'MMM'}}</div>\n" +
