@@ -28368,8 +28368,10 @@ function correctEventTime(apiEventTime) {
   return apiToJsTime(apiEventTime) + CURRENT_LOCALE_OFFSET_MILLISECONDS - CENTRAL_TIME_OFFSET_MILLISECONDS;
 }
 ;angular.module('ualib.news')
-	.factory('ualibEventFactory', ['$resource', $resource => {
-		const transformResponse = response => JSON.parse(response).events;
+	.factory('ualibEventFactory', ['$resource', function($resource) {
+		function transformResponse(response) {
+			return JSON.parse(response).events;
+		}
 
 		return $resource('https://calendar.ua.edu/api/2/events', {
 			days: 365,
@@ -28380,7 +28382,7 @@ function correctEventTime(apiEventTime) {
 				method: 'GET',
 				params: { pp: 4 },
 				isArray: true,
-				transformResponse,
+				transformResponse: transformResponse,
 				cache: true,
 			},
 		});
@@ -28958,12 +28960,18 @@ angular.module('ualib.news')
         Promise.all([
             ualibNewsFactory.today()
                 .$promise
-                .then(data => $scope.news = data.news),
+                .then(function(data) {
+                    $scope.news = data.news;
+                }),
             ualibEventFactory.today()
                 .$promise
-                .then(events => $scope.events = events),
+                .then(function(events) {
+                    $scope.events = events;
+                }),
         ])
-            .then(() => $scope.newsOverflow = ($scope.news.length + $scope.events.length) > 3);
+            .then(function() {
+                $scope.newsOverflow = ($scope.news.length + $scope.events.length) > 3;
+            });
     }]);
 
 angular.module('ualib.softwareList.templates', ['software-list/software-list.tpl.html']);
