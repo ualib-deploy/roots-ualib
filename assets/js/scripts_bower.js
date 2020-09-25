@@ -28045,16 +28045,16 @@ angular.module('ualib.news.templates', ['news-item/event-card.tpl.html', 'news-i
 
 angular.module("news-item/event-card.tpl.html", []).run(["$templateCache", function ($templateCache) {
   $templateCache.put("news-item/event-card.tpl.html",
-    "<a ng-href=\"{{newsCard.link}}\" target=\"_new\" class=\"media news-card\">\n" +
+    "<a ng-href=\"{{newsCard.event.localist_url}}\" target=\"_new\" class=\"media news-card\">\n" +
     "    <div class=\"media-left\">\n" +
     "        <div class=\"cal-icon\">\n" +
-    "            <div class=\"cal-month\">{{newsCard.activeFrom | date:'MMM'}}</div>\n" +
-    "            <div class=\"cal-day\">{{newsCard.activeFrom | date:'d'}}</div>\n" +
+    "            <div class=\"cal-month\">{{newsCard.event.first_date | date:'MMM'}}</div>\n" +
+    "            <div class=\"cal-day\">{{newsCard.event.first_date | date:'d'}}</div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "    <div class=\"media-body\">\n" +
-    "        <h3 class=\"h4 media-heading\" ng-bind-html=\"newsCard.title | truncate:50:'...':true\"></h3>\n" +
-    "        <p ng-bind-html=\"newsCard.blurb | truncate:150:'...':true\"></p>\n" +
+    "        <h3 class=\"h4 media-heading\" ng-bind-html=\"newsCard.event.title | truncate:50:'...':true\"></h3>\n" +
+    "        <p ng-bind-html=\"newsCard.event.description_text | truncate:150:'...':true\"></p>\n" +
     "    </div>\n" +
     "</a>\n" +
     "");
@@ -28367,6 +28367,26 @@ function correctEventTime(apiEventTime) {
 
   return apiToJsTime(apiEventTime) + CURRENT_LOCALE_OFFSET_MILLISECONDS - CENTRAL_TIME_OFFSET_MILLISECONDS;
 }
+;angular.module('ualib.news')
+	.factory('ualibEventFactory', ['$resource', function($resource) {
+		function transformResponse(response) {
+			return JSON.parse(response).events;
+		}
+
+		return $resource('https://calendar.ua.edu/api/2/events', {
+			days: 365,
+			group_id: 32423144336963,
+			distinct: true,
+		}, {
+			today: {
+				method: 'GET',
+				params: { pp: 4 },
+				isArray: true,
+				transformResponse: transformResponse,
+				cache: true,
+			},
+		});
+	}]);
 ;angular.module('ualib.news')
 
     /**
@@ -28914,6 +28934,7 @@ angular.module('ualib.news')
      * @requires $scope
      * @requires $filter
      * @requires ualibNewsFactory
+     * @requires ualibEventFactory
      *
      * @description
      * Convenience controller to be used with the {@link news.directive:newsCard newsCard} directive, to display
@@ -28935,15 +28956,24 @@ angular.module('ualib.news')
      * ```
      */
 
-    .controller('NewsTodayCtrl', ['$scope', '$filter', 'ualibNewsFactory', function($scope, $filter, ualibNewsFactory){
-        ualibNewsFactory.today()
-            .$promise
-            .then(function(data){
-                $scope.news = data.news;
-                $scope.events = data.events;
-                $scope.newsOverflow = (data.news.length + data.events.length) > 3;
+    .controller('NewsTodayCtrl', ['$scope', '$filter', 'ualibNewsFactory', 'ualibEventFactory', function($scope, $filter, ualibNewsFactory, ualibEventFactory){
+        Promise.all([
+            ualibNewsFactory.today()
+                .$promise
+                .then(function(data) {
+                    $scope.news = data.news;
+                }),
+            ualibEventFactory.today()
+                .$promise
+                .then(function(events) {
+                    $scope.events = events;
+                }),
+        ])
+            .then(function() {
+                $scope.newsOverflow = ($scope.news.length + $scope.events.length) > 3;
             });
     }]);
+
 angular.module('ualib.softwareList.templates', ['software-list/software-list.tpl.html']);
 
 angular.module("software-list/software-list.tpl.html", []).run(["$templateCache", function($templateCache) {
