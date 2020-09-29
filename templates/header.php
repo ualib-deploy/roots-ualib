@@ -389,7 +389,7 @@
                                                     <li><a href="/wp-content/uploads/UA_Library_Annual_Report_2019-20.pdf">2019 Annual Report</a></li>
                                                     <li><a href="/about/about-the-libraries/">Branch libraries information</a></li>
                                                     <li><a href="/wp-content/uploads/2017/04/Strategic-Plan-11162016-FINAL.pdf">UA Libraries Strategic Plan</a></li>
-                                                    <li><a href="/wp-content/uploads/university_libraries_organizational_chart-jan2020.pdf">UA Libraries Organizational Chart</a></li>
+                                                    <li><a href="/wp-content/uploads/university_libraries_organizational_chart.pdf">UA Libraries Organizational Chart</a></li>
 
                                                     <li><a href="/about/about-the-libraries/library-assessment/"> UA Libraries Assessment </a></li>
                                                 </ul>
