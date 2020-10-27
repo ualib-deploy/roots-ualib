@@ -125,34 +125,54 @@
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="/research-help/google-scholar/">
+                                                <span class="fa fa-google" aria-hidden="true"></span>
+                                                <h4>Google Scholar</h4>
+                                                <p>Search for scholarly literature through a Google web search</p>
+                                            </a>
+                                        </div>
+
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="https://guides.lib.ua.edu/">
+                                                <span class="fa fa-compass" aria-hidden="true"></span>
+                                                <h4>Research Guides</h4>
+                                                <p>Explore subject and course specific resources in guides curated by UA librarians</p>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="/research-help/e-resources/">
                                                 <span class="fa fa-bolt" aria-hidden="true"></span>
                                                 <h4>E-Journals</h4>
                                                 <p>Explore the libraries electronic resource collections and more </p>
                                             </a>
                                         </div>
-                                    </div>
-                                    <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                          <a class="service-card" href="/research-help/google-scholar/">
-                                              <span class="fa fa-google" aria-hidden="true"></span>
-                                              <h4>Google Scholar</h4>
-                                              <p>Search for scholarly literature through a Google web search</p>
-                                          </a>
+                                            <a class="service-card" href="https://guides.lib.ua.edu/distance_learning">
+                                                <span class="fa fa-globe" aria-hidden="true"></span>
+                                                <h4>Distance Education</h4>
+                                                <p>Information on research, writing, and key resources for distant learners</p>
+                                            </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="/research-help/government-information/">
                                                 <span class="fa fa-bar-chart" aria-hidden="true"></span>
-                                                <h4>Government Information, Statistics, &amp; Data</h4>
+                                                <h4>Government Information, Statistics, and Data</h4>
                                                 <p>Explore our large collection of U.S. Federal documents</p>
                                             </a>
                                         </div>
+                                    </div>
+                                    <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="https://ir.ua.edu">
-                                                <span class="fa fa-archive" aria-hidden="true"></span>
-                                                <h4>UA Institutional Repository</h4>
-                                                <p>A platform for promoting open access and exposing UA scholarship</p>
-                                            </a>
+                                            <div class="service-list">
+                                                <span class="fa fa-music" aria-hidden="true"></span>
+                                                <h4>Music Library</h4>
+                                                <ul>
+                                                    <li class="menu-research-guides"><a href="https://guides.lib.ua.edu/music">Research Guides</a></li>
+                                                    <li class="menu-home"><a href="/libraries/music/">Music Library Home</a></li>
+                                                </ul>
+                                            </div>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <div class="service-list">
@@ -166,37 +186,26 @@
                                                 </ul>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="row">
-                                      <div class="col-xs-12 col-sm-6 col-md-3">
-                                          <a class="service-card" href="https://adhc.lib.ua.edu/">
-                                              <span class="fa fa-tachometer" aria-hidden="true"></span>
-                                              <h4>Digital Humanities Center</h4>
-                                              <p>Explore the digital humanities with innovative research and teaching projects </p>
-                                          </a>
-                                      </div>
-                                      <div class="col-xs-12 col-sm-6 col-md-3">
-                                          <a class="service-card" href="https://guides.lib.ua.edu/rdmp">
-                                              <span class="fa fa-archive" aria-hidden="true"></span>
-                                              <h4>Research Data Services</h4>
-                                              <p>Research data management and curation resources available at the University of Alabama</p>
-                                          </a>
-                                      </div>
-                                        <div class="col-xs-12 col-sm-6 col-md-3">
-                                          <a class="service-card" href="https://guides.lib.ua.edu/">
-                                              <span class="fa fa-compass" aria-hidden="true"></span>
-                                              <h4>Research Guides</h4>
-                                              <p>Explore subject and course specific resources in guides curated by UA librarians</p>
-                                          </a>
-                                        </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <div class="service-list">
                                                 <span class="fa fa-folder" aria-hidden="true"></span>
                                                 <h4>Citation Managers</h4>
                                                 <p>Save citations, organize your research, and create bibliographies</p>
                                                 <ul>
-                                                    <li class="menu-refworks"><a href="https://refworks.ua.edu/">RefWorks</a></li>
-                                                    <li class="menu-endnote"><a href="https://oit.ua.edu/software/endnote/">EndNote</a></li>
+                                                    <li class="menu-refworks"><a href="http://refworks.ua.edu/">RefWorks</a></li>
+                                                    <li class="menu-endnote"><a href="http://oit.ua.edu/oit/services/software-licensing/endnote/">EndNote</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <div class="service-list">
+                                                <span class="fa fa-archive" aria-hidden="true"></span>
+                                                <h4>Research Data Services</h4>
+                                                <p>Research data management and curation resources available at the University of Alabama</p>
+                                                <ul>
+                                                    <li class="menu-rdmc"><a href="https://guides.lib.ua.edu/rdmp">Research Data Management & Curation</a></li>
+                                                    <li class="menu-ir"><a href="https://ir.ua.edu/">UA Institutional Repository</a></li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -206,35 +215,40 @@
                         </ul>
                     </li>
                     <li class="dropdown yamm-fw">
-                        <a href="#" class="dropdown-toggle">Using the Libraries</a>
+                        <a href="#" class="dropdown-toggle">Using the Library</a>
                         <ul class="dropdown-menu">
                             <li>
                                 <div class="yamm-content">
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="/using-the-library/information-for-students/">
-                                                <span class="fa fa-pencil" aria-hidden="true"></span>
-                                                <h4>Information for Students</h4>
-                                                <p>Learn more about the libraries, materials, and our services</p>
-                                            </a>
-                                        </div>
-                                        <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="/using-the-library/information-for-faculty/">
-                                                <span class="fa fa-graduation-cap" aria-hidden="true"></span>
-                                                <h4>Information for Faculty</h4>
-                                                <p>Purchases, teaching, and research support</p>
-                                            </a>
-                                        </div>
-                                        <div class="col-xs-12 col-sm-6 col-md-3">
                                             <div class="service-list">
                                                 <span class="fa fa-lightbulb-o" aria-hidden="true"></span>
                                                 <h4>Find a Place to Study</h4>
                                                 <ul>
+                                                    <li class="menu-computer-availability"><a href="http://www.lib.ua.edu/computers">Computer Availability</a></li>
                                                     <li><a href="/using-the-library/presentation-practice-rooms/">Presentation Practice Rooms</a></li>
-                                                    <!--<li><a href="https://ua.libcal.com/booking/groupstudy">Group Study Rooms</a></li>-->
+                                                    <li><a href="https://ua.libcal.com/booking/groupstudy">Group Study Rooms</a></li>
                                                     <li><a href="/using-the-library/find-a-place-to-study/">Spaces by Library</a></li>
                                                 </ul>
                                             </div>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <div class="service-list">
+                                                <span class="fa fa-book" aria-hidden="true"></span>
+                                                <h4>Borrow, Renew &amp; Course Reserves</h4>
+                                                <ul>
+                                                    <li class="menu-reserves"><a href="/using-the-library/course-reserves/">Course Reserves</a></li>
+                                                    <li class="menu-access-reserves"><a href="http://library.ua.edu/vwebv/enterCourseReserve.do">Find and access reserve items</a></li>
+                                                    <li class="menu-borrow"><a href="/using-the-library/circulation-services/borrowing/">Borrow and renew items</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="https://adhc.lib.ua.edu/">
+                                                <span class="fa fa-tachometer" aria-hidden="true"></span>
+                                                <h4>Digital Humanities Center</h4>
+                                                <p>Explore the digital humanities with innovative research and teaching projects </p>
+                                            </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="/using-the-library/accessibility/">
@@ -247,16 +261,16 @@
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <div class="service-list">
-                                                <span class="fa fa-book" aria-hidden="true"></span>
-                                                <h4>Borrow, Renew, &amp; Course Reserves</h4>
+                                                <span class="fa fa-desktop" aria-hidden="true"></span>
+                                                <h4>Computers and Equipment</h4>
                                                 <ul>
-                                                    <li class="menu-reserves"><a href="/using-the-library/course-reserves/">Course Reserves</a></li>
-                                                    <li class="menu-access-reserves"><a href="http://library.ua.edu/vwebv/enterCourseReserve.do">Find and access reserve items</a></li>
-                                                    <li class="menu-borrow"><a href="/using-the-library/circulation-services/borrowing/">Borrow and renew items</a></li>
-                                                  </ul>
+                                                    <li><a href="/using-the-library/photocopying/">Print, Scan, Copy</a></li>
+                                                    <li><a href="/using-the-library/3d-print/">3D Printing</a></li>
+                                                    <li class="menu-laptop-computers"><a href="/using-the-library/equipment/">Equipment</a></li>
+                                                    <li><a href="/using-the-library/equipment/whisper-booths">Whisper Booths</a></li>
+                                                </ul>
                                             </div>
                                         </div>
-
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <div class="service-list">
                                                 <span class="fa fa-exchange" aria-hidden="true"></span>
@@ -276,33 +290,33 @@
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="/using-the-library/library-instruction/">
-                                                <span class="fa fa-calendar" aria-hidden="true"></span>
-                                                <h4>Classes &amp; Workshops</h4>
-                                                <p>Register for instruction sessions and outreach opportunities</p>
+                                            <a class="service-card" href="/using-the-library/information-for-faculty/">
+                                                <span class="fa fa-graduation-cap" aria-hidden="true"></span>
+                                                <h4>Information for Faculty</h4>
+                                                <p>Purchases, teaching, and research support</p>
                                             </a>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <div class="service-list">
-                                                <span class="fa fa-desktop" aria-hidden="true"></span>
-                                                <h4>Computers, Software, &amp; Equipment</h4>
-                                                <ul>
-                                                    <li class="menu-computer-availability"><a href="/computers/">Computer Availability</a></li>
-                                                    <li><a href="/using-the-library/photocopying/">Print, Scan, Copy</a></li>
-                                                    <li><a href="/using-the-library/3d-print/">3D Printing</a></li>
-                                                    <li class="menu-laptop-computers"><a href="/using-the-library/equipment/">Equipment</a></li>
-                                                    <li><a href="/#/software">Software</a></li>
-                                                    <li><a href="/using-the-library/equipment/whisper-booths">Whisper Booths</a></li>
-                                                </ul>
-                                            </div>
+                                            <a class="service-card" href="/using-the-library/library-instruction/">
+                                                <span class="fa fa-calendar" aria-hidden="true"></span>
+                                                <h4>Classes and Workshops</h4>
+                                                <p>Register for instruction sessions and outreach opportunities</p>
+                                            </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="https://guides.lib.ua.edu/distance_learning">
-                                                <span class="fa fa-globe" aria-hidden="true"></span>
-                                                <h4>Distance Education</h4>
-                                                <p>Information on research, writing, and key resources for distant learners</p>
+                                            <a class="service-card" href="/using-the-library/information-for-students/">
+                                                <span class="fa fa-pencil" aria-hidden="true"></span>
+                                                <h4>Information for Students</h4>
+                                                <p>Learn more about the libraries, materials, and our services</p>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="/#/software">
+                                                <span class="fa fa-pencil" aria-hidden="true"></span>
+                                                <h4>Library Software</h4>
+                                                <p>Browse a list of the software available on library computers</p>
                                             </a>
                                         </div>
                                     </div>
@@ -333,8 +347,31 @@
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="/#/news-exhibits/">
                                                 <span class="fa fa-newspaper-o" aria-hidden="true"></span>
-                                                <h4>News &amp; Events</h4>
+                                                <h4>News and Events</h4>
                                                 <p>The latest news and upcoming events at the libraries</p>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="/about/libraries-policies/">
+                                                <span class="fa fa-sitemap" aria-hidden="true"></span>
+                                                <h4>Policies</h4>
+                                                <p>Learn about libraries policies and procedures</p>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="/about/library-annex/">
+                                                <span class="fa fa-building" aria-hidden="true"></span>
+                                                <h4>Libraries Annex</h4>
+                                                <p>Library collections located off campus</p>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="/ua-libraries-giving/">
+                                                <span class="fa fa-gift" aria-hidden="true"></span>
+                                                <h4>Support UA Libraries</h4>
+                                                <p>Help strengthen the libraries collections, services, and resources </p>
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
@@ -344,48 +381,19 @@
                                                 <p>Explore the libraries multiple social media outlets </p>
                                             </a>
                                         </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="/about/libraries-policies/">
-                                                <span class="fa fa-sitemap" aria-hidden="true"></span>
-                                                <h4>Procedures</h4>
-                                                <p>Learn about libraries policies and procedures</p>
-                                            </a>
-                                        </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <div class="service-list">
                                                 <span class="fa fa-university" aria-hidden="true"></span>
-                                                <h4>Libraries Locations</h4>
+                                                <h4>About the Libraries</h4>
                                                 <ul>
-                                                    <li><a href="/libraries/gorgas/">Gorgas Library</a></li>
-                                                    <li><a href="/libraries/bruno/">Bruno Business Library</a></li>
-                                                    <li><a href="/libraries/mclure/">McLure Education Library</a></li>
-                                                    <li><a href="/libraries/rodgers/">Rodgers Library for Science & Engineering</a></li>
-                                                    <li><a href="/libraries/music/">Music Library</a></li>
-                                                    <li><a href="/about/library-annex/">Libraries Annex</a></li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                        <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <div class="service-list">
-                                                <span class="fa fa-file" aria-hidden="true"></span>
-                                                <h4>Libraries Documents</h4>
-                                                <ul>
-                                                    <li><a href="/about/mission-statement/">Mission Statement</a></li>
                                                     <li><a href="/about/about-the-libraries/annual-report/">Annual Report</a></li>
+                                                    <li><a href="/about/about-the-libraries/">Branch libraries information</a></li>
                                                     <li><a href="/wp-content/uploads/2017/04/Strategic-Plan-11162016-FINAL.pdf">UA Libraries Strategic Plan</a></li>
                                                     <li><a href="/wp-content/uploads/university_libraries_organizational_chart.pdf">UA Libraries Organizational Chart</a></li>
+
                                                     <li><a href="/about/about-the-libraries/library-assessment/"> UA Libraries Assessment </a></li>
                                                 </ul>
                                             </div>
-                                        </div>
-                                        <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="/about/employment/">
-                                                <span class="fa fa-building" aria-hidden="true"></span>
-                                                <h4>Employment</h4>
-                                                <p>Explore job opportunities at UA Libraries</p>
-                                            </a>
                                         </div>
                                     </div>
                                 </div>
@@ -393,7 +401,7 @@
                         </ul>
                     </li>
                     <li class="dropdown yamm-fw">
-                        <a href="#" class="dropdown-toggle">Help</a>
+                        <a href="#" class="dropdown-toggle">Library Help</a>
                         <ul class="dropdown-menu">
                             <li>
                                 <div class="yamm-content">
@@ -406,33 +414,19 @@
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="/using-the-library/library-instruction/request-a-research-consultation/">
-                                                <span class="fa fa-comments-o" aria-hidden="true"></span>
-                                                <h4>Request a Research Consultation</h4>
-                                                <p>Meet with a specialist for in-depth research assistance</p>
-                                            </a>
-                                        </div>
-                                        <!-- new tutorials service-list -->
-                                        <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <div class="service-list">
-                                                <span class="fa fa-question-circle" aria-hidden="true"></span>
-                                                <h4>Tutorials &amp; Instructional Videos</h4>
-                                                <p>Brief tutorials designed to help you use library services and resources</p>
-                                                <ul>
-                                                    <li><a href="https://www.lib.ua.edu/library-help/tutorials/">Tutorials and Instructional Videos</a></li>
-                                                    <li><a href="https://apps.lib.ua.edu/blogs/rolltideresearch/">Roll Tide Research</a></li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                        <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="/#/staffdir?liaison=1">
                                                 <span class="fa fa-comment-o" aria-hidden="true"></span>
                                                 <h4>Liaisons</h4>
                                                 <p>Need research help? Reach out to your liaison</p>
                                             </a>
                                         </div>
-                                    </div>
-                                    <div class="row">
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="/library-help/kacecontact-form/">
+                                                <span class="fa fa-envelope" aria-hidden="true"></span>
+                                                <h4>Run into Website Issues?</h4>
+                                                <p>Please contact Web Services for help </p>
+                                            </a>
+                                        </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="https://oit.ua.edu/service/wifi/">
                                                 <span class="fa fa-wifi" aria-hidden="true"></span>
@@ -440,13 +434,31 @@
                                                 <p>Access the Libraries internet using a wireless connection</p>
                                             </a>
                                         </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="/using-the-library/library-instruction/request-a-research-consultation/">
+                                                <span class="fa fa-comments-o" aria-hidden="true"></span>
+                                                <h4>Request a Research Consultation</h4>
+                                                <p>Meet with a specialist for in-depth research assistance</p>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="/forms/login-problem-report-form/">
+                                                <span class="fa fa-sign-in" aria-hidden="true"></span>
+                                                <h4>Report a Login Problem</h4>
+                                                <p>Unable to access online resources?  Report the problem</p>
+                                            </a>
+                                        </div>
+                                        <!-- new tutorials service-list -->
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <div class="service-list">
-                                                <span class="fa fa-exclamation-circle" aria-hidden="true"></span>
-                                                <h4>Report a Technical Problem</h4>
+                                                <span class="fa fa-question-circle" aria-hidden="true"></span>
+                                                <h4>Tutorials and Instructional Videos</h4>
+                                                <p>Brief tutorials designed to help you use library services and resources</p>
                                                 <ul>
-                                                    <li><a href="/forms/login-problem-report-form/">Report a Login Problem</a></li>
-                                                    <li><a href="/library-help/kacecontact-form/">Report a Website Issue</a></li>
+                                                    <li><a href="https://www.lib.ua.edu/library-help/tutorials/">Tutorials and Instructional Videos Page</a></li>
+                                                    <li><a href="http://apps.lib.ua.edu/blogs/rolltideresearch/ ">Roll Tide Research</a></li>
                                                 </ul>
                                             </div>
                                         </div>
