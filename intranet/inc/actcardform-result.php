@@ -17,7 +17,7 @@
     // Check for blank entry
     if (empty($_POST["CircOperator"]) && empty($_POST["OperatorEmail"]) && empty($_POST["ReaderMSG"]) && empty($_POST["PatronName"]) && empty($_POST["PatronCWID"]) && empty($_POST["PatronEmail"]) && empty($_POST["PatronPhone"]) && empty($_POST["Info"])) {
         $bad_happened = 1;
-        $submit_error_list .= ' - No data entered<br />';      
+        $submit_error_list .= ' - No data entered<br />';
       }
 
     // Check for single and correctly formatted email address in email fields
@@ -112,12 +112,12 @@
     $mail->Host = "smtp.ua.edu";
     $mail->From = $_POST['OperatorEmail'];
     $mail->FromName = $_POST['CircOperator'];
-    /* $mail->AddAddress("mpatrick@lib.ua.edu", "Michael Patrick"); */
-    $mail->AddAddress("cewyatt@ua.edu", "caryl");
-    $mail->AddAddress("jrmichelich@ua.edu", "james");
-    /* $mail->AddCC("ierm@ua.edu", "ILS & E-Resource Management"); */
-    #$mail->AddCC("libsys@bama.ua.edu", "Libsys");
-    # $mail->AddAddress("jtillis@ua.edu", "Jennifer Tillis");
+    $mail->AddAddress("mpatrick@lib.ua.edu", "Michael Patrick");
+		$mail->AddCC("ierm@ua.edu", "ILS & E-Resource Management");
+		// $mail->AddCC("libsys@bama.ua.edu", "Libsys");
+		// FOR DEV ONLY:
+    // $mail->AddAddress("cewyatt@ua.edu", "caryl");
+    // $mail->AddAddress("jrmichelich@ua.edu", "james");
     $mail->Subject = "Action Card Scan Problem Report - " . $_POST['CircDesk'] . " Circ Desk";
     $mail->Body    = $fullemailbody;
 
@@ -133,7 +133,7 @@
     print "<h2>Bad Referer - Cannot Proceed</h2>";
     print "<p>Your submittion came from an invalid location.</p>";
     print "<p>Please follow this link to submit the report from the correct location:<br /><br />";
-    print '<a href="/departments/systems/forms/ActCardForm">Action Card Scan Problem Report</a></p><br />';
+    print '<a href="/intranet/actcardform/">Action Card Scan Problem Report</a></p><br />';
   }
   else {
     // No error condition - attempt to send email
@@ -148,10 +148,9 @@
       // Success message
       print '<h2>Message Sent</h2>';
       print '<p>The patron will be contacted when the problem is resolved.<br /><br />';
-      print '<br /><p align="center"><a href="/">Return to Intranet Home</a></p>';
+      print '<br /><p align="center"><a href="/intranet/">Return to Intranet Home</a></p>';
     }
 
   }
 
 ?>
-

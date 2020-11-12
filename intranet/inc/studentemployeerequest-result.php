@@ -108,8 +108,10 @@
     $mail->Subject = "Student Employee Job Request Form";
     $mail->Body    = $fullemailbody;
 
-    $mail->AddAddress("cewyatt@ua.edu", "caryl");
-    $mail->AddAddress("jrmichelich@ua.edu", "james");
+		$mail->AddAddress("mljackson@ua.edu", "Millie Jackson");
+		// FOR DEV ONLY:
+    //$mail->AddAddress("cewyatt@ua.edu", "caryl");
+    //$mail->AddAddress("jrmichelich@ua.edu", "james");
 
   }
 
@@ -140,10 +142,9 @@
     } else {
       // Success message
       print '<h2>Message Sent</h2>';
-      print '<p>Your Student Employee Job Request Form has been sent to Harriet Deason.<br /><br />';
-      print '<br /><p align="center"><a href="/">Return to Intranet Home</a></p>';
+      print '<p>Your Student Employee Job Request Form has been sent to Dr. Millie Jackson.<br /><br />';
+      print '<br /><p align="center"><a href="/intranet/">Return to Intranet Home</a></p>';
     }
   }
 
 ?></div>
-

@@ -17,12 +17,12 @@
 // Check for blank entry
   if (empty($_POST['callnum']) && empty($_POST['title']) && empty($_POST['barcode']) && empty($_POST['patronName']) && empty($_POST['PatronEmail']) && empty($_POST['PatronPhone']) && empty($_POST['neededBy']) && empty($_POST['Info'])) {
     $bad_happened = 1;
-    $submit_error_list .= ' - No data entered';      
+    $submit_error_list .= ' - No data entered';
   }
 
 // Check for single and correctly formatted email address in email field
   if ($bad_happened != 1) {
-    
+
     if ($_POST['PatronEmail']) {
       $newcleanemail = filter_var($_POST['PatronEmail'], FILTER_SANITIZE_EMAIL);
       if(filter_var($newcleanemail, FILTER_VALIDATE_EMAIL) === FALSE)  {
@@ -41,19 +41,19 @@
     if (empty($_POST['personsubmit'])) {
       $bad_happened = 1;
       $submit_error_list .= ' - No Person Submitting Name Entered';
-    }   
+    }
 
     // patronName
     if (empty($_POST['patronName'])) {
       $bad_happened = 1;
       $submit_error_list .= ' - No Patron Name Entered';
-    }        
+    }
 
     // PatronEmail
     if (empty($_POST['PatronEmail'])) {
       $bad_happened = 1;
       $submit_error_list .= ' - No BAMA Email Address Entered';
-    }  
+    }
 
   }
 
@@ -133,13 +133,19 @@
     $mail->Body    = $fullemailbody;
 
     if ($_POST['whichlibrary'] == 'Gorgas') {
-      $mail->AddAddress("cewyatt@ua.edu", "caryl");
-      $mail->AddAddress("jrmichelich@ua.edu", "james");
+      $mail->AddAddress("jjbonner@ua.edu", "Jaiva Bonner");
+			$mail->AddAddress("lntubbs@ua.edu", "Lauren Tubbs");
+      // $mail->AddAddress("cdavis@ua.edu", "Cornelia Davis");
+			// FOR DEV ONLY:
+      // $mail->AddAddress("cewyatt@ua.edu", "caryl");
+      // $mail->AddAddress("jrmichelich@ua.edu", "james");
     }
 
     if ($_POST['whichlibrary'] == 'Rodgers') {
-      $mail->AddAddress("cewyatt@ua.edu", "caryl");
-      $mail->AddAddress("jrmichelich@ua.edu", "james");
+			$mail->AddAddress("cathy.craig@ua.edu", "Cathy Craig");
+			// FOR DEV ONLY:
+      // $mail->AddAddress("cewyatt@ua.edu", "caryl");
+      // $mail->AddAddress("jrmichelich@ua.edu", "james");
     }
 
   }
@@ -172,9 +178,8 @@
       // Success message
       print '<h2>Message Sent</h2>';
       print '<p>Your Trace Form has been sent to the appropriate persons.<br /><br />';
-      print '<br /><p align="center"><a href="/">Return to Intranet Home</a></p>';
+      print '<br /><p align="center"><a href="/intranet/">Return to Intranet Home</a></p>';
     }
   }
 
 ?>
-
