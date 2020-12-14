@@ -412,6 +412,22 @@
                                                 <p>Meet with a specialist for in-depth research assistance</p>
                                             </a>
                                         </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="https://oit.ua.edu/service/wifi/">
+                                                <span class="fa fa-wifi" aria-hidden="true"></span>
+                                                <h4>Connect to a Wireless Network</h4>
+                                                <p>Access the Libraries internet using a wireless connection</p>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-6 col-md-3">
+                                            <a class="service-card" href="/#/staffdir?liaison=1">
+                                                <span class="fa fa-comment-o" aria-hidden="true"></span>
+                                                <h4>Liaisons</h4>
+                                                <p>Need research help? Reach out to your liaison</p>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="row">
                                         <!-- new tutorials service-list -->
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <div class="service-list">
@@ -423,22 +439,6 @@
                                                     <li><a href="https://apps.lib.ua.edu/blogs/rolltideresearch/">Roll Tide Research</a></li>
                                                 </ul>
                                             </div>
-                                        </div>
-                                        <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="/#/staffdir?liaison=1">
-                                                <span class="fa fa-comment-o" aria-hidden="true"></span>
-                                                <h4>Liaisons</h4>
-                                                <p>Need research help? Reach out to your liaison</p>
-                                            </a>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="https://oit.ua.edu/service/wifi/">
-                                                <span class="fa fa-wifi" aria-hidden="true"></span>
-                                                <h4>Connect to a Wireless Network</h4>
-                                                <p>Access the Libraries internet using a wireless connection</p>
-                                            </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <div class="service-list">
