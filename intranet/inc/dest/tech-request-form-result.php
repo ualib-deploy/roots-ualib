@@ -6,9 +6,9 @@ if ( ! function_exists( 'wp_handle_upload' ) ) {
 
 // Set valid referers
   $valid_referers=array(
+  "http://www.lib.ua.edu/intranet/tech-request-form",
   "http://www.lib.ua.edu/intranet/tech-request-form/",
-  "http://www.lib.ua.edu/intranet/tech-request-form/",
-  "https://www.lib.ua.edu/intranet/tech-request-form/",
+  "https://www.lib.ua.edu/intranet/tech-request-form",
   "https://www.lib.ua.edu/intranet/tech-request-form/");
 
 // Test for required fields and filter email entry fields
@@ -20,12 +20,12 @@ if ( ! function_exists( 'wp_handle_upload' ) ) {
   // left out request type since it has to be one of three things
   if (empty($_POST['department']) && empty($_POST['description']) && empty($_POST['itemType']) && empty($_POST['purpose']) && empty($_POST['costEstimate']) && empty($_POST['imageUpload'])) {
     $bad_happened = 1;
-    $submit_error_list .= ' - No data entered';      
+    $submit_error_list .= ' - No data entered';
   }
 
 // Check for single and correctly formatted email address in email field
   if ($bad_happened != 1) {
-    
+
     if ($_POST['email']) {
       $newcleanemail = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
       if(filter_var($newcleanemail, FILTER_VALIDATE_EMAIL) === FALSE)  {
@@ -44,48 +44,48 @@ if ( ! function_exists( 'wp_handle_upload' ) ) {
     if (empty($_POST['requester'])) {
       $bad_happened = 1;
       $submit_error_list .= ' - No Requester Name Entered';
-    }   
+    }
 
     // department
     if (empty($_POST['department'])) {
       $bad_happened = 1;
       $submit_error_list .= ' - No Department Entered';
-    }        
+    }
 
     // description
     if (empty($_POST['description'])) {
       $bad_happened = 1;
       $submit_error_list .= ' - No Description Entered';
-    }  
-    
+    }
+
     // type of item
     if (empty($_POST['itemType'])) {
       $bad_happened = 1;
       $submit_error_list .= ' - No Type of Item Entered';
-    }  
+    }
 
     // purpose
     if (empty($_POST['purpose'])) {
       $bad_happened = 1;
       $submit_error_list .= ' - No Purpose Entered';
-    }  
+    }
 
     // cost estimate
     if (empty($_POST['costEstimate'])) {
       $bad_happened = 1;
       $submit_error_list .= ' - No Cost Estimate Entered';
-    }  
+    }
 
       if(isset($_FILES['imageUpload'])){
         $tiff = $_FILES['imageUpload'];
         if($tiff['type'] !== 'image/tiff') {
-          
+
             $bad_happened = 1;
             $submit_error_list .= 'Unsupported file type upload. Please submit .TIFF image.';
-          
+
       } else {
           $overrides = array( 'test_form' => false);
-    
+
           // Use the wordpress function to upload
           $uploaded=wp_handle_upload($tiff, $overrides);
           // Error checking using WP functions
@@ -157,8 +157,11 @@ if ( ! function_exists( 'wp_handle_upload' ) ) {
     $mail->IsSMTP();
     $mail->Host = "smtp.ua.edu";
     $mail->From = $_POST['email'];
-    $mail->FromName = 'Tech Request Form';
-     $mail->AddAddress("cewyatt@ua.edu", "Caryl Wyatt");
+    $mail->FromName = 'Technology Request Form';
+		$mail->AddAddress("libhelpdesk@ua.edu", "Library Help Desk");
+		// FOR DEV ONLY:
+    // $mail->AddAddress("cewyatt@ua.edu", "Caryl Wyatt");
+		// $mail->AddAddress("jrmichelich@ua.edu", "James Michelich");
     // $mail->AddAddress("jtillis@ua.edu", "Jennifer Tillis");
     $mail->Subject = "TRF: ".$_POST['itemType'];
     $mail->Body    = $fullemailbody;
@@ -169,17 +172,17 @@ if ( ! function_exists( 'wp_handle_upload' ) ) {
 // Print result
 
   if (($bad_happened == 1) && ($submit_error_list)) {
-    print '<h2>Tech Request Form Submission Error</h2>
-    <p>The following entry errors were detected in your Trace Form submission:</p>';
+    print '<h2>Technology Request Form Submission Error</h2>
+    <p>The following entry errors were detected in your Technology Request Form submission:</p>';
     print '<p><div style="color:#990000">' . $submit_error_list . '</div></p>';
     print '<br /><br /><p>Please click the "Back" button in your browser and correct these errors.<br/>';
-    print 'Once corrected, click the "Submit Form" button to again attempt to send the Trace Form.</p>';
+    print 'Once corrected, click the "Submit Form" button to again attempt to send the Technology Request Form.</p>';
   }
   elseif (($bad_happened == 1) && ($good_referer == 0)) {
     print "<h2>Bad Referer - Cannot Proceed</h2>";
-    print "<p>Your submittion came from an invalid location.</p>";
+    print "<p>Your submission came from an invalid location.</p>";
     print "<p>Please follow this link to submit the report from the correct location:<br /><br />";
-    print '<a href="/tech-request/">Circulation - Online Trace Form</a></p><br />';
+    print '<a href="/intranet/tech-request-form/">Technology Request Form</a></p><br />';
   }
   else {
     // No error condition - attempt to send email
@@ -189,14 +192,13 @@ if ( ! function_exists( 'wp_handle_upload' ) ) {
       echo "<p>Please click the back button in your browser and attempt to send the request again.<br /><br />";
       echo "Error: " . $mail->ErrorInfo;
       echo "</p><br />";
-      error_log("CIRC-TRACE-FORM: SMTP Error: " . $mail->ErrorInfo);
+      error_log("TECH-REQUEST-FORM: SMTP Error: " . $mail->ErrorInfo);
     } else {
       // Success message
       print '<h2>Message Sent</h2>';
-      print '<p>Your Tech Request Form has been sent to the appropriate persons.<br /><br />';
+      print '<p>Your Technology Request Form has been sent to the appropriate persons.<br /><br />';
       print '<br /><p align="center"><a href="/intranet/">Return to Intranet Home</a></p>';
     }
-  } 
+  }
 
 ?>
-

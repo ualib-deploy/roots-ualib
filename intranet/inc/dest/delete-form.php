@@ -1,7 +1,7 @@
     
         
   <div class="container">
-		<form action="https://imageweb-test.ua-net.ua.edu/Public/LoginFormProc.aspx?FromLoginFormProc=true" method="post">
+		<form action="https://imageweb.ua-net.ua.edu/Public/LoginFormProc.aspx?FromLoginFormProc=true" method="post">
 		
 			<!-- Begin Required OnBase Fields -->
 			<div id="loginformprocparams"> 
