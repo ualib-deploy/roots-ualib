@@ -49,7 +49,7 @@
 	// If no good referer found, set bad_happened to 1
 	if ($good_referer == 0) {
 		$bad_happened = 1;
-		error_log("CIRC-TRACE-FORM: Bad Referer: " . $_SERVER['HTTP_REFERER']);
+		error_log("STUDENT-EMPLOYEE-REQUEST-FORM: Bad Referer: " . $_SERVER['HTTP_REFERER']);
 	}
 
   }
@@ -108,7 +108,7 @@
     $mail->Subject = "Student Employee Job Request Form";
     $mail->Body    = $fullemailbody;
 
-		$mail->AddAddress("mljackson@ua.edu", "Millie Jackson");
+		$mail->AddAddress("amywilson@ua.edu", "Amy Wilson");
 		// FOR DEV ONLY:
     //$mail->AddAddress("cewyatt@ua.edu", "caryl");
     //$mail->AddAddress("jrmichelich@ua.edu", "james");
@@ -142,7 +142,7 @@
     } else {
       // Success message
       print '<h2>Message Sent</h2>';
-      print '<p>Your Student Employee Job Request Form has been sent to Dr. Millie Jackson.<br /><br />';
+      print '<p>Your Student Employee Job Request Form has been sent to Amy Wilson.<br /><br />';
       print '<br /><p align="center"><a href="/intranet/">Return to Intranet Home</a></p>';
     }
   }
