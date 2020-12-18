@@ -14,7 +14,7 @@ Each form has a few components:
 1. the wordpress template `roots-ualib/templates/content-page.php` serves the corresponding files when pages are in use, such as results scripts that handle error checking and sending emails, and an email server, PHPmailer
 1. `roots-ualib/functions-ualib.php` contains the wordpress enqueue function for loading and serving javascript files for interactive forms 
 
-NB: Before deploying to production, run "grunt live-build" (this will replace development-specific urls and strings, and copy certain forms to their necessary production directory paths).
+NB: Before merging to production, run "grunt live-build" (this will replace development-specific urls and strings, and copy certain forms to their necessary production directory paths).
 
 ## TODO
 
