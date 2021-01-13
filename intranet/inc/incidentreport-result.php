@@ -307,7 +307,7 @@
 	$incidentemail->Host="smtp.ua.edu";
 
 	// FROM: Business Office
-	$incidentemail->From="psteward@ua.edu";
+	$incidentemail->From="tbrown@ua.edu";
 	$incidentemail->FromName="UA Libraries Incident Report Submission";
 
 	// UNCOMMENT FOR TEST MODE ONLY (Email Jennifer)
@@ -393,7 +393,7 @@
 	echo 'Thank you for submitting an Incident Report.<br /><br />
 	The report has been sent to the Business Office and appropriate department head(s). If
 	you have any questions or need to follow up with any additional information, please
-	<a href="mailto:psteward@ua.edu">contact the UAL business office</a>.<br />
+	<a href="mailto:tbrown@ua.edu">contact the UAL business office</a>.<br />
 
 	<p align="center">
 	<a href="/intranet/">Return to Intranet Home</a>
