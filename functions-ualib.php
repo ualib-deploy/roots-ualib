@@ -201,8 +201,8 @@ function intranet_forms_scripts() {
         wp_enqueue_script( 'voyrequest-script', get_template_directory_uri() . '/intranet/inc/voyrequest.js', array( 'jquery' ) );
       }
       if(is_page(array('security-authorization-form', 'security-authorization-form-landing', 'delete-form', 'delete-form-landing', 'voyager-only-form', 'voyager-only-form-landing', 'intranet'))) {
-        wp_enqueue_script( 'bootstrap-script', 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js', array( 'jquery' ));
-        wp_enqueue_style( 'bootstrap-styles', 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css' );
+        wp_enqueue_script( 'bootstrap-script', 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js', array( 'jquery' ));
+        wp_enqueue_style( 'bootstrap-styles', 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' );
       }
       if(is_page('security-authorization-form')) {
         wp_enqueue_script( 'saf-script', get_template_directory_uri() . '/intranet/inc/sec-auth-form.js', array( 'jquery' ));
