@@ -10735,8 +10735,8 @@ angular.module("manageNews/manageNewsItemFields.tpl.html", []).run(["$templateCa
     "</div>\n" +
     "<div class=\"row\">\n" +
     "    <div class=\"col-md-12 form-group\">\n" +
-    "        <label>Detailed Description</label>\n" +
-    "        <textarea ui-tinymce=\"tinymceOptions\" ng-model=\"news.description\" rows=\"5\" maxlength=\"64000\" required></textarea>\n" +
+    "        <label for=\"news_description\">Detailed Description</label>\n" +
+    "        <textarea id=\"news_description\" ng-model=\"news.description\" rows=\"5\" maxlength=\"64000\" required></textarea>\n" +
     "    </div>\n" +
     "</div>\n" +
     "<div class=\"row form-group\">\n" +
