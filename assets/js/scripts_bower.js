@@ -10729,14 +10729,14 @@ angular.module("manageNews/manageNewsItemFields.tpl.html", []).run(["$templateCa
     "    <div class=\"col-md-6 form-group\">\n" +
     "        <label for=\"altText\">Alternative text (note: required for accessibliity)</label>\n" +
     "        <div id=\"altText\">\n" +
-    "            <input ng-model=\"news.altText\" style=\"width: 100%;\"></input>\n" +
+    "            <input ng-model=\"news.altText\" style=\"width: 100%;\" class=\"form-control\"></input>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>\n" +
     "<div class=\"row\">\n" +
-    "    <div class=\"col-md-12 form-group\">\n" +
-    "        <label for=\"news_description\">Detailed Description</label>\n" +
-    "        <textarea id=\"news_description\" ng-model=\"news.description\" rows=\"5\" maxlength=\"64000\" required></textarea>\n" +
+    "    <div class=\"col-md-6 form-group\">\n" +
+    "        <label for=\"news_description\" style=\"display:block;\">Detailed Description</label>\n" +
+    "        <textarea class=\"form-control\" id=\"news_description\" ng-model=\"news.description\" rows=\"5\" maxlength=\"64000\" required></textarea>\n" +
     "    </div>\n" +
     "</div>\n" +
     "<div class=\"row form-group\">\n" +
@@ -10774,7 +10774,7 @@ angular.module("manageNews/manageNewsList.tpl.html", []).run(["$templateCache", 
   $templateCache.put("manageNews/manageNewsList.tpl.html",
     "<div>\n" +
     "    <form name=\"addNewsExh\" ng-submit=\"createNews()\">\n" +
-    "        <div class=\"sdOpen\">\n" +
+    "        <div class=\"sdOpen\" style=\"padding:2rem;\">\n" +
     "            <h3>Add News Record</h3>\n" +
     "            <div news-item-fields-list newsdata=\"newNews\" list=\"data\"></div>\n" +
     "            <div class=\"row text-center form-group\">\n" +
