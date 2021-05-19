@@ -232,6 +232,7 @@
                                                 <ul>
                                                     <li><a href="/using-the-library/presentation-practice-rooms/">Presentation Practice Rooms</a></li>
                                                     <!--<li><a href="https://ua.libcal.com/booking/groupstudy">Group Study Rooms</a></li>-->
+                                                    <li><a href="https://ua.libcal.com/allspaces">Group Study Rooms</a></li>
                                                     <li><a href="/using-the-library/find-a-place-to-study/">Spaces by Library</a></li>
                                                 </ul>
                                             </div>
