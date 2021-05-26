@@ -372,7 +372,7 @@
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <div class="service-list">
                                                 <span class="fa fa-file" aria-hidden="true"></span>
-                                                <h4>Strategic Planning and Reporting</h4>
+                                                <h4>Strategic Planning and Assessment</h4>
                                                 <ul>
                                                     <li><a href="/about/mission-statement/">Mission Statement</a></li>
                                                     <li><a href="/about/annual-report/">Annual Report</a></li>
