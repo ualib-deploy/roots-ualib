@@ -372,11 +372,11 @@
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <div class="service-list">
                                                 <span class="fa fa-file" aria-hidden="true"></span>
-                                                <h4>Libraries Documents</h4>
+                                                <h4>Strategic Planning and Assessment</h4>
                                                 <ul>
                                                     <li><a href="/about/mission-statement/">Mission Statement</a></li>
-                                                    <li><a href="/about/about-the-libraries/annual-report/">Annual Report</a></li>
-                                                    <li><a href="/wp-content/uploads/2017/04/Strategic-Plan-11162016-FINAL.pdf">UA Libraries Strategic Plan</a></li>
+                                                    <li><a href="/about/annual-report/">Annual Report</a></li>
+                                                    <li><a href="/about/strategic-planning">Strategic Planning</a></li>
                                                     <li><a href="/wp-content/uploads/university_libraries_organizational_chart.pdf">UA Libraries Organizational Chart</a></li>
                                                     <li><a href="/about/about-the-libraries/library-assessment/"> UA Libraries Assessment </a></li>
                                                 </ul>
