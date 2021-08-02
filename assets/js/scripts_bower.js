@@ -24727,124 +24727,214 @@ angular.module("hours-locations/hours-locations.tpl.html", []).run(["$templateCa
   $templateCache.put("hours-locations/hours-locations.tpl.html",
     "<!--<script src='//maps.googleapis.com/maps/api/js?sensor=false&key=AIzaSyCdXuKwZiDx5W2uP8plV5d-o-jLQ5UQtIQ&mid=z4A8-271j5C8.kowwE312jycE'></script>-->\n" +
     "\n" +
-    "\n" +
     "<div class=\"jumbotron-header\">\n" +
-    "    <div class=\"jumbotron\">\n" +
-    "        <div class=\"container\">\n" +
-    "            <div class=\"row\">\n" +
-    "                <div class=\"col-sm-12\">\n" +
-    "                    <ol class=\"breadcrumb\" typeof=\"BreadcrumbList\" vocab=\"http://schema.org/\">\n" +
-    "                        <li><a title=\"Go to The University of Alabama Libraries.\" href=\"/#/home\" class=\"home\">The University of Alabama Libraries</a></li>\n" +
-    "                        <li><a title=\"Go to Hours.\" href=\"/#/hours\" class=\"post post-page\">Hours</a></li>\n" +
-    "                    </ol>\n" +
-    "                </div>\n" +
-    "            </div>\n" +
-    "            <div class=\"row\">\n" +
-    "                <div class=\"col-sm-8\">\n" +
-    "                    <h1>Hours & Locations</h1>\n" +
-    "                    <h2 class=\"hidden-xs hidden-sm\">{{library}}</h2>\n" +
-    "                    <div class=\"dropdown multipage-menu visible-xs visible-sm\">\n" +
-    "                        <button class=\"btn btn-default btn-lg dropdown-toggle\" id=\"locationMenu\"  type=\"button\">\n" +
-    "                            {{library}}\n" +
-    "                        </button>\n" +
-    "                        <ul class=\"dropdown-menu nav nav-stacked hours-locations-menu\" role=\"menu\" aria-labelledby=\"locationMenu\">\n" +
-    "                            <li><a href=\"#\" hours-href=\"{library: 'gorgas', month: 0}\">Gorgas</a>\n" +
-    "                                <ul class=\"nav nav-stacked\">\n" +
-    "                                    <li><a href=\"#\" hours-href=\"{library: 'music', month: 0}\">Music Library</a></li>\n" +
-    "                                    <li><a href=\"#\" hours-href=\"{library: 'media', month: 0}\">Sanford Media Center</a></li>\n" +
-    "                                    <li><a href=\"#\" hours-href=\"{library: 'williams', month: 0}\">Williams Americana Collection</a></li>\n" +
-    "                                </ul>\n" +
-    "                            </li>\n" +
-    "                            <li><a href=\"#\" hours-href=\"{library: 'rodgers', month: 0}\">Rodgers</a></li>\n" +
-    "                            <li><a href=\"#\" hours-href=\"{library: 'mclure', month: 0}\">McLure</a></li>\n" +
-    "                            <li><a href=\"#\" hours-href=\"{library: 'hoole', month: 0}\">Hoole</a></li>\n" +
-    "                            <li><a href=\"#\" hours-href=\"{library: 'bruno', month: 0}\">Bruno</a></li>\n" +
-    "                        </ul>\n" +
-    "                    </div>\n" +
-    "                    <ul class=\"list-unstyled fa-ul\" ng-if=\"contact\">\n" +
-    "                        <li ng-if=\"contact.email\"><span class=\"fa fa-li fa-envelope\"></span> <a ng-href=\"mailto:{{contact.email}}\">{{contact.email}}</a></li>\n" +
-    "                        <li ng-if=\"contact.phone\">\n" +
-    "                            <span class=\"fa fa-li fa-phone\"></span>\n" +
-    "                            <ul class=\"list-unstyled\">\n" +
-    "                                <li ng-repeat=\"phone in contact.phone\">\n" +
-    "                                    <span ng-if=\"phone.dept\">{{phone.dept}}: </span>\n" +
-    "                                    <a ng-href=\"tel:+1-205-{{phone.number}}\" title=\"{{library}} phone number\">{{phone.number}}</a>\n" +
-    "                                </li>\n" +
-    "                            </ul>\n" +
-    "                        </li>\n" +
-    "                        <li ng-if=\"contact.appointment\">\n" +
-    "                          <span class=\"fa fa-li fa-exclamation-circle\"></span>{{contact.appointment}}\n" +
-    "                        </li>\n" +
-    "                    </ul>\n" +
-    "                </div>\n" +
-    "                <div class=\"col-sm-4\">\n" +
-    "                    <div class=\"well\">\n" +
-    "                        <p class=\"lead\">What can {{library}} do for you?</p>\n" +
-    "                        <a ng-href=\"{{moreLink}}\" class=\"btn btn-primary btn-primary-dark\">Learn more <span class=\"fa fa-fw fa-info-circle\"></span></a>\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "            </div>\n" +
+    "  <div class=\"jumbotron\">\n" +
+    "    <div class=\"container\">\n" +
+    "      <div class=\"row\">\n" +
+    "        <div class=\"col-sm-12\">\n" +
+    "          <ol\n" +
+    "            class=\"breadcrumb\"\n" +
+    "            typeof=\"BreadcrumbList\"\n" +
+    "            vocab=\"http://schema.org/\"\n" +
+    "          >\n" +
+    "            <li>\n" +
+    "              <a\n" +
+    "                title=\"Go to The University of Alabama Libraries.\"\n" +
+    "                href=\"/#/home\"\n" +
+    "                class=\"home\"\n" +
+    "                >The University of Alabama Libraries</a\n" +
+    "              >\n" +
+    "            </li>\n" +
+    "            <li>\n" +
+    "              <a title=\"Go to Hours.\" href=\"/#/hours\" class=\"post post-page\"\n" +
+    "                >Hours</a\n" +
+    "              >\n" +
+    "            </li>\n" +
+    "          </ol>\n" +
     "        </div>\n" +
+    "      </div>\n" +
+    "      <div class=\"row\">\n" +
+    "        <div class=\"col-sm-8\">\n" +
+    "          <h1>Hours & Locations</h1>\n" +
+    "          <h2 class=\"hidden-xs hidden-sm\">{{library}}</h2>\n" +
+    "          <div class=\"dropdown multipage-menu visible-xs visible-sm\">\n" +
+    "            <button\n" +
+    "              class=\"btn btn-default btn-lg dropdown-toggle\"\n" +
+    "              id=\"locationMenu\"\n" +
+    "              type=\"button\"\n" +
+    "            >\n" +
+    "              {{library}}\n" +
+    "            </button>\n" +
+    "            <ul\n" +
+    "              class=\"dropdown-menu nav nav-stacked hours-locations-menu\"\n" +
+    "              role=\"menu\"\n" +
+    "              aria-labelledby=\"locationMenu\"\n" +
+    "            >\n" +
+    "              <li>\n" +
+    "                <a href=\"#\" hours-href=\"{library: 'gorgas', month: 0}\"\n" +
+    "                  >Gorgas</a\n" +
+    "                >\n" +
+    "                <ul class=\"nav nav-stacked\">\n" +
+    "                  <li>\n" +
+    "                    <a href=\"#\" hours-href=\"{library: 'music', month: 0}\"\n" +
+    "                      >Music Library</a\n" +
+    "                    >\n" +
+    "                  </li>\n" +
+    "                  <li>\n" +
+    "                    <a href=\"#\" hours-href=\"{library: 'media', month: 0}\"\n" +
+    "                      >Sanford Media Center</a\n" +
+    "                    >\n" +
+    "                  </li>\n" +
+    "                  <li>\n" +
+    "                    <a href=\"#\" hours-href=\"{library: 'williams', month: 0}\"\n" +
+    "                      >Williams Americana Collection</a\n" +
+    "                    >\n" +
+    "                  </li>\n" +
+    "                </ul>\n" +
+    "              </li>\n" +
+    "              <li>\n" +
+    "                <a href=\"#\" hours-href=\"{library: 'rodgers', month: 0}\"\n" +
+    "                  >Rodgers</a\n" +
+    "                >\n" +
+    "              </li>\n" +
+    "              <li>\n" +
+    "                <a href=\"#\" hours-href=\"{library: 'mclure', month: 0}\"\n" +
+    "                  >McLure</a\n" +
+    "                >\n" +
+    "              </li>\n" +
+    "              <li>\n" +
+    "                <a href=\"#\" hours-href=\"{library: 'hoole', month: 0}\">Hoole</a>\n" +
+    "              </li>\n" +
+    "              <li>\n" +
+    "                <a href=\"#\" hours-href=\"{library: 'bruno', month: 0}\">Bruno</a>\n" +
+    "              </li>\n" +
+    "            </ul>\n" +
+    "          </div>\n" +
+    "          <ul class=\"list-unstyled fa-ul\" ng-if=\"contact\">\n" +
+    "            <li ng-if=\"contact.email\">\n" +
+    "              <span class=\"fa fa-li fa-envelope\"></span>\n" +
+    "              <a ng-href=\"mailto:{{contact.email}}\">{{contact.email}}</a>\n" +
+    "            </li>\n" +
+    "            <li ng-if=\"contact.phone\">\n" +
+    "              <span class=\"fa fa-li fa-phone\"></span>\n" +
+    "              <ul class=\"list-unstyled\">\n" +
+    "                <li ng-repeat=\"phone in contact.phone\">\n" +
+    "                  <span ng-if=\"phone.dept\">{{phone.dept}}: </span>\n" +
+    "                  <a\n" +
+    "                    ng-href=\"tel:+1-205-{{phone.number}}\"\n" +
+    "                    title=\"{{library}} phone number\"\n" +
+    "                    >{{phone.number}}</a\n" +
+    "                  >\n" +
+    "                </li>\n" +
+    "              </ul>\n" +
+    "            </li>\n" +
+    "            <li ng-if=\"contact.alert\">\n" +
+    "              <span class=\"fa fa-li fa-exclamation-circle\"></span\n" +
+    "              >{{contact.alert}}\n" +
+    "            </li>\n" +
+    "          </ul>\n" +
+    "        </div>\n" +
+    "        <div class=\"col-sm-4\">\n" +
+    "          <div class=\"well\">\n" +
+    "            <p class=\"lead\">What can {{library}} do for you?</p>\n" +
+    "            <a ng-href=\"{{moreLink}}\" class=\"btn btn-primary btn-primary-dark\"\n" +
+    "              >Learn more <span class=\"fa fa-fw fa-info-circle\"></span\n" +
+    "            ></a>\n" +
+    "          </div>\n" +
+    "        </div>\n" +
+    "      </div>\n" +
     "    </div>\n" +
+    "  </div>\n" +
     "</div>\n" +
     "<div class=\"container\">\n" +
-    "    <div class=\"row\">\n" +
-    "        <div class=\"col-md-3 col-md-push-9\">\n" +
-    "            <div class=\"hidden-xs hidden-sm\">\n" +
-    "                <ul class=\"nav nav-pills nav-stacked hours-locations-menu\">\n" +
-    "                    <li><a href=\"#\" hours-href=\"{library: 'gorgas', month: 0}\">Gorgas</a>\n" +
-    "                        <ul class=\"nav nav-pills nav-stacked\">\n" +
-    "                            <li><a href=\"#\" hours-href=\"{library: 'media', month: 0}\">Sanford Media Center</a></li>\n" +
-    "                        </ul>\n" +
-    "                    </li>\n" +
-    "                    <li><a href=\"#\" hours-href=\"{library: 'rodgers', month: 0}\">Rodgers</a></li>\n" +
-    "                    <li><a href=\"#\" hours-href=\"{library: 'mclure', month: 0}\">McLure</a></li>\n" +
-    "                    <li><a href=\"#\" hours-href=\"{library: 'hoole', month: 0}\">Hoole</a></li>\n" +
-    "                    <li><a href=\"#\" hours-href=\"{library: 'bruno', month: 0}\">Bruno</a></li>\n" +
-    "                </ul>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-md-9 col-md-pull-3\">\n" +
-    "\n" +
-    "            <div class=\"row\">\n" +
-    "                <div class=\"col-md-12\">\n" +
-    "                    <div class=\"hours-calendar\"></div>\n" +
-    "                </div>\n" +
-    "            </div>\n" +
-    "\n" +
-    "\n" +
-    "             <div class=\"row\">\n" +
-    "                <div class=\"col-md-12\">\n" +
-    "                    <div class=\"panel panel-default\">\n" +
-    "                        <div class=\"panel-body\">\n" +
-    "                            <div map-lazy-load=\"https://maps.google.com/maps/api/js\"\n" +
-    "                                 map-lazy-load-params=\"{{googleMapsUrl}}\">\n" +
-    "                                <ng-map center='{{center}}' zoom='18' scrollwheel=\"false\" id=\"map-canvas\" map-initialized=\"updateMap()\">\n" +
-    "                                    <marker\n" +
-    "                                            ng-repeat=\"l in loc\"\n" +
-    "                                            no-watcher=\"true\"\n" +
-    "                                            position=\"{{l.latitude}}, {{l.longitude}}\"\n" +
-    "                                            title=\"{{l.name}}\"></marker>\n" +
-    "                                </ng-map>\n" +
-    "                            </div>\n" +
-    "                        </div>\n" +
-    "\n" +
-    "                        <div class=\"panel-footer\">\n" +
-    "                            <form ng-submit=\"getDirections()\">\n" +
-    "                                <div class=\"input-group\">\n" +
-    "                                    <input type=\"text\" class=\"form-control\" ng-model=\"directionsFrom\" placeholder=\"Your address or location\" required>\n" +
-    "                        <span class=\"input-group-btn\">\n" +
-    "                            <button type=\"submit\" class=\"btn btn-default\" target=\"_gmaps\">Get Directions <span class=\"fa fa-external-link\"></span></button>\n" +
-    "                        </span>\n" +
-    "                                </div>\n" +
-    "                            </form>\n" +
-    "                        </div>\n" +
-    "                    </div>\n" +
-    "                </div>\n" +
-    "            </div>\n" +
-    "\n" +
-    "        </div>\n" +
+    "  <div class=\"row\">\n" +
+    "    <div class=\"col-md-3 col-md-push-9\">\n" +
+    "      <div class=\"hidden-xs hidden-sm\">\n" +
+    "        <ul class=\"nav nav-pills nav-stacked hours-locations-menu\">\n" +
+    "          <li>\n" +
+    "            <a href=\"#\" hours-href=\"{library: 'gorgas', month: 0}\">Gorgas</a>\n" +
+    "            <ul class=\"nav nav-pills nav-stacked\">\n" +
+    "              <li>\n" +
+    "                <a href=\"#\" hours-href=\"{library: 'media', month: 0}\"\n" +
+    "                  >Sanford Media Center</a\n" +
+    "                >\n" +
+    "              </li>\n" +
+    "            </ul>\n" +
+    "          </li>\n" +
+    "          <li>\n" +
+    "            <a href=\"#\" hours-href=\"{library: 'rodgers', month: 0}\">Rodgers</a>\n" +
+    "          </li>\n" +
+    "          <li>\n" +
+    "            <a href=\"#\" hours-href=\"{library: 'mclure', month: 0}\">McLure</a>\n" +
+    "          </li>\n" +
+    "          <li>\n" +
+    "            <a href=\"#\" hours-href=\"{library: 'hoole', month: 0}\">Hoole</a>\n" +
+    "          </li>\n" +
+    "          <li>\n" +
+    "            <a href=\"#\" hours-href=\"{library: 'bruno', month: 0}\">Bruno</a>\n" +
+    "          </li>\n" +
+    "        </ul>\n" +
+    "      </div>\n" +
     "    </div>\n" +
+    "    <div class=\"col-md-9 col-md-pull-3\">\n" +
+    "      <div class=\"row\">\n" +
+    "        <div class=\"col-md-12\">\n" +
+    "          <div class=\"hours-calendar\"></div>\n" +
+    "        </div>\n" +
+    "      </div>\n" +
+    "\n" +
+    "      <div class=\"row\">\n" +
+    "        <div class=\"col-md-12\">\n" +
+    "          <div class=\"panel panel-default\">\n" +
+    "            <div class=\"panel-body\">\n" +
+    "              <div\n" +
+    "                map-lazy-load=\"https://maps.google.com/maps/api/js\"\n" +
+    "                map-lazy-load-params=\"{{googleMapsUrl}}\"\n" +
+    "              >\n" +
+    "                <ng-map\n" +
+    "                  center=\"{{center}}\"\n" +
+    "                  zoom=\"18\"\n" +
+    "                  scrollwheel=\"false\"\n" +
+    "                  id=\"map-canvas\"\n" +
+    "                  map-initialized=\"updateMap()\"\n" +
+    "                >\n" +
+    "                  <marker\n" +
+    "                    ng-repeat=\"l in loc\"\n" +
+    "                    no-watcher=\"true\"\n" +
+    "                    position=\"{{l.latitude}}, {{l.longitude}}\"\n" +
+    "                    title=\"{{l.name}}\"\n" +
+    "                  ></marker>\n" +
+    "                </ng-map>\n" +
+    "              </div>\n" +
+    "            </div>\n" +
+    "\n" +
+    "            <div class=\"panel-footer\">\n" +
+    "              <form ng-submit=\"getDirections()\">\n" +
+    "                <div class=\"input-group\">\n" +
+    "                  <input\n" +
+    "                    type=\"text\"\n" +
+    "                    class=\"form-control\"\n" +
+    "                    ng-model=\"directionsFrom\"\n" +
+    "                    placeholder=\"Your address or location\"\n" +
+    "                    required\n" +
+    "                  />\n" +
+    "                  <span class=\"input-group-btn\">\n" +
+    "                    <button\n" +
+    "                      type=\"submit\"\n" +
+    "                      class=\"btn btn-default\"\n" +
+    "                      target=\"_gmaps\"\n" +
+    "                    >\n" +
+    "                      Get Directions <span class=\"fa fa-external-link\"></span>\n" +
+    "                    </button>\n" +
+    "                  </span>\n" +
+    "                </div>\n" +
+    "              </form>\n" +
+    "            </div>\n" +
+    "          </div>\n" +
+    "        </div>\n" +
+    "      </div>\n" +
+    "    </div>\n" +
+    "  </div>\n" +
     "</div>\n" +
     "");
 }]);
@@ -25136,21 +25226,23 @@ angular
           longitude: -87.543182,
           icon: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
           contact: {
-            // remove phone number in favor of "by appointment" July 2020
-            // phone: [
-            //   {
-            //     number: "(205) 348-0500",
-            //     dept: "Front Desk",
-            //   },
-            // ],
-            appointment: "By appointment only",
-            email: "archives@ua.edu",
-            alert: [
+            phone: [
               {
-                type: "info",
-                msg: "For reference questions",
+                number: "(205) 348-0500",
+                dept: "Front Desk",
               },
             ],
+            //appointment: "By appointment only",
+            email: "archives@ua.edu",
+            alert:
+              "In June 2021, we started moving some materials to our off-site Archival Facility (AF). Those materials will require two business days for retrieval and delivery for use in our Hoole Library reading room. Please contact us for more information.",
+            // updated aug 2021 for new messaging
+            //   [
+            //   {
+            //     type: "info",
+            //     msg: "For reference questions",
+            //   },
+            // ],
           },
           link: "/libraries/hoole/",
         },
