@@ -78,7 +78,7 @@ if ( ! function_exists( 'wp_handle_upload' ) ) {
 
       if(isset($_FILES['imageUpload'])){
         $tiff = $_FILES['imageUpload'];
-        if($tiff['type'] !== 'image/tiff') {
+        if($tiff['size'] !== 0 && $tiff['type'] !== 'image/tiff') {
 
             $bad_happened = 1;
             $submit_error_list .= 'Unsupported file type upload. Please submit .TIFF image.';
