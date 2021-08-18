@@ -377,7 +377,7 @@
                                                     <li><a href="/about/mission-statement/">Mission Statement</a></li>
                                                     <li><a href="/about/annual-report/">Annual Report</a></li>
                                                     <li><a href="/about/strategic-planning">Strategic Planning</a></li>
-                                                    <li><a href="/wp-content/uploads/university_libraries_organizational_chart.pdf">UA Libraries Organizational Chart</a></li>
+                                                    <!--<li><a href="/wp-content/uploads/university_libraries_organizational_chart.pdf">UA Libraries Organizational Chart</a></li>-->
                                                     <li><a href="/about/about-the-libraries/library-assessment/"> UA Libraries Assessment </a></li>
                                                 </ul>
                                             </div>
