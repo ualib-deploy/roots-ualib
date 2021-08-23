@@ -324,7 +324,6 @@
 	$incidentemail->AddCC("tbrown@ua.edu", "Terry Brown");
 
 	// CC: Associate Deans
-	$incidentemail->AddCC("tcwilson@ua.edu", "Tom Wilson");
   $incidentemail->AddCC("mljackson@ua.edu", "Millie Jackson");
   $incidentemail->AddCC("endecker@ua.edu", "Emily Decker");
   $incidentemail->AddCC("kchapman@ua.edu", "Karen Chapman");
@@ -342,7 +341,6 @@
 	switch ($_POST['reportlocation']) {
 	case "Gorgas":
 		// $incidentemail->AddCC("mljackson@ua.edu", "Millie Jackson");
-		// $incidentemail->AddCC("tcwilson@ua.edu", "Tom Wilson");
 		$incidentemail->AddCC("cdavis@ua.edu", "Cornelia Davis");
     //$incidentemail->AddCC("pearc007@ua.edu", "Michael Pearce");
     break;
