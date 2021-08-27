@@ -321,7 +321,7 @@
 
 	// CC: Business Office
 	$incidentemail->AddCC("kgibson@ua.edu", "Kara Gibson");
-	$incidentemail->AddCC("tbrown@ua.edu", "Terry Brown");
+	$incidentemail->AddCC("lrweaver2@ua.edu", "Lane Weaver");
 
 	// CC: Associate Deans
   $incidentemail->AddCC("mljackson@ua.edu", "Millie Jackson");
@@ -340,9 +340,7 @@
 	// Determine CC by Location
 	switch ($_POST['reportlocation']) {
 	case "Gorgas":
-		// $incidentemail->AddCC("mljackson@ua.edu", "Millie Jackson");
 		$incidentemail->AddCC("cdavis@ua.edu", "Cornelia Davis");
-    //$incidentemail->AddCC("pearc007@ua.edu", "Michael Pearce");
     break;
 	case "Bruno":
 		$incidentemail->AddCC("kchapman@ua.edu", "Karen Chapman");
@@ -362,8 +360,6 @@
 		break;
   case "Annex":
     $incidentemail->AddCC("bdahlbac@ua.edu", "Barbara Dahlbach");
-    //$incidentemail->AddCC("kray@ua.edu", "Ray, Kevin");
-    //$incidentemail->AddAddress("sjturner1@ua.edu", "Steve Turner");
 		break;
 
 	}
