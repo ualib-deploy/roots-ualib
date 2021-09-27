@@ -176,7 +176,7 @@
                                           </a>
                                       </div>
                                       <div class="col-xs-12 col-sm-6 col-md-3">
-                                          <a class="service-card" href="https://guides.lib.ua.edu/rdmp">
+                                          <a class="service-card" href="https://guides.lib.ua.edu/Data/ResearchDataServices/">
                                               <span class="fa fa-archive" aria-hidden="true"></span>
                                               <h4>Research Data Services</h4>
                                               <p>Research data management and curation resources available at the University of Alabama</p>
