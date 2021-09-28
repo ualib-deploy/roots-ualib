@@ -9679,6 +9679,9 @@ footer > .sub-footer {
   margin-left: -10px;
   margin-bottom: 21px;
 }
+.jumbotron-header > .jumbotron .dropdown a {
+  color: #990000;
+}
 .ualib-image-carousel {
   position: relative;
 }
