@@ -9646,7 +9646,7 @@ footer > .sub-footer {
   color: #416d41;
 }
 .jumbotron-header {
-  background-image: url('../img/jumbotron-header-bg.jpg');
+  background-image: url("../img/jumbotron-header-bg.jpg");
   background-repeat: no-repeat;
   background-position: center center;
   -webkit-background-size: cover;
@@ -9672,7 +9672,7 @@ footer > .sub-footer {
 }
 .jumbotron-header > .jumbotron .well {
   background-color: rgba(25, 20, 20, 0.75);
-  border-color: #0D0A0A;
+  border-color: #0d0a0a;
 }
 .jumbotron-header > .jumbotron .breadcrumb {
   padding: 8px 15px;
