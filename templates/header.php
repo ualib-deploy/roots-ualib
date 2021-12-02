@@ -364,7 +364,7 @@
                                                     <li><a href="/libraries/mclure/">McLure Education Library</a></li>
                                                     <li><a href="/libraries/rodgers/">Rodgers Library for Science & Engineering</a></li>
                                                     <li><a href="/libraries/music/">Music Library</a></li>
-                                                    <li><a href="/about/library-annex/">Libraries Annex</a></li>
+                                                    <li><a href="/about/library-archival-facility/">Libraries Archival Facility</a></li>
                                                     <li><a href="/libraries/hoole/">Special Collections</a></li>
                                                 </ul>
                                             </div>
