@@ -133,8 +133,8 @@
     $mail->Body    = $fullemailbody;
 
     if ($_POST['whichlibrary'] == 'Gorgas') {
-      $mail->AddAddress("mrmiller19@ua.edu", "Matthew Miller");
-			$mail->AddAddress("lntubbs@ua.edu", "Lauren Tubbs");
+      $mail->AddAddress("iszago@ua.edu", "Ida Zago");
+			$mail->AddAddress("benorthrup@ua.edu", "Ben Northrup");
       // $mail->AddAddress("cdavis@ua.edu", "Cornelia Davis");
 			// FOR DEV ONLY:
       // $mail->AddAddress("cewyatt@ua.edu", "caryl");
