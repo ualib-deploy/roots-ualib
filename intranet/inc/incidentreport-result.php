@@ -324,7 +324,7 @@
 	$incidentemail->AddCC("lrweaver2@ua.edu", "Lane Weaver");
 
 	// CC: Associate Deans
-  $incidentemail->AddCC("mljackson@ua.edu", "Millie Jackson");
+  $incidentemail->AddCC("maarthur@ua.edu", "Michael Arthur");
   $incidentemail->AddCC("endecker@ua.edu", "Emily Decker");
   $incidentemail->AddCC("kchapman@ua.edu", "Karen Chapman");
   // added emily on aug 14 2019
