@@ -326,7 +326,6 @@
 	// CC: Associate Deans
   $incidentemail->AddCC("maarthur@ua.edu", "Michael Arthur");
   $incidentemail->AddCC("endecker@ua.edu", "Emily Decker");
-  $incidentemail->AddCC("kchapman@ua.edu", "Karen Chapman");
   // added emily on aug 14 2019
 
 	$incidentemail->Subject="UA Libraries Incident Report Submission";
@@ -343,19 +342,15 @@
 		$incidentemail->AddCC("cdavis@ua.edu", "Cornelia Davis");
     break;
 	case "Bruno":
-		$incidentemail->AddCC("kchapman@ua.edu", "Karen Chapman");
+		//$incidentemail->AddCC("kchapman@ua.edu", "Karen Chapman");
 		break;
 	case "Hoole":
-		$incidentemail->AddCC("dfwalton@ua.edu", "Donnelly Walton");
     $incidentemail->AddCC("lmadway@ua.edu", "Lorraine Madway");
 		break;
 	case "McLure":
-    // $incidentemail->AddCC("bstrnad@ua.edu", "Benita Strnad");
-    $incidentemail->AddCC("kchapman@ua.edu", "Karen Chapman");
     $incidentemail->AddCC("dminor@ua.edu", "Donna Minor");
 		break;
 	case "Rodgers":
-    $incidentemail->AddCC("kchapman@ua.edu", "Karen Chapman");
     $incidentemail->AddCC("dminor@ua.edu", "Donna Minor");
 		break;
   case "Annex":
