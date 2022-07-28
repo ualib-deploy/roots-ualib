@@ -321,7 +321,7 @@
 
 	// CC: Business Office
 	$incidentemail->AddCC("kgibson@ua.edu", "Kara Gibson");
-	$incidentemail->AddCC("lrweaver2@ua.edu", "Lane Weaver");
+	$incidentemail->AddCC("tcapell@ua.edu", "Tyler Capell");
 
 	// CC: Associate Deans
   $incidentemail->AddCC("maarthur@ua.edu", "Michael Arthur");
