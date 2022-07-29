@@ -325,11 +325,14 @@
                                             </a>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
-                                            <a class="service-card" href="/#/staffdir">
+                                            <div class="service-list">
                                                 <span class="fa fa-users" aria-hidden="true"></span>
                                                 <h4>Directory</h4>
-                                                <p>UA Libraries Faculty and Staff</p>
-                                            </a>
+                                                <ul>
+                                                    <li><a href="/#/staffdir">UA Libraries Faculty and Staff</a></li>
+                                                    <li><a href="/about/about-the-libraries/faculty-committees/">UA Libraries Faculty Committees</a></li>
+                                                </ul>
+                                            </div>
                                         </div>
                                         <div class="col-xs-12 col-sm-6 col-md-3">
                                             <a class="service-card" href="/#/news-exhibits/">
