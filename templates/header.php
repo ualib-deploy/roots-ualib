@@ -330,7 +330,7 @@
                                                 <h4>Directory</h4>
                                                 <ul>
                                                     <li><a href="/#/staffdir">UA Libraries Faculty and Staff</a></li>
-                                                    <li><a href="/about/about-the-libraries/faculty-committees/">UA Libraries Faculty Committees</a></li>
+                                                    <li><a href="/about/about-the-libraries/faculty-committees/">UA Libraries Committees</a></li>
                                                 </ul>
                                             </div>
                                         </div>
