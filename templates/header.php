@@ -231,7 +231,7 @@
                                                 <h4>Find a Place to Study</h4>
                                                 <ul>
                                                     <li><a href="/using-the-library/presentation-practice-rooms/">Presentation Practice Rooms</a></li>
-                                                    <li><a href="https://ua.libcal.com/allspaces">Group Study Rooms</a></li>
+                                                    <li><a href="https://ua.libcal.com/allspaces">Team Workrooms</a></li>
                                                     <li><a href="/using-the-library/find-a-place-to-study/">Spaces by Library</a></li>
                                                 </ul>
                                             </div>
