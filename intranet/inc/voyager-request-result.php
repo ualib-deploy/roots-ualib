@@ -242,7 +242,6 @@ if (!empty($_POST['voyfields'])) {
 		// FOR DEV ONLY:
     // $mail->AddAddress("cewyatt@ua.edu", "caryl");
     // $mail->AddAddress("jrmichelich@ua.edu", "james");
-    $mail->AddCC($_POST['RequestorEmail']);
 
     $mail->isHTML(true);
     $mail->Subject = "Voyager Report Request - " . $_POST['ReportTitle'];
